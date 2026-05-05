@@ -4,259 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add a Holiday or Absence</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f4f6;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      color: #1a1a1a;
-    }
-
-    .modal {
-      background: #fff;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 560px;
-      padding: 32px;
-      position: relative;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #7c3aed;
-      font-size: 20px;
-      line-height: 1;
-      padding: 4px;
-    }
-    .close-btn:hover { opacity: 0.7; }
-
-    h2 {
-      font-size: 26px;
-      font-weight: 600;
-      margin: 0 0 24px;
-      color: #2d2d2d;
-    }
-
-    .field { margin-bottom: 18px; }
-
-    label {
-      font-size: 13px;
-      color: #666;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    select, input[type="text"] {
-      width: 100%;
-      border: 1.5px solid #d1d5db;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 15px;
-      color: #1a1a1a;
-      background: #fff;
-      font-family: inherit;
-      transition: border-color 0.15s;
-      outline: none;
-    }
-    select:focus, input[type="text"]:focus { border-color: #7c3aed; }
-
-    .select-wrap { position: relative; }
-    .select-wrap select { appearance: none; padding-right: 36px; cursor: pointer; }
-    .select-wrap::after {
-      content: '▾';
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #7c3aed;
-      pointer-events: none;
-    }
-
-    .entitlement {
-      font-size: 13px;
-      color: #444;
-      line-height: 2;
-      margin-bottom: 20px;
-    }
-
-    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-
-    .input-wrap { position: relative; }
-    .input-wrap input { padding-right: 40px; }
-    .input-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      font-size: 16px;
-      pointer-events: none;
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 24px;
-    }
-
-    .primary-btn {
-      background: #7c3aed;
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      padding: 13px 28px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-    .primary-btn:hover { background: #6d28d9; }
-
-    .secondary-btn {
-      background: #fff;
-      color: #1a1a1a;
-      border: 1.5px solid #d1d5db;
-      border-radius: 999px;
-      padding: 12px 28px;
-      font-size: 15px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-    .secondary-btn:hover { background: #f9fafb; }
-
-    .step { display: none; }
-    .step.active { display: block; }
-
-    .warning-banner {
-      background: #fffbeb;
-      border: 1.5px solid #f59e0b;
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: #92400e;
-    }
-
-    .expander {
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-
-    .expander-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 11px 14px;
-      cursor: pointer;
-      user-select: none;
-      background: #fafafa;
-      transition: background 0.15s;
-    }
-    .expander-header:hover { background: #f3f4f6; }
-
-    .expander-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-    .expander-meta { font-size: 12px; color: #6b7280; margin-left: 8px; }
-
-    .expander-chevron {
-      font-size: 12px;
-      color: #9ca3af;
-      transition: transform 0.2s;
-    }
-    .expander-chevron.open { transform: rotate(180deg); }
-
-    .expander-body {
-      padding: 0 14px;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.25s ease;
-    }
-    .expander-body.open { max-height: 300px; }
-
-    .visit-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid #f3f4f6;
-      font-size: 13px;
-    }
-    .visit-row:last-child { border-bottom: none; }
-
-    .visit-date { color: #6b7280; min-width: 84px; }
-    .visit-name { flex: 1; color: #1a1a1a; }
-
-    .badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .badge-am { background: #fef3c7; color: #92400e; }
-    .badge-pm { background: #ede9fe; color: #5b21b6; }
-
-    .option-card {
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 12px 14px;
-      cursor: pointer;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 8px;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .option-card:hover { background: #fafafa; }
-    .option-card.selected { border-color: #7c3aed; }
-
-    .radio {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1.5px solid #d1d5db;
-      flex-shrink: 0;
-      margin-top: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.15s;
-    }
-    .radio.checked { border-color: #7c3aed; }
-    .radio.checked::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #7c3aed;
-      display: block;
-    }
-
-    .opt-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px; }
-    .opt-desc { font-size: 12px; color: #6b7280; margin: 0; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../Styles/fonts.css">
+  <link rel="stylesheet" href="../Styles/colors.css">
+  <link rel="stylesheet" href="../Styles/modal.css">
+  <link rel="stylesheet" href="holiday-absence-dialog.css">
 </head>
 <body>
 
   <div class="modal">
-    <button class="close-btn" aria-label="Close">✕</button>
+    <button class="close-btn" aria-label="Close"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><polygon fill="currentColor" stroke="currentColor" stroke-linejoin="round" points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12"/></svg></button>
 
     <!-- Step 1: The form -->
     <div class="step active" id="step1">
@@ -298,14 +57,14 @@
           <label for="start-date">Start date</label>
           <div class="input-wrap">
             <input type="text" id="start-date" value="30/04/2026">
-            <span class="input-icon">&#128197;</span>
+            <span class="input-icon"><svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.9024, 0.7143)" fill-rule="nonzero"><path d="M8.4375,13.5 L6.5625,13.5 C6.253125,13.5 6,13.246875 6,12.9375 L6,11.0625 C6,10.753125 6.253125,10.5 6.5625,10.5 L8.4375,10.5 C8.746875,10.5 9,10.753125 9,11.0625 L9,12.9375 C9,13.246875 8.746875,13.5 8.4375,13.5 Z M13.5,12.9375 L13.5,11.0625 C13.5,10.753125 13.246875,10.5 12.9375,10.5 L11.0625,10.5 C10.753125,10.5 10.5,10.753125 10.5,11.0625 L10.5,12.9375 C10.5,13.246875 10.753125,13.5 11.0625,13.5 L12.9375,13.5 C13.246875,13.5 13.5,13.246875 13.5,12.9375 Z M18,12.9375 L18,11.0625 C18,10.753125 17.746875,10.5 17.4375,10.5 L15.5625,10.5 C15.253125,10.5 15,10.753125 15,11.0625 L15,12.9375 C15,13.246875 15.253125,13.5 15.5625,13.5 L17.4375,13.5 C17.746875,13.5 18,13.246875 18,12.9375 Z M13.5,17.4375 L13.5,15.5625 C13.5,15.253125 13.246875,15 12.9375,15 L11.0625,15 C10.753125,15 10.5,15.253125 10.5,15.5625 L10.5,17.4375 C10.5,17.746875 10.753125,18 11.0625,18 L12.9375,18 C13.246875,18 13.5,17.746875 13.5,17.4375 Z M9,17.4375 L9,15.5625 C9,15.253125 8.746875,15 8.4375,15 L6.5625,15 C6.253125,15 6,15.253125 6,15.5625 L6,17.4375 C6,17.746875 6.253125,18 6.5625,18 L8.4375,18 C8.746875,18 9,17.746875 9,17.4375 Z M18,17.4375 L18,15.5625 C18,15.253125 17.746875,15 17.4375,15 L15.5625,15 C15.253125,15 15,15.253125 15,15.5625 L15,17.4375 C15,17.746875 15.253125,18 15.5625,18 L17.4375,18 C17.746875,18 18,17.746875 18,17.4375 Z M22.5,5.25 L22.5,21.75 C22.5,22.9921875 21.4921875,24 20.25,24 L3.75,24 C2.5078125,24 1.5,22.9921875 1.5,21.75 L1.5,5.25 C1.5,4.0078125 2.5078125,3 3.75,3 L6,3 L6,0.5625 C6,0.253125 6.253125,0 6.5625,0 L8.4375,0 C8.746875,0 9,0.253125 9,0.5625 L9,3 L15,3 L15,0.5625 C15,0.253125 15.253125,0 15.5625,0 L17.4375,0 C17.746875,0 18,0.253125 18,0.5625 L18,3 L20.25,3 C21.4921875,3 22.5,4.0078125 22.5,5.25 Z M20.25,21.46875 L20.25,7.5 L3.75,7.5 L3.75,21.46875 C3.75,21.6234375 3.8765625,21.75 4.03125,21.75 L19.96875,21.75 C20.1234375,21.75 20.25,21.6234375 20.25,21.46875 Z" fill="currentColor"/></g></svg></span>
           </div>
         </div>
         <div>
           <label for="end-date">End date</label>
           <div class="input-wrap">
             <input type="text" id="end-date" value="01/05/2026">
-            <span class="input-icon">&#128197;</span>
+            <span class="input-icon"><svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.9024, 0.7143)" fill-rule="nonzero"><path d="M8.4375,13.5 L6.5625,13.5 C6.253125,13.5 6,13.246875 6,12.9375 L6,11.0625 C6,10.753125 6.253125,10.5 6.5625,10.5 L8.4375,10.5 C8.746875,10.5 9,10.753125 9,11.0625 L9,12.9375 C9,13.246875 8.746875,13.5 8.4375,13.5 Z M13.5,12.9375 L13.5,11.0625 C13.5,10.753125 13.246875,10.5 12.9375,10.5 L11.0625,10.5 C10.753125,10.5 10.5,10.753125 10.5,11.0625 L10.5,12.9375 C10.5,13.246875 10.753125,13.5 11.0625,13.5 L12.9375,13.5 C13.246875,13.5 13.5,13.246875 13.5,12.9375 Z M18,12.9375 L18,11.0625 C18,10.753125 17.746875,10.5 17.4375,10.5 L15.5625,10.5 C15.253125,10.5 15,10.753125 15,11.0625 L15,12.9375 C15,13.246875 15.253125,13.5 15.5625,13.5 L17.4375,13.5 C17.746875,13.5 18,13.246875 18,12.9375 Z M13.5,17.4375 L13.5,15.5625 C13.5,15.253125 13.246875,15 12.9375,15 L11.0625,15 C10.753125,15 10.5,15.253125 10.5,15.5625 L10.5,17.4375 C10.5,17.746875 10.753125,18 11.0625,18 L12.9375,18 C13.246875,18 13.5,17.746875 13.5,17.4375 Z M9,17.4375 L9,15.5625 C9,15.253125 8.746875,15 8.4375,15 L6.5625,15 C6.253125,15 6,15.253125 6,15.5625 L6,17.4375 C6,17.746875 6.253125,18 6.5625,18 L8.4375,18 C8.746875,18 9,17.746875 9,17.4375 Z M18,17.4375 L18,15.5625 C18,15.253125 17.746875,15 17.4375,15 L15.5625,15 C15.253125,15 15,15.253125 15,15.5625 L15,17.4375 C15,17.746875 15.253125,18 15.5625,18 L17.4375,18 C17.746875,18 18,17.746875 18,17.4375 Z M22.5,5.25 L22.5,21.75 C22.5,22.9921875 21.4921875,24 20.25,24 L3.75,24 C2.5078125,24 1.5,22.9921875 1.5,21.75 L1.5,5.25 C1.5,4.0078125 2.5078125,3 3.75,3 L6,3 L6,0.5625 C6,0.253125 6.253125,0 6.5625,0 L8.4375,0 C8.746875,0 9,0.253125 9,0.5625 L9,3 L15,3 L15,0.5625 C15,0.253125 15.253125,0 15.5625,0 L17.4375,0 C17.746875,0 18,0.253125 18,0.5625 L18,3 L20.25,3 C21.4921875,3 22.5,4.0078125 22.5,5.25 Z M20.25,21.46875 L20.25,7.5 L3.75,7.5 L3.75,21.46875 C3.75,21.6234375 3.8765625,21.75 4.03125,21.75 L19.96875,21.75 C20.1234375,21.75 20.25,21.6234375 20.25,21.46875 Z" fill="currentColor"/></g></svg></span>
           </div>
         </div>
       </div>
@@ -315,14 +74,14 @@
           <label for="start-time">Start time</label>
           <div class="input-wrap">
             <input type="text" id="start-time" value="00:00">
-            <span class="input-icon">&#128336;</span>
+            <span class="input-icon"><svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.0374, 0.7143)" fill-rule="nonzero"><path d="M12,0.375 C5.578125,0.375 0.375,5.578125 0.375,12 C0.375,18.421875 5.578125,23.625 12,23.625 C18.421875,23.625 23.625,18.421875 23.625,12 C23.625,5.578125 18.421875,0.375 12,0.375 Z M12,21.375 C6.8203125,21.375 2.625,17.1796875 2.625,12 C2.625,6.8203125 6.8203125,2.625 12,2.625 C17.1796875,2.625 21.375,6.8203125 21.375,12 C21.375,17.1796875 17.1796875,21.375 12,21.375 Z M14.896875,16.48125 L10.9171875,13.5890625 C10.771875,13.48125 10.6875,13.3125 10.6875,13.134375 L10.6875,5.4375 C10.6875,5.128125 10.940625,4.875 11.25,4.875 L12.75,4.875 C13.059375,4.875 13.3125,5.128125 13.3125,5.4375 L13.3125,12.0796875 L16.44375,14.3578125 C16.696875,14.540625 16.7484375,14.8921875 16.565625,15.1453125 L15.684375,16.359375 C15.5015625,16.6078125 15.15,16.6640625 14.896875,16.48125 Z" fill="currentColor"/></g></svg></span>
           </div>
         </div>
         <div>
           <label for="end-time">End time</label>
           <div class="input-wrap">
             <input type="text" id="end-time" value="00:00">
-            <span class="input-icon">&#128336;</span>
+            <span class="input-icon"><svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.0374, 0.7143)" fill-rule="nonzero"><path d="M12,0.375 C5.578125,0.375 0.375,5.578125 0.375,12 C0.375,18.421875 5.578125,23.625 12,23.625 C18.421875,23.625 23.625,18.421875 23.625,12 C23.625,5.578125 18.421875,0.375 12,0.375 Z M12,21.375 C6.8203125,21.375 2.625,17.1796875 2.625,12 C2.625,6.8203125 6.8203125,2.625 12,2.625 C17.1796875,2.625 21.375,6.8203125 21.375,12 C21.375,17.1796875 17.1796875,21.375 12,21.375 Z M14.896875,16.48125 L10.9171875,13.5890625 C10.771875,13.48125 10.6875,13.3125 10.6875,13.134375 L10.6875,5.4375 C10.6875,5.128125 10.940625,4.875 11.25,4.875 L12.75,4.875 C13.059375,4.875 13.3125,5.128125 13.3125,5.4375 L13.3125,12.0796875 L16.44375,14.3578125 C16.696875,14.540625 16.7484375,14.8921875 16.565625,15.1453125 L15.684375,16.359375 C15.5015625,16.6078125 15.15,16.6640625 14.896875,16.48125 Z" fill="currentColor"/></g></svg></span>
           </div>
         </div>
         <div>
@@ -341,9 +100,11 @@
       <h2>Add a Holiday or Absence</h2>
 
       <div class="warning-banner">
-        4 visits are assigned during this period. What would you like to do with them?
+        <p class="warning-title">Warning</p>
+        <p class="warning-body">4 visits are assigned during this period. What would you like to do with them?</p>
       </div>
 
+      <!-- Affected visits expander hidden — may cause information overload for employees with many visits
       <div class="expander">
         <div class="expander-header" onclick="toggleExpander()" aria-expanded="false" id="expander-toggle">
           <span>
@@ -375,6 +136,7 @@
           </div>
         </div>
       </div>
+      -->
 
       <div class="option-card selected" id="opt-keep" onclick="selectOpt('keep')" role="radio" aria-checked="true">
         <div class="radio checked" id="dot-keep"></div>
@@ -388,7 +150,7 @@
         <div class="radio" id="dot-unassign"></div>
         <div>
           <p class="opt-title">Move to unassigned</p>
-          <p class="opt-desc">Visits are released to the unassigned pool to be allocated to another carer.</p>
+          <p class="opt-desc">Visits are unassigned to be allocated to another carer.</p>
         </div>
       </div>
 

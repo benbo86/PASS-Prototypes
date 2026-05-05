@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Chevron Down</title>
+    <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Chevron-Down">
+            <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+            <polygon id="Shape" fill="#000000" points="16.6 8.59997559 12 13.1999756 7.4 8.59997559 6 9.99997559 12 15.9999756 18 9.99997559"></polygon>
+        </g>
+    </g>
+</svg>
