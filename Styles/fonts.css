@@ -82,38 +82,6 @@
   font-stretch: normal;
 }
 
-.RedundantHeadingsH3 {
-  font-family: Barlow;
-  font-size: 28px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1;
-  letter-spacing: normal;
-  color: var(--greyscale-3-grey-30);
-}
-
-.DesktopHeading-4H4---Left-aligned {
-  font-family: Barlow;
-  font-size: 28px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.29;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopHeading-5H5---Left-aligned {
-  font-family: Barlow;
-  font-size: 24px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
 
 .Symbol-OrganizerGroup-Title {
   font-family: SFProText;
@@ -126,73 +94,6 @@
   color: var(--greyscale-01-black);
 }
 
-.DesktopHeading-6H6---Centre-aligned {
-  font-family: Barlow;
-  font-size: 20px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.3;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopHeading-6H6---Left-aligned {
-  font-family: Barlow;
-  font-size: 20px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.3;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.RedundantHeadingsH6-MOVE {
-  font-family: Barlow;
-  font-size: 18px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-1Left-alignedB1L---Medium {
-  font-family: Barlow;
-  font-size: 18px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-1Centre-alignedB1C---Medium {
-  font-family: Barlow;
-  font-size: 18px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-1Left-alignedB1L---Regular {
-  font-family: Barlow;
-  font-size: 18px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
 
 .PASSButton_centre_16px {
   font-family: Barlow;
@@ -206,85 +107,7 @@
   color: var(--greyscale-01-black);
 }
 
-.DesktopBody-2Left-alignedB2L---Semibold {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
 
-.DesktopBody-2Centre-alignedB2C---Semibold {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.RedundantSubtitleMedium-16 {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-2Right-alignedB2R---Medium {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  text-align: right;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-2Left-alignedB2L---Medium {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-2Centre-alignedB2C---Medium {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.RedundantColour-Variantsgrey_40 {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: normal;
-  color: var(--greyscale-4-grey-40);
-}
 
 .PASSBodyBody-Std-Centre {
   font-family: Barlow;
@@ -309,40 +132,6 @@
   color: var(--greyscale-01-black);
 }
 
-.DesktopBody-2Left-alignedB2L---Regular {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-2Centre-alignedB2C---Regular {
-  font-family: Barlow;
-  font-size: 16px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.38;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.RedundantButtonsWebStd-right {
-  font-family: Barlow;
-  font-size: 15px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: normal;
-  letter-spacing: normal;
-  text-align: right;
-  color: var(--brand-purple-5-purple-3);
-}
 
 .PASSButtonsTab-Centre-Sentance-selected {
   font-family: Barlow;
@@ -356,17 +145,6 @@
   color: var(--greyscale-01-black);
 }
 
-.RedundantButtonsTab-Centre-Sentance-med {
-  font-family: Barlow;
-  font-size: 15px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
 
 .PASSButton-White {
   font-family: Barlow;
@@ -388,29 +166,6 @@
   font-style: normal;
   line-height: 1.43;
   letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Left-alignedB3L---Semibold {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Centre-alignedB3C---Semibold {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  text-align: center;
   color: var(--greyscale-01-black);
 }
 
@@ -436,41 +191,6 @@
   color: var(--greyscale-16-white);
 }
 
-.DesktopBody-3Right-alignedB3R---Medium {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  text-align: right;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Left-alignedB3L---Medium {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Centre-alignedB3C---Medium {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
 .PASSBodyBody-Sml-Light {
   font-family: Barlow;
   font-size: 14px;
@@ -493,41 +213,6 @@
   color: var(--greyscale-01-black);
 }
 
-.DesktopBody-3Right-alignedB3R---Regular {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  text-align: right;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Left-alignedB3L---Regular {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-3Centre-alignedB3C---Regular {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.43;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
 .PsWebBody {
   font-family: HelveticaNeue;
   font-size: 14px;
@@ -539,39 +224,6 @@
   color: #5a5967;
 }
 
-.DesktopBody-4Left-alignedB4L---Semibold {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Centre-alignedB4C---Semibold {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 600;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.RedundantCaptiongrey_30 {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-3-grey-30);
-}
 
 .PASSCaptionCaption-Medium {
   font-family: Barlow;
@@ -581,75 +233,6 @@
   font-style: normal;
   line-height: 1.33;
   letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Right-alignedB4R---Medium {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: right;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Left-alignedB4L---Medium {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Centre-alignedB4C---Medium {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: 500;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: center;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Left-alignedB4L---Regular {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-01-black);
-}
-
-.DesktopBody-4Left-alignedB4L---Caption-Grey-30 {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  color: var(--greyscale-3-grey-30);
-}
-
-.DesktopBody-4Centre-alignedB4C---Regular {
-  font-family: Barlow;
-  font-size: 12px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: 1.33;
-  letter-spacing: normal;
-  text-align: center;
   color: var(--greyscale-01-black);
 }
 

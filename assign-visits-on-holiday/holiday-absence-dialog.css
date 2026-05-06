@@ -1,8 +1,4 @@
 .entitlement {
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 1.5;
-  color: var(--greyscale-01-black);
   margin-bottom: 20px;
 }
 
@@ -17,12 +13,6 @@
   margin-bottom: 4px;
 }
 
-.warning-body {
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 1.5;
-  color: var(--greyscale-01-black);
-}
 
 .warning-banner {
   background: #fff8e1;
@@ -129,4 +119,4 @@
 }
 
 .opt-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px; }
-.opt-desc { font-size: 14px; font-weight: normal; line-height: 1.43; color: var(--greyscale-3-grey-30); margin: 0; }
+.opt-desc { color: var(--greyscale-3-grey-30); margin: 0; }
