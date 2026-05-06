@@ -20,7 +20,12 @@
   border-radius: 6px;
   padding: 16px;
   margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
 }
+
+.warning-icon { flex-shrink: 0; }
 
 .expander {
   border: 1.5px solid #e5e7eb;
@@ -80,7 +85,7 @@
   white-space: nowrap;
 }
 .badge-am { background: #fef3c7; color: #92400e; }
-.badge-pm { background: #ede9fe; color: #5b21b6; }
+.badge-pm { background: #ede9fe; color: var(--brand-purple-6-purple-4); }
 
 .option-card {
   border: 1.5px solid #e5e7eb;
@@ -94,7 +99,7 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .option-card:hover { background: #fafafa; }
-.option-card.selected { border-color: #7c3aed; }
+.option-card.selected { border-color: var(--brand-purple-6-purple-4); }
 
 .radio {
   width: 16px;
@@ -114,7 +119,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #7c3aed;
+  background: var(--brand-purple-6-purple-4);
   display: block;
 }
 
