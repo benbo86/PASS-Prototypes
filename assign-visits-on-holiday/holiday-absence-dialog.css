@@ -5,28 +5,6 @@
 .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
-.warning-title {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.5;
-  color: #7b3306;
-  margin-bottom: 4px;
-}
-
-
-.warning-banner {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 16px;
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-
-.warning-icon { flex-shrink: 0; color: var(--rag-amber-amber-7); }
-
 /* react-datepicker overrides */
 .react-datepicker-wrapper { width: 100%; }
 .react-datepicker-popper { z-index: 100; }

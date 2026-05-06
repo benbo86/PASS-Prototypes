@@ -1,0 +1,92 @@
+body, p {
+    font-family: Barlow;
+    font-size: 16px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.38;
+    letter-spacing: normal;
+    color: #000;
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: normal;
+    color: #000;
+}
+
+.semi-bold {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.38;
+    letter-spacing: normal;
+    color: #000;
+}
+
+.medium {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  letter-spacing: normal;
+  color: #000;
+}
+
+.warning-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #7b3306;
+  margin-bottom: 4px;
+}
+
+.warning-banner {
+  background: var(--rag-amber-amber-lightest);
+  border: 1px solid var( --rag-amber-amber-7);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.warning-icon {
+    flex-shrink: 0;
+    color: var(--rag-amber-amber-7);
+}
+
+.primary-btn {
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.primary-btn:hover {
+    background: var(--brand-purple-5-purple-3);
+}
+
+.secondary-btn {
+  background: #fff;
+  color: var(--brand-purple-6-purple-4);
+  border: 2px solid var(--brand-purple-6-purple-4);
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.secondary-btn:hover {
+    background: #f9fafb;
+}
