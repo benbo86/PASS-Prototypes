@@ -13,7 +13,13 @@ h1 {
     font-size: 20px;
     font-weight: 500;
     line-height: 1.3;
-    letter-spacing: normal;
+    color: #000;
+}
+
+h6 {
+    font-size: 18px !important;
+    font-weight: 600;
+    line-height: 1.33;
     color: #000;
 }
 
@@ -33,14 +39,6 @@ h1 {
   color: #000;
 }
 
-.warning-title {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.5;
-  color: #7b3306;
-  margin-bottom: 4px;
-}
-
 .warning-banner {
   background: var(--rag-amber-amber-lightest);
   border: 1px solid var( --rag-amber-amber-7);
@@ -50,6 +48,15 @@ h1 {
   display: flex;
   gap: 8px;
   align-items: flex-start;
+
+    h4 {
+        font-size: 16px;
+        font-weight: 600 !important;
+        line-height: 1.5;
+        color: #7b3306;
+        margin-bottom: 0px;
+    }
+
 }
 
 .warning-icon {
@@ -57,18 +64,22 @@ h1 {
     color: var(--rag-amber-amber-7);
 }
 
+.round-btn {
+    border-radius: 999px;
+    padding: 13px 28px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.38;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    border:none;
+}
+
 .primary-btn {
-  background: var(--brand-purple-6-purple-4);
-  color: #fff;
-  border: none;
-  border-radius: 999px;
-  padding: 13px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.38;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
+    background: var(--brand-purple-6-purple-4);
+    color: #fff;
+    border: none;
 }
 .primary-btn:hover {
     background: var(--brand-purple-5-purple-3);
@@ -78,15 +89,88 @@ h1 {
   background: #fff;
   color: var(--brand-purple-6-purple-4);
   border: 2px solid var(--brand-purple-6-purple-4);
-  border-radius: 999px;
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.38;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
 }
 .secondary-btn:hover {
     background: #f9fafb;
+}
+
+.tertiary-btn {
+    background: var(--buttons-lozenge-3-tertiary-1-default);
+    color: var(--greyscale-3-grey-30);
+}
+
+.back-link {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-purple-6-purple-4);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--brand-purple-5-purple-3); }
+
+.warning-banner.orange {
+  background: var(--rag-amber-amber-lightest);
+  border-color: var(--rag-amber-amber-7);
+}
+.warning-banner.orange .warning-icon { color: var(--rag-amber-amber-7); }
+.warning-banner.orange h4 { color: #7b3306; }
+
+.warning-banner.red {
+  background: var(--rag-red-red-pastel-lighter);
+  border-color: var(--rag-red-red-overdue);
+}
+.warning-banner.red .warning-icon { color: var(--rag-red-red-overdue); }
+.warning-banner.red .warning-title { color: var(--rag-red-red-overdue-dark); }
+
+/* react-datepicker overrides */
+.react-datepicker-wrapper { width: 100%; }
+.react-datepicker-popper { z-index: 100; }
+
+.react-datepicker {
+  font-family: 'Barlow', sans-serif;
+  border: 1.5px solid #cac6d7;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.react-datepicker__header {
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 8px 8px 0 0;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.react-datepicker__day-name { color: #968caf; }
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #9a26d6;
+  border-radius: 50%;
+}
+
+.react-datepicker__day:hover {
+  background: #f3f4f6;
+  border-radius: 50%;
+}
+
+.react-datepicker__navigation-icon::before { border-color: #968caf; }
+
+.react-datepicker__time-container { border-left: 1px solid #f3f4f6; }
+
+.react-datepicker__time-list-item--selected { background: #9a26d6 !important; }
+
+.react-datepicker__time-list-item:hover:not(.react-datepicker__time-list-item--selected) {
+  background: #f3f4f6 !important;
 }

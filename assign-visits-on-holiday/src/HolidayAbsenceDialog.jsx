@@ -4,6 +4,12 @@ import DatePicker from 'react-datepicker'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
+const ChevronLeftIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <polygon fill="currentColor" points="15.4 7.4 14 6 8 12 14 18 15.4 16.6 10.8 12" />
+  </svg>
+)
+
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
@@ -168,7 +174,9 @@ export default function HolidayAbsenceDialog() {
   const [option,      setOption]      = useState('keep')
 
   return (
-    <div className="modal">
+    <>
+      <a href="../" className="back-link"><ChevronLeftIcon /> Back</a>
+      <div className="modal">
       <button className="close-btn" aria-label="Close"><CloseIcon /></button>
 
       {step === 1 && (
@@ -265,7 +273,7 @@ export default function HolidayAbsenceDialog() {
           </div>
 
           <div className="btn-row">
-            <button className="primary-btn" onClick={() => setStep(2)}>Add absence</button>
+            <button className="round-btn primary-btn" onClick={() => setStep(2)}>Add absence</button>
           </div>
         </div>
       )}
@@ -277,8 +285,10 @@ export default function HolidayAbsenceDialog() {
           <div className="warning-banner">
             <WarningIcon />
             <div>
-              <p className="warning-title">Warning</p>
-              <p className="PASSBodyBody-Std">4 visits are assigned during this period. What would you like to do with them?</p>
+              <h4>Warning</h4>
+              <ul>
+                <li>4 visits are assigned during this period. What would you like to do with them?</li>
+              </ul>
             </div>
           </div>
 
@@ -305,9 +315,9 @@ export default function HolidayAbsenceDialog() {
           ))}
 
           <div className="btn-row">
-            <button className="secondary-btn" onClick={() => setStep(1)}>Back</button>
+            <button className="round-btn secondary-btn" onClick={() => setStep(1)}>Back</button>
             <button
-              className="primary-btn"
+              className="round-btn primary-btn"
               onClick={() => alert(`Holiday booked. Visits: ${option === 'keep' ? 'Keep assigned' : 'Move to unassigned'}`)}
             >
               Confirm
@@ -316,5 +326,6 @@ export default function HolidayAbsenceDialog() {
         </div>
       )}
     </div>
+    </>
   )
 }

@@ -12,8 +12,8 @@ body {
 .modal {
   background: #fff;
   border-radius: 6px;
-  width: 100%;
-  max-width: 560px;
+  width: 750px;
+  max-width: 100%;
   padding: 32px;
   position: relative;
   box-shadow: 0 4px 24px rgba(0,0,0,0.08);
@@ -26,7 +26,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--brand-purple-7-purple-5);
+  color: var(--buttons-lozenge-1-primary-1-default);
   padding: 4px;
   display: flex;
 }
@@ -37,6 +37,10 @@ h2 {
   font-weight: 600;
   margin: 0 0 24px;
   color: var(--greyscale-01-black);
+}
+
+h6 {
+  margin-bottom:12px;
 }
 
 .field { margin-bottom: 18px; }
@@ -101,36 +105,15 @@ select:focus, input[type="text"]:focus { border-color: var(--brand-purple-6-purp
   gap: 10px;
   margin-top: 24px;
 }
-
-.primary-btn {
-  background: var(--brand-purple-6-purple-4);
-  color: #fff;
-  border: none;
-  border-radius: 999px;
-  padding: 13px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.38;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.primary-btn:hover { background: var(--brand-purple-5-purple-3); }
-
-.secondary-btn {
-  background: #fff;
-  color: var(--brand-purple-6-purple-4);
-  border: 2px solid var(--brand-purple-6-purple-4);
-  border-radius: 999px;
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.38;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.secondary-btn:hover { background: #f9fafb; }
+.btn-row.centered { justify-content: center; }
 
 .step { display: none; }
 .step.active { display: block; }
+
+ul {
+  margin-top:12px;
+
+  li {
+    margin:0 0 12px 16px;
+  }
+}
