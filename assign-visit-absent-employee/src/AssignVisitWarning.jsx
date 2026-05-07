@@ -25,7 +25,7 @@ const ChevronLeftIcon = () => (
 export default function AssignVisitWarning() {
   return (
     <>
-      <a href="../" className="back-link"><ChevronLeftIcon /> Back</a>
+      <a href="../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="modal">
       <button className="close-btn" aria-label="Close"><CloseIcon /></button>
 
