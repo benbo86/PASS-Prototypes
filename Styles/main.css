@@ -209,8 +209,9 @@ h6 {
 .react-datepicker__triangle { display: none !important; }
 
 .react-datepicker__day:hover {
-  background: none !important;
-  color: inherit !important;
+  background: var(--brand-purple-6-purple-4) !important;
+  border-radius: 100% !important;
+  color: #fff !important;
 }
 
 .react-datepicker__navigation {

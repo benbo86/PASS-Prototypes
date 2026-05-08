@@ -200,9 +200,23 @@ export default function Timesheets() {
     return [mon, sun];
   });
   const [startDate, endDate] = dateRange;
+  const [hoverDate, setHoverDate] = useState(null);
+
+  const backwardHighlight = useMemo(() => {
+    if (!startDate || endDate || !hoverDate || hoverDate >= startDate) return [];
+    const dates = [];
+    const cur = new Date(hoverDate);
+    while (cur < startDate) {
+      dates.push(new Date(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return [{ 'react-datepicker__day--in-selecting-range': dates }];
+  }, [startDate, endDate, hoverDate]);
 
   const rangeLabel = startDate && endDate
-    ? `${fmtDate(startDate)} – ${fmtDate(endDate)}`
+    ? startDate.toDateString() === endDate.toDateString()
+      ? fmtDate(startDate)
+      : `${fmtDate(startDate)} – ${fmtDate(endDate)}`
     : startDate ? fmtDate(startDate) : 'Select dates';
 
   const navigateRange = (dir) => {
@@ -386,6 +400,13 @@ export default function Timesheets() {
               customInput={<DateRangeInput label={rangeLabel} />}
               calendarStartDay={1}
               formatWeekDay={d => d.slice(0, 1)}
+              highlightDates={backwardHighlight}
+              renderDayContents={(day, date) => (
+                <span
+                  onMouseEnter={() => { if (startDate && !endDate) setHoverDate(date); }}
+                  onMouseLeave={() => setHoverDate(null)}
+                >{day}</span>
+              )}
               popperPlacement="bottom"
               portalId="ts-datepicker-portal"
             />

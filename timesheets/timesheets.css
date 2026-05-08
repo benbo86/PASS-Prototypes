@@ -166,7 +166,7 @@ body {
 
 .sort-icon { overflow: visible; color: var(--ui-purple-4-lavendar); width: 20px; height: 20px; }
 
-.ts-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); }
+/* .ts-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); } */
 
 /* Body rows */
 .ts-table tbody tr {
