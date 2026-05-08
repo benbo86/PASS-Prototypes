@@ -190,8 +190,15 @@ function VisitDetail({ employee, visits, onBack }) {
 export default function Timesheets() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  // Date range picker
-  const [dateRange, setDateRange] = useState([new Date(2026, 8, 1), new Date(2026, 9, 30)]);
+  // Date range picker — default to current week Mon–Sun
+  const [dateRange, setDateRange] = useState(() => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    const mon = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
+    const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+    return [mon, sun];
+  });
   const [startDate, endDate] = dateRange;
 
   const rangeLabel = startDate && endDate
@@ -377,6 +384,8 @@ export default function Timesheets() {
                 }
               }}
               customInput={<DateRangeInput label={rangeLabel} />}
+              calendarStartDay={1}
+              formatWeekDay={d => d.slice(0, 1)}
               popperPlacement="bottom"
               portalId="ts-datepicker-portal"
             />
