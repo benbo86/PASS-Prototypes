@@ -12,11 +12,11 @@ export const CUSTOMERS = [
   { id: 1,  name: 'Margaret Wilson',  funder: 'NHS South East' },
   { id: 2,  name: 'Robert Taylor',    funder: 'Southwark Council' },
   { id: 3,  name: 'Dorothy Hughes',   funder: 'NHS South East' },
-  { id: 4,  name: 'Patricia Moore',   funder: 'Patricia Moore' },
+  { id: 4,  name: 'Patricia Moore',   funder: 'Self-funded' },
   { id: 5,  name: 'James Anderson',   funder: 'Southwark Council' },
   { id: 6,  name: 'Helen Davies',     funder: 'NHS South East' },
   { id: 7,  name: 'Thomas Clarke',    funder: 'Southwark Council' },
-  { id: 8,  name: 'Susan Roberts',    funder: 'Susan Roberts' },
+  { id: 8,  name: 'Susan Roberts',    funder: 'Self-funded' },
   { id: 9,  name: 'Frank Harrison',   funder: 'NHS South East' },
   { id: 10, name: 'Jean Campbell',    funder: 'Southwark Council' },
 ];
@@ -27,21 +27,23 @@ export const FUNDERS = [...new Set(CUSTOMERS.map(c => c.funder))].sort();
 export const VISIT_TYPES = ['Personal care', 'Medication', 'Domestic', 'Social support', 'Complex care'];
 export const VISIT_STATUSES = ['Completed', 'Missed', 'Cancelled'];
 
+// customerIds: the subset of customers each employee visits
+// visitRange: [min, max] visits for the period
 export const EMPLOYEES = [
-  { id: 1,  name: 'Stephen Nicholls', contract: 'Fixed hours',    runs: 1, holiday: '2 days' },
-  { id: 2,  name: 'David Bukowski',   contract: 'Variable hours', runs: 0, holiday: '8 hours' },
-  { id: 3,  name: 'Justin Keller',    contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 4,  name: 'Jeffrey Henry',    contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 5,  name: 'Anita Bradley',    contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 6,  name: 'Kira Oswell',      contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 7,  name: 'Amirah Marsden',   contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 8,  name: 'Mike Fenwick',     contract: 'Fixed hours',    runs: 0, holiday: '1 day' },
-  { id: 9,  name: 'Alex Jones',       contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 10, name: 'John Smith',       contract: 'Fixed hours',    runs: 0, holiday: '0' },
-  { id: 11, name: 'Pauline Steed',    contract: 'Fixed hours',    runs: 0, holiday: '2 days' },
-  { id: 12, name: 'Rachel Clarke',    contract: 'Salary',         runs: 1, holiday: '1 day' },
-  { id: 13, name: 'Tom Briggs',       contract: 'Variable hours', runs: 0, holiday: '0' },
-  { id: 14, name: 'Louise Patel',     contract: 'Fixed hours',    runs: 0, holiday: '4 hours' },
+  { id: 1,  name: 'Stephen Nicholls', contract: 'Fixed hours',    runs: 1, holiday: '2 days',  customerIds: [1, 3, 6, 9],    visitRange: [18, 22] },
+  { id: 2,  name: 'David Bukowski',   contract: 'Variable hours', runs: 0, holiday: '8 hours', customerIds: [2, 5],           visitRange: [4, 6]   },
+  { id: 3,  name: 'Justin Keller',    contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [1, 4, 8],        visitRange: [11, 15] },
+  { id: 4,  name: 'Jeffrey Henry',    contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [3, 7, 9],        visitRange: [9, 13]  },
+  { id: 5,  name: 'Anita Bradley',    contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [2, 6, 10],       visitRange: [13, 17] },
+  { id: 6,  name: 'Kira Oswell',      contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [1, 5, 8],        visitRange: [14, 18] },
+  { id: 7,  name: 'Amirah Marsden',   contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [4, 7, 9],        visitRange: [10, 14] },
+  { id: 8,  name: 'Mike Fenwick',     contract: 'Fixed hours',    runs: 0, holiday: '1 day',    customerIds: [2, 3, 6],        visitRange: [12, 16] },
+  { id: 9,  name: 'Alex Jones',       contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [5, 8],           visitRange: [5, 8]   },
+  { id: 10, name: 'John Smith',       contract: 'Fixed hours',    runs: 0, holiday: '0',        customerIds: [1, 4, 7],        visitRange: [8, 12]  },
+  { id: 11, name: 'Pauline Steed',    contract: 'Fixed hours',    runs: 0, holiday: '2 days',   customerIds: [3, 9, 10],       visitRange: [15, 20] },
+  { id: 12, name: 'Rachel Clarke',    contract: 'Salary',         runs: 1, holiday: '1 day',    customerIds: [2, 5, 6, 8],     visitRange: [16, 22] },
+  { id: 13, name: 'Tom Briggs',       contract: 'Variable hours', runs: 0, holiday: '0',        customerIds: [7, 9],           visitRange: [5, 7]   },
+  { id: 14, name: 'Louise Patel',     contract: 'Fixed hours',    runs: 0, holiday: '4 hours',  customerIds: [4, 6, 10],       visitRange: [14, 18] },
 ];
 
 const VISIT_NAMES = [
@@ -69,9 +71,11 @@ function addSlots(time, slots) {
 
 let _vid = 1;
 export const VISITS = EMPLOYEES.flatMap(emp => {
-  const count = between(13, 22);
+  const empCustomers = CUSTOMERS.filter(c => emp.customerIds.includes(c.id));
+  const [lo, hi] = emp.visitRange;
+  const count = between(lo, hi);
   return Array.from({ length: count }, () => {
-    const customer = pick(CUSTOMERS);
+    const customer = pick(empCustomers);
     const statusRoll = rand();
     const status = statusRoll > 0.88 ? 'Cancelled' : statusRoll > 0.78 ? 'Missed' : 'Completed';
     const startIdx = between(0, HALF_HOURS.length - 5);
