@@ -418,7 +418,7 @@ export default function Timesheets() {
                 selected={funderFilter}
                 onApply={(sel) => { setFunderFilter(sel); setPage(1); }}
                 onClear={() => { setFunderFilter(new Set()); setPage(1); }}
-                hasNameSort
+                hasSort={false} /* hasNameSort */
                 isOpen={openDD === 'funder'}
                 onClose={closeDropdown}
                 anchorEl={anchorRefs.current['funder']}
@@ -441,7 +441,7 @@ export default function Timesheets() {
                 selected={customerFilter}
                 onApply={(sel) => { setCustomerFilter(sel); setPage(1); }}
                 onClear={() => { setCustomerFilter(new Set()); setPage(1); }}
-                hasNameSort
+                hasSort={false} /* hasNameSort */
                 isOpen={openDD === 'customer'}
                 onClose={closeDropdown}
                 anchorEl={anchorRefs.current['customer']}
@@ -464,6 +464,7 @@ export default function Timesheets() {
                 selected={statusFilter}
                 onApply={(sel) => { setStatusFilter(sel); setPage(1); }}
                 onClear={() => { setStatusFilter(new Set()); setPage(1); }}
+                hasSort={false}
                 isOpen={openDD === 'status'}
                 onClose={closeDropdown}
                 anchorEl={anchorRefs.current['status']}
