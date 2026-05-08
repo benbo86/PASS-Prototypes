@@ -409,7 +409,7 @@ export default function Timesheets() {
                 className={`ts-filter-pill ${funderFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('funder')}
               >
-                <span>Funder</span>
+                <span>Funder type</span>
                 {funderFilter.size > 0 && <span className="ts-filter-count">{funderFilter.size}</span>}
                 <ChevronDown size={20} />
               </button>
