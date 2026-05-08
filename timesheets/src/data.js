@@ -12,11 +12,11 @@ export const CUSTOMERS = [
   { id: 1,  name: 'Margaret Wilson',  funder: 'NHS South East' },
   { id: 2,  name: 'Robert Taylor',    funder: 'Southwark Council' },
   { id: 3,  name: 'Dorothy Hughes',   funder: 'NHS South East' },
-  { id: 4,  name: 'Patricia Moore',   funder: 'Self-funded' },
+  { id: 4,  name: 'Patricia Moore',   funder: 'Private' },
   { id: 5,  name: 'James Anderson',   funder: 'Southwark Council' },
   { id: 6,  name: 'Helen Davies',     funder: 'NHS South East' },
   { id: 7,  name: 'Thomas Clarke',    funder: 'Southwark Council' },
-  { id: 8,  name: 'Susan Roberts',    funder: 'Self-funded' },
+  { id: 8,  name: 'Susan Roberts',    funder: 'Private' },
   { id: 9,  name: 'Frank Harrison',   funder: 'NHS South East' },
   { id: 10, name: 'Jean Campbell',    funder: 'Southwark Council' },
 ];
