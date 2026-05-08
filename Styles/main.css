@@ -66,14 +66,17 @@ h6 {
 
 .round-btn {
     border-radius: 999px;
-    padding: 13px 28px;
+    padding: 12px 24px;
     font-size: 16px;
     font-weight: 500;
     line-height: 1.38;
     cursor: pointer;
     font-family: inherit;
     transition: background 0.15s;
-    border:none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .primary-btn {
@@ -81,18 +84,22 @@ h6 {
     color: #fff;
     border: none;
 }
-.primary-btn:hover {
-    background: var(--brand-purple-5-purple-3);
-}
 
 .secondary-btn {
   background: #fff;
   color: var(--brand-purple-6-purple-4);
   border: 2px solid var(--brand-purple-6-purple-4);
 }
-.secondary-btn:hover {
-    background: #f9fafb;
+
+.secondary-btn:disabled {
+    border-color: var(--greyscale-13-grey-90);
+    color: var(--greyscale-12-grey-85);
+    cursor: default;
 }
+
+/* Icon padding modifiers — use on any round-btn with an icon on one side */
+.btn-icon-left  { padding-left:  16px; }
+.btn-icon-right { padding-right: 16px; }
 
 .tertiary-btn {
     background: var(--buttons-lozenge-3-tertiary-1-default);
@@ -174,3 +181,63 @@ h6 {
 .react-datepicker__time-list-item:hover:not(.react-datepicker__time-list-item--selected) {
   background: #f3f4f6 !important;
 }
+
+/* ── Global: custom checkbox ──────────────────────────────── */
+.checkbox-wrap { display: inline-flex; align-items: center; cursor: pointer; }
+.checkbox-wrap input[type="checkbox"] { display: none; }
+.checkbox-box {
+  width: 18px; height: 18px; border-radius: 3px;
+  border: 1.5px solid var(--ui-purple-3-grape-grey);
+  background: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s;
+}
+.checkbox-wrap input:checked + .checkbox-box {
+  background: var(--brand-purple-7-purple-5);
+  border-color: var(--brand-purple-7-purple-5);
+}
+.checkbox-wrap input:checked + .checkbox-box::after {
+  content: '';
+  display: block;
+  width: 5px; height: 8px;
+  border: 2px solid #fff; border-top: none; border-left: none;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+/* ── Global: custom radio button ──────────────────────────── */
+.form-radio {
+  appearance: none; -webkit-appearance: none;
+  position: relative;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid var(--ui-purple-3-grape-grey);
+  background: #fff; cursor: pointer; flex-shrink: 0; margin: 0;
+  transition: border-color 0.12s;
+}
+.form-radio:checked {
+  border-color: var(--brand-purple-7-purple-5);
+}
+.form-radio:checked::before {
+  content: '';
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--brand-purple-7-purple-5);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Global: search bar ───────────────────────────────────── */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 6px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  color: var(--ui-purple-3-grape-grey);
+}
+.search-bar input {
+  border: none; background: none; outline: none;
+  font-size: 14px; font-family: inherit; color: #000;
+  flex: 1; min-width: 0;
+}
+.search-bar input::placeholder { color: #000; }

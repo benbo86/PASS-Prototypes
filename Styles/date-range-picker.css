@@ -1,0 +1,15 @@
+/* ── Date range picker trigger ────────────────────────────────────────────────
+   Import alongside main.css and colors.css in any prototype that uses
+   the DateRangeInput component from Styles/components/DateRangePicker.jsx.
+   The surrounding nav arrows and layout are prototype-specific.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.cal-trigger {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer; padding: 0;
+  font-family: inherit; color: var(--ui-purple-3-grape-grey);
+}
+
+.date-range-text {
+  font-size: 18px; font-weight: 500; color: #000; white-space: nowrap;
+}

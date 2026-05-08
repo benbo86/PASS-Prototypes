@@ -1,15 +1,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Barlow', sans-serif;
-  font-size: 14px;
-  background: #f7f7f7;
-  color: #333;
+  background: #fff;
   min-height: 100vh;
 }
-
-/* back-link as button (level 2 uses <button> not <a>) */
-button.back-link { background: none; border: none; cursor: pointer; }
 
 /* ── Page body ──────────────────────────────────────────────── */
 .ts-page { min-height: 100vh; display: flex; flex-direction: column; }
@@ -27,50 +21,31 @@ button.back-link { background: none; border: none; cursor: pointer; }
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+  position: relative;
 }
 .ts-page-header h1 {
   font-size: 22px; font-weight: 600; color: #000; white-space: nowrap;
 }
 .ts-page-header-left { display: flex; align-items: center; gap: 12px; }
 .ts-date-nav {
-  display: flex; align-items: center; gap: 6px; margin-left: 8px;
+  display: flex; align-items: center; gap: 12px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
-.ts-date-range { font-size: 15px; font-weight: 500; color: #000; white-space: nowrap; }
 .ts-nav-arrow {
-  width: 32px; height: 32px; border-radius: 50%;
   border: none; background: transparent; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--greyscale-4-grey-40); transition: background 0.15s;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s;
+  padding: 0;
 }
-.ts-nav-arrow:hover { background: var(--greyscale-14-grey-95); }
-.ts-calendar-btn { color: var(--greyscale-5-grey-45); }
+.ts-nav-arrow:hover { color: var(--ui-purple-2-dark-grape-grey); }
+
+.ts-date-nav .react-datepicker-wrapper { width: auto; }
+
+#ts-datepicker-portal .react-datepicker-popper { z-index: 9999; }
+
 .ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
-
-.ts-select-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 999px;
-  border: 2px solid var(--brand-purple-6-purple-4);
-  background: #fff; color: var(--brand-purple-6-purple-4);
-  font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer;
-  transition: background 0.15s;
-}
-.ts-select-btn:hover { background: var(--ui-purple-7-lightest-lavendar); }
-
-.ts-actions-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 999px;
-  border: 1.5px solid var(--greyscale-12-grey-85);
-  background: #fff; color: var(--greyscale-7-grey-60);
-  font-size: 14px; font-weight: 500; font-family: inherit; cursor: not-allowed;
-}
-
-.ts-back-btn {
-  display: flex; align-items: center; gap: 6px;
-  border: none; background: none; cursor: pointer;
-  color: var(--brand-purple-6-purple-4); font-size: 14px; font-weight: 500;
-  font-family: inherit; padding: 0;
-}
-.ts-back-btn:hover { color: var(--brand-purple-5-purple-3); }
 
 /* ── Filter bar ─────────────────────────────────────────────── */
 .ts-filter-bar {
@@ -82,8 +57,11 @@ button.back-link { background: none; border: none; cursor: pointer; }
   margin-bottom: 2px;
   flex-wrap: wrap;
 }
-.ts-filter-bar-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ts-filter-bar-left  { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
 .ts-filter-bar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.ts-filter-copies { gap: 8px; margin-right: 8px; }
+.ts-filter-copies-label { font-size: 16px; font-weight: 500; color: #000; white-space: nowrap; }
 
 .ts-filter-icon-btn {
   display: flex; align-items: center; justify-content: center;
@@ -95,18 +73,18 @@ button.back-link { background: none; border: none; cursor: pointer; }
 
 .ts-filter-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 999px;
-  border: 1.5px solid var(--greyscale-12-grey-85);
-  background: #fff; color: #333;
-  font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  padding: 6px 12px; border-radius: 4px;
+  border: none;
+  background: #fff; color: var(--greyscale-3-grey-30);
+  font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer;
+  transition: background 0.15s;
   white-space: nowrap;
 }
-.ts-filter-pill:hover { border-color: var(--ui-purple-3-grape-grey); }
+.ts-filter-pill:hover { background: var(--ui-purple-7-lightest-lavendar); }
 .ts-filter-pill.active {
   border-color: var(--brand-purple-6-purple-4);
   background: var(--ui-purple-7-lightest-lavendar);
-  color: var(--brand-purple-1-purple-0);
+  color: #000;
 }
 
 .ts-filter-count {
@@ -117,15 +95,15 @@ button.back-link { background: none; border: none; cursor: pointer; }
 }
 
 .ts-clear-btn {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-flex; align-items: center; gap: 4px;
   padding: 6px 12px; border-radius: 999px;
   border: none; background: none;
-  color: var(--greyscale-4-grey-40); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+  color: var(--brand-purple-5-purple-3); font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer;
 }
-.ts-clear-btn:hover { color: #000; }
+.ts-clear-btn:hover { color: var(--brand-purple-6-purple-4); }
 
 .ts-count-label {
-  font-size: 13px; color: var(--greyscale-4-grey-40); white-space: nowrap;
+  font-size: 16px; color: #000; white-space: nowrap;
 }
 
 .ts-pag-inline { width: 28px; height: 28px; }
@@ -133,8 +111,8 @@ button.back-link { background: none; border: none; cursor: pointer; }
 /* ── Table ──────────────────────────────────────────────────── */
 .ts-table-wrap {
   background: #fff;
-  border: 1px solid var(--greyscale-13-grey-90);
-  border-radius: 8px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 0;
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -142,18 +120,19 @@ button.back-link { background: none; border: none; cursor: pointer; }
 .ts-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: 14px;
+  line-height: 20px;
   min-width: 1200px;
 }
 
 .ts-table thead tr {
-  background: #fff;
-  border-bottom: 1.5px solid var(--greyscale-13-grey-90);
+  background: var(--ui-purple-6-lavendar-grey);
+  border-bottom: 1.5px solid var(--ui-purple-5-languid-lavendar);
 }
 
 .ts-table th {
-  padding: 10px 12px;
-  font-size: 12.5px; font-weight: 600; color: var(--greyscale-4-grey-40);
+  padding: 16px 14px;
+  font-size: 14px; font-weight: 600; color: #000;
   text-align: left; white-space: nowrap;
   display: table-cell;
   vertical-align: middle;
@@ -170,27 +149,28 @@ button.back-link { background: none; border: none; cursor: pointer; }
 
 .col-icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border: none; background: none; cursor: pointer;
+  width: 24px; height: 24px; border: none; background: none; cursor: pointer;
   border-radius: 4px; padding: 0; vertical-align: middle; margin-left: 2px;
   transition: background 0.12s;
 }
-.col-icon-btn:hover { background: var(--greyscale-14-grey-95); }
+.col-icon-btn:hover { background: none; }
 .col-icon-btn--active .col-icon { color: var(--brand-purple-6-purple-4); }
 
 .col-icon {
-  color: var(--greyscale-9-grey-70);
+  color: var(--ui-purple-3-grape-grey);
   display: block;
+  width: 20px; height: 20px;
   transition: color 0.12s;
 }
 .col-icon--active { color: var(--brand-purple-6-purple-4); }
 
-.sort-icon { overflow: visible; }
+.sort-icon { overflow: visible; color: var(--ui-purple-4-lavendar); width: 20px; height: 20px; }
 
-.ts-table th.sorted { background: var(--ui-purple-7-lightest-lavendar); }
+.ts-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); }
 
 /* Body rows */
 .ts-table tbody tr {
-  border-bottom: 1px solid var(--greyscale-14-grey-95);
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
   transition: background 0.12s;
 }
 .ts-table tbody tr:last-child { border-bottom: none; }
@@ -198,8 +178,19 @@ button.back-link { background: none; border: none; cursor: pointer; }
 .ts-row { cursor: pointer; }
 .ts-row:hover { background: var(--ui-purple-opacity-tint-cyber-opacity-3); }
 
+.ts-table th,
 .ts-table td {
-  padding: 11px 12px;
+  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+.ts-table th:last-child,
+.ts-table td:last-child {
+  border-right: none;
+}
+
+.ts-table td {
+  padding: 16px 14px;
+  font-size: 14px;
+  line-height: 20px;
   color: #333;
   vertical-align: middle;
 }
@@ -213,45 +204,32 @@ button.back-link { background: none; border: none; cursor: pointer; }
 /* Checkbox column */
 .ts-check-col {
   text-align: center !important;
-  width: 52px; min-width: 52px;
+  width: 60px; min-width: 60px;
   white-space: nowrap;
 }
 .ts-table th.ts-check-col {
   display: table-cell;
   vertical-align: middle;
 }
-.ts-table th.ts-check-col span { margin-left: 4px; vertical-align: middle; }
-
-.ts-checkbox-wrap { display: inline-flex; align-items: center; cursor: pointer; }
-.ts-checkbox-wrap input[type="checkbox"] { display: none; }
-.ts-custom-check {
-  width: 16px; height: 16px; border-radius: 3px;
-  border: 1.5px solid var(--greyscale-11-grey-80);
-  background: #fff; display: inline-block; flex-shrink: 0;
-  transition: background 0.12s, border-color 0.12s;
-  position: relative;
+.ts-table th.ts-check-col .ts-header-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
-.ts-checkbox-wrap input:checked + .ts-custom-check {
-  background: var(--brand-purple-6-purple-4);
-  border-color: var(--brand-purple-6-purple-4);
-}
-.ts-checkbox-wrap input:checked + .ts-custom-check::after {
-  content: '';
-  position: absolute; left: 3px; top: 0px;
-  width: 5px; height: 9px;
-  border: 2px solid #fff; border-top: none; border-left: none;
-  transform: rotate(45deg);
+.ts-table th.ts-check-col .ts-header-check .checkbox-wrap {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Verified badges */
 .verified-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 2px 8px; border-radius: 4px;
-  font-size: 12px; font-weight: 600; min-width: 44px;
+  padding: 3px 16px 5px; border-radius: 4px;
+  font-size: 14px; line-height: 20px; font-weight: 500;
 }
-.verified-full    { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
-.verified-partial { background: var(--rag-amber-amber-lightest); color: #7b5800; }
-.verified-none    { background: var(--greyscale-14-grey-95); color: var(--greyscale-6-grey-50); }
+.verified-full    { background: var(--availability-3-green-tint);      color: var(--greyscale-2-grey-20); }
+.verified-partial { background: var(--rag-amber-amber-lightest);        color: var(--greyscale-2-grey-20); }
+.verified-none    { background: var(--rag-red-action-med-pastel);       color: var(--greyscale-2-grey-20); }
 
 /* Visit status pills (level 2) */
 .visit-status {
@@ -295,121 +273,4 @@ button.back-link { background: none; border: none; cursor: pointer; }
   border: 1px solid var(--greyscale-12-grey-85); background: #fff;
   font-size: 13px; font-family: inherit; cursor: pointer;
 }
-
-/* ── Filter dropdown ────────────────────────────────────────── */
-.fd-wrap {
-  background: #fff;
-  border: 1px solid var(--greyscale-12-grey-85);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  width: 280px;
-  overflow: hidden;
-}
-
-/* Sort section */
-.fd-sort-section {
-  display: flex;
-  gap: 6px;
-  padding: 10px 12px 8px;
-}
-.fd-sort-col {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-.fd-sort-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1.5px solid transparent;
-  background: none;
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--greyscale-4-grey-40);
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-  white-space: nowrap;
-}
-.fd-sort-btn:hover:not(.selected) { background: var(--greyscale-14-grey-95); color: #333; }
-.fd-sort-btn.selected {
-  border-color: var(--brand-purple-6-purple-4);
-  background: var(--ui-purple-7-lightest-lavendar);
-  color: var(--brand-purple-1-purple-0);
-  font-weight: 500;
-}
-
-.fd-divider { height: 1px; background: var(--greyscale-13-grey-90); margin: 4px 0; }
-
-/* Search */
-.fd-search {
-  display: flex; align-items: center; gap: 8px;
-  margin: 8px 12px;
-  padding: 7px 12px;
-  background: var(--greyscale-14-grey-95); border-radius: 8px;
-  color: var(--greyscale-6-grey-50);
-}
-.fd-search input {
-  border: none; background: none; outline: none;
-  font-size: 13.5px; font-family: inherit; color: #333;
-  flex: 1; min-width: 0;
-}
-.fd-search input::placeholder { color: var(--greyscale-7-grey-60); }
-
-/* Item list */
-.fd-list {
-  max-height: 200px; overflow-y: auto;
-  padding: 4px 0;
-}
-.fd-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 16px; cursor: pointer;
-  border-bottom: 1px solid var(--greyscale-14-grey-95);
-  transition: background 0.1s;
-}
-.fd-item:last-child { border-bottom: none; }
-.fd-item:hover { background: var(--ui-purple-7-lightest-lavendar); }
-.fd-item-label { font-size: 13.5px; color: #333; }
-.fd-empty { padding: 16px; text-align: center; color: var(--greyscale-7-grey-60); font-size: 13px; display: block; }
-
-/* Custom checkbox in dropdown */
-.fd-checkbox {
-  width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
-  border: 1.5px solid var(--greyscale-11-grey-80);
-  background: #fff; display: flex; align-items: center; justify-content: center;
-  transition: background 0.12s, border-color 0.12s;
-}
-.fd-checkbox.checked {
-  background: var(--brand-purple-6-purple-4);
-  border-color: var(--brand-purple-6-purple-4);
-}
-
-/* Footer */
-.fd-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--greyscale-15-grey-97);
-  border-top: 1px solid var(--greyscale-13-grey-90);
-  gap: 10px;
-}
-.fd-apply-btn {
-  padding: 8px 20px; border-radius: 999px;
-  border: none; background: var(--greyscale-12-grey-85);
-  font-size: 13.5px; font-weight: 500; font-family: inherit;
-  color: var(--greyscale-5-grey-45); cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.fd-apply-btn:not(:disabled) {
-  background: var(--brand-purple-6-purple-4); color: #fff; cursor: pointer;
-}
-.fd-apply-btn:not(:disabled):hover { background: var(--brand-purple-5-purple-3); }
-.fd-apply-btn:disabled { cursor: default; }
-
-.fd-clear-btn {
-  padding: 8px 20px; border-radius: 999px;
-  border: 2px solid var(--brand-purple-6-purple-4);
-  background: #fff; color: var(--brand-purple-6-purple-4);
-  font-size: 13.5px; font-weight: 500; font-family: inherit; cursor: pointer;
-  transition: background 0.15s;
-}
-.fd-clear-btn:hover { background: var(--ui-purple-7-lightest-lavendar); }
+/* fd-* styles are now in Styles/filter-dropdown.css */

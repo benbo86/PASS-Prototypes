@@ -1,5 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
+import { CalendarIcon, fmtDate, DateRangeInput } from '../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
   fmtMins, fmtGBP,
@@ -9,7 +11,11 @@ import {
 
 const FilterIcon = ({ active }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" className={`col-icon ${active ? 'col-icon--active' : ''}`}>
-    <path d="M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z" fill="currentColor"/>
+    {active ? (
+      <path d="M10.5,15.7658125 L10.5,12 L10.5,12 L6.75103413,7.83448237 C6.56630462,7.62922736 6.58294383,7.31308244 6.78819884,7.12835293 C6.88001119,7.04572181 6.99916031,7 7.1226812,7 L16.8773188,7 C17.1534612,7 17.3773188,7.22385763 17.3773188,7.5 C17.3773188,7.62352089 17.331597,7.74267001 17.2489659,7.83448237 L13.5,12 L13.5,12 L13.5,17.4324792 C13.5,17.7086216 13.2761424,17.9324792 13,17.9324792 C12.8830317,17.9324792 12.7697653,17.8914711 12.6799078,17.8165898 L10.6799078,16.1499232 C10.5659115,16.0549263 10.5,15.9142024 10.5,15.7658125 Z" fill="currentColor"/>
+    ) : (
+      <path d="M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z" fill="currentColor"/>
+    )}
   </svg>
 );
 
@@ -30,27 +36,21 @@ const ChevronDown = ({ size = 16 }) => (
 );
 
 const ChevronLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24">
+  <svg width="24" height="24" viewBox="0 0 24 24">
     <polygon points="15.4,8.6 10.8,13.2 15.4,17.8 14,19.2 8,13.2 14,7.2" fill="currentColor"/>
   </svg>
 );
 
 const ChevronRight = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24">
+  <svg width="24" height="24" viewBox="0 0 24 24">
     <polygon points="8.6,8.6 13.2,13.2 8.6,17.8 10,19.2 16,13.2 10,7.2" fill="currentColor"/>
   </svg>
 );
 
-const CalendarIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-);
-
 const CloseIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
+      points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12"/>
   </svg>
 );
 
@@ -102,9 +102,9 @@ function VisitDetail({ employee, visits, onBack }) {
         <div className="ts-page-header">
           <h1>{employee.name}</h1>
           <div className="ts-header-controls">
-            <button className="ts-select-btn" onClick={onBack}><BackIcon /> Back</button>
-            <button className="ts-select-btn">Select <ChevronDown /></button>
-            <button className="ts-actions-btn" disabled>Actions <ChevronDown /></button>
+            <button className="round-btn secondary-btn btn-icon-left" onClick={onBack}><BackIcon /> Back</button>
+            <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDown size={24} /></button>
+            <button className="round-btn secondary-btn btn-icon-right" disabled>Actions <ChevronDown size={24} /></button>
           </div>
         </div>
 
@@ -126,18 +126,22 @@ function VisitDetail({ employee, visits, onBack }) {
                 <th>Pay ref</th>
                 <th>Invoice ref</th>
                 <th className="ts-check-col">
-                  <label className="ts-checkbox-wrap">
-                    <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
-                    <span className="ts-custom-check" />
-                  </label>
-                  <span>Pay</span>
+                  <div className="ts-header-check">
+                    <label className="checkbox-wrap">
+                      <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
+                      <span className="checkbox-box" />
+                    </label>
+                    <span>Pay</span>
+                  </div>
                 </th>
                 <th className="ts-check-col">
-                  <label className="ts-checkbox-wrap">
-                    <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
-                    <span className="ts-custom-check" />
-                  </label>
-                  <span>Inv</span>
+                  <div className="ts-header-check">
+                    <label className="checkbox-wrap">
+                      <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
+                      <span className="checkbox-box" />
+                    </label>
+                    <span>Inv</span>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -158,17 +162,17 @@ function VisitDetail({ employee, visits, onBack }) {
                   <td className="ts-ref">{v.payRef || '—'}</td>
                   <td className="ts-ref">{v.invRef || '—'}</td>
                   <td className="ts-check-col">
-                    <label className="ts-checkbox-wrap">
+                    <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll || !!payRows[v.id]}
                         onChange={e => setPayRows(p => ({ ...p, [v.id]: e.target.checked }))} />
-                      <span className="ts-custom-check" />
+                      <span className="checkbox-box" />
                     </label>
                   </td>
                   <td className="ts-check-col">
-                    <label className="ts-checkbox-wrap">
+                    <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll || !!invRows[v.id]}
                         onChange={e => setInvRows(p => ({ ...p, [v.id]: e.target.checked }))} />
-                      <span className="ts-custom-check" />
+                      <span className="checkbox-box" />
                     </label>
                   </td>
                 </tr>
@@ -185,6 +189,20 @@ function VisitDetail({ employee, visits, onBack }) {
 
 export default function Timesheets() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Date range picker
+  const [dateRange, setDateRange] = useState([new Date(2026, 8, 1), new Date(2026, 9, 30)]);
+  const [startDate, endDate] = dateRange;
+
+  const rangeLabel = startDate && endDate
+    ? `${fmtDate(startDate)} – ${fmtDate(endDate)}`
+    : startDate ? fmtDate(startDate) : 'Select dates';
+
+  const navigateRange = (dir) => {
+    if (!startDate || !endDate) return;
+    const ms = endDate.getTime() - startDate.getTime() + 86400000;
+    setDateRange([new Date(startDate.getTime() + dir * ms), new Date(endDate.getTime() + dir * ms)]);
+  };
 
   // Above-table filters (filter the underlying visits, changing totals)
   const [funderFilter,   setFunderFilter]   = useState(new Set());
@@ -207,6 +225,9 @@ export default function Timesheets() {
   // Pagination
   const [page,       setPage]       = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
+
+  // Filter bar checkbox
+  const [copies, setCopies] = useState(false);
 
   // Select checkboxes
   const [payAll, setPayAll]   = useState(false);
@@ -341,22 +362,40 @@ export default function Timesheets() {
       <div className="ts-body">
         {/* Page header */}
         <div className="ts-page-header">
-          <h1>Timesheets</h1>
           <div className="ts-date-nav">
-            <button className="ts-nav-arrow"><ChevronLeft /></button>
-            <span className="ts-date-range">Wed 01 Sep – Thu 31 Oct</span>
-            <button className="ts-nav-arrow ts-calendar-btn"><CalendarIcon /></button>
-            <button className="ts-nav-arrow"><ChevronRight /></button>
+            <button className="ts-nav-arrow" onClick={() => navigateRange(-1)}><ChevronLeft /></button>
+            <DatePicker
+              selectsRange
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(update) => {
+                const [newStart, newEnd] = update;
+                if (startDate && !endDate && newStart && !newEnd && newStart < startDate) {
+                  setDateRange([newStart, startDate]);
+                } else {
+                  setDateRange(update);
+                }
+              }}
+              customInput={<DateRangeInput label={rangeLabel} />}
+              popperPlacement="bottom"
+              portalId="ts-datepicker-portal"
+            />
+            <button className="ts-nav-arrow" onClick={() => navigateRange(1)}><ChevronRight /></button>
           </div>
           <div className="ts-header-controls">
-            <button className="ts-select-btn">Select <ChevronDown /></button>
-            <button className="ts-actions-btn" disabled>Actions <ChevronDown /></button>
+            <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDown size={24} /></button>
+            <button className="round-btn secondary-btn btn-icon-right" disabled>Actions <ChevronDown size={24} /></button>
           </div>
         </div>
 
         {/* Filter bar */}
         <div className="ts-filter-bar">
           <div className="ts-filter-bar-left">
+            <label className="checkbox-wrap ts-filter-copies">
+              <input type="checkbox" checked={copies} onChange={e => setCopies(e.target.checked)} />
+              <span className="checkbox-box" />
+              <span>Copies</span>
+            </label>
             <span className="ts-filter-icon-btn">
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path d="M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z" fill="currentColor"/>
@@ -372,7 +411,7 @@ export default function Timesheets() {
               >
                 <span>Funder</span>
                 {funderFilter.size > 0 && <span className="ts-filter-count">{funderFilter.size}</span>}
-                <ChevronDown size={14} />
+                <ChevronDown size={20} />
               </button>
               <FilterDropdown
                 items={allFunders}
@@ -395,7 +434,7 @@ export default function Timesheets() {
               >
                 <span>Customer</span>
                 {customerFilter.size > 0 && <span className="ts-filter-count">{customerFilter.size}</span>}
-                <ChevronDown size={14} />
+                <ChevronDown size={20} />
               </button>
               <FilterDropdown
                 items={allCustomers}
@@ -418,7 +457,7 @@ export default function Timesheets() {
               >
                 <span>Visit status</span>
                 {statusFilter.size > 0 && <span className="ts-filter-count">{statusFilter.size}</span>}
-                <ChevronDown size={14} />
+                <ChevronDown size={20} />
               </button>
               <FilterDropdown
                 items={allStatuses}
@@ -556,20 +595,24 @@ export default function Timesheets() {
 
                 {/* Pay checkbox */}
                 <th className="ts-check-col">
-                  <label className="ts-checkbox-wrap">
-                    <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
-                    <span className="ts-custom-check" />
-                  </label>
-                  <span>Pay</span>
+                  <div className="ts-header-check">
+                    <label className="checkbox-wrap">
+                      <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
+                      <span className="checkbox-box" />
+                    </label>
+                    <span>Pay</span>
+                  </div>
                 </th>
 
                 {/* Invoice checkbox */}
                 <th className="ts-check-col">
-                  <label className="ts-checkbox-wrap">
-                    <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
-                    <span className="ts-custom-check" />
-                  </label>
-                  <span>Inv</span>
+                  <div className="ts-header-check">
+                    <label className="checkbox-wrap">
+                      <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
+                      <span className="checkbox-box" />
+                    </label>
+                    <span>Inv</span>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -593,17 +636,17 @@ export default function Timesheets() {
                     <VerifiedBadge verified={row.invVerCount} total={row.visits} />
                   </td>
                   <td className="ts-check-col" onClick={e => e.stopPropagation()}>
-                    <label className="ts-checkbox-wrap">
+                    <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll || !!payRows[row.id]}
                         onChange={e => setPayRows(p => ({ ...p, [row.id]: e.target.checked }))} />
-                      <span className="ts-custom-check" />
+                      <span className="checkbox-box" />
                     </label>
                   </td>
                   <td className="ts-check-col" onClick={e => e.stopPropagation()}>
-                    <label className="ts-checkbox-wrap">
+                    <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll || !!invRows[row.id]}
                         onChange={e => setInvRows(p => ({ ...p, [row.id]: e.target.checked }))} />
-                      <span className="ts-custom-check" />
+                      <span className="checkbox-box" />
                     </label>
                   </td>
                 </tr>
