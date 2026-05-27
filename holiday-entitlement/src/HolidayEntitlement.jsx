@@ -1,6 +1,7 @@
 import { useState, forwardRef } from 'react'
 import DatePicker from 'react-datepicker'
 import { CalendarIcon } from '../../Components/DateRangePicker'
+import Tooltip from '../../Components/Tooltip'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -13,6 +14,12 @@ const ChevronLeft = () => (
 const CheckIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+  </svg>
+)
+
+const InfoIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24">
+    <path fill="currentColor" fillRule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z" />
   </svg>
 )
 
@@ -91,12 +98,17 @@ export default function HolidayEntitlement() {
                 <a href="#" className="he-link he-deduction-view-link">View in timesheet</a>
               </div>
             ) : (
-              <button
-                className="round-btn primary-btn he-deduction-cta"
-                onClick={() => setDeductionAdded(true)}
-              >
-                Add deduction to timesheet
-              </button>
+              <div className="he-deduction-action">
+                <button
+                  className="round-btn primary-btn"
+                  onClick={() => setDeductionAdded(true)}
+                >
+                  Add deduction to timesheet
+                </button>
+                <Tooltip text="Creates a timesheet record for verification. Once verified and the gross pay advice generated, the deduction will be taken off the total.">
+                  <InfoIcon />
+                </Tooltip>
+              </div>
             )}
           </div>
         </div>

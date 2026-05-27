@@ -493,3 +493,54 @@ h6 {
   transition: border-color 0.15s;
 }
 .form-select:focus { border-color: var(--brand-purple-6-purple-4); }
+
+/* ── Tooltip ─────────────────────────────────────────────────── */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ui-purple-3-grape-grey);
+  cursor: help;
+  line-height: 0;
+}
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: var(--greyscale-2-grey-20);
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 8px 12px;
+  width: 260px;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: var(--ui-purple-5-languid-lavendar);
+}
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -1px;
+  border: 6px solid transparent;
+  border-top-color: #fff;
+}
+.tooltip-wrap:hover .tooltip { opacity: 1; }

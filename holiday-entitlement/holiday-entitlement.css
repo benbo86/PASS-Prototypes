@@ -308,7 +308,12 @@
   font-size: 14px;
   color: var(--greyscale-6-grey-50);
 }
-.he-deduction-cta { margin-top: 16px; }
+.he-deduction-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
 .he-deduction-view-link { margin-left: 16px; font-size: 14px; font-weight: 400; }
 .he-deduction-confirmed {
   display: inline-flex;
