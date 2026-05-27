@@ -5,7 +5,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Page body ──────────────────────────────────────────────── */
+/* ── Page layout ─────────────────────────────────────────────── */
 .ts-page { min-height: 100vh; display: flex; flex-direction: column; }
 .ts-body {
   flex: 1;
@@ -15,262 +15,33 @@ body {
   margin: 0 auto;
 }
 
-/* ── Page header ────────────────────────────────────────────── */
+/* ── Page header ─────────────────────────────────────────────── */
 .ts-page-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  position: relative;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px; position: relative;
 }
-.ts-page-header h1 {
-  font-size: 22px; font-weight: 600; color: #000; white-space: nowrap;
-}
+.ts-page-header h1 { font-size: 22px; font-weight: 600; color: #000; white-space: nowrap; }
 .ts-page-header-left { display: flex; align-items: center; gap: 12px; }
+.ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
+
+/* ── Date navigation ─────────────────────────────────────────── */
 .ts-date-nav {
   display: flex; align-items: center; gap: 12px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .ts-nav-arrow {
   border: none; background: transparent; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--ui-purple-3-grape-grey); transition: color 0.15s;
-  padding: 0;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s; padding: 0;
 }
 .ts-nav-arrow:hover { color: var(--ui-purple-2-dark-grape-grey); }
-
 .ts-date-nav .react-datepicker-wrapper { width: auto; }
-
 #ts-datepicker-portal .react-datepicker-popper { z-index: 9999; }
 
-.ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
-
-/* ── Filter bar ─────────────────────────────────────────────── */
-.ts-filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
-  margin-bottom: 2px;
-  flex-wrap: wrap;
-}
-.ts-filter-bar-left  { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
-.ts-filter-bar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
+/* ── Filter bar additions (timesheets-specific) ──────────────── */
 .ts-filter-copies { gap: 8px; margin-right: 8px; }
 .ts-filter-copies-label { font-size: 16px; font-weight: 500; color: #000; white-space: nowrap; }
 
-.ts-filter-icon-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 6px;
-  color: var(--greyscale-4-grey-40);
-}
-
-.ts-filter-pill-wrap { position: relative; }
-
-.ts-filter-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 4px;
-  border: none;
-  background: #fff; color: var(--greyscale-3-grey-30);
-  font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-.ts-filter-pill:hover { background: var(--ui-purple-7-lightest-lavendar); }
-.ts-filter-pill.active {
-  border-color: var(--brand-purple-6-purple-4);
-  background: var(--ui-purple-7-lightest-lavendar);
-  color: #000;
-}
-
-.ts-filter-count {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px;
-  background: var(--brand-purple-6-purple-4); color: #fff;
-  font-size: 11px; font-weight: 600;
-}
-
-.ts-clear-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 6px 12px; border-radius: 999px;
-  border: none; background: none;
-  color: var(--brand-purple-5-purple-3); font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer;
-}
-.ts-clear-btn:hover { color: var(--brand-purple-6-purple-4); }
-
-.ts-count-label {
-  font-size: 16px; color: #000; white-space: nowrap;
-}
-
-.ts-pag-inline { width: 28px; height: 28px; }
-
-/* ── Table ──────────────────────────────────────────────────── */
-.ts-table-wrap {
-  background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
-  border-radius: 0;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.ts-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  line-height: 20px;
-  min-width: 1200px;
-}
-
-.ts-table thead tr {
-  background: var(--ui-purple-6-lavendar-grey);
-  border-bottom: 1.5px solid var(--ui-purple-5-languid-lavendar);
-}
-
-.ts-table th {
-  padding: 16px 14px;
-  font-size: 14px; font-weight: 600; color: #000;
-  text-align: left; white-space: nowrap;
-  display: table-cell;
-  vertical-align: middle;
-}
-
-/* th inner layout — icon sits inline */
-.ts-table th {
-  position: relative;
-}
-.ts-table th > span { vertical-align: middle; }
-
-.ts-th-name { min-width: 180px; }
-.ts-th-num  { text-align: right; }
-
-.col-icon-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; border: none; background: none; cursor: pointer;
-  border-radius: 4px; padding: 0; vertical-align: middle; margin-left: 2px;
-  transition: background 0.12s;
-}
-.col-icon-btn:hover { background: none; }
-.col-icon-btn--active .col-icon { color: var(--brand-purple-6-purple-4); }
-
-.col-icon {
-  color: var(--ui-purple-3-grape-grey);
-  display: block;
-  width: 20px; height: 20px;
-  transition: color 0.12s;
-}
-.col-icon--active { color: var(--brand-purple-6-purple-4); }
-
-.sort-icon { overflow: visible; color: var(--ui-purple-4-lavendar); width: 20px; height: 20px; }
-
-/* .ts-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); } */
-
-/* Body rows */
-.ts-table tbody tr {
-  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
-  transition: background 0.12s;
-}
-.ts-table tbody tr:last-child { border-bottom: none; }
-
-.ts-row { cursor: pointer; }
-.ts-row:hover { background: var(--ui-purple-opacity-tint-cyber-opacity-3); }
-
-.ts-table th,
-.ts-table td {
-  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
-}
-.ts-table th:last-child,
-.ts-table td:last-child {
-  border-right: none;
-}
-
-.ts-table td {
-  padding: 16px 14px;
-  font-size: 14px;
-  line-height: 20px;
-  color: #333;
-  vertical-align: middle;
-}
-
-.ts-td-name { font-weight: 500; color: #000; min-width: 180px; }
-.ts-td-num  { text-align: right; white-space: nowrap; color: var(--greyscale-3-grey-30); }
-.ts-nowrap  { white-space: nowrap; }
-.ts-ref     { font-size: 12px; color: var(--greyscale-6-grey-50); white-space: nowrap; }
-.ts-empty   { text-align: center; padding: 40px; color: var(--greyscale-6-grey-50); }
-
-/* Checkbox column */
-.ts-check-col {
-  text-align: center !important;
-  width: 60px; min-width: 60px;
-  white-space: nowrap;
-}
-.ts-table th.ts-check-col {
-  display: table-cell;
-  vertical-align: middle;
-}
-.ts-table th.ts-check-col .ts-header-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.ts-table th.ts-check-col .ts-header-check .checkbox-wrap {
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Verified badges */
-.verified-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 3px 16px 5px; border-radius: 4px;
-  font-size: 14px; line-height: 20px; font-weight: 500;
-}
-.verified-full    { background: var(--availability-3-green-tint);      color: var(--greyscale-2-grey-20); }
-.verified-partial { background: var(--rag-amber-amber-lightest);        color: var(--greyscale-2-grey-20); }
-.verified-none    { background: var(--rag-red-action-med-pastel);       color: var(--greyscale-2-grey-20); }
-
-/* Visit status pills (level 2) */
-.visit-status {
-  display: inline-flex; align-items: center;
-  padding: 2px 8px; border-radius: 999px;
-  font-size: 12px; font-weight: 500;
-}
-.status-completed { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
-.status-missed    { background: var(--rag-red-action-med-pastel); color: var(--rag-red-red-overdue-dark); }
-.status-cancelled { background: var(--greyscale-13-grey-90); color: var(--greyscale-4-grey-40); }
-
-/* ── Pagination ─────────────────────────────────────────────── */
-.ts-pagination {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 0 0;
-  font-size: 13px;
-}
-.ts-pag-left  { display: flex; align-items: center; gap: 4px; }
-.ts-pag-right { display: flex; align-items: center; gap: 10px; }
-
-.ts-pag-btn {
-  padding: 5px 10px; border-radius: 6px;
-  border: 1px solid var(--greyscale-12-grey-85); background: #fff;
-  font-size: 13px; font-family: inherit; color: #333; cursor: pointer;
-  transition: background 0.12s;
-}
-.ts-pag-btn:hover:not(:disabled) { background: var(--greyscale-14-grey-95); }
-.ts-pag-btn:disabled { color: var(--greyscale-10-grey-75); cursor: default; }
-.ts-pag-btn.current { background: var(--brand-purple-6-purple-4); color: #fff; border-color: var(--brand-purple-6-purple-4); }
-.ts-pag-arrow {
-  padding: 5px 8px; border-radius: 6px;
-  border: 1px solid var(--greyscale-12-grey-85); background: #fff;
-  font-size: 16px; font-family: inherit; color: #333; cursor: pointer; line-height: 1;
-}
-.ts-pag-arrow:hover:not(:disabled) { background: var(--greyscale-14-grey-95); }
-.ts-pag-arrow:disabled { color: var(--greyscale-10-grey-75); cursor: default; }
-.ts-pag-num { min-width: 34px; text-align: center; }
-
-.ts-rows-select {
-  padding: 4px 8px; border-radius: 6px;
-  border: 1px solid var(--greyscale-12-grey-85); background: #fff;
-  font-size: 13px; font-family: inherit; cursor: pointer;
-}
-/* fd-* styles are now in Styles/filter-dropdown.css */
+/* ── Table (timesheets-specific overrides) ───────────────────── */
+.data-table { min-width: 1200px; }
+/* .data-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); } */

@@ -1,0 +1,388 @@
+/* ── Page layout ─────────────────────────────────────────────────────────────── */
+.he-page {
+  max-width: 940px;
+  margin: 48px auto;
+  padding: 0 24px 80px;
+}
+
+/* ── Finish date field ───────────────────────────────────────────────────────── */
+.he-leaver-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.he-finish-date-label {
+  font-size: 16px;
+  color: #000;
+  white-space: nowrap;
+}
+.he-datepicker-wrap {
+  width: 200px;
+}
+.he-datepicker-wrap .react-datepicker-wrapper {
+  width: 100%;
+}
+
+.he-finish-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 200px;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 6px;
+  padding: 10px 12px 10px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  color: #000;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+.he-finish-date:hover { border-color: var(--brand-purple-6-purple-4); }
+.he-finish-date-icon {
+  display: flex;
+  align-items: center;
+  color: var(--ui-purple-3-grape-grey);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+/* ── Summary stat cards ──────────────────────────────────────────────────────── */
+.he-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.he-stat-card {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 16px 24px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+.he-stat-card--overpaid {
+  background: var(--rag-red-red-pastel-lighter);
+  border-color: var(--rag-red-action-medication);
+}
+
+.he-stat-label {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+  line-height: 1.4;
+}
+.he-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.3;
+}
+.he-stat-value--overpaid {
+  color: var(--rag-red-red-overdue-dark);
+}
+
+/* ── Year navigator ──────────────────────────────────────────────────────────── */
+.he-year-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.he-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-purple-6-purple-4);
+  border-radius: 4px;
+  padding: 0;
+  line-height: 0;
+}
+.he-nav-btn:hover:not(:disabled) { background: var(--ui-purple-6-lavendar-grey); }
+.he-nav-btn:disabled { color: var(--greyscale-10-grey-75); cursor: default; }
+
+.he-year-range {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  min-width: 240px;
+  text-align: center;
+}
+
+/* ── Adjustments table action controls ───────────────────────────────────────── */
+.he-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--brand-purple-6-purple-4);
+  cursor: pointer;
+  line-height: 0;
+}
+.he-add-btn:hover { background: var(--ui-purple-6-lavendar-grey); }
+
+.he-row-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--ui-purple-3-grape-grey);
+  line-height: 0;
+}
+.he-row-btn:hover { background: var(--ui-purple-6-lavendar-grey); }
+.he-row-btn--danger { color: var(--rag-red-red-overdue); }
+.he-row-btn--danger:hover { background: var(--rag-red-action-med-lightest); }
+
+/* ── Section heading ─────────────────────────────────────────────────────────── */
+.he-section { margin-top: 32px; }
+.he-section h1 { margin-bottom: 16px; }
+
+/* ── Info banner ─────────────────────────────────────────────────────────────── */
+.he-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--ui-blue-lightest);
+  border: 1px solid var(--ui-blue-edited-outline);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 24px;
+  font-size: 16px;
+  color: #000;
+  line-height: 1.5;
+}
+.he-info-icon {
+  color: var(--ui-blue-edited-text);
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 0;
+}
+.he-link { color: var(--brand-purple-6-purple-4); text-decoration: underline; }
+.he-muted-link { color: var(--greyscale-4-grey-40); font-size: 14px; text-decoration: underline; }
+
+/* ── Pay cards row ───────────────────────────────────────────────────────────── */
+.he-pay-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.he-pay-card {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 24px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+.he-pay-label {
+  font-size: 16px;
+  color: #000;
+  margin-bottom: 8px;
+}
+.he-pay-amount {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.he-calc-box {
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-radius: 4px;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #000;
+}
+.he-calc-title { margin-bottom: 0; }
+.he-calc-row { line-height: 1.7; }
+
+/* ── GPA totals card ─────────────────────────────────────────────────────────── */
+.he-gpa-card {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 24px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.he-gpa-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.5;
+}
+.he-gpa-sub {
+  font-weight: 400;
+  color: var(--greyscale-4-grey-40);
+}
+.he-gpa-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.he-gpa-stat {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+}
+.he-gpa-stat-label {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.he-gpa-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+}
+
+/* ── Leaver deduction block (extends .warning-banner.orange) ─────────────────── */
+.he-deduction {
+  flex-direction: column;
+  gap: 0;
+}
+.he-deduction-content {
+  width: 100%;
+}
+.he-deduction-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 8px;
+}
+.he-deduction-desc {
+  font-size: 16px;
+  color: var(--greyscale-2-grey-20);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.he-deduction-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+.he-deduction-row-label { color: var(--greyscale-4-grey-40); }
+.he-deduction-row-value { font-weight: 600; color: #000; }
+
+.he-deduction-box {
+  background: #fff;
+  border: 1px solid var(--rag-amber-amber-7);
+  border-radius: 6px;
+  padding: 16px 24px;
+}
+.he-deduction-box-label {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 4px;
+}
+.he-deduction-box-amount {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--rag-red-red-overdue-dark);
+  margin-bottom: 4px;
+}
+.he-deduction-box-calc {
+  font-size: 14px;
+  color: var(--greyscale-6-grey-50);
+}
+.he-deduction-cta { margin-top: 16px; }
+.he-deduction-view-link { margin-left: 16px; font-size: 14px; font-weight: 400; }
+.he-deduction-confirmed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 16px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rag-green-green-5);
+}
+
+/* ── Adjustments table inline add-row inputs ─────────────────────────────────── */
+.he-table-input {
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #000;
+  background: #fff;
+  outline: none;
+  width: 100%;
+}
+.he-table-input:focus { border-color: var(--brand-purple-6-purple-4); }
+
+.he-table-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #000;
+  background: #fff;
+  cursor: pointer;
+  width: 100%;
+}
+.he-table-date:hover { border-color: var(--brand-purple-6-purple-4); }
+.he-table-date svg { flex-shrink: 0; color: var(--ui-purple-3-grape-grey); }
+
+.he-page .react-datepicker-popper { z-index: 100; }
+
+/* ── Upload historic pay ─────────────────────────────────────────────────────── */
+.he-upload {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.he-upload-label {
+  font-size: 16px;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.he-info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--ui-purple-2-glossy-grape);
+  font-size: 11px;
+  font-weight: 600;
+  font-style: italic;
+  cursor: help;
+}

@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
+import Pagination from '../../Components/Pagination';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
@@ -108,8 +109,8 @@ function VisitDetail({ employee, visits, onBack }) {
           </div>
         </div>
 
-        <div className="ts-table-wrap">
-          <table className="ts-table">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
               <tr>
                 <th>Customer</th>
@@ -125,8 +126,8 @@ function VisitDetail({ employee, visits, onBack }) {
                 <th>Expenses</th>
                 <th>Pay ref</th>
                 <th>Invoice ref</th>
-                <th className="ts-check-col">
-                  <div className="ts-header-check">
+                <th className="check-col">
+                  <div className="header-check">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
                       <span className="checkbox-box" />
@@ -134,8 +135,8 @@ function VisitDetail({ employee, visits, onBack }) {
                     <span>Pay</span>
                   </div>
                 </th>
-                <th className="ts-check-col">
-                  <div className="ts-header-check">
+                <th className="check-col">
+                  <div className="header-check">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
                       <span className="checkbox-box" />
@@ -151,24 +152,24 @@ function VisitDetail({ employee, visits, onBack }) {
                   <td>{v.customerName}</td>
                   <td>{v.visitName}</td>
                   <td>{v.visitType}</td>
-                  <td className="ts-nowrap">{v.date}</td>
-                  <td className="ts-nowrap">{v.plannedStart}–{v.plannedEnd}</td>
-                  <td className="ts-nowrap">{v.actualStart}–{v.actualEnd}</td>
-                  <td><span className={`visit-status ${statusClass(v.status)}`}>{v.status}</span></td>
+                  <td className="nowrap">{v.date}</td>
+                  <td className="nowrap">{v.plannedStart}–{v.plannedEnd}</td>
+                  <td className="nowrap">{v.actualStart}–{v.actualEnd}</td>
+                  <td><span className={`status-pill ${statusClass(v.status)}`}>{v.status}</span></td>
                   <td>{v.mileage}</td>
                   <td>{fmtMins(v.travelMins)}</td>
                   <td>{fmtMins(v.waitMins)}</td>
                   <td>{fmtGBP(v.expenses)}</td>
-                  <td className="ts-ref">{v.payRef || '—'}</td>
-                  <td className="ts-ref">{v.invRef || '—'}</td>
-                  <td className="ts-check-col">
+                  <td className="td-ref">{v.payRef || '—'}</td>
+                  <td className="td-ref">{v.invRef || '—'}</td>
+                  <td className="check-col">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll || !!payRows[v.id]}
                         onChange={e => setPayRows(p => ({ ...p, [v.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
-                  <td className="ts-check-col">
+                  <td className="check-col">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll || !!invRows[v.id]}
                         onChange={e => setInvRows(p => ({ ...p, [v.id]: e.target.checked }))} />
@@ -419,28 +420,28 @@ export default function Timesheets() {
         </div>
 
         {/* Filter bar */}
-        <div className="ts-filter-bar">
-          <div className="ts-filter-bar-left">
+        <div className="filter-bar">
+          <div className="filter-bar-left">
             <label className="checkbox-wrap ts-filter-copies">
               <input type="checkbox" checked={copies} onChange={e => setCopies(e.target.checked)} />
               <span className="checkbox-box" />
               <span>Copies</span>
             </label>
-            <span className="ts-filter-icon-btn">
+            <span className="filter-icon-btn">
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path d="M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z" fill="currentColor"/>
               </svg>
             </span>
 
             {/* Funder filter */}
-            <div className="ts-filter-pill-wrap">
+            <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['funder'] = el}
-                className={`ts-filter-pill ${funderFilter.size ? 'active' : ''}`}
+                className={`filter-pill ${funderFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('funder')}
               >
                 <span>Funder</span>
-                {funderFilter.size > 0 && <span className="ts-filter-count">{funderFilter.size}</span>}
+                {funderFilter.size > 0 && <span className="filter-count">{funderFilter.size}</span>}
                 <ChevronDown size={20} />
               </button>
               <FilterDropdown
@@ -456,14 +457,14 @@ export default function Timesheets() {
             </div>
 
             {/* Customer filter */}
-            <div className="ts-filter-pill-wrap">
+            <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['customer'] = el}
-                className={`ts-filter-pill ${customerFilter.size ? 'active' : ''}`}
+                className={`filter-pill ${customerFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('customer')}
               >
                 <span>Customer</span>
-                {customerFilter.size > 0 && <span className="ts-filter-count">{customerFilter.size}</span>}
+                {customerFilter.size > 0 && <span className="filter-count">{customerFilter.size}</span>}
                 <ChevronDown size={20} />
               </button>
               <FilterDropdown
@@ -479,14 +480,14 @@ export default function Timesheets() {
             </div>
 
             {/* Visit status filter */}
-            <div className="ts-filter-pill-wrap">
+            <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['status'] = el}
-                className={`ts-filter-pill ${statusFilter.size ? 'active' : ''}`}
+                className={`filter-pill ${statusFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('status')}
               >
                 <span>Visit status</span>
-                {statusFilter.size > 0 && <span className="ts-filter-count">{statusFilter.size}</span>}
+                {statusFilter.size > 0 && <span className="filter-count">{statusFilter.size}</span>}
                 <ChevronDown size={20} />
               </button>
               <FilterDropdown
@@ -502,33 +503,33 @@ export default function Timesheets() {
             </div>
 
             {anyActiveFilter && (
-              <button className="ts-clear-btn" onClick={clearAll}>
+              <button className="clear-btn" onClick={clearAll}>
                 <CloseIcon /> Clear
               </button>
             )}
           </div>
 
-          <div className="ts-filter-bar-right">
-            <span className="ts-count-label">
+          <div className="filter-bar-right">
+            <span className="count-label">
               Selected: {selectedCount} – {totalRows}
             </span>
-            <span className="ts-count-label">
+            <span className="count-label">
               Showing: {showStart} – {showEnd} of {totalRows}
             </span>
-            <button className="ts-nav-arrow ts-pag-inline" disabled={safePage <= 1}
+            <button className="ts-nav-arrow pag-inline" disabled={safePage <= 1}
               onClick={() => setPage(p => Math.max(1, p - 1))}><ChevronLeft /></button>
-            <button className="ts-nav-arrow ts-pag-inline" disabled={safePage >= totalPages}
+            <button className="ts-nav-arrow pag-inline" disabled={safePage >= totalPages}
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}><ChevronRight /></button>
           </div>
         </div>
 
         {/* Table */}
-        <div className="ts-table-wrap">
-          <table className="ts-table">
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
               <tr>
                 {/* Employee — filterable */}
-                <th className="ts-th-name">
+                <th className="th-name">
                   <span>Employee</span>
                   <button
                     ref={el => anchorRefs.current['emp'] = el}
@@ -572,7 +573,7 @@ export default function Timesheets() {
 
                 {/* Sortable numeric columns */}
                 {SORTABLE_COLS.map(col => (
-                  <th key={col} className={`ts-th-num ${sort.col === col ? 'sorted' : ''}`}>
+                  <th key={col} className={`th-num ${sort.col === col ? 'sorted' : ''}`}>
                     <span>{COL_LABELS[col]}</span>
                     <button className="col-icon-btn" onClick={() => toggleSort(col)}>
                       <SortIcon dir={sort.col === col ? sort.dir : null} />
@@ -625,8 +626,8 @@ export default function Timesheets() {
                 </th>
 
                 {/* Pay checkbox */}
-                <th className="ts-check-col">
-                  <div className="ts-header-check">
+                <th className="check-col">
+                  <div className="header-check">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll} onChange={e => setPayAll(e.target.checked)} />
                       <span className="checkbox-box" />
@@ -636,8 +637,8 @@ export default function Timesheets() {
                 </th>
 
                 {/* Invoice checkbox */}
-                <th className="ts-check-col">
-                  <div className="ts-header-check">
+                <th className="check-col">
+                  <div className="header-check">
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll} onChange={e => setInvAll(e.target.checked)} />
                       <span className="checkbox-box" />
@@ -650,30 +651,30 @@ export default function Timesheets() {
 
             <tbody>
               {pageRows.map(row => (
-                <tr key={row.id} className="ts-row" onClick={() => setSelectedEmployee(row)}>
-                  <td className="ts-td-name">{row.name}</td>
+                <tr key={row.id} className="data-row" onClick={() => setSelectedEmployee(row)}>
+                  <td className="td-name">{row.name}</td>
                   <td>{row.contract}</td>
-                  <td className="ts-td-num">{row.visits}</td>
-                  <td className="ts-td-num">{row.runs}</td>
-                  <td className="ts-td-num">{fmtMins(row.travelMins)}</td>
-                  <td className="ts-td-num">{fmtMins(row.waitMins)}</td>
-                  <td className="ts-td-num">{row.mileage.toFixed(1)}</td>
-                  <td className="ts-td-num">{fmtGBP(row.expenses)}</td>
-                  <td className="ts-td-num">{row.holiday}</td>
-                  <td className="ts-td-num">
+                  <td className="td-num">{row.visits}</td>
+                  <td className="td-num">{row.runs}</td>
+                  <td className="td-num">{fmtMins(row.travelMins)}</td>
+                  <td className="td-num">{fmtMins(row.waitMins)}</td>
+                  <td className="td-num">{row.mileage.toFixed(1)}</td>
+                  <td className="td-num">{fmtGBP(row.expenses)}</td>
+                  <td className="td-num">{row.holiday}</td>
+                  <td className="td-num">
                     <VerifiedBadge verified={row.payVerCount} total={row.visits} />
                   </td>
-                  <td className="ts-td-num">
+                  <td className="td-num">
                     <VerifiedBadge verified={row.invVerCount} total={row.visits} />
                   </td>
-                  <td className="ts-check-col" onClick={e => e.stopPropagation()}>
+                  <td className="check-col" onClick={e => e.stopPropagation()}>
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll || !!payRows[row.id]}
                         onChange={e => setPayRows(p => ({ ...p, [row.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
-                  <td className="ts-check-col" onClick={e => e.stopPropagation()}>
+                  <td className="check-col" onClick={e => e.stopPropagation()}>
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll || !!invRows[row.id]}
                         onChange={e => setInvRows(p => ({ ...p, [row.id]: e.target.checked }))} />
@@ -683,33 +684,23 @@ export default function Timesheets() {
                 </tr>
               ))}
               {pageRows.length === 0 && (
-                <tr><td colSpan={13} className="ts-empty">No employees match the current filters</td></tr>
+                <tr><td colSpan={13} className="table-empty">No employees match the current filters</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
-        <div className="ts-pagination">
-          <div className="ts-pag-left">
-            <button className="ts-pag-btn" onClick={() => setPage(1)} disabled={safePage <= 1}>First</button>
-            <button className="ts-pag-arrow" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage <= 1}>‹</button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-              <button key={p} className={`ts-pag-btn ts-pag-num ${p === safePage ? 'current' : ''}`}
-                onClick={() => setPage(p)}>{p}</button>
-            ))}
-            <button className="ts-pag-arrow" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}>›</button>
-            <button className="ts-pag-btn" onClick={() => setPage(totalPages)} disabled={safePage >= totalPages}>Last</button>
-          </div>
-          <div className="ts-pag-right">
-            <span className="ts-count-label">Rows per page</span>
-            <select className="ts-rows-select" value={rowsPerPage}
-              onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}>
-              {[10, 12, 25, 50].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-            <span className="ts-count-label">{showStart}–{showEnd} of {totalRows}</span>
-          </div>
-        </div>
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          showStart={showStart}
+          showEnd={showEnd}
+          totalRows={totalRows}
+          onPageChange={setPage}
+          onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
+        />
       </div>
     </div>
   );
