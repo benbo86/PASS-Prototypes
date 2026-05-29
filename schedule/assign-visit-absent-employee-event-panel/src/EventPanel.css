@@ -308,6 +308,162 @@ body {
   color: var(--ui-purple-3-grape-grey);
 }
 
+/* ── Visit note button ──────────────────────────────────────────────────── */
+
+.ep-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 29px;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+.ep-note-btn:hover,
+.ep-note-btn--active {
+  background: #d9d9d9;
+}
+.ep-note-btn--has-note {
+  background: #eff6ff;
+  border-color: #bedbff;
+  color: #193cb8;
+  cursor: default;
+}
+
+/* ── Note area (between details and tabs) ───────────────────────────────── */
+
+.ep-note-area {
+  padding: 12px 48px 16px;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+.ep-note-textarea {
+  display: block;
+  width: 100%;
+  height: 82px;
+  resize: none;
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 16px;
+  color: #000;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ep-note-textarea:focus {
+  border-color: var(--brand-purple-6-purple-4);
+}
+.ep-note-textarea::placeholder {
+  color: var(--greyscale-8-grey-65);
+}
+
+.ep-note-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.round-btn.primary-btn:disabled {
+  background: var(--ui-purple-7-lightest-lavendar);
+  color: var(--greyscale-11-grey-80);
+  cursor: default;
+}
+
+/* ── Saved note display ─────────────────────────────────────────────────── */
+
+.ep-note-saved {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #eff6ff;
+  border: 1px solid #bedbff;
+  border-radius: 16px;
+  height: 69px;
+  padding: 0 20px;
+}
+
+.ep-note-saved__icon {
+  color: #193cb8;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ep-note-saved__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ep-note-saved__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #193cb8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ep-note-saved__text {
+  font-size: 14px;
+  color: #193cb8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ep-note-saved__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.ep-note-saved__updated {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.ep-note-saved__date {
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.ep-note-saved__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ep-note-action-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: #193cb8;
+}
+
 /* ── Tabs ───────────────────────────────────────────────────────────────── */
 
 .ep-tabs {

@@ -48,9 +48,11 @@ employee-contract/
 | `Styles/date-range-picker.css` | `.cal-trigger`, `.date-range-text` |
 | `Components/FilterDropdown.jsx` | Column/above-table filter dropdown |
 | `Components/DateRangePicker.jsx` | Exports `CalendarIcon`, `fmtDate`, `DateRangeInput` |
-| `Icons/` | Shared SVGs: Calendar, Chevron Down, Clock, Close, Edit, Filter Active, Filters, Right Arrow, Search, Sort, Warning |
+| `Icons/` | Shared SVGs: Calendar, Chevron Down, Clock, Close, Delete, Document, Edit, Filter Active, Filters, Recurs, Right Arrow, Search, Sort, Warning |
 
-**Always read `Styles/main.css` before adding local CSS.** If the style exists there, use the shared class. Only write prototype-specific CSS for genuinely local things (layout, one-off colours, prototype-specific structure).
+**Always read `Styles/main.css` before adding local CSS.**
+
+**Any new icon fetched from Figma must be saved to `Icons/` as an `.svg` file** before (or alongside) being used as an inline JSX component. Use the same viewBox as the Figma source. The inline JSX component uses `fill="currentColor"` for theming; the `.svg` file uses `fill="#000000"` as the static reference. If the style exists there, use the shared class. Only write prototype-specific CSS for genuinely local things (layout, one-off colours, prototype-specific structure).
 
 ---
 
@@ -168,7 +170,7 @@ Rules established while building this prototype:
 
 ## Figma
 
-**File:** PASS Web Legacy Components
+**File:** PASS Web Components
 **File key:** `jCC8CRGDHxjRo1aQZPQzNh`
 **Team:** ELT UX (Pro)
 

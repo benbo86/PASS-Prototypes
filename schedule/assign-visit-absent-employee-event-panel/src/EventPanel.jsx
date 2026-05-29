@@ -67,6 +67,24 @@ const WarningIcon = () => (
   </svg>
 )
 
+const DocumentIcon = ({ size = 24 }) => {
+  // Path content is 13.8645×18. Figma insets it 12.5% top/bottom and ~21% left/right
+  // so we shift the viewBox origin to include that padding.
+  const pad = size * 0.2133
+  const padV = size * 0.125
+  return (
+    <svg width={size} height={size} viewBox={`${-pad} ${-padV} ${size} ${size}`} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill="currentColor" d="M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z" />
+    </svg>
+  )
+}
+
+const DeleteIcon = () => (
+  <svg width="24" height="24" viewBox="-4 -3 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 18C2.45 18 1.97917 17.8042 1.5875 17.4125C1.19583 17.0208 1 16.55 1 16V3H0V1H5V0H11V1H16V3H15V16C15 16.55 14.8042 17.0208 14.4125 17.4125C14.0208 17.8042 13.55 18 13 18H3ZM13 3H3V16H13V3ZM5 14H7V5H5V14ZM9 14H11V5H9V14Z" />
+  </svg>
+)
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const formatDisplayDate = (iso) => {
@@ -86,6 +104,15 @@ const calcDuration = (start, end) => {
   const h = Math.floor(total / 60)
   const m = total % 60
   return h > 0 ? `${h}hr ${m.toString().padStart(2, '0')}m` : `${m}m`
+}
+
+const formatNoteDate = (date) => {
+  const d = date.getDate().toString().padStart(2, '0')
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const y = date.getFullYear()
+  const h = date.getHours().toString().padStart(2, '0')
+  const min = date.getMinutes().toString().padStart(2, '0')
+  return `${d}/${m}/${y} ${h}:${min}`
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -249,6 +276,36 @@ export default function EventPanel() {
   // Holiday warning
   const [showWarning, setShowWarning] = useState(false)
 
+  // Visit note
+  const [showNoteInput, setShowNoteInput] = useState(false)
+  const [draftText, setDraftText] = useState('')
+  const [savedNote, setSavedNote] = useState(null)
+  const [editingNote, setEditingNote] = useState(false)
+
+  const handleSaveNote = () => {
+    setSavedNote({ text: draftText.trim(), savedAt: new Date() })
+    setDraftText('')
+    setShowNoteInput(false)
+    setEditingNote(false)
+  }
+
+  const handleEditNote = () => {
+    setDraftText(savedNote.text)
+    setEditingNote(true)
+  }
+
+  const handleDeleteNote = () => {
+    setSavedNote(null)
+    setEditingNote(false)
+    setDraftText('')
+  }
+
+  const handleNoteBtnClick = () => {
+    if (savedNote) return
+    setShowNoteInput(prev => !prev)
+    setDraftText('')
+  }
+
   const assignedCount = slots.filter(Boolean).length
   const allFilled = assignedCount === TOTAL_SLOTS
 
@@ -402,9 +459,68 @@ export default function EventPanel() {
                 <span className="ep-recurrence">
                   <RecurIcon /> 10 days, bi-weekly <ChevronDownIcon />
                 </span>
+
+                <button
+                  className={`ep-note-btn${savedNote ? ' ep-note-btn--has-note' : ''}${showNoteInput ? ' ep-note-btn--active' : ''}`}
+                  onClick={handleNoteBtnClick}
+                >
+                  <DocumentIcon size={16} /> Visit note
+                </button>
               </div>
             </div>
           </div>
+
+          {/* ── Note input / saved note ── */}
+          {(showNoteInput || editingNote || savedNote) && (
+            <div className="ep-note-area">
+              {savedNote && !editingNote ? (
+                <div className="ep-note-saved">
+                  <span className="ep-note-saved__icon"><DocumentIcon size={24} /></span>
+                  <div className="ep-note-saved__content">
+                    <span className="ep-note-saved__label">Visit note</span>
+                    <span className="ep-note-saved__text">{savedNote.text}</span>
+                  </div>
+                  <div className="ep-note-saved__meta">
+                    <span className="ep-note-saved__updated">Updated by admin</span>
+                    <span className="ep-note-saved__date">{formatNoteDate(savedNote.savedAt)}</span>
+                  </div>
+                  <div className="ep-note-saved__actions">
+                    <button className="ep-note-action-btn" onClick={handleEditNote} aria-label="Edit note">
+                      <EditIcon />
+                    </button>
+                    <button className="ep-note-action-btn" onClick={handleDeleteNote} aria-label="Delete note">
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    className="ep-note-textarea"
+                    placeholder="Add a visit note…"
+                    value={draftText}
+                    onChange={e => setDraftText(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="ep-note-btns">
+                    <button
+                      className="round-btn tertiary-btn"
+                      onClick={() => { setShowNoteInput(false); setEditingNote(false); setDraftText('') }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="round-btn primary-btn"
+                      disabled={!draftText.trim()}
+                      onClick={handleSaveNote}
+                    >
+                      Save note
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <div className="ep-tabs" role="tablist">
             {TABS.map(tab => (
