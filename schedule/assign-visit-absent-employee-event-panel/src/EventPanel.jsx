@@ -303,7 +303,7 @@ export default function EventPanel() {
 
   return (
     <>
-      <a href="../" className="back-link ep-back-link">
+      <a href="../../" className="back-link ep-back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
 

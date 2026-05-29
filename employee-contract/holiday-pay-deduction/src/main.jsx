@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import HolidayEntitlement from './HolidayEntitlement'
-import '../../Styles/colors.css'
-import '../../Styles/main.css'
+import '../../../Styles/colors.css'
+import '../../../Styles/main.css'
 import '../holiday-entitlement.css'
 import 'react-datepicker/dist/react-datepicker.css'
 

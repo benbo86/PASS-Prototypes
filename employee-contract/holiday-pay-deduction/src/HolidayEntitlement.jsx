@@ -1,7 +1,7 @@
 import { useState, forwardRef } from 'react'
 import DatePicker from 'react-datepicker'
-import { CalendarIcon } from '../../Components/DateRangePicker'
-import Tooltip from '../../Components/Tooltip'
+import { CalendarIcon } from '../../../Components/DateRangePicker'
+import Tooltip from '../../../Components/Tooltip'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ export default function HolidayEntitlement() {
 
   return (
     <div className="he-page">
-      <a href="../" className="back-link"><ChevronLeft /> Prototypes</a>
+      <a href="../../" className="back-link"><ChevronLeft /> Prototypes</a>
 
       {/* ── Finish date ── */}
       <div className="he-leaver-row">

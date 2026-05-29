@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import EventPanel from './EventPanel'
-import '../../Styles/colors.css'
-import '../../Styles/main.css'
+import '../../../Styles/colors.css'
+import '../../../Styles/main.css'
 import './EventPanel.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
