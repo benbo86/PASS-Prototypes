@@ -34,7 +34,7 @@ export default function AssignVisitWarning() {
       <div className="warning-banner orange">
         <WarningIcon />
         <div>
-          <h4>Warnings</h4>
+          <h6>Warnings</h6>
           <ul>
               <li>Amirah Marsden is absent</li>
           </ul>

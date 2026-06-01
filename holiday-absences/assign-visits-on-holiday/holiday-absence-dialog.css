@@ -1,9 +1,13 @@
+.modal-add-absence h1 {
+  color:var(--greyscale-3-grey-30);
+}
+
 .entitlement {
   margin-bottom: 20px;
 }
 
-.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
 
 
 .expander {

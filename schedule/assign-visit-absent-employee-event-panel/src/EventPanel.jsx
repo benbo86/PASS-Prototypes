@@ -541,10 +541,10 @@ export default function EventPanel() {
         <div className="ep-body">
           {activeTab === 'Assigned Today' && (
             <>
-              <h1 className="ep-section-title">
+              <h2 className='ep-section-title'>
                 {TOTAL_SLOTS} Employees required{' '}
                 <span className="ep-section-count">({assignedCount}/{TOTAL_SLOTS} assigned)</span>
-              </h1>
+              </h2>
               <div className="ep-bars">
                 {slots.map((employee, i) =>
                   employee
@@ -560,7 +560,7 @@ export default function EventPanel() {
                 )}
               </div>
 
-              <h1 className="ep-section-title ep-section-title--gap">Recommended</h1>
+              <h2 className="ep-section-title">Recommended</h2>
               <div className="ep-bars">
                 {EMPLOYEES.map(emp => (
                   <AssignBar

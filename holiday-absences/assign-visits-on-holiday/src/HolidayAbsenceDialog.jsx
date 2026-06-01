@@ -176,12 +176,12 @@ export default function HolidayAbsenceDialog() {
   return (
     <>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
-      <div className="modal">
+      <div className="modal modal-add-absence">
       <button className="close-btn" aria-label="Close"><CloseIcon /></button>
 
       {step === 1 && (
         <div>
-          <h2>Add a Holiday or Absence</h2>
+          <h1>Add a Holiday or Absence</h1>
 
           <div className="field">
             <label htmlFor="employee">Employee</label>
