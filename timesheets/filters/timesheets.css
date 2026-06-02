@@ -6,16 +6,13 @@ body {
 }
 
 /* ── Page layout ─────────────────────────────────────────────── */
-.ts-page { min-height: 100vh; display: flex; flex-direction: column; }
+.ts-page { min-height: 100vh; display: flex; flex-direction: column; margin-top:96px; }
 .ts-body {
   flex: 1;
-  padding: 64px 32px 40px;
-  max-width: 1600px;
-  width: 100%;
-  margin: 0 auto;
+  margin: 0 40px;
 }
 
-/* ── Page header ─────────────────────────────────────────────── */
+/* ── Page header (Level 1) ───────────────────────────────────── */
 .ts-page-header {
   display: flex; align-items: center; gap: 16px;
   margin-bottom: 24px; position: relative;
@@ -23,6 +20,109 @@ body {
 .ts-page-header h1 { font-size: 22px; font-weight: 600; color: #000; white-space: nowrap; }
 .ts-page-header-left { display: flex; align-items: center; gap: 12px; }
 .ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
+
+/* ── Level 2 header ──────────────────────────────────────────── */
+.ts-l2-header { margin-bottom: 24px; }
+
+.ts-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+.ts-breadcrumbs span { color: #000; }
+
+.ts-breadcrumb-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--brand-purple-6-purple-4);
+  padding: 0;
+}
+.ts-breadcrumb-link:hover { text-decoration: underline; }
+
+.ts-header-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ts-header-name-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ts-l2-header h1 {
+  font-size: 28px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+  margin-bottom: 0px;
+}
+
+.ts-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 16px 5px;
+  border-radius: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+}
+.ts-status-unverified { background: #f2dedf; }
+.ts-status-partial    { background: var(--rag-amber-amber-lightest); }
+.ts-status-verified   { background: #d4edda; }
+
+.ts-header-rule {
+  height: 2px;
+  background: var(--ui-purple-5-languid-lavendar);
+  margin-bottom: 16px;
+}
+
+.ts-header-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 24px;
+}
+
+.ts-header-sub-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.ts-header-sub-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.ts-sub-item {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.ts-sub-label { font-weight: 600; color: #000; }
+.ts-sub-value { font-weight: 400; color: #000; }
 
 /* ── Date navigation ─────────────────────────────────────────── */
 .ts-date-nav {
@@ -41,6 +141,7 @@ body {
 /* ── Filter bar additions (timesheets-specific) ──────────────── */
 .ts-filter-copies { gap: 8px; margin-right: 8px; }
 .ts-filter-copies-label { font-size: 16px; font-weight: 500; color: #000; white-space: nowrap; }
+
 
 /* ── Table (timesheets-specific overrides) ───────────────────── */
 .data-table { min-width: 1200px; }

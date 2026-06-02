@@ -21,6 +21,7 @@ export default function FilterDropdown({
   onClear,
   hasNameSort,
   hasSort,
+  searchOnly,
   isOpen,
   onClose,
   anchorEl,
@@ -82,7 +83,7 @@ export default function FilterDropdown({
     setPending(next);
   };
 
-  const handleApply = () => { onApply(pending, sortDir, nameField); onClose(); };
+  const handleApply = () => { onApply(pending, sortDir, nameField, search); onClose(); };
   const handleClear = () => { onClear(); onClose(); };
 
   return createPortal(
@@ -147,30 +148,41 @@ export default function FilterDropdown({
         />
       </div>
 
-      <div className="fd-list">
-        {visible.map(item => (
-          <div key={item} className="fd-item" onClick={() => toggle(item)}>
-            <span className={`fd-checkbox ${pending.has(item) ? 'checked' : ''}`}>
-              {pending.has(item) && (
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              )}
-            </span>
-            <span className="fd-item-label">{item}</span>
+      {!searchOnly && (
+        <>
+          <div className="fd-list">
+            {visible.map(item => (
+              <div key={item} className="fd-item" onClick={() => toggle(item)}>
+                <span className={`fd-checkbox ${pending.has(item) ? 'checked' : ''}`}>
+                  {pending.has(item) && (
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </span>
+                <span className="fd-item-label">{item}</span>
+              </div>
+            ))}
+            {visible.length === 0 && <span className="fd-empty">No results</span>}
           </div>
-        ))}
-        {visible.length === 0 && <span className="fd-empty">No results</span>}
-      </div>
 
-      <div className="fd-footer">
-        <button className="fd-apply-btn" onClick={handleApply} disabled={pending.size === 0}>
-          Apply
-        </button>
-        <button className="fd-clear-btn" onClick={handleClear} disabled={pending.size === 0 && selected.size === 0}>
-          Clear
-        </button>
-      </div>
+          <div className="fd-footer">
+            <button className="fd-apply-btn" onClick={handleApply} disabled={pending.size === 0}>
+              Apply
+            </button>
+            <button className="fd-clear-btn" onClick={handleClear} disabled={pending.size === 0 && selected.size === 0}>
+              Clear
+            </button>
+          </div>
+        </>
+      )}
+
+      {searchOnly && (
+        <div className="fd-footer">
+          <button className="fd-apply-btn" onClick={handleApply}>Apply</button>
+          <button className="fd-clear-btn" onClick={handleClear}>Clear</button>
+        </div>
+      )}
     </div>,
     document.body
   );

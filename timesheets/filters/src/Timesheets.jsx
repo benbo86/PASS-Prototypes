@@ -61,6 +61,12 @@ const BackIcon = () => (
   </svg>
 );
 
+const SettingsIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+  </svg>
+);
+
 // ─── Verified badge ─────────────────────────────────────────────────────────
 
 function VerifiedBadge({ verified, total }) {
@@ -203,18 +209,125 @@ function HolidayPanel({ record, onClose }) {
 
 // ─── Level 2 – Visit Detail ─────────────────────────────────────────────────
 
-function VisitDetail({ employee, visits, onBack }) {
+function VisitDetail({ employee, visits, onBack, period = '' }) {
   const [payAll,  setPayAll]  = useState(false);
   const [invAll,  setInvAll]  = useState(false);
   const [payRows, setPayRows] = useState({});
   const [invRows, setInvRows] = useState({});
   const [selectedHoliday, setSelectedHoliday] = useState(null);
+  const [copies, setCopies] = useState(false);
 
-  const empVisits = visits.filter(v => v.employeeId === employee.id)
-    .sort((a, b) => a.date.localeCompare(b.date) || a.plannedStart.localeCompare(b.plannedStart));
+  // Filter + sort state
+  const [sort,            setSort]            = useState({ col: null, dir: 'asc' });
+  const [customerFilter,  setCustomerFilter]  = useState({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
+  const [typeFilter,      setTypeFilter]      = useState({ selected: new Set() });
+  const [statusFilter,    setStatusFilter]    = useState({ selected: new Set() });
+  const [payRefFilter,    setPayRefFilter]    = useState({ search: '', sortDir: null });
+  const [invRefFilter,    setInvRefFilter]    = useState({ search: '', sortDir: null });
+  const [page,            setPage]            = useState(1);
+  const [rowsPerPage,     setRowsPerPage]     = useState(12);
+  const [openDD,          setOpenDD]          = useState(null);
+  const anchorRefs = useRef({});
 
-  const empHolidays = HOLIDAY_RECORDS.filter(h => h.employeeId === employee.id)
-    .sort((a, b) => a.rawDate.localeCompare(b.rawDate));
+  const openDropdown  = useCallback((id) => setOpenDD(prev => prev === id ? null : id), []);
+  const closeDropdown = useCallback(() => setOpenDD(null), []);
+
+  const clearAllFilters = () => {
+    setCustomerFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
+    setTypeFilter({ selected: new Set() });
+    setStatusFilter({ selected: new Set() });
+    setPayRefFilter({ search: '', sortDir: null });
+    setInvRefFilter({ search: '', sortDir: null });
+    setSort({ col: null, dir: 'asc' });
+    setPage(1);
+  };
+
+  const toggleSort    = (col) => setSort(prev =>
+    prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' }
+  );
+
+  // Base data for this employee
+  const baseVisits = useMemo(() =>
+    visits.filter(v => v.employeeId === employee.id),
+    [visits, employee.id]
+  );
+  const empHolidays = useMemo(() =>
+    HOLIDAY_RECORDS.filter(h => h.employeeId === employee.id)
+      .sort((a, b) => a.rawDate.localeCompare(b.rawDate)),
+    [employee.id]
+  );
+
+  const payVerCount = useMemo(() => baseVisits.filter(v => v.payVerified).length, [baseVisits]);
+  const invVerCount = useMemo(() => baseVisits.filter(v => v.invVerified).length, [baseVisits]);
+  const verStatus = payVerCount === 0 ? 'unverified' : payVerCount === baseVisits.length ? 'verified' : 'partial';
+  const verLabel  = verStatus === 'verified' ? 'Verified' : verStatus === 'partial' ? 'Partially verified' : 'Unverified';
+  const anyFilter = !!(customerFilter.selected.size || typeFilter.selected.size || statusFilter.selected.size || payRefFilter.search || invRefFilter.search);
+
+  // Filter value lists
+  const allCustomers = useMemo(() => [...new Set(baseVisits.map(v => v.customerName))].sort(), [baseVisits]);
+  const allTypes     = useMemo(() => {
+    const t = [...new Set(baseVisits.map(v => v.visitType))].sort();
+    return empHolidays.length > 0 ? [...t, 'Holiday deduction'] : t;
+  }, [baseVisits, empHolidays]);
+
+  // Apply filters to visits
+  const filteredVisits = useMemo(() => {
+    let r = baseVisits;
+    if (customerFilter.selected.size) r = r.filter(v => customerFilter.selected.has(v.customerName));
+    if (typeFilter.selected.size)     r = r.filter(v => typeFilter.selected.has(v.visitType));
+    if (statusFilter.selected.size)   r = r.filter(v => statusFilter.selected.has(v.status));
+    if (payRefFilter.search)          r = r.filter(v => (v.payRef || '').toLowerCase().includes(payRefFilter.search.toLowerCase()));
+    if (invRefFilter.search)          r = r.filter(v => (v.invRef || '').toLowerCase().includes(invRefFilter.search.toLowerCase()));
+    return r;
+  }, [baseVisits, customerFilter, typeFilter, statusFilter, payRefFilter, invRefFilter]);
+
+  // Hide holiday rows if Type filter is active without 'Holiday deduction'
+  const filteredHolidays = useMemo(() => {
+    if (typeFilter.selected.size && !typeFilter.selected.has('Holiday deduction')) return [];
+    return empHolidays;
+  }, [empHolidays, typeFilter]);
+
+  // Sort visits
+  const sortedVisits = useMemo(() => {
+    const r = [...filteredVisits];
+    if (sort.col === 'customerName') {
+      const key = name => {
+        const parts = name.trim().split(/\s+/);
+        return customerFilter.nameField === 'last' ? parts[parts.length - 1] : parts[0];
+      };
+      return r.sort((a, b) => sort.dir === 'asc'
+        ? key(a.customerName).localeCompare(key(b.customerName))
+        : key(b.customerName).localeCompare(key(a.customerName)));
+    }
+    if (sort.col) {
+      return r.sort((a, b) => {
+        const av = a[sort.col] ?? '', bv = b[sort.col] ?? '';
+        if (typeof av === 'number' && typeof bv === 'number')
+          return sort.dir === 'asc' ? av - bv : bv - av;
+        return sort.dir === 'asc'
+          ? String(av).localeCompare(String(bv))
+          : String(bv).localeCompare(String(av));
+      });
+    }
+    return r.sort((a, b) => a.date.localeCompare(b.date) || a.plannedStart.localeCompare(b.plannedStart));
+  }, [filteredVisits, sort, customerFilter.nameField]);
+
+  // Reset to page 1 whenever any filter changes
+  useEffect(() => { setPage(1); }, [customerFilter, typeFilter, statusFilter, payRefFilter, invRefFilter]);
+
+  // Combine holiday + visit rows for unified pagination
+  const allRows = useMemo(() => [
+    ...filteredHolidays.map(h => ({ ...h, _isHoliday: true })),
+    ...sortedVisits,
+  ], [filteredHolidays, sortedVisits]);
+
+  const totalRows  = allRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+  const safePage   = Math.min(page, totalPages);
+  const pageRows   = allRows.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
+  const showStart  = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
+  const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
+  const selectedCount = Object.values(payRows).filter(Boolean).length + (payAll ? pageRows.length : 0);
 
   const statusClass = (s) =>
     s === 'Completed' ? 'status-completed' : s === 'Missed' ? 'status-missed' : 'status-cancelled';
@@ -223,32 +336,277 @@ function VisitDetail({ employee, visits, onBack }) {
     <div className="ts-page">
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="ts-body">
-        <div className="ts-page-header">
-          <h1>{employee.name}</h1>
-          <div className="ts-header-controls">
-            <button className="round-btn secondary-btn btn-icon-left" onClick={onBack}><BackIcon /> Back</button>
-            <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDown size={24} /></button>
-            <button className="round-btn secondary-btn btn-icon-right" disabled>Actions <ChevronDown size={24} /></button>
+        <div className="ts-l2-header">
+
+          {/* Breadcrumbs */}
+          <div className="ts-breadcrumbs">
+            <button className="ts-breadcrumb-link" onClick={onBack}>Timesheets</button>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--ui-purple-3-grape-grey)', flexShrink: 0 }}>
+              <polygon points="8.6,8.6 13.2,13.2 8.6,17.8 10,19.2 16,13.2 10,7.2" />
+            </svg>
+            <span>{employee.name}</span>
           </div>
+
+          {/* Name + status + action buttons */}
+          <div className="ts-header-name-row">
+            <div className="ts-header-name-group">
+              <h1>{employee.name}</h1>
+              <span className={`ts-status-badge ts-status-${verStatus}`}>{verLabel}</span>
+            </div>
+            <div className="ts-header-controls">
+              <button className="round-btn secondary-btn" onClick={onBack}>Back</button>
+              <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDown size={24} /></button>
+              <button className="round-btn tertiary-btn btn-icon-left btn-icon-right"><SettingsIcon size={20} /> Actions <ChevronDown size={24} /></button>
+            </div>
+          </div>
+
+          {/* Rule */}
+          <div className="ts-header-rule" />
+
+          {/* Sub-row: stats left, selected/showing right */}
+          <div className="ts-header-sub-row">
+            <div className="ts-header-sub-left">
+              <label className="checkbox-wrap ts-filter-copies">
+                <input type="checkbox" checked={copies} onChange={e => setCopies(e.target.checked)} />
+                <span className="checkbox-box" />
+                <span>Copies</span>
+              </label>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Period:</span>
+                <span className="ts-sub-value">{period || '—'}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Total visits:</span>
+                <span className="ts-sub-value">{baseVisits.length}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Total shifts:</span>
+                <span className="ts-sub-value">{employee.runs > 0 ? `${employee.runs} day${employee.runs !== 1 ? 's' : ''}` : '0'}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Total holidays</span>
+                <span className="ts-sub-value">{employee.holiday !== '0' ? employee.holiday : '0'}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Verified payroll:</span>
+                <span className="ts-sub-value">{payVerCount}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Verified invoice:</span>
+                <span className="ts-sub-value">{invVerCount}</span>
+              </div>
+            </div>
+            <div className="ts-header-sub-right">
+              {anyFilter && (
+                <button className="clear-btn" onClick={clearAllFilters}>
+                  <CloseIcon /> Clear
+                </button>
+              )}
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Selected:</span>
+                <span className="ts-sub-value">{selectedCount} – {totalRows}</span>
+              </div>
+              <div className="ts-sub-item">
+                <span className="ts-sub-label">Showing:</span>
+                <span className="ts-sub-value">{showStart} – {showEnd} of {totalRows}</span>
+              </div>
+              <button className="ts-nav-arrow pag-inline" disabled={safePage <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}><ChevronLeft /></button>
+              <button className="ts-nav-arrow pag-inline" disabled={safePage >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}><ChevronRight /></button>
+            </div>
+          </div>
+
         </div>
 
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Customer</th>
-                <th>Visit name</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Planned time</th>
-                <th>Actual time</th>
-                <th>Status</th>
-                <th>Mileage</th>
-                <th>Travel time</th>
-                <th>Wait time</th>
-                <th>Expenses</th>
-                <th>Pay ref</th>
-                <th>Invoice ref</th>
+
+                {/* Customer — filter + name sort */}
+                <th>
+                  <span>Customer</span>
+                  <button
+                    ref={el => anchorRefs.current['customer'] = el}
+                    className={`col-icon-btn ${customerFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                    onClick={() => openDropdown('customer')}
+                  >
+                    <FilterIcon active={customerFilter.selected.size > 0} />
+                  </button>
+                  <FilterDropdown
+                    items={allCustomers}
+                    selected={customerFilter.selected}
+                    onApply={(sel, sortDir, nameField) => {
+                      setCustomerFilter({ selected: sel, sortDir, nameField });
+                      setSort({ col: 'customerName', dir: sortDir });
+                    }}
+                    onClear={() => { setCustomerFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' }); setSort({ col: null, dir: 'asc' }); }}
+                    hasNameSort
+                    isOpen={openDD === 'customer'}
+                    onClose={closeDropdown}
+                    anchorEl={anchorRefs.current['customer']}
+                  />
+                </th>
+
+                {/* Visit / Shift — sort */}
+                <th className={sort.col === 'visitName' ? 'sorted' : ''}>
+                  <span>Visit / Shift</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('visitName')}>
+                    <SortIcon dir={sort.col === 'visitName' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Type — filter */}
+                <th>
+                  <span>Type</span>
+                  <button
+                    ref={el => anchorRefs.current['type'] = el}
+                    className={`col-icon-btn ${typeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                    onClick={() => openDropdown('type')}
+                  >
+                    <FilterIcon active={typeFilter.selected.size > 0} />
+                  </button>
+                  <FilterDropdown
+                    items={allTypes}
+                    selected={typeFilter.selected}
+                    onApply={(sel, sortDir) => { setTypeFilter({ selected: sel }); if (sortDir) setSort({ col: 'visitType', dir: sortDir }); }}
+                    onClear={() => setTypeFilter({ selected: new Set() })}
+                    hasSort={false}
+                    isOpen={openDD === 'type'}
+                    onClose={closeDropdown}
+                    anchorEl={anchorRefs.current['type']}
+                  />
+                </th>
+
+                {/* Date — sort */}
+                <th className={sort.col === 'date' ? 'sorted' : ''}>
+                  <span>Date</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('date')}>
+                    <SortIcon dir={sort.col === 'date' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Planned time — sort */}
+                <th className={sort.col === 'plannedStart' ? 'sorted' : ''}>
+                  <span>Planned time</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('plannedStart')}>
+                    <SortIcon dir={sort.col === 'plannedStart' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Actual time — sort */}
+                <th className={sort.col === 'actualStart' ? 'sorted' : ''}>
+                  <span>Actual time</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('actualStart')}>
+                    <SortIcon dir={sort.col === 'actualStart' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Status — filter */}
+                <th>
+                  <span>Status</span>
+                  <button
+                    ref={el => anchorRefs.current['status'] = el}
+                    className={`col-icon-btn ${statusFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                    onClick={() => openDropdown('status')}
+                  >
+                    <FilterIcon active={statusFilter.selected.size > 0} />
+                  </button>
+                  <FilterDropdown
+                    items={VISIT_STATUSES}
+                    selected={statusFilter.selected}
+                    onApply={(sel, sortDir) => { setStatusFilter({ selected: sel }); if (sortDir) setSort({ col: 'status', dir: sortDir }); }}
+                    onClear={() => setStatusFilter({ selected: new Set() })}
+                    hasSort={false}
+                    isOpen={openDD === 'status'}
+                    onClose={closeDropdown}
+                    anchorEl={anchorRefs.current['status']}
+                  />
+                </th>
+
+                {/* Mileage — sort */}
+                <th className={sort.col === 'mileage' ? 'sorted' : ''}>
+                  <span>Mileage</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('mileage')}>
+                    <SortIcon dir={sort.col === 'mileage' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Travel time — sort */}
+                <th className={sort.col === 'travelMins' ? 'sorted' : ''}>
+                  <span>Travel time</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('travelMins')}>
+                    <SortIcon dir={sort.col === 'travelMins' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Wait time — sort */}
+                <th className={sort.col === 'waitMins' ? 'sorted' : ''}>
+                  <span>Wait time</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('waitMins')}>
+                    <SortIcon dir={sort.col === 'waitMins' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Expenses — sort */}
+                <th className={sort.col === 'expenses' ? 'sorted' : ''}>
+                  <span>Expenses</span>
+                  <button className="col-icon-btn" onClick={() => toggleSort('expenses')}>
+                    <SortIcon dir={sort.col === 'expenses' ? sort.dir : null} />
+                  </button>
+                </th>
+
+                {/* Pay ref — sort + search */}
+                <th>
+                  <span>Pay ref</span>
+                  <button
+                    ref={el => anchorRefs.current['payRef'] = el}
+                    className={`col-icon-btn ${payRefFilter.search || payRefFilter.sortDir ? 'col-icon-btn--active' : ''}`}
+                    onClick={() => openDropdown('payRef')}
+                  >
+                    <FilterIcon active={!!(payRefFilter.search || payRefFilter.sortDir)} />
+                  </button>
+                  <FilterDropdown
+                    items={[]}
+                    selected={new Set()}
+                    onApply={(_, sortDir, __, search) => {
+                      setPayRefFilter({ search: search || '', sortDir: sortDir || null });
+                      if (sortDir) setSort({ col: 'payRef', dir: sortDir });
+                    }}
+                    onClear={() => { setPayRefFilter({ search: '', sortDir: null }); setSort(s => s.col === 'payRef' ? { col: null, dir: 'asc' } : s); }}
+                    searchOnly
+                    isOpen={openDD === 'payRef'}
+                    onClose={closeDropdown}
+                    anchorEl={anchorRefs.current['payRef']}
+                  />
+                </th>
+
+                {/* Invoice ref — sort + search */}
+                <th>
+                  <span>Invoice ref</span>
+                  <button
+                    ref={el => anchorRefs.current['invRef'] = el}
+                    className={`col-icon-btn ${invRefFilter.search || invRefFilter.sortDir ? 'col-icon-btn--active' : ''}`}
+                    onClick={() => openDropdown('invRef')}
+                  >
+                    <FilterIcon active={!!(invRefFilter.search || invRefFilter.sortDir)} />
+                  </button>
+                  <FilterDropdown
+                    items={[]}
+                    selected={new Set()}
+                    onApply={(_, sortDir, __, search) => {
+                      setInvRefFilter({ search: search || '', sortDir: sortDir || null });
+                      if (sortDir) setSort({ col: 'invRef', dir: sortDir });
+                    }}
+                    onClear={() => { setInvRefFilter({ search: '', sortDir: null }); setSort(s => s.col === 'invRef' ? { col: null, dir: 'asc' } : s); }}
+                    searchOnly
+                    isOpen={openDD === 'invRef'}
+                    onClose={closeDropdown}
+                    anchorEl={anchorRefs.current['invRef']}
+                  />
+                </th>
+
                 <th className="check-col">
                   <div className="header-check">
                     <label className="checkbox-wrap">
@@ -270,13 +628,13 @@ function VisitDetail({ employee, visits, onBack }) {
               </tr>
             </thead>
             <tbody>
-              {empHolidays.map(h => (
-                <tr key={h.id} className="holiday-row" onClick={() => setSelectedHoliday(h)}>
+              {pageRows.map(row => row._isHoliday ? (
+                <tr key={row.id} className="holiday-row" onClick={() => setSelectedHoliday(row)}>
                   <td className="td-dash">—</td>
                   <td className="td-dash">—</td>
                   <td>Holiday deduction</td>
-                  <td className="nowrap">{h.date}</td>
-                  <td className="nowrap">{h.duration}</td>
+                  <td className="nowrap">{row.date}</td>
+                  <td className="nowrap">{row.duration}</td>
                   <td className="td-dash">—</td>
                   <td className="td-dash">—</td>
                   <td className="td-dash">—</td>
@@ -287,8 +645,8 @@ function VisitDetail({ employee, visits, onBack }) {
                   <td className="td-ref">—</td>
                   <td className="check-col" onClick={e => e.stopPropagation()}>
                     <label className="checkbox-wrap">
-                      <input type="checkbox" checked={payAll || !!payRows[h.id]}
-                        onChange={e => setPayRows(p => ({ ...p, [h.id]: e.target.checked }))} />
+                      <input type="checkbox" checked={payAll || !!payRows[row.id]}
+                        onChange={e => setPayRows(p => ({ ...p, [row.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
@@ -299,41 +657,54 @@ function VisitDetail({ employee, visits, onBack }) {
                     </label>
                   </td>
                 </tr>
-              ))}
-              {empVisits.map(v => (
-                <tr key={v.id}>
-                  <td>{v.customerName}</td>
-                  <td>{v.visitName}</td>
-                  <td>{v.visitType}</td>
-                  <td className="nowrap">{v.date}</td>
-                  <td className="nowrap">{v.plannedStart}–{v.plannedEnd}</td>
-                  <td className="nowrap">{v.actualStart}–{v.actualEnd}</td>
-                  <td><span className={`status-pill ${statusClass(v.status)}`}>{v.status}</span></td>
-                  <td>{v.mileage}</td>
-                  <td>{fmtMins(v.travelMins)}</td>
-                  <td>{fmtMins(v.waitMins)}</td>
-                  <td>{fmtGBP(v.expenses)}</td>
-                  <td className="td-ref">{v.payRef || '—'}</td>
-                  <td className="td-ref">{v.invRef || '—'}</td>
+              ) : (
+                <tr key={row.id}>
+                  <td>{row.customerName}</td>
+                  <td>{row.visitName}</td>
+                  <td>{row.visitType}</td>
+                  <td className="nowrap">{row.date}</td>
+                  <td className="nowrap">{row.plannedStart}–{row.plannedEnd}</td>
+                  <td className="nowrap">{row.actualStart}–{row.actualEnd}</td>
+                  <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
+                  <td>{row.mileage}</td>
+                  <td>{fmtMins(row.travelMins)}</td>
+                  <td>{fmtMins(row.waitMins)}</td>
+                  <td>{fmtGBP(row.expenses)}</td>
+                  <td className="td-ref">{row.payRef || '—'}</td>
+                  <td className="td-ref">{row.invRef || '—'}</td>
                   <td className="check-col">
                     <label className="checkbox-wrap">
-                      <input type="checkbox" checked={payAll || !!payRows[v.id]}
-                        onChange={e => setPayRows(p => ({ ...p, [v.id]: e.target.checked }))} />
+                      <input type="checkbox" checked={payAll || !!payRows[row.id]}
+                        onChange={e => setPayRows(p => ({ ...p, [row.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
                   <td className="check-col">
                     <label className="checkbox-wrap">
-                      <input type="checkbox" checked={invAll || !!invRows[v.id]}
-                        onChange={e => setInvRows(p => ({ ...p, [v.id]: e.target.checked }))} />
+                      <input type="checkbox" checked={invAll || !!invRows[row.id]}
+                        onChange={e => setInvRows(p => ({ ...p, [row.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
                 </tr>
               ))}
+              {totalRows === 0 && (
+                <tr><td colSpan={15} className="table-empty">No records match the current filters</td></tr>
+              )}
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          page={safePage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          showStart={showStart}
+          showEnd={showEnd}
+          totalRows={totalRows}
+          onPageChange={setPage}
+          onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
+        />
       </div>
 
       {selectedHoliday && (
@@ -538,6 +909,7 @@ export default function Timesheets() {
         employee={selectedEmployee}
         visits={filteredVisits}
         onBack={() => setSelectedEmployee(null)}
+        period={rangeLabel}
       />
     );
   }
