@@ -149,13 +149,13 @@ body {
 .hp-finance {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .hp-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .hp-label {
@@ -186,7 +186,6 @@ body {
   font-size: 16px;
   font-weight: 500;
   color: #333;
-  height: 44px;
   display: flex;
   align-items: center;
 }
