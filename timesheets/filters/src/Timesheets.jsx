@@ -167,7 +167,9 @@ function HolidayPanel({ record, onClose }) {
 
               <div className="hp-calc-card">
                 <span className="hp-calc-label">{rateLabel}</span>
-                <span className="hp-calc-total">= £{savedDeduction.toFixed(2)} deduction</span>
+                <span className={`hp-calc-total${savedDeduction !== record.deduction ? ' hp-calc-struck' : ''}`}>
+                  = £{record.deduction.toFixed(2)} deduction
+                </span>
                 <a
                   href="#"
                   className="hp-contract-link"

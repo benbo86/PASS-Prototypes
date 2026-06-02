@@ -314,6 +314,10 @@ body {
   font-weight: 600;
   color: #000;
 }
+.hp-calc-struck {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
 
 .hp-contract-link {
   font-family: Barlow, sans-serif;
