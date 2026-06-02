@@ -1,11 +1,11 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
-  fmtMins, fmtGBP,
+  HOLIDAY_RECORDS, fmtMins, fmtGBP,
 } from './data';
 
 // ─── SVG icons ─────────────────────────────────────────────────────────────
@@ -83,6 +83,124 @@ const COL_LABELS = {
   waitMins: 'Wait time', mileage: 'Mileage', expenses: 'Expenses', holiday: 'Holidays',
 };
 
+// ─── Holiday Panel ───────────────────────────────────────────────────────────
+
+const TABS = ['Details', 'Finance', 'Notes', 'History'];
+
+function HolidayPanel({ record, onClose }) {
+  const [activeTab, setActiveTab] = useState('finance');
+  const [deduction, setDeduction] = useState(record.deduction.toFixed(2));
+  const [savedDeduction, setSavedDeduction] = useState(record.deduction);
+  const [editHistory, setEditHistory] = useState([]);
+
+  const isDirty = parseFloat(deduction) !== savedDeduction;
+
+  const handleSave = () => {
+    const newVal = parseFloat(deduction);
+    const now = new Date();
+    setEditHistory(prev => [{
+      user: 'Karen Bailey',
+      time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+      date: now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+      from: savedDeduction,
+      to: newVal,
+    }, ...prev]);
+    setSavedDeduction(newVal);
+  };
+
+  const rateLabel = record.dailyRate
+    ? `${record.durationLabel} × £${record.dailyRate.toFixed(2)} daily rate`
+    : `${record.durationLabel} × £${record.hourlyRate.toFixed(2)}/hr rate`;
+
+  return (
+    <>
+      <div className="hp-scrim" onClick={onClose} />
+      <div className="hp-panel">
+
+        {/* Header */}
+        <div className="hp-header">
+          <button className="hp-close" onClick={onClose}><CloseIcon /></button>
+          <h2>Holiday — {record.date}</h2>
+          <div className="hp-tabs">
+            {TABS.map(t => (
+              <button
+                key={t}
+                className={`hp-tab ${activeTab === t.toLowerCase() ? 'active' : ''}`}
+                onClick={() => setActiveTab(t.toLowerCase())}
+              >{t}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="hp-body">
+          {activeTab === 'finance' && (
+            <div className="hp-finance">
+
+              <div className="hp-field">
+                <label className="hp-label">Holiday deduction (£)</label>
+                <input
+                  className="hp-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={deduction}
+                  onChange={e => setDeduction(e.target.value)}
+                />
+                {editHistory.length > 0 && (
+                  <span className="hp-last-edit">
+                    Last edited by {editHistory[0].user} at {editHistory[0].time}, {editHistory[0].date}
+                  </span>
+                )}
+              </div>
+
+              <div className="hp-field">
+                <label className="hp-label">Duration deducted</label>
+                <div className="hp-read-only">{record.durationLabel}</div>
+              </div>
+
+              <div className="hp-calc-card">
+                <span className="hp-calc-label">{rateLabel}</span>
+                <span className="hp-calc-total">= £{savedDeduction.toFixed(2)} deduction</span>
+                <a
+                  href="#"
+                  className="hp-contract-link"
+                  onClick={e => e.preventDefault()}
+                >View contract →</a>
+              </div>
+
+            </div>
+          )}
+          {activeTab === 'history' && (
+            editHistory.length === 0
+              ? <p className="hp-placeholder">No changes have been recorded.</p>
+              : <div className="hp-history-list">
+                  {editHistory.map((e, i) => (
+                    <div key={i} className="hp-history-entry">
+                      <div className="hp-history-meta">{e.user} · {e.time}, {e.date}</div>
+                      <div className="hp-history-detail">
+                        Holiday deduction changed from £{e.from.toFixed(2)} to £{e.to.toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+          )}
+          {activeTab !== 'finance' && activeTab !== 'history' && (
+            <p className="hp-placeholder">No content for this tab in the prototype.</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="hp-footer">
+          <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
+          <button className="round-btn primary-btn" disabled={!isDirty} onClick={handleSave}>Save changes</button>
+        </div>
+
+      </div>
+    </>
+  );
+}
+
 // ─── Level 2 – Visit Detail ─────────────────────────────────────────────────
 
 function VisitDetail({ employee, visits, onBack }) {
@@ -90,15 +208,20 @@ function VisitDetail({ employee, visits, onBack }) {
   const [invAll,  setInvAll]  = useState(false);
   const [payRows, setPayRows] = useState({});
   const [invRows, setInvRows] = useState({});
+  const [selectedHoliday, setSelectedHoliday] = useState(null);
 
   const empVisits = visits.filter(v => v.employeeId === employee.id)
     .sort((a, b) => a.date.localeCompare(b.date) || a.plannedStart.localeCompare(b.plannedStart));
+
+  const empHolidays = HOLIDAY_RECORDS.filter(h => h.employeeId === employee.id)
+    .sort((a, b) => a.rawDate.localeCompare(b.rawDate));
 
   const statusClass = (s) =>
     s === 'Completed' ? 'status-completed' : s === 'Missed' ? 'status-missed' : 'status-cancelled';
 
   return (
     <div className="ts-page">
+      <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="ts-body">
         <div className="ts-page-header">
           <h1>{employee.name}</h1>
@@ -115,7 +238,7 @@ function VisitDetail({ employee, visits, onBack }) {
               <tr>
                 <th>Customer</th>
                 <th>Visit name</th>
-                <th>Visit type</th>
+                <th>Type</th>
                 <th>Date</th>
                 <th>Planned time</th>
                 <th>Actual time</th>
@@ -147,6 +270,36 @@ function VisitDetail({ employee, visits, onBack }) {
               </tr>
             </thead>
             <tbody>
+              {empHolidays.map(h => (
+                <tr key={h.id} className="holiday-row" onClick={() => setSelectedHoliday(h)}>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td>Holiday deduction</td>
+                  <td className="nowrap">{h.date}</td>
+                  <td className="nowrap">{h.duration}</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-dash">—</td>
+                  <td className="td-ref">—</td>
+                  <td className="td-ref">—</td>
+                  <td className="check-col" onClick={e => e.stopPropagation()}>
+                    <label className="checkbox-wrap">
+                      <input type="checkbox" checked={payAll || !!payRows[h.id]}
+                        onChange={e => setPayRows(p => ({ ...p, [h.id]: e.target.checked }))} />
+                      <span className="checkbox-box" />
+                    </label>
+                  </td>
+                  <td className="check-col">
+                    <label className="checkbox-wrap checkbox-disabled">
+                      <input type="checkbox" disabled />
+                      <span className="checkbox-box" />
+                    </label>
+                  </td>
+                </tr>
+              ))}
               {empVisits.map(v => (
                 <tr key={v.id}>
                   <td>{v.customerName}</td>
@@ -182,6 +335,10 @@ function VisitDetail({ employee, visits, onBack }) {
           </table>
         </div>
       </div>
+
+      {selectedHoliday && (
+        <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
+      )}
     </div>
   );
 }
@@ -190,6 +347,14 @@ function VisitDetail({ employee, visits, onBack }) {
 
 export default function Timesheets() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  useEffect(() => {
+    const id = parseInt(new URLSearchParams(window.location.search).get('employee'));
+    if (id) {
+      const emp = EMPLOYEES.find(e => e.id === id);
+      if (emp) setSelectedEmployee(emp);
+    }
+  }, []);
 
   // Date range picker — default to current week Mon–Sun
   const [dateRange, setDateRange] = useState(() => {

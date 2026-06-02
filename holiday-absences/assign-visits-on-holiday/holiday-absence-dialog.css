@@ -2,6 +2,10 @@
   color:var(--greyscale-3-grey-30);
 }
 
+.modal-add-absence h2 {
+  margin-bottom:12px;
+}
+
 .entitlement {
   margin-bottom: 20px;
 }

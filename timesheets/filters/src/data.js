@@ -113,6 +113,18 @@ export const VISITS = EMPLOYEES.flatMap(emp => {
   });
 });
 
+// Holiday records — one per day for multi-day holidays
+export const HOLIDAY_RECORDS = [
+  { id: 'h1', employeeId: 1,  date: 'Mon, 07/10/24', rawDate: '07/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 120.00, hourlyRate: null,  deduction: 120.00 },
+  { id: 'h2', employeeId: 1,  date: 'Tue, 08/10/24', rawDate: '08/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 120.00, hourlyRate: null,  deduction: 120.00 },
+  { id: 'h3', employeeId: 2,  date: 'Wed, 09/10/24', rawDate: '09/10/2024', duration: '8h', durationLabel: '8 hours', dailyRate: null,   hourlyRate: 15.00, deduction: 120.00 },
+  { id: 'h4', employeeId: 8,  date: 'Mon, 07/10/24', rawDate: '07/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 110.00, hourlyRate: null,  deduction: 110.00 },
+  { id: 'h5', employeeId: 11, date: 'Mon, 07/10/24', rawDate: '07/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 125.00, hourlyRate: null,  deduction: 125.00 },
+  { id: 'h6', employeeId: 11, date: 'Tue, 08/10/24', rawDate: '08/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 125.00, hourlyRate: null,  deduction: 125.00 },
+  { id: 'h7', employeeId: 12, date: 'Fri, 11/10/24', rawDate: '11/10/2024', duration: '1d', durationLabel: '1 day',   dailyRate: 130.00, hourlyRate: null,  deduction: 130.00 },
+  { id: 'h8', employeeId: 14, date: 'Thu, 10/10/24', rawDate: '10/10/2024', duration: '4h', durationLabel: '4 hours', dailyRate: null,   hourlyRate: 13.50, deduction:  54.00 },
+];
+
 // Helper: format total minutes as "Xh Ym"
 export function fmtMins(mins) {
   const h = Math.floor(mins / 60);
