@@ -5,6 +5,100 @@
   padding: 0 24px 80px;
 }
 
+
+/* ── Contract form (on-save mode) ────────────────────────────────────────────── */
+.he-contract-form {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  padding: 24px 32px 24px;
+}
+.he-contract-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 48px;
+  margin-bottom: 24px;
+}
+.he-contract-field-label {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 6px;
+}
+.he-contract-field-value {
+  font-size: 16px;
+  color: #000;
+}
+.he-contract-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+
+/* ── Modal overlay ───────────────────────────────────────────────────────────── */
+.he-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--web-skrim);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.he-modal {
+  background: #fff;
+  border-radius: 8px;
+  width: 620px;
+  max-width: 100%;
+  padding: 32px;
+  position: relative;
+}
+.he-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 16px;
+  padding-right: 32px;
+}
+.he-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--brand-purple-7-purple-5);
+  display: flex;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 0;
+}
+.he-modal-close:hover { background: var(--ui-purple-6-lavendar-grey); }
+
+/* ── Toast ───────────────────────────────────────────────────────────────────── */
+.he-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--rag-green-green-5);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 300;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* ── Finish date field ───────────────────────────────────────────────────────── */
 .he-leaver-row {
   display: flex;
@@ -310,11 +404,36 @@
 }
 .he-deduction-action {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
   margin-top: 16px;
 }
+.he-deduction-action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.primary-btn .tooltip-wrap { color: #fff; }
+.he-deduction-date-note {
+  font-size: 13px;
+  color: var(--greyscale-01-black);
+}
 .he-deduction-view-link { margin-left: 16px; font-size: 14px; font-weight: 400; }
+
+.he-btn-confirmed {
+  background: var(--rag-green-green-5);
+  color: #fff;
+  cursor: default;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.he-btn-confirmed:disabled {
+  background: var(--rag-green-green-5);
+  color: #fff;
+}
+
 .he-deduction-confirmed {
   display: inline-flex;
   align-items: center;
