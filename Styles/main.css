@@ -400,8 +400,10 @@ h6 {
 }
 .data-table tbody tr:last-child { border-bottom: none; }
 
-.data-row { cursor: pointer; }
-.data-row:hover { background: var(--ui-purple-opacity-tint-cyber-opacity-3); }
+.data-row  { cursor: pointer; }
+.holiday-row { cursor: pointer; }
+.data-row:hover,
+.holiday-row:hover { background: var(--ui-purple-opacity-tint-cyber-opacity-3); }
 
 .data-table th,
 .data-table td { border-right: 1px solid var(--ui-purple-5-languid-lavendar); }
@@ -552,3 +554,56 @@ h6 {
   border-top-color: #fff;
 }
 .tooltip-wrap:hover .tooltip { opacity: 1; }
+
+/* ── Shared L2 header patterns ───────────────────────────────── */
+.ts-l2-header { margin-bottom: 16px; }
+
+.ts-breadcrumbs {
+  display: flex; align-items: center; gap: 4px;
+  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 400;
+}
+.ts-breadcrumbs span { color: #000; }
+
+.ts-breadcrumb-link {
+  background: none; border: none; cursor: pointer;
+  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 400;
+  color: var(--brand-purple-6-purple-4); padding: 0;
+}
+.ts-breadcrumb-link:hover { text-decoration: underline; }
+
+.ts-header-name-row {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 20px;
+}
+.ts-header-name-group { display: flex; align-items: center; gap: 16px; }
+
+.ts-l2-header h1 { white-space: nowrap; margin-bottom: 0; }
+
+.ts-status-badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 16px 5px; border-radius: 4px;
+  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500; color: #333;
+  white-space: nowrap;
+}
+
+.ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
+
+.ts-header-sub-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; min-height: 24px;
+}
+.ts-header-sub-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.ts-header-sub-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+
+.ts-sub-item  { display: flex; align-items: baseline; gap: 4px; font-family: Barlow, sans-serif; font-size: 16px; white-space: nowrap; }
+.ts-sub-label { font-weight: 600; color: #000; }
+.ts-sub-value { font-weight: 400; color: #000; }
+
+/* ── Edit icon button / icon column (shared) ─────────────────── */
+.edit-icon-btn {
+  background: none; border: none; padding: 2px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #000; cursor: inherit;
+}
+
+.icon-col { width: 48px; min-width: 48px; text-align: center; }

@@ -19,110 +19,11 @@ body {
 }
 .ts-page-header h1 { font-size: 22px; font-weight: 600; color: #000; white-space: nowrap; }
 .ts-page-header-left { display: flex; align-items: center; gap: 12px; }
-.ts-header-controls { display: flex; gap: 10px; margin-left: auto; }
 
-/* ── Level 2 header ──────────────────────────────────────────── */
-.ts-l2-header { margin-bottom: 24px; }
-
-.ts-breadcrumbs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-}
-.ts-breadcrumbs span { color: #000; }
-
-.ts-breadcrumb-link {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--brand-purple-6-purple-4);
-  padding: 0;
-}
-.ts-breadcrumb-link:hover { text-decoration: underline; }
-
-.ts-header-name-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.ts-header-name-group {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.ts-l2-header h1 {
-  font-size: 28px;
-  font-weight: 500;
-  color: #000;
-  white-space: nowrap;
-  margin-bottom: 0px;
-}
-
-.ts-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 16px 5px;
-  border-radius: 4px;
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  white-space: nowrap;
-}
+/* ── Status badge variants (timesheets-specific) ─────────────── */
 .ts-status-unverified { background: #f2dedf; }
 .ts-status-partial    { background: var(--rag-amber-amber-lightest); }
 .ts-status-verified   { background: #d4edda; }
-
-.ts-header-rule {
-  height: 2px;
-  background: var(--ui-purple-5-languid-lavendar);
-  margin-bottom: 16px;
-}
-
-.ts-header-sub-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 24px;
-}
-
-.ts-header-sub-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  flex: 1;
-  min-width: 0;
-}
-
-.ts-header-sub-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.ts-sub-item {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  font-family: Barlow, sans-serif;
-  font-size: 16px;
-  white-space: nowrap;
-}
-
-.ts-sub-label { font-weight: 600; color: #000; }
-.ts-sub-value { font-weight: 400; color: #000; }
 
 /* ── Date navigation ─────────────────────────────────────────── */
 .ts-date-nav {
@@ -142,14 +43,10 @@ body {
 .ts-filter-copies { gap: 8px; margin-right: 8px; }
 .ts-filter-copies-label { font-size: 16px; font-weight: 500; color: #000; white-space: nowrap; }
 
-
 /* ── Table (timesheets-specific overrides) ───────────────────── */
 .data-table { min-width: 1200px; }
-/* .data-table th.sorted { background: var(--ui-purple-8-vibrant-lavendar); } */
 
 /* ── Holiday row ─────────────────────────────────────────────── */
-.holiday-row { cursor: pointer; }
-
 .checkbox-disabled { cursor: not-allowed; }
 .checkbox-disabled input { pointer-events: none; }
 .checkbox-disabled .checkbox-box { opacity: 0.35; }
@@ -337,35 +234,6 @@ body {
 .hp-last-edit {
   font-family: Barlow, sans-serif;
   font-size: 13px;
-  color: var(--greyscale-6-grey-50);
-}
-
-.hp-history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.hp-history-entry {
-  background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
-  border-radius: 8px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hp-history-meta {
-  font-family: Barlow, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #000;
-}
-
-.hp-history-detail {
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
   color: var(--greyscale-6-grey-50);
 }
 

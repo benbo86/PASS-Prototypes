@@ -85,8 +85,8 @@ export const VISITS = EMPLOYEES.flatMap(emp => {
     const off = between(-1, 1);
     const actualStart  = HALF_HOURS[Math.max(0, startIdx + off)];
     const actualEnd    = HALF_HOURS[Math.min(HALF_HOURS.length - 1, startIdx + durSlots + off + between(0, 1))];
-    const payVerified  = rand() > 0.12;
-    const invVerified  = payVerified && rand() > 0.06;
+    const payVerified  = false;
+    const invVerified  = false;
     return {
       id: _vid++,
       employeeId:   emp.id,

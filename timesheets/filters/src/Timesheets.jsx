@@ -55,6 +55,12 @@ const CloseIcon = () => (
   </svg>
 );
 
+const EditIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M5.00125,16.245799 L5.00125,18.6099151 C5.00125,18.8276627 5.17233735,18.99875 5.39008488,18.99875 L7.75420098,18.99875 C7.85529805,18.99875 7.95639512,18.9598665 8.0263854,18.8820995 L16.5185393,10.3977224 L13.6022776,7.48146073 L5.11790047,15.9658379 C5.04013349,16.0436049 5.00125,16.1369253 5.00125,16.245799 Z M18.7737816,8.14248004 C19.0770728,7.83918883 19.0770728,7.34925687 18.7737816,7.04596566 L16.9540343,5.22621841 C16.6507431,4.9229272 16.1608112,4.9229272 15.85752,5.22621841 L14.4343843,6.64935408 L17.3506459,9.56561571 L18.7737816,8.14248004 Z"/>
+  </svg>
+);
+
 const BackIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15,18 9,12 15,6"/>
@@ -91,7 +97,7 @@ const COL_LABELS = {
 
 // ─── Holiday Panel ───────────────────────────────────────────────────────────
 
-const TABS = ['Details', 'Finance', 'Notes', 'History'];
+const TABS = ['Details', 'Finance', 'Notes'];
 
 function HolidayPanel({ record, onClose }) {
   const [activeTab, setActiveTab] = useState('finance');
@@ -180,21 +186,7 @@ function HolidayPanel({ record, onClose }) {
 
             </div>
           )}
-          {activeTab === 'history' && (
-            editHistory.length === 0
-              ? <p className="hp-placeholder">No changes have been recorded.</p>
-              : <div className="hp-history-list">
-                  {editHistory.map((e, i) => (
-                    <div key={i} className="hp-history-entry">
-                      <div className="hp-history-meta">{e.user} · {e.time}, {e.date}</div>
-                      <div className="hp-history-detail">
-                        Holiday deduction changed from £{e.from.toFixed(2)} to £{e.to.toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-          )}
-          {activeTab !== 'finance' && activeTab !== 'history' && (
+          {activeTab !== 'finance' && (
             <p className="hp-placeholder">No content for this tab in the prototype.</p>
           )}
         </div>
@@ -625,6 +617,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                     <span>Inv</span>
                   </div>
                 </th>
+                <th className="icon-col"></th>
               </tr>
             </thead>
             <tbody>
@@ -656,6 +649,9 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                       <span className="checkbox-box" />
                     </label>
                   </td>
+                  <td className="icon-col">
+                    <button className="edit-icon-btn"><EditIcon /></button>
+                  </td>
                 </tr>
               ) : (
                 <tr key={row.id}>
@@ -686,10 +682,13 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                       <span className="checkbox-box" />
                     </label>
                   </td>
+                  <td className="icon-col">
+                    <button className="edit-icon-btn"><EditIcon /></button>
+                  </td>
                 </tr>
               ))}
               {totalRows === 0 && (
-                <tr><td colSpan={15} className="table-empty">No records match the current filters</td></tr>
+                <tr><td colSpan={16} className="table-empty">No records match the current filters</td></tr>
               )}
             </tbody>
           </table>
@@ -720,12 +719,22 @@ export default function Timesheets() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
-    const id = parseInt(new URLSearchParams(window.location.search).get('employee'));
-    if (id) {
-      const emp = EMPLOYEES.find(e => e.id === id);
+    const slug = new URLSearchParams(window.location.search).get('employee');
+    if (slug) {
+      const emp = EMPLOYEES.find(e => e.name.toLowerCase().replace(/\s+/g, '-') === slug);
       if (emp) setSelectedEmployee(emp);
     }
   }, []);
+
+  const navigateTo = (employee) => {
+    history.pushState(null, '', `?employee=${employee.name.toLowerCase().replace(/\s+/g, '-')}`);
+    setSelectedEmployee(employee);
+  };
+
+  const navigateBack = () => {
+    history.pushState(null, '', window.location.pathname);
+    setSelectedEmployee(null);
+  };
 
   // Date range picker — default to current week Mon–Sun
   const [dateRange, setDateRange] = useState(() => {
@@ -908,7 +917,7 @@ export default function Timesheets() {
       <VisitDetail
         employee={selectedEmployee}
         visits={filteredVisits}
-        onBack={() => setSelectedEmployee(null)}
+        onBack={navigateBack}
         period={rangeLabel}
       />
     );
@@ -1188,7 +1197,7 @@ export default function Timesheets() {
 
             <tbody>
               {pageRows.map(row => (
-                <tr key={row.id} className="data-row" onClick={() => setSelectedEmployee(row)}>
+                <tr key={row.id} className="data-row" onClick={() => navigateTo(row)}>
                   <td className="td-name">{row.name}</td>
                   <td>{row.contract}</td>
                   <td className="td-num">{row.visits}</td>

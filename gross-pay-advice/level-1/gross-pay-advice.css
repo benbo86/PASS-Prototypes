@@ -1,0 +1,117 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* ── Page layout ─────────────────────────────────────────────── */
+.gpa-page { min-height: 100vh; display: flex; flex-direction: column; margin-top: 96px; }
+.gpa-body { flex: 1; margin: 0 40px; }
+
+/* ── Page header (L1) ────────────────────────────────────────── */
+.gpa-page-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px; position: relative;
+}
+.gpa-page-header h1 { margin-bottom: 0; white-space: nowrap; }
+.gpa-header-controls { display: flex; gap: 10px; margin-left: auto; }
+
+/* ── Date navigation ─────────────────────────────────────────── */
+.gpa-date-nav {
+  display: flex; align-items: center; gap: 12px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.gpa-date-nav .react-datepicker-wrapper { width: auto; }
+#gpa-datepicker-portal .react-datepicker-popper { z-index: 9999; }
+
+.gpa-nav-arrow {
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s; padding: 0;
+}
+.gpa-nav-arrow:hover:not(:disabled) { color: var(--ui-purple-2-dark-grape-grey); }
+.gpa-nav-arrow:disabled { color: var(--ui-purple-5-languid-lavendar); cursor: default; }
+
+/* ── Sub-row (L1 showing / pagination) ──────────────────────── */
+.gpa-sub-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 16px; padding: 10px 0; margin-bottom: 2px;
+}
+
+/* ── Status pills (L1 table) ─────────────────────────────────── */
+.status-ready { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+.status-sent  { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+
+/* ── L2 status badge variants (GPA-specific) ─────────────────── */
+.gpa-status-ready { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+.gpa-status-sent  { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+
+/* ── Negative value (deduction) ─────────────────────────────── */
+.td-neg { color: var(--rag-red-red-overdue-dark); }
+
+/* ── Timesheet link icon ─────────────────────────────────────── */
+.gpa-ts-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--brand-purple-7-purple-5); text-decoration: none; padding: 2px;
+}
+
+/* ── Holiday panel (mirrors timesheets) ──────────────────────── */
+.hp-scrim {
+  position: fixed; inset: 0; background: var(--web-skrim); z-index: 100;
+}
+.hp-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 937px;
+  background: #fff; z-index: 101; display: flex; flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+}
+.hp-header {
+  background: #fff; padding: 0 48px; flex-shrink: 0; position: relative;
+  box-shadow: 0 3px 2px rgba(0,0,0,0.06); min-height: 148px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.hp-close {
+  position: absolute; top: 24px; right: 24px; background: none; border: none;
+  cursor: pointer; color: var(--brand-purple-7-purple-5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px; border-radius: 4px;
+}
+.hp-close:hover { background: var(--ui-purple-6-lavendar-grey); }
+.hp-header h2 { font-size: 28px; font-weight: 500; color: #000; margin-bottom: 12px; margin-top: auto; padding-top: 53px; }
+.hp-tabs { display: flex; margin: 0 -48px; padding: 0 48px; }
+.hp-tab {
+  padding: 14px 24px; background: none; border: none;
+  border-bottom: 3px solid transparent; cursor: pointer;
+  font-family: Barlow, sans-serif; font-size: 15px; font-weight: 400; color: #000;
+  white-space: nowrap; transition: border-color 0.15s, color 0.15s;
+}
+.hp-tab:hover { color: var(--brand-purple-3-purple-2); }
+.hp-tab.active { font-weight: 500; border-bottom-color: var(--brand-purple-4-purple-2-tint); }
+.hp-body { flex: 1; overflow-y: auto; background: var(--ui-purple-7-lightest-lavendar); padding: 48px; }
+.hp-finance { display: flex; flex-direction: column; gap: 24px; }
+.hp-field { display: flex; flex-direction: column; gap: 8px; }
+.hp-label { font-family: Barlow, sans-serif; font-size: 14px; font-weight: 400; color: #000; }
+.hp-input {
+  width: 120px; height: 44px;
+  border: 1px solid var(--ui-purple-4-lavendar); border-radius: 6px; padding: 0 16px;
+  font-family: Barlow, sans-serif; font-size: 16px; font-weight: 500; color: #333;
+  background: #fff; outline: none; transition: border-color 0.15s;
+}
+.hp-input:focus { border-color: var(--brand-purple-6-purple-4); }
+.hp-read-only { font-family: Barlow, sans-serif; font-size: 16px; font-weight: 500; color: #333; display: flex; align-items: center; }
+.hp-calc-card {
+  background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px; padding: 20px 24px; display: flex; flex-direction: column; gap: 8px;
+}
+.hp-calc-label { font-family: Barlow, sans-serif; font-size: 14px; color: var(--greyscale-6-grey-50); }
+.hp-calc-total { font-family: Barlow, sans-serif; font-size: 16px; font-weight: 600; color: #000; }
+.hp-calc-struck { text-decoration: line-through; opacity: 0.45; }
+.hp-contract-link { font-family: Barlow, sans-serif; font-size: 13px; color: var(--brand-purple-6-purple-4); text-decoration: none; margin-top: 4px; }
+.hp-contract-link:hover { text-decoration: underline; }
+.hp-placeholder { font-family: Barlow, sans-serif; font-size: 15px; color: var(--greyscale-6-grey-50); }
+.hp-last-edit { font-family: Barlow, sans-serif; font-size: 13px; color: var(--greyscale-6-grey-50); }
+.hp-footer {
+  background: #fff; padding: 36px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 -3px 2px rgba(0,0,0,0.06); flex-shrink: 0;
+}
