@@ -1041,5 +1041,72 @@ html, body {
 }
 .picker-item svg { color: var(--brand-purple-3-purple-2); }
 
+/* ── Thread info sheet ───────────────────────────────────────── */
+.info-sheet { max-height: 75%; }
+
+.info-sheet-top {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.info-sheet-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--ui-purple-6-lavendar-grey);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ui-purple-3-grape-grey); margin-bottom: 12px;
+}
+.info-sheet-avatar.group { background: var(--ui-purple-5-languid-lavendar); }
+
+.info-sheet-name {
+  font-size: 17px; font-weight: 600; color: #000;
+  text-align: center; margin-bottom: 3px;
+}
+.info-sheet-type { font-size: 13px; color: var(--greyscale-6-grey-50); }
+
+.info-section {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+.info-section-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--greyscale-6-grey-50); margin-bottom: 8px;
+}
+.info-row {
+  display: flex; align-items: center; gap: 10px;
+  font-family: Barlow, sans-serif; font-size: 15px; color: #000;
+}
+.info-row svg { color: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
+
+.info-participants-list { display: flex; flex-direction: column; }
+
+.info-participant-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0;
+}
+.info-participant-row:not(:last-child) {
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.info-participant-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: Barlow, sans-serif; font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.info-participant-name {
+  font-family: Barlow, sans-serif; font-size: 15px; color: #000;
+}
+
+.info-action-btn {
+  width: 100%; padding: 16px 20px;
+  border: none; background: none; cursor: pointer;
+  font-family: Barlow, sans-serif; font-size: 16px; font-weight: 500;
+  color: var(--brand-purple-6-purple-4); text-align: left;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+.info-action-btn:active { background: var(--ui-purple-7-lightest-lavendar); }
+
 /* ── Back link override (ensure visible on grey bg) ──────────── */
 .back-link { color: var(--brand-purple-6-purple-4); }

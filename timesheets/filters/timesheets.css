@@ -215,6 +215,13 @@ body {
   text-decoration: line-through;
   opacity: 0.45;
 }
+.hp-edited-note {
+  display: inline-flex; align-self: flex-start;
+  font-family: Barlow, sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+  padding: 3px 8px; border-radius: 4px;
+}
 
 .hp-contract-link {
   font-family: Barlow, sans-serif;

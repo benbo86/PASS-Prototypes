@@ -140,6 +140,16 @@ const THREADS = [
     isGroup: true,
     careReceiver: null,
     participants: 'Sarah M., Karen B. and 6 others',
+    participantList: [
+      { name: 'You', initials: 'AJ' },
+      { name: 'Sarah Mitchell', initials: 'SM' },
+      { name: 'Karen Bailey', initials: 'KB' },
+      { name: 'Tom Harris', initials: 'TH' },
+      { name: 'Priya Sharma', initials: 'PS' },
+      { name: 'James Okafor', initials: 'JO' },
+      { name: 'Linda Peters', initials: 'LP' },
+      { name: 'David Chen', initials: 'DC' },
+    ],
     lastSender: 'Sarah M.',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
     time: '10:42 AM',
@@ -153,6 +163,10 @@ const THREADS = [
     isGroup: false,
     careReceiver: 'Margaret Thompson',
     participants: 'Office',
+    participantList: [
+      { name: 'You', initials: 'AJ' },
+      { name: 'Karen Bailey', initials: 'KB' },
+    ],
     lastSender: 'Karen B.',
     lastMessage: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit?",
     time: '9:15 AM',
@@ -166,6 +180,10 @@ const THREADS = [
     isGroup: false,
     careReceiver: null,
     participants: 'Office',
+    participantList: [
+      { name: 'You', initials: 'AJ' },
+      { name: 'Karen Bailey', initials: 'KB' },
+    ],
     lastSender: 'Karen B.',
     lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
     time: 'Yesterday',
@@ -179,6 +197,10 @@ const THREADS = [
     isGroup: false,
     careReceiver: null,
     participants: 'Office',
+    participantList: [
+      { name: 'You', initials: 'AJ' },
+      { name: 'Karen Bailey', initials: 'KB' },
+    ],
     lastSender: 'You',
     lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
     time: 'Mon',
@@ -450,15 +472,68 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
   )
 }
 
+// Soft palette for participant avatars — index 0 is always "You" (mauve)
+const P_BG = ['#c4a8d8', '#a8d5b5', '#a8c5e8', '#f0d4a0', '#f0a8b8', '#a8ddd5', '#c8daa8', '#f0c4a0']
+const P_FG = ['#ffffff', '#1b5e20', '#0d47a1', '#7a5200', '#7a1030', '#00504a', '#3d5e00', '#7a3200']
+
+// ─── Thread Info Sheet ───────────────────────────────────────
+
+function ThreadInfoSheet({ thread, onClose, onArchive }) {
+  const list = (THREADS.find(t => t.id === thread.id) || thread).participantList || []
+  return (
+    <div className="picker-overlay" onClick={onClose}>
+      <div className="picker-sheet info-sheet" onClick={e => e.stopPropagation()}>
+        <div className="picker-handle" />
+
+        <div className="info-sheet-top">
+          <div className={`info-sheet-avatar${thread.isGroup ? ' group' : ''}`}>
+            {thread.isGroup ? <GroupIcon size={28} /> : <PersonIcon size={28} />}
+          </div>
+          <div className="info-sheet-name">{thread.title}</div>
+          <div className="info-sheet-type">{thread.isGroup ? 'Group conversation' : 'Direct message'}</div>
+        </div>
+
+        {thread.careReceiver && (
+          <div className="info-section">
+            <div className="info-section-label">Care receiver</div>
+            <div className="info-row"><PersonIcon size={18} /><span>{thread.careReceiver}</span></div>
+          </div>
+        )}
+
+        <div className="info-section">
+          <div className="info-section-label">Participants · {list.length}</div>
+          <div className="info-participants-list">
+            {list.map((p, i) => (
+              <div key={i} className="info-participant-row">
+                <div className="info-participant-avatar" style={{ background: P_BG[i % P_BG.length], color: P_FG[i % P_FG.length] }}>
+                  {p.initials}
+                </div>
+                <span className="info-participant-name">{p.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {thread.sentByMe && !thread.isGroup && (
+          <button className="info-action-btn" onClick={onArchive}>
+            {thread.archived ? 'Unarchive thread' : 'Archive thread'}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Thread Screen ───────────────────────────────────────────
 
-function ThreadScreen({ thread, messages, onBack, onMessageSent, totalUnread }) {
+function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, totalUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [actionTarget, setActionTarget] = useState(null)
   const [replyTo, setReplyTo] = useState(null)
   const [editing, setEditing] = useState(null)
   const [showAttach, setShowAttach] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
   const endRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -499,7 +574,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, totalUnread }) 
     setShowAttach(false)
   }
 
-  const dismissOverlays = () => { setActionTarget(null); setShowAttach(false) }
+  const dismissOverlays = () => { setActionTarget(null); setShowAttach(false); setShowInfo(false) }
 
   return (
     <div className="screen" onClick={dismissOverlays}>
@@ -514,7 +589,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, totalUnread }) 
           <span className="thread-header-title">{thread?.title}</span>
           <span className="thread-header-sub">{thread?.participants}</span>
         </div>
-        <button className="app-header-action"><InfoIcon /></button>
+        <button className="app-header-action" onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}><InfoIcon /></button>
       </div>
 
       {/* Care receiver / group tag */}
@@ -634,6 +709,15 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, totalUnread }) 
       </div>
 
       <AppNav onNavigate={() => {}} totalUnread={totalUnread} />
+
+      {/* Thread info sheet */}
+      {showInfo && (
+        <ThreadInfoSheet
+          thread={thread}
+          onClose={() => setShowInfo(false)}
+          onArchive={() => { onArchive?.(thread.id); setShowInfo(false); onBack(); }}
+        />
+      )}
 
       {/* Message action menu */}
       {actionTarget && (
@@ -853,6 +937,7 @@ export default function App() {
             messages={threadMessages[activeThreadId] || []}
             onBack={() => { setView('inbox'); setActiveThreadId(null) }}
             onMessageSent={handleReply}
+            onArchive={handleArchive}
             totalUnread={totalUnread}
           />
         )}
