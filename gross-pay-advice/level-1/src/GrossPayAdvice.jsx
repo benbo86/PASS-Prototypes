@@ -636,7 +636,9 @@ export default function GrossPayAdvice() {
                   <td className="nowrap">{row.cycleFrom}</td>
                   <td className="nowrap">{row.cycleTo}</td>
                   <td className="td-num">{fmtGBP(row.visitShiftPay)}</td>
-                  <td className="td-num">{row.holidayPay > 0 ? fmtGBP(row.holidayPay) : '—'}</td>
+                  <td className={`td-num${row.holidayPay > 0 ? ' td-neg' : ''}`}>
+                    {row.holidayPay > 0 ? `-${fmtGBP(row.holidayPay)}` : '—'}
+                  </td>
                   <td className="td-num">{fmtGBP(row.mileagePay)}</td>
                   <td className="td-num">{fmtGBP(row.total)}</td>
                   <td><span className={`status-pill ${row.status === 'Ready' ? 'status-ready' : 'status-sent'}`}>{row.status}</span></td>

@@ -19,7 +19,7 @@ const raw = [
 
 export const GPA_RECORDS = raw.map(r => ({
   ...r,
-  total: r2(r.visitShiftPay + r.holidayPay + r.mileagePay),
+  total: r2(r.visitShiftPay - r.holidayPay + r.mileagePay),
 }));
 
 export const GPA_EMPLOYEE_NAMES = raw.map(r => r.employeeName);
