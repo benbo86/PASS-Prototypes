@@ -37,46 +37,6 @@
 }
 
 
-/* ── Modal overlay ───────────────────────────────────────────────────────────── */
-.he-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--web-skrim);
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.he-modal {
-  background: #fff;
-  border-radius: 8px;
-  width: 620px;
-  max-width: 100%;
-  padding: 32px;
-  position: relative;
-}
-.he-modal-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 16px;
-  padding-right: 32px;
-}
-.he-modal-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--brand-purple-7-purple-5);
-  display: flex;
-  padding: 4px;
-  border-radius: 4px;
-  line-height: 0;
-}
-.he-modal-close:hover { background: var(--ui-purple-6-lavendar-grey); }
 
 /* ── Toast ───────────────────────────────────────────────────────────────────── */
 .he-toast {
@@ -371,36 +331,24 @@
   margin: 0 0 16px;
   line-height: 1.5;
 }
-.he-deduction-row {
+.he-calc-card {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  padding: 20px 24px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  font-size: 16px;
   margin-bottom: 16px;
 }
-.he-deduction-row-label { color: var(--greyscale-4-grey-40); }
-.he-deduction-row-value { font-weight: 600; color: #000; }
-
-.he-deduction-box {
-  background: #fff;
-  border: 1px solid var(--rag-amber-amber-7);
-  border-radius: 6px;
-  padding: 16px 24px;
-}
-.he-deduction-box-label {
-  font-size: 14px;
-  color: var(--greyscale-4-grey-40);
-  margin-bottom: 4px;
-}
-.he-deduction-box-amount {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--rag-red-red-overdue-dark);
-  margin-bottom: 4px;
-}
-.he-deduction-box-calc {
+.he-calc-label {
   font-size: 14px;
   color: var(--greyscale-6-grey-50);
+}
+.he-calc-total {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
 }
 .he-deduction-action {
   display: flex;

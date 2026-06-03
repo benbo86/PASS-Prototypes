@@ -2,6 +2,7 @@ import { useState, useRef, forwardRef } from 'react'
 import DatePicker from 'react-datepicker'
 import { CalendarIcon } from '../../../Components/DateRangePicker'
 import Tooltip from '../../../Components/Tooltip'
+import Modal from '../../../Components/Modal'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -23,11 +24,6 @@ const TickIcon = () => (
   </svg>
 )
 
-const CloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-  </svg>
-)
 
 // ── Date picker custom input ───────────────────────────────────────────────────
 
@@ -58,13 +54,9 @@ function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, on
         This employee has taken more holiday than their pro-rated entitlement for this period.
         The following amount should be deducted from their final pay.
       </p>
-      <div className="he-deduction-row">
-        <span className="he-deduction-row-label">Days overpaid</span>
-        <span className="he-deduction-row-value">{overpaidDays.toFixed(1)} days</span>
-      </div>
-      <div className="he-deduction-box">
-        <div className="he-deduction-box-label">Amount to deduct from final pay</div>
-        <div className="he-deduction-box-amount">£{deduction.toFixed(2)}</div>
+      <div className="he-calc-card">
+        <span className="he-calc-label">{overpaidDays.toFixed(1)} days × £{AVG_DAILY_PAY.toFixed(2)} avg daily pay</span>
+        <span className="he-calc-total">= £{deduction.toFixed(2)} deduction</span>
       </div>
       <div className="he-deduction-action">
         <div className="he-deduction-action-row">
@@ -166,22 +158,16 @@ export default function HolidayEntitlement() {
       </div>
 
       {showModal && (
-        <div className="he-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false) }}>
-          <div className="he-modal">
-            <button className="he-modal-close" aria-label="Close" onClick={() => setShowModal(false)}>
-              <CloseIcon />
-            </button>
-            <div className="he-modal-title">Leaver holiday deduction</div>
-            <DeductionBody
-              overpaidDays={overpaidDays}
-              deduction={deduction}
-              finishDate={finishDate}
-              deductionAdded={deductionAdded}
-              onAdd={() => setDeductionAdded(true)}
-              onDismiss={() => setShowModal(false)}
-            />
-          </div>
-        </div>
+        <Modal title="Leaver holiday deduction" onClose={() => setShowModal(false)}>
+          <DeductionBody
+            overpaidDays={overpaidDays}
+            deduction={deduction}
+            finishDate={finishDate}
+            deductionAdded={deductionAdded}
+            onAdd={() => setDeductionAdded(true)}
+            onDismiss={() => setShowModal(false)}
+          />
+        </Modal>
       )}
 
       {showToast && (
