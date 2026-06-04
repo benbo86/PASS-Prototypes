@@ -453,19 +453,22 @@ html, body {
   padding: 0 4px;
 }
 
+.bubble.has-reply {
+  overflow: hidden;
+  padding-top: 0;
+}
+
 .reply-quote {
   display: flex;
   flex-direction: column;
   border-left: 3px solid var(--ui-purple-3-grape-grey);
-  background: rgba(255,255,255,0.7);
-  border-radius: 4px;
-  padding: 5px 8px;
-  margin-bottom: 3px;
-  max-width: 75%;
+  background: var(--ui-purple-6-lavendar-grey);
+  padding: 8px 14px;
+  margin: 0 -14px 8px;
 }
 .reply-quote-me {
-  border-left-color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.15);
+  border-left-color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.18);
 }
 .reply-quote-author {
   font-family: Barlow, sans-serif;

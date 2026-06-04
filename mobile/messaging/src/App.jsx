@@ -611,9 +611,11 @@ function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants 
         <div className="info-section">
           <div className="info-section-header">
             <div className="info-section-label">Participants · {list.length}</div>
-            <button className="info-add-btn" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }} aria-label="Add participant">
-              <PlusIcon size={16} />
-            </button>
+            {thread.sentByMe && (
+              <button className="info-add-btn" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }} aria-label="Add participant">
+                <PlusIcon size={16} />
+              </button>
+            )}
           </div>
           <div className="info-participants-list">
             {list.map((p, i) => (
@@ -796,7 +798,7 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAddParticipants, totalUnread }) {
+function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAddParticipants, onMessageDeleted, totalUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [actionTarget, setActionTarget] = useState(null)
@@ -896,13 +898,13 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
                   onClick={e => openActions(e, msg)}
                 >
                   {showSender && <div className="msg-sender-name">{msg.sender}</div>}
+                  <div className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}>
                   {msg.replyTo && (
                     <div className={`reply-quote ${msg.isMe ? 'reply-quote-me' : ''}`}>
                       <span className="reply-quote-author">{msg.replyTo.isMe ? 'You' : msg.replyTo.sender}</span>
                       <span className="reply-quote-text">{msg.replyTo.text.slice(0, 70)}{msg.replyTo.text.length > 70 ? '…' : ''}</span>
                     </div>
                   )}
-                  <div className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}`}>
                     {msg.attachments?.map((att, i) => (
                       <Attachment key={i} attachment={att} isMe={msg.isMe} onPreview={(e) => { e.stopPropagation(); setPreviewAttachment(att) }} />
                     ))}
@@ -950,7 +952,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
       {/* Attach picker */}
       {showAttach && (
         <div className="attach-picker" onClick={e => e.stopPropagation()}>
-          {[{ icon: <PhotoIcon />, label: 'Photo' }, { icon: <VideoIcon />, label: 'Video' }, { icon: <FileIcon />, label: 'File' }].map(({ icon, label }) => (
+          {[{ icon: <PhotoIcon />, label: 'Photo' }, { icon: <FileIcon />, label: 'File' }].map(({ icon, label }) => (
             <button key={label} className="attach-option" onClick={() => setShowAttach(false)}>
               {icon}
               <span>{label}</span>
@@ -1029,7 +1031,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
               </button>
             )}
             {actionTarget.isMe && (
-              <button className="action-delete" onClick={() => { setLocalMsgs(prev => prev.filter(m => m.id !== actionTarget.id)); setActionTarget(null) }}>
+              <button className="action-delete" onClick={() => { setLocalMsgs(prev => prev.filter(m => m.id !== actionTarget.id)); onMessageDeleted?.(actionTarget.id); setActionTarget(null) }}>
                 <DeleteActionIcon /> Delete
               </button>
             )}
@@ -1240,7 +1242,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
         <div className="compose-field-group">
           <label className="compose-field-label">Attachments</label>
           <div className="attachment-row">
-            {[{ icon: <PhotoIcon />, label: 'Photo' }, { icon: <VideoIcon />, label: 'Video' }, { icon: <FileIcon />, label: 'File' }].map(({ icon, label }) => (
+            {[{ icon: <PhotoIcon />, label: 'Photo' }, { icon: <FileIcon />, label: 'File' }].map(({ icon, label }) => (
               <button key={label} className="attachment-btn">{icon}<span>{label}</span></button>
             ))}
           </div>
@@ -1353,6 +1355,19 @@ export default function App() {
     setView('thread')
   }
 
+  const handleMessageDeleted = (msgId) => {
+    const updatedMsgs = (threadMessages[activeThreadId] || []).filter(m => m.id !== msgId)
+    setThreadMessages(prev => ({ ...prev, [activeThreadId]: updatedMsgs }))
+    const last = updatedMsgs[updatedMsgs.length - 1]
+    setThreads(prev => prev.map(t =>
+      t.id !== activeThreadId ? t : {
+        ...t,
+        lastMessage: last ? (last.text || '') : '',
+        sentByMe: last ? last.isMe : t.sentByMe,
+      }
+    ))
+  }
+
   const handleAddParticipants = (newParticipants) => {
     setThreads(prev => prev.map(t => {
       if (t.id !== activeThreadId) return t
@@ -1388,6 +1403,7 @@ export default function App() {
             onMessageSent={handleReply}
             onArchive={handleArchive}
             onAddParticipants={handleAddParticipants}
+            onMessageDeleted={handleMessageDeleted}
             totalUnread={totalUnread}
           />
         )}
