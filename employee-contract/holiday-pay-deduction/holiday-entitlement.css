@@ -331,25 +331,8 @@
   margin: 0 0 16px;
   line-height: 1.5;
 }
-.he-calc-card {
-  background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
-  border-radius: 8px;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.he-calc-label {
-  font-size: 14px;
-  color: var(--greyscale-6-grey-50);
-}
-.he-calc-total {
-  font-size: 16px;
-  font-weight: 600;
-  color: #000;
-}
+.calc-card { margin-bottom: 16px; }
+.calc-total { font-size: 20px; }
 .he-deduction-action {
   display: flex;
   flex-direction: column;

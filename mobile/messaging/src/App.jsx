@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import cqcImg from '../../../Images/CQC Good.jpeg'
+import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
 
 // ─── Icons ───────────────────────────────────────────────────
 
@@ -102,9 +104,19 @@ const ReplyIcon = ({ size = 20 }) => (
     <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
   </svg>
 )
-const InfoIcon = ({ size = 22 }) => (
+const InfoIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+    <path fillRule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
+  </svg>
+)
+const ArrowLeftIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4.71969 12.6255L4.73999 12.6499C4.74414 12.6548 4.74834 12.6596 4.75259 12.6644L9.75259 18.2894C10.1195 18.7022 10.7516 18.7393 11.1644 18.3724C11.5771 18.0055 11.6143 17.3734 11.2474 16.9606L7.727 13L18.5 13C19.0523 13 19.5 12.5523 19.5 12C19.5 11.4477 19.0523 11 18.5 11L7.727 11L11.2474 7.03937C11.5861 6.65834 11.5805 6.09046 11.2529 5.71676L11.1644 5.6276C10.7516 5.26068 10.1195 5.29786 9.75259 5.71065L4.75259 11.3356L4.7402 11.3498C4.73323 11.358 4.72639 11.3662 4.71969 11.3746L4.75259 11.3356C4.72265 11.3693 4.69538 11.4045 4.67076 11.441C4.65284 11.4675 4.63629 11.4947 4.62104 11.5227C4.60922 11.5452 4.59534 11.5722 4.5711 11.629C4.56169 11.6537 4.52179 11.7614 4.5 12C4.5 12.1218 4.52179 12.2386 4.56167 12.3465C4.5711 12.3998 4.59534 12.4278 4.62098 12.4771C4.63629 12.5053 4.65284 12.5325 4.67061 12.5589L4.71969 12.6255Z"/>
+  </svg>
+)
+const AddIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M11.916 5.00275L12.0151 5C12.5912 5.00028 13.0705 5.47958 13.0705 6.07082V10.9295H17.9292C18.4906 10.9295 18.9557 11.3634 18.9968 11.9197L19 12.0151C18.9997 12.5912 18.5204 13.0705 17.9292 13.0705H13.0705V17.9292C13.0705 18.4906 12.6366 18.9557 12.0803 18.9968L11.9849 19C11.4088 18.9997 10.9295 18.5204 10.9295 17.9292V13.0705H6.07082C5.5094 13.0705 5.04427 12.6366 5.00323 12.0803L5 11.9849C5.00028 11.4088 5.47958 10.9295 6.07082 10.9295H10.9295V6.07082L10.9351 5.95992C10.9841 5.48574 11.3434 5.10031 11.8101 5.01699L11.916 5.00275Z"/>
   </svg>
 )
 const CheckDoubleIcon = ({ read, size = 16 }) => (
@@ -122,15 +134,84 @@ const TickIcon = () => (
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
+const PlusIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+  </svg>
+)
+const PlayIcon = ({ size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+)
+const SaveIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+  </svg>
+)
+const ShareIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+  </svg>
+)
+const ForwardIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 8V4l8 8-8 8v-4H4V8h8z"/>
+  </svg>
+)
+const ChevronDownIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+  </svg>
+)
+const ChevronUpIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
+  </svg>
+)
 
 // ─── Data ────────────────────────────────────────────────────
 
+const CARERS = [
+  { id: 0,  name: 'Office',          initials: 'OF', hasPhoto: true,  photoColor: '#7040a8' },
+  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', hasPhoto: true,  photoColor: '#c4a0d4' },
+  { id: 2,  name: 'Karen Bailey',    initials: 'KB', hasPhoto: false },
+  { id: 3,  name: 'Tom Harris',      initials: 'TH', hasPhoto: true,  photoColor: '#8ab8d4' },
+  { id: 4,  name: 'Priya Sharma',    initials: 'PS', hasPhoto: false },
+  { id: 5,  name: 'James Okafor',    initials: 'JO', hasPhoto: true,  photoColor: '#8aba9e' },
+  { id: 6,  name: 'Linda Peters',    initials: 'LP', hasPhoto: false },
+  { id: 7,  name: 'David Chen',      initials: 'DC', hasPhoto: true,  photoColor: '#e898b0' },
+  { id: 8,  name: 'Emma Richardson', initials: 'ER', hasPhoto: false },
+  { id: 9,  name: 'Michael Hughes',  initials: 'MH', hasPhoto: true,  photoColor: '#d4a050' },
+  { id: 10, name: 'Olivia Brooks',   initials: 'OB', hasPhoto: false },
+  { id: 11, name: 'Nathan Wells',    initials: 'NW', hasPhoto: true,  photoColor: '#60b8a8' },
+  { id: 12, name: 'Chloe Barker',    initials: 'CB', hasPhoto: false },
+  { id: 13, name: 'Ryan Sutton',     initials: 'RS', hasPhoto: true,  photoColor: '#a0b868' },
+  { id: 14, name: 'Fiona Marsh',     initials: 'FM', hasPhoto: false },
+  { id: 15, name: 'Callum Reid',     initials: 'CR', hasPhoto: true,  photoColor: '#e08858' },
+]
+
 const CUSTOMERS = [
-  { id: 1, name: 'Margaret Thompson' },
-  { id: 2, name: 'George Evans' },
-  { id: 3, name: 'Dorothy Williams' },
-  { id: 4, name: 'Harold Clarke' },
-  { id: 5, name: 'Edith Morrison' },
+  { id: 1,  name: 'Margaret Thompson',  initials: 'MT', hasPhoto: true,  photoColor: '#c4a0d4' },
+  { id: 2,  name: 'George Evans',       initials: 'GE', hasPhoto: false },
+  { id: 3,  name: 'Dorothy Williams',   initials: 'DW', hasPhoto: true,  photoColor: '#8ab8d4' },
+  { id: 4,  name: 'Harold Clarke',      initials: 'HC', hasPhoto: false },
+  { id: 5,  name: 'Edith Morrison',     initials: 'EM', hasPhoto: true,  photoColor: '#8aba9e' },
+  { id: 6,  name: 'Arthur Bennett',     initials: 'AB', hasPhoto: false },
+  { id: 7,  name: 'Florence Harding',   initials: 'FH', hasPhoto: true,  photoColor: '#e898b0' },
+  { id: 8,  name: 'Walter Johnson',     initials: 'WJ', hasPhoto: false },
+  { id: 9,  name: 'Beatrice Cooper',    initials: 'BC', hasPhoto: true,  photoColor: '#d4a050' },
+  { id: 10, name: 'Stanley Moore',      initials: 'SM', hasPhoto: false },
+  { id: 11, name: 'Vera Patterson',     initials: 'VP', hasPhoto: true,  photoColor: '#60b8a8' },
+  { id: 12, name: 'Reginald Foster',    initials: 'RF', hasPhoto: false },
+  { id: 13, name: 'Agnes Lambert',      initials: 'AL', hasPhoto: true,  photoColor: '#a0b868' },
+  { id: 14, name: 'Clarence Webb',      initials: 'CW', hasPhoto: false },
+  { id: 15, name: 'Mildred Shaw',       initials: 'MS', hasPhoto: true,  photoColor: '#e08858' },
+  { id: 16, name: 'Herbert Ellis',      initials: 'HE', hasPhoto: false },
+  { id: 17, name: 'Constance Ward',     initials: 'CW', hasPhoto: true,  photoColor: '#b870c8' },
+  { id: 18, name: 'Leonard Dixon',      initials: 'LD', hasPhoto: false },
+  { id: 19, name: 'Gladys Hunt',        initials: 'GH', hasPhoto: false },
+  { id: 20, name: 'Cecil Barnes',       initials: 'CB', hasPhoto: true,  photoColor: '#7090d0' },
 ]
 
 const THREADS = [
@@ -192,6 +273,23 @@ const THREADS = [
     archived: false,
   },
   {
+    id: 5,
+    title: 'Attachments',
+    isGroup: false,
+    careReceiver: null,
+    participants: 'Office',
+    participantList: [
+      { name: 'You', initials: 'AJ' },
+      { name: 'Karen Bailey', initials: 'KB' },
+    ],
+    lastSender: 'Karen B.',
+    lastMessage: 'Please see the training video above.',
+    time: '10:35 AM',
+    unread: 0,
+    sentByMe: false,
+    archived: false,
+  },
+  {
     id: 4,
     title: 'Annual Leave — July',
     isGroup: false,
@@ -221,7 +319,7 @@ const THREAD_MESSAGES = {
   ],
   2: [
     { id: 1, isMe: false, sender: 'Office', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
-    { id: 2, isMe: true, text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I documented it in the care plan. I'll double check the notes now.", time: '2:47 PM', day: 'Yesterday', receipt: 'read' },
+    { id: 2, isMe: true, text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday', receipt: 'read', attachments: [{ type: 'file', name: 'Visit_Notes_Margaret_12May.pdf', size: '148 KB' }] },
     { id: 3, isMe: false, sender: 'Office', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday' },
     { id: 4, isMe: false, sender: 'Office', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today' },
   ],
@@ -232,6 +330,13 @@ const THREAD_MESSAGES = {
   ],
   4: [
     { id: 1, isMe: true, text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
+  ],
+  5: [
+    { id: 1, isMe: false, sender: 'Office', text: "Photo from our CQC inspection, Well done everyone.", time: '10:01 AM', day: 'Today', attachments: [{ type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg }] },
+    { id: 3, isMe: true, time: '10:12 AM', day: 'Today', receipt: 'read', attachments: [{ type: 'file', name: 'Timesheet_May_Week3.pdf', size: '56 KB' }] },
+    { id: 4, isMe: true, text: "Please find this week's timesheet attached.", time: '10:13 AM', day: 'Today', receipt: 'delivered', attachments: [{ type: 'file', name: 'Timesheet_May_Week4.pdf', size: '62 KB' }] },
+    { id: 5, isMe: false, sender: 'Office', text: 'Please make sure everyone watches the Moving and Handling Guide for Carers.', time: '10:30 AM', day: 'Today', attachments: [{ type: 'video', name: 'Manual_Handling_Training.mp4', duration: '4:12', poster: handlingImg }] },
+    { id: 6, isMe: false, sender: 'Office', text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
   ],
 }
 
@@ -378,18 +483,6 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
           </div>
           <div className="thread-bottom">
             <div className="thread-tags">
-              {thread.careReceiver && (
-                <span className="thread-care-tag">
-                  <PersonIcon size={10} />
-                  {thread.careReceiver}
-                </span>
-              )}
-              {thread.isGroup && (
-                <span className="thread-care-tag">
-                  <GroupIcon size={10} />
-                  Group
-                </span>
-              )}
               {showArchivedTag && <span className="thread-archived-tag">Archived</span>}
             </div>
             <div className="thread-right-meta">
@@ -431,7 +524,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
         <div style={{ width: 36 }} />
         <span className="app-header-title">Messages</span>
         <button className="app-header-action" onClick={onCompose} aria-label="New message">
-          <EditIcon />
+          <AddIcon />
         </button>
       </div>
       <div className="inbox-search">
@@ -478,8 +571,8 @@ const P_FG = ['#ffffff', '#1b5e20', '#0d47a1', '#7a5200', '#7a1030', '#00504a', 
 
 // ─── Thread Info Sheet ───────────────────────────────────────
 
-function ThreadInfoSheet({ thread, onClose, onArchive }) {
-  const list = (THREADS.find(t => t.id === thread.id) || thread).participantList || []
+function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants }) {
+  const list = thread.participantList || []
   return (
     <div className="picker-overlay" onClick={onClose}>
       <div className="picker-sheet info-sheet" onClick={e => e.stopPropagation()}>
@@ -495,13 +588,33 @@ function ThreadInfoSheet({ thread, onClose, onArchive }) {
 
         {thread.careReceiver && (
           <div className="info-section">
-            <div className="info-section-label">Care receiver</div>
-            <div className="info-row"><PersonIcon size={18} /><span>{thread.careReceiver}</span></div>
+            <div className="info-section-label">Care receivers</div>
+            <div className="info-participants-list">
+              {thread.careReceiver.split(', ').map((name, i) => {
+                const parts = name.trim().split(' ')
+                const initials = parts.length > 1
+                  ? `${parts[0][0]}${parts[parts.length - 1][0]}`
+                  : parts[0].slice(0, 2).toUpperCase()
+                return (
+                  <div key={i} className="info-participant-row">
+                    <div className="info-participant-avatar" style={{ background: P_BG[(i + 3) % P_BG.length], color: P_FG[(i + 3) % P_FG.length] }}>
+                      {initials}
+                    </div>
+                    <span className="info-participant-name">{name.trim()}</span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
 
         <div className="info-section">
-          <div className="info-section-label">Participants · {list.length}</div>
+          <div className="info-section-header">
+            <div className="info-section-label">Participants · {list.length}</div>
+            <button className="info-add-btn" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }} aria-label="Add participant">
+              <PlusIcon size={16} />
+            </button>
+          </div>
           <div className="info-participants-list">
             {list.map((p, i) => (
               <div key={i} className="info-participant-row">
@@ -524,9 +637,166 @@ function ThreadInfoSheet({ thread, onClose, onArchive }) {
   )
 }
 
+// ─── Attachment ──────────────────────────────────────────────
+
+const Attachment = ({ attachment, isMe, onPreview }) => {
+  if (attachment.type === 'image') {
+    return (
+      <div className="msg-attachment-image" onClick={onPreview}>
+        {attachment.src
+          ? <img src={attachment.src} alt={attachment.name} className="msg-attachment-real-img" />
+          : <><PhotoIcon size={34} /><span className="msg-attachment-image-name">{attachment.name}</span></>
+        }
+      </div>
+    )
+  }
+  if (attachment.type === 'video') {
+    return (
+      <div className="msg-attachment-image msg-attachment-video" onClick={onPreview}>
+        {attachment.poster
+          ? <img src={attachment.poster} alt={attachment.name} className="msg-attachment-real-img" />
+          : <span className="msg-attachment-image-name">{attachment.name}{attachment.duration ? ` · ${attachment.duration}` : ''}</span>
+        }
+        <div className={`msg-attachment-play-btn${attachment.poster ? ' overlay' : ''}`}>
+          <PlayIcon size={26} />
+        </div>
+      </div>
+    )
+  }
+  if (attachment.type === 'file') {
+    return (
+      <div className={`msg-attachment-file ${isMe ? 'sent' : 'received'}`} onClick={onPreview} style={{ cursor: 'pointer' }}>
+        <FileIcon size={22} />
+        <div className="msg-attachment-file-info">
+          <span className="msg-attachment-file-name">{attachment.name}</span>
+          {attachment.size && <span className="msg-attachment-file-size">{attachment.size}</span>}
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
+// ─── File doc mocks ───────────────────────────────────────────
+
+function VisitNotesDoc() {
+  return (
+    <>
+      <div className="doc-header-bar">
+        <div className="doc-logo" />
+        <div className="doc-header-text">
+          <div className="doc-h1">Visit Record</div>
+          <div className="doc-subtitle">12 May 2026 · 16:30</div>
+        </div>
+      </div>
+      <div className="doc-meta-row"><div className="doc-meta-label">Client</div><div className="doc-meta-value">Margaret Thompson</div></div>
+      <div className="doc-meta-row"><div className="doc-meta-label">Carer</div><div className="doc-meta-value">Adrianna Jackson</div></div>
+      <div className="doc-meta-row"><div className="doc-meta-label">Duration</div><div className="doc-meta-value">45 minutes</div></div>
+      <div className="doc-divider" />
+      <div className="doc-section-title">Tasks completed</div>
+      <div className="doc-checklist">
+        {['Evening medication administered', 'Light meal prepared and served', 'Mobility assistance provided', 'General welfare check'].map(t => (
+          <div key={t} className="doc-check-item"><span className="doc-check">✓</span><span>{t}</span></div>
+        ))}
+      </div>
+      <div className="doc-section-title">Notes</div>
+      <div className="doc-text-lines">
+        <div className="doc-line long" />
+        <div className="doc-line long" />
+        <div className="doc-line medium" />
+      </div>
+      <div className="doc-meta-row" style={{ marginTop: 8 }}><div className="doc-meta-label">Signed</div><div className="doc-meta-value doc-signature">A. Jackson</div></div>
+    </>
+  )
+}
+
+function TimesheetDoc({ week }) {
+  const rows = [
+    ['Monday',    '08:00', '14:00', '6.0'],
+    ['Tuesday',   '08:30', '13:30', '5.0'],
+    ['Wednesday', '09:00', '15:00', '6.0'],
+    ['Thursday',  '08:00', '14:30', '6.5'],
+    ['Friday',    '08:30', '13:00', '4.5'],
+  ]
+  return (
+    <>
+      <div className="doc-header-bar">
+        <div className="doc-logo" />
+        <div className="doc-header-text">
+          <div className="doc-h1">Weekly Timesheet</div>
+          <div className="doc-subtitle">Week {week} · May 2026</div>
+        </div>
+      </div>
+      <div className="doc-meta-row"><div className="doc-meta-label">Employee</div><div className="doc-meta-value">Adrianna Jackson</div></div>
+      <div className="doc-meta-row"><div className="doc-meta-label">Department</div><div className="doc-meta-value">Care Services</div></div>
+      <div className="doc-divider" />
+      <table className="doc-table">
+        <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Hours</th></tr></thead>
+        <tbody>
+          {rows.map(([day, start, end, hrs]) => (
+            <tr key={day}><td>{day}</td><td>{start}</td><td>{end}</td><td>{hrs}</td></tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="doc-total-row"><span>Total hours</span><span>28.0 hrs</span></div>
+    </>
+  )
+}
+
+function FileDocPreview({ attachment }) {
+  const name = attachment.name.toLowerCase()
+  const weekMatch = attachment.name.match(/Week(\d+)/i)
+  const week = weekMatch ? weekMatch[1] : '1'
+  const isTimesheet = name.includes('timesheet')
+  return (
+    <div className="file-doc-preview">
+      {isTimesheet ? <TimesheetDoc week={week} /> : <VisitNotesDoc />}
+    </div>
+  )
+}
+
+// ─── Attachment Preview ──────────────────────────────────────
+
+function AttachmentPreview({ attachment, onClose }) {
+  const imgSrc = attachment.src || attachment.poster
+  const isFile = attachment.type === 'file'
+  const displayTitle = attachment.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ')
+  return (
+    <div className="attachment-preview-overlay">
+      <StatusBar />
+      <div className="app-header attachment-preview-appheader">
+        <button className="app-header-back" onClick={onClose}>
+          <ArrowLeftIcon />
+        </button>
+        <span className="app-header-title">{displayTitle}</span>
+        <div style={{ width: 36 }} />
+      </div>
+      <div className={`attachment-preview-content${isFile ? ' file-content' : ''}`}>
+        {!isFile && imgSrc && <img src={imgSrc} alt={attachment.name} className="attachment-preview-img" />}
+        {attachment.type === 'video' && (
+          <div className="attachment-preview-play"><PlayIcon size={38} /></div>
+        )}
+        {isFile && <FileDocPreview attachment={attachment} />}
+      </div>
+      <div className="attachment-preview-footer">
+        {[
+          { icon: <SaveIcon size={24} />, label: 'Save' },
+          { icon: <ShareIcon size={24} />, label: 'Share' },
+          { icon: <ForwardIcon size={24} />, label: 'Forward' },
+        ].map(({ icon, label }) => (
+          <button key={label} className="attachment-preview-action">
+            {icon}
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Thread Screen ───────────────────────────────────────────
 
-function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, totalUnread }) {
+function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAddParticipants, totalUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [actionTarget, setActionTarget] = useState(null)
@@ -534,6 +804,9 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
   const [editing, setEditing] = useState(null)
   const [showAttach, setShowAttach] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showParticipantPicker, setShowParticipantPicker] = useState(false)
+  const [pendingParticipants, setPendingParticipants] = useState([])
+  const [previewAttachment, setPreviewAttachment] = useState(null)
   const endRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -574,7 +847,14 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
     setShowAttach(false)
   }
 
-  const dismissOverlays = () => { setActionTarget(null); setShowAttach(false); setShowInfo(false) }
+  const dismissOverlays = () => { setActionTarget(null); setShowAttach(false); setShowInfo(false); setShowParticipantPicker(false); setPreviewAttachment(null) }
+
+  const togglePendingParticipant = (p) => setPendingParticipants(prev =>
+    prev.some(r => r.id === p.id) ? prev.filter(r => r.id !== p.id) : [...prev, p]
+  )
+
+  const existingParticipantNames = new Set((thread?.participantList || []).map(p => p.name))
+  const availableCarers = CARERS.filter(c => !existingParticipantNames.has(c.name))
 
   return (
     <div className="screen" onClick={dismissOverlays}>
@@ -583,7 +863,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
       {/* Header */}
       <div className="app-header thread-app-header">
         <button className="app-header-back" onClick={onBack}>
-          <ChevronLeftIcon size={20} /> Back
+          <ArrowLeftIcon />
         </button>
         <div className="thread-header-center">
           <span className="thread-header-title">{thread?.title}</span>
@@ -592,19 +872,12 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
         <button className="app-header-action" onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}><InfoIcon /></button>
       </div>
 
-      {/* Care receiver / group tag */}
-      {(thread?.careReceiver || thread?.isGroup) && (
+      {/* Care receiver tag */}
+      {thread?.careReceiver && (
         <div className="thread-tag-bar">
-          {thread.careReceiver && (
-            <span className="care-receiver-tag">
-              <PersonIcon size={12} /> {thread.careReceiver}
-            </span>
-          )}
-          {thread.isGroup && !thread.careReceiver && (
-            <span className="care-receiver-tag">
-              <GroupIcon size={12} /> {thread.participants}
-            </span>
-          )}
+          <span className="care-receiver-tag">
+            <PersonIcon size={12} /> {thread.careReceiver}
+          </span>
         </div>
       )}
 
@@ -630,6 +903,9 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
                     </div>
                   )}
                   <div className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}`}>
+                    {msg.attachments?.map((att, i) => (
+                      <Attachment key={i} attachment={att} isMe={msg.isMe} onPreview={(e) => { e.stopPropagation(); setPreviewAttachment(att) }} />
+                    ))}
                     {msg.text}
                     {msg.edited && <span className="edited-label">(edited)</span>}
                   </div>
@@ -686,7 +962,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
       {/* Compose bar */}
       <div className="compose-bar" onClick={e => e.stopPropagation()}>
         <button className="compose-icon-btn" onClick={() => { setShowAttach(s => !s); setActionTarget(null) }}>
-          <AttachIcon />
+          <AddIcon />
         </button>
         <div className="compose-input-wrap">
           <button className="compose-icon-btn emoji-btn">
@@ -716,7 +992,28 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
           thread={thread}
           onClose={() => setShowInfo(false)}
           onArchive={() => { onArchive?.(thread.id); setShowInfo(false); onBack(); }}
+          onRequestAddParticipants={() => { setPendingParticipants([]); setShowParticipantPicker(true) }}
         />
+      )}
+
+      {/* Add participant picker — renders on top of info sheet */}
+      {showParticipantPicker && (
+        <PersonPickerSheet
+          title="Add Participants"
+          items={availableCarers}
+          selected={pendingParticipants}
+          onToggle={togglePendingParticipant}
+          onClose={() => {
+            if (pendingParticipants.length > 0) onAddParticipants(pendingParticipants)
+            setPendingParticipants([])
+            setShowParticipantPicker(false)
+          }}
+        />
+      )}
+
+      {/* Attachment preview */}
+      {previewAttachment && (
+        <AttachmentPreview attachment={previewAttachment} onClose={() => setPreviewAttachment(null)} />
       )}
 
       {/* Message action menu */}
@@ -745,19 +1042,128 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, tota
 
 // ─── Compose Screen ───────────────────────────────────────────
 
-function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
-  const [subject, setSubject] = useState('')
-  const [careReceiver, setCareReceiver] = useState(null)
+const INITIALS_COLORS = [
+  { bg: '#e8e0f0', fg: '#5a3878' },
+  { bg: '#ddeef8', fg: '#1a4a6e' },
+  { bg: '#ddf0e8', fg: '#1a5a36' },
+  { bg: '#f8eedc', fg: '#6e4210' },
+  { bg: '#f0dde8', fg: '#6e1a3c' },
+  { bg: '#ddf0ee', fg: '#1a5a52' },
+]
+
+const PersonAvatar = ({ person }) => {
+  if (person.hasPhoto) {
+    return (
+      <div className="customer-avatar customer-avatar-photo" style={{ background: person.photoColor }}>
+        {person.initials}
+      </div>
+    )
+  }
+  const palette = INITIALS_COLORS[person.id % INITIALS_COLORS.length]
+  return (
+    <div className="customer-avatar customer-avatar-initials" style={{ background: palette.bg, color: palette.fg }}>
+      {person.initials}
+    </div>
+  )
+}
+
+const summariseReceivers = (receivers) => {
+  if (!receivers.length) return ''
+  const abbrev = r => {
+    const parts = r.name.split(' ')
+    return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
+  }
+  if (receivers.length === 1) return receivers[0].name
+  const shown = receivers.slice(0, 2).map(abbrev).join(', ')
+  const rest = receivers.length - 2
+  return rest > 0 ? `${shown} +${rest}` : shown
+}
+
+function PersonPickerSheet({ title, items, selected, onToggle, onClose }) {
+  const [search, setSearch] = useState('')
+  const [chipsExpanded, setChipsExpanded] = useState(false)
+  const filtered = items.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <div className="picker-overlay" onClick={onClose}>
+      <div className="picker-sheet" onClick={e => e.stopPropagation()}>
+        <div className="picker-handle" />
+        <div className="picker-header">
+          <h2>{title}</h2>
+          <button className="picker-done-btn" onClick={onClose}>Done</button>
+        </div>
+        <div className="picker-search">
+          <div className="picker-search-bar">
+            <SearchIcon size={18} />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+        {selected.length > 0 && (
+          <div className="picker-selected-container">
+            <button className="picker-selected-summary" onClick={() => setChipsExpanded(s => !s)}>
+              <span className="picker-summary-count">{selected.length}</span>
+              <span className="picker-summary-text">{summariseReceivers(selected)}</span>
+              {chipsExpanded ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
+            </button>
+            {chipsExpanded && (
+              <div className="picker-selected-area">
+                {selected.map(r => (
+                  <div key={r.id} className="picker-selected-chip">
+                    <span>{r.name}</span>
+                    <button className="picker-chip-remove" onClick={e => { e.stopPropagation(); onToggle(r) }} aria-label={`Remove ${r.name}`}>
+                      <CloseIcon size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="picker-list">
+          {filtered.map(p => {
+            const isSelected = selected.some(r => r.id === p.id)
+            return (
+              <div key={p.id} className={`picker-item ${isSelected ? 'selected' : ''}`} onClick={() => onToggle(p)}>
+                <PersonAvatar person={p} />
+                <span>{p.name}</span>
+                {isSelected && <TickIcon />}
+              </div>
+            )
+          })}
+          {filtered.length === 0 && <div className="empty-state">No results found</div>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
+  const [title, setTitle] = useState('')
+  const [toRecipients, setToRecipients] = useState([])
+  const [careReceivers, setCareReceivers] = useState([])
   const [message, setMessage] = useState('')
-  const [showPicker, setShowPicker] = useState(false)
-  const canSend = subject.trim() && message.trim()
+  const [showToPicker, setShowToPicker] = useState(false)
+  const [showCarePicker, setShowCarePicker] = useState(false)
+  const canSend = title.trim() && message.trim()
+
+  const toggleTo = (carer) => setToRecipients(prev =>
+    prev.some(r => r.id === carer.id) ? prev.filter(r => r.id !== carer.id) : [...prev, carer]
+  )
+  const toggleCare = (customer) => setCareReceivers(prev =>
+    prev.some(r => r.id === customer.id) ? prev.filter(r => r.id !== customer.id) : [...prev, customer]
+  )
 
   return (
     <div className="screen">
       <StatusBar />
       <div className="app-header compose-app-header">
         <button className="app-header-back" onClick={onBack}>
-          <ChevronLeftIcon size={20} /> Back
+          <ArrowLeftIcon />
         </button>
         <span className="app-header-title">New Message</span>
         <div style={{ width: 40 }} />
@@ -766,38 +1172,56 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
       <div className="compose-form">
 
         {/* To */}
-        <div className="compose-field-group">
-          <div className="compose-to-row">
-            <span className="compose-to-label">To</span>
-            <span className="compose-to-value">Office</span>
+        <div className="compose-field-group compose-tappable-group" onClick={() => setShowToPicker(true)}>
+          <div className="compose-inline-row">
+            <span className="compose-to-label">To:</span>
+            {toRecipients.length === 0
+              ? <span className="compose-field-placeholder">Add recipient</span>
+              : <div className="compose-inline-chips" onClick={e => e.stopPropagation()}>
+                  {toRecipients.map(c => (
+                    <div key={c.id} className="compose-chip">
+                      <span>{c.name}</span>
+                      <button className="compose-chip-remove" onClick={e => { e.stopPropagation(); toggleTo(c) }} aria-label={`Remove ${c.name}`}>
+                        <CloseIcon size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+            }
           </div>
         </div>
 
         <div className="compose-divider" />
 
-        {/* Subject */}
+        {/* Title */}
         <div className="compose-field-group">
-          <label className="compose-field-label">Subject <span className="required">*</span></label>
+          <label className="compose-field-label">Title <span className="required">*</span></label>
           <input
             className="form-input-mobile"
             placeholder="What's this message about?"
-            value={subject}
-            onChange={e => setSubject(e.target.value)}
+            value={title}
+            onChange={e => setTitle(e.target.value)}
           />
         </div>
 
-        {/* Care receiver */}
-        <div className="compose-field-group">
-          <label className="compose-field-label">
-            Care Receiver
-            <span className="optional-label">Optional</span>
-          </label>
-          <button className="care-picker-btn" onClick={() => setShowPicker(true)}>
-            <span className={careReceiver ? 'care-picker-selected' : 'care-picker-placeholder'}>
-              {careReceiver ? careReceiver.name : 'Select from your customers...'}
-            </span>
-            <ChevronRightIcon size={20} />
-          </button>
+        {/* Care receivers */}
+        <div className="compose-field-group compose-tappable-group" onClick={() => setShowCarePicker(true)}>
+          <div className="compose-inline-row">
+            <span className="compose-to-label">Care Receiver:</span>
+            {careReceivers.length === 0
+              ? <span className="optional-label">Optional</span>
+              : <div className="compose-inline-chips" onClick={e => e.stopPropagation()}>
+                  {careReceivers.map(r => (
+                    <div key={r.id} className="compose-chip">
+                      <span>{r.name}</span>
+                      <button className="compose-chip-remove" onClick={e => { e.stopPropagation(); toggleCare(r) }} aria-label={`Remove ${r.name}`}>
+                        <CloseIcon size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+            }
+          </div>
         </div>
 
         {/* Message */}
@@ -826,7 +1250,7 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
         <button
           className={`compose-send-btn ${!canSend ? 'disabled' : ''}`}
           disabled={!canSend}
-          onClick={() => canSend && onSend({ subject, careReceiver, message })}
+          onClick={() => canSend && onSend({ title, toRecipients, careReceivers, message })}
         >
           Send Message <SendIcon size={18} />
         </button>
@@ -835,34 +1259,42 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
 
       <AppNav onNavigate={() => {}} totalUnread={totalUnread} />
 
-      {/* Care receiver picker sheet */}
-      {showPicker && (
-        <div className="picker-overlay" onClick={() => setShowPicker(false)}>
-          <div className="picker-sheet" onClick={e => e.stopPropagation()}>
-            <div className="picker-handle" />
-            <div className="picker-header">
-              <h2>Select a Care Receiver</h2>
-            </div>
-            <div className="picker-list">
-              {customers.map(c => (
-                <div
-                  key={c.id}
-                  className={`picker-item ${careReceiver?.id === c.id ? 'selected' : ''}`}
-                  onClick={() => { setCareReceiver(c); setShowPicker(false) }}
-                >
-                  <span>{c.name}</span>
-                  {careReceiver?.id === c.id && <TickIcon />}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      {showToPicker && (
+        <PersonPickerSheet
+          title="Add Recipients"
+          items={carers}
+          selected={toRecipients}
+          onToggle={toggleTo}
+          onClose={() => setShowToPicker(false)}
+        />
+      )}
+      {showCarePicker && (
+        <PersonPickerSheet
+          title="Add Care Receivers"
+          items={customers}
+          selected={careReceivers}
+          onToggle={toggleCare}
+          onClose={() => setShowCarePicker(false)}
+        />
       )}
     </div>
   )
 }
 
 // ─── Root ────────────────────────────────────────────────────
+
+const buildParticipantsStr = (participantList) => {
+  const others = (participantList || []).filter(p => p.name !== 'You')
+  if (others.length === 0) return ''
+  if (others.length === 1) return others[0].name
+  const abbrev = p => {
+    const parts = p.name.split(' ')
+    return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
+  }
+  const shown = others.slice(0, 2).map(abbrev).join(', ')
+  const rest = others.length - 2
+  return rest > 0 ? `${shown} +${rest}` : shown
+}
 
 export default function App() {
   const [view, setView] = useState('inbox')
@@ -892,14 +1324,19 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ subject, careReceiver, message }) => {
+  const handleNewMessage = ({ title, toRecipients, careReceivers, message }) => {
     const newId = threads.reduce((max, t) => Math.max(max, t.id), 0) + 1
+    const participantList = [
+      { name: 'You', initials: 'AJ' },
+      ...toRecipients.map(r => ({ name: r.name, initials: r.initials })),
+    ]
     const newThread = {
       id: newId,
-      title: subject,
+      title,
       isGroup: false,
-      careReceiver: careReceiver ? careReceiver.name : null,
-      participants: 'Office',
+      careReceiver: careReceivers.length > 0 ? careReceivers.map(r => r.name).join(', ') : null,
+      participants: buildParticipantsStr(participantList),
+      participantList,
       lastSender: 'You',
       lastMessage: message,
       time: 'Just now',
@@ -914,6 +1351,18 @@ export default function App() {
     }))
     setActiveThreadId(newId)
     setView('thread')
+  }
+
+  const handleAddParticipants = (newParticipants) => {
+    setThreads(prev => prev.map(t => {
+      if (t.id !== activeThreadId) return t
+      const existing = new Set((t.participantList || []).map(p => p.name))
+      const toAdd = newParticipants
+        .filter(p => !existing.has(p.name))
+        .map(p => ({ name: p.name, initials: p.initials }))
+      const updatedList = [...(t.participantList || []), ...toAdd]
+      return { ...t, participantList: updatedList, participants: buildParticipantsStr(updatedList) }
+    }))
   }
 
   return (
@@ -938,6 +1387,7 @@ export default function App() {
             onBack={() => { setView('inbox'); setActiveThreadId(null) }}
             onMessageSent={handleReply}
             onArchive={handleArchive}
+            onAddParticipants={handleAddParticipants}
             totalUnread={totalUnread}
           />
         )}
@@ -946,6 +1396,7 @@ export default function App() {
             onBack={() => setView('inbox')}
             onSend={handleNewMessage}
             customers={CUSTOMERS}
+            carers={CARERS}
             totalUnread={totalUnread}
           />
         )}

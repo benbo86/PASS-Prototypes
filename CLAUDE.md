@@ -76,6 +76,12 @@ employee-contract/
 - Exceptions: ellipsis circle icon (32×32), footer warning icon (40×40 if using the large amber variant).
 - Use `fill="currentColor"` so icons inherit colour from CSS.
 - Icons inside clickable areas (e.g. edit icon next to text) should be wrapped in a `<button>` with `.ep-icon-btn` or similar — not a bare `<span>`.
+- **Back buttons in headers** — always use `Arrow Left.svg` from `Icons/` at 24×24px with no accompanying text label:
+  ```jsx
+  <button className="app-header-back" onClick={onBack}>
+    <ArrowLeftIcon />
+  </button>
+  ```
 
 ---
 

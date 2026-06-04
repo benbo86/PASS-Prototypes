@@ -54,9 +54,9 @@ function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, on
         This employee has taken more holiday than their pro-rated entitlement for this period.
         The following amount should be deducted from their final pay.
       </p>
-      <div className="he-calc-card">
-        <span className="he-calc-label">{overpaidDays.toFixed(1)} days × £{AVG_DAILY_PAY.toFixed(2)} avg daily pay</span>
-        <span className="he-calc-total">= £{deduction.toFixed(2)} deduction</span>
+      <div className="calc-card">
+        <span className="calc-label">{overpaidDays.toFixed(1)} days × £{AVG_DAILY_PAY.toFixed(2)} avg daily pay</span>
+        <span className="calc-total">= £{deduction.toFixed(2)} deduction</span>
       </div>
       <div className="he-deduction-action">
         <div className="he-deduction-action-row">

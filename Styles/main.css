@@ -608,6 +608,26 @@ h6 {
 
 .icon-col { width: 48px; min-width: 48px; text-align: center; }
 
+/* ── Calculation breakdown card ──────────────────────────────────────────────── */
+.calc-card {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.calc-label {
+  font-size: 14px;
+  color: var(--greyscale-6-grey-50);
+}
+.calc-total {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
 /* ── Modal overlay ───────────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
