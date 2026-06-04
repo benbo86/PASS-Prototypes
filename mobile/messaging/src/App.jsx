@@ -220,7 +220,7 @@ const THREADS = [
     title: 'Blue Bird Sheffield — Team Update',
     isGroup: true,
     careReceiver: null,
-    participants: 'Sarah M., Karen B. and 6 others',
+    participants: 'Sarah M., Karen B. +13',
     participantList: [
       { name: 'You', initials: 'AJ' },
       { name: 'Sarah Mitchell', initials: 'SM' },
@@ -230,6 +230,14 @@ const THREADS = [
       { name: 'James Okafor', initials: 'JO' },
       { name: 'Linda Peters', initials: 'LP' },
       { name: 'David Chen', initials: 'DC' },
+      { name: 'Emma Richardson', initials: 'ER' },
+      { name: 'Michael Hughes', initials: 'MH' },
+      { name: 'Olivia Brooks', initials: 'OB' },
+      { name: 'Nathan Wells', initials: 'NW' },
+      { name: 'Chloe Barker', initials: 'CB' },
+      { name: 'Ryan Sutton', initials: 'RS' },
+      { name: 'Fiona Marsh', initials: 'FM' },
+      { name: 'Callum Reid', initials: 'CR' },
     ],
     lastSender: 'Sarah M.',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
@@ -511,7 +519,8 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
   const filtered = threads.filter(t => {
     const matchesSearch =
       t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.lastMessage.toLowerCase().includes(search.toLowerCase())
+      t.lastMessage.toLowerCase().includes(search.toLowerCase()) ||
+      (t.careReceiver && t.careReceiver.toLowerCase().includes(search.toLowerCase()))
     if (!matchesSearch) return false
     if (isSearching) return true
     return tab === 'inbox' ? !t.archived : t.archived
@@ -586,28 +595,6 @@ function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants 
           <div className="info-sheet-type">{thread.isGroup ? 'Group conversation' : 'Direct message'}</div>
         </div>
 
-        {thread.careReceiver && (
-          <div className="info-section">
-            <div className="info-section-label">Care receivers</div>
-            <div className="info-participants-list">
-              {thread.careReceiver.split(', ').map((name, i) => {
-                const parts = name.trim().split(' ')
-                const initials = parts.length > 1
-                  ? `${parts[0][0]}${parts[parts.length - 1][0]}`
-                  : parts[0].slice(0, 2).toUpperCase()
-                return (
-                  <div key={i} className="info-participant-row">
-                    <div className="info-participant-avatar" style={{ background: P_BG[(i + 3) % P_BG.length], color: P_FG[(i + 3) % P_FG.length] }}>
-                      {initials}
-                    </div>
-                    <span className="info-participant-name">{name.trim()}</span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         <div className="info-section">
           <div className="info-section-header">
             <div className="info-section-label">Participants · {list.length}</div>
@@ -628,6 +615,28 @@ function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants 
             ))}
           </div>
         </div>
+
+        {thread.careReceiver && (
+          <div className="info-section">
+            <div className="info-section-label">In relation to</div>
+            <div className="info-participants-list">
+              {thread.careReceiver.split(', ').map((name, i) => {
+                const parts = name.trim().split(' ')
+                const initials = parts.length > 1
+                  ? `${parts[0][0]}${parts[parts.length - 1][0]}`
+                  : parts[0].slice(0, 2).toUpperCase()
+                return (
+                  <div key={i} className="info-participant-row">
+                    <div className="info-participant-avatar" style={{ background: P_BG[(i + 3) % P_BG.length], color: P_FG[(i + 3) % P_FG.length] }}>
+                      {initials}
+                    </div>
+                    <span className="info-participant-name">{name.trim()}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {thread.sentByMe && !thread.isGroup && (
           <button className="info-action-btn" onClick={onArchive}>
@@ -878,7 +887,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
       {thread?.careReceiver && (
         <div className="thread-tag-bar">
           <span className="care-receiver-tag">
-            <PersonIcon size={12} /> {thread.careReceiver}
+            <span className="care-re-label">Re:</span>{thread.careReceiver}
           </span>
         </div>
       )}
@@ -1209,21 +1218,21 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
         {/* Care receivers */}
         <div className="compose-field-group compose-tappable-group" onClick={() => setShowCarePicker(true)}>
           <div className="compose-inline-row">
-            <span className="compose-to-label">Care Receiver:</span>
-            {careReceivers.length === 0
-              ? <span className="optional-label">Optional</span>
-              : <div className="compose-inline-chips" onClick={e => e.stopPropagation()}>
-                  {careReceivers.map(r => (
-                    <div key={r.id} className="compose-chip">
-                      <span>{r.name}</span>
-                      <button className="compose-chip-remove" onClick={e => { e.stopPropagation(); toggleCare(r) }} aria-label={`Remove ${r.name}`}>
-                        <CloseIcon size={13} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-            }
+            <span className="compose-to-label">Customer:</span>
+            {careReceivers.length === 0 && <span className="optional-label">Optional</span>}
           </div>
+          {careReceivers.length > 0 && (
+            <div className="compose-chips-full" onClick={e => e.stopPropagation()}>
+              {careReceivers.map(r => (
+                <div key={r.id} className="compose-chip">
+                  <span>{r.name}</span>
+                  <button className="compose-chip-remove" onClick={e => { e.stopPropagation(); toggleCare(r) }} aria-label={`Remove ${r.name}`}>
+                    <CloseIcon size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Message */}
@@ -1272,7 +1281,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
       )}
       {showCarePicker && (
         <PersonPickerSheet
-          title="Add Care Receivers"
+          title="Add Customers"
           items={customers}
           selected={careReceivers}
           onToggle={toggleCare}
