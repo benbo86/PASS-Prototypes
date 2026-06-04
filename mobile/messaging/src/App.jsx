@@ -274,7 +274,7 @@ const THREADS = [
   },
   {
     id: 5,
-    title: 'Attachments',
+    title: 'Attachment Examples',
     isGroup: false,
     careReceiver: null,
     participants: 'Office',
