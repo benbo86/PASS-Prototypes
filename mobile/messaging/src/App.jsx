@@ -250,7 +250,7 @@ const THREADS = [
     id: 2,
     title: 'Medication Query',
     isGroup: false,
-    careReceiver: 'Margaret Thompson',
+    careReceiver: null,
     participants: 'Office',
     participantList: [
       { name: 'You', initials: 'AJ' },
@@ -898,6 +898,13 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
           <div key={group.day}>
             <div className="day-separator"><span>{group.day}</span></div>
             {group.msgs.map((msg, i) => {
+              if (msg.type === 'event') {
+                return (
+                  <div key={msg.id} className="event-message">
+                    <span>{msg.text}</span>
+                  </div>
+                )
+              }
               const prev = group.msgs[i - 1]
               const showSender = !msg.isMe && (!prev || prev.sender !== msg.sender || prev.isMe)
               return (
@@ -1015,7 +1022,22 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
           selected={pendingParticipants}
           onToggle={togglePendingParticipant}
           onClose={() => {
-            if (pendingParticipants.length > 0) onAddParticipants(pendingParticipants)
+            if (pendingParticipants.length > 0) {
+              onAddParticipants(pendingParticipants)
+              const names = pendingParticipants.map(p => p.name)
+              const nameStr = names.length === 1
+                ? names[0]
+                : names.length === 2
+                  ? `${names[0]} and ${names[1]}`
+                  : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+              setLocalMsgs(prev => [...prev, {
+                id: prev.length + 1,
+                type: 'event',
+                text: `You added ${nameStr}`,
+                time: 'Just now',
+                day: 'Today',
+              }])
+            }
             setPendingParticipants([])
             setShowParticipantPicker(false)
           }}
@@ -1216,7 +1238,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
         </div>
 
         {/* Care receivers */}
-        <div className="compose-field-group compose-tappable-group" onClick={() => setShowCarePicker(true)}>
+        <div className="compose-field-group compose-tappable-group" style={{ display: 'none' }} onClick={() => setShowCarePicker(true)}>
           <div className="compose-inline-row">
             <span className="compose-to-label">Customer:</span>
             {careReceivers.length === 0 && <span className="optional-label">Optional</span>}
