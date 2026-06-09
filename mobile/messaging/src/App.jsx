@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import StatusBar from '../../../Components/StatusBar'
+import AppNav from '../../../Components/AppNav'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
 
@@ -62,21 +64,6 @@ const VideoIcon = ({ size = 22 }) => (
 const FileIcon = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-  </svg>
-)
-const EmailNavIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" clipRule="evenodd" d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM19 18H5C4.45 18 4 17.55 4 17V8L10.94 12.34C11.59 12.75 12.41 12.75 13.06 12.34L20 8V17C20 17.55 19.55 18 19 18ZM12 11L4 6H20L12 11Z" />
-  </svg>
-)
-const BookingsNavIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" clipRule="evenodd" d="M15.4946 10C18.5352 10 21 12.4631 21 15.5C21 18.5369 18.5352 21 15.4946 21C12.4596 21 10 18.537 10 15.5C10 12.463 12.4596 10 15.4946 10ZM15.4946 11.4395C13.2551 11.4395 11.4395 13.2575 11.4395 15.5C11.4395 17.7425 13.2551 19.5605 15.4946 19.5605C17.74 19.5605 19.5605 17.742 19.5605 15.5C19.5605 13.258 17.74 11.4395 15.4946 11.4395ZM15 2C15.5523 2 16 2.44772 16 3V4H17C18.1046 4 19 4.89543 19 6V7.999L5.5 8C5.22386 8 5 8.22386 5 8.5V16.5C5 16.7761 5.22386 17 5.5 17L8.37533 17.0009C8.47788 17.7018 8.673 18.3726 8.94787 19.0005L5 19C3.89543 19 3 18.1046 3 17V6C3 4.89543 3.89543 4 5 4H6V3C6 2.44772 6.44772 2 7 2C7.55228 2 8 2.44772 8 3V4H14V3C14 2.44772 14.4477 2 15 2ZM15.5 12.3901C15.8663 12.3901 16.173 12.6651 16.2155 13.0332L16.2198 13.1099L16.2187 15.7562L17.4815 16.5032C17.7653 16.6709 17.8942 17.0058 17.8073 17.3179L17.7703 17.4208L17.7349 17.489C17.5485 17.8044 17.1558 17.9285 16.8172 17.7778L16.7491 17.7424L15.1338 16.7878C14.9431 16.6751 14.8153 16.4812 14.7857 16.2546L14.7802 16.1682V13.1099C14.7802 12.7124 15.1025 12.3901 15.5 12.3901Z" />
-  </svg>
-)
-const UsersNavIcon = ({ size = 24 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M13.3318 13.0337C13.9829 13.3315 14.7011 13.5008 15.4602 13.5008C16.1244 13.5008 16.7595 13.3711 17.3421 13.1392L17.5885 13.0337H18.0761C20.1787 13.0337 21.8963 15.1612 21.9955 17.2671L22 17.4584V18.1721C22 18.9003 21.444 19.4991 20.7335 19.5671L20.5986 19.5735H10.3218C9.5936 19.5735 8.99474 19.0174 8.9268 18.307L8.92038 18.1721V17.4584C8.92038 15.3558 10.5761 13.1664 12.6542 13.0395L12.8443 13.0337H13.3318ZM6.41145 13.0326C7.06251 13.3304 7.78072 13.4997 8.53981 13.4997L8.67088 13.4967C8.23978 13.9639 7.88262 14.5386 7.62719 15.1655C7.23536 15.1151 6.84965 15.0279 6.47353 14.908L6.06261 14.7616L5.92388 14.7625C4.92452 14.7625 3.86284 15.9422 3.7414 17.2174L3.72989 17.4573L3.72899 17.8408L7.19 17.8404L7.1905 18.1475C7.1905 18.7704 7.50505 19.3102 7.96326 19.5723L3.40139 19.5724C2.68722 19.5724 2.09743 19.0376 2.01092 18.3468L2 18.171V17.4573C2 15.3777 3.61978 13.2131 5.66598 13.0433L5.92388 13.0326H6.41145ZM12.9858 14.7738L12.8443 14.7738C11.8308 14.7738 10.7507 15.9967 10.6659 17.2957L10.6606 17.4584L10.6598 17.8326H20.2598V17.4584C20.2598 16.155 19.2203 14.88 18.2031 14.7801L18.0761 14.7738L17.9357 14.7738L17.7099 14.8591C16.9917 15.11 16.2333 15.241 15.4602 15.241C14.6881 15.241 13.9325 15.1104 13.2141 14.8599L12.9858 14.7738ZM15.4602 4.00448C17.5243 4.00448 19.1972 5.67738 19.1972 7.74151C19.1972 9.74113 17.6272 11.3736 15.6525 11.4737L15.4602 11.4785C13.3961 11.4785 11.7232 9.80564 11.7232 7.74151C11.7232 5.74189 13.2931 4.10941 15.2679 4.00934L15.4602 4.00448ZM8.53981 4.00342C9.41333 4.00342 10.2168 4.30302 10.853 4.80508C10.5195 5.29862 10.2694 5.87906 10.1272 6.51462C9.7619 6.03909 9.18665 5.73331 8.53981 5.73331C7.43107 5.73331 6.53266 6.63172 6.53266 7.74045C6.53266 8.84919 7.43107 9.7476 8.53981 9.7476C9.18657 9.7476 9.76176 9.44189 10.1288 8.96705C10.2701 9.60298 10.5206 10.1834 10.8532 10.6769C10.2824 11.1262 9.57681 11.4138 8.80672 11.4681L8.53981 11.4775C6.47568 11.4775 4.80277 9.80458 4.80277 7.74045C4.80277 5.76607 6.33337 4.14963 8.2729 4.0128L8.53981 4.00342ZM15.4602 5.74466C14.3571 5.74466 13.4633 6.63846 13.4633 7.74151C13.4633 8.84456 14.3571 9.73836 15.4602 9.73836C16.5632 9.73836 17.457 8.84456 17.457 7.74151C17.457 6.63846 16.5632 5.74466 15.4602 5.74466Z" />
   </svg>
 )
 const GroupIcon = ({ size = 20 }) => (
@@ -348,59 +335,6 @@ const THREAD_MESSAGES = {
   ],
 }
 
-// ─── Shared Components ───────────────────────────────────────
-
-function StatusBar() {
-  return (
-    <div className="status-bar">
-      <span className="status-time">9:41</span>
-      <div className="status-icons">
-        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
-          <rect x="0" y="4" width="3" height="8" rx="0.5"/>
-          <rect x="4.5" y="2.5" width="3" height="9.5" rx="0.5"/>
-          <rect x="9" y="1" width="3" height="11" rx="0.5"/>
-          <rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.3"/>
-        </svg>
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
-          <path d="M8 2.4C10.5 2.4 12.7 3.5 14.2 5.2L15.8 3.4C13.8 1.3 11 0 8 0 5 0 2.2 1.3 0.2 3.4l1.6 1.8C3.3 3.5 5.5 2.4 8 2.4z" opacity="0.3"/>
-          <path d="M8 5C9.7 5 11.2 5.7 12.3 6.8L13.9 5C12.3 3.5 10.3 2.5 8 2.5 5.7 2.5 3.7 3.5 2.1 5l1.6 1.8C4.8 5.7 6.3 5 8 5z"/>
-          <circle cx="8" cy="10" r="2"/>
-        </svg>
-        <svg width="26" height="13" viewBox="0 0 26 13" fill="currentColor">
-          <rect x="0.5" y="0.5" width="21" height="12" rx="2.5" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.4"/>
-          <rect x="1.5" y="1.5" width="19" height="10" rx="2" opacity="0.9"/>
-          <path d="M23 4.5v4a2 2 0 000-4z" opacity="0.5"/>
-        </svg>
-      </div>
-    </div>
-  )
-}
-
-function AppNav({ onNavigate, totalUnread = 0 }) {
-  return (
-    <div className="app-nav">
-      <button className="nav-item" onClick={() => onNavigate('bookings')}>
-        <BookingsNavIcon />
-        <span className="nav-label">Bookings</span>
-      </button>
-      <button className="nav-item" onClick={() => onNavigate('users')}>
-        <UsersNavIcon />
-        <span className="nav-label">Users</span>
-      </button>
-      <button className="nav-item active">
-        <div className="nav-messages-wrap">
-          <EmailNavIcon />
-          {totalUnread > 0 && <span className="nav-badge">{totalUnread}</span>}
-        </div>
-        <span className="nav-label">Messages</span>
-      </button>
-      <button className="nav-item" onClick={() => onNavigate('account')}>
-        <div className="nav-avatar">AJ</div>
-      </button>
-    </div>
-  )
-}
-
 // ─── Inbox Screen ────────────────────────────────────────────
 
 function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
@@ -569,7 +503,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
           </div>
         )}
       </div>
-      <AppNav onNavigate={() => {}} totalUnread={totalUnread} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
     </div>
   )
 }
@@ -1002,7 +936,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
         }
       </div>
 
-      <AppNav onNavigate={() => {}} totalUnread={totalUnread} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
 
       {/* Thread info sheet */}
       {showInfo && (
@@ -1290,7 +1224,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
 
       </div>
 
-      <AppNav onNavigate={() => {}} totalUnread={totalUnread} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
 
       {showToPicker && (
         <PersonPickerSheet

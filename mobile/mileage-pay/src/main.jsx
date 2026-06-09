@@ -4,7 +4,7 @@ import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
-import './messaging.css'
+import './mileage.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
