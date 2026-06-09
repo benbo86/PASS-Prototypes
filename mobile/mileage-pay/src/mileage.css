@@ -26,6 +26,66 @@
   border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
 }
 
+.period-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.period-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--greyscale-6-grey-50);
+  text-align: left;
+}
+
+.period-selector-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.period-selector .summary-label {
+  margin-bottom: 2px;
+}
+
+.period-dropdown {
+  margin-top: 12px;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+  animation: expandDown 0.2s ease-out;
+}
+
+@keyframes expandDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.period-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  cursor: pointer;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  text-align: left;
+}
+
+.period-option:last-child { border-bottom: none; }
+.period-option:hover { color: #333; }
+.period-option.active {
+  color: var(--brand-purple-6-purple-4);
+  font-weight: 600;
+}
+
 .summary-label {
   font-family: Barlow, sans-serif;
   font-size: 13px;

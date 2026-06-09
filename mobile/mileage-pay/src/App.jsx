@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppHeader from '../../../Components/AppHeader'
 import AppNav from '../../../Components/AppNav'
@@ -9,6 +9,12 @@ import PhoneFrame from '../../../Components/PhoneFrame'
 const ChevronLeftIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+  </svg>
+)
+
+const ChevronDownIcon = ({ open }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>
+    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
   </svg>
 )
 
@@ -107,10 +113,16 @@ const GreenTickIcon = () => (
 
 /* ── Data ────────────────────────────────────────────────────────── */
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+const todayDate = new Date()
+const todayStr = `${todayDate.getDate()} ${MONTHS[todayDate.getMonth()]} ${todayDate.getFullYear()}`
+const todayFullStr = `${DAYS[todayDate.getDay()]} ${todayStr}`
+
 const STATES = {
-  default: {
-    label: 'Current period',
-    date: '1 Jun – 8 Jun 2026',
+  payPeriod: {
+    label: 'Pay period to date',
+    date: `1 Jun – ${todayStr}`,
     miles: '39.2 mi',
     pay: '£47.80',
     visits: [
@@ -124,7 +136,7 @@ const STATES = {
   },
   today: {
     label: 'Today',
-    date: 'Mon 8 Jun 2026',
+    date: todayFullStr,
     miles: '12.7 mi',
     pay: '£15.40',
     visits: [
@@ -143,25 +155,12 @@ const STATES = {
       { name: 'Margaret Thompson', datetime: 'Thu 29 May · 14:00–14:45', pay: '£5.20', miles: '4.2 mi' },
     ],
   },
-  lastPayPeriod: {
-    label: 'Last pay period',
-    date: '1 May – 31 May 2026',
-    miles: '28.9 mi',
-    pay: '£35.20',
-    visits: [
-      { name: 'George Evans',      datetime: 'Thu 1 May · 11:00–12:00', pay: '£6.80', miles: '5.6 mi' },
-      { name: 'Dorothy Williams',  datetime: 'Mon 5 May · 10:00–11:00', pay: '£8.60', miles: '7.1 mi' },
-      { name: 'Margaret Thompson', datetime: 'Wed 7 May · 09:00–09:45', pay: '£5.20', miles: '4.2 mi' },
-      { name: 'Harold Clarke',     datetime: 'Fri 9 May · 15:00–16:00', pay: '£6.20', miles: '5.1 mi' },
-      { name: 'Edith Morrison',    datetime: 'Mon 12 May · 09:30–10:30', pay: '£8.40', miles: '6.9 mi' },
-    ],
-  },
 }
 
 const PILLS = [
-  { id: 'today',         label: 'Today' },
-  { id: 'lastWeek',      label: 'Last week' },
-  { id: 'lastPayPeriod', label: 'Last pay period' },
+  { id: 'payPeriod', label: 'Pay period to date' },
+  { id: 'today',     label: 'Today' },
+  { id: 'lastWeek',  label: 'Last week' },
 ]
 
 /* ── Account screen ──────────────────────────────────────────────── */
@@ -243,8 +242,18 @@ function AccountScreen({ onGoToMileage }) {
 /* ── Mileage screen ──────────────────────────────────────────────── */
 
 function MileageScreen({ filter, setFilter, onBack }) {
-  const state = filter ? STATES[filter] : STATES.default
-  const toggleFilter = (id) => setFilter(prev => prev === id ? null : id)
+  const state = STATES[filter]
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    if (!showDropdown) return
+    const handler = (e) => {
+      if (!dropdownRef.current?.contains(e.target)) setShowDropdown(false)
+    }
+    document.addEventListener('pointerdown', handler)
+    return () => document.removeEventListener('pointerdown', handler)
+  }, [showDropdown])
 
   return (
     <>
@@ -252,9 +261,27 @@ function MileageScreen({ filter, setFilter, onBack }) {
       <AppHeader title="Mileage Pay" onBack={onBack} />
 
       <div className="summary-card">
-        <div className="summary-period">
-          <div className="summary-label">{state.label}</div>
-          <div className="summary-date">{state.date}</div>
+        <div className="period-area" ref={dropdownRef}>
+          <button className="period-selector" onClick={() => setShowDropdown(s => !s)}>
+            <div className="period-selector-text">
+              <span className="summary-label">{state.label}</span>
+              <span className="summary-date">{state.date}</span>
+            </div>
+            <ChevronDownIcon open={showDropdown} />
+          </button>
+          {showDropdown && (
+            <div className="period-dropdown">
+              {PILLS.map(p => (
+                <button
+                  key={p.id}
+                  className={`period-option${filter === p.id ? ' active' : ''}`}
+                  onClick={() => { setFilter(p.id); setShowDropdown(false) }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="summary-divider" />
         <div className="summary-stats">
@@ -268,18 +295,6 @@ function MileageScreen({ filter, setFilter, onBack }) {
             <div className="summary-stat-value pay">{state.pay}</div>
           </div>
         </div>
-      </div>
-
-      <div className="filter-bar">
-        {PILLS.map(p => (
-          <button
-            key={p.id}
-            className={`filter-pill${filter === p.id ? ' active' : ''}`}
-            onClick={() => toggleFilter(p.id)}
-          >
-            {p.label}
-          </button>
-        ))}
       </div>
 
       <div className="visit-list">
@@ -306,10 +321,10 @@ function MileageScreen({ filter, setFilter, onBack }) {
 
 export default function App() {
   const [screen, setScreen] = useState('account')
-  const [filter, setFilter] = useState(null)
+  const [filter, setFilter] = useState('payPeriod')
 
   const goToMileage = () => setScreen('mileage')
-  const goBack = () => { setScreen('account'); setFilter(null) }
+  const goBack = () => { setScreen('account'); setFilter('payPeriod') }
 
   return (
     <>
