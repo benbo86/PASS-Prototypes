@@ -127,7 +127,7 @@ html, body {
   background: none;
   border: none;
   padding: 0;
-  color: var(--greyscale-8-grey-65);
+  color: var(--brand-purple-3-purple-2);
   text-decoration: none;
 }
 
@@ -135,12 +135,9 @@ html, body {
   font-family: Barlow, sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: var(--greyscale-8-grey-65);
+  color: var(--brand-purple-3-purple-2);
   line-height: 1;
 }
-
-.nav-item.active { color: var(--brand-purple-6-purple-4); }
-.nav-item.active .nav-label { color: var(--brand-purple-6-purple-4); }
 
 .nav-messages-wrap {
   position: relative;
