@@ -45,6 +45,14 @@
   padding: 0 24px 24px;
 }
 
+.he-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+
 .he-warning-text {
   margin: 4px 0 0;
 }

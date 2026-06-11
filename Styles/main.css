@@ -146,6 +146,15 @@ h6 {
 .warning-banner.red .warning-icon { color: var(--rag-red-red-overdue); }
 .warning-banner.red .warning-title { color: var(--rag-red-red-overdue-dark); }
 
+.warning-banner.green {
+  background: var(--rag-green-green-lightest);
+  border-color: var(--rag-green-green-3-aa);
+}
+.warning-banner.green .success-icon { color: var(--rag-green-green-5); }
+.warning-banner.green h4 { color: var(--rag-green-green-3-aa); }
+.warning-banner.green p,
+.warning-banner.green li { color: var(--greyscale-2-grey-20); font-size: 15px; line-height: 1.5; }
+
 /* react-datepicker overrides */
 .react-datepicker-wrapper { width: 100%; }
 .react-datepicker-popper { z-index: 100; }

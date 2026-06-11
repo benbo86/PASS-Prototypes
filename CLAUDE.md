@@ -146,7 +146,7 @@ Common values: `4 8 12 16 24 32 40 48px`
 
 ## Warning banners (`main.css`)
 
-Use `.warning-banner.orange` for amber warnings, `.warning-banner.red` for red/error warnings.
+Use `.warning-banner.orange` for amber warnings, `.warning-banner.red` for red/error warnings, `.warning-banner.green` for success/confirmation states.
 
 Standard structure:
 ```jsx

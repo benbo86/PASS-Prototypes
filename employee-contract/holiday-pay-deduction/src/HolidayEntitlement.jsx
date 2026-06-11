@@ -15,8 +15,8 @@ const InfoIcon = () => (
   </svg>
 )
 
-const TickIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24">
+const TickIcon = ({ className }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" className={className}>
     <polygon stroke="currentColor" fill="currentColor" strokeLinejoin="round" points="9.29090299 15.7925373 5.47272117 12.0313433 4.1999939 13.2850746 9.29090299 18.3 20.1999939 7.55373134 18.9272666 6.3" />
   </svg>
 )
@@ -110,11 +110,30 @@ export default function HolidayEntitlement() {
           <p className="he-scenario-label">
             On save of Contract Summary — finish date changed or removed and the existing deduction record has already been verified in timesheets
           </p>
-          <div className="warning-banner orange">
-            <WarningIcon />
+          <div className="he-modal-card">
+            <div className="he-modal-title">Leaver holiday deduction</div>
+            <div className="he-modal-body">
+              <div className="warning-banner orange">
+                <WarningIcon />
+                <p className="he-warning-text">The finish date has changed but a verified holiday pay deduction already exists. Review and update the deduction in timesheets.</p>
+              </div>
+              <div className="he-modal-footer">
+                <button className="round-btn tertiary-btn">Close</button>
+                <button className="round-btn primary-btn">View in timesheets</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="he-scenario">
+          <p className="he-scenario-label">
+            In the Holiday section — after a deduction has been added
+          </p>
+          <div className="warning-banner green">
+            <TickIcon className="success-icon" />
             <div>
-              <h4>Action required</h4>
-              <p className="he-warning-text">The finish date has changed but a verified holiday pay deduction already exists. Review and update the deduction in timesheets.</p>
+              <h4>Holiday pay deduction added</h4>
+              <p>£{(overpaidDays * AVG_DAILY_PAY).toFixed(2)} deduction record created. <a href="#" className="he-link">View in timesheets</a></p>
             </div>
           </div>
         </div>
