@@ -1,8 +1,5 @@
-import { useState, useRef, forwardRef } from 'react'
-import DatePicker from 'react-datepicker'
-import { CalendarIcon } from '../../../Components/DateRangePicker'
+import { useState } from 'react'
 import Tooltip from '../../../Components/Tooltip'
-import Modal from '../../../Components/Modal'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -24,26 +21,22 @@ const TickIcon = () => (
   </svg>
 )
 
-
-// ── Date picker custom input ───────────────────────────────────────────────────
-
-const FinishDateInput = forwardRef(({ value, onClick }, ref) => (
-  <button type="button" className="he-finish-date" ref={ref} onClick={onClick}>
-    <span>{value || 'Select date'}</span>
-    <span className="he-finish-date-icon"><CalendarIcon /></span>
-  </button>
-))
-FinishDateInput.displayName = 'FinishDateInput'
+const WarningIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" className="warning-icon">
+    <path fill="currentColor" fillRule="evenodd" d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z" />
+  </svg>
+)
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-// Year 2 = leaver scenario: 7 days entitlement, 9 days booked → 2 days overpaid
+// Leaver scenario: 7 days entitlement, 9 days booked → 2 days overpaid
 const LEAVER_YEAR = { entitlement: 7.0, adjustment: 0.0, booked: 9.0 }
 const AVG_DAILY_PAY = 250.00
+const STATIC_FINISH_DATE = new Date(2023, 5, 15)
 
-// ── Deduction content (shared between inline and modal) ───────────────────────
+// ── Deduction modal content ───────────────────────────────────────────────────
 
-function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, onAdd, onDismiss }) {
+function DeductionBody({ overpaidDays, deduction, deductionAdded, onAdd }) {
   const fmtDate = (d) => d
     ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
     : '—'
@@ -60,11 +53,6 @@ function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, on
       </div>
       <div className="he-deduction-action">
         <div className="he-deduction-action-row">
-          {onDismiss && !deductionAdded && (
-            <button className="round-btn tertiary-btn" onClick={onDismiss}>
-              Don't add deduction
-            </button>
-          )}
           {deductionAdded ? (
             <button className="round-btn btn-icon-left he-btn-confirmed" disabled>
               <TickIcon /> Deduction added
@@ -79,8 +67,7 @@ function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, on
           )}
         </div>
         <span className="he-deduction-date-note">
-          The deduction record in timesheets will use the employee's finish date {fmtDate(finishDate)}
-          {deductionAdded && <a href="#" className="he-link he-deduction-view-link">View in timesheet</a>}
+          The deduction record in timesheets will use the employee's finish date {fmtDate(STATIC_FINISH_DATE)}
         </span>
       </div>
     </>
@@ -90,136 +77,49 @@ function DeductionBody({ overpaidDays, deduction, finishDate, deductionAdded, on
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function HolidayEntitlement() {
-  const [finishDate, setFinishDate] = useState(new Date(2023, 5, 15))
-  const [showModal, setShowModal] = useState(false)
   const [deductionAdded, setDeductionAdded] = useState(false)
-  const [showToast, setShowToast] = useState(false)
-  const toastTimer = useRef(null)
 
   const remaining    = LEAVER_YEAR.entitlement + LEAVER_YEAR.adjustment - LEAVER_YEAR.booked
-  const isOverpaid   = remaining < 0
-  const overpaidDays = isOverpaid ? Math.abs(remaining) : 0
+  const overpaidDays = Math.abs(remaining)
   const deduction    = overpaidDays * AVG_DAILY_PAY
-
-  const handleDateChange = (d) => {
-    setFinishDate(d)
-    setDeductionAdded(false)
-    setShowModal(false)
-  }
-
-  const triggerToast = () => {
-    setShowToast(true)
-    clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setShowToast(false), 3000)
-  }
-
-  const handleSave = () => {
-    setDeductionAdded(false)
-    triggerToast()
-    if (isOverpaid) setShowModal(true)
-  }
 
   return (
     <div className="he-page">
       <a href="../../" className="back-link"><ChevronLeft /> Prototypes</a>
 
-      <div className="he-contract-form">
-        <div className="he-contract-fields">
-          <div className="he-contract-field">
-            <div className="he-contract-field-label">Contract type</div>
-            <div className="he-contract-field-value">Permanent</div>
-          </div>
-          <div className="he-contract-field">
-            <div className="he-contract-field-label">Start date</div>
-            <div className="he-contract-field-value">01/04/2020</div>
-          </div>
-          <div className="he-contract-field">
-            <div className="he-contract-field-label">Weekly contracted hours</div>
-            <div className="he-contract-field-value">37.5 hrs</div>
-          </div>
-          <div className="he-contract-field">
-            <div className="he-contract-field-label">Employee finish date</div>
-            <div className="he-datepicker-wrap">
-              <DatePicker
-                selected={finishDate}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                calendarStartDay={1}
-                popperPlacement="bottom"
-                customInput={<FinishDateInput />}
+      <div className="he-scenarios">
+
+        <div className="he-scenario">
+          <p className="he-scenario-label">
+            On save of Contract Summary — employee has taken more holiday than their pro-rated entitlement
+          </p>
+          <div className="he-modal-card">
+            <div className="he-modal-title">Leaver holiday deduction</div>
+            <div className="he-modal-body">
+              <DeductionBody
+                overpaidDays={overpaidDays}
+                deduction={deduction}
+                deductionAdded={deductionAdded}
+                onAdd={() => setDeductionAdded(true)}
               />
             </div>
           </div>
         </div>
-        <div className="he-contract-footer">
-          <button className="round-btn secondary-btn" onClick={() => {}}>Cancel</button>
-          <button className="round-btn primary-btn" onClick={handleSave}>Save contract</button>
+
+        <div className="he-scenario">
+          <p className="he-scenario-label">
+            On save of Contract Summary — finish date changed or removed and the existing deduction record has already been verified in timesheets
+          </p>
+          <div className="warning-banner orange">
+            <WarningIcon />
+            <div>
+              <h4>Action required</h4>
+              <p className="he-warning-text">The finish date has changed but a verified holiday pay deduction already exists. Review and update the deduction in timesheets.</p>
+            </div>
+          </div>
         </div>
+
       </div>
-
-      {showModal && (
-        <Modal title="Leaver holiday deduction" onClose={() => setShowModal(false)}>
-          <DeductionBody
-            overpaidDays={overpaidDays}
-            deduction={deduction}
-            finishDate={finishDate}
-            deductionAdded={deductionAdded}
-            onAdd={() => setDeductionAdded(true)}
-            onDismiss={() => setShowModal(false)}
-          />
-        </Modal>
-      )}
-
-      {showToast && (
-        <div className="he-toast">
-          <TickIcon /> Contract saved
-        </div>
-      )}
     </div>
   )
 }
-
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PRESERVED — Holiday entitlement sections available for future prototypes
-   ─────────────────────────────────────────────────────────────────────────────
-
-// Summary stat cards
-// <div className="he-summary">
-//   <StatCard label="Entitlement"    value={`${year.entitlement.toFixed(1)} days`} />
-//   <StatCard label="Adjustment"     value={`${year.adjustment.toFixed(1)} days`} />
-//   <StatCard label="Booked & taken" value={`${year.booked.toFixed(1)} days`} />
-//   {isOverpaid
-//     ? <StatCard label="Overpaid"  value={`${overpaidDays.toFixed(1)} days`} variant="overpaid" />
-//     : <StatCard label="Remaining" value={`${Math.max(0, remaining).toFixed(1)} days`} />
-//   }
-// </div>
-
-// Year navigator
-// <div className="he-year-nav">
-//   <button className="he-nav-btn" onClick={() => setYearIdx(i => Math.max(0, i-1))} disabled={yearIdx===0}>
-//     <ChevronLeft />
-//   </button>
-//   <span className="he-year-range">{year.range}</span>
-//   <button className="he-nav-btn" onClick={() => setYearIdx(i => Math.min(HOLIDAY_YEARS.length-1, i+1))} disabled={yearIdx===HOLIDAY_YEARS.length-1}>
-//     <ChevronRight />
-//   </button>
-// </div>
-
-// Adjustments table (with inline add-row and DatePicker)
-// See git history or previous component version for full implementation.
-// Requires: PlusIcon, EditIcon, DeleteIcon, XIcon, TableDateInput, fmtAdjDate,
-//           addingRow/newAmount/newReason/newDate state, handleSaveRow/handleCancelRow.
-
-// Holiday pay section (Average daily pay card, GPA totals, upload historic pay)
-// <section className="he-section">
-//   <h1>Holiday pay</h1>
-//   <div className="he-info-banner">...</div>
-//   <div className="he-pay-row">
-//     <div className="he-pay-card">...</div>
-//     <div className="he-gpa-card">...</div>
-//   </div>
-//   <div className="he-upload">...</div>
-// </section>
-
-   ───────────────────────────────────────────────────────────────────────────── */

@@ -62,7 +62,8 @@ h6 {
         font-weight: 600 !important;
         line-height: 1.5;
         color: #7b3306;
-        margin-bottom: 0px;
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
 }
@@ -135,6 +136,8 @@ h6 {
 }
 .warning-banner.orange .warning-icon { color: var(--rag-amber-amber-7); }
 .warning-banner.orange h4 { color: #7b3306; }
+.warning-banner.orange p,
+.warning-banner.orange li { color: var(--greyscale-2-grey-20); font-size: 15px; line-height: 1.5; }
 
 .warning-banner.red {
   background: var(--rag-red-red-pastel-lighter);

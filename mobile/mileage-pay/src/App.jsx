@@ -126,12 +126,12 @@ const STATES = {
     miles: '39.2 mi',
     pay: '£47.80',
     visits: [
-      { name: 'Margaret Thompson', datetime: 'Mon 2 Jun · 09:00–09:45', pay: '£5.20', miles: '4.2 mi' },
-      { name: 'George Evans',      datetime: 'Mon 2 Jun · 14:30–15:30', pay: '£7.40', miles: '6.1 mi' },
-      { name: 'Dorothy Williams',  datetime: 'Tue 3 Jun · 10:00–11:00', pay: '£8.60', miles: '7.1 mi' },
-      { name: 'Harold Clarke',     datetime: 'Tue 3 Jun · 15:00–16:00', pay: '£6.20', miles: '5.1 mi' },
-      { name: 'Edith Morrison',    datetime: 'Wed 4 Jun · 09:30–10:30', pay: '£8.40', miles: '6.9 mi' },
-      { name: 'Margaret Thompson', datetime: 'Thu 5 Jun · 14:00–14:45', pay: '£5.20', miles: '4.2 mi' },
+      { name: 'Margaret Thompson', datetime: 'Mon 2 Jun · 09:00–09:45', pay: '£5.20', miles: '4.2 mi', status: 'complete',  rate: '£0.45/mi' },
+      { name: 'George Evans',      datetime: 'Mon 2 Jun · 14:30–15:30', pay: '£7.40', miles: '6.1 mi', status: 'complete',  rate: '£0.45/mi' },
+      { name: 'Dorothy Williams',  datetime: 'Tue 3 Jun · 10:00–11:00', pay: '£8.60', miles: '7.1 mi', status: 'cancelled', rate: '£0.45/mi' },
+      { name: 'Harold Clarke',     datetime: 'Tue 3 Jun · 15:00–16:00', pay: '£6.20', miles: '5.1 mi', status: 'complete',  rate: '£0.45/mi' },
+      { name: 'Edith Morrison',    datetime: 'Wed 4 Jun · 09:30–10:30', pay: '£8.40', miles: '6.9 mi', status: 'missed',    rate: '£0.45/mi' },
+      { name: 'Margaret Thompson', datetime: 'Thu 5 Jun · 14:00–14:45', pay: '£5.20', miles: '4.2 mi', status: 'complete',  rate: '£0.45/mi' },
     ],
   },
   today: {
@@ -140,8 +140,8 @@ const STATES = {
     miles: '12.7 mi',
     pay: '£15.40',
     visits: [
-      { name: 'George Evans',     datetime: 'Today · 09:00–10:00', pay: '£6.80', miles: '5.6 mi' },
-      { name: 'Dorothy Williams', datetime: 'Today · 14:00–15:00', pay: '£8.60', miles: '7.1 mi' },
+      { name: 'George Evans',     datetime: 'Today · 09:00–10:00', pay: '£6.80', miles: '5.6 mi', status: 'complete', rate: '£0.45/mi' },
+      { name: 'Dorothy Williams', datetime: 'Today · 14:00–15:00', pay: '£8.60', miles: '7.1 mi', status: 'complete', rate: '£0.45/mi' },
     ],
   },
   lastWeek: {
@@ -150,9 +150,9 @@ const STATES = {
     miles: '16.2 mi',
     pay: '£19.80',
     visits: [
-      { name: 'Harold Clarke',     datetime: 'Mon 26 May · 09:00–10:00', pay: '£6.20', miles: '5.1 mi' },
-      { name: 'Edith Morrison',    datetime: 'Wed 28 May · 10:00–11:00', pay: '£8.40', miles: '6.9 mi' },
-      { name: 'Margaret Thompson', datetime: 'Thu 29 May · 14:00–14:45', pay: '£5.20', miles: '4.2 mi' },
+      { name: 'Harold Clarke',     datetime: 'Mon 26 May · 09:00–10:00', pay: '£6.20', miles: '5.1 mi', status: 'complete', rate: '£0.45/mi' },
+      { name: 'Edith Morrison',    datetime: 'Wed 28 May · 10:00–11:00', pay: '£8.40', miles: '6.9 mi', status: 'missed',   rate: '£0.45/mi' },
+      { name: 'Margaret Thompson', datetime: 'Thu 29 May · 14:00–14:45', pay: '£5.20', miles: '4.2 mi', status: 'complete', rate: '£0.45/mi' },
     ],
   },
 }
@@ -262,6 +262,11 @@ function MileageScreen({ filter, setFilter, onBack }) {
 
       <div className="summary-card">
         <div className="period-area" ref={dropdownRef}>
+          <div className="period-selector-text">
+            <span className="summary-label">{state.label}</span>
+            <span className="summary-date">{state.date}</span>
+          </div>
+          {/* Filter dropdown — hidden; restore by replacing the div above with:
           <button className="period-selector" onClick={() => setShowDropdown(s => !s)}>
             <div className="period-selector-text">
               <span className="summary-label">{state.label}</span>
@@ -281,7 +286,7 @@ function MileageScreen({ filter, setFilter, onBack }) {
                 </button>
               ))}
             </div>
-          )}
+          )} */}
         </div>
         <div className="summary-divider" />
         <div className="summary-stats">
@@ -303,10 +308,12 @@ function MileageScreen({ filter, setFilter, onBack }) {
             <div className="visit-left">
               <div className="visit-name">{v.name}</div>
               <div className="visit-datetime">{v.datetime}</div>
+              <div className={`visit-status visit-status-${v.status}`}>{v.status.charAt(0).toUpperCase() + v.status.slice(1)}</div>
             </div>
             <div className="visit-right">
               <div className="visit-pay">{v.pay}</div>
               <div className="visit-miles">{v.miles}</div>
+              <div className="visit-rate">{v.rate}</div>
             </div>
           </div>
         ))}

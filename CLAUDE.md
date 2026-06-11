@@ -85,6 +85,48 @@ employee-contract/
 
 ---
 
+## Figma auto layout
+
+Use auto layout for any group of vertically or horizontally stacked items — don't use absolute x/y positioning for children that have a structural relationship.
+
+- Vertical stacks (list rows, label+value pairs, form fields): `VERTICAL` auto layout
+- Horizontal stacks (icon+label, badge content, side-by-side stats): `HORIZONTAL` auto layout
+- `itemSpacing` and padding values follow the 8px spacing grid
+- Children that should stretch to fill width: `layoutSizingHorizontal = 'FILL'`
+- Containers that should hug content: `layoutSizingHorizontal/Vertical = 'HUG'`
+
+Review existing designs when updating — convert absolute-positioned stacks to auto layout proactively.
+
+---
+
+## Figma constraints (responsiveness)
+
+Always set constraints on nodes when creating or updating Figma designs, so frames can be resized to simulate different screen widths (smaller phone, wider phone, tablet).
+
+| Element | Horizontal | Vertical |
+|---|---|---|
+| Full-width bars (header, nav, cards, dividers) | Left & Right | Top or Bottom |
+| Scroll/body area | Left & Right | Top & Bottom |
+| Left-pinned content (name, datetime, badge) | Left | Top |
+| Right-pinned content (pay, miles, icons) | Right | Top |
+| Centered content (header title) | Center | Top |
+| Bottom nav | Left & Right | Bottom |
+| Status bar | Left & Right | Top |
+
+Set constraints at the same time as position/size — not as an afterthought.
+
+---
+
+## Spacing
+
+Use multiples of **8px** for all spacing — padding, gap, margin, position offsets — in both CSS prototypes and Figma designs.
+
+Common values: `4 8 12 16 24 32 40 48px`
+
+**Exceptions:** 4px and 12px are fine (4px sub-grid). Avoid arbitrary values like 5, 6, 10, 14, 18px unless driven by a specific typographic need (e.g. line-height).
+
+---
+
 ## Buttons (`main.css`)
 
 | Class | Usage |
@@ -112,15 +154,16 @@ Standard structure:
   <WarningIcon />   {/* uses .warning-icon class — amber colour auto-applied */}
   <div>
     <h4>Warnings</h4>
-    <ul>
-      <li>The specific warning message</li>
-    </ul>
+    <p>Body text for a single message.</p>
+    {/* or use <ul><li> for multiple messages */}
   </div>
 </div>
 ```
 
-- `h4` inside `.warning-banner` is pre-styled in `main.css` (16px, 600 weight, dark amber `#7b3306`)
+- `h4` inside `.warning-banner` is pre-styled in `main.css` (16px, 600 weight, dark amber `#7b3306`, margin 0)
+- `p` and `li` inside `.warning-banner.orange` are pre-styled in `main.css` (`var(--greyscale-2-grey-20)` / `#333`, 15px, 1.5 line-height)
 - The `WarningIcon` SVG should have `className="warning-icon"` — `main.css` colours it `var(--rag-amber-amber-7)`
+- Use `<p>` for a single message, `<ul><li>` for multiple
 
 ---
 
