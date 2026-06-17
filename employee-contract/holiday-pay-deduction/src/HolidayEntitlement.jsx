@@ -21,6 +21,13 @@ const TickIcon = ({ className }) => (
   </svg>
 )
 
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24">
+    <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
+      points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />
+  </svg>
+)
+
 const WarningIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" className="warning-icon">
     <path fill="currentColor" fillRule="evenodd" d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z" />
@@ -53,6 +60,9 @@ function DeductionBody({ overpaidDays, deduction, deductionAdded, onAdd }) {
       </div>
       <div className="he-deduction-action">
         <div className="he-deduction-action-row">
+          {!deductionAdded && (
+            <button className="round-btn tertiary-btn">Close</button>
+          )}
           {deductionAdded ? (
             <button className="round-btn btn-icon-left he-btn-confirmed" disabled>
               <TickIcon /> Deduction added
@@ -67,7 +77,7 @@ function DeductionBody({ overpaidDays, deduction, deductionAdded, onAdd }) {
           )}
         </div>
         <span className="he-deduction-date-note">
-          The deduction record in timesheets will use the employee's finish date {fmtDate(STATIC_FINISH_DATE)}
+          The deduction record in timesheets will use the employee's finish date {fmtDate(STATIC_FINISH_DATE)}. <a href="#" className="he-link">View in timesheets</a>
         </span>
       </div>
     </>
@@ -94,6 +104,7 @@ export default function HolidayEntitlement() {
             On save of Contract Summary — employee has taken more holiday than their pro-rated entitlement
           </p>
           <div className="he-modal-card">
+            <button className="modal-close-btn"><CloseIcon /></button>
             <div className="he-modal-title">Leaver holiday deduction</div>
             <div className="he-modal-body">
               <DeductionBody
@@ -111,6 +122,7 @@ export default function HolidayEntitlement() {
             On save of Contract Summary — finish date changed or removed and the existing deduction record has already been verified in timesheets
           </p>
           <div className="he-modal-card">
+            <button className="modal-close-btn"><CloseIcon /></button>
             <div className="he-modal-title">Leaver holiday deduction</div>
             <div className="he-modal-body">
               <div className="warning-banner orange">

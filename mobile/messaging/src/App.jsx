@@ -345,7 +345,7 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
   const baseXRef = useRef(0)
   const didDragRef = useRef(false)
   const ACTION_WIDTH = 88
-  const canArchive = thread.sentByMe && !thread.isGroup
+  const canArchive = thread.sentByMe
 
   const updateSwipeX = (val) => {
     swipeXRef.current = val
@@ -514,7 +514,7 @@ const P_FG = ['#ffffff', '#1b5e20', '#0d47a1', '#7a5200', '#7a1030', '#00504a', 
 
 // ─── Thread Info Sheet ───────────────────────────────────────
 
-function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants }) {
+function ThreadInfoSheet({ thread, onClose, onArchive, onMarkUnread, onRequestAddParticipants }) {
   const list = thread.participantList || []
   return (
     <div className="picker-overlay" onClick={onClose}>
@@ -572,7 +572,10 @@ function ThreadInfoSheet({ thread, onClose, onArchive, onRequestAddParticipants 
           </div>
         )}
 
-        {thread.sentByMe && !thread.isGroup && (
+        <button className="info-action-btn" onClick={() => { onMarkUnread?.(); onClose() }}>
+          Mark as unread
+        </button>
+        {thread.sentByMe && (
           <button className="info-action-btn" onClick={onArchive}>
             {thread.archived ? 'Unarchive thread' : 'Archive thread'}
           </button>
@@ -741,7 +744,7 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAddParticipants, onMessageDeleted, totalUnread }) {
+function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [actionTarget, setActionTarget] = useState(null)
@@ -917,9 +920,6 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
           <AddIcon />
         </button>
         <div className="compose-input-wrap">
-          <button className="compose-icon-btn emoji-btn">
-            <EmojiIcon />
-          </button>
           <input
             ref={inputRef}
             className="compose-input"
@@ -930,10 +930,9 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
             onClick={e => e.stopPropagation()}
           />
         </div>
-        {inputText.trim()
-          ? <button className="send-btn" onClick={handleSend}><SendIcon /></button>
-          : <button className="compose-icon-btn" onClick={e => e.stopPropagation()}><MicIcon /></button>
-        }
+        <button className="send-btn" onClick={handleSend} style={{ visibility: inputText.trim() ? 'visible' : 'hidden' }}>
+          <SendIcon />
+        </button>
       </div>
 
       <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
@@ -944,6 +943,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onAd
           thread={thread}
           onClose={() => setShowInfo(false)}
           onArchive={() => { onArchive?.(thread.id); setShowInfo(false); onBack(); }}
+          onMarkUnread={() => onMarkUnread?.(thread.id)}
           onRequestAddParticipants={() => { setPendingParticipants([]); setShowParticipantPicker(true) }}
         />
       )}
@@ -1277,6 +1277,10 @@ export default function App() {
     ))
   }
 
+  const handleMarkUnread = (id) => {
+    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 1 } : t))
+  }
+
   const openThread = (id) => {
     setActiveThreadId(id)
     setView('thread')
@@ -1300,7 +1304,7 @@ export default function App() {
     const newThread = {
       id: newId,
       title,
-      isGroup: false,
+      isGroup: toRecipients.length > 1,
       careReceiver: careReceivers.length > 0 ? careReceivers.map(r => r.name).join(', ') : null,
       participants: buildParticipantsStr(participantList),
       participantList,
@@ -1367,6 +1371,7 @@ export default function App() {
             onBack={() => { setView('inbox'); setActiveThreadId(null) }}
             onMessageSent={handleReply}
             onArchive={handleArchive}
+            onMarkUnread={handleMarkUnread}
             onAddParticipants={handleAddParticipants}
             onMessageDeleted={handleMessageDeleted}
             totalUnread={totalUnread}
