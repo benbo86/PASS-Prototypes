@@ -890,6 +890,7 @@ body { overflow: hidden; }
 }
 .msg-carer-option:last-child { border-bottom: none; }
 .msg-carer-option:hover { background: var(--ui-purple-7-lightest-lavendar); }
+.msg-carer-option-all { border-bottom: 2px solid var(--ui-purple-5-languid-lavendar) !important; }
 
 .msg-carer-avatar {
   width: 32px;

@@ -653,6 +653,14 @@ function ComposeView({ onSend, onCancel }) {
     setShowDropdown(false)
   }
 
+  const selectAllCarers = () => {
+    setSelectedCarers(CARERS)
+    setRecipientSearch('')
+    setShowDropdown(false)
+  }
+
+  const allSelected = selectedCarers.length === CARERS.length
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -695,8 +703,16 @@ function ComposeView({ onSend, onCancel }) {
                 onFocus={() => setShowDropdown(true)}
               />
             </div>
-            {showDropdown && filteredCarers.length > 0 && (
+            {showDropdown && (filteredCarers.length > 0 || (!recipientSearch && !allSelected)) && (
               <div className="msg-carer-dropdown">
+                {!recipientSearch && !allSelected && (
+                  <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
+                    <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                      <GroupIcon size={16} />
+                    </div>
+                    <span>All carers</span>
+                  </div>
+                )}
                 {filteredCarers.map(c => {
                   const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
                   return (
