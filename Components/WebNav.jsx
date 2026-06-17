@@ -1,5 +1,5 @@
 import passLogoUrl from '../Images/pass-logo-white.svg'
-import passGeniusUrl from '../Icons/PASS Nav/pass-genius.svg'
+import passGeniusUrl from '../Icons/PASS nav/pass-genius.svg'
 
 // ─── Nav icons ────────────────────────────────────────────────
 
