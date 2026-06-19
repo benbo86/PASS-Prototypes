@@ -503,7 +503,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
           </div>
         )}
       </div>
-      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
     </div>
   )
 }
@@ -935,7 +935,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
         </button>
       </div>
 
-      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
 
       {/* Thread info sheet */}
       {showInfo && (
@@ -1224,7 +1224,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
 
       </div>
 
-      <AppNav activeTab="messages" totalUnread={totalUnread} links={{ account: '../mileage-pay/' }} />
+      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
 
       {showToPicker && (
         <PersonPickerSheet

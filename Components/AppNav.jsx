@@ -16,6 +16,12 @@ const MessagesNavIcon = () => (
   </svg>
 )
 
+const BellNavIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+  </svg>
+)
+
 function NavItem({ id, activeTab, href, children }) {
   const isActive = activeTab === id
   const className = `nav-item${isActive ? ' active' : ''}`
@@ -25,7 +31,7 @@ function NavItem({ id, activeTab, href, children }) {
   return <button className={className}>{children}</button>
 }
 
-export default function AppNav({ activeTab = 'messages', totalUnread = 0, links = {} }) {
+export default function AppNav({ activeTab = 'messages', totalUnread = 0, notifCount = 0, links = {} }) {
   return (
     <div className="app-nav">
       <NavItem id="bookings" activeTab={activeTab} href={links.bookings}>
@@ -42,6 +48,13 @@ export default function AppNav({ activeTab = 'messages', totalUnread = 0, links 
           {totalUnread > 0 && <span className="nav-badge">{totalUnread}</span>}
         </div>
         <span className="nav-label">Messages</span>
+      </NavItem>
+      <NavItem id="notifications" activeTab={activeTab} href={links.notifications}>
+        <div className="nav-messages-wrap">
+          <BellNavIcon />
+          {notifCount > 0 && <span className="nav-badge">{notifCount}</span>}
+        </div>
+        <span className="nav-label">Notifications</span>
       </NavItem>
       <NavItem id="account" activeTab={activeTab} href={links.account}>
         <div className="nav-avatar">AJ</div>
