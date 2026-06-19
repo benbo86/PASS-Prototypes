@@ -104,6 +104,18 @@ html, body {
 
 .app-header-action:hover { background: rgba(255,255,255,0.15); }
 
+/* Screen slide transitions (drill-down nav only — not bottom nav switches) */
+.screen-slide {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.screen-slide.slide-active    { transform: translateX(0); }
+.screen-slide.slide-out-left  { transform: translateX(-25%); }
+.screen-slide.slide-out-right { transform: translateX(100%); }
+
 /* App nav */
 .app-nav {
   background: #fff;

@@ -1355,7 +1355,7 @@ export default function App() {
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
       <div className="phone-frame">
-        {view === 'inbox' && (
+        <div className={`screen-slide ${view === 'inbox' ? 'slide-active' : 'slide-out-left'}`}>
           <InboxScreen
             threads={threads}
             onOpenThread={openThread}
@@ -1363,21 +1363,23 @@ export default function App() {
             onArchive={handleArchive}
             totalUnread={totalUnread}
           />
-        )}
-        {view === 'thread' && (
-          <ThreadScreen
-            thread={threads.find(t => t.id === activeThreadId)}
-            messages={threadMessages[activeThreadId] || []}
-            onBack={() => { setView('inbox'); setActiveThreadId(null) }}
-            onMessageSent={handleReply}
-            onArchive={handleArchive}
-            onMarkUnread={handleMarkUnread}
-            onAddParticipants={handleAddParticipants}
-            onMessageDeleted={handleMessageDeleted}
-            totalUnread={totalUnread}
-          />
-        )}
-        {view === 'compose' && (
+        </div>
+        <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
+          {activeThreadId && (
+            <ThreadScreen
+              thread={threads.find(t => t.id === activeThreadId)}
+              messages={threadMessages[activeThreadId] || []}
+              onBack={() => { setView('inbox'); setActiveThreadId(null) }}
+              onMessageSent={handleReply}
+              onArchive={handleArchive}
+              onMarkUnread={handleMarkUnread}
+              onAddParticipants={handleAddParticipants}
+              onMessageDeleted={handleMessageDeleted}
+              totalUnread={totalUnread}
+            />
+          )}
+        </div>
+        <div className={`screen-slide ${view === 'compose' ? 'slide-active' : 'slide-out-right'}`}>
           <ComposeScreen
             onBack={() => setView('inbox')}
             onSend={handleNewMessage}
@@ -1385,7 +1387,7 @@ export default function App() {
             carers={CARERS}
             totalUnread={totalUnread}
           />
-        )}
+        </div>
       </div>
     </div>
   )

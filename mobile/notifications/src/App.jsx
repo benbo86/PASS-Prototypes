@@ -405,19 +405,21 @@ export default function App() {
         <ChevronLeftIcon /> Prototypes
       </a>
       <div className="phone-frame">
-        {view === 'list' && (
+        <div className={`screen-slide ${view === 'list' ? 'slide-active' : 'slide-out-left'}`}>
           <NotifCentreScreen
             notifications={notifications}
             onViewBooking={viewBooking}
             unreadCount={unreadCount}
           />
-        )}
-        {view === 'detail' && selectedNotif && (
-          <BookingDetailScreen
-            notif={selectedNotif}
-            onBack={() => setView('list')}
-          />
-        )}
+        </div>
+        <div className={`screen-slide ${view === 'detail' ? 'slide-active' : 'slide-out-right'}`}>
+          {selectedNotif && (
+            <BookingDetailScreen
+              notif={selectedNotif}
+              onBack={() => setView('list')}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
