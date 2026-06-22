@@ -101,7 +101,8 @@
 }
 
 .notif-row.unread {
-  background: #faf8fd;
+  /*background: #faf8fd;*/
+  background: var(--ui-purple-6-lavendar-grey);
 }
 
 .notif-avatar-wrap {
