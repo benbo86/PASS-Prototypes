@@ -958,14 +958,11 @@
 .send-btn:hover { background: var(--brand-purple-1-purple-0); }
 
 /* ── Message actions overlay ─────────────────────────────────── */
-.actions-overlay {
+.phone-frame-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--web-skrim);
+  z-index: 100;
 }
 
 .actions-menu {

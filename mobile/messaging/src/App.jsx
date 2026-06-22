@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import cqcImg from '../../../Images/CQC Good.jpeg'
@@ -743,10 +743,9 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread }) {
+const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
-  const [actionTarget, setActionTarget] = useState(null)
   const [replyTo, setReplyTo] = useState(null)
   const [editing, setEditing] = useState(null)
   const [showAttach, setShowAttach] = useState(false)
@@ -771,7 +770,6 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
   // Reset UI state when switching threads (localMsgs reset happens synchronously above)
   useEffect(() => {
     setInputText('')
-    setActionTarget(null)
     setReplyTo(null)
     setEditing(null)
     setShowAttach(false)
@@ -781,6 +779,13 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
     setPreviewAttachment(null)
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'auto' }), 0)
   }, [thread?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useImperativeHandle(ref, () => ({
+    replyToMessage: (msg) => { setReplyTo(msg); inputRef.current?.focus() },
+    editMessage:    (msg) => { setEditing(msg); setInputText(msg.text); inputRef.current?.focus() },
+    deleteMessage:  (msg) => { setLocalMsgs(prev => prev.filter(m => m.id !== msg.id)); onMessageDeleted?.(msg.id) },
+    dismissAll:     ()    => { setShowAttach(false); setShowInfo(false); setShowParticipantPicker(false); setPreviewAttachment(null) },
+  }))
 
   if (!thread) return <div className="screen" />
 
@@ -813,11 +818,18 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
 
   const openActions = (e, msg) => {
     e.stopPropagation()
-    setActionTarget(actionTarget?.id === msg.id ? null : msg)
+    const rect = e.currentTarget.getBoundingClientRect()
+    onOpenActions?.(msg, rect)
     setShowAttach(false)
   }
 
-  const dismissOverlays = () => { setActionTarget(null); setShowAttach(false); setShowInfo(false); setShowParticipantPicker(false); setPreviewAttachment(null) }
+  const dismissOverlays = () => {
+    onCloseActions?.()
+    setShowAttach(false)
+    setShowInfo(false)
+    setShowParticipantPicker(false)
+    setPreviewAttachment(null)
+  }
 
   const togglePendingParticipant = (p) => setPendingParticipants(prev =>
     prev.some(r => r.id === p.id) ? prev.filter(r => r.id !== p.id) : [...prev, p]
@@ -938,7 +950,7 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
 
       {/* Compose bar */}
       <div className="compose-bar" onClick={e => e.stopPropagation()}>
-        <button className="compose-icon-btn" onClick={() => { setShowAttach(s => !s); setActionTarget(null) }}>
+        <button className="compose-icon-btn" onClick={() => { setShowAttach(s => !s); onCloseActions?.() }}>
           <AddIcon />
         </button>
         <div className="compose-input-wrap">
@@ -1004,29 +1016,9 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
         <AttachmentPreview attachment={previewAttachment} onClose={() => setPreviewAttachment(null)} />
       )}
 
-      {/* Message action menu */}
-      {actionTarget && (
-        <div className="actions-overlay" onClick={dismissOverlays}>
-          <div className="actions-menu" onClick={e => e.stopPropagation()}>
-            <button onClick={() => { setReplyTo(actionTarget); setActionTarget(null); inputRef.current?.focus() }}>
-              <ReplyIcon /> Reply
-            </button>
-            {actionTarget.isMe && (
-              <button onClick={() => { setEditing(actionTarget); setInputText(actionTarget.text); setActionTarget(null); inputRef.current?.focus() }}>
-                <EditActionIcon /> Edit
-              </button>
-            )}
-            {actionTarget.isMe && (
-              <button className="action-delete" onClick={() => { setLocalMsgs(prev => prev.filter(m => m.id !== actionTarget.id)); onMessageDeleted?.(actionTarget.id); setActionTarget(null) }}>
-                <DeleteActionIcon /> Delete
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
-}
+})
 
 // ─── Compose Screen ───────────────────────────────────────────
 
@@ -1290,8 +1282,29 @@ export default function App() {
   const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
   const [composeVisible, setComposeVisible] = useState(false)
   const [composeExiting, setComposeExiting] = useState(false)
+  const [actionTarget, setActionTarget] = useState(null)
+  const [actionMenuY, setActionMenuY] = useState(0)
+  const phoneFrameRef = useRef(null)
+  const threadScreenRef = useRef(null)
 
   const totalUnread = threads.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
+
+  const handleOpenActions = (msg, rect) => {
+    if (actionTarget?.id === msg.id) { setActionTarget(null); return }
+    const frameRect = phoneFrameRef.current?.getBoundingClientRect()
+    if (!frameRect) return
+    const rawTop = rect.bottom - frameRect.top
+    const menuItemCount = msg.isMe ? 3 : 1
+    const menuHeight = menuItemCount * 52 + 8
+    const clamped = Math.min(rawTop + 4, frameRect.height - menuHeight - 16)
+    setActionMenuY(Math.max(clamped, rect.top - frameRect.top))
+    setActionTarget(msg)
+  }
+
+  const handleCloseActions = () => {
+    setActionTarget(null)
+    threadScreenRef.current?.dismissAll()
+  }
 
   const handleArchive = (id) => {
     setThreads(prev => prev.map(t =>
@@ -1389,7 +1402,7 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
-      <div className="phone-frame">
+      <div className="phone-frame" ref={phoneFrameRef}>
         <div className="screen-area">
           <div className={`screen-slide ${view === 'inbox' ? 'slide-active' : 'slide-out-left'}`}>
             <InboxScreen
@@ -1402,6 +1415,7 @@ export default function App() {
           </div>
           <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
             <ThreadScreen
+              ref={threadScreenRef}
               thread={threads.find(t => t.id === activeThreadId) || null}
               messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
               onBack={() => setView('inbox')}
@@ -1411,6 +1425,8 @@ export default function App() {
               onAddParticipants={handleAddParticipants}
               onMessageDeleted={handleMessageDeleted}
               totalUnread={totalUnread}
+              onOpenActions={handleOpenActions}
+              onCloseActions={handleCloseActions}
             />
           </div>
           {composeVisible && (
@@ -1431,6 +1447,33 @@ export default function App() {
           notifCount={3}
           links={{ notifications: '../notifications/', account: '../mileage-pay/' }}
         />
+        {actionTarget && (
+          <div className="phone-frame-overlay" onClick={handleCloseActions}>
+            <div
+              className="actions-menu"
+              style={{
+                position: 'absolute',
+                top: actionMenuY,
+                ...(actionTarget.isMe ? { right: 16 } : { left: 16 }),
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button onClick={() => { threadScreenRef.current?.replyToMessage(actionTarget); handleCloseActions() }}>
+                <ReplyIcon /> Reply
+              </button>
+              {actionTarget.isMe && (
+                <button onClick={() => { threadScreenRef.current?.editMessage(actionTarget); handleCloseActions() }}>
+                  <EditActionIcon /> Edit
+                </button>
+              )}
+              {actionTarget.isMe && (
+                <button className="action-delete" onClick={() => { threadScreenRef.current?.deleteMessage(actionTarget); handleCloseActions() }}>
+                  <DeleteActionIcon /> Delete
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
