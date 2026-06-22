@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 
@@ -219,7 +219,7 @@ const FILTERS = [
 
 // ─── Notification Centre Screen ────────────────────────────────
 
-function NotifCentreScreen({ notifications, onViewBooking, unreadCount }) {
+function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAllRead }) {
   const [activeFilter, setActiveFilter] = useState('all')
 
   const filter = FILTERS.find(f => f.id === activeFilter)
@@ -236,9 +236,10 @@ function NotifCentreScreen({ notifications, onViewBooking, unreadCount }) {
     <div className="screen">
       <StatusBar />
       <div className="app-header">
-        <div style={{ width: 36 }} />
-        <span className="app-header-title">Notifications</span>
-        <div style={{ width: 36 }} />
+        <span className="app-header-title" style={{ textAlign: 'left' }}>Notifications</span>
+        {unreadCount > 0 && (
+          <button className="notif-header-action" onClick={onMarkAllRead}>Mark all as read</button>
+        )}
       </div>
       <div className="notif-filters">
         {FILTERS.map(f => (
@@ -299,7 +300,7 @@ function DetailRow({ icon, label, value, strikethrough = false, iconColor = '#aa
   )
 }
 
-function BookingDetailScreen({ notif, onBack }) {
+function BookingDetailScreen({ notif, onBack, unreadCount }) {
   const status = STATUS_CONFIG[notif.type]
 
   return (
@@ -365,14 +366,9 @@ function BookingDetailScreen({ notif, onBack }) {
           <DetailRow icon={<MapPinIcon />}       label="Address"  value={notif.address} />
         </div>
 
-        <div className="booking-detail-actions">
-          <button className="round-btn secondary-btn btn-icon-right">
-            View booking <ExternalLinkIcon />
-          </button>
-        </div>
       </div>
 
-      <AppNav activeTab="notifications" totalUnread={4} links={{ messages: '../messaging/' }} />
+      <AppNav activeTab="notifications" notifCount={unreadCount} links={{ messages: '../messaging/' }} />
     </div>
   )
 }
@@ -384,15 +380,12 @@ export default function App() {
   const [selectedNotif, setSelectedNotif] = useState(null)
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
 
-  // Mark all as read 1s after the screen opens
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [])
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
 
   const viewBooking = (notif) => {
+    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))
     setSelectedNotif(notif)
     setView('detail')
   }
@@ -410,6 +403,7 @@ export default function App() {
             notifications={notifications}
             onViewBooking={viewBooking}
             unreadCount={unreadCount}
+            onMarkAllRead={markAllRead}
           />
         </div>
         <div className={`screen-slide ${view === 'detail' ? 'slide-active' : 'slide-out-right'}`}>
@@ -417,6 +411,7 @@ export default function App() {
             <BookingDetailScreen
               notif={selectedNotif}
               onBack={() => setView('list')}
+              unreadCount={unreadCount}
             />
           )}
         </div>

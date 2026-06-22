@@ -27,6 +27,24 @@
   padding: 16px 16px 8px;
 }
 
+.notif-header-action {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.notif-header-action:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* ── Filters ───────────────────────────────────────────────────── */
 
 .notif-filters {
