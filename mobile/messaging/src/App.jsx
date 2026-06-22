@@ -503,7 +503,6 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
           </div>
         )}
       </div>
-      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
     </div>
   )
 }
@@ -755,12 +754,35 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
   const [showParticipantPicker, setShowParticipantPicker] = useState(false)
   const [pendingParticipants, setPendingParticipants] = useState([])
   const [previewAttachment, setPreviewAttachment] = useState(null)
+  const [prevThreadId, setPrevThreadId] = useState(thread?.id)
   const endRef = useRef(null)
   const inputRef = useRef(null)
+
+  // Sync derived state: reset localMsgs immediately when thread changes (no stale-render flash)
+  if (prevThreadId !== thread?.id) {
+    setPrevThreadId(thread?.id)
+    setLocalMsgs(messages)
+  }
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'auto' })
   }, [])
+
+  // Reset UI state when switching threads (localMsgs reset happens synchronously above)
+  useEffect(() => {
+    setInputText('')
+    setActionTarget(null)
+    setReplyTo(null)
+    setEditing(null)
+    setShowAttach(false)
+    setShowInfo(false)
+    setShowParticipantPicker(false)
+    setPendingParticipants([])
+    setPreviewAttachment(null)
+    setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'auto' }), 0)
+  }, [thread?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!thread) return <div className="screen" />
 
   // Group messages by day
   const byDay = localMsgs.reduce((acc, msg) => {
@@ -935,7 +957,6 @@ function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMa
         </button>
       </div>
 
-      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
 
       {/* Thread info sheet */}
       {showInfo && (
@@ -1224,7 +1245,6 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
 
       </div>
 
-      <AppNav activeTab="messages" totalUnread={totalUnread} notifCount={3} links={{ notifications: '../notifications/', account: '../mileage-pay/' }} />
 
       {showToPicker && (
         <PersonPickerSheet
@@ -1268,6 +1288,8 @@ export default function App() {
   const [activeThreadId, setActiveThreadId] = useState(null)
   const [threads, setThreads] = useState(THREADS)
   const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
+  const [composeVisible, setComposeVisible] = useState(false)
+  const [composeExiting, setComposeExiting] = useState(false)
 
   const totalUnread = threads.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
 
@@ -1281,10 +1303,22 @@ export default function App() {
     setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 1 } : t))
   }
 
+  const openCompose = () => {
+    setComposeExiting(false)
+    setComposeVisible(true)
+    setView('compose')
+  }
+
+  const closeCompose = () => {
+    setComposeExiting(true)
+    setView('inbox')
+    setTimeout(() => { setComposeVisible(false); setComposeExiting(false) }, 300)
+  }
+
   const openThread = (id) => {
     setActiveThreadId(id)
-    setView('thread')
     setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 0 } : t))
+    setView('thread')
   }
 
   const handleReply = (text) => {
@@ -1321,6 +1355,7 @@ export default function App() {
       [newId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', receipt: 'delivered' }],
     }))
     setActiveThreadId(newId)
+    setComposeVisible(false)
     setView('thread')
   }
 
@@ -1355,21 +1390,21 @@ export default function App() {
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
       <div className="phone-frame">
-        <div className={`screen-slide ${view === 'inbox' ? 'slide-active' : 'slide-out-left'}`}>
-          <InboxScreen
-            threads={threads}
-            onOpenThread={openThread}
-            onCompose={() => setView('compose')}
-            onArchive={handleArchive}
-            totalUnread={totalUnread}
-          />
-        </div>
-        <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
-          {activeThreadId && (
+        <div className="screen-area">
+          <div className={`screen-slide ${view === 'inbox' ? 'slide-active' : 'slide-out-left'}`}>
+            <InboxScreen
+              threads={threads}
+              onOpenThread={openThread}
+              onCompose={openCompose}
+              onArchive={handleArchive}
+              totalUnread={totalUnread}
+            />
+          </div>
+          <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
             <ThreadScreen
-              thread={threads.find(t => t.id === activeThreadId)}
-              messages={threadMessages[activeThreadId] || []}
-              onBack={() => { setView('inbox'); setActiveThreadId(null) }}
+              thread={threads.find(t => t.id === activeThreadId) || null}
+              messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
+              onBack={() => setView('inbox')}
               onMessageSent={handleReply}
               onArchive={handleArchive}
               onMarkUnread={handleMarkUnread}
@@ -1377,17 +1412,25 @@ export default function App() {
               onMessageDeleted={handleMessageDeleted}
               totalUnread={totalUnread}
             />
+          </div>
+          {composeVisible && (
+            <div className={`compose-overlay ${composeExiting ? 'exiting' : 'entering'}`}>
+              <ComposeScreen
+                onBack={closeCompose}
+                onSend={handleNewMessage}
+                customers={CUSTOMERS}
+                carers={CARERS}
+                totalUnread={totalUnread}
+              />
+            </div>
           )}
         </div>
-        <div className={`screen-slide ${view === 'compose' ? 'slide-active' : 'slide-out-right'}`}>
-          <ComposeScreen
-            onBack={() => setView('inbox')}
-            onSend={handleNewMessage}
-            customers={CUSTOMERS}
-            carers={CARERS}
-            totalUnread={totalUnread}
-          />
-        </div>
+        <AppNav
+          activeTab="messages"
+          totalUnread={totalUnread}
+          notifCount={3}
+          links={{ notifications: '../notifications/', account: '../mileage-pay/' }}
+        />
       </div>
     </div>
   )

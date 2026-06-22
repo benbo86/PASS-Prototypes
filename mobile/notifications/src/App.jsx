@@ -266,12 +266,6 @@ function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAl
           <div className="notif-empty-state">No notifications</div>
         )}
       </div>
-      <AppNav
-        activeTab="notifications"
-        notifCount={unreadCount}
-        totalUnread={4}
-        links={{ messages: '../messaging/' }}
-      />
     </div>
   )
 }
@@ -368,7 +362,6 @@ function BookingDetailScreen({ notif, onBack, unreadCount }) {
 
       </div>
 
-      <AppNav activeTab="notifications" notifCount={unreadCount} links={{ messages: '../messaging/' }} />
     </div>
   )
 }
@@ -398,23 +391,31 @@ export default function App() {
         <ChevronLeftIcon /> Prototypes
       </a>
       <div className="phone-frame">
-        <div className={`screen-slide ${view === 'list' ? 'slide-active' : 'slide-out-left'}`}>
-          <NotifCentreScreen
-            notifications={notifications}
-            onViewBooking={viewBooking}
-            unreadCount={unreadCount}
-            onMarkAllRead={markAllRead}
-          />
-        </div>
-        <div className={`screen-slide ${view === 'detail' ? 'slide-active' : 'slide-out-right'}`}>
-          {selectedNotif && (
-            <BookingDetailScreen
-              notif={selectedNotif}
-              onBack={() => setView('list')}
+        <div className="screen-area">
+          <div className={`screen-slide ${view === 'list' ? 'slide-active' : 'slide-out-left'}`}>
+            <NotifCentreScreen
+              notifications={notifications}
+              onViewBooking={viewBooking}
               unreadCount={unreadCount}
+              onMarkAllRead={markAllRead}
             />
-          )}
+          </div>
+          <div className={`screen-slide ${view === 'detail' ? 'slide-active' : 'slide-out-right'}`}>
+            {selectedNotif && (
+              <BookingDetailScreen
+                notif={selectedNotif}
+                onBack={() => setView('list')}
+                unreadCount={unreadCount}
+              />
+            )}
+          </div>
         </div>
+        <AppNav
+          activeTab="notifications"
+          notifCount={unreadCount}
+          totalUnread={4}
+          links={{ messages: '../messaging/' }}
+        />
       </div>
     </div>
   )

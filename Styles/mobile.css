@@ -23,13 +23,53 @@ html, body {
   background: #fff;
   position: relative;
   overflow: hidden;
+  transform: translateZ(0);
   border-radius: 44px;
   box-shadow:
     0 0 0 10px #1c1c1e,
     0 0 0 13px #3a3a3c,
     0 40px 80px rgba(0, 0, 0, 0.45);
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
+
+/* Scrollable screen area — sits above the fixed nav */
+.screen-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Horizontal track: two screens side-by-side, slides between them */
+.screen-track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.screen-track-item {
+  width: 50%;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Compose slide-over — enters/exits on top of the track */
+.compose-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+@keyframes composeIn  { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes composeOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
+
+.compose-overlay.entering { animation: composeIn  0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.compose-overlay.exiting  { animation: composeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 
 /* Status bar */
 .status-bar {
@@ -105,16 +145,25 @@ html, body {
 .app-header-action:hover { background: rgba(255,255,255,0.15); }
 
 /* Screen slide transitions (drill-down nav only — not bottom nav switches) */
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
 .screen-slide {
   position: absolute;
   inset: 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
 }
 
 .screen-slide.slide-active    { transform: translateX(0); }
 .screen-slide.slide-out-left  { transform: translateX(-25%); }
 .screen-slide.slide-out-right { transform: translateX(100%); }
+
+/* Used when a screen-slide div is new to the DOM — animation supplies its own start position */
+.screen-slide.slide-entering {
+  animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 
 /* App nav */
 .app-nav {
