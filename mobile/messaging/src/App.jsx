@@ -1287,6 +1287,14 @@ export default function App() {
   const phoneFrameRef = useRef(null)
   const threadScreenRef = useRef(null)
 
+  const [messageBadge, setMessageBadge] = useState(() =>
+    THREADS.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
+  )
+
+  useEffect(() => {
+    setMessageBadge(0)
+  }, [])
+
   const totalUnread = threads.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
 
   const handleOpenActions = (msg, rect) => {
@@ -1443,7 +1451,7 @@ export default function App() {
         </div>
         <AppNav
           activeTab="messages"
-          totalUnread={totalUnread}
+          totalUnread={messageBadge}
           notifCount={3}
           links={{ notifications: '../notifications/', account: '../mileage-pay/' }}
         />

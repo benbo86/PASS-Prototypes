@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 
@@ -372,6 +372,11 @@ export default function App() {
   const [view, setView] = useState('list')
   const [selectedNotif, setSelectedNotif] = useState(null)
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
+  const [badgeCount, setBadgeCount] = useState(() => NOTIFICATIONS.filter(n => !n.read).length)
+
+  useEffect(() => {
+    setBadgeCount(0)
+  }, [])
 
   const markAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
@@ -412,7 +417,7 @@ export default function App() {
         </div>
         <AppNav
           activeTab="notifications"
-          notifCount={unreadCount}
+          notifCount={badgeCount}
           totalUnread={4}
           links={{ messages: '../messaging/' }}
         />
