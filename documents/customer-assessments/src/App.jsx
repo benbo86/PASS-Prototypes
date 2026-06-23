@@ -63,6 +63,12 @@ const DeleteIcon = () => (
   </svg>
 )
 
+const DuplicateIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+  </svg>
+)
+
 // ─── Shared data ──────────────────────────────────────────────
 
 const ROLES = [
@@ -271,18 +277,17 @@ function StatusDropdown({ status, onChange, disabled }) {
 
 // ─── TemplateRow ───────────────────────────────────────────────
 
-function TemplateRow({ template, onUpdate, onDelete }) {
-  const isCustom = template.level === 'custom'
+function TemplateRow({ template, onUpdate, onDelete, onCustomise }) {
+  const isBrand = template.level === 'brand' && !template.isCustomised
+  const isCustom = template.level === 'custom' || template.isCustomised
   const isDisabled = template.status === 'disabled'
   const [showPerms, setShowPerms] = useState(false)
+  const [showCustomise, setShowCustomise] = useState(false)
 
   return (
     <li className={`template-row ${template.level} ${template.status === 'disabled' ? 'is-disabled' : ''}`}>
       <div className="template-name">
         <span className="template-title">{template.name}</span>
-        {template.level === 'brand' && (
-          <span className="level-tag">Brand</span>
-        )}
       </div>
 
       <div className="template-actions">
@@ -301,12 +306,13 @@ function TemplateRow({ template, onUpdate, onDelete }) {
           </button>
         )}
 
-        {/* Status */}
-        <StatusDropdown
-          status={template.status}
-          onChange={(s) => onUpdate(template.id, { status: s })}
-          disabled={!isCustom}
-        />
+        {/* Status — only for office/custom templates */}
+        {isCustom && (
+          <StatusDropdown
+            status={template.status}
+            onChange={(s) => onUpdate(template.id, { status: s })}
+          />
+        )}
 
         {/* Mandatory / Optional */}
         <MandatoryDropdown
@@ -326,26 +332,37 @@ function TemplateRow({ template, onUpdate, onDelete }) {
               <DeleteIcon />
             </button>
           )}
+          {isBrand && (
+            <button
+              className="icon-btn"
+              title="Customise"
+              onClick={() => setShowCustomise(true)}
+            >
+              <DuplicateIcon />
+            </button>
+          )}
           <button
             className={`icon-btn ${template.includedInPrint ? 'is-active' : ''}`}
             title={template.includedInPrint ? 'Included in print' : 'Not included in print'}
             onClick={() => isCustom && onUpdate(template.id, { includedInPrint: !template.includedInPrint })}
-            disabled={!isCustom}
+            disabled={isBrand}
           >
             <PrintIcon />
           </button>
-          <button
-            className="icon-btn"
-            title="Edit"
-            disabled={!isCustom || isDisabled}
-          >
-            <EditIcon />
-          </button>
+          {isCustom && (
+            <button
+              className="icon-btn"
+              title="Edit"
+              disabled={isDisabled}
+            >
+              <EditIcon />
+            </button>
+          )}
           <button
             className={`icon-btn ${template.reviewRequired ? 'is-active' : ''}`}
             title={template.reviewRequired ? 'Review required' : 'Review not required'}
             onClick={() => isCustom && onUpdate(template.id, { reviewRequired: !template.reviewRequired })}
-            disabled={!isCustom}
+            disabled={isBrand}
           >
             <CalendarIcon />
           </button>
@@ -360,7 +377,61 @@ function TemplateRow({ template, onUpdate, onDelete }) {
           onSave={(read, write) => { onUpdate(template.id, { read, write }); setShowPerms(false) }}
         />
       )}
+
+      {showCustomise && (
+        <CustomiseModal
+          template={template}
+          onClose={() => setShowCustomise(false)}
+          onCustomise={(displayName) => { onCustomise(template, displayName); setShowCustomise(false) }}
+        />
+      )}
     </li>
+  )
+}
+
+const CloseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+  </svg>
+)
+
+// ─── CustomiseModal ───────────────────────────────────────────
+
+function CustomiseModal({ template, onClose, onCustomise }) {
+  const [displayName, setDisplayName] = useState(template.name)
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Customise document type</h2>
+          <button className="modal-close-btn" onClick={onClose}><CloseIcon /></button>
+        </div>
+
+        <div className="modal-form">
+          <div className="form-row">
+            <label className="form-label">Display name</label>
+            <input
+              className="form-input"
+              type="text"
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              autoFocus
+            />
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
+          <button
+            className="round-btn primary-btn"
+            onClick={() => onCustomise(displayName.trim())}
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -436,11 +507,6 @@ const EMPTY_FORM = {
   write: 'Care Manager',
 }
 
-const CloseIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-  </svg>
-)
 
 function CreateTemplateModal({ onClose, onSave }) {
   const [form, setForm] = useState(EMPTY_FORM)
@@ -586,7 +652,26 @@ export default function App() {
     setTemplates(prev => prev.filter(t => t.id !== id))
   }
 
-  const visible = templates.filter(t => showDisabled || t.status !== 'disabled')
+  const handleCustomise = (brandTemplate, displayName) => {
+    const newTemplate = {
+      id: Date.now(),
+      name: displayName || brandTemplate.name,
+      level: 'brand',
+      isCustomised: true,
+      mandatory: brandTemplate.mandatory,
+      status: 'active',
+      read: brandTemplate.read,
+      write: brandTemplate.write,
+      includedInPrint: brandTemplate.includedInPrint,
+      reviewRequired: brandTemplate.reviewRequired,
+    }
+    setTemplates(prev => [...prev, newTemplate])
+  }
+
+  const templateLevel = level === 'office' ? 'custom' : 'brand'
+  const visible = templates.filter(t =>
+    t.level === templateLevel && (showDisabled || t.status !== 'disabled')
+  )
 
   return (
     <div className="page">
@@ -658,7 +743,7 @@ export default function App() {
           <div className="template-list-card">
             <ul className="template-list">
               {visible.map(t => (
-                <TemplateRow key={t.id} template={t} onUpdate={handleUpdate} onDelete={handleDelete} />
+                <TemplateRow key={t.id} template={t} onUpdate={handleUpdate} onDelete={handleDelete} onCustomise={handleCustomise} />
               ))}
             </ul>
           </div>

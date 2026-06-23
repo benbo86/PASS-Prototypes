@@ -264,10 +264,7 @@ export default function App() {
           <div className="warning-banner orange">
             <WarningIcon />
             <div>
-              <h4>Incomplete mandatory assessments</h4>
-              <p>
-                {incompleteCount} mandatory assessment{incompleteCount !== 1 ? 's have' : ' has'} not been completed for this customer.
-              </p>
+              <h4>{incompleteCount} incomplete mandatory assessment{incompleteCount !== 1 ? 's' : ''}</h4>
             </div>
           </div>
         )}
@@ -281,7 +278,7 @@ export default function App() {
 
         {optionalAdded.length > 0 && (
           <section className="assessment-section">
-            <h2 className="section-heading">Optional — added to this customer</h2>
+            <h2 className="section-heading">Optional</h2>
             <div className="assessment-list-card">
               {optionalAdded.map(a => <AssessmentRow key={a.id} assessment={a} />)}
             </div>
