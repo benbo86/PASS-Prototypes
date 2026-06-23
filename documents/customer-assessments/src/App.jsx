@@ -344,8 +344,7 @@ function TemplateRow({ template, onUpdate, onDelete, onCustomise }) {
           <button
             className={`icon-btn ${template.includedInPrint ? 'is-active' : ''}`}
             title={template.includedInPrint ? 'Included in print' : 'Not included in print'}
-            onClick={() => isCustom && onUpdate(template.id, { includedInPrint: !template.includedInPrint })}
-            disabled={isBrand}
+            onClick={() => onUpdate(template.id, { includedInPrint: !template.includedInPrint })}
           >
             <PrintIcon />
           </button>
@@ -361,8 +360,7 @@ function TemplateRow({ template, onUpdate, onDelete, onCustomise }) {
           <button
             className={`icon-btn ${template.reviewRequired ? 'is-active' : ''}`}
             title={template.reviewRequired ? 'Review required' : 'Review not required'}
-            onClick={() => isCustom && onUpdate(template.id, { reviewRequired: !template.reviewRequired })}
-            disabled={isBrand}
+            onClick={() => onUpdate(template.id, { reviewRequired: !template.reviewRequired })}
           >
             <CalendarIcon />
           </button>
