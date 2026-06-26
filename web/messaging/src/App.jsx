@@ -48,11 +48,6 @@ const CheckSentIcon = () => (
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
-const ArchiveIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
-  </svg>
-)
 const MailUnreadIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
     <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
@@ -130,7 +125,7 @@ const THREADS = [
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
     time: '10:42 AM',
     unread: 3,
-    archived: false,
+    closed: false,
   },
   {
     id: 2,
@@ -142,7 +137,7 @@ const THREADS = [
     lastMessage: "Hi Karen, yes I was there until 5pm and she did take all her medication.",
     time: '9:15 AM',
     unread: 1,
-    archived: false,
+    closed: false,
   },
   {
     id: 3,
@@ -154,7 +149,7 @@ const THREADS = [
     lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
     time: 'Yesterday',
     unread: 0,
-    archived: false,
+    closed: false,
   },
   {
     id: 4,
@@ -166,7 +161,7 @@ const THREADS = [
     lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
     time: 'Mon',
     unread: 0,
-    archived: false,
+    closed: false,
   },
   {
     id: 5,
@@ -178,7 +173,7 @@ const THREADS = [
     lastMessage: 'Please see the training video above.',
     time: '10:35 AM',
     unread: 0,
-    archived: false,
+    closed: false,
   },
 ]
 
@@ -249,7 +244,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
   const [tab, setTab] = useState('inbox')
 
   const filtered = threads.filter(t => {
-    const matchesTab = tab === 'inbox' ? !t.archived : t.archived
+    const matchesTab = tab === 'inbox' ? !t.closed : t.closed
     const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
       t.lastMessage.toLowerCase().includes(search.toLowerCase()) ||
       t.participants.toLowerCase().includes(search.toLowerCase())
@@ -282,9 +277,9 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
           onClick={() => setTab('inbox')}
         >Inbox</button>
         <button
-          className={`msg-sidebar-tab${tab === 'archived' ? ' active' : ''}`}
-          onClick={() => setTab('archived')}
-        >Archived</button>
+          className={`msg-sidebar-tab${tab === 'closed' ? ' active' : ''}`}
+          onClick={() => setTab('closed')}
+        >Closed</button>
       </div>
       <div className="msg-thread-list">
         {filtered.map(t => (
@@ -297,7 +292,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
         ))}
         {filtered.length === 0 && (
           <div className="msg-empty-list">
-            {tab === 'archived' ? 'No archived messages' : 'No messages found'}
+            {tab === 'closed' ? 'No closed threads' : 'No messages found'}
           </div>
         )}
       </div>
@@ -307,7 +302,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
 
 // ─── Thread View ───────────────────────────────────────────────
 
-function ThreadView({ thread, messages, onSend, onArchive, onMarkUnread }) {
+function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -408,21 +403,22 @@ function ThreadView({ thread, messages, onSend, onArchive, onMarkUnread }) {
           <span className="msg-thread-header-sub">{thread.participants}</span>
         </div>
         <div className="msg-thread-header-actions">
+          {!thread.closed && (
+            <button
+              className="msg-header-action-btn"
+              title="Mark as unread"
+              onClick={e => { e.stopPropagation(); onMarkUnread?.() }}
+            >
+              <MailUnreadIcon />
+              <span>Mark unread</span>
+            </button>
+          )}
           <button
             className="msg-header-action-btn"
-            title="Mark as unread"
-            onClick={e => { e.stopPropagation(); onMarkUnread?.() }}
+            title={thread.closed ? 'Reopen thread' : 'Close thread'}
+            onClick={e => { e.stopPropagation(); onClose?.() }}
           >
-            <MailUnreadIcon />
-            <span>Mark unread</span>
-          </button>
-          <button
-            className="msg-header-action-btn"
-            title={thread.archived ? 'Unarchive thread' : 'Archive thread'}
-            onClick={e => { e.stopPropagation(); onArchive?.() }}
-          >
-            <ArchiveIcon />
-            <span>{thread.archived ? 'Unarchive' : 'Archive'}</span>
+            <span>{thread.closed ? 'Reopen' : 'Close'}</span>
           </button>
           <button
             className={`msg-header-action-btn icon-only${showInfo ? ' active' : ''}`}
@@ -819,24 +815,37 @@ export default function App() {
   }
 
   const handleSend = (text) => {
+    const wasClosed = threads.find(t => t.id === activeThreadId)?.closed
+    const now = Date.now()
     setThreads(prev => prev.map(t =>
       t.id === activeThreadId
-        ? { ...t, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0 }
+        ? { ...t, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasClosed ? { closed: false } : {}) }
         : t
+    ))
+    setThreadMessages(prev => {
+      const existing = prev[activeThreadId] || []
+      const additions = wasClosed
+        ? [
+            { id: now, type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' },
+            { id: now + 1, isMe: true, text, time: 'Just now', day: 'Today' },
+          ]
+        : [{ id: now, isMe: true, text, time: 'Just now', day: 'Today' }]
+      return { ...prev, [activeThreadId]: [...existing, ...additions] }
+    })
+  }
+
+  const handleClose = () => {
+    const isClosed = threads.find(t => t.id === activeThreadId)?.closed
+    setThreads(prev => prev.map(t =>
+      t.id === activeThreadId ? { ...t, closed: !t.closed } : t
     ))
     setThreadMessages(prev => ({
       ...prev,
       [activeThreadId]: [
         ...(prev[activeThreadId] || []),
-        { id: Date.now(), isMe: true, text, time: 'Just now', day: 'Today' },
+        { id: Date.now(), type: 'event', text: isClosed ? 'This thread has been reopened' : 'This thread has been closed', time: 'Just now', day: 'Today' },
       ],
     }))
-  }
-
-  const handleArchive = () => {
-    setThreads(prev => prev.map(t =>
-      t.id === activeThreadId ? { ...t, archived: !t.archived } : t
-    ))
     setActiveThreadId(null)
     setRightPanel('empty')
   }
@@ -859,7 +868,7 @@ export default function App() {
       lastMessage: message,
       time: 'Just now',
       unread: 0,
-      archived: false,
+      closed: false,
     }
     setThreads(prev => [newThread, ...prev])
     setThreadMessages(prev => ({
@@ -893,7 +902,7 @@ export default function App() {
               thread={activeThread}
               messages={activeMessages}
               onSend={handleSend}
-              onArchive={handleArchive}
+              onClose={handleClose}
               onMarkUnread={handleMarkUnread}
             />
           )}

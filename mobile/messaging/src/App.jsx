@@ -231,7 +231,7 @@ const THREADS = [
     time: '10:42 AM',
     unread: 3,
     sentByMe: false,
-    archived: false,
+    closed: false,
   },
   {
     id: 2,
@@ -248,7 +248,7 @@ const THREADS = [
     time: '9:15 AM',
     unread: 1,
     sentByMe: false,
-    archived: false,
+    closed: false,
   },
   {
     id: 3,
@@ -265,7 +265,7 @@ const THREADS = [
     time: 'Yesterday',
     unread: 0,
     sentByMe: false,
-    archived: false,
+    closed: false,
   },
   {
     id: 5,
@@ -282,7 +282,7 @@ const THREADS = [
     time: '10:35 AM',
     unread: 0,
     sentByMe: false,
-    archived: false,
+    closed: false,
   },
   {
     id: 4,
@@ -300,7 +300,7 @@ const THREADS = [
     unread: 0,
     sentByMe: true,
     deliveredNotRead: true,
-    archived: false,
+    closed: false,
   },
 ]
 
@@ -337,80 +337,11 @@ const THREAD_MESSAGES = {
 
 // ─── Inbox Screen ────────────────────────────────────────────
 
-function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
-  const [swipeX, setSwipeX] = useState(0)
-  const [isSwiping, setIsSwiping] = useState(false)
-  const swipeXRef = useRef(0)
-  const startXRef = useRef(null)
-  const baseXRef = useRef(0)
-  const didDragRef = useRef(false)
-  const ACTION_WIDTH = 88
-  const canArchive = thread.sentByMe
-
-  const updateSwipeX = (val) => {
-    swipeXRef.current = val
-    setSwipeX(val)
-  }
-
-  const handlePointerDown = (e) => {
-    if (e.target.closest('button')) return
-    e.currentTarget.setPointerCapture(e.pointerId)
-    startXRef.current = e.clientX
-    baseXRef.current = swipeXRef.current
-    didDragRef.current = false
-    setIsSwiping(true)
-  }
-
-  const handlePointerMove = (e) => {
-    if (startXRef.current === null) return
-    const delta = e.clientX - startXRef.current
-    if (Math.abs(delta) > 5) didDragRef.current = true
-    updateSwipeX(Math.min(0, Math.max(-ACTION_WIDTH, baseXRef.current + delta)))
-  }
-
-  const handlePointerUp = () => {
-    if (startXRef.current === null) return
-    startXRef.current = null
-    setIsSwiping(false)
-    updateSwipeX(swipeXRef.current < -ACTION_WIDTH / 2 ? -ACTION_WIDTH : 0)
-  }
-
-  const handleRowClick = () => {
-    if (didDragRef.current) { didDragRef.current = false; return }
-    if (swipeXRef.current !== 0) { updateSwipeX(0); return }
-    onClick()
-  }
-
-  const handleArchive = (e) => {
-    e.stopPropagation()
-    updateSwipeX(0)
-    onArchive(thread.id)
-  }
-
+function ThreadRow({ thread, onClick, showClosedTag }) {
   const isUnread = thread.unread > 0
   return (
-    <div
-      className="thread-row-outer"
-      onPointerDown={canArchive ? handlePointerDown : undefined}
-      onPointerMove={canArchive ? handlePointerMove : undefined}
-      onPointerUp={canArchive ? handlePointerUp : undefined}
-      onPointerCancel={canArchive ? handlePointerUp : undefined}
-      onClick={handleRowClick}
-    >
-      {canArchive && (
-        <div className="thread-swipe-action">
-          <button
-            className={`thread-archive-btn${thread.archived ? ' unarchive' : ''}`}
-            onClick={handleArchive}
-          >
-            {thread.archived ? 'Unarchive' : 'Archive'}
-          </button>
-        </div>
-      )}
-      <div
-        className="thread-row"
-        style={{ transform: `translateX(${swipeX}px)`, transition: isSwiping ? 'none' : 'transform 0.2s ease' }}
-      >
+    <div className="thread-row-outer" onClick={onClick}>
+      <div className="thread-row">
         <div className={`thread-avatar ${thread.isGroup ? 'group' : ''}`}>
           {thread.isGroup ? <GroupIcon /> : <PersonIcon />}
         </div>
@@ -425,7 +356,7 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
           </div>
           <div className="thread-bottom">
             <div className="thread-tags">
-              {showArchivedTag && <span className="thread-archived-tag">Archived</span>}
+              {showClosedTag && <span className="thread-closed-tag">Closed</span>}
             </div>
             <div className="thread-right-meta">
               {isUnread
@@ -444,7 +375,7 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
   )
 }
 
-function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread }) {
+function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('inbox')
 
@@ -457,7 +388,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
       (t.careReceiver && t.careReceiver.toLowerCase().includes(search.toLowerCase()))
     if (!matchesSearch) return false
     if (isSearching) return true
-    return tab === 'inbox' ? !t.archived : t.archived
+    return tab === 'inbox' ? !t.closed : t.closed
   })
 
   return (
@@ -484,7 +415,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
       {!isSearching && (
         <div className="inbox-tabs">
           <button className={`inbox-tab${tab === 'inbox' ? ' active' : ''}`} onClick={() => setTab('inbox')}>Inbox</button>
-          <button className={`inbox-tab${tab === 'archived' ? ' active' : ''}`} onClick={() => setTab('archived')}>Archived</button>
+          <button className={`inbox-tab${tab === 'closed' ? ' active' : ''}`} onClick={() => setTab('closed')}>Closed</button>
         </div>
       )}
       <div className="thread-list">
@@ -493,13 +424,12 @@ function InboxScreen({ threads, onOpenThread, onCompose, onArchive, totalUnread 
             key={t.id}
             thread={t}
             onClick={() => onOpenThread(t.id)}
-            onArchive={onArchive}
-            showArchivedTag={isSearching && t.archived}
+            showClosedTag={isSearching && t.closed}
           />
         ))}
         {filtered.length === 0 && (
           <div className="empty-state">
-            {isSearching ? 'No messages found' : tab === 'archived' ? 'No archived messages' : 'No messages'}
+            {isSearching ? 'No messages found' : tab === 'closed' ? 'No closed threads' : 'No messages'}
           </div>
         )}
       </div>
@@ -513,7 +443,7 @@ const P_FG = ['#ffffff', '#1b5e20', '#0d47a1', '#7a5200', '#7a1030', '#00504a', 
 
 // ─── Thread Info Sheet ───────────────────────────────────────
 
-function ThreadInfoSheet({ thread, onClose, onArchive, onMarkUnread, onRequestAddParticipants }) {
+function ThreadInfoSheet({ thread, onClose, onMarkUnread, onRequestAddParticipants }) {
   const list = thread.participantList || []
   return (
     <div className="picker-overlay" onClick={onClose}>
@@ -574,11 +504,6 @@ function ThreadInfoSheet({ thread, onClose, onArchive, onMarkUnread, onRequestAd
         <button className="info-action-btn" onClick={() => { onMarkUnread?.(); onClose() }}>
           Mark as unread
         </button>
-        {thread.sentByMe && (
-          <button className="info-action-btn" onClick={onArchive}>
-            {thread.archived ? 'Unarchive thread' : 'Archive thread'}
-          </button>
-        )}
       </div>
     </div>
   )
@@ -743,7 +668,7 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onArchive, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
+const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -975,7 +900,6 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
         <ThreadInfoSheet
           thread={thread}
           onClose={() => setShowInfo(false)}
-          onArchive={() => { onArchive?.(thread.id); setShowInfo(false); onBack(); }}
           onMarkUnread={() => onMarkUnread?.(thread.id)}
           onRequestAddParticipants={() => { setPendingParticipants([]); setShowParticipantPicker(true) }}
         />
@@ -1314,12 +1238,6 @@ export default function App() {
     threadScreenRef.current?.dismissAll()
   }
 
-  const handleArchive = (id) => {
-    setThreads(prev => prev.map(t =>
-      t.id === id ? { ...t, archived: !t.archived, ...(t.archived ? {} : { unread: 0 }) } : t
-    ))
-  }
-
   const handleMarkUnread = (id) => {
     setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 1 } : t))
   }
@@ -1417,7 +1335,6 @@ export default function App() {
               threads={threads}
               onOpenThread={openThread}
               onCompose={openCompose}
-              onArchive={handleArchive}
               totalUnread={totalUnread}
             />
           </div>
@@ -1428,7 +1345,6 @@ export default function App() {
               messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
               onBack={() => setView('inbox')}
               onMessageSent={handleReply}
-              onArchive={handleArchive}
               onMarkUnread={handleMarkUnread}
               onAddParticipants={handleAddParticipants}
               onMessageDeleted={handleMessageDeleted}

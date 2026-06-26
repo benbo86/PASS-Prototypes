@@ -107,41 +107,13 @@
   border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
 }
 
-.thread-swipe-action {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: stretch;
-  width: 88px;
-}
-
-.thread-archive-btn {
-  flex: 1;
-  background: var(--brand-purple-3-purple-2);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-family: Barlow, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-.thread-archive-btn:hover { background: var(--brand-purple-1-purple-0); }
-.thread-archive-btn.unarchive { background: var(--greyscale-6-grey-50); }
-.thread-archive-btn.unarchive:hover { background: var(--greyscale-4-grey-40); }
-
 .thread-tags {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.thread-archived-tag {
+.thread-closed-tag {
   display: inline-flex;
   align-items: center;
   background: var(--ui-purple-6-lavendar-grey);
