@@ -91,6 +91,17 @@ const ReplyIcon = ({ size = 20 }) => (
     <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
   </svg>
 )
+const EllipsisIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+  </svg>
+)
+const UnreadBubbleIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+    <circle cx="19" cy="5" r="3.5"/>
+  </svg>
+)
 const InfoIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
@@ -450,23 +461,19 @@ function ThreadInfoSheet({ thread, onClose, onMarkUnread, onRequestAddParticipan
       <div className="picker-sheet info-sheet" onClick={e => e.stopPropagation()}>
         <div className="picker-handle" />
 
-        <div className="info-sheet-top">
-          <div className={`info-sheet-avatar${thread.isGroup ? ' group' : ''}`}>
-            {thread.isGroup ? <GroupIcon size={28} /> : <PersonIcon size={28} />}
-          </div>
-          <div className="info-sheet-name">{thread.title}</div>
-          <div className="info-sheet-type">{thread.isGroup ? 'Group conversation' : 'Direct message'}</div>
+        <div className="info-menu">
+          <button className="info-menu-item" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }}>
+            <AddIcon size={20} />
+            <span>Participants</span>
+          </button>
+          <button className="info-menu-item" onClick={() => { onMarkUnread?.(); onClose() }}>
+            <UnreadBubbleIcon size={20} />
+            <span>Mark as unread</span>
+          </button>
         </div>
 
         <div className="info-section">
-          <div className="info-section-header">
-            <div className="info-section-label">Participants · {list.length}</div>
-            {thread.sentByMe && (
-              <button className="info-add-btn" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }} aria-label="Add participant">
-                <PlusIcon size={16} />
-              </button>
-            )}
-          </div>
+          <div className="info-section-label">Participants · {list.length}</div>
           <div className="info-participants-list">
             {list.map((p, i) => (
               <div key={i} className="info-participant-row">
@@ -500,10 +507,6 @@ function ThreadInfoSheet({ thread, onClose, onMarkUnread, onRequestAddParticipan
             </div>
           </div>
         )}
-
-        <button className="info-action-btn" onClick={() => { onMarkUnread?.(); onClose() }}>
-          Mark as unread
-        </button>
       </div>
     </div>
   )
@@ -776,7 +779,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
           <span className="thread-header-title">{thread?.title}</span>
           <span className="thread-header-sub">{thread?.participants}</span>
         </div>
-        <button className="app-header-action" onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}><InfoIcon /></button>
+        <button className="app-header-action" onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}><EllipsisIcon /></button>
       </div>
 
       {/* Care receiver tag */}
@@ -807,10 +810,12 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                 <div
                   key={msg.id}
                   className={`message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
-                  onClick={e => openActions(e, msg)}
                 >
                   {showSender && <div className="msg-sender-name">{msg.sender}</div>}
-                  <div className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}>
+                  <div
+                    className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}
+                    onClick={e => openActions(e, msg)}
+                  >
                   {msg.replyTo && (
                     <div className={`reply-quote ${msg.isMe ? 'reply-quote-me' : ''}`}>
                       <span className="reply-quote-author">{msg.replyTo.isMe ? 'You' : msg.replyTo.sender}</span>
@@ -875,7 +880,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
 
       {/* Compose bar */}
       <div className="compose-bar" onClick={e => e.stopPropagation()}>
-        <button className="compose-icon-btn" onClick={() => { setShowAttach(s => !s); onCloseActions?.() }}>
+        <button className="compose-icon-btn" onClick={e => { e.stopPropagation(); setShowAttach(s => !s) }}>
           <AddIcon />
         </button>
         <div className="compose-input-wrap">

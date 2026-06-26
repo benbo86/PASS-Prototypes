@@ -48,9 +48,10 @@ const CheckSentIcon = () => (
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
-const MailUnreadIcon = () => (
+const UnreadBubbleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+    <circle cx="19" cy="5" r="3.5"/>
   </svg>
 )
 const InfoIcon = () => (
@@ -112,6 +113,24 @@ const CARERS = [
   { id: 13, name: 'Ryan Sutton',     initials: 'RS' },
   { id: 14, name: 'Fiona Marsh',     initials: 'FM' },
   { id: 15, name: 'Callum Reid',     initials: 'CR' },
+]
+
+const TAG_TYPES = [
+  { id: 1, name: 'Care Home' },
+  { id: 2, name: 'Area' },
+  { id: 3, name: 'Shift Pattern' },
+]
+
+const TAGS = [
+  { id: 101, typeId: 1, name: 'Blue Bird Sheffield',  memberCount: 15 },
+  { id: 102, typeId: 1, name: 'Sunrise Rotherham',    memberCount: 8  },
+  { id: 103, typeId: 1, name: 'Meadow View Leeds',    memberCount: 6  },
+  { id: 104, typeId: 2, name: 'North Sheffield',      memberCount: 11 },
+  { id: 105, typeId: 2, name: 'South Sheffield',      memberCount: 9  },
+  { id: 106, typeId: 2, name: 'Rotherham Central',    memberCount: 14 },
+  { id: 107, typeId: 3, name: 'Early Shift',          memberCount: 12 },
+  { id: 108, typeId: 3, name: 'Late Shift',           memberCount: 10 },
+  { id: 109, typeId: 3, name: 'Weekend',              memberCount: 7  },
 ]
 
 const THREADS = [
@@ -309,9 +328,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   const [editing, setEditing] = useState(null)
   const [actionTarget, setActionTarget] = useState(null)
   const [showInfo, setShowInfo] = useState(false)
+  const [showAttach, setShowAttach] = useState(false)
   const [participantList, setParticipantList] = useState(thread.participantList)
   const [addSearch, setAddSearch] = useState('')
   const [showAddDropdown, setShowAddDropdown] = useState(false)
+  const [addTab, setAddTab] = useState('carers')
   const endRef = useRef(null)
   const inputRef = useRef(null)
   const addRef = useRef(null)
@@ -322,6 +343,7 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
     setEditing(null)
     setInputText('')
     setReplyTo(null)
+    setShowAttach(false)
   }, [thread.id])
 
   useEffect(() => {
@@ -339,21 +361,63 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const availableCarers = CARERS.filter(c =>
-    c.name.toLowerCase().includes(addSearch.toLowerCase()) &&
-    !participantList.includes(c.name)
-  )
+  const addFilteredCarers = CARERS
+    .filter(c => c.name.toLowerCase().includes(addSearch.toLowerCase()))
+    .sort((a, b) => a.name.split(' ').at(-1).localeCompare(b.name.split(' ').at(-1)))
+  const addFilteredTagTypes = TAG_TYPES.map(type => ({
+    ...type,
+    tags: TAGS.filter(tag =>
+      tag.typeId === type.id &&
+      tag.name.toLowerCase().includes(addSearch.toLowerCase())
+    ),
+  })).filter(type => type.tags.length > 0)
+
+  const carerInList = (carer) => participantList.includes(carer.name)
+  const tagLabel = (tag) => `${tag.name} · ${tag.memberCount} members`
+  const tagInList = (tag) => participantList.includes(tagLabel(tag))
+  const addAllCarersSelected = addFilteredCarers.length > 0 && addFilteredCarers.every(carerInList)
+  const hasAdded = CARERS.some(carerInList) || TAGS.some(tagInList)
+
+  const toggleAddCarer = (carer) => {
+    if (carerInList(carer)) {
+      setParticipantList(prev => prev.filter(n => n !== carer.name))
+      appendEvent(`You removed ${carer.name}`)
+    } else {
+      setParticipantList(prev => [...prev, carer.name])
+      appendEvent(`You added ${carer.name}`)
+    }
+  }
+  const toggleAddTag = (tag) => {
+    if (tagInList(tag)) {
+      setParticipantList(prev => prev.filter(n => n !== tagLabel(tag)))
+      appendEvent(`You removed ${tag.name}`)
+    } else {
+      setParticipantList(prev => [...prev, tagLabel(tag)])
+      appendEvent(`You added ${tag.name}`)
+    }
+  }
+  const selectAllAddCarers = () => {
+    if (addAllCarersSelected) {
+      const names = addFilteredCarers.map(c => c.name)
+      names.forEach(n => appendEvent(`You removed ${n}`))
+      setParticipantList(prev => prev.filter(n => !names.includes(n)))
+    } else {
+      const toAdd = addFilteredCarers.filter(c => !carerInList(c))
+      toAdd.forEach(c => appendEvent(`You added ${c.name}`))
+      setParticipantList(prev => [...prev, ...toAdd.map(c => c.name)])
+    }
+  }
+  const clearAddAll = () => {
+    const carerNames = CARERS.filter(carerInList).map(c => c.name)
+    const tagLabels = TAGS.filter(tagInList).map(tagLabel)
+    carerNames.forEach(n => appendEvent(`You removed ${n}`))
+    TAGS.filter(tagInList).forEach(t => appendEvent(`You removed ${t.name}`))
+    setParticipantList(prev => prev.filter(n => !carerNames.includes(n) && !tagLabels.includes(n)))
+  }
 
   const appendEvent = (text) => {
     setLocalMsgs(prev => [...prev, { id: Date.now(), type: 'event', text, time: 'Just now', day: 'Today' }])
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-  }
-
-  const handleAddParticipant = (carer) => {
-    setParticipantList(prev => [...prev, carer.name])
-    setAddSearch('')
-    setShowAddDropdown(false)
-    appendEvent(`You added ${carer.name}`)
   }
 
   const handleRemoveParticipant = (name) => {
@@ -392,7 +456,7 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   }
 
   return (
-    <div className="msg-thread-view" onClick={() => { setActionTarget(null); setShowInfo(false) }}>
+    <div className="msg-thread-view" onClick={() => { setActionTarget(null); setShowInfo(false); setShowAttach(false) }}>
       {/* Header */}
       <div className="msg-thread-header">
         <div className={`msg-thread-header-avatar${thread.isGroup ? ' group' : ''}`}>
@@ -403,29 +467,31 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
           <span className="msg-thread-header-sub">{thread.participants}</span>
         </div>
         <div className="msg-thread-header-actions">
+          <button
+            className={`msg-header-action-btn${showInfo ? ' active' : ''}`}
+            title="Participants"
+            onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}
+          >
+            <GroupIcon size={18} />
+            <span>Participants</span>
+          </button>
           {!thread.closed && (
             <button
               className="msg-header-action-btn"
               title="Mark as unread"
               onClick={e => { e.stopPropagation(); onMarkUnread?.() }}
             >
-              <MailUnreadIcon />
+              <UnreadBubbleIcon />
               <span>Mark unread</span>
             </button>
           )}
           <button
             className="msg-header-action-btn"
-            title={thread.closed ? 'Reopen thread' : 'Close thread'}
+            title={thread.closed ? 'Reopen thread' : 'Close message'}
             onClick={e => { e.stopPropagation(); onClose?.() }}
           >
-            <span>{thread.closed ? 'Reopen' : 'Close'}</span>
-          </button>
-          <button
-            className={`msg-header-action-btn icon-only${showInfo ? ' active' : ''}`}
-            title="Thread info"
-            onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}
-          >
-            <InfoIcon />
+            {!thread.closed && <CloseIcon size={18} />}
+            <span>{thread.closed ? 'Reopen' : 'Close message'}</span>
           </button>
         </div>
       </div>
@@ -435,48 +501,111 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         <div className="msg-info-panel" onClick={e => e.stopPropagation()}>
           <div className="msg-info-section">
             <span className="msg-info-label">Participants</span>
-            <div className="msg-info-participants">
-              {participantList.map((name, i) => (
-                <span key={i} className="msg-info-chip">
-                  {name}
-                  {participantList.length > 1 && (
-                    <button className="msg-chip-remove" onClick={() => handleRemoveParticipant(name)}>
-                      <CloseIcon size={11} />
-                    </button>
-                  )}
-                </span>
-              ))}
-              <div className="msg-add-participant" ref={addRef}>
-                  <input
-                    className="msg-add-participant-input"
-                    placeholder="Add participant..."
-                    value={addSearch}
-                    onChange={e => { setAddSearch(e.target.value); setShowAddDropdown(true) }}
-                    onFocus={() => setShowAddDropdown(true)}
-                  />
-                  {showAddDropdown && availableCarers.length > 0 && (
-                    <div className="msg-carer-dropdown msg-add-dropdown">
-                      {availableCarers.map(c => {
+            <div className="msg-compose-to-wrap" ref={addRef}>
+              <div className="msg-compose-to-inner">
+                {(() => {
+                  const LIMIT = 5
+                  const visible = participantList.slice(0, LIMIT)
+                  const overflow = participantList.length - LIMIT
+                  return (
+                    <>
+                      {visible.map((name, i) => (
+                        <span key={i} className="msg-compose-chip">
+                          {name}
+                          {participantList.length > 1 && (
+                            <button className="msg-chip-remove" onMouseDown={e => { e.preventDefault(); handleRemoveParticipant(name) }}>
+                              <CloseIcon size={12} />
+                            </button>
+                          )}
+                        </span>
+                      ))}
+                      {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
+                    </>
+                  )
+                })()}
+                <input
+                  className="msg-compose-to-input"
+                  placeholder={participantList.length === 0 ? 'Add participant...' : ''}
+                  value={addSearch}
+                  onChange={e => { setAddSearch(e.target.value); setShowAddDropdown(true) }}
+                  onFocus={() => setShowAddDropdown(true)}
+                />
+              </div>
+              {showAddDropdown && (
+                <div className="msg-carer-dropdown msg-add-dropdown">
+                  <div className="msg-dropdown-tabs">
+                    <button
+                      className={`msg-dropdown-tab${addTab === 'carers' ? ' active' : ''}`}
+                      onMouseDown={e => { e.preventDefault(); setAddTab('carers') }}
+                    ><PersonIcon size={16} />Carers</button>
+                    <button
+                      className={`msg-dropdown-tab${addTab === 'groups' ? ' active' : ''}`}
+                      onMouseDown={e => { e.preventDefault(); setAddTab('groups') }}
+                    ><GroupIcon size={16} />Groups</button>
+                  </div>
+
+                  {addTab === 'carers' && (
+                    <>
+                      {!addSearch && (
+                        <div className="msg-carer-option msg-carer-option-all" onClick={selectAllAddCarers}>
+                          <input type="checkbox" className="msg-option-checkbox" checked={addAllCarersSelected} onChange={() => {}} />
+                          <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                            <GroupIcon size={16} />
+                          </div>
+                          <span>All carers</span>
+                        </div>
+                      )}
+                      {addFilteredCarers.length > 0 ? addFilteredCarers.map(c => {
                         const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
                         return (
-                          <div key={c.id} className="msg-carer-option" onClick={() => handleAddParticipant(c)}>
+                          <div key={c.id} className="msg-carer-option" onClick={() => toggleAddCarer(c)}>
+                            <input type="checkbox" className="msg-option-checkbox" checked={carerInList(c)} onChange={() => {}} />
                             <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
                               {c.initials}
                             </div>
                             <span>{c.name}</span>
                           </div>
                         )
-                      })}
+                      }) : <div className="msg-dropdown-empty">No carers found</div>}
+                    </>
+                  )}
+
+                  {addTab === 'groups' && (
+                    addFilteredTagTypes.length > 0 ? addFilteredTagTypes.map(type => (
+                      <div key={type.id}>
+                        <div className="msg-dropdown-type-header">{type.name}</div>
+                        {type.tags.map(tag => {
+                          return (
+                            <div key={tag.id} className="msg-carer-option" onClick={() => toggleAddTag(tag)}>
+                              <input type="checkbox" className="msg-option-checkbox" checked={tagInList(tag)} onChange={() => {}} />
+                              <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                                <GroupIcon size={16} />
+                              </div>
+                              <div className="msg-tag-option-body">
+                                <span>{tag.name}</span>
+                                <span className="msg-tag-member-count">{tag.memberCount} members</span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )) : <div className="msg-dropdown-empty">{addSearch ? 'No groups found' : 'No groups available'}</div>
+                  )}
+
+                  {hasAdded && (
+                    <div className="msg-dropdown-clear">
+                      <button onMouseDown={e => { e.preventDefault(); clearAddAll() }}>Clear all</button>
                     </div>
                   )}
                 </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Messages */}
-      <div className="msg-messages-area" onClick={e => e.stopPropagation()}>
+      <div className="msg-messages-area" onClick={() => { setActionTarget(null); setShowAttach(false) }}>
         {byDay.map(group => (
           <div key={group.day}>
             <div className="msg-day-sep"><span>{group.day}</span></div>
@@ -494,13 +623,15 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
                 <div
                   key={msg.id}
                   className={`msg-message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
-                  onClick={e => { e.stopPropagation(); setActionTarget(actionTarget?.id === msg.id ? null : msg) }}
                 >
                   {showSender && <div className="msg-sender-label">{msg.sender}</div>}
                   {replyTo?.id === msg.id && (
                     <div className="msg-reply-indicator" />
                   )}
-                  <div className={`msg-bubble ${msg.isMe ? 'sent' : 'received'}`}>
+                  <div
+                    className={`msg-bubble ${msg.isMe ? 'sent' : 'received'}`}
+                    onClick={e => { e.stopPropagation(); setActionTarget(actionTarget?.id === msg.id ? null : msg) }}
+                  >
                     {msg.replyTo && (
                       <div className={`msg-reply-quote${msg.isMe ? ' me' : ''}`}>
                         <span className="msg-reply-author">{msg.replyTo.isMe ? 'You' : msg.replyTo.sender}</span>
@@ -576,7 +707,14 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
 
       {/* Compose bar */}
       <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
-        <button className="msg-compose-attach" title="Attach file">
+        {showAttach && (
+          <div className="msg-attach-picker" onClick={e => e.stopPropagation()}>
+            <button className="msg-attach-option" onClick={() => setShowAttach(false)}>
+              <AttachIcon /><span>File</span>
+            </button>
+          </div>
+        )}
+        <button className="msg-compose-attach" title="Attach file" onClick={e => { e.stopPropagation(); setShowAttach(s => !s) }}>
           <AttachIcon />
         </button>
         <div className="msg-compose-input-wrap">
@@ -616,18 +754,29 @@ function ComposeView({ onSend, onCancel }) {
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const [selectedCarers, setSelectedCarers] = useState([])
+  const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [dropdownTab, setDropdownTab] = useState('carers')
   const [attachments, setAttachments] = useState([])
   const dropdownRef = useRef(null)
   const fileInputRef = useRef(null)
 
-  const filteredCarers = CARERS.filter(c =>
-    c.name.toLowerCase().includes(recipientSearch.toLowerCase()) &&
-    !selectedCarers.some(s => s.id === c.id)
-  )
+  const filteredCarers = CARERS
+    .filter(c => c.name.toLowerCase().includes(recipientSearch.toLowerCase()))
+    .sort((a, b) => a.name.split(' ').at(-1).localeCompare(b.name.split(' ').at(-1)))
 
-  const canSend = title.trim() && message.trim() && selectedCarers.length > 0
+  const filteredTagTypes = TAG_TYPES.map(type => ({
+    ...type,
+    tags: TAGS.filter(tag =>
+      tag.typeId === type.id &&
+      tag.name.toLowerCase().includes(recipientSearch.toLowerCase())
+    ),
+  })).filter(type => type.tags.length > 0)
+
+  const hasRecipients = selectedCarers.length > 0 || selectedTags.length > 0
+  const canSend = title.trim() && message.trim() && hasRecipients
+  const allCarersSelected = selectedCarers.length === CARERS.length
 
   const handleFileAttach = (e) => {
     const files = Array.from(e.target.files)
@@ -641,21 +790,24 @@ function ComposeView({ onSend, onCancel }) {
 
   const toggleCarer = (carer) => {
     setSelectedCarers(prev =>
-      prev.some(c => c.id === carer.id)
-        ? prev.filter(c => c.id !== carer.id)
-        : [...prev, carer]
+      prev.some(c => c.id === carer.id) ? prev.filter(c => c.id !== carer.id) : [...prev, carer]
     )
-    setRecipientSearch('')
-    setShowDropdown(false)
+  }
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev =>
+      prev.some(t => t.id === tag.id) ? prev.filter(t => t.id !== tag.id) : [...prev, tag]
+    )
   }
 
   const selectAllCarers = () => {
-    setSelectedCarers(CARERS)
-    setRecipientSearch('')
-    setShowDropdown(false)
+    setSelectedCarers(allCarersSelected ? [] : CARERS)
   }
 
-  const allSelected = selectedCarers.length === CARERS.length
+  const clearAll = () => {
+    setSelectedCarers([])
+    setSelectedTags([])
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -666,6 +818,9 @@ function ComposeView({ onSend, onCancel }) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const showCarerDropdown = dropdownTab === 'carers' && (filteredCarers.length > 0 || !recipientSearch)
+  const showGroupDropdown = dropdownTab === 'groups'
 
   return (
     <div className="msg-compose-view">
@@ -683,43 +838,119 @@ function ComposeView({ onSend, onCancel }) {
           <label className="msg-compose-label">To</label>
           <div className="msg-compose-to-wrap" ref={dropdownRef}>
             <div className="msg-compose-to-inner">
-              {selectedCarers.map((c, i) => (
-                <span key={c.id} className="msg-compose-chip">
-                  {c.name}
-                  <button onClick={() => toggleCarer(c)} className="msg-chip-remove">
-                    <CloseIcon size={12} />
-                  </button>
-                </span>
-              ))}
+              {(() => {
+                const allChips = [
+                  ...selectedTags.map(tag => ({ type: 'tag', tag })),
+                  ...selectedCarers.map(c => ({ type: 'carer', carer: c })),
+                ]
+                const LIMIT = 5
+                const visible = allChips.slice(0, LIMIT)
+                const overflow = allChips.length - LIMIT
+                return (
+                  <>
+                    {visible.map((item, i) =>
+                      item.type === 'tag' ? (
+                        <span key={`tag-${item.tag.id}`} className="msg-compose-chip msg-compose-chip-tag">
+                          <GroupIcon size={11} />
+                          {item.tag.name} · {item.tag.memberCount}
+                          <button onClick={() => toggleTag(item.tag)} className="msg-chip-remove">
+                            <CloseIcon size={12} />
+                          </button>
+                        </span>
+                      ) : (
+                        <span key={item.carer.id} className="msg-compose-chip">
+                          {item.carer.name}
+                          <button onClick={() => toggleCarer(item.carer)} className="msg-chip-remove">
+                            <CloseIcon size={12} />
+                          </button>
+                        </span>
+                      )
+                    )}
+                    {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
+                  </>
+                )
+              })()}
               <input
                 className="msg-compose-to-input"
-                placeholder={selectedCarers.length === 0 ? 'Search for a carer...' : ''}
+                placeholder={!hasRecipients ? 'Search for a carer or group...' : ''}
                 value={recipientSearch}
                 onChange={e => { setRecipientSearch(e.target.value); setShowDropdown(true) }}
                 onFocus={() => setShowDropdown(true)}
               />
             </div>
-            {showDropdown && (filteredCarers.length > 0 || (!recipientSearch && !allSelected)) && (
+            {showDropdown && (
               <div className="msg-carer-dropdown">
-                {!recipientSearch && !allSelected && (
-                  <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
-                    <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                      <GroupIcon size={16} />
-                    </div>
-                    <span>All carers</span>
-                  </div>
-                )}
-                {filteredCarers.map(c => {
-                  const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
-                  return (
-                    <div key={c.id} className="msg-carer-option" onClick={() => toggleCarer(c)}>
-                      <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
-                        {c.initials}
+                <div className="msg-dropdown-tabs">
+                  <button
+                    className={`msg-dropdown-tab${dropdownTab === 'carers' ? ' active' : ''}`}
+                    onMouseDown={e => { e.preventDefault(); setDropdownTab('carers') }}
+                  ><PersonIcon size={16} />Carers</button>
+                  <button
+                    className={`msg-dropdown-tab${dropdownTab === 'groups' ? ' active' : ''}`}
+                    onMouseDown={e => { e.preventDefault(); setDropdownTab('groups') }}
+                  ><GroupIcon size={16} />Groups</button>
+                </div>
+
+                {dropdownTab === 'carers' && (
+                  <>
+                    {!recipientSearch && (
+                      <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
+                        <input type="checkbox" className="msg-option-checkbox" checked={allCarersSelected} onChange={() => {}} />
+                        <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                          <GroupIcon size={16} />
+                        </div>
+                        <span>All carers</span>
                       </div>
-                      <span>{c.name}</span>
+                    )}
+                    {filteredCarers.map(c => {
+                      const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
+                      const isSelected = selectedCarers.some(s => s.id === c.id)
+                      return (
+                        <div key={c.id} className="msg-carer-option" onClick={() => toggleCarer(c)}>
+                          <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
+                          <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
+                            {c.initials}
+                          </div>
+                          <span>{c.name}</span>
+                        </div>
+                      )
+                    })}
+                    {filteredCarers.length === 0 && <div className="msg-dropdown-empty">No carers found</div>}
+                  </>
+                )}
+
+                {dropdownTab === 'groups' && (
+                  filteredTagTypes.length > 0 ? filteredTagTypes.map(type => (
+                    <div key={type.id}>
+                      <div className="msg-dropdown-type-header">{type.name}</div>
+                      {type.tags.map(tag => {
+                        const isSelected = selectedTags.some(s => s.id === tag.id)
+                        return (
+                          <div key={tag.id} className="msg-carer-option" onClick={() => toggleTag(tag)}>
+                            <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
+                            <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                              <GroupIcon size={16} />
+                            </div>
+                            <div className="msg-tag-option-body">
+                              <span>{tag.name}</span>
+                              <span className="msg-tag-member-count">{tag.memberCount} members</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )) : (
+                    <div className="msg-dropdown-empty">
+                      {recipientSearch ? 'No groups found' : 'No groups available'}
                     </div>
                   )
-                })}
+                )}
+
+                {hasRecipients && (
+                  <div className="msg-dropdown-clear">
+                    <button onMouseDown={e => { e.preventDefault(); clearAll() }}>Clear all</button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -770,7 +1001,7 @@ function ComposeView({ onSend, onCancel }) {
           <button
             className="round-btn primary-btn btn-icon-right"
             disabled={!canSend}
-            onClick={() => canSend && onSend({ title, recipients: selectedCarers, message })}
+            onClick={() => canSend && onSend({ title, recipients: selectedCarers, tags: selectedTags, message })}
           >
             Send <SendIcon />
           </button>
@@ -856,14 +1087,19 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ title, recipients, message }) => {
+  const handleNewMessage = ({ title, recipients, tags, message }) => {
     const newId = Math.max(...threads.map(t => t.id)) + 1
+    const isGroup = recipients.length + tags.length > 1 || tags.length > 0
+    const participantParts = [
+      ...tags.map(t => `${t.name} · ${t.memberCount} members`),
+      ...recipients.map(r => r.name),
+    ]
     const newThread = {
       id: newId,
       title,
-      isGroup: recipients.length > 1,
-      participants: recipients.map(r => r.name).join(', '),
-      participantList: recipients.map(r => r.name),
+      isGroup,
+      participants: participantParts.join(', '),
+      participantList: [...tags.map(t => t.name), ...recipients.map(r => r.name)],
       lastSender: 'Office',
       lastMessage: message,
       time: 'Just now',
