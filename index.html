@@ -25,22 +25,43 @@
       padding: 40px 48px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       width: 100%;
-      max-width: 480px;
+      max-width: 640px;
     }
     h1 { font-size: 22px; font-weight: 600; margin-bottom: 24px; }
     ul { list-style: none; }
-    ul li { margin-bottom: 16px; }
-    li ul li { margin: 8px 0px; }
-    a {
-      display: block;
-      padding: 14px 0;
-      font-size: 16px;
+    ul > li { margin-bottom: 16px; }
+    li ul { margin-top: 8px; }
+    li ul li {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 6px 0;
+    }
+    .proto-link {
+      flex: 1;
+      font-size: 15px;
       font-weight: 400;
       color: #9a26d6;
       text-decoration: none;
-      padding:0px;
     }
-    a:hover { color: #8421b8; }
+    .proto-link:hover { color: #8421b8; }
+    .jira-link {
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: #968caf;
+      text-decoration: none;
+      border: 1px solid #dcd9e4;
+      border-radius: 4px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .jira-link:hover { color: #9a26d6; border-color: #9a26d6; }
+    .jira-spacer {
+      flex-shrink: 0;
+      width: 57px;
+    }
   </style>
 </head>
 <body>
@@ -49,43 +70,90 @@
     <ul>
       <li><b>Schedule</b>
         <ul>
-          <li><a href="./schedule/assign-visit-absent-employee-event-panel/">Assign visit when absent warning (event panel)</a></li>
-          <li><a href="./schedule/assign-visit-absent-employee/">Assign visit when absent warning (schedule)</a></li>
+          <li>
+            <a class="proto-link" href="./schedule/assign-visit-absent-employee-event-panel/">Assign visit when absent warning (event panel)</a>
+            <span class="jira-spacer"></span>
+          </li>
+          <li>
+            <a class="proto-link" href="./schedule/assign-visit-absent-employee/">Assign visit when absent warning (schedule)</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
+      </li>
       <li><b>Holiday &amp; Absences</b>
         <ul>
-          <li><a href="./holiday-absences/assign-visits-on-holiday/">Adding holiday when visits are assigned</a></li>
+          <li>
+            <a class="proto-link" href="./holiday-absences/assign-visits-on-holiday/">Adding holiday when visits are assigned</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
-      <li>
+      </li>
       <li><b>Timesheets</b>
         <ul>
-          <li><a href="./timesheets/filters/">Funder, Customer & Status Filters</a></li>
-          <li><a href="./timesheets/filters/?employee=stephen-nicholls">Holiday Deduction</a></li>
+          <li>
+            <a class="proto-link" href="./timesheets/filters/">Funder, Customer &amp; Status Filters</a>
+            <span class="jira-spacer"></span>
+          </li>
+          <li>
+            <a class="proto-link" href="./timesheets/filters/?employee=stephen-nicholls">Holiday Deduction</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
       </li>
       <li><b>Gross Pay Advice</b>
         <ul>
-          <li><a href="./gross-pay-advice/holiday-deduction/?employee=stephen-nicholls">Holiday Deduction</a></li>
+          <li>
+            <a class="proto-link" href="./gross-pay-advice/holiday-deduction/?employee=stephen-nicholls">Holiday Deduction</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
       </li>
       <li><b>Employee Contract</b>
         <ul>
-          <li><a href="./employee-contract/holiday-pay-deduction/">Holiday Pay Deduction</a></li>
+          <li>
+            <a class="proto-link" href="./employee-contract/holiday-pay-deduction/">Holiday Pay Deduction</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
       </li>
       <li><b>PASS</b>
         <ul>
-          <li><a href="./documents/customer-assessments/">Customer Assessments — Office Templates</a></li>
-          <li><a href="./documents/customer-assessments-profile/">Customer Assessments — Customer Profile</a></li>
-          <li><a href="./web/messaging/">Staff Messaging</a></li>
-          <li><a href="./roster/contactable-staff/">Roster Settings — Contactable Employees</a></li>
+          <li>
+            <a class="proto-link" href="./office/details/">Office — Details (placeholder)</a>
+            <span class="jira-spacer"></span>
+          </li>
+          <li>
+            <a class="proto-link" href="./documents/customer-assessments/">Customer Assessments — Office Templates</a>
+            <span class="jira-spacer"></span>
+          </li>
+          <li>
+            <a class="proto-link" href="./documents/customer-assessments-profile/">Customer Assessments — Customer Profile</a>
+            <span class="jira-spacer"></span>
+          </li>
+          <li>
+            <a class="proto-link" href="./web/messaging/">Staff Messaging</a>
+            <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22493" target="_blank">Jira</a>
+          </li>
+          <li>
+            <a class="proto-link" href="./roster/contactable-staff/">Roster Settings — Contactable Employees</a>
+            <span class="jira-spacer"></span>
+          </li>
         </ul>
       </li>
       <li><b>Mobile</b>
         <ul>
-          <li><a href="./mobile/messaging/">Staff Messaging</a></li>
-          <li><a href="./mobile/mileage-pay/">Mileage Pay</a></li>
-          <li><a href="./mobile/notifications/">Notification Centre</a></li>
+          <li>
+            <a class="proto-link" href="./mobile/messaging/">Staff Messaging</a>
+            <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22494" target="_blank">Jira</a>
+          </li>
+          <li>
+            <a class="proto-link" href="./mobile/mileage-pay/">Mileage Pay</a>
+            <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22041" target="_blank">Jira</a>
+          </li>
+          <li>
+            <a class="proto-link" href="./mobile/notifications/">Notification Centre</a>
+            <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22494" target="_blank">Jira</a>
+          </li>
         </ul>
       </li>
     </ul>
