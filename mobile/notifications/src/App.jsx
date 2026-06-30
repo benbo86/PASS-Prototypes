@@ -312,24 +312,22 @@ function NotifRow({ notif }) {
 
 // ─── Filters ──────────────────────────────────────────────────
 
-const FILTERS = [
-  { id: 'all',       label: 'All',         types: null },
-  { id: 'changes',   label: 'Changes',     types: ['time_changed', 'duration_changed', 'date_changed'] },
-  { id: 'shifts',    label: 'Shifts',      types: SHIFT_TYPES },
-  { id: 'new',       label: 'New',         types: ['new'] },
-  { id: 'cancelled', label: 'Cancelled',   types: ['cancelled'] },
-  { id: 'carer',     label: 'Careworker',  types: ['shadow_added', 'shadow_removed'] },
-]
+// const FILTERS = [
+//   { id: 'all',       label: 'All',         types: null },
+//   { id: 'changes',   label: 'Changes',     types: ['time_changed', 'duration_changed', 'date_changed'] },
+//   { id: 'shifts',    label: 'Shifts',      types: SHIFT_TYPES },
+//   { id: 'new',       label: 'New',         types: ['new'] },
+//   { id: 'cancelled', label: 'Cancelled',   types: ['cancelled'] },
+//   { id: 'carer',     label: 'Careworker',  types: ['shadow_added', 'shadow_removed'] },
+// ]
 
 // ─── Notification Centre Screen ────────────────────────────────
 
 function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAllRead }) {
-  const [activeFilter, setActiveFilter] = useState('all')
-
-  const filter = FILTERS.find(f => f.id === activeFilter)
-  const filtered = filter.types
-    ? notifications.filter(n => filter.types.includes(n.type))
-    : notifications
+  // const [activeFilter, setActiveFilter] = useState('all')
+  // const filter = FILTERS.find(f => f.id === activeFilter)
+  // const filtered = filter.types ? notifications.filter(n => filter.types.includes(n.type)) : notifications
+  const filtered = notifications
 
   const sections = ['Today', 'Yesterday', 'Earlier']
   const grouped = sections
@@ -345,7 +343,7 @@ function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAl
           <button className="notif-header-action" onClick={onMarkAllRead}>Mark all as read</button>
         )}
       </div>
-      <div className="notif-filters">
+      {/* <div className="notif-filters">
         {FILTERS.map(f => (
           <button
             key={f.id}
@@ -355,7 +353,7 @@ function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAl
             {f.label}
           </button>
         ))}
-      </div>
+      </div> */}
       <div className="notif-list">
         {grouped.length > 0 ? grouped.map(group => (
           <div key={group.label}>
