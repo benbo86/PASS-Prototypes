@@ -710,6 +710,7 @@ h6 {
   align-items: center;
   flex: 1;
   gap: 2px;
+  justify-content: flex-end;
 }
 
 .web-nav-item {

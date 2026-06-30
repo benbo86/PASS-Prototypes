@@ -13,7 +13,7 @@
 .notif-list {
   flex: 1;
   overflow-y: auto;
-  background: var(--ui-purple-7-lightest-lavendar);
+  background: #FFFFFF;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -102,7 +102,7 @@
 
 .notif-row.unread {
   /*background: #faf8fd;*/
-  background: var(--ui-purple-6-lavendar-grey);
+  background: var(--ui-purple-7-lightest-lavendar); 
 }
 
 .notif-avatar-wrap {
@@ -214,6 +214,16 @@
   text-decoration-color: var(--greyscale-7-grey-50);
 }
 
+.notif-shift-context {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  color: #6d1b98;
+  margin-top: 4px;
+}
+
 /* ── Booking Detail ────────────────────────────────────────────── */
 
 .booking-detail-scroll {
@@ -318,6 +328,17 @@
   text-decoration: line-through;
   color: var(--greyscale-7-grey-50);
   font-weight: 400;
+}
+
+.booking-detail-section-label {
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--greyscale-6-grey-40);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px 4px;
+  background: #fff;
 }
 
 .booking-detail-actions {
