@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import WebNav from '../../../Components/WebNav'
+import OfficeNav from '../../../Components/OfficeNav'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -616,7 +617,6 @@ function CreateTemplateModal({ onClose, onSave }) {
 
 // ─── App ──────────────────────────────────────────────────────
 
-const OFFICE_TABS = ['Details', 'Checklists', 'Documents', 'Care Groups', 'Tags', 'Roster Settings', 'Settings and Permissions']
 const DOC_TABS = ['Customer', 'Employee', 'Customer Assessments', 'Observations']
 
 export default function App() {
@@ -679,18 +679,9 @@ export default function App() {
 
       <WebNav activePage="settings" />
 
-      <div className="page-content">
-        {/* Office primary tabs */}
-        <div className="primary-tabs-bar">
-          <ul className="primary-tabs">
-            {OFFICE_TABS.map(tab => (
-              <li key={tab} className={tab === 'Documents' ? 'active' : ''}>
-                <button>{tab}</button>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <OfficeNav active="documents" />
 
+      <div className="page-content">
         <div className="documents-content">
           {/* Secondary tabs */}
           <ul className="doc-tabs">

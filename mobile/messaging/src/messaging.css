@@ -1326,9 +1326,24 @@
 }
 .picker-item > span { flex: 1; }
 .picker-item:hover { background: var(--ui-purple-7-lightest-lavendar); }
-.picker-item.selected > span {
+.picker-item.selected > span,
+.picker-item.selected .picker-item-name {
   color: var(--brand-purple-3-purple-2);
   font-weight: 600;
+}
+.picker-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.picker-item-name {
+  font-size: 16px;
+  color: #000;
+}
+.picker-item-reach {
+  font-size: 13px;
+  color: var(--ui-purple-3-grape-grey);
 }
 .picker-item svg:last-child { color: var(--brand-purple-3-purple-2); flex-shrink: 0; }
 

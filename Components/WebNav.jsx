@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import passLogoUrl from '../Images/pass-logo-white.svg'
 import passGeniusUrl from '../Icons/PASS nav/pass-genius.svg'
 
@@ -79,6 +80,20 @@ const NAV_ITEMS = [
 ]
 
 export default function WebNav({ activePage, unreadMessages = 0 }) {
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef(null)
+
+  useEffect(() => {
+    if (!moreOpen) return
+    const handleClick = (e) => {
+      if (moreRef.current && !moreRef.current.contains(e.target)) {
+        setMoreOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [moreOpen])
+
   return (
     <nav className="web-nav">
       <div className="web-nav-logo">
@@ -105,6 +120,7 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
         <button
           className={`web-nav-action-btn${activePage === 'messages' ? ' active' : ''}`}
           title="Messages"
+          onClick={() => { window.location.href = '../../web/messaging/' }}
         >
           <MessagesIcon />
           {unreadMessages > 0 && (
@@ -114,10 +130,33 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
         <button className="web-nav-action-btn web-nav-passg-btn" title="PASSgenius">
           <img src={passGeniusUrl} alt="PASSgenius" />
         </button>
-        <button className="web-nav-item" title="More">
-          <MoreIcon />
-          <span>More</span>
-        </button>
+        <div className="web-nav-more" ref={moreRef}>
+          <button
+            className={`web-nav-item${moreOpen ? ' active' : ''}`}
+            onClick={() => setMoreOpen(o => !o)}
+            title="More"
+          >
+            <MoreIcon />
+            <span>More</span>
+          </button>
+          {moreOpen && (
+            <div className="web-nav-more-menu">
+              <a
+                href="../../office/details/"
+                className="web-nav-more-item"
+                onClick={() => setMoreOpen(false)}
+              >
+                Office
+              </a>
+              <button
+                className="web-nav-more-item"
+                onClick={() => setMoreOpen(false)}
+              >
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   )

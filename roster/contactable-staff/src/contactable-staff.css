@@ -1,0 +1,377 @@
+/* ─── Page ───────────────────────────────────────────────────── */
+
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+
+.settings-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+
+.settings-sidebar {
+  width: 232px;
+  background: #fff;
+  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.settings-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 13px;
+  font-size: 14px;
+  color: #444;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.1s, color 0.1s;
+  line-height: 1.3;
+}
+
+.settings-nav-item:hover {
+  background: var(--ui-purple-7-lightest-lavendar);
+  color: #1a1a1a;
+}
+
+.settings-nav-item.active {
+  color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-left-color: var(--brand-purple-6-purple-4);
+  font-weight: 500;
+}
+
+.settings-nav-item svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.settings-nav-item.active svg {
+  opacity: 1;
+}
+
+/* ─── Content ────────────────────────────────────────────────── */
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 40px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+/* ─── Section ────────────────────────────────────────────────── */
+
+.settings-section {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.settings-section-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.settings-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+}
+
+.settings-edit-btn:hover {
+  color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+/* ─── Subsection ─────────────────────────────────────────────── */
+
+.settings-subsection {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.settings-subsection:last-child {
+  border-bottom: none;
+}
+
+.settings-subsection-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.settings-subsection-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.settings-value-empty {
+  font-style: italic;
+  color: #aaa;
+}
+
+/* ─── Table ──────────────────────────────────────────────────── */
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.settings-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  padding: 8px 16px;
+  background: var(--ui-purple-6-lavendar-grey);
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+.settings-table th:first-child { border-radius: 4px 0 0 4px; }
+.settings-table th:last-child  { border-radius: 0 4px 4px 0; }
+
+.settings-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  color: #333;
+}
+
+.settings-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Panel: Contactable Staff ───────────────────────────────── */
+
+.cs-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.cs-subheading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.cs-explainer {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.cs-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.cs-field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cs-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ui-purple-3-grape-grey);
+}
+
+.cs-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  padding: 10px 0;
+  color: #1a1a1a;
+  background: transparent;
+}
+
+.cs-search-bar input::placeholder {
+  color: var(--greyscale-8-grey-65);
+}
+
+.cs-search-results {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cs-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  transition: background 0.1s;
+}
+
+.cs-search-result:last-child {
+  border-bottom: none;
+}
+
+.cs-search-result:hover {
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.cs-result-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.cs-result-role {
+  font-size: 13px;
+  color: #777;
+}
+
+.cs-no-results {
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ─── Configured contacts ────────────────────────────────────── */
+
+.cs-contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  background: #fff;
+}
+
+.cs-contact-row:last-child {
+  border-bottom: none;
+}
+
+.cs-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.cs-contact-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cs-contact-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cs-contact-role {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.cs-reach-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cs-reach-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+}
+
+.cs-optional {
+  font-weight: 400;
+  color: #999;
+}
+
+.cs-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: color 0.12s;
+}
+
+.cs-remove-btn:hover {
+  color: var(--rag-red-red-7, #c0392b);
+}
+
+.cs-empty-state {
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+  text-align: center;
+  padding: 24px 0;
+}

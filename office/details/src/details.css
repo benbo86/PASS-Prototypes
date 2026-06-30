@@ -1,0 +1,33 @@
+.office-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.office-content {
+  flex: 1;
+  padding: 40px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.office-placeholder-card {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 32px 40px;
+  max-width: 600px;
+}
+
+.office-placeholder-card h1 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.office-placeholder-card p {
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+  margin: 0;
+}

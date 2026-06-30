@@ -189,6 +189,14 @@ const CARERS = [
   { id: 15, name: 'Callum Reid',     initials: 'CR', hasPhoto: true,  photoColor: '#e08858' },
 ]
 
+const OFFICE_CONTACTS = [
+  { id: 101, name: 'Rachel Simmons',  initials: 'RS', hasPhoto: true,  photoColor: '#c4a0d4', role: 'Care Coordinator',    reachMeFor: 'Rota queries, shift swaps and cover' },
+  { id: 102, name: 'Paul Griffiths',  initials: 'PG', hasPhoto: false,                        role: 'Branch Manager',      reachMeFor: 'Complaints and HR matters' },
+  { id: 103, name: 'Jennifer Walsh',  initials: 'JW', hasPhoto: true,  photoColor: '#8ab8d4', role: 'Finance',             reachMeFor: 'Pay queries and expenses' },
+  { id: 104, name: 'Mark Thompson',   initials: 'MT', hasPhoto: false,                        role: 'Training Coordinator', reachMeFor: null },
+  { id: 105, name: 'On-call Support', initials: 'OC', hasPhoto: false,                        role: null,                  reachMeFor: 'Urgent out-of-hours support' },
+]
+
 const CUSTOMERS = [
   { id: 1,  name: 'Margaret Thompson',  initials: 'MT', hasPhoto: true,  photoColor: '#c4a0d4' },
   { id: 2,  name: 'George Evans',       initials: 'GE', hasPhoto: false },
@@ -1039,7 +1047,10 @@ function PersonPickerSheet({ title, items, selected, onToggle, onClose }) {
             return (
               <div key={p.id} className={`picker-item ${isSelected ? 'selected' : ''}`} onClick={() => onToggle(p)}>
                 <PersonAvatar person={p} />
-                <span>{p.name}</span>
+                <div className="picker-item-info">
+                  <span className="picker-item-name">{p.name}</span>
+                  {p.reachMeFor && <span className="picker-item-reach">{p.reachMeFor}</span>}
+                </div>
                 {isSelected && <TickIcon />}
               </div>
             )
@@ -1364,7 +1375,7 @@ export default function App() {
                 onBack={closeCompose}
                 onSend={handleNewMessage}
                 customers={CUSTOMERS}
-                carers={CARERS}
+                carers={OFFICE_CONTACTS}
                 totalUnread={totalUnread}
               />
             </div>
