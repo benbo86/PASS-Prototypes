@@ -33,6 +33,16 @@ const PersonIcon = ({ size = 20 }) => (
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
   </svg>
 )
+const TagIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M6.8,8 C6.1376,8 5.6008,7.4616 5.6008,6.8 C5.6008,6.1376 6.1376,5.6 6.8,5.6 C7.4624,5.6 8,6.1376 8,6.8 C8,7.4616 7.4624,8 6.8,8 M4,5 L4,11.2 L4,11.2 C4,11.6416 4.18,12.0408 4.4696,12.332 L11.672,19.5304 C11.9608,19.82 12.3608,20 12.8032,20 C13.2456,20 13.6456,19.8208 13.9344,19.532 L19.5296,13.936 C19.82,13.6464 20,13.2448 20,12.8032 C20,12.3608 19.8216,11.96 19.5304,11.672 L12.332,4.468 C12.0408,4.18 11.6416,4 11.1992,4 L5,4 C4.44771525,4 4,4.44771525 4,5 Z"/>
+  </svg>
+)
+const EmployeesIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path fillRule="evenodd" d="M6.34529323,13.6992001 C6.98659064,13.9861115 7.69403084,14.1492572 8.44173186,14.1492572 C8.83563565,14.1492572 9.21916363,14.1039779 9.58727007,14.0191771 C8.13951251,14.6947293 7.11265435,16.3547899 7.11265435,17.9622169 L7.11265435,18.6498286 C7.11265435,19.3952357 7.73094558,20 8.49302546,20 L3.38037111,20 C2.61829123,20 2,19.3952357 2,18.6498286 L2,17.9622169 C2,15.8750769 3.73121544,13.6992001 5.86503911,13.6992001 L6.34529323,13.6992001 Z M13.3845982,13.6992001 C14.0316964,13.9861115 14.7455357,14.1492572 15.5,14.1492572 C16.2544643,14.1492572 16.9712054,13.9861115 17.6154018,13.6992001 L18.1,13.6992001 C20.253125,13.6992001 22,15.8750769 22,17.9622169 L22,18.6498286 C22,19.3952357 21.3761161,20 20.6071429,20 L10.3928571,20 C9.62388393,20 9,19.3952357 9,18.6498286 L9,17.9622169 C9,15.8750769 10.746875,13.6992001 12.9,13.6992001 Z M19.6758297,16.8496 L17.2371129,16.8496 C16.9609705,16.8496 16.7371129,17.0734577 16.7371129,17.3496 L16.7371129,18.2311353 C16.7371129,18.5072776 16.9609705,18.7311353 17.2371129,18.7311353 L19.6758297,18.7311353 C19.9519721,18.7311353 20.1758297,18.5072776 20.1758297,18.2311353 L20.1758297,17.3496 C20.1758297,17.0734577 19.9519721,16.8496 19.6758297,16.8496 Z M8.44173186,5 C9.43518456,5 10.3366335,5.384812 10.9988003,6.01037989 C10.3047346,6.66418301 9.87339658,7.5829878 9.87339658,8.60045709 C9.87339658,9.61792638 10.3047346,10.5367312 10.9983346,11.1914945 C10.3366335,11.8161022 9.43518456,12.2009142 8.44173186,12.2009142 C6.40856024,12.2009142 4.76074222,10.5891471 4.76074222,8.60045709 C4.76074222,6.61176712 6.40856024,5 8.44173186,5 Z M15.5,5 C17.5515625,5 19.2142857,6.61176712 19.2142857,8.60045709 C19.2142857,10.5891471 17.5515625,12.2009142 15.5,12.2009142 C13.4484375,12.2009142 11.7857143,10.5891471 11.7857143,8.60045709 C11.7857143,6.61176712 13.4484375,5 15.5,5 Z"/>
+  </svg>
+)
 const BroadcastIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM19.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/>
@@ -193,9 +203,7 @@ const THREADS = [
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: true, text: "Hi team, just a reminder that we have a new care plan in place for all Blue Bird residents. Please review the updated notes before your next visits.", time: '2:00 PM', day: 'Monday' },
-    { id: 2, isMe: true, text: "Also, please note that parking on Station Road is restricted from next week. Plan your journeys accordingly.", time: '2:01 PM', day: 'Monday' },
-    { id: 3, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
+    { id: 1, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
   ],
   2: [
     { id: 1, isMe: true, text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
@@ -212,8 +220,7 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
   ],
   5: [
-    { id: 1, isMe: true, text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
-    { id: 2, isMe: true, text: "Affected roads: A57 Penistone Road, Herries Road, and parts of Middlewood Road. Works are expected to run until Friday.", time: '9:11 AM', day: 'Yesterday' },
+    { id: 1, isMe: true, text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
   ],
 }
 
@@ -281,6 +288,18 @@ function ThreadRow({ thread, isActive, onClick }) {
 
 function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, onCompose }) {
   const [tab, setTab] = useState('inbox')
+  const [showComposeMenu, setShowComposeMenu] = useState(false)
+  const composeMenuRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (composeMenuRef.current && !composeMenuRef.current.contains(e.target)) {
+        setShowComposeMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const filtered = threads.filter(t => {
     const matchesTab = tab === 'inbox' ? !t.closed : t.closed
@@ -294,10 +313,22 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
     <div className="msg-sidebar">
       <div className="msg-sidebar-header">
         <h2 className="msg-sidebar-title">Messages</h2>
-        <button className="msg-compose-btn" onClick={onCompose} title="New message">
-          <EditIcon />
-          <span>New message</span>
-        </button>
+        <div className="msg-compose-btn-wrap" ref={composeMenuRef}>
+          <button className="msg-compose-btn" onClick={() => setShowComposeMenu(v => !v)} title="New message">
+            <EditIcon />
+            <span>New message</span>
+          </button>
+          {showComposeMenu && (
+            <div className="msg-compose-mode-menu">
+              <button onClick={() => { setShowComposeMenu(false); onCompose('employee') }}>
+                <PersonIcon size={16} /> Employee
+              </button>
+              <button onClick={() => { setShowComposeMenu(false); onCompose('broadcast') }}>
+                <BroadcastIcon size={16} /> Broadcast
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <div className="msg-sidebar-search">
         <div className="msg-search-bar">
@@ -430,11 +461,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
           )}
           <button
             className="msg-header-action-btn"
-            title={thread.closed ? 'Reopen thread' : 'Close thread'}
+            title={thread.closed ? (thread.isBroadcast ? 'Move to inbox' : 'Reopen thread') : (thread.isBroadcast ? 'Close broadcast' : 'Close thread')}
             onClick={e => { e.stopPropagation(); onClose?.() }}
           >
             {!thread.closed && <CloseIcon size={18} />}
-            <span>{thread.closed ? 'Reopen' : 'Close thread'}</span>
+            <span>{thread.closed ? (thread.isBroadcast ? 'Move to inbox' : 'Reopen') : (thread.isBroadcast ? 'Close broadcast' : 'Close thread')}</span>
           </button>
         </div>
       </div>
@@ -544,26 +575,28 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         </div>
       )}
 
-      {/* Compose bar */}
-      <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
-        <div className="msg-compose-input-wrap">
-          <input
-            ref={inputRef}
-            className="msg-compose-input"
-            placeholder={thread.isBroadcast ? 'Send another broadcast message...' : 'Reply to this thread...'}
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-          />
+      {/* Compose bar — broadcasts are send-once, so no further messages on this thread */}
+      {!thread.isBroadcast && (
+        <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
+          <div className="msg-compose-input-wrap">
+            <input
+              ref={inputRef}
+              className="msg-compose-input"
+              placeholder="Reply to this thread..."
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+            />
+          </div>
+          <button
+            className={`msg-send-btn${inputText.trim() ? ' active' : ''}`}
+            onClick={handleSend}
+            disabled={!inputText.trim()}
+          >
+            <SendIcon />
+          </button>
         </div>
-        <button
-          className={`msg-send-btn${inputText.trim() ? ' active' : ''}`}
-          onClick={handleSend}
-          disabled={!inputText.trim()}
-        >
-          <SendIcon />
-        </button>
-      </div>
+      )}
     </div>
   )
 }
@@ -579,18 +612,18 @@ const INITIALS_COLORS = [
   { bg: '#ddf0ee', fg: '#1a5a52' },
 ]
 
-function ComposeView({ onSend, onCancel }) {
+function ComposeView({ mode, onSend, onCancel }) {
+  const isBroadcast = mode === 'broadcast'
+
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
+  const [selectedCarer, setSelectedCarer] = useState(null)
+  const [broadcastType, setBroadcastType] = useState('all')
   const [selectedCarers, setSelectedCarers] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
-  const [dropdownTab, setDropdownTab] = useState('carers')
   const dropdownRef = useRef(null)
-
-  const allCarersSelected = selectedCarers.length === CARERS.length
-  const isBroadcast = allCarersSelected || selectedTags.length > 0
 
   const filteredCarers = CARERS
     .filter(c => c.name.toLowerCase().includes(recipientSearch.toLowerCase()))
@@ -604,34 +637,44 @@ function ComposeView({ onSend, onCancel }) {
     ),
   })).filter(type => type.tags.length > 0)
 
-  const hasRecipients = selectedCarers.length > 0 || isBroadcast
+  const hasRecipients = isBroadcast
+    ? (broadcastType === 'all' || (broadcastType === 'groups' ? selectedTags.length > 0 : selectedCarers.length > 0))
+    : !!selectedCarer
   const canSend = title.trim() && message.trim() && hasRecipients
 
-  // Selecting individual employees: multi-select allowed, clears tags (mutually exclusive with broadcast)
+  // Employee mode: single selection, picking a new one replaces the current one
+  const selectCarer = (carer) => {
+    setSelectedCarer(carer)
+    setRecipientSearch('')
+    setShowDropdown(false)
+  }
+
+  // Broadcast mode, "Selected employees": multi-select
   const toggleCarer = (carer) => {
-    setSelectedTags([])
     setSelectedCarers(prev =>
       prev.some(c => c.id === carer.id) ? prev.filter(c => c.id !== carer.id) : [...prev, carer]
     )
   }
 
-  // Selecting a group switches to broadcast mode (clears individual selection)
+  // Broadcast mode, "Area tags": multi-select
   const toggleTag = (tag) => {
-    setSelectedCarers([])
     setSelectedTags(prev =>
       prev.some(t => t.id === tag.id) ? prev.filter(t => t.id !== tag.id) : [...prev, tag]
     )
   }
 
-  // Selecting all employees switches to broadcast mode (clears tags)
-  const selectAllCarers = () => {
-    setSelectedTags([])
-    setSelectedCarers(allCarersSelected ? [] : CARERS)
-  }
-
   const clearAll = () => {
+    setSelectedCarer(null)
     setSelectedCarers([])
     setSelectedTags([])
+  }
+
+  // The three broadcast targets are mutually exclusive — switching clears the others
+  const changeBroadcastType = (type) => {
+    setBroadcastType(type)
+    setSelectedCarers([])
+    setSelectedTags([])
+    setRecipientSearch('')
   }
 
   useEffect(() => {
@@ -644,10 +687,17 @@ function ComposeView({ onSend, onCancel }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const showPicker = !isBroadcast || broadcastType !== 'all'
+
   return (
     <div className="msg-compose-view">
       <div className="msg-compose-header">
-        <h2>New Message</h2>
+        <div className="msg-compose-header-titles">
+          <h2>New {isBroadcast ? 'Broadcast' : 'Message'}</h2>
+          {isBroadcast && (
+            <span className="msg-compose-header-subtitle">Employees will receive this individually. Replies will start new threads in your inbox.</span>
+          )}
+        </div>
         <button className="msg-compose-cancel" onClick={onCancel}>
           <CloseIcon size={20} />
         </button>
@@ -658,102 +708,118 @@ function ComposeView({ onSend, onCancel }) {
         {/* To field */}
         <div className="msg-compose-field">
           <label className="msg-compose-label">To</label>
-          <div className="msg-compose-to-wrap" ref={dropdownRef}>
-            <div className="msg-compose-to-inner">
-              {/* All employees chip */}
-              {allCarersSelected && (
-                <span className="msg-compose-chip msg-compose-chip-broadcast">
-                  <BroadcastIcon size={11} />
-                  All employees
-                  <button onClick={() => setSelectedCarers([])} className="msg-chip-remove">
-                    <CloseIcon size={12} />
-                  </button>
-                </span>
-              )}
-              {/* Tag chips */}
-              {!allCarersSelected && selectedTags.map(tag => (
-                <span key={tag.id} className="msg-compose-chip msg-compose-chip-broadcast">
-                  <BroadcastIcon size={11} />
-                  {tag.name} · {tag.memberCount}
-                  <button onClick={() => toggleTag(tag)} className="msg-chip-remove">
-                    <CloseIcon size={12} />
-                  </button>
-                </span>
-              ))}
-              {/* Individual employee chips */}
-              {!allCarersSelected && selectedTags.length === 0 && (() => {
-                const LIMIT = 4
-                const visible = selectedCarers.slice(0, LIMIT)
-                const overflow = selectedCarers.length - LIMIT
-                return (
+
+          {isBroadcast && (
+            <div className="msg-broadcast-type-tabs">
+              <button
+                className={`msg-broadcast-type-tab${broadcastType === 'all' ? ' active' : ''}`}
+                onClick={() => changeBroadcastType('all')}
+              ><BroadcastIcon size={14} />All</button>
+              <button
+                className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
+                onClick={() => changeBroadcastType('groups')}
+              ><TagIcon size={14} />Area</button>
+              <button
+                className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
+                onClick={() => changeBroadcastType('individuals')}
+              ><EmployeesIcon size={14} />Employees</button>
+            </div>
+          )}
+
+          {showPicker && (
+            <div className="msg-compose-to-wrap" ref={dropdownRef}>
+              <div className="msg-compose-to-inner">
+                {/* Employee mode: single selection, shown as plain text (not a removable pill — only one is ever possible) */}
+                {!isBroadcast && selectedCarer ? (
+                  <div className="msg-compose-single-selected">
+                    <span>{selectedCarer.name}</span>
+                    <button onClick={() => setSelectedCarer(null)} className="msg-chip-remove">
+                      <CloseIcon size={12} />
+                    </button>
+                  </div>
+                ) : !isBroadcast ? (
+                  <input
+                    className="msg-compose-to-input"
+                    placeholder="Search for an employee..."
+                    value={recipientSearch}
+                    onChange={e => { setRecipientSearch(e.target.value); setShowDropdown(true) }}
+                    onFocus={() => setShowDropdown(true)}
+                  />
+                ) : (
                   <>
-                    {visible.map(c => (
-                      <span key={c.id} className="msg-compose-chip">
-                        {c.name}
-                        <button onClick={() => toggleCarer(c)} className="msg-chip-remove">
+                    {/* Broadcast, "Selected employees": multi chips */}
+                    {broadcastType === 'individuals' && (() => {
+                      const LIMIT = 4
+                      const visible = selectedCarers.slice(0, LIMIT)
+                      const overflow = selectedCarers.length - LIMIT
+                      return (
+                        <>
+                          {visible.map(c => (
+                            <span key={c.id} className="msg-compose-chip msg-compose-chip-broadcast">
+                              <BroadcastIcon size={11} />
+                              {c.name}
+                              <button onClick={() => toggleCarer(c)} className="msg-chip-remove">
+                                <CloseIcon size={12} />
+                              </button>
+                            </span>
+                          ))}
+                          {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
+                        </>
+                      )
+                    })()}
+                    {/* Broadcast, "Area tags": tag chips */}
+                    {broadcastType === 'groups' && selectedTags.map(tag => (
+                      <span key={tag.id} className="msg-compose-chip msg-compose-chip-broadcast">
+                        <BroadcastIcon size={11} />
+                        {tag.name} · {tag.memberCount}
+                        <button onClick={() => toggleTag(tag)} className="msg-chip-remove">
                           <CloseIcon size={12} />
                         </button>
                       </span>
                     ))}
-                    {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
-                  </>
-                )
-              })()}
-              <input
-                className="msg-compose-to-input"
-                placeholder={!hasRecipients ? 'Search for an employee or group...' : ''}
-                value={recipientSearch}
-                onChange={e => { setRecipientSearch(e.target.value); setShowDropdown(true) }}
-                onFocus={() => setShowDropdown(true)}
-              />
-            </div>
-            {showDropdown && (
-              <div className="msg-carer-dropdown">
-                <div className="msg-dropdown-tabs">
-                  <button
-                    className={`msg-dropdown-tab${dropdownTab === 'carers' ? ' active' : ''}`}
-                    onMouseDown={e => { e.preventDefault(); setDropdownTab('carers') }}
-                  ><PersonIcon size={16} />Individual</button>
-                  <button
-                    className={`msg-dropdown-tab${dropdownTab === 'groups' ? ' active' : ''}`}
-                    onMouseDown={e => { e.preventDefault(); setDropdownTab('groups') }}
-                  ><BroadcastIcon size={16} />Broadcast</button>
-                </div>
-
-                {dropdownTab === 'carers' && (
-                  <>
-                    {filteredCarers.map(c => {
-                      const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
-                      const isSelected = selectedCarers.some(s => s.id === c.id)
-                      return (
-                        <div key={c.id} className="msg-carer-option" onClick={() => toggleCarer(c)}>
-                          <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
-                          <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
-                            {c.initials}
-                          </div>
-                          <span>{c.name}</span>
-                        </div>
-                      )
-                    })}
-                    {filteredCarers.length === 0 && <div className="msg-dropdown-empty">No employees found</div>}
+                    <input
+                      className="msg-compose-to-input"
+                      placeholder={
+                        hasRecipients ? '' :
+                        broadcastType === 'groups' ? 'Search for an area tag...' :
+                        'Search for an employee...'
+                      }
+                      value={recipientSearch}
+                      onChange={e => { setRecipientSearch(e.target.value); setShowDropdown(true) }}
+                      onFocus={() => setShowDropdown(true)}
+                    />
                   </>
                 )}
+              </div>
+              {showDropdown && (
+                <div className="msg-carer-dropdown">
+                  {(!isBroadcast || broadcastType === 'individuals') && (
+                    <>
+                      {filteredCarers.map(c => {
+                        const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
+                        const isSelected = isBroadcast && selectedCarers.some(s => s.id === c.id)
+                        return (
+                          <div
+                            key={c.id}
+                            className="msg-carer-option"
+                            onClick={() => (isBroadcast ? toggleCarer(c) : selectCarer(c))}
+                          >
+                            {isBroadcast && (
+                              <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
+                            )}
+                            <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
+                              {c.initials}
+                            </div>
+                            <span>{c.name}</span>
+                          </div>
+                        )
+                      })}
+                      {filteredCarers.length === 0 && <div className="msg-dropdown-empty">No employees found</div>}
+                    </>
+                  )}
 
-                {dropdownTab === 'groups' && (
-                  <>
-                    {!recipientSearch && (
-                      <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
-                        <input type="checkbox" className="msg-option-checkbox" checked={allCarersSelected} onChange={() => {}} />
-                        <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                          <BroadcastIcon size={16} />
-                        </div>
-                        <div className="msg-tag-option-body">
-                          <span>All employees</span>
-                          <span className="msg-tag-member-count">{CARERS.length} employees</span>
-                        </div>
-                      </div>
-                    )}
-                    {filteredTagTypes.length > 0 ? filteredTagTypes.map(type => (
+                  {isBroadcast && broadcastType === 'groups' && (
+                    filteredTagTypes.length > 0 ? filteredTagTypes.map(type => (
                       <div key={type.id}>
                         <div className="msg-dropdown-type-header">{type.name}</div>
                         {type.tags.map(tag => {
@@ -773,32 +839,17 @@ function ComposeView({ onSend, onCancel }) {
                         })}
                       </div>
                     )) : (
-                      recipientSearch && <div className="msg-dropdown-empty">No groups found</div>
-                    )}
-                  </>
-                )}
+                      recipientSearch && <div className="msg-dropdown-empty">No area tags found</div>
+                    )
+                  )}
 
-                {hasRecipients && (
-                  <div className="msg-dropdown-clear">
-                    <button onMouseDown={e => { e.preventDefault(); clearAll() }}>Clear</button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Multi-carer notice */}
-          {!isBroadcast && selectedCarers.length > 1 && (
-            <div className="msg-broadcast-mode-notice">
-              <PersonIcon size={14} />
-              <span>Sending to {selectedCarers.length} employees as separate conversations. Each will receive their own thread and replies will come back individually.</span>
-            </div>
-          )}
-          {/* Broadcast mode notice */}
-          {isBroadcast && (
-            <div className="msg-broadcast-mode-notice">
-              <BroadcastIcon size={14} />
-              <span>Broadcast — employees will receive this individually. Replies will start new threads in your inbox.</span>
+                  {hasRecipients && (
+                    <div className="msg-dropdown-clear">
+                      <button onMouseDown={e => { e.preventDefault(); clearAll() }}>Clear</button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -831,7 +882,14 @@ function ComposeView({ onSend, onCancel }) {
           <button
             className="round-btn primary-btn btn-icon-right"
             disabled={!canSend}
-            onClick={() => canSend && onSend({ title, recipients: selectedCarers, tags: selectedTags, message, isBroadcast })}
+            onClick={() => canSend && onSend({
+              mode,
+              broadcastType: isBroadcast ? broadcastType : undefined,
+              title,
+              recipients: isBroadcast ? (broadcastType === 'individuals' ? selectedCarers : []) : [selectedCarer],
+              tags: isBroadcast && broadcastType === 'groups' ? selectedTags : [],
+              message,
+            })}
           >
             {isBroadcast ? 'Send broadcast' : 'Send'} <SendIcon />
           </button>
@@ -863,6 +921,7 @@ export default function App() {
   const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
   const [activeThreadId, setActiveThreadId] = useState(null)
   const [rightPanel, setRightPanel] = useState('empty')
+  const [composeMode, setComposeMode] = useState(null)
   const [search, setSearch] = useState('')
 
   const totalUnread = threads.reduce((sum, t) => sum + t.unread, 0)
@@ -896,17 +955,20 @@ export default function App() {
   }
 
   const handleClose = () => {
-    const isClosed = threads.find(t => t.id === activeThreadId)?.closed
+    const activeThread = threads.find(t => t.id === activeThreadId)
+    const isClosed = activeThread?.closed
     setThreads(prev => prev.map(t =>
       t.id === activeThreadId ? { ...t, closed: !t.closed } : t
     ))
-    setThreadMessages(prev => ({
-      ...prev,
-      [activeThreadId]: [
-        ...(prev[activeThreadId] || []),
-        { id: Date.now(), type: 'event', text: isClosed ? 'This thread has been reopened' : 'This thread has been closed', time: 'Just now', day: 'Today' },
-      ],
-    }))
+    if (!activeThread?.isBroadcast) {
+      setThreadMessages(prev => ({
+        ...prev,
+        [activeThreadId]: [
+          ...(prev[activeThreadId] || []),
+          { id: Date.now(), type: 'event', text: isClosed ? 'This thread has been reopened' : 'This thread has been closed', time: 'Just now', day: 'Today' },
+        ],
+      }))
+    }
     setActiveThreadId(null)
     setRightPanel('empty')
   }
@@ -917,13 +979,18 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ title, recipients, tags, message, isBroadcast }) => {
+  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message }) => {
     const baseId = Math.max(...threads.map(t => t.id)) + 1
 
-    if (isBroadcast) {
-      const participantsSummary = tags.length > 0
-        ? tags.map(t => `${t.name} · ${t.memberCount} employees`).join(', ')
-        : `All employees · ${CARERS.length} employees`
+    if (mode === 'broadcast') {
+      const participantsSummary =
+        broadcastType === 'groups' ? tags.map(t => `${t.name} · ${t.memberCount} employees`).join(', ') :
+        broadcastType === 'all'    ? `All employees · ${CARERS.length} employees` :
+        recipients.map(r => r.name).join(', ')
+      const participantList =
+        broadcastType === 'groups' ? tags.map(t => t.name) :
+        broadcastType === 'all'    ? [] :
+        recipients.map(r => r.name)
       const newThread = {
         id: baseId,
         title,
@@ -931,7 +998,7 @@ export default function App() {
         isBroadcast: true,
         replyAllowed: false,
         participants: participantsSummary,
-        participantList: tags.map(t => t.name),
+        participantList,
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
@@ -946,27 +1013,27 @@ export default function App() {
       setActiveThreadId(baseId)
       setRightPanel('thread')
     } else {
-      // Create one 1:1 thread per recipient
-      const newThreads = recipients.map((r, i) => ({
-        id: baseId + i,
+      // Employee mode — always exactly one recipient, normal 1:1 thread
+      const recipient = recipients[0]
+      const newThread = {
+        id: baseId,
         title,
         isGroup: false,
         isBroadcast: false,
-        replyAllowed: recipients.length === 1,
-        participants: r.name,
-        participantList: [r.name],
+        replyAllowed: true,
+        participants: recipient.name,
+        participantList: [recipient.name],
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
         unread: 0,
         closed: false,
+      }
+      setThreads(prev => [newThread, ...prev])
+      setThreadMessages(prev => ({
+        ...prev,
+        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }],
       }))
-      const newMessages = Object.fromEntries(
-        newThreads.map(t => [t.id, [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }]])
-      )
-      setThreads(prev => [...newThreads, ...prev])
-      setThreadMessages(prev => ({ ...prev, ...newMessages }))
-      // Open the first thread
       setActiveThreadId(baseId)
       setRightPanel('thread')
     }
@@ -985,7 +1052,7 @@ export default function App() {
           search={search}
           onSearch={setSearch}
           onSelectThread={handleSelectThread}
-          onCompose={() => { setActiveThreadId(null); setRightPanel('compose') }}
+          onCompose={(mode) => { setActiveThreadId(null); setComposeMode(mode); setRightPanel('compose') }}
         />
         <div className="msg-main">
           {rightPanel === 'empty' && <EmptyState />}
@@ -1001,6 +1068,7 @@ export default function App() {
           )}
           {rightPanel === 'compose' && (
             <ComposeView
+              mode={composeMode}
               onSend={handleNewMessage}
               onCancel={() => setRightPanel('empty')}
             />

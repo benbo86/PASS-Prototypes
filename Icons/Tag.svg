@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Glyphs/Visit/Tag</title>
+    <g id="Glyphs/Visit/Tag" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group">
+            <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
+            <path d="M6.8,8 C6.1376,8 5.6008,7.4616 5.6008,6.8 C5.6008,6.1376 6.1376,5.6 6.8,5.6 C7.4624,5.6 8,6.1376 8,6.8 C8,7.4616 7.4624,8 6.8,8 M4,5 L4,11.2 L4,11.2 C4,11.6416 4.18,12.0408 4.4696,12.332 L11.672,19.5304 C11.9608,19.82 12.3608,20 12.8032,20 C13.2456,20 13.6456,19.8208 13.9344,19.532 L19.5296,13.936 C19.82,13.6464 20,13.2448 20,12.8032 C20,12.3608 19.8216,11.96 19.5304,11.672 L12.332,4.468 C12.0408,4.18 11.6416,4 11.1992,4 L5,4 C4.44771525,4 4,4.44771525 4,5 Z" id="Icon" fill="#000000"></path>
+        </g>
+    </g>
+</svg>

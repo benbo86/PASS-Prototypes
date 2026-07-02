@@ -94,6 +94,12 @@ h6 {
     border: none;
 }
 
+.primary-btn:disabled {
+    background: var(--ui-purple-7-lightest-lavendar);
+    color: var(--greyscale-11-grey-80);
+    cursor: default;
+}
+
 .secondary-btn {
   background: #fff;
   color: var(--brand-purple-6-purple-4);
