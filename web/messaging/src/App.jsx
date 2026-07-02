@@ -33,6 +33,11 @@ const PersonIcon = ({ size = 20 }) => (
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
   </svg>
 )
+const BroadcastIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM19.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/>
+  </svg>
+)
 const AttachIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 015 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 005 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
@@ -54,11 +59,6 @@ const UnreadBubbleIcon = () => (
     <circle cx="19" cy="5" r="3.5"/>
   </svg>
 )
-const InfoIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.67,9.94 L10.58,9.94 C10.11,9.94 9.73,10.32 9.73,10.79 C9.73,11.27 10.11,11.65 10.58,11.65 L10.67,11.65 L10.67,16.63 L10.58,16.63 C10.11,16.63 9.73,17.02 9.73,17.49 C9.73,17.96 10.11,18.35 10.58,18.35 L13.42,18.35 C13.89,18.35 14.27,17.96 14.27,17.49 C14.27,17.02 13.89,16.63 13.42,16.63 L13.34,16.63 L13.34,10.94 C13.34,10.38 12.89,9.94 12.34,9.94 L10.67,9.94 Z M11.87,5.65 C11,5.65 10.3,6.35 10.3,7.22 C10.3,8.09 11,8.79 11.87,8.79 C12.74,8.79 13.44,8.09 13.44,7.22 C13.44,6.35 12.74,5.65 11.87,5.65 Z"/>
-  </svg>
-)
 const ReplyIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
@@ -72,21 +72,6 @@ const DeleteIcon = () => (
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-  </svg>
-)
-const ChevronDownIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-  </svg>
-)
-const ChevronUpIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/>
-  </svg>
-)
-const TickIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
 const PlusIcon = ({ size = 16 }) => (
@@ -137,19 +122,23 @@ const THREADS = [
   {
     id: 1,
     title: 'Blue Bird Sheffield — Team Update',
-    isGroup: true,
-    participants: 'Sarah M., Karen B. +13',
-    participantList: ['Sarah Mitchell', 'Karen Bailey', 'Tom Harris', 'Priya Sharma', 'James Okafor', 'Linda Peters', 'David Chen', 'Emma Richardson', 'Michael Hughes', 'Olivia Brooks', 'Nathan Wells', 'Chloe Barker', 'Ryan Sutton', 'Fiona Marsh', 'Callum Reid'],
-    lastSender: 'Sarah Mitchell',
-    lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
+    isGroup: false,
+    isBroadcast: true,
+    replyAllowed: false,
+    participants: 'Blue Bird Sheffield · 15 employees',
+    participantList: ['Blue Bird Sheffield'],
+    lastSender: 'Office',
+    lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm.",
     time: '10:42 AM',
-    unread: 3,
+    unread: 0,
     closed: false,
   },
   {
     id: 2,
     title: 'Medication Query',
     isGroup: false,
+    isBroadcast: false,
+    replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
     lastSender: 'Adrianna Jackson',
@@ -162,6 +151,8 @@ const THREADS = [
     id: 3,
     title: 'Friday Shift — Swap Request',
     isGroup: false,
+    isBroadcast: false,
+    replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
     lastSender: 'Office',
@@ -174,6 +165,8 @@ const THREADS = [
     id: 4,
     title: 'Annual Leave — July',
     isGroup: false,
+    isBroadcast: false,
+    replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
     lastSender: 'Adrianna Jackson',
@@ -184,13 +177,15 @@ const THREADS = [
   },
   {
     id: 5,
-    title: 'Attachment Examples',
+    title: 'Road Closures — This Week',
     isGroup: false,
-    participants: 'Adrianna Jackson',
-    participantList: ['Adrianna Jackson'],
+    isBroadcast: true,
+    replyAllowed: false,
+    participants: 'All employees · 47 employees',
+    participantList: [],
     lastSender: 'Office',
-    lastMessage: 'Please see the training video above.',
-    time: '10:35 AM',
+    lastMessage: "Please be aware of road closures on the A57 this week due to utility works.",
+    time: 'Yesterday',
     unread: 0,
     closed: false,
   },
@@ -200,15 +195,13 @@ const THREAD_MESSAGES = {
   1: [
     { id: 1, isMe: true, text: "Hi team, just a reminder that we have a new care plan in place for all Blue Bird residents. Please review the updated notes before your next visits.", time: '2:00 PM', day: 'Monday' },
     { id: 2, isMe: true, text: "Also, please note that parking on Station Road is restricted from next week. Plan your journeys accordingly.", time: '2:01 PM', day: 'Monday' },
-    { id: 3, isMe: false, sender: 'Sarah Mitchell', text: "Thanks, noted. Will there be updated route suggestions shared?", time: '3:14 PM', day: 'Monday', receipt: 'read' },
-    { id: 4, isMe: true, text: "Yes, we'll share those by end of the week.", time: '3:20 PM', day: 'Monday' },
-    { id: 5, isMe: false, sender: 'Sarah Mitchell', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
+    { id: 3, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
   ],
   2: [
-    { id: 1, isMe: true, text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
-    { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday', receipt: 'read' },
-    { id: 3, isMe: true, text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday' },
-    { id: 4, isMe: true, text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today' },
+    { id: 1, isMe: true, text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
+    { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
+    { id: 3, isMe: true, text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read' },
+    { id: 4, isMe: true, text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
   ],
   3: [
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I was wondering if it would be possible to swap my Friday 6th shift? I have a family commitment that afternoon.", time: 'Fri 11:02 AM', day: 'Friday', receipt: 'read' },
@@ -219,23 +212,50 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
   ],
   5: [
-    { id: 1, isMe: true, text: "Photo from our CQC inspection, well done everyone.", time: '10:01 AM', day: 'Today' },
-    { id: 2, isMe: true, text: "Please make sure everyone watches the Moving and Handling Guide for Carers.", time: '10:30 AM', day: 'Today' },
-    { id: 3, isMe: true, text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
+    { id: 1, isMe: true, text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
+    { id: 2, isMe: true, text: "Affected roads: A57 Penistone Road, Herries Road, and parts of Middlewood Road. Works are expected to run until Friday.", time: '9:11 AM', day: 'Yesterday' },
   ],
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+
+function getInitials(name) {
+  const parts = name.trim().split(' ')
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase()
+}
+
+function nameToColor(name) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return INITIALS_COLORS[Math.abs(hash) % INITIALS_COLORS.length]
 }
 
 // ─── Thread Row ────────────────────────────────────────────────
 
 function ThreadRow({ thread, isActive, onClick }) {
   const isUnread = thread.unread > 0
+  const firstName = thread.participantList[0] || ''
+  const palette = !thread.isBroadcast && firstName ? nameToColor(firstName) : null
+  const extraCount = !thread.isBroadcast && thread.participantList.length > 1
+    ? thread.participantList.length - 1
+    : 0
+
   return (
     <div
       className={`msg-thread-row${isActive ? ' active' : ''}${isUnread ? ' unread' : ''}`}
       onClick={onClick}
     >
-      <div className={`msg-thread-avatar${thread.isGroup ? ' group' : ''}`}>
-        {thread.isGroup ? <GroupIcon size={18} /> : <PersonIcon size={18} />}
+      <div
+        className={`msg-thread-avatar${thread.isBroadcast ? ' broadcast' : ''}`}
+        style={palette ? { background: palette.bg, color: palette.fg } : {}}
+      >
+        {thread.isBroadcast
+          ? <BroadcastIcon size={18} />
+          : <span className="msg-thread-initials">{getInitials(firstName)}</span>
+        }
+        {extraCount > 0 && <span className="msg-thread-extra">+{extraCount}</span>}
       </div>
       <div className="msg-thread-body">
         <div className="msg-thread-top">
@@ -244,7 +264,7 @@ function ThreadRow({ thread, isActive, onClick }) {
         </div>
         <div className="msg-thread-preview-row">
           <span className="msg-thread-preview">
-            {!thread.isGroup && <span className="msg-thread-sender">{thread.lastSender}: </span>}
+            <span className="msg-thread-sender">{thread.lastSender}: </span>
             {thread.lastMessage}
           </span>
           {isUnread
@@ -327,103 +347,28 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   const [replyTo, setReplyTo] = useState(null)
   const [editing, setEditing] = useState(null)
   const [actionTarget, setActionTarget] = useState(null)
-  const [showInfo, setShowInfo] = useState(false)
-  const [showAttach, setShowAttach] = useState(false)
-  const [participantList, setParticipantList] = useState(thread.participantList)
-  const [addSearch, setAddSearch] = useState('')
-  const [showAddDropdown, setShowAddDropdown] = useState(false)
-  const [addTab, setAddTab] = useState('carers')
   const endRef = useRef(null)
   const inputRef = useRef(null)
-  const addRef = useRef(null)
 
   useEffect(() => {
     setLocalMsgs(messages)
-    setParticipantList(thread.participantList)
     setEditing(null)
     setInputText('')
     setReplyTo(null)
-    setShowAttach(false)
   }, [thread.id])
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'auto' })
   }, [localMsgs.length, thread.id])
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (addRef.current && !addRef.current.contains(e.target)) {
-        setShowAddDropdown(false)
-        setAddSearch('')
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const addFilteredCarers = CARERS
-    .filter(c => c.name.toLowerCase().includes(addSearch.toLowerCase()))
-    .sort((a, b) => a.name.split(' ').at(-1).localeCompare(b.name.split(' ').at(-1)))
-  const addFilteredTagTypes = TAG_TYPES.map(type => ({
-    ...type,
-    tags: TAGS.filter(tag =>
-      tag.typeId === type.id &&
-      tag.name.toLowerCase().includes(addSearch.toLowerCase())
-    ),
-  })).filter(type => type.tags.length > 0)
-
-  const carerInList = (carer) => participantList.includes(carer.name)
-  const tagLabel = (tag) => `${tag.name} · ${tag.memberCount} members`
-  const tagInList = (tag) => participantList.includes(tagLabel(tag))
-  const addAllCarersSelected = addFilteredCarers.length > 0 && addFilteredCarers.every(carerInList)
-  const hasAdded = CARERS.some(carerInList) || TAGS.some(tagInList)
-
-  const toggleAddCarer = (carer) => {
-    if (carerInList(carer)) {
-      setParticipantList(prev => prev.filter(n => n !== carer.name))
-      appendEvent(`You removed ${carer.name}`)
-    } else {
-      setParticipantList(prev => [...prev, carer.name])
-      appendEvent(`You added ${carer.name}`)
-    }
-  }
-  const toggleAddTag = (tag) => {
-    if (tagInList(tag)) {
-      setParticipantList(prev => prev.filter(n => n !== tagLabel(tag)))
-      appendEvent(`You removed ${tag.name}`)
-    } else {
-      setParticipantList(prev => [...prev, tagLabel(tag)])
-      appendEvent(`You added ${tag.name}`)
-    }
-  }
-  const selectAllAddCarers = () => {
-    if (addAllCarersSelected) {
-      const names = addFilteredCarers.map(c => c.name)
-      names.forEach(n => appendEvent(`You removed ${n}`))
-      setParticipantList(prev => prev.filter(n => !names.includes(n)))
-    } else {
-      const toAdd = addFilteredCarers.filter(c => !carerInList(c))
-      toAdd.forEach(c => appendEvent(`You added ${c.name}`))
-      setParticipantList(prev => [...prev, ...toAdd.map(c => c.name)])
-    }
-  }
-  const clearAddAll = () => {
-    const carerNames = CARERS.filter(carerInList).map(c => c.name)
-    const tagLabels = TAGS.filter(tagInList).map(tagLabel)
-    carerNames.forEach(n => appendEvent(`You removed ${n}`))
-    TAGS.filter(tagInList).forEach(t => appendEvent(`You removed ${t.name}`))
-    setParticipantList(prev => prev.filter(n => !carerNames.includes(n) && !tagLabels.includes(n)))
-  }
-
   const appendEvent = (text) => {
     setLocalMsgs(prev => [...prev, { id: Date.now(), type: 'event', text, time: 'Just now', day: 'Today' }])
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
   }
 
-  const handleRemoveParticipant = (name) => {
-    setParticipantList(prev => prev.filter(n => n !== name))
-    appendEvent(`You removed ${name}`)
-  }
+  const headerFirstName = thread.participantList[0] || ''
+  const headerInitials = !thread.isBroadcast && headerFirstName ? getInitials(headerFirstName) : ''
+  const headerPalette = !thread.isBroadcast && headerFirstName ? nameToColor(headerFirstName) : null
 
   const byDay = localMsgs.reduce((acc, msg) => {
     const last = acc[acc.length - 1]
@@ -456,26 +401,24 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   }
 
   return (
-    <div className="msg-thread-view" onClick={() => { setActionTarget(null); setShowInfo(false); setShowAttach(false) }}>
+    <div className="msg-thread-view" onClick={() => setActionTarget(null)}>
       {/* Header */}
       <div className="msg-thread-header">
-        <div className={`msg-thread-header-avatar${thread.isGroup ? ' group' : ''}`}>
-          {thread.isGroup ? <GroupIcon size={20} /> : <PersonIcon size={20} />}
+        <div
+          className={`msg-thread-header-avatar${thread.isBroadcast ? ' broadcast' : ''}`}
+          style={headerPalette ? { background: headerPalette.bg, color: headerPalette.fg } : {}}
+        >
+          {thread.isBroadcast
+            ? <BroadcastIcon size={20} />
+            : <span className="msg-thread-initials">{headerInitials}</span>
+          }
         </div>
         <div className="msg-thread-header-info">
           <span className="msg-thread-header-title">{thread.title}</span>
           <span className="msg-thread-header-sub">{thread.participants}</span>
         </div>
         <div className="msg-thread-header-actions">
-          <button
-            className={`msg-header-action-btn${showInfo ? ' active' : ''}`}
-            title="Participants"
-            onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}
-          >
-            <GroupIcon size={18} />
-            <span>Participants</span>
-          </button>
-          {!thread.closed && (
+          {!thread.closed && thread.replyAllowed && (
             <button
               className="msg-header-action-btn"
               title="Mark as unread"
@@ -487,125 +430,17 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
           )}
           <button
             className="msg-header-action-btn"
-            title={thread.closed ? 'Reopen thread' : 'Close message'}
+            title={thread.closed ? 'Reopen thread' : 'Close thread'}
             onClick={e => { e.stopPropagation(); onClose?.() }}
           >
             {!thread.closed && <CloseIcon size={18} />}
-            <span>{thread.closed ? 'Reopen' : 'Close message'}</span>
+            <span>{thread.closed ? 'Reopen' : 'Close thread'}</span>
           </button>
         </div>
       </div>
 
-      {/* Info panel */}
-      {showInfo && (
-        <div className="msg-info-panel" onClick={e => e.stopPropagation()}>
-          <div className="msg-info-section">
-            <span className="msg-info-label">Participants</span>
-            <div className="msg-compose-to-wrap" ref={addRef}>
-              <div className="msg-compose-to-inner">
-                {(() => {
-                  const LIMIT = 5
-                  const visible = participantList.slice(0, LIMIT)
-                  const overflow = participantList.length - LIMIT
-                  return (
-                    <>
-                      {visible.map((name, i) => (
-                        <span key={i} className="msg-compose-chip">
-                          {name}
-                          {participantList.length > 1 && (
-                            <button className="msg-chip-remove" onMouseDown={e => { e.preventDefault(); handleRemoveParticipant(name) }}>
-                              <CloseIcon size={12} />
-                            </button>
-                          )}
-                        </span>
-                      ))}
-                      {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
-                    </>
-                  )
-                })()}
-                <input
-                  className="msg-compose-to-input"
-                  placeholder={participantList.length === 0 ? 'Add participant...' : ''}
-                  value={addSearch}
-                  onChange={e => { setAddSearch(e.target.value); setShowAddDropdown(true) }}
-                  onFocus={() => setShowAddDropdown(true)}
-                />
-              </div>
-              {showAddDropdown && (
-                <div className="msg-carer-dropdown msg-add-dropdown">
-                  <div className="msg-dropdown-tabs">
-                    <button
-                      className={`msg-dropdown-tab${addTab === 'carers' ? ' active' : ''}`}
-                      onMouseDown={e => { e.preventDefault(); setAddTab('carers') }}
-                    ><PersonIcon size={16} />Carers</button>
-                    <button
-                      className={`msg-dropdown-tab${addTab === 'groups' ? ' active' : ''}`}
-                      onMouseDown={e => { e.preventDefault(); setAddTab('groups') }}
-                    ><GroupIcon size={16} />Groups</button>
-                  </div>
-
-                  {addTab === 'carers' && (
-                    <>
-                      {!addSearch && (
-                        <div className="msg-carer-option msg-carer-option-all" onClick={selectAllAddCarers}>
-                          <input type="checkbox" className="msg-option-checkbox" checked={addAllCarersSelected} onChange={() => {}} />
-                          <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                            <GroupIcon size={16} />
-                          </div>
-                          <span>All carers</span>
-                        </div>
-                      )}
-                      {addFilteredCarers.length > 0 ? addFilteredCarers.map(c => {
-                        const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
-                        return (
-                          <div key={c.id} className="msg-carer-option" onClick={() => toggleAddCarer(c)}>
-                            <input type="checkbox" className="msg-option-checkbox" checked={carerInList(c)} onChange={() => {}} />
-                            <div className="msg-carer-avatar" style={{ background: palette.bg, color: palette.fg }}>
-                              {c.initials}
-                            </div>
-                            <span>{c.name}</span>
-                          </div>
-                        )
-                      }) : <div className="msg-dropdown-empty">No carers found</div>}
-                    </>
-                  )}
-
-                  {addTab === 'groups' && (
-                    addFilteredTagTypes.length > 0 ? addFilteredTagTypes.map(type => (
-                      <div key={type.id}>
-                        <div className="msg-dropdown-type-header">{type.name}</div>
-                        {type.tags.map(tag => {
-                          return (
-                            <div key={tag.id} className="msg-carer-option" onClick={() => toggleAddTag(tag)}>
-                              <input type="checkbox" className="msg-option-checkbox" checked={tagInList(tag)} onChange={() => {}} />
-                              <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                                <GroupIcon size={16} />
-                              </div>
-                              <div className="msg-tag-option-body">
-                                <span>{tag.name}</span>
-                                <span className="msg-tag-member-count">{tag.memberCount} members</span>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )) : <div className="msg-dropdown-empty">{addSearch ? 'No groups found' : 'No groups available'}</div>
-                  )}
-
-                  {hasAdded && (
-                    <div className="msg-dropdown-clear">
-                      <button onMouseDown={e => { e.preventDefault(); clearAddAll() }}>Clear all</button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Messages */}
-      <div className="msg-messages-area" onClick={() => { setActionTarget(null); setShowAttach(false) }}>
+      <div className="msg-messages-area" onClick={() => setActionTarget(null)}>
         {byDay.map(group => (
           <div key={group.day}>
             <div className="msg-day-sep"><span>{group.day}</span></div>
@@ -617,17 +452,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
                   </div>
                 )
               }
-              const prev = group.msgs[i - 1]
-              const showSender = !msg.isMe && thread.isGroup && (!prev || prev.sender !== msg.sender || prev.isMe)
               return (
                 <div
                   key={msg.id}
                   className={`msg-message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
                 >
-                  {showSender && <div className="msg-sender-label">{msg.sender}</div>}
-                  {replyTo?.id === msg.id && (
-                    <div className="msg-reply-indicator" />
-                  )}
                   <div
                     className={`msg-bubble ${msg.isMe ? 'sent' : 'received'}`}
                     onClick={e => { e.stopPropagation(); setActionTarget(actionTarget?.id === msg.id ? null : msg) }}
@@ -651,9 +480,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
                   {/* Inline action menu on click */}
                   {actionTarget?.id === msg.id && (
                     <div className={`msg-action-menu${msg.isMe ? ' from-me' : ' from-them'}`} onClick={e => e.stopPropagation()}>
-                      <button onClick={() => { setReplyTo(msg); setActionTarget(null); inputRef.current?.focus() }}>
-                        <ReplyIcon /> Reply
-                      </button>
+                      {thread.replyAllowed && (
+                        <button onClick={() => { setReplyTo(msg); setActionTarget(null); inputRef.current?.focus() }}>
+                          <ReplyIcon /> Reply
+                        </button>
+                      )}
                       {msg.isMe && (
                         <button onClick={() => { setEditing(msg); setInputText(msg.text); setReplyTo(null); setActionTarget(null); inputRef.current?.focus() }}>
                           <EditIcon /> Edit
@@ -705,23 +536,21 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         </div>
       )}
 
+      {/* One-way notice */}
+      {!thread.replyAllowed && (
+        <div className="msg-broadcast-notice">
+          <BroadcastIcon size={16} />
+          <span>Employee replies will appear as new threads in your inbox.</span>
+        </div>
+      )}
+
       {/* Compose bar */}
       <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
-        {showAttach && (
-          <div className="msg-attach-picker" onClick={e => e.stopPropagation()}>
-            <button className="msg-attach-option" onClick={() => setShowAttach(false)}>
-              <AttachIcon /><span>File</span>
-            </button>
-          </div>
-        )}
-        <button className="msg-compose-attach" title="Attach file" onClick={e => { e.stopPropagation(); setShowAttach(s => !s) }}>
-          <AttachIcon />
-        </button>
         <div className="msg-compose-input-wrap">
           <input
             ref={inputRef}
             className="msg-compose-input"
-            placeholder="Reply to this thread..."
+            placeholder={thread.isBroadcast ? 'Send another broadcast message...' : 'Reply to this thread...'}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
@@ -758,9 +587,10 @@ function ComposeView({ onSend, onCancel }) {
   const [recipientSearch, setRecipientSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [dropdownTab, setDropdownTab] = useState('carers')
-  const [attachments, setAttachments] = useState([])
   const dropdownRef = useRef(null)
-  const fileInputRef = useRef(null)
+
+  const allCarersSelected = selectedCarers.length === CARERS.length
+  const isBroadcast = allCarersSelected || selectedTags.length > 0
 
   const filteredCarers = CARERS
     .filter(c => c.name.toLowerCase().includes(recipientSearch.toLowerCase()))
@@ -774,33 +604,28 @@ function ComposeView({ onSend, onCancel }) {
     ),
   })).filter(type => type.tags.length > 0)
 
-  const hasRecipients = selectedCarers.length > 0 || selectedTags.length > 0
+  const hasRecipients = selectedCarers.length > 0 || isBroadcast
   const canSend = title.trim() && message.trim() && hasRecipients
-  const allCarersSelected = selectedCarers.length === CARERS.length
 
-  const handleFileAttach = (e) => {
-    const files = Array.from(e.target.files)
-    setAttachments(prev => [...prev, ...files.map(f => ({ name: f.name }))])
-    e.target.value = ''
-  }
-
-  const removeAttachment = (index) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index))
-  }
-
+  // Selecting individual employees: multi-select allowed, clears tags (mutually exclusive with broadcast)
   const toggleCarer = (carer) => {
+    setSelectedTags([])
     setSelectedCarers(prev =>
       prev.some(c => c.id === carer.id) ? prev.filter(c => c.id !== carer.id) : [...prev, carer]
     )
   }
 
+  // Selecting a group switches to broadcast mode (clears individual selection)
   const toggleTag = (tag) => {
+    setSelectedCarers([])
     setSelectedTags(prev =>
       prev.some(t => t.id === tag.id) ? prev.filter(t => t.id !== tag.id) : [...prev, tag]
     )
   }
 
+  // Selecting all employees switches to broadcast mode (clears tags)
   const selectAllCarers = () => {
+    setSelectedTags([])
     setSelectedCarers(allCarersSelected ? [] : CARERS)
   }
 
@@ -819,9 +644,6 @@ function ComposeView({ onSend, onCancel }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const showCarerDropdown = dropdownTab === 'carers' && (filteredCarers.length > 0 || !recipientSearch)
-  const showGroupDropdown = dropdownTab === 'groups'
-
   return (
     <div className="msg-compose-view">
       <div className="msg-compose-header">
@@ -838,41 +660,48 @@ function ComposeView({ onSend, onCancel }) {
           <label className="msg-compose-label">To</label>
           <div className="msg-compose-to-wrap" ref={dropdownRef}>
             <div className="msg-compose-to-inner">
-              {(() => {
-                const allChips = [
-                  ...selectedTags.map(tag => ({ type: 'tag', tag })),
-                  ...selectedCarers.map(c => ({ type: 'carer', carer: c })),
-                ]
-                const LIMIT = 5
-                const visible = allChips.slice(0, LIMIT)
-                const overflow = allChips.length - LIMIT
+              {/* All employees chip */}
+              {allCarersSelected && (
+                <span className="msg-compose-chip msg-compose-chip-broadcast">
+                  <BroadcastIcon size={11} />
+                  All employees
+                  <button onClick={() => setSelectedCarers([])} className="msg-chip-remove">
+                    <CloseIcon size={12} />
+                  </button>
+                </span>
+              )}
+              {/* Tag chips */}
+              {!allCarersSelected && selectedTags.map(tag => (
+                <span key={tag.id} className="msg-compose-chip msg-compose-chip-broadcast">
+                  <BroadcastIcon size={11} />
+                  {tag.name} · {tag.memberCount}
+                  <button onClick={() => toggleTag(tag)} className="msg-chip-remove">
+                    <CloseIcon size={12} />
+                  </button>
+                </span>
+              ))}
+              {/* Individual employee chips */}
+              {!allCarersSelected && selectedTags.length === 0 && (() => {
+                const LIMIT = 4
+                const visible = selectedCarers.slice(0, LIMIT)
+                const overflow = selectedCarers.length - LIMIT
                 return (
                   <>
-                    {visible.map((item, i) =>
-                      item.type === 'tag' ? (
-                        <span key={`tag-${item.tag.id}`} className="msg-compose-chip msg-compose-chip-tag">
-                          <GroupIcon size={11} />
-                          {item.tag.name} · {item.tag.memberCount}
-                          <button onClick={() => toggleTag(item.tag)} className="msg-chip-remove">
-                            <CloseIcon size={12} />
-                          </button>
-                        </span>
-                      ) : (
-                        <span key={item.carer.id} className="msg-compose-chip">
-                          {item.carer.name}
-                          <button onClick={() => toggleCarer(item.carer)} className="msg-chip-remove">
-                            <CloseIcon size={12} />
-                          </button>
-                        </span>
-                      )
-                    )}
+                    {visible.map(c => (
+                      <span key={c.id} className="msg-compose-chip">
+                        {c.name}
+                        <button onClick={() => toggleCarer(c)} className="msg-chip-remove">
+                          <CloseIcon size={12} />
+                        </button>
+                      </span>
+                    ))}
                     {overflow > 0 && <span className="msg-compose-chip msg-chip-overflow">+{overflow} more</span>}
                   </>
                 )
               })()}
               <input
                 className="msg-compose-to-input"
-                placeholder={!hasRecipients ? 'Search for a carer or group...' : ''}
+                placeholder={!hasRecipients ? 'Search for an employee or group...' : ''}
                 value={recipientSearch}
                 onChange={e => { setRecipientSearch(e.target.value); setShowDropdown(true) }}
                 onFocus={() => setShowDropdown(true)}
@@ -884,24 +713,15 @@ function ComposeView({ onSend, onCancel }) {
                   <button
                     className={`msg-dropdown-tab${dropdownTab === 'carers' ? ' active' : ''}`}
                     onMouseDown={e => { e.preventDefault(); setDropdownTab('carers') }}
-                  ><PersonIcon size={16} />Carers</button>
+                  ><PersonIcon size={16} />Individual</button>
                   <button
                     className={`msg-dropdown-tab${dropdownTab === 'groups' ? ' active' : ''}`}
                     onMouseDown={e => { e.preventDefault(); setDropdownTab('groups') }}
-                  ><GroupIcon size={16} />Groups</button>
+                  ><BroadcastIcon size={16} />Broadcast</button>
                 </div>
 
                 {dropdownTab === 'carers' && (
                   <>
-                    {!recipientSearch && (
-                      <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
-                        <input type="checkbox" className="msg-option-checkbox" checked={allCarersSelected} onChange={() => {}} />
-                        <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                          <GroupIcon size={16} />
-                        </div>
-                        <span>All carers</span>
-                      </div>
-                    )}
                     {filteredCarers.map(c => {
                       const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
                       const isSelected = selectedCarers.some(s => s.id === c.id)
@@ -915,45 +735,72 @@ function ComposeView({ onSend, onCancel }) {
                         </div>
                       )
                     })}
-                    {filteredCarers.length === 0 && <div className="msg-dropdown-empty">No carers found</div>}
+                    {filteredCarers.length === 0 && <div className="msg-dropdown-empty">No employees found</div>}
                   </>
                 )}
 
                 {dropdownTab === 'groups' && (
-                  filteredTagTypes.length > 0 ? filteredTagTypes.map(type => (
-                    <div key={type.id}>
-                      <div className="msg-dropdown-type-header">{type.name}</div>
-                      {type.tags.map(tag => {
-                        const isSelected = selectedTags.some(s => s.id === tag.id)
-                        return (
-                          <div key={tag.id} className="msg-carer-option" onClick={() => toggleTag(tag)}>
-                            <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
-                            <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
-                              <GroupIcon size={16} />
+                  <>
+                    {!recipientSearch && (
+                      <div className="msg-carer-option msg-carer-option-all" onClick={selectAllCarers}>
+                        <input type="checkbox" className="msg-option-checkbox" checked={allCarersSelected} onChange={() => {}} />
+                        <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                          <BroadcastIcon size={16} />
+                        </div>
+                        <div className="msg-tag-option-body">
+                          <span>All employees</span>
+                          <span className="msg-tag-member-count">{CARERS.length} employees</span>
+                        </div>
+                      </div>
+                    )}
+                    {filteredTagTypes.length > 0 ? filteredTagTypes.map(type => (
+                      <div key={type.id}>
+                        <div className="msg-dropdown-type-header">{type.name}</div>
+                        {type.tags.map(tag => {
+                          const isSelected = selectedTags.some(s => s.id === tag.id)
+                          return (
+                            <div key={tag.id} className="msg-carer-option" onClick={() => toggleTag(tag)}>
+                              <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
+                              <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                                <GroupIcon size={16} />
+                              </div>
+                              <div className="msg-tag-option-body">
+                                <span>{tag.name}</span>
+                                <span className="msg-tag-member-count">{tag.memberCount} employees</span>
+                              </div>
                             </div>
-                            <div className="msg-tag-option-body">
-                              <span>{tag.name}</span>
-                              <span className="msg-tag-member-count">{tag.memberCount} members</span>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )) : (
-                    <div className="msg-dropdown-empty">
-                      {recipientSearch ? 'No groups found' : 'No groups available'}
-                    </div>
-                  )
+                          )
+                        })}
+                      </div>
+                    )) : (
+                      recipientSearch && <div className="msg-dropdown-empty">No groups found</div>
+                    )}
+                  </>
                 )}
 
                 {hasRecipients && (
                   <div className="msg-dropdown-clear">
-                    <button onMouseDown={e => { e.preventDefault(); clearAll() }}>Clear all</button>
+                    <button onMouseDown={e => { e.preventDefault(); clearAll() }}>Clear</button>
                   </div>
                 )}
               </div>
             )}
           </div>
+
+          {/* Multi-carer notice */}
+          {!isBroadcast && selectedCarers.length > 1 && (
+            <div className="msg-broadcast-mode-notice">
+              <PersonIcon size={14} />
+              <span>Sending to {selectedCarers.length} employees as separate conversations. Each will receive their own thread and replies will come back individually.</span>
+            </div>
+          )}
+          {/* Broadcast mode notice */}
+          {isBroadcast && (
+            <div className="msg-broadcast-mode-notice">
+              <BroadcastIcon size={14} />
+              <span>Broadcast — employees will receive this individually. Replies will start new threads in your inbox.</span>
+            </div>
+          )}
         </div>
 
         {/* Title */}
@@ -978,32 +825,15 @@ function ComposeView({ onSend, onCancel }) {
           />
         </div>
 
-        {/* Attachments */}
-        <div className="msg-compose-attachments">
-          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} multiple />
-          <button type="button" className="msg-compose-attach-btn" onClick={() => fileInputRef.current.click()}>
-            <AttachIcon /> Attach
-          </button>
-          {attachments.map((att, i) => (
-            <span key={i} className="msg-compose-attachment-chip">
-              <AttachIcon />
-              <span className="msg-compose-attachment-name">{att.name}</span>
-              <button className="msg-chip-remove" onClick={() => removeAttachment(i)}>
-                <CloseIcon size={12} />
-              </button>
-            </span>
-          ))}
-        </div>
-
         {/* Actions */}
         <div className="msg-compose-actions">
           <button className="round-btn tertiary-btn" onClick={onCancel}>Cancel</button>
           <button
             className="round-btn primary-btn btn-icon-right"
             disabled={!canSend}
-            onClick={() => canSend && onSend({ title, recipients: selectedCarers, tags: selectedTags, message })}
+            onClick={() => canSend && onSend({ title, recipients: selectedCarers, tags: selectedTags, message, isBroadcast })}
           >
-            Send <SendIcon />
+            {isBroadcast ? 'Send broadcast' : 'Send'} <SendIcon />
           </button>
         </div>
       </div>
@@ -1087,32 +917,59 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ title, recipients, tags, message }) => {
-    const newId = Math.max(...threads.map(t => t.id)) + 1
-    const isGroup = recipients.length + tags.length > 1 || tags.length > 0
-    const participantParts = [
-      ...tags.map(t => `${t.name} · ${t.memberCount} members`),
-      ...recipients.map(r => r.name),
-    ]
-    const newThread = {
-      id: newId,
-      title,
-      isGroup,
-      participants: participantParts.join(', '),
-      participantList: [...tags.map(t => t.name), ...recipients.map(r => r.name)],
-      lastSender: 'Office',
-      lastMessage: message,
-      time: 'Just now',
-      unread: 0,
-      closed: false,
+  const handleNewMessage = ({ title, recipients, tags, message, isBroadcast }) => {
+    const baseId = Math.max(...threads.map(t => t.id)) + 1
+
+    if (isBroadcast) {
+      const participantsSummary = tags.length > 0
+        ? tags.map(t => `${t.name} · ${t.memberCount} employees`).join(', ')
+        : `All employees · ${CARERS.length} employees`
+      const newThread = {
+        id: baseId,
+        title,
+        isGroup: false,
+        isBroadcast: true,
+        replyAllowed: false,
+        participants: participantsSummary,
+        participantList: tags.map(t => t.name),
+        lastSender: 'Office',
+        lastMessage: message,
+        time: 'Just now',
+        unread: 0,
+        closed: false,
+      }
+      setThreads(prev => [newThread, ...prev])
+      setThreadMessages(prev => ({
+        ...prev,
+        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }],
+      }))
+      setActiveThreadId(baseId)
+      setRightPanel('thread')
+    } else {
+      // Create one 1:1 thread per recipient
+      const newThreads = recipients.map((r, i) => ({
+        id: baseId + i,
+        title,
+        isGroup: false,
+        isBroadcast: false,
+        replyAllowed: recipients.length === 1,
+        participants: r.name,
+        participantList: [r.name],
+        lastSender: 'Office',
+        lastMessage: message,
+        time: 'Just now',
+        unread: 0,
+        closed: false,
+      }))
+      const newMessages = Object.fromEntries(
+        newThreads.map(t => [t.id, [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }]])
+      )
+      setThreads(prev => [...newThreads, ...prev])
+      setThreadMessages(prev => ({ ...prev, ...newMessages }))
+      // Open the first thread
+      setActiveThreadId(baseId)
+      setRightPanel('thread')
     }
-    setThreads(prev => [newThread, ...prev])
-    setThreadMessages(prev => ({
-      ...prev,
-      [newId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }],
-    }))
-    setActiveThreadId(newId)
-    setRightPanel('thread')
   }
 
   return (

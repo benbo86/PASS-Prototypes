@@ -164,6 +164,32 @@ body { overflow: hidden; }
   flex-shrink: 0;
 }
 .msg-thread-avatar.group { background: var(--ui-purple-8-vibrant-lavendar); }
+.msg-thread-avatar.broadcast { background: #ede8f7; color: var(--brand-purple-6-purple-4); }
+
+.msg-thread-initials {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.msg-thread-avatar {
+  position: relative;
+}
+
+.msg-thread-extra {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 6px;
+  line-height: 1.4;
+}
 
 .msg-thread-body { flex: 1; min-width: 0; }
 
@@ -294,6 +320,7 @@ body { overflow: hidden; }
   flex-shrink: 0;
 }
 .msg-thread-header-avatar.group { background: var(--ui-purple-8-vibrant-lavendar); }
+.msg-thread-header-avatar.broadcast { background: #ede8f7; color: var(--brand-purple-6-purple-4); }
 
 .msg-thread-header-info {
   flex: 1;
@@ -1150,4 +1177,45 @@ body { overflow: hidden; }
   padding: 16px 24px;
   border-top: 1px solid var(--ui-purple-6-lavendar-grey);
   flex-shrink: 0;
+}
+
+/* ── Broadcast styles ────────────────────────────────────────── */
+.msg-compose-chip-broadcast {
+  background: #ede8f7;
+  border: 1.5px solid #c5b8e8;
+  color: var(--brand-purple-6-purple-4);
+  gap: 5px;
+}
+
+.msg-broadcast-mode-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ede8f7;
+  border-radius: 8px;
+  color: var(--brand-purple-6-purple-4);
+  margin-top: 6px;
+}
+.msg-broadcast-mode-notice span {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.msg-broadcast-mode-notice svg { flex-shrink: 0; margin-top: 1px; }
+
+.msg-broadcast-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #ede8f7;
+  border-top: 1px solid #c5b8e8;
+  flex-shrink: 0;
+  color: var(--brand-purple-6-purple-4);
+}
+.msg-broadcast-notice span {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
 }

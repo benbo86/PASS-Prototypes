@@ -405,7 +405,7 @@ function DetailSectionLabel({ children }) {
 
 function BookingDetailScreen({ notif, onBack }) {
   const status = STATUS_CONFIG[notif.type]
-  const isShift = SHIFT_TYPES.includes(notif.type)
+  const isShift = notif.type === 'shift_duration_changed' || notif.type === 'shift_summary'
   const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.customer)
   const headerTitle = isShift ? 'Shift update' : 'Booking update'
 
