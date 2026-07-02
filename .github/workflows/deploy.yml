@@ -38,3 +38,6 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v5
         id: deployment
+        with:
+          timeout: 1200000
+          error_count: 20
