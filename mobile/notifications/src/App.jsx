@@ -460,7 +460,7 @@ function BookingDetailScreen({ notif, onBack }) {
           </>}
 
           {notif.type === 'duration_changed' && <>
-            <DetailRow icon={<ClockDetailIcon />} label="Visit time"        value={`${notif.bookingTime}, ${notif.bookingDate}`} />
+            <DetailRow icon={<ClockDetailIcon />} label="Booking time"        value={`${notif.bookingTime}, ${notif.bookingDate}`} />
             <DetailRow icon={<TimeGlassDetailIcon />} label="Original duration" value={notif.originalDuration} strikethrough iconColor="#bbb" />
             <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newDuration} iconColor="#e09000" />
           </>}
@@ -505,18 +505,18 @@ function BookingDetailScreen({ notif, onBack }) {
             <DetailRow icon={<TimeGlassDetailIcon />}  label="Original duration" value={notif.originalShiftDuration} strikethrough iconColor="#bbb" />
             <DetailRow icon={<TimeGlassDetailIcon />}  label="Updated duration"  value={notif.newShiftDuration} iconColor="#e09000" />
             <DetailRow icon={<ClockDetailIcon />}  label="Time"        value={`${notif.shiftStartTime}, ${notif.shiftDate}`} />
-            <DetailRow icon={<RunDetailIcon />}    label="Visits"         value={notif.visitCount} iconColor="#726694" />
+            <DetailRow icon={<RunDetailIcon />}    label="Bookings"         value={notif.visitCount} iconColor="#726694" />
           </>}
 
           {/* ── Shift: summary (multiple changes) ── */}
           {notif.type === 'shift_summary' && <>
-            <DetailSectionLabel>Visit changes ({notif.changes.length})</DetailSectionLabel>
+            <DetailSectionLabel>Booking changes ({notif.changes.length})</DetailSectionLabel>
             {notif.changes.map((c, i) => {
               if (c.changeType === 'time_changed') return (
                 <DetailRow key={i} icon={<ClockDetailIcon />}      label={`Time changed, ${c.customer}`}     value={<><s>{c.originalTime}</s>{` ${c.newTime}`}</>}                   iconColor="#e09000" />
               )
               if (c.changeType === 'visit_added') return (
-                <DetailRow key={i} icon={<AddCircleDetailIcon />}  label={`Visit added, ${c.customer}`}      value={`${c.time}, ${c.duration}`}                                    iconColor="#27ae60" />
+                <DetailRow key={i} icon={<AddCircleDetailIcon />}  label={`Booking added, ${c.customer}`}      value={`${c.time}, ${c.duration}`}                                    iconColor="#27ae60" />
               )
               if (c.changeType === 'duration_changed') return (
                 <DetailRow key={i} icon={<TimeGlassDetailIcon />}      label={`Duration changed, ${c.customer}`} value={<><s>{c.originalDuration}</s>{` ${c.newDuration}`}</>}           iconColor="#e09000" />
