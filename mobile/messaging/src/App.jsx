@@ -66,9 +66,9 @@ const FileIcon = ({ size = 22 }) => (
     <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
   </svg>
 )
-const GroupIcon = ({ size = 20 }) => (
+const BroadcastIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+    <path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM19.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/>
   </svg>
 )
 const PersonIcon = ({ size = 20 }) => (
@@ -170,33 +170,6 @@ const ChevronUpIcon = ({ size = 18 }) => (
 
 // ─── Data ────────────────────────────────────────────────────
 
-const CARERS = [
-  { id: 0,  name: 'Office',          initials: 'OF', hasPhoto: true,  photoColor: '#7040a8' },
-  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', hasPhoto: true,  photoColor: '#c4a0d4' },
-  { id: 2,  name: 'Karen Bailey',    initials: 'KB', hasPhoto: false },
-  { id: 3,  name: 'Tom Harris',      initials: 'TH', hasPhoto: true,  photoColor: '#8ab8d4' },
-  { id: 4,  name: 'Priya Sharma',    initials: 'PS', hasPhoto: false },
-  { id: 5,  name: 'James Okafor',    initials: 'JO', hasPhoto: true,  photoColor: '#8aba9e' },
-  { id: 6,  name: 'Linda Peters',    initials: 'LP', hasPhoto: false },
-  { id: 7,  name: 'David Chen',      initials: 'DC', hasPhoto: true,  photoColor: '#e898b0' },
-  { id: 8,  name: 'Emma Richardson', initials: 'ER', hasPhoto: false },
-  { id: 9,  name: 'Michael Hughes',  initials: 'MH', hasPhoto: true,  photoColor: '#d4a050' },
-  { id: 10, name: 'Olivia Brooks',   initials: 'OB', hasPhoto: false },
-  { id: 11, name: 'Nathan Wells',    initials: 'NW', hasPhoto: true,  photoColor: '#60b8a8' },
-  { id: 12, name: 'Chloe Barker',    initials: 'CB', hasPhoto: false },
-  { id: 13, name: 'Ryan Sutton',     initials: 'RS', hasPhoto: true,  photoColor: '#a0b868' },
-  { id: 14, name: 'Fiona Marsh',     initials: 'FM', hasPhoto: false },
-  { id: 15, name: 'Callum Reid',     initials: 'CR', hasPhoto: true,  photoColor: '#e08858' },
-]
-
-const OFFICE_CONTACTS = [
-  { id: 101, name: 'Rachel Simmons',  initials: 'RS', hasPhoto: true,  photoColor: '#c4a0d4', role: 'Care Coordinator',    reachMeFor: 'Rota queries, shift swaps and cover' },
-  { id: 102, name: 'Paul Griffiths',  initials: 'PG', hasPhoto: false,                        role: 'Branch Manager',      reachMeFor: 'Complaints and HR matters' },
-  { id: 103, name: 'Jennifer Walsh',  initials: 'JW', hasPhoto: true,  photoColor: '#8ab8d4', role: 'Finance',             reachMeFor: 'Pay queries and expenses' },
-  { id: 104, name: 'Mark Thompson',   initials: 'MT', hasPhoto: false,                        role: 'Training Coordinator', reachMeFor: null },
-  { id: 105, name: 'On-call Support', initials: 'OC', hasPhoto: false,                        role: null,                  reachMeFor: 'Urgent out-of-hours support' },
-]
-
 const CUSTOMERS = [
   { id: 1,  name: 'Margaret Thompson',  initials: 'MT', hasPhoto: true,  photoColor: '#c4a0d4' },
   { id: 2,  name: 'George Evans',       initials: 'GE', hasPhoto: false },
@@ -224,45 +197,22 @@ const THREADS = [
   {
     id: 1,
     title: 'Blue Bird Sheffield — Team Update',
-    isGroup: true,
+    isBroadcast: true,
     careReceiver: null,
-    participants: 'Sarah M., Karen B. +13',
-    participantList: [
-      { name: 'You', initials: 'AJ' },
-      { name: 'Sarah Mitchell', initials: 'SM' },
-      { name: 'Karen Bailey', initials: 'KB' },
-      { name: 'Tom Harris', initials: 'TH' },
-      { name: 'Priya Sharma', initials: 'PS' },
-      { name: 'James Okafor', initials: 'JO' },
-      { name: 'Linda Peters', initials: 'LP' },
-      { name: 'David Chen', initials: 'DC' },
-      { name: 'Emma Richardson', initials: 'ER' },
-      { name: 'Michael Hughes', initials: 'MH' },
-      { name: 'Olivia Brooks', initials: 'OB' },
-      { name: 'Nathan Wells', initials: 'NW' },
-      { name: 'Chloe Barker', initials: 'CB' },
-      { name: 'Ryan Sutton', initials: 'RS' },
-      { name: 'Fiona Marsh', initials: 'FM' },
-      { name: 'Callum Reid', initials: 'CR' },
-    ],
-    lastSender: 'Sarah M.',
+    participants: 'Office',
+    lastSender: 'Office',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
     time: '10:42 AM',
-    unread: 3,
+    unread: 1,
     sentByMe: false,
     closed: false,
   },
   {
     id: 2,
     title: 'Medication Query',
-    isGroup: false,
     careReceiver: null,
     participants: 'Office',
-    participantList: [
-      { name: 'You', initials: 'AJ' },
-      { name: 'Karen Bailey', initials: 'KB' },
-    ],
-    lastSender: 'Karen B.',
+    lastSender: 'Office',
     lastMessage: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit?",
     time: '9:15 AM',
     unread: 1,
@@ -272,14 +222,9 @@ const THREADS = [
   {
     id: 3,
     title: 'Friday Shift — Swap Request',
-    isGroup: false,
     careReceiver: null,
     participants: 'Office',
-    participantList: [
-      { name: 'You', initials: 'AJ' },
-      { name: 'Karen Bailey', initials: 'KB' },
-    ],
-    lastSender: 'Karen B.',
+    lastSender: 'Office',
     lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
     time: 'Yesterday',
     unread: 0,
@@ -289,14 +234,9 @@ const THREADS = [
   {
     id: 5,
     title: 'Attachment Examples',
-    isGroup: false,
     careReceiver: null,
     participants: 'Office',
-    participantList: [
-      { name: 'You', initials: 'AJ' },
-      { name: 'Karen Bailey', initials: 'KB' },
-    ],
-    lastSender: 'Karen B.',
+    lastSender: 'Office',
     lastMessage: 'Please see the training video above.',
     time: '10:35 AM',
     unread: 0,
@@ -306,13 +246,8 @@ const THREADS = [
   {
     id: 4,
     title: 'Annual Leave — July',
-    isGroup: false,
     careReceiver: null,
     participants: 'Office',
-    participantList: [
-      { name: 'You', initials: 'AJ' },
-      { name: 'Karen Bailey', initials: 'KB' },
-    ],
     lastSender: 'You',
     lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
     time: 'Mon',
@@ -325,11 +260,7 @@ const THREADS = [
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: false, sender: 'Sarah Mitchell', text: "Hi team, just a reminder that we have a new care plan in place for all Blue Bird residents. Please review the updated notes before your next visits.", time: '2:00 PM', day: 'Monday' },
-    { id: 2, isMe: false, sender: 'Sarah Mitchell', text: "Also, please note that parking on Station Road is restricted from next week. Plan your journeys accordingly.", time: '2:01 PM', day: 'Monday' },
-    { id: 3, isMe: true, text: "Thanks Sarah, noted. Will there be updated route suggestions shared?", time: '3:14 PM', day: 'Monday', receipt: 'read' },
-    { id: 4, isMe: false, sender: 'Sarah Mitchell', text: "Yes, we'll share those by end of the week. Thanks for asking Adrianna!", time: '3:20 PM', day: 'Monday' },
-    { id: 5, isMe: false, sender: 'Sarah Mitchell', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
+    { id: 1, isMe: false, sender: 'Office', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
   ],
   2: [
     { id: 1, isMe: false, sender: 'Office', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
@@ -361,8 +292,8 @@ function ThreadRow({ thread, onClick, showClosedTag }) {
   return (
     <div className="thread-row-outer" onClick={onClick}>
       <div className="thread-row">
-        <div className={`thread-avatar ${thread.isGroup ? 'group' : ''}`}>
-          {thread.isGroup ? <GroupIcon /> : <PersonIcon />}
+        <div className={`thread-avatar ${thread.isBroadcast ? 'broadcast' : ''}`}>
+          {thread.isBroadcast ? <BroadcastIcon /> : <PersonIcon />}
         </div>
         <div className="thread-body">
           <div className="thread-top">
@@ -449,70 +380,6 @@ function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
         {filtered.length === 0 && (
           <div className="empty-state">
             {isSearching ? 'No messages found' : tab === 'closed' ? 'No closed threads' : 'No messages'}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Soft palette for participant avatars — index 0 is always "You" (mauve)
-const P_BG = ['#c4a8d8', '#a8d5b5', '#a8c5e8', '#f0d4a0', '#f0a8b8', '#a8ddd5', '#c8daa8', '#f0c4a0']
-const P_FG = ['#ffffff', '#1b5e20', '#0d47a1', '#7a5200', '#7a1030', '#00504a', '#3d5e00', '#7a3200']
-
-// ─── Thread Info Sheet ───────────────────────────────────────
-
-function ThreadInfoSheet({ thread, onClose, onMarkUnread, onRequestAddParticipants }) {
-  const list = thread.participantList || []
-  return (
-    <div className="picker-overlay" onClick={onClose}>
-      <div className="picker-sheet info-sheet" onClick={e => e.stopPropagation()}>
-        <div className="picker-handle" />
-
-        <div className="info-menu">
-          <button className="info-menu-item" onClick={e => { e.stopPropagation(); onRequestAddParticipants() }}>
-            <AddIcon size={20} />
-            <span>Participants</span>
-          </button>
-          <button className="info-menu-item" onClick={() => { onMarkUnread?.(); onClose() }}>
-            <UnreadBubbleIcon size={20} />
-            <span>Mark as unread</span>
-          </button>
-        </div>
-
-        <div className="info-section">
-          <div className="info-section-label">Participants · {list.length}</div>
-          <div className="info-participants-list">
-            {list.map((p, i) => (
-              <div key={i} className="info-participant-row">
-                <div className="info-participant-avatar" style={{ background: P_BG[i % P_BG.length], color: P_FG[i % P_FG.length] }}>
-                  {p.initials}
-                </div>
-                <span className="info-participant-name">{p.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {thread.careReceiver && (
-          <div className="info-section">
-            <div className="info-section-label">In relation to</div>
-            <div className="info-participants-list">
-              {thread.careReceiver.split(', ').map((name, i) => {
-                const parts = name.trim().split(' ')
-                const initials = parts.length > 1
-                  ? `${parts[0][0]}${parts[parts.length - 1][0]}`
-                  : parts[0].slice(0, 2).toUpperCase()
-                return (
-                  <div key={i} className="info-participant-row">
-                    <div className="info-participant-avatar" style={{ background: P_BG[(i + 3) % P_BG.length], color: P_FG[(i + 3) % P_FG.length] }}>
-                      {initials}
-                    </div>
-                    <span className="info-participant-name">{name.trim()}</span>
-                  </div>
-                )
-              })}
-            </div>
           </div>
         )}
       </div>
@@ -679,19 +546,19 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onAddParticipants, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
+const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
   const [editing, setEditing] = useState(null)
   const [showAttach, setShowAttach] = useState(false)
-  const [showInfo, setShowInfo] = useState(false)
-  const [showParticipantPicker, setShowParticipantPicker] = useState(false)
-  const [pendingParticipants, setPendingParticipants] = useState([])
+  const [infoMenuOpen, setInfoMenuOpen] = useState(false)
+  const [infoMenuPos, setInfoMenuPos] = useState({ top: 0, right: 16 })
   const [previewAttachment, setPreviewAttachment] = useState(null)
   const [prevThreadId, setPrevThreadId] = useState(thread?.id)
   const endRef = useRef(null)
   const inputRef = useRef(null)
+  const screenRef = useRef(null)
 
   // Sync derived state: reset localMsgs immediately when thread changes (no stale-render flash)
   if (prevThreadId !== thread?.id) {
@@ -709,9 +576,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     setReplyTo(null)
     setEditing(null)
     setShowAttach(false)
-    setShowInfo(false)
-    setShowParticipantPicker(false)
-    setPendingParticipants([])
+    setInfoMenuOpen(false)
     setPreviewAttachment(null)
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'auto' }), 0)
   }, [thread?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -720,7 +585,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     replyToMessage: (msg) => { setReplyTo(msg); inputRef.current?.focus() },
     editMessage:    (msg) => { setEditing(msg); setInputText(msg.text); inputRef.current?.focus() },
     deleteMessage:  (msg) => { setLocalMsgs(prev => prev.filter(m => m.id !== msg.id)); onMessageDeleted?.(msg.id) },
-    dismissAll:     ()    => { setShowAttach(false); setShowInfo(false); setShowParticipantPicker(false); setPreviewAttachment(null) },
+    dismissAll:     ()    => { setShowAttach(false); setInfoMenuOpen(false); setPreviewAttachment(null) },
   }))
 
   if (!thread) return <div className="screen" />
@@ -759,23 +624,25 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     setShowAttach(false)
   }
 
+  const toggleInfoMenu = (e) => {
+    e.stopPropagation()
+    if (infoMenuOpen) { setInfoMenuOpen(false); return }
+    const rect = e.currentTarget.getBoundingClientRect()
+    const screenRect = screenRef.current.getBoundingClientRect()
+    setInfoMenuPos({ top: rect.bottom - screenRect.top + 4, right: screenRect.right - rect.right })
+    setInfoMenuOpen(true)
+    setShowAttach(false)
+  }
+
   const dismissOverlays = () => {
     onCloseActions?.()
     setShowAttach(false)
-    setShowInfo(false)
-    setShowParticipantPicker(false)
+    setInfoMenuOpen(false)
     setPreviewAttachment(null)
   }
 
-  const togglePendingParticipant = (p) => setPendingParticipants(prev =>
-    prev.some(r => r.id === p.id) ? prev.filter(r => r.id !== p.id) : [...prev, p]
-  )
-
-  const existingParticipantNames = new Set((thread?.participantList || []).map(p => p.name))
-  const availableCarers = CARERS.filter(c => !existingParticipantNames.has(c.name))
-
   return (
-    <div className="screen" onClick={dismissOverlays}>
+    <div className="screen" onClick={dismissOverlays} ref={screenRef}>
       <StatusBar />
 
       {/* Header */}
@@ -787,8 +654,21 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
           <span className="thread-header-title">{thread?.title}</span>
           <span className="thread-header-sub">{thread?.participants}</span>
         </div>
-        <button className="app-header-action" onClick={e => { e.stopPropagation(); setShowInfo(s => !s) }}><EllipsisIcon /></button>
+        <button className="app-header-action" onClick={toggleInfoMenu}><EllipsisIcon /></button>
       </div>
+
+      {/* Info dropdown menu */}
+      {infoMenuOpen && (
+        <div
+          className="actions-menu"
+          style={{ position: 'absolute', top: infoMenuPos.top, right: infoMenuPos.right, zIndex: 20 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button onClick={() => { onMarkUnread?.(thread.id); setInfoMenuOpen(false) }}>
+            <UnreadBubbleIcon size={20} /> Mark as unread
+          </button>
+        </div>
+      )}
 
       {/* Care receiver tag */}
       {thread?.careReceiver && (
@@ -908,46 +788,6 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
       </div>
 
 
-      {/* Thread info sheet */}
-      {showInfo && (
-        <ThreadInfoSheet
-          thread={thread}
-          onClose={() => setShowInfo(false)}
-          onMarkUnread={() => onMarkUnread?.(thread.id)}
-          onRequestAddParticipants={() => { setPendingParticipants([]); setShowParticipantPicker(true) }}
-        />
-      )}
-
-      {/* Add participant picker — renders on top of info sheet */}
-      {showParticipantPicker && (
-        <PersonPickerSheet
-          title="Add Participants"
-          items={availableCarers}
-          selected={pendingParticipants}
-          onToggle={togglePendingParticipant}
-          onClose={() => {
-            if (pendingParticipants.length > 0) {
-              onAddParticipants(pendingParticipants)
-              const names = pendingParticipants.map(p => p.name)
-              const nameStr = names.length === 1
-                ? names[0]
-                : names.length === 2
-                  ? `${names[0]} and ${names[1]}`
-                  : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
-              setLocalMsgs(prev => [...prev, {
-                id: prev.length + 1,
-                type: 'event',
-                text: `You added ${nameStr}`,
-                time: 'Just now',
-                day: 'Today',
-              }])
-            }
-            setPendingParticipants([])
-            setShowParticipantPicker(false)
-          }}
-        />
-      )}
-
       {/* Attachment preview */}
       {previewAttachment && (
         <AttachmentPreview attachment={previewAttachment} onClose={() => setPreviewAttachment(null)} />
@@ -1062,18 +902,13 @@ function PersonPickerSheet({ title, items, selected, onToggle, onClose }) {
   )
 }
 
-function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
+function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
   const [title, setTitle] = useState('')
-  const [toRecipients, setToRecipients] = useState([])
   const [careReceivers, setCareReceivers] = useState([])
   const [message, setMessage] = useState('')
-  const [showToPicker, setShowToPicker] = useState(false)
   const [showCarePicker, setShowCarePicker] = useState(false)
   const canSend = title.trim() && message.trim()
 
-  const toggleTo = (carer) => setToRecipients(prev =>
-    prev.some(r => r.id === carer.id) ? prev.filter(r => r.id !== carer.id) : [...prev, carer]
-  )
   const toggleCare = (customer) => setCareReceivers(prev =>
     prev.some(r => r.id === customer.id) ? prev.filter(r => r.id !== customer.id) : [...prev, customer]
   )
@@ -1091,23 +926,11 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
 
       <div className="compose-form">
 
-        {/* To */}
-        <div className="compose-field-group compose-tappable-group" onClick={() => setShowToPicker(true)}>
+        {/* To — carers only ever message Office, so there's nothing to pick */}
+        <div className="compose-field-group">
           <div className="compose-inline-row">
             <span className="compose-to-label">To:</span>
-            {toRecipients.length === 0
-              ? <span className="compose-field-placeholder">Add recipient</span>
-              : <div className="compose-inline-chips" onClick={e => e.stopPropagation()}>
-                  {toRecipients.map(c => (
-                    <div key={c.id} className="compose-chip">
-                      <span>{c.name}</span>
-                      <button className="compose-chip-remove" onClick={e => { e.stopPropagation(); toggleTo(c) }} aria-label={`Remove ${c.name}`}>
-                        <CloseIcon size={13} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-            }
+            <span>Office</span>
           </div>
         </div>
 
@@ -1170,7 +993,7 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
         <button
           className={`compose-send-btn ${!canSend ? 'disabled' : ''}`}
           disabled={!canSend}
-          onClick={() => canSend && onSend({ title, toRecipients, careReceivers, message })}
+          onClick={() => canSend && onSend({ title, careReceivers, message })}
         >
           Send Message <SendIcon size={18} />
         </button>
@@ -1178,15 +1001,6 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
       </div>
 
 
-      {showToPicker && (
-        <PersonPickerSheet
-          title="Add Recipients"
-          items={carers}
-          selected={toRecipients}
-          onToggle={toggleTo}
-          onClose={() => setShowToPicker(false)}
-        />
-      )}
       {showCarePicker && (
         <PersonPickerSheet
           title="Add Customers"
@@ -1201,19 +1015,6 @@ function ComposeScreen({ onBack, onSend, customers, carers, totalUnread }) {
 }
 
 // ─── Root ────────────────────────────────────────────────────
-
-const buildParticipantsStr = (participantList) => {
-  const others = (participantList || []).filter(p => p.name !== 'You')
-  if (others.length === 0) return ''
-  if (others.length === 1) return others[0].name
-  const abbrev = p => {
-    const parts = p.name.split(' ')
-    return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
-  }
-  const shown = others.slice(0, 2).map(abbrev).join(', ')
-  const rest = others.length - 2
-  return rest > 0 ? `${shown} +${rest}` : shown
-}
 
 export default function App() {
   const [view, setView] = useState('inbox')
@@ -1277,26 +1078,24 @@ export default function App() {
   }
 
   const handleReply = (text) => {
-    setThreads(prev => prev.map(t =>
-      t.id === activeThreadId
-        ? { ...t, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: 0 }
-        : t
-    ))
+    setThreads(prev => {
+      const updated = prev.find(t => t.id === activeThreadId)
+      if (!updated) return prev
+      const rest = prev.filter(t => t.id !== activeThreadId)
+      return [
+        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: 0 },
+        ...rest,
+      ]
+    })
   }
 
-  const handleNewMessage = ({ title, toRecipients, careReceivers, message }) => {
+  const handleNewMessage = ({ title, careReceivers, message }) => {
     const newId = threads.reduce((max, t) => Math.max(max, t.id), 0) + 1
-    const participantList = [
-      { name: 'You', initials: 'AJ' },
-      ...toRecipients.map(r => ({ name: r.name, initials: r.initials })),
-    ]
     const newThread = {
       id: newId,
       title,
-      isGroup: toRecipients.length > 1,
       careReceiver: careReceivers.length > 0 ? careReceivers.map(r => r.name).join(', ') : null,
-      participants: buildParticipantsStr(participantList),
-      participantList,
+      participants: 'Office',
       lastSender: 'You',
       lastMessage: message,
       time: 'Just now',
@@ -1327,18 +1126,6 @@ export default function App() {
     ))
   }
 
-  const handleAddParticipants = (newParticipants) => {
-    setThreads(prev => prev.map(t => {
-      if (t.id !== activeThreadId) return t
-      const existing = new Set((t.participantList || []).map(p => p.name))
-      const toAdd = newParticipants
-        .filter(p => !existing.has(p.name))
-        .map(p => ({ name: p.name, initials: p.initials }))
-      const updatedList = [...(t.participantList || []), ...toAdd]
-      return { ...t, participantList: updatedList, participants: buildParticipantsStr(updatedList) }
-    }))
-  }
-
   return (
     <div className="phone-wrap">
       <a href="../../" className="back-link">
@@ -1362,7 +1149,6 @@ export default function App() {
               onBack={() => setView('inbox')}
               onMessageSent={handleReply}
               onMarkUnread={handleMarkUnread}
-              onAddParticipants={handleAddParticipants}
               onMessageDeleted={handleMessageDeleted}
               totalUnread={totalUnread}
               onOpenActions={handleOpenActions}
@@ -1375,7 +1161,6 @@ export default function App() {
                 onBack={closeCompose}
                 onSend={handleNewMessage}
                 customers={CUSTOMERS}
-                carers={OFFICE_CONTACTS}
                 totalUnread={totalUnread}
               />
             </div>

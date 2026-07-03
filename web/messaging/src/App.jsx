@@ -33,9 +33,11 @@ const PersonIcon = ({ size = 20 }) => (
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
   </svg>
 )
-const TagIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M6.8,8 C6.1376,8 5.6008,7.4616 5.6008,6.8 C5.6008,6.1376 6.1376,5.6 6.8,5.6 C7.4624,5.6 8,6.1376 8,6.8 C8,7.4616 7.4624,8 6.8,8 M4,5 L4,11.2 L4,11.2 C4,11.6416 4.18,12.0408 4.4696,12.332 L11.672,19.5304 C11.9608,19.82 12.3608,20 12.8032,20 C13.2456,20 13.6456,19.8208 13.9344,19.532 L19.5296,13.936 C19.82,13.6464 20,13.2448 20,12.8032 C20,12.3608 19.8216,11.96 19.5304,11.672 L12.332,4.468 C12.0408,4.18 11.6416,4 11.1992,4 L5,4 C4.44771525,4 4,4.44771525 4,5 Z"/>
+const MapPinIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <g transform="translate(5, 3)" fill="currentColor">
+      <path d="M7.00005192,0 C9.20321149,0 11.2406469,1.00396045 12.5689437,2.75376482 C14.4241722,5.2002101 14.4757064,8.56321728 12.7226637,11.0617419 L12.5679835,11.2737425 L7.68915023,17.6588892 C7.64275576,17.7196077 7.58858253,17.7739295 7.52803012,17.8204513 C7.1767269,18.0903536 6.68540691,18.0494818 6.38255112,17.7414404 L6.3109536,17.6588892 L1.43116014,11.272481 C-0.477074945,8.75613733 -0.477074945,5.27010853 1.43128954,2.75359427 C2.75945696,1.00396045 4.79689234,0 7.00005192,0 Z M7,9 C8.20812289,9 9.1875,8.04061018 9.1875,6.85714286 C9.1875,5.67367554 8.20812289,4.71428571 7,4.71428571 C5.79187711,4.71428571 4.8125,5.67367554 4.8125,6.85714286 C4.8125,8.04061018 5.79187711,9 7,9 Z" />
+    </g>
   </svg>
 )
 const EmployeesIcon = ({ size = 20 }) => (
@@ -695,7 +697,7 @@ function ComposeView({ mode, onSend, onCancel }) {
         <div className="msg-compose-header-titles">
           <h2>New {isBroadcast ? 'Broadcast' : 'Message'}</h2>
           {isBroadcast && (
-            <span className="msg-compose-header-subtitle">Employees will receive this individually. Replies will start new threads in your inbox.</span>
+            <span className="msg-compose-header-subtitle">Employees will receive broadcasts individually. Replies start new threads in your inbox.</span>
           )}
         </div>
         <button className="msg-compose-cancel" onClick={onCancel}>
@@ -718,7 +720,7 @@ function ComposeView({ mode, onSend, onCancel }) {
               <button
                 className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
                 onClick={() => changeBroadcastType('groups')}
-              ><TagIcon size={14} />Area</button>
+              ><MapPinIcon size={14} />Area</button>
               <button
                 className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
                 onClick={() => changeBroadcastType('individuals')}
@@ -937,11 +939,15 @@ export default function App() {
   const handleSend = (text) => {
     const wasClosed = threads.find(t => t.id === activeThreadId)?.closed
     const now = Date.now()
-    setThreads(prev => prev.map(t =>
-      t.id === activeThreadId
-        ? { ...t, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasClosed ? { closed: false } : {}) }
-        : t
-    ))
+    setThreads(prev => {
+      const updated = prev.find(t => t.id === activeThreadId)
+      if (!updated) return prev
+      const rest = prev.filter(t => t.id !== activeThreadId)
+      return [
+        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasClosed ? { closed: false } : {}) },
+        ...rest,
+      ]
+    })
     setThreadMessages(prev => {
       const existing = prev[activeThreadId] || []
       const additions = wasClosed
