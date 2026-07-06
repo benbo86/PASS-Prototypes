@@ -266,7 +266,7 @@ h6 {
 }
 
 /* ── Global: custom checkbox ──────────────────────────────── */
-.checkbox-wrap { display: inline-flex; align-items: center; cursor: pointer; }
+.checkbox-wrap { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .checkbox-wrap input[type="checkbox"] { display: none; }
 .checkbox-box {
   width: 18px; height: 18px; border-radius: 3px;
@@ -447,7 +447,7 @@ h6 {
 
 .check-col { text-align: center !important; width: 60px; min-width: 60px; white-space: nowrap; }
 .data-table th.check-col { display: table-cell; vertical-align: middle; }
-.data-table th.check-col .header-check { display: inline-flex; align-items: center; gap: 5px; }
+.data-table th.check-col .header-check { display: inline-flex; align-items: center; gap: 8px; }
 .data-table th.check-col .header-check .checkbox-wrap { display: inline-flex; align-items: center; }
 
 /* ── Badges ──────────────────────────────────────────────────── */
@@ -517,6 +517,18 @@ h6 {
 }
 .form-input:focus { border-color: var(--brand-purple-6-purple-4); }
 .form-input::placeholder { color: var(--greyscale-8-grey-65); }
+
+/* ── Textarea ────────────────────────────────────────────────── */
+.form-textarea {
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px; padding: 10px 14px;
+  font-size: 16px; font-family: inherit; color: #000;
+  background: #fff; outline: none; width: 100%;
+  resize: none; line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.form-textarea:focus { border-color: var(--brand-purple-6-purple-4); }
+.form-textarea::placeholder { color: var(--greyscale-8-grey-65); }
 
 /* ── Select ──────────────────────────────────────────────────── */
 .form-select {

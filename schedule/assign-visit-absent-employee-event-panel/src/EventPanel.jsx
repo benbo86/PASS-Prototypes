@@ -496,7 +496,7 @@ export default function EventPanel() {
               ) : (
                 <>
                   <textarea
-                    className="ep-note-textarea"
+                    className="form-textarea ep-note-textarea"
                     placeholder="Add a visit note…"
                     value={draftText}
                     onChange={e => setDraftText(e.target.value)}

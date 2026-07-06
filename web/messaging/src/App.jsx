@@ -95,21 +95,21 @@ const PlusIcon = ({ size = 16 }) => (
 // ─── Data ─────────────────────────────────────────────────────
 
 const CARERS = [
-  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM' },
-  { id: 2,  name: 'Karen Bailey',    initials: 'KB' },
-  { id: 3,  name: 'Tom Harris',      initials: 'TH' },
-  { id: 4,  name: 'Priya Sharma',    initials: 'PS' },
-  { id: 5,  name: 'James Okafor',    initials: 'JO' },
-  { id: 6,  name: 'Linda Peters',    initials: 'LP' },
-  { id: 7,  name: 'David Chen',      initials: 'DC' },
-  { id: 8,  name: 'Emma Richardson', initials: 'ER' },
-  { id: 9,  name: 'Michael Hughes',  initials: 'MH' },
-  { id: 10, name: 'Olivia Brooks',   initials: 'OB' },
-  { id: 11, name: 'Nathan Wells',    initials: 'NW' },
-  { id: 12, name: 'Chloe Barker',    initials: 'CB' },
-  { id: 13, name: 'Ryan Sutton',     initials: 'RS' },
-  { id: 14, name: 'Fiona Marsh',     initials: 'FM' },
-  { id: 15, name: 'Callum Reid',     initials: 'CR' },
+  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', area: 'North Sheffield' },
+  { id: 2,  name: 'Karen Bailey',    initials: 'KB', area: 'North Sheffield' },
+  { id: 3,  name: 'Tom Harris',      initials: 'TH', area: 'South Sheffield' },
+  { id: 4,  name: 'Priya Sharma',    initials: 'PS', area: 'South Sheffield' },
+  { id: 5,  name: 'James Okafor',    initials: 'JO', area: 'Rotherham Central' },
+  { id: 6,  name: 'Linda Peters',    initials: 'LP', area: 'Rotherham Central' },
+  { id: 7,  name: 'David Chen',      initials: 'DC', area: 'North Sheffield' },
+  { id: 8,  name: 'Emma Richardson', initials: 'ER', area: 'South Sheffield' },
+  { id: 9,  name: 'Michael Hughes',  initials: 'MH', area: 'Rotherham Central' },
+  { id: 10, name: 'Olivia Brooks',   initials: 'OB', area: 'North Sheffield' },
+  { id: 11, name: 'Nathan Wells',    initials: 'NW', area: 'South Sheffield' },
+  { id: 12, name: 'Chloe Barker',    initials: 'CB', area: 'Rotherham Central' },
+  { id: 13, name: 'Ryan Sutton',     initials: 'RS', area: 'North Sheffield' },
+  { id: 14, name: 'Fiona Marsh',     initials: 'FM', area: 'South Sheffield' },
+  { id: 15, name: 'Callum Reid',     initials: 'CR', area: 'Rotherham Central' },
 ]
 
 const TAG_TYPES = [
@@ -137,8 +137,10 @@ const THREADS = [
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
+    repliesEnabled: false,
     participants: 'Blue Bird Sheffield · 15 employees',
     participantList: ['Blue Bird Sheffield'],
+    areaTags: [{ name: 'Blue Bird Sheffield', memberCount: 15 }],
     lastSender: 'Office',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm.",
     time: '10:42 AM',
@@ -153,6 +155,7 @@ const THREADS = [
     replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
+    area: 'North Sheffield',
     lastSender: 'Adrianna Jackson',
     lastMessage: "Hi Karen, yes I was there until 5pm and she did take all her medication.",
     time: '9:15 AM',
@@ -167,6 +170,7 @@ const THREADS = [
     replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
+    area: 'North Sheffield',
     lastSender: 'Office',
     lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
     time: 'Yesterday',
@@ -181,6 +185,7 @@ const THREADS = [
     replyAllowed: true,
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
+    area: 'North Sheffield',
     lastSender: 'Adrianna Jackson',
     lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
     time: 'Mon',
@@ -193,6 +198,7 @@ const THREADS = [
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
+    repliesEnabled: true,
     participants: 'All employees · 47 employees',
     participantList: [],
     lastSender: 'Office',
@@ -281,6 +287,16 @@ function ThreadRow({ thread, isActive, onClick }) {
             : null
           }
         </div>
+        {(thread.areaTags || thread.area) && (
+          <div className="msg-thread-area-row">
+            {thread.areaTags
+              ? thread.areaTags.map(t => (
+                  <span key={t.name} className="msg-area-badge">{t.name}</span>
+                ))
+              : <span className="msg-area-badge">{thread.area}</span>
+            }
+          </div>
+        )}
       </div>
     </div>
   )
@@ -288,7 +304,7 @@ function ThreadRow({ thread, isActive, onClick }) {
 
 // ─── Sidebar ───────────────────────────────────────────────────
 
-function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, onCompose }) {
+function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, onCompose, width, onResizeStart }) {
   const [tab, setTab] = useState('inbox')
   const [showComposeMenu, setShowComposeMenu] = useState(false)
   const composeMenuRef = useRef(null)
@@ -312,7 +328,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
   })
 
   return (
-    <div className="msg-sidebar">
+    <div className="msg-sidebar" style={{ width }}>
       <div className="msg-sidebar-header">
         <h2 className="msg-sidebar-title">Messages</h2>
         <div className="msg-compose-btn-wrap" ref={composeMenuRef}>
@@ -368,6 +384,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
           </div>
         )}
       </div>
+      <div className="msg-sidebar-resize-handle" onMouseDown={onResizeStart} />
     </div>
   )
 }
@@ -448,7 +465,19 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         </div>
         <div className="msg-thread-header-info">
           <span className="msg-thread-header-title">{thread.title}</span>
-          <span className="msg-thread-header-sub">{thread.participants}</span>
+          <span className="msg-thread-header-sub-row">
+            {thread.areaTags
+              ? thread.areaTags.map(t => (
+                  <span key={t.name} className="msg-area-badge">{t.name} <span className="msg-area-badge-count">{t.memberCount}</span></span>
+                ))
+              : (
+                <>
+                  <span className="msg-thread-header-sub">{thread.participants}</span>
+                  {thread.area && <span className="msg-area-badge">{thread.area}</span>}
+                </>
+              )
+            }
+          </span>
         </div>
         <div className="msg-thread-header-actions">
           {!thread.closed && thread.replyAllowed && (
@@ -570,10 +599,14 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
       )}
 
       {/* One-way notice */}
-      {!thread.replyAllowed && (
-        <div className="msg-broadcast-notice">
+      {thread.isBroadcast && (
+        <div className={`msg-broadcast-notice${thread.repliesEnabled === false ? ' read-only' : ''}`}>
           <BroadcastIcon size={16} />
-          <span>Employee replies will appear as new threads in your inbox.</span>
+          <span>
+            {thread.repliesEnabled === false
+              ? "This is a read-only broadcast — employees can't reply."
+              : 'Employee replies will appear as new threads in your inbox.'}
+          </span>
         </div>
       )}
 
@@ -621,6 +654,7 @@ function ComposeView({ mode, onSend, onCancel }) {
   const [message, setMessage] = useState('')
   const [selectedCarer, setSelectedCarer] = useState(null)
   const [broadcastType, setBroadcastType] = useState('all')
+  const [allowReplies, setAllowReplies] = useState(true)
   const [selectedCarers, setSelectedCarers] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
@@ -697,7 +731,7 @@ function ComposeView({ mode, onSend, onCancel }) {
         <div className="msg-compose-header-titles">
           <h2>New {isBroadcast ? 'Broadcast' : 'Message'}</h2>
           {isBroadcast && (
-            <span className="msg-compose-header-subtitle">Employees will receive broadcasts individually. Replies start new threads in your inbox.</span>
+            <span className="msg-compose-header-subtitle">Employees will receive broadcasts individually.</span>
           )}
         </div>
         <button className="msg-compose-cancel" onClick={onCancel}>
@@ -856,6 +890,22 @@ function ComposeView({ mode, onSend, onCancel }) {
           )}
         </div>
 
+        {/* Allow replies */}
+        {isBroadcast && (
+          <div className="msg-compose-field">
+            <label className="checkbox-wrap">
+              <input type="checkbox" checked={allowReplies} onChange={e => setAllowReplies(e.target.checked)} />
+              <span className="checkbox-box" />
+              <span>Allow employees to reply</span>
+            </label>
+            <span className="msg-compose-header-subtitle">
+              {allowReplies
+                ? 'Replies will start new 1:1 threads in your inbox.'
+                : "This is a read-only broadcast — employees won't be able to reply."}
+            </span>
+          </div>
+        )}
+
         {/* Title */}
         <div className="msg-compose-field">
           <label className="msg-compose-label">Subject <span className="msg-required">*</span></label>
@@ -871,7 +921,7 @@ function ComposeView({ mode, onSend, onCancel }) {
         <div className="msg-compose-field msg-compose-field-grow">
           <label className="msg-compose-label">Message <span className="msg-required">*</span></label>
           <textarea
-            className="msg-compose-textarea"
+            className="form-textarea msg-compose-textarea"
             placeholder="Write your message..."
             value={message}
             onChange={e => setMessage(e.target.value)}
@@ -890,6 +940,7 @@ function ComposeView({ mode, onSend, onCancel }) {
               title,
               recipients: isBroadcast ? (broadcastType === 'individuals' ? selectedCarers : []) : [selectedCarer],
               tags: isBroadcast && broadcastType === 'groups' ? selectedTags : [],
+              allowReplies: isBroadcast ? allowReplies : undefined,
               message,
             })}
           >
@@ -925,6 +976,27 @@ export default function App() {
   const [rightPanel, setRightPanel] = useState('empty')
   const [composeMode, setComposeMode] = useState(null)
   const [search, setSearch] = useState('')
+  const [sidebarWidth, setSidebarWidth] = useState(320)
+
+  const handleSidebarResizeStart = (e) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    const handleMouseMove = (moveEvent) => {
+      const newWidth = startWidth + (moveEvent.clientX - startX)
+      setSidebarWidth(Math.min(480, Math.max(240, newWidth)))
+    }
+    const handleMouseUp = () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
 
   const totalUnread = threads.reduce((sum, t) => sum + t.unread, 0)
   const activeThread = threads.find(t => t.id === activeThreadId)
@@ -985,7 +1057,7 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message }) => {
+  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, allowReplies, message }) => {
     const baseId = Math.max(...threads.map(t => t.id)) + 1
 
     if (mode === 'broadcast') {
@@ -1003,8 +1075,12 @@ export default function App() {
         isGroup: false,
         isBroadcast: true,
         replyAllowed: false,
+        repliesEnabled: allowReplies,
         participants: participantsSummary,
         participantList,
+        areaTags: broadcastType === 'groups' && tags.length > 0
+          ? tags.map(t => ({ name: t.name, memberCount: t.memberCount }))
+          : undefined,
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
@@ -1029,6 +1105,7 @@ export default function App() {
         replyAllowed: true,
         participants: recipient.name,
         participantList: [recipient.name],
+        area: recipient.area,
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
@@ -1059,6 +1136,8 @@ export default function App() {
           onSearch={setSearch}
           onSelectThread={handleSelectThread}
           onCompose={(mode) => { setActiveThreadId(null); setComposeMode(mode); setRightPanel('compose') }}
+          width={sidebarWidth}
+          onResizeStart={handleSidebarResizeStart}
         />
         <div className="msg-main">
           {rightPanel === 'empty' && <EmptyState />}

@@ -40,7 +40,7 @@ body {
 #ts-datepicker-portal .react-datepicker-popper { z-index: 9999; }
 
 /* ── Filter bar additions (timesheets-specific) ──────────────── */
-.ts-filter-copies { gap: 8px; margin-right: 8px; }
+.ts-filter-copies { margin-right: 8px; }
 .ts-filter-copies-label { font-size: 16px; font-weight: 500; color: #000; white-space: nowrap; }
 
 /* ── Table (timesheets-specific overrides) ───────────────────── */

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
+import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
 
@@ -198,6 +199,7 @@ const THREADS = [
     id: 1,
     title: 'Blue Bird Sheffield — Team Update',
     isBroadcast: true,
+    repliesEnabled: false,
     careReceiver: null,
     participants: 'Office',
     lastSender: 'Office',
@@ -590,6 +592,8 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
 
   if (!thread) return <div className="screen" />
 
+  const isReadOnly = thread.isBroadcast && thread.repliesEnabled === false
+
   // Group messages by day
   const byDay = localMsgs.reduce((acc, msg) => {
     const last = acc[acc.length - 1]
@@ -702,7 +706,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                   {showSender && <div className="msg-sender-name">{msg.sender}</div>}
                   <div
                     className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}
-                    onClick={e => openActions(e, msg)}
+                    onClick={e => { if (!isReadOnly || msg.isMe) openActions(e, msg) }}
                   >
                   {msg.replyTo && (
                     <div className={`reply-quote ${msg.isMe ? 'reply-quote-me' : ''}`}>
@@ -767,25 +771,32 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
       )}
 
       {/* Compose bar */}
-      <div className="compose-bar" onClick={e => e.stopPropagation()}>
-        <button className="compose-icon-btn" onClick={e => { e.stopPropagation(); setShowAttach(s => !s) }}>
-          <AddIcon />
-        </button>
-        <div className="compose-input-wrap">
-          <input
-            ref={inputRef}
-            className="compose-input"
-            placeholder="Message..."
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend() } }}
-            onClick={e => e.stopPropagation()}
-          />
+      {isReadOnly ? (
+        <div className="broadcast-notice">
+          <BroadcastIcon size={16} />
+          <span>This is a read-only broadcast — you can't reply.</span>
         </div>
-        <button className="send-btn" onClick={handleSend} style={{ visibility: inputText.trim() ? 'visible' : 'hidden' }}>
-          <SendIcon />
-        </button>
-      </div>
+      ) : (
+        <div className="compose-bar" onClick={e => e.stopPropagation()}>
+          <button className="compose-icon-btn" onClick={e => { e.stopPropagation(); setShowAttach(s => !s) }}>
+            <AddIcon />
+          </button>
+          <div className="compose-input-wrap">
+            <input
+              ref={inputRef}
+              className="compose-input"
+              placeholder="Message..."
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend() } }}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+          <button className="send-btn" onClick={handleSend} style={{ visibility: inputText.trim() ? 'visible' : 'hidden' }}>
+            <SendIcon />
+          </button>
+        </div>
+      )}
 
 
       {/* Attachment preview */}
@@ -1126,6 +1137,9 @@ export default function App() {
     ))
   }
 
+  const activeThread = threads.find(t => t.id === activeThreadId) || null
+  const canReplyInThread = !(activeThread?.isBroadcast && activeThread?.repliesEnabled === false)
+
   return (
     <div className="phone-wrap">
       <a href="../../" className="back-link">
@@ -1144,7 +1158,7 @@ export default function App() {
           <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
             <ThreadScreen
               ref={threadScreenRef}
-              thread={threads.find(t => t.id === activeThreadId) || null}
+              thread={activeThread}
               messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
               onBack={() => setView('inbox')}
               onMessageSent={handleReply}
@@ -1169,7 +1183,7 @@ export default function App() {
         <AppNav
           activeTab="messages"
           totalUnread={messageBadge}
-          notifCount={3}
+          notifCount={UNREAD_NOTIFICATIONS_COUNT}
           links={{ notifications: '../notifications/', account: '../mileage-pay/' }}
         />
         {actionTarget && (
@@ -1183,9 +1197,11 @@ export default function App() {
               }}
               onClick={e => e.stopPropagation()}
             >
-              <button onClick={() => { threadScreenRef.current?.replyToMessage(actionTarget); handleCloseActions() }}>
-                <ReplyIcon /> Reply
-              </button>
+              {canReplyInThread && (
+                <button onClick={() => { threadScreenRef.current?.replyToMessage(actionTarget); handleCloseActions() }}>
+                  <ReplyIcon /> Reply
+                </button>
+              )}
               {actionTarget.isMe && (
                 <button onClick={() => { threadScreenRef.current?.editMessage(actionTarget); handleCloseActions() }}>
                   <EditActionIcon /> Edit

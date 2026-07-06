@@ -854,6 +854,23 @@
 .attach-option:hover { background: var(--ui-purple-6-lavendar-grey); }
 .attach-option svg { color: var(--brand-purple-3-purple-2); }
 
+/* ── Broadcast read-only notice ──────────────────────────────── */
+.broadcast-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--ui-purple-6-lavendar-grey);
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+  color: var(--greyscale-6-grey-50);
+}
+.broadcast-notice span {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 /* ── Compose bar ─────────────────────────────────────────────── */
 .compose-bar {
   background: #fff;
