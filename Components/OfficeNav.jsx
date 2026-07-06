@@ -1,7 +1,7 @@
 const TABS = [
   { key: 'details',                  label: 'Details',                  href: '../../office/details/' },
   { key: 'checklists',               label: 'Checklists',               href: null },
-  { key: 'documents',                label: 'Documents',                href: '../../documents/customer-assessments/' },
+  { key: 'documents',                label: 'Documents',                href: '../../office/customer-assessments/' },
   { key: 'care-groups',              label: 'Care Groups',              href: null },
   { key: 'tags',                     label: 'Tags',                     href: null },
   { key: 'roster-settings',          label: 'Roster Settings',          href: '../../roster/contactable-staff/' },

@@ -1,0 +1,324 @@
+/* ── Legacy MAR Chart styling ────────────────────────────────────
+   Ported as-is from the production PASS app's marsheet component
+   (main.07f329c6f67b3dc27bfc.css). Everything here is scoped under
+   .mar-legacy so it cannot leak into / be overridden by the shared
+   prototype design system, and vice versa. Do not convert these
+   values to the project's CSS variables — this is intentional. */
+
+.mar-legacy { padding-top: 15px; font-size: 14px; line-height: 1.428571429; }
+.mar-legacy:hover { cursor: grab; }
+.mar-legacy:active { cursor: grabbing; }
+.mar-legacy .today { background-color: #fefbd5 !important; }
+.mar-legacy .clearfix:after,
+.mar-legacy .clearfix:before { content: " "; display: table; }
+.mar-legacy .clearfix:after { clear: both; }
+
+.mar-legacy .marsheet-page-body {
+  background-color: #fff;
+  border-style: none;
+  margin: 20px auto auto;
+  padding: 0;
+}
+
+/* ── Grid container ──────────────────────────────────────────── */
+
+.mar-legacy .marsheet-container {
+  box-shadow: 0 0 .1cm rgba(0, 0, 0, .25);
+}
+
+.mar-legacy .marsheet-container .marsheet-month-info {
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  font-weight: 500;
+  height: 40px;
+  left: 0;
+  padding-left: 10px;
+  position: sticky;
+}
+
+.mar-legacy .marsheet-container .marsheet-left-info-panel {
+  background: #fff;
+  border-right: 1px solid #ccc;
+  left: 0;
+  padding: 0;
+  pointer-events: none;
+  position: sticky;
+  width: 200px;
+  z-index: 1;
+}
+
+.mar-legacy .marsheet-container .marsheet-left-info-panel .marsheet-left-empty-panel { height: 40px; }
+
+.mar-legacy .marsheet-container .tasks-container {
+  background-color: #ebeded;
+  border-collapse: separate;
+  width: 100%;
+}
+
+.mar-legacy .tasks-container { border-top: 1px solid #ccc; }
+.mar-legacy .tasks-container:first-of-type { border-top: none; }
+
+.mar-legacy .task-info-panels { border-bottom: 1px solid #ccc; }
+
+/* Sticky positioning lives on this inner wrapper rather than the
+   colspanned <td> itself, and needs an explicit width narrower than
+   the full colspan. Without a width constraint the wrapper stretches
+   to fill the entire colspanned cell — exactly as wide as the
+   remaining scrollable area — which leaves the browser no slack to
+   stick it, so it silently scrolls with the content instead. */
+.mar-legacy .task-info-panels-inner {
+  left: 200px;
+  width: 900px;
+  padding-bottom: 10px;
+  padding-right: 7.5px;
+  padding-top: 10px;
+  position: sticky;
+}
+
+.mar-legacy .marsheet-container .marsheet-task-info-panel {
+  align-content: center;
+  overflow: hidden;
+  padding-top: 15px;
+}
+
+.mar-legacy .marsheet-container .marsheet-task-info-panel .marsheet-task-info { display: flex; }
+
+.mar-legacy .marsheet-container .marsheet-task-info-panel .task-info-panel {
+  display: inline-block;
+  margin-left: 10px;
+  min-width: 180px;
+}
+
+.mar-legacy .task-info-panel div { margin-bottom:5px; }
+.mar-legacy .task-info-panel.first { height: 100%; vertical-align: top; }
+.mar-legacy .task-info-panel.first .control-label { width: 100px; }
+.mar-legacy .task-info-panel.second .control-label { width: 110px; }
+.mar-legacy .task-info-panel.third { display: inline-block; }
+.mar-legacy .task-info-panel.third .control-label { width: 54px; }
+.mar-legacy .task-info-panel.fourth { display: inline-block; }
+.mar-legacy .task-info-panel.fourth .control-label { width: 54px; }
+
+.mar-legacy .control-label { margin-bottom: 0; vertical-align: middle; color: #a7a599; font-weight: 400; }
+.mar-legacy .task-info-panel span { vertical-align: middle; }
+
+.mar-legacy .x-task-notes { word-wrap: normal; display: inline-block; vertical-align: middle; white-space: normal; }
+
+.mar-legacy .marsheet_timeline-medication-panel {
+  left: 0;
+  max-width: 200px;
+  min-width: 200px;
+  position: sticky;
+  vertical-align: top;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+.mar-legacy .marsheet_timeline-medication-panel .labelList { margin: 10px 0 10px 10px; }
+
+.mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel {
+  word-wrap: break-word;
+  display: inline-table;
+  margin-right: 5px;
+  max-height: 52px;
+  max-width: 174px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13.44px;
+  padding: 0 .6em .3em;
+  text-align: left;
+}
+
+.mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel.med {
+  background-color: #f2dede !important;
+  color: #5a5967 !important;
+}
+
+/* Icon sits in a floated box so the label text flows beside it, same as
+   the original's .pull-left wrapper around .label-icon-bg — not a flex
+   row (that was our earlier mistake). Also the positioning context for
+   the point triangle below, since the original's CSS has no explicit
+   rule placing it under the icon and it renders overlapping the icon
+   otherwise (verified in the browser — the two boxes share a top edge
+   without this). */
+.mar-legacy .etlLabel .pull-left { float: left; margin-right: 6px; position: relative; }
+
+.mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel .label-icon-bg {
+  background-color: #c05e5e !important;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel .icon { color: #fff !important; }
+
+/* Small triangular "flag" point beneath the icon badge, ported from
+   .label-icon-bg-point in the original: border-left: 0 solid transparent;
+   border-right: <badge-width> solid transparent; border-top: <badge-color>
+   solid — an asymmetric flag shape, not a centered pointer. */
+.mar-legacy .label-icon-bg-point {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 0 solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 6px solid #c05e5e;
+}
+
+.mar-legacy .marsheet-visit-name {
+  height: auto;
+  margin-bottom: 8px;
+  max-width: 200px;
+  overflow: hidden;
+  padding-left: 8px;
+  padding-top: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mar-legacy .marsheet-visit-name > div:first-of-type.adhoc { font-weight: 700; }
+
+.mar-legacy .marsheet-timeline-panel { overflow-x: scroll; overflow-y: hidden; }
+.mar-legacy .marsheet-timeline-panel::-webkit-scrollbar { background: transparent; border: none; box-shadow: none; height: 0; }
+.mar-legacy .marsheet-timeline-panel .marsheet-month-container { background: #fff; }
+.mar-legacy .marsheet-timeline-panel .marsheet-visit-row { background: #fff; position: relative; }
+.mar-legacy .marsheet-timeline-panel .marsheet-visit-row .marsheet-task-instance { text-align: center; }
+.mar-legacy .marsheet-timeline-panel .marsheet_timeline-days-left-panel { width: 200px; }
+
+.mar-legacy .marsheet-visit-row .marsheet-task-instance:nth-of-type(2) .bubble-item { margin-left: 8px; }
+.mar-legacy .marsheet-visit-row .marsheet-task-instance:last-of-type .bubble-item { margin-right: 8px; }
+
+.mar-legacy .marsheet_timeline-day {
+  height: 40px;
+  min-width: 48px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+/* ── Bubbles (task instance status) ──────────────────────────── */
+
+.mar-legacy .bubble-item {
+  border-radius: 50%;
+  cursor: default;
+  font-size: 18px;
+  height: 40px;
+  line-height: 38px;
+  margin: 8px 4px;
+  max-width: 40px;
+  min-width: 40px;
+  pointer-events: none;
+  text-align: center;
+  text-transform: uppercase;
+  width: 40px;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.mar-legacy .bubble-item:hover { background-color: transparent !important; }
+
+.mar-legacy .bubble-item.COMPLETE,
+.mar-legacy .bubble-item.NOTREQUIRED {
+  background-color: #73f088 !important;
+  border: 1px solid #118213;
+  color: #118213;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mar-legacy .bubble-item.INCOMPLETE,
+.mar-legacy .bubble-item.MISSED {
+  background-color: #f5b5be !important;
+  border: 1px solid #cc0c23;
+  color: #cc0c23;
+}
+
+.mar-legacy .bubble-item.INCOMPLETE { cursor: pointer; pointer-events: auto; }
+
+.mar-legacy .bubble-item.PARTIAL {
+  background-color: #f5e23b !important;
+  border: 1px solid #f2a538;
+  color: #f2a538;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mar-legacy .bubble-item.FUTURE {
+  background-color: #ebebeb !important;
+  border: 1px solid #999;
+  color: #999;
+  font-weight: 200;
+}
+
+.mar-legacy .bubble-item.POSSIBLE {
+  background-color: #ccc !important;
+  border: 1px solid #999;
+  color: #999;
+  font-weight: 400;
+}
+
+.mar-legacy .bubble-item.MULTIPLE {
+  background-color: #6e99fe !important;
+  border: 1px solid #0e41b9;
+  color: #fff;
+}
+
+/* CANCELLED — new state added for AIOP-22638 (Cancelled via Roster).
+   No design spec existed; starting point is a grey bubble with a
+   diagonal line (rather than an icon or initials), to refine later.
+   The line is a background gradient clipped to the circular bubble
+   by border-radius, rather than an extra element. */
+.mar-legacy .bubble-item.CANCELLED {
+  background-color: #bdbdbd !important;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    #757575 calc(50% - 1px),
+    #757575 calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  border: 1px solid #757575;
+  color: #757575;
+  line-height: 40px;
+}
+
+.mar-legacy .bubble-item.legend { pointer-events: none !important; }
+
+.mar-legacy .bubble-label { line-height: 40px; vertical-align: middle; }
+
+/* ── Legend / reason codes ───────────────────────────────────── */
+
+.mar-legacy .reason-codes {
+  margin: auto;
+  max-width: 1710px;
+  text-align: center;
+}
+
+.mar-legacy .reason-codes .reason-title { display: inline-block; font-weight: 500; margin-top: 18px; }
+.mar-legacy .reason-codes .bubble-info { display: inline-block; }
+.mar-legacy .reason-codes .reason-code { display: inline-block; margin-bottom: 8px; margin-top: 8px; padding: 4px; }
+.mar-legacy .reason-codes .reason-code span { padding-left: 4px; padding-right: 4px; }
+.mar-legacy .reason-codes .legend-info,
+.mar-legacy .reason-codes .reason-code .bubble-item { display: inline-block; }
+
+.mar-legacy .reason-codes .legend-info .square-info {
+  border: 1px solid #ddd;
+  display: inline-block;
+  height: 40px;
+  line-height: 38px;
+  text-align: center;
+  text-transform: uppercase;
+  width: 40px;
+}
+
+.mar-legacy .reason-codes .legend-info .square-info.today-info { background-color: #fefbd5 !important; }
+.mar-legacy .reason-codes .legend-info .square-info.history-info { background-color: #f6ddde !important; }

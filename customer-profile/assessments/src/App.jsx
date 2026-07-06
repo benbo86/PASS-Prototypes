@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import WebNav from '../../../Components/WebNav'
+import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -54,12 +55,6 @@ const IncompleteIcon = () => (
 )
 
 // ─── Data ─────────────────────────────────────────────────────
-
-const PRIMARY_TABS = [
-  'Dashboard', 'Care Management', 'Care Notes', 'MAR Chart', 'Timeline',
-  'Documents', 'About Me', 'Details', 'Checklists', 'Rostering',
-  'Communications', 'Medical History', 'Customer File', 'openPASS',
-]
 
 const DOC_TABS = ['Enquiry', 'Assessments', 'Documents', 'Files']
 
@@ -212,34 +207,7 @@ export default function App() {
 
       <WebNav activePage="customers" />
 
-      {/* Customer context bar */}
-      <div className="context-bar">
-        <div className="context-top">
-          <div className="context-avatar">PA</div>
-          <div className="context-info">
-            <div className="context-name-row">
-              <h1 className="context-name">Mrs Patricia 'Pat' Allin</h1>
-              <span className="ctx-badge ctx-badge--danger">HIGH RISK</span>
-              <span className="ctx-badge ctx-badge--success">ACTIVE</span>
-            </div>
-            <div className="context-details">
-              <span><span className="detail-label">Tel:</span> 0208 505 0682</span>
-              <span><span className="detail-label">DOB:</span> 12/12/1945</span>
-              <span>3 Morgan Way, Woodford Green, IG8 8DL</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="primary-tabs-wrap">
-          <ul className="primary-tabs">
-            {PRIMARY_TABS.map(tab => (
-              <li key={tab} className={tab === 'Documents' ? 'active' : ''}>
-                <button>{tab}</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <CustomerProfileNav activeTab="Documents" />
 
       {/* Doc sub-tabs */}
       <div className="sub-tabs-bar">

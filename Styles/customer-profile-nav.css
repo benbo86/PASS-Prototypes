@@ -1,0 +1,130 @@
+/* ── Customer context bar ────────────────────────────────────── */
+
+.context-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  position: sticky;
+  top: 56px;
+  z-index: 90;
+}
+
+.context-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px 12px;
+}
+
+.context-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: Barlow, sans-serif;
+}
+
+.context-info { flex: 1; min-width: 0; }
+
+.context-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.context-name {
+  font-family: Barlow, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  color: #000;
+  margin-bottom: 0;
+}
+
+.ctx-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.ctx-badge--danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.ctx-badge--success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.context-details {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  color: var(--greyscale-5-grey-35);
+  flex-wrap: wrap;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: var(--greyscale-8-grey-65);
+  margin-right: 2px;
+}
+
+/* ── Primary tabs (inside context bar) ──────────────────────── */
+
+.primary-tabs-wrap {
+  overflow-x: auto;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  scrollbar-width: none;
+}
+
+.primary-tabs-wrap::-webkit-scrollbar { display: none; }
+
+.primary-tabs {
+  list-style: none;
+  display: flex;
+  padding: 0 16px;
+  width: max-content;
+}
+
+.primary-tabs li button {
+  display: block;
+  padding: 10px 14px 8px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--greyscale-5-grey-35);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.primary-tabs li button:hover { color: #000; }
+
+.primary-tabs li.active button {
+  color: var(--brand-purple-6-purple-4);
+  border-bottom-color: var(--brand-purple-6-purple-4);
+  font-weight: 600;
+}

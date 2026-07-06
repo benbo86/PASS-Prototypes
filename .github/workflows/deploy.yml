@@ -39,5 +39,5 @@ jobs:
       - uses: actions/deploy-pages@v5
         id: deployment
         with:
-          timeout: 1200000
+          timeout: 600000
           error_count: 20
