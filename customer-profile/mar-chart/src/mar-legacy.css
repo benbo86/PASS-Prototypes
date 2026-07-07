@@ -5,7 +5,12 @@
    prototype design system, and vice versa. Do not convert these
    values to the project's CSS variables — this is intentional. */
 
-.mar-legacy { padding-top: 15px; font-size: 14px; line-height: 1.428571429; }
+/* PASS (care planning) runs on Helvetica, not Barlow (our shared
+   prototype font used for app chrome like WebNav/CustomerProfileNav).
+   Set once here so every legacy-scoped element inherits it, rather
+   than repeating the original's redundant per-element declarations
+   (e.g. .etlLabel re-stated the same body font-family). */
+.mar-legacy { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding-top: 15px; font-size: 14px; line-height: 1.428571429; }
 .mar-legacy:hover { cursor: grab; }
 .mar-legacy:active { cursor: grabbing; }
 .mar-legacy .today { background-color: #fefbd5 !important; }
@@ -18,6 +23,7 @@
   border-style: none;
   margin: 20px auto auto;
   padding: 0;
+  color: #5a5967;
 }
 
 /* ── Grid container ──────────────────────────────────────────── */
