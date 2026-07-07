@@ -199,7 +199,6 @@ const THREADS = [
     id: 1,
     title: 'Blue Bird Sheffield — Team Update',
     isBroadcast: true,
-    repliesEnabled: false,
     careReceiver: null,
     participants: 'Office',
     lastSender: 'Office',
@@ -592,7 +591,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
 
   if (!thread) return <div className="screen" />
 
-  const isReadOnly = thread.isBroadcast && thread.repliesEnabled === false
+  const isReadOnly = thread.isBroadcast
 
   // Group messages by day
   const byDay = localMsgs.reduce((acc, msg) => {
@@ -1138,7 +1137,7 @@ export default function App() {
   }
 
   const activeThread = threads.find(t => t.id === activeThreadId) || null
-  const canReplyInThread = !(activeThread?.isBroadcast && activeThread?.repliesEnabled === false)
+  const canReplyInThread = !activeThread?.isBroadcast
 
   return (
     <div className="phone-wrap">

@@ -137,7 +137,6 @@ const THREADS = [
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
-    repliesEnabled: false,
     participants: 'Blue Bird Sheffield · 15 employees',
     participantList: ['Blue Bird Sheffield'],
     areaTags: [{ name: 'Blue Bird Sheffield', memberCount: 15 }],
@@ -198,7 +197,6 @@ const THREADS = [
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
-    repliesEnabled: true,
     participants: 'All employees · 47 employees',
     participantList: [],
     lastSender: 'Office',
@@ -442,7 +440,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         day: 'Today',
         ...(replyTo ? { replyTo } : {}),
       }
-      setLocalMsgs(prev => [...prev, newMsg])
+      setLocalMsgs(prev => [
+        ...prev,
+        ...(thread.closed ? [{ id: Date.now(), type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' }] : []),
+        newMsg,
+      ])
       onSend?.(text)
       setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
@@ -600,13 +602,9 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
 
       {/* One-way notice */}
       {thread.isBroadcast && (
-        <div className={`msg-broadcast-notice${thread.repliesEnabled === false ? ' read-only' : ''}`}>
+        <div className="msg-broadcast-notice read-only">
           <BroadcastIcon size={16} />
-          <span>
-            {thread.repliesEnabled === false
-              ? "This is a read-only broadcast — employees can't reply."
-              : 'Employee replies will appear as new threads in your inbox.'}
-          </span>
+          <span>This is a read-only broadcast — employees can't reply.</span>
         </div>
       )}
 
@@ -654,7 +652,6 @@ function ComposeView({ mode, onSend, onCancel }) {
   const [message, setMessage] = useState('')
   const [selectedCarer, setSelectedCarer] = useState(null)
   const [broadcastType, setBroadcastType] = useState('all')
-  const [allowReplies, setAllowReplies] = useState(true)
   const [selectedCarers, setSelectedCarers] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
@@ -730,9 +727,6 @@ function ComposeView({ mode, onSend, onCancel }) {
       <div className="msg-compose-header">
         <div className="msg-compose-header-titles">
           <h2>New {isBroadcast ? 'Broadcast' : 'Message'}</h2>
-          {isBroadcast && (
-            <span className="msg-compose-header-subtitle">Employees will receive broadcasts individually.</span>
-          )}
         </div>
         <button className="msg-compose-cancel" onClick={onCancel}>
           <CloseIcon size={20} />
@@ -890,22 +884,6 @@ function ComposeView({ mode, onSend, onCancel }) {
           )}
         </div>
 
-        {/* Allow replies */}
-        {isBroadcast && (
-          <div className="msg-compose-field">
-            <label className="checkbox-wrap">
-              <input type="checkbox" checked={allowReplies} onChange={e => setAllowReplies(e.target.checked)} />
-              <span className="checkbox-box" />
-              <span>Allow employees to reply</span>
-            </label>
-            <span className="msg-compose-header-subtitle">
-              {allowReplies
-                ? 'Replies will start new 1:1 threads in your inbox.'
-                : "This is a read-only broadcast — employees won't be able to reply."}
-            </span>
-          </div>
-        )}
-
         {/* Title */}
         <div className="msg-compose-field">
           <label className="msg-compose-label">Subject <span className="msg-required">*</span></label>
@@ -940,7 +918,6 @@ function ComposeView({ mode, onSend, onCancel }) {
               title,
               recipients: isBroadcast ? (broadcastType === 'individuals' ? selectedCarers : []) : [selectedCarer],
               tags: isBroadcast && broadcastType === 'groups' ? selectedTags : [],
-              allowReplies: isBroadcast ? allowReplies : undefined,
               message,
             })}
           >
@@ -1057,7 +1034,7 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, allowReplies, message }) => {
+  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message }) => {
     const baseId = Math.max(...threads.map(t => t.id)) + 1
 
     if (mode === 'broadcast') {
@@ -1075,7 +1052,6 @@ export default function App() {
         isGroup: false,
         isBroadcast: true,
         replyAllowed: false,
-        repliesEnabled: allowReplies,
         participants: participantsSummary,
         participantList,
         areaTags: broadcastType === 'groups' && tags.length > 0

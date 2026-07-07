@@ -896,12 +896,6 @@ body { overflow: hidden; }
   color: #000;
 }
 
-.msg-compose-header-subtitle {
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  color: var(--greyscale-6-grey-50);
-}
-
 .msg-compose-cancel {
   background: none;
   border: none;
