@@ -118,9 +118,17 @@
 
 .mar-legacy .marsheet_timeline-medication-panel .labelList { margin: 10px 0 10px 10px; }
 
+/* display: inline-block, not the original's inline-table — inline-table
+   wraps its content in an anonymous table-cell, and the floated icon
+   below positions itself against that cell's edge rather than this
+   element's padding box, so the padding is computed but never actually
+   visible (verified: the icon's rendered x-position exactly matches the
+   label's, regardless of left padding). inline-block respects padding
+   around a floated child normally and costs us nothing here since we
+   don't rely on table-cell vertical-centering behavior. */
 .mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel {
   word-wrap: break-word;
-  display: inline-table;
+  display: inline-block;
   margin-right: 5px;
   max-height: 52px;
   max-width: 174px;
@@ -129,7 +137,7 @@
   white-space: normal;
   border: 0;
   border-radius: 8px;
-  font-size: 13.44px;
+  font-size: .8em;
   padding: 0 .6em .3em;
   text-align: left;
 }
@@ -146,7 +154,7 @@
    rule placing it under the icon and it renders overlapping the icon
    otherwise (verified in the browser — the two boxes share a top edge
    without this). */
-.mar-legacy .etlLabel .pull-left { float: left; margin-right: 6px; position: relative; }
+.mar-legacy .etlLabel .pull-left { float: left; position: relative; }
 
 .mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel .label-icon-bg {
   background-color: #c05e5e !important;
@@ -158,6 +166,17 @@
 }
 
 .mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel .icon { color: #fff !important; }
+
+/* Missed on first pass — targets a bare span, not a named class, so it
+   didn't show up in earlier classname-based greps. Its taller line-height
+   (200% of a larger 1.2em font-size) is what the label's height was
+   actually built around; without it the text sits shorter than the
+   original and the badge looks squashed. */
+.mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel span {
+  font-size: 1.2em;
+  line-height: 200%;
+  padding-left: 7.5px;
+}
 
 /* Small triangular "flag" point beneath the icon badge, ported from
    .label-icon-bg-point in the original: border-left: 0 solid transparent;
