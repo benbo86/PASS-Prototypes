@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import WebNav from '../../../Components/WebNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 
@@ -58,10 +59,28 @@ const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'O
 function isToday(d) { return d.toDateString() === TODAY.toDateString() }
 function fmtRangeDate(d) { return `${WEEKDAY[d.getDay()]} ${d.getDate()} ${MONTH[d.getMonth()]} ${d.getFullYear()}` }
 
-// Pad a partial set of cell statuses out to a full month with FUTURE.
+// Pad a partial set of cells out to a full month with FUTURE.
 function withFuture(cells) {
-  return Array.from({ length: DAYS_IN_MONTH }, (_, i) => cells[i] ?? 'FUTURE')
+  return Array.from({ length: DAYS_IN_MONTH }, (_, i) => cells[i] ?? { status: 'FUTURE' })
 }
+
+// Shorthand for a cell carrying popover detail: c('COMPLETE', {...}).
+function c(status, extra) { return { status, ...extra } }
+
+const KAREN = { firstName: 'Karen', lastName: 'Bailey' }
+const TOM = { firstName: 'Tom', lastName: 'Harris' }
+
+const CANCELLED_VISIT = {
+  reason: 'Customer cancelled',
+  notes: "Customer called the office to cancel today's visit — hospital appointment ran over.",
+}
+
+// Statuses with real visit/task detail worth showing in a popover —
+// matches the original's cursor:pointer/pointer-events:auto bubble
+// states. CANCELLED is our own addition (AIOP-22638) with a simpler
+// popover, since none of the usual visit fields apply to a visit that
+// never took place.
+const CLICKABLE = new Set(['COMPLETE', 'NOTREQUIRED', 'PARTIAL', 'INCOMPLETE', 'CANCELLED'])
 
 // Cancelled visit lands on 3 Jul 2026 — every task/visit that day
 // is marked CANCELLED, matching the ticket's "all tasks within the
@@ -80,7 +99,14 @@ const TASKS = [
       {
         name: 'Personal care',
         time: '09:30 - 10:30',
-        cells: withFuture(['COMPLETE', 'COMPLETE', 'CANCELLED', 'COMPLETE', 'MISSED', 'COMPLETE']),
+        cells: withFuture([
+          c('COMPLETE', { cw: KAREN, completedDateTime: '01/07/2026 09:47', scheduledStart: '01/07/2026 09:30', scheduledEnd: '01/07/2026 10:30', visitStart: '01/07/2026 09:32', visitEnd: '01/07/2026 09:58' }),
+          c('COMPLETE', { cw: KAREN, completedDateTime: '02/07/2026 09:41', scheduledStart: '02/07/2026 09:30', scheduledEnd: '02/07/2026 10:30', visitStart: '02/07/2026 09:33', visitEnd: '02/07/2026 09:55' }),
+          c('CANCELLED', CANCELLED_VISIT),
+          c('COMPLETE', { cw: TOM, completedDateTime: '04/07/2026 09:50', scheduledStart: '04/07/2026 09:30', scheduledEnd: '04/07/2026 10:30', visitStart: '04/07/2026 09:34', visitEnd: '04/07/2026 09:59' }),
+          { status: 'MISSED' },
+          c('COMPLETE', { cw: KAREN, completedDateTime: '06/07/2026 09:44', scheduledStart: '06/07/2026 09:30', scheduledEnd: '06/07/2026 10:30', visitStart: '06/07/2026 09:31', visitEnd: '06/07/2026 09:53' }),
+        ]),
       },
     ],
   },
@@ -96,12 +122,25 @@ const TASKS = [
       {
         name: 'Morning call',
         time: '08:00 - 09:00',
-        cells: withFuture(['COMPLETE', 'PARTIAL', 'CANCELLED', 'COMPLETE', 'POSSIBLE', 'COMPLETE']),
+        cells: withFuture([
+          c('COMPLETE', { cw: KAREN, completedDateTime: '01/07/2026 08:12', scheduledStart: '01/07/2026 08:00', scheduledEnd: '01/07/2026 09:00', visitStart: '01/07/2026 08:05', visitEnd: '01/07/2026 08:20' }),
+          c('PARTIAL', { cw: KAREN, reasonName: 'Refused, will retry', completedDateTime: '02/07/2026 08:15', scheduledStart: '02/07/2026 08:00', scheduledEnd: '02/07/2026 09:00', visitStart: '02/07/2026 08:06', visitEnd: '02/07/2026 08:18' }),
+          c('CANCELLED', CANCELLED_VISIT),
+          c('COMPLETE', { cw: KAREN, completedDateTime: '04/07/2026 08:10', scheduledStart: '04/07/2026 08:00', scheduledEnd: '04/07/2026 09:00', visitStart: '04/07/2026 08:04', visitEnd: '04/07/2026 08:16' }),
+          { status: 'POSSIBLE' },
+          c('COMPLETE', { cw: KAREN, completedDateTime: '06/07/2026 08:09', scheduledStart: '06/07/2026 08:00', scheduledEnd: '06/07/2026 09:00', visitStart: '06/07/2026 08:03', visitEnd: '06/07/2026 08:14' }),
+        ]),
       },
       {
         name: 'Evening call',
         time: '18:00 - 19:00',
-        cells: withFuture(['COMPLETE', 'INCOMPLETE', 'CANCELLED', 'COMPLETE', 'COMPLETE']),
+        cells: withFuture([
+          c('COMPLETE', { cw: TOM, completedDateTime: '01/07/2026 18:22', scheduledStart: '01/07/2026 18:00', scheduledEnd: '01/07/2026 19:00', visitStart: '01/07/2026 18:11', visitEnd: '01/07/2026 18:26' }),
+          c('INCOMPLETE', { cw: TOM, completedDateTime: '02/07/2026 18:30', scheduledStart: '02/07/2026 18:00', scheduledEnd: '02/07/2026 19:00', visitStart: '02/07/2026 18:10' }),
+          c('CANCELLED', CANCELLED_VISIT),
+          c('COMPLETE', { cw: TOM, completedDateTime: '04/07/2026 18:19', scheduledStart: '04/07/2026 18:00', scheduledEnd: '04/07/2026 19:00', visitStart: '04/07/2026 18:08', visitEnd: '04/07/2026 18:24' }),
+          c('COMPLETE', { cw: TOM, completedDateTime: '05/07/2026 18:15', scheduledStart: '05/07/2026 18:00', scheduledEnd: '05/07/2026 19:00', visitStart: '05/07/2026 18:07', visitEnd: '05/07/2026 18:21' }),
+        ]),
       },
     ],
   },
@@ -117,6 +156,8 @@ const BUBBLE_CONTENT = {
   FUTURE: '',
   CANCELLED: '',
 }
+
+function initialsOf(cw) { return cw ? `${cw.firstName[0]}${cw.lastName[0]}` : '' }
 
 const LEGEND = [
   { status: 'COMPLETE', content: 'XX', label: 'Task completed (employee initials/reason code)' },
@@ -141,11 +182,98 @@ const REASON_CODES = [
 
 // ─── Bubble ───────────────────────────────────────────────────
 
-function Bubble({ status, legend, content }) {
+function Bubble({ status, legend, content, onClick }) {
   const body = content !== undefined ? content : (BUBBLE_CONTENT[status] ?? '')
   return (
-    <div className={`bubble-item ${status}${legend ? ' legend' : ''}`}>
+    <div className={`bubble-item ${status}${legend ? ' legend' : ''}`} onClick={onClick}>
       {body}
+    </div>
+  )
+}
+
+// ─── TaskInstancePopover ────────────────────────────────────────
+// Mirrors the original's bubbleTooltipPopover.html template, triggered
+// from COMPLETE/PARTIAL/INCOMPLETE bubbles. CANCELLED gets its own
+// simpler variant — none of the visit/careworker fields below apply to
+// a visit that never took place, so it just states what happened.
+
+function TaskInstancePopover({ task, cell, rect, onClose }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      // Ignore clicks on bubbles entirely — the bubble's own onClick handles
+      // both closing this popover and opening/toggling the next one. If we
+      // closed here too (on mousedown, which fires first), the state would
+      // already be null by the time the click's toggle check runs, so a
+      // second click on the same bubble would reopen it instead of closing.
+      if (ref.current && !ref.current.contains(e.target) && !e.target.closest('.bubble-item')) onClose()
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [onClose])
+
+  const style = {
+    position: 'fixed',
+    left: rect.left + rect.width / 2,
+    top: rect.top,
+  }
+
+  if (cell.status === 'CANCELLED') {
+    return (
+      <div ref={ref} className="task-instance-popover cancelled" style={style}>
+        <div className="popover-arrow" />
+        <div className="popover-header">
+          <div className="popover-header-content">
+            <strong>Visit cancelled</strong>
+          </div>
+        </div>
+        <div className="popover-body">
+          <div><strong>Reason:</strong> {cell.reason}</div>
+          {cell.notes && <div className="cancelled-notes">{cell.notes}</div>}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div ref={ref} className="task-instance-popover" style={style}>
+      <div className="popover-arrow" />
+      <div className="popover-header">
+        <div className="popover-header-content clearfix">
+          <div className="cw-profile">
+            <div className="profile-image">{initialsOf(cell.cw)}</div>
+          </div>
+          <div className="options">
+            <div className="option">
+              <div className="cw-name">{cell.cw?.firstName}</div>
+              <div className="cw-name">{cell.cw?.lastName}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="popover-body">
+        {cell.reasonName && (
+          <div className="reason-info">
+            <div className="medName">{task.name}</div>
+            <div>:</div>
+            <div className="refused-reason-name">{cell.reasonName}</div>
+          </div>
+        )}
+        <div><strong>Task completed:</strong> <span>{cell.completedDateTime}</span></div>
+        {cell.scheduledStart && (
+          <div>
+            <strong>Visit start (scheduled):</strong> <span>{cell.scheduledStart}</span><br />
+            <strong>Visit end (scheduled):</strong> <span>{cell.scheduledEnd}</span>
+          </div>
+        )}
+        {cell.visitStart && (
+          <div>
+            <strong>Visit start (completed):</strong> <span>{cell.visitStart}</span>
+            {cell.visitEnd && <><br /><strong>Visit end (completed):</strong> <span>{cell.visitEnd}</span></>}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -153,6 +281,14 @@ function Bubble({ status, legend, content }) {
 // ─── App ──────────────────────────────────────────────────────
 
 export default function App() {
+  const [popover, setPopover] = useState(null) // { task, cell, rect }
+
+  const handleBubbleClick = (e, task, cell) => {
+    if (!CLICKABLE.has(cell.status)) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPopover(prev => (prev && prev.cell === cell ? null : { task, cell, rect }))
+  }
+
   return (
     <div className="page">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
@@ -238,9 +374,12 @@ export default function App() {
                                   <div>{visit.time}</div>
                                 </div>
                               </td>
-                              {visit.cells.map((status, i) => (
+                              {visit.cells.map((cell, i) => (
                                 <td key={i} className={`marsheet-task-instance${isToday(DAYS[i]) ? ' today' : ''}`}>
-                                  <Bubble status={status} />
+                                  <Bubble
+                                    status={cell.status}
+                                    onClick={CLICKABLE.has(cell.status) ? (e) => handleBubbleClick(e, task, cell) : undefined}
+                                  />
                                 </td>
                               ))}
                             </tr>
@@ -282,6 +421,15 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {popover && (
+              <TaskInstancePopover
+                task={popover.task}
+                cell={popover.cell}
+                rect={popover.rect}
+                onClose={() => setPopover(null)}
+              />
+            )}
           </div>
         </div>
       </div>
