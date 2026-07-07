@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messaging discovery — requirement coverage</title>
+<style>
+  :root {
+    --bg: #f6f4f9;
+    --surface: #ffffff;
+    --surface-soft: #fbfafd;
+    --ink: #221e2e;
+    --ink-soft: #5b5568;
+    --ink-faint: #948d9f;
+    --accent: #6b3fa0;
+    --accent-soft: #efe9f7;
+    --line: #e3dfea;
+    --line-strong: #d2cbdd;
+
+    --covered: #2f7a57;
+    --covered-bg: #e5f3ec;
+    --covered-line: #bfe0cf;
+    --open: #9c6b1f;
+    --open-bg: #fbf1de;
+    --open-line: #edd9a8;
+    --deferred: #6b5b95;
+    --deferred-bg: #ece7f5;
+    --deferred-line: #d3c8e6;
+    --notwanted: #a14a3d;
+    --notwanted-bg: #f8e9e5;
+    --notwanted-line: #e6c7bd;
+
+    --serif: Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #17141f;
+    --surface: #1e1a29;
+    --surface-soft: #221e2e;
+    --ink: #ece8f2;
+    --ink-soft: #b3aac2;
+    --ink-faint: #7c7390;
+    --accent: #b58ee0;
+    --accent-soft: #2c2440;
+    --line: #322b41;
+    --line-strong: #433a56;
+
+    --covered: #6fcf9c;
+    --covered-bg: #1c2f26;
+    --covered-line: #2f4b3c;
+    --open: #e0b76a;
+    --open-bg: #332a17;
+    --open-line: #4d3f22;
+    --deferred: #b6a4e0;
+    --deferred-bg: #2a2440;
+    --deferred-line: #40365c;
+    --notwanted: #e0897a;
+    --notwanted-bg: #332320;
+    --notwanted-line: #4d332c;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17141f;
+      --surface: #1e1a29;
+      --surface-soft: #221e2e;
+      --ink: #ece8f2;
+      --ink-soft: #b3aac2;
+      --ink-faint: #7c7390;
+      --accent: #b58ee0;
+      --accent-soft: #2c2440;
+      --line: #322b41;
+      --line-strong: #433a56;
+
+      --covered: #6fcf9c;
+      --covered-bg: #1c2f26;
+      --covered-line: #2f4b3c;
+      --open: #e0b76a;
+      --open-bg: #332a17;
+      --open-line: #4d3f22;
+      --deferred: #b6a4e0;
+      --deferred-bg: #2a2440;
+      --deferred-line: #40365c;
+      --notwanted: #e0897a;
+      --notwanted-bg: #332320;
+      --notwanted-line: #4d332c;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    margin: 0;
+    padding: 56px 24px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ── Back link — hand-styled to match the shared .back-link
+     convention (bottom-left purple pill) without importing main.css,
+     since this page runs its own self-contained palette/type system
+     rather than the app's design system. ── */
+  .back-link {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #9a26d6;
+    color: #fff;
+    border-radius: 20px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.15s;
+  }
+  .back-link:hover { background: #8421b8; }
+  .back-link svg { display: block; }
+
+  /* ── Header ─────────────────────────────────────────────── */
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+
+  .dek {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 0 32px;
+  }
+
+  .dek b { color: var(--ink); font-weight: 600; }
+
+  /* ── Stat strip ─────────────────────────────────────────── */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 18px 20px;
+  }
+
+  .stat .n {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat .n.covered { color: var(--covered); }
+  .stat .n.open { color: var(--open); }
+  .stat .n.deferred { color: var(--deferred); }
+
+  .stat .l {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* ── Legend ─────────────────────────────────────────────── */
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    padding: 16px 20px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 36px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+
+  .swatch {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .swatch.covered { background: var(--covered); }
+  .swatch.open { background: var(--open); }
+  .swatch.deferred { background: var(--deferred); }
+  .swatch.notwanted { background: var(--notwanted); }
+  .swatch.blank { background: var(--line-strong); }
+
+  /* ── Table ──────────────────────────────────────────────── */
+
+  .table-scroll {
+    overflow-x: auto;
+    margin-bottom: 40px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 940px;
+    background: var(--surface);
+  }
+
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--line-strong);
+    vertical-align: bottom;
+  }
+
+  thead th.feature-col { width: 30%; }
+
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .who .chip {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .who .name { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+  .who .org { font-size: 11.5px; color: var(--ink-faint); font-weight: 400; }
+
+  .chip.aysen { background: #6b3fa0; }
+  .chip.simon { background: #3f7ea0; }
+  .chip.charlotte { background: #a05f3f; }
+  .chip.heretocare { background: #3f6b6b; }
+
+  .cat-row td {
+    padding: 20px 18px 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-soft);
+  }
+
+  .cat-row:first-child td { padding-top: 16px; }
+
+  tbody tr.feature-row td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  tbody tr.feature-row:last-child td { border-bottom: none; }
+
+  .feature-name { font-weight: 500; color: var(--ink); }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .status-pill.covered { background: var(--covered-bg); color: var(--covered); border-color: var(--covered-line); }
+  .status-pill.open { background: var(--open-bg); color: var(--open); border-color: var(--open-line); }
+  .status-pill.deferred { background: var(--deferred-bg); color: var(--deferred); border-color: var(--deferred-line); }
+  .status-pill.notwanted { background: var(--notwanted-bg); color: var(--notwanted); border-color: var(--notwanted-line); }
+
+  .status-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .cell-note {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    line-height: 1.4;
+    max-width: 22ch;
+  }
+
+  .blank-cell { color: var(--ink-faint); font-size: 13px; }
+
+  .overall-cell { font-weight: 600; }
+
+  /* ── Footnote / next steps ──────────────────────────────── */
+
+  .next {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+  }
+
+  .next h2 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+
+  .next ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .next li { margin-bottom: 7px; }
+  .next li:last-child { margin-bottom: 0; }
+  .next b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 27px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="../../" class="back-link">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  Prototypes
+</a>
+
+<div class="page">
+
+  <div class="eyebrow">Product research · Staff messaging</div>
+  <h1>What four customers asked for, and where it stands</h1>
+  <p class="dek">
+    Cross-referencing discovery sessions with <b>Aysen Hulusi</b>, <b>Simon Box</b> (Arch Care Services),
+    <b>Charlotte</b> (SOS Homecare), and <b>Here to Care</b> against the mobile and web messaging prototypes —
+    16 distinct asks, grouped by theme.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="n covered">11</div><div class="l">Covered / built</div></div>
+    <div class="stat"><div class="n open">3</div><div class="l">Open — not yet built</div></div>
+    <div class="stat"><div class="n deferred">2</div><div class="l">Deliberately deferred / parked</div></div>
+    <div class="stat"><div class="n" style="color:var(--ink-faint)">4</div><div class="l">Customers consulted</div></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch covered"></span>Requested (or agreed) &amp; built</div>
+    <div class="legend-item"><span class="swatch open"></span>Requested, not yet built</div>
+    <div class="legend-item"><span class="swatch deferred"></span>Raised, parked on purpose</div>
+    <div class="legend-item"><span class="swatch notwanted"></span>Explicitly doesn't want it</div>
+    <div class="legend-item"><span class="swatch blank"></span>Not discussed with them</div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="feature-col">Feature discussed</th>
+          <th>
+            <div class="who">
+              <div class="chip aysen">AH</div>
+              <div><div class="name">Aysen</div><div class="org">Discovery, 07/01</div></div>
+            </div>
+          </th>
+          <th>
+            <div class="who">
+              <div class="chip simon">SB</div>
+              <div><div class="name">Simon Box</div><div class="org">Arch Care Services</div></div>
+            </div>
+          </th>
+          <th>
+            <div class="who">
+              <div class="chip charlotte">C</div>
+              <div><div class="name">Charlotte</div><div class="org">SOS Homecare</div></div>
+            </div>
+          </th>
+          <th>
+            <div class="who">
+              <div class="chip heretocare">H2C</div>
+              <div><div class="name">Here to Care</div><div class="org">Discovery, 07/08</div></div>
+            </div>
+          </th>
+          <th>Where it stands</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="cat-row"><td colspan="6">Recipient model</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">No carer-to-carer messaging</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Agrees</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Agrees</span><span class="cell-note">priority is office↔carer only</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Broadcast to all carers</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Broadcast to a chosen subset (multi-select)</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">"5 care workers about a road closure"</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Not wanted</span><span class="cell-note">prefers area-tag or 1:1 only</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Area/tag-based broadcast targeting</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Shared inbox for CM+ office staff</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">avoids single-recipient annual-leave bounce-back</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Analogous</span><span class="cell-note">her "general mailbox" workflow</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="6">Replies &amp; broadcasts</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Replies fork into private 1:1s, never shared</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Core ask</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Agrees</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Covered</span><span class="cell-note">different path, same toggle — no-reply instead of forked reply</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">No-reply / read-only broadcasts</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">"I don't want 10 staff telling me thanks"</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">stronger — must start a new message</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Sender = CM+ / sufficient access, not a custom list</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Stated</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Stated</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered<span class="cell-note" style="margin-top:2px">design principle — prototype has no real auth layer</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="6">Trust &amp; accountability</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Read receipts / proof of delivery</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">disciplinary letter dispute — "I didn't see it"</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered<span class="cell-note" style="margin-top:2px">already built — first customer to explain why it matters</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="6">Attachments</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Carer → office attachments (photo/video/file)</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Agrees</span><span class="cell-note">mileage claims, handwritten notes</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Low priority</span><span class="cell-note">already covered by Tasks</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">medication photos — 3rd customer to raise this</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Office → carer attachments</td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">files only, no photo/video</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Low value</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Not needed</span></td>
+          <td><span class="status-pill covered"><span class="dot"></span>Requested</span><span class="cell-note">confidential docs, simple instructions</span></td>
+          <td class="overall-cell" style="color:var(--covered)">Covered<span class="cell-note" style="margin-top:2px">demand varies, but real on both sides</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="6">Thread lifecycle</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Manual Close / Reopen on any thread</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Not for 1:1s</span><span class="cell-note">fine for broadcasts only</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Not for 1:1s</span><span class="cell-note">wants one continuous thread</span></td>
+          <td><span class="status-pill notwanted"><span class="dot"></span>Not essential</span><span class="cell-note">workaround: copies to client notes already</span></td>
+          <td class="overall-cell" style="color:var(--open)">Open tension</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Single continuous thread per carer</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill open"><span class="dot"></span>Requested</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--open)">Open</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Inbox scoped to carer's own area/region</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill open"><span class="dot"></span>Raised</span><span class="cell-note">theory only, not confirmed w/ Simon</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--open)">Open</td>
+        </tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Auto-close thread when a carer leaves</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill deferred"><span class="dot"></span>Requested</span></td>
+          <td><span class="status-pill deferred"><span class="dot"></span>Requested</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td class="overall-cell" style="color:var(--deferred)">Deferred<span class="cell-note" style="margin-top:2px">parked on purpose, 07/07</span></td>
+        </tr>
+
+        <tr class="cat-row"><td colspan="6">Beyond v1</td></tr>
+
+        <tr class="feature-row">
+          <td class="feature-name">Message a customer's family members directly</td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="blank-cell">—</span></td>
+          <td><span class="status-pill deferred"><span class="dot"></span>Requested</span><span class="cell-note">has a workaround via shared email today</span></td>
+          <td class="overall-cell" style="color:var(--deferred)">Deferred<span class="cell-note" style="margin-top:2px">explicitly out of scope for v1</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="next">
+    <h2>What's still open</h2>
+    <ul>
+      <li><b>Manual close/reopen vs. one continuous thread</b> — the built model lets office close any 1:1 at will; Simon, Charlotte, and Here to Care all independently downplay it for 1:1s (for three different reasons). Not yet decided whether to change the default or make it configurable.</li>
+      <li><b>Inbox scoping by area</b> — Simon doesn't want to see messages from carers outside his region. Area tags already exist on employees and customers, which looks like the natural mechanism, but this is a theory, not a design.</li>
+      <li><b>Auto-close on employment end</b> — now asked for independently three times (Ben, Simon, Charlotte), but knowingly parked for now rather than built.</li>
+      <li><b>Messaging a customer's family member directly</b> — new idea from Here to Care, explicitly ruled out of scope for v1. Revisit post-launch if it resurfaces.</li>
+    </ul>
+  </div>
+
+  <footer>
+    Sources: Aysen discovery session (2026-07-01), Simon Box / Arch Care Services (2026-07-03), Charlotte / SOS Homecare (reported 2026-07-07), Here to Care (2026-07-08).
+  </footer>
+
+</div>
+</body>
+</html>
