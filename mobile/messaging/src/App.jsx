@@ -22,6 +22,11 @@ const CloseIcon = ({ size = 20 }) => (
     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
   </svg>
 )
+const ArchiveIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.15.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+  </svg>
+)
 const EditIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M5.00125 16.2458L5.00125 18.6099C5.00125 18.8277 5.17234 18.9988 5.39008 18.9988L7.7542 18.9988C7.8553 18.9988 7.9564 18.9599 8.02639 18.8821L16.5185 10.3977L13.6023 7.48146L5.1179 15.9658C5.04013 16.0436 5.00125 16.1369 5.00125 16.2458ZM18.7738 8.1425C19.0771 7.83919 19.0771 7.34926 18.7738 7.04597L16.954 5.22622C16.6507 4.92293 16.1608 4.92293 15.8575 5.22622L14.4344 6.64935L17.3506 9.56562L18.7738 8.1425Z" />
@@ -206,7 +211,7 @@ const THREADS = [
     time: '10:42 AM',
     unread: 1,
     sentByMe: false,
-    closed: false,
+    archivedByCarer: false,
   },
   {
     id: 2,
@@ -218,7 +223,7 @@ const THREADS = [
     time: '9:15 AM',
     unread: 1,
     sentByMe: false,
-    closed: false,
+    archivedByCarer: false,
   },
   {
     id: 3,
@@ -230,7 +235,7 @@ const THREADS = [
     time: 'Yesterday',
     unread: 0,
     sentByMe: false,
-    closed: false,
+    archivedByCarer: false,
   },
   {
     id: 5,
@@ -242,7 +247,7 @@ const THREADS = [
     time: '10:35 AM',
     unread: 0,
     sentByMe: false,
-    closed: false,
+    archivedByCarer: false,
   },
   {
     id: 4,
@@ -255,7 +260,7 @@ const THREADS = [
     unread: 0,
     sentByMe: true,
     deliveredNotRead: true,
-    closed: false,
+    archivedByCarer: false,
   },
 ]
 
@@ -288,7 +293,7 @@ const THREAD_MESSAGES = {
 
 // ─── Inbox Screen ────────────────────────────────────────────
 
-function ThreadRow({ thread, onClick, showClosedTag }) {
+function ThreadRow({ thread, onClick, showArchivedTag }) {
   const isUnread = thread.unread > 0
   return (
     <div className="thread-row-outer" onClick={onClick}>
@@ -307,7 +312,7 @@ function ThreadRow({ thread, onClick, showClosedTag }) {
           </div>
           <div className="thread-bottom">
             <div className="thread-tags">
-              {showClosedTag && <span className="thread-closed-tag">Closed</span>}
+              {showArchivedTag && <span className="thread-archived-tag">Archived</span>}
             </div>
             <div className="thread-right-meta">
               {isUnread
@@ -339,7 +344,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
       (t.careReceiver && t.careReceiver.toLowerCase().includes(search.toLowerCase()))
     if (!matchesSearch) return false
     if (isSearching) return true
-    return tab === 'inbox' ? !t.closed : t.closed
+    return tab === 'inbox' ? !t.archivedByCarer : t.archivedByCarer
   })
 
   return (
@@ -366,7 +371,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
       {!isSearching && (
         <div className="inbox-tabs">
           <button className={`inbox-tab${tab === 'inbox' ? ' active' : ''}`} onClick={() => setTab('inbox')}>Inbox</button>
-          <button className={`inbox-tab${tab === 'closed' ? ' active' : ''}`} onClick={() => setTab('closed')}>Closed</button>
+          <button className={`inbox-tab${tab === 'archived' ? ' active' : ''}`} onClick={() => setTab('archived')}>Archived</button>
         </div>
       )}
       <div className="thread-list">
@@ -375,12 +380,12 @@ function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
             key={t.id}
             thread={t}
             onClick={() => onOpenThread(t.id)}
-            showClosedTag={isSearching && t.closed}
+            showArchivedTag={isSearching && t.archivedByCarer}
           />
         ))}
         {filtered.length === 0 && (
           <div className="empty-state">
-            {isSearching ? 'No messages found' : tab === 'closed' ? 'No closed threads' : 'No messages'}
+            {isSearching ? 'No messages found' : tab === 'archived' ? 'No archived threads' : 'No messages'}
           </div>
         )}
       </div>
@@ -547,7 +552,7 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
+const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onToggleArchive, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -669,6 +674,9 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
         >
           <button onClick={() => { onMarkUnread?.(thread.id); setInfoMenuOpen(false) }}>
             <UnreadBubbleIcon size={20} /> Mark as unread
+          </button>
+          <button onClick={() => { onToggleArchive?.(thread.id); setInfoMenuOpen(false) }}>
+            <ArchiveIcon size={20} /> {thread.archivedByCarer ? 'Unarchive' : 'Archive'}
           </button>
         </div>
       )}
@@ -1039,14 +1047,14 @@ export default function App() {
   const threadScreenRef = useRef(null)
 
   const [messageBadge, setMessageBadge] = useState(() =>
-    THREADS.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
+    THREADS.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
   )
 
   useEffect(() => {
     setMessageBadge(0)
   }, [])
 
-  const totalUnread = threads.filter(t => !t.archived).reduce((sum, t) => sum + t.unread, 0)
+  const totalUnread = threads.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
 
   const handleOpenActions = (msg, rect) => {
     if (actionTarget?.id === msg.id) { setActionTarget(null); return }
@@ -1088,15 +1096,30 @@ export default function App() {
   }
 
   const handleReply = (text) => {
+    const wasArchived = threads.find(t => t.id === activeThreadId)?.archivedByCarer
+    const now = Date.now()
     setThreads(prev => {
       const updated = prev.find(t => t.id === activeThreadId)
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: 0 },
+        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: 0, ...(wasArchived ? { archivedByCarer: false } : {}) },
         ...rest,
       ]
     })
+    setThreadMessages(prev => ({
+      ...prev,
+      [activeThreadId]: [
+        ...(prev[activeThreadId] || []),
+        { id: now, isMe: true, text, time: 'Just now', day: 'Today', receipt: 'delivered' },
+      ],
+    }))
+  }
+
+  const handleToggleArchive = (id) => {
+    setThreads(prev => prev.map(t => t.id === id ? { ...t, archivedByCarer: !t.archivedByCarer } : t))
+    setActiveThreadId(null)
+    setView('inbox')
   }
 
   const handleNewMessage = ({ title, careReceivers, message }) => {
@@ -1162,6 +1185,7 @@ export default function App() {
               onBack={() => setView('inbox')}
               onMessageSent={handleReply}
               onMarkUnread={handleMarkUnread}
+              onToggleArchive={handleToggleArchive}
               onMessageDeleted={handleMessageDeleted}
               totalUnread={totalUnread}
               onOpenActions={handleOpenActions}

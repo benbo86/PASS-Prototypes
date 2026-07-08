@@ -23,6 +23,11 @@ const CloseIcon = ({ size = 18 }) => (
     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
   </svg>
 )
+const ArchiveIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.15.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+  </svg>
+)
 const GroupIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
@@ -144,7 +149,7 @@ const THREADS = [
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm.",
     time: '10:42 AM',
     unread: 0,
-    closed: false,
+    archivedByOffice: false,
   },
   {
     id: 2,
@@ -159,7 +164,7 @@ const THREADS = [
     lastMessage: "Hi Karen, yes I was there until 5pm and she did take all her medication.",
     time: '9:15 AM',
     unread: 1,
-    closed: false,
+    archivedByOffice: false,
   },
   {
     id: 3,
@@ -174,7 +179,7 @@ const THREADS = [
     lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
     time: 'Yesterday',
     unread: 0,
-    closed: false,
+    archivedByOffice: false,
   },
   {
     id: 4,
@@ -189,7 +194,7 @@ const THREADS = [
     lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
     time: 'Mon',
     unread: 0,
-    closed: false,
+    archivedByOffice: false,
   },
   {
     id: 5,
@@ -203,7 +208,7 @@ const THREADS = [
     lastMessage: "Please be aware of road closures on the A57 this week due to utility works.",
     time: 'Yesterday',
     unread: 0,
-    closed: false,
+    archivedByOffice: false,
   },
 ]
 
@@ -324,7 +329,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
   }, [])
 
   const filtered = threads.filter(t => {
-    const matchesTab = tab === 'inbox' ? !t.closed : t.closed
+    const matchesTab = tab === 'inbox' ? !t.archivedByOffice : t.archivedByOffice
     const query = search.toLowerCase()
     const matchesSearch = t.title.toLowerCase().includes(query) ||
       t.lastMessage.toLowerCase().includes(query) ||
@@ -372,9 +377,9 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
           onClick={() => setTab('inbox')}
         >Inbox</button>
         <button
-          className={`msg-sidebar-tab${tab === 'closed' ? ' active' : ''}`}
-          onClick={() => setTab('closed')}
-        >Closed</button>
+          className={`msg-sidebar-tab${tab === 'archived' ? ' active' : ''}`}
+          onClick={() => setTab('archived')}
+        >Archived</button>
       </div>
       <div className="msg-thread-list">
         {filtered.map(t => (
@@ -387,7 +392,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
         ))}
         {filtered.length === 0 && (
           <div className="msg-empty-list">
-            {tab === 'closed' ? 'No closed threads' : 'No messages found'}
+            {tab === 'archived' ? 'No archived threads' : 'No messages found'}
           </div>
         )}
       </div>
@@ -398,7 +403,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
 
 // ─── Thread View ───────────────────────────────────────────────
 
-function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
+function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -465,7 +470,7 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
       }
       setLocalMsgs(prev => [
         ...prev,
-        ...(thread.closed ? [{ id: Date.now(), type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' }] : []),
+        ...(thread.archivedByOffice ? [{ id: Date.now(), type: 'event', text: 'This thread has been unarchived', time: 'Just now', day: 'Today' }] : []),
         newMsg,
       ])
       onSend?.(text, attachments)
@@ -506,7 +511,7 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
           </span>
         </div>
         <div className="msg-thread-header-actions">
-          {!thread.closed && thread.replyAllowed && (
+          {!thread.archivedByOffice && thread.replyAllowed && (
             <button
               className="msg-header-action-btn"
               title="Mark as unread"
@@ -518,11 +523,11 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
           )}
           <button
             className="msg-header-action-btn"
-            title={thread.closed ? (thread.isBroadcast ? 'Move to inbox' : 'Reopen thread') : (thread.isBroadcast ? 'Close broadcast' : 'Close thread')}
-            onClick={e => { e.stopPropagation(); onClose?.() }}
+            title={thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive thread') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}
+            onClick={e => { e.stopPropagation(); onToggleArchive?.() }}
           >
-            {!thread.closed && <CloseIcon size={18} />}
-            <span>{thread.closed ? (thread.isBroadcast ? 'Move to inbox' : 'Reopen') : (thread.isBroadcast ? 'Close broadcast' : 'Close thread')}</span>
+            {!thread.archivedByOffice && <ArchiveIcon size={18} />}
+            <span>{thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}</span>
           </button>
         </div>
       </div>
@@ -1057,7 +1062,14 @@ export default function App() {
     document.addEventListener('mouseup', handleMouseUp)
   }
 
-  const totalUnread = threads.reduce((sum, t) => sum + t.unread, 0)
+  const [messageBadge, setMessageBadge] = useState(() =>
+    THREADS.reduce((sum, t) => sum + t.unread, 0)
+  )
+
+  useEffect(() => {
+    setMessageBadge(0)
+  }, [])
+
   const activeThread = threads.find(t => t.id === activeThreadId)
   const activeMessages = activeThread ? (threadMessages[activeThreadId] || []) : []
 
@@ -1068,23 +1080,23 @@ export default function App() {
   }
 
   const handleSend = (text, attachments) => {
-    const wasClosed = threads.find(t => t.id === activeThreadId)?.closed
+    const wasArchived = threads.find(t => t.id === activeThreadId)?.archivedByOffice
     const now = Date.now()
     setThreads(prev => {
       const updated = prev.find(t => t.id === activeThreadId)
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasClosed ? { closed: false } : {}) },
+        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasArchived ? { archivedByOffice: false } : {}) },
         ...rest,
       ]
     })
     setThreadMessages(prev => {
       const existing = prev[activeThreadId] || []
       const sentMsg = { id: now + 1, isMe: true, text, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }
-      const additions = wasClosed
+      const additions = wasArchived
         ? [
-            { id: now, type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' },
+            { id: now, type: 'event', text: 'This thread has been unarchived', time: 'Just now', day: 'Today' },
             sentMsg,
           ]
         : [{ ...sentMsg, id: now }]
@@ -1092,18 +1104,18 @@ export default function App() {
     })
   }
 
-  const handleClose = () => {
+  const handleToggleArchive = () => {
     const activeThread = threads.find(t => t.id === activeThreadId)
-    const isClosed = activeThread?.closed
+    const isArchived = activeThread?.archivedByOffice
     setThreads(prev => prev.map(t =>
-      t.id === activeThreadId ? { ...t, closed: !t.closed } : t
+      t.id === activeThreadId ? { ...t, archivedByOffice: !t.archivedByOffice } : t
     ))
     if (!activeThread?.isBroadcast) {
       setThreadMessages(prev => ({
         ...prev,
         [activeThreadId]: [
           ...(prev[activeThreadId] || []),
-          { id: Date.now(), type: 'event', text: isClosed ? 'This thread has been reopened' : 'This thread has been closed', time: 'Just now', day: 'Today' },
+          { id: Date.now(), type: 'event', text: isArchived ? 'This thread has been unarchived' : 'This thread has been archived', time: 'Just now', day: 'Today' },
         ],
       }))
     }
@@ -1144,7 +1156,7 @@ export default function App() {
         lastMessage: message,
         time: 'Just now',
         unread: 0,
-        closed: false,
+        archivedByOffice: false,
       }
       setThreads(prev => [newThread, ...prev])
       setThreadMessages(prev => ({
@@ -1169,7 +1181,7 @@ export default function App() {
         lastMessage: message,
         time: 'Just now',
         unread: 0,
-        closed: false,
+        archivedByOffice: false,
       }
       setThreads(prev => [newThread, ...prev])
       setThreadMessages(prev => ({
@@ -1186,7 +1198,7 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
-      <WebNav activePage="messages" unreadMessages={totalUnread} />
+      <WebNav activePage="messages" unreadMessages={messageBadge} />
       <div className="messages-layout">
         <Sidebar
           threads={threads}
@@ -1206,7 +1218,7 @@ export default function App() {
               thread={activeThread}
               messages={activeMessages}
               onSend={handleSend}
-              onClose={handleClose}
+              onToggleArchive={handleToggleArchive}
               onMarkUnread={handleMarkUnread}
             />
           )}

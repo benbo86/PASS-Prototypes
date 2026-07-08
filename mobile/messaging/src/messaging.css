@@ -113,7 +113,7 @@
   gap: 4px;
 }
 
-.thread-closed-tag {
+.thread-archived-tag {
   display: inline-flex;
   align-items: center;
   background: var(--ui-purple-6-lavendar-grey);
