@@ -229,6 +229,8 @@
 
   .table-scroll {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 70vh;
     margin-bottom: 40px;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -248,6 +250,10 @@
     padding: 16px 18px 14px;
     border-bottom: 1px solid var(--line-strong);
     vertical-align: bottom;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--surface);
   }
 
   thead th.feature-col { width: 30%; }

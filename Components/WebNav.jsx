@@ -67,6 +67,10 @@ const MoreIcon = () => (
 
 // ─── Component ─────────────────────────────────────────────────
 
+const NAV_LINKS = {
+  employees: '../../web/employees/',
+}
+
 const NAV_ITEMS = [
   { key: 'customers',  label: 'Customers',  Icon: CustomerIcon },
   { key: 'employees',  label: 'Employees',  Icon: EmployeesIcon },
@@ -104,6 +108,7 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
           <button
             key={key}
             className={`web-nav-item${activePage === key ? ' active' : ''}`}
+            onClick={() => { if (NAV_LINKS[key]) window.location.href = NAV_LINKS[key] }}
           >
             <Icon />
             <span>{label}</span>

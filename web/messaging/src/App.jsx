@@ -209,7 +209,7 @@ const THREADS = [
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
+    { id: 1, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }] },
   ],
   2: [
     { id: 1, isMe: true, text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
@@ -243,6 +243,12 @@ function nameToColor(name) {
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
   return INITIALS_COLORS[Math.abs(hash) % INITIALS_COLORS.length]
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 // ─── Thread Row ────────────────────────────────────────────────
@@ -319,9 +325,12 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
 
   const filtered = threads.filter(t => {
     const matchesTab = tab === 'inbox' ? !t.closed : t.closed
-    const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.lastMessage.toLowerCase().includes(search.toLowerCase()) ||
-      t.participants.toLowerCase().includes(search.toLowerCase())
+    const query = search.toLowerCase()
+    const matchesSearch = t.title.toLowerCase().includes(query) ||
+      t.lastMessage.toLowerCase().includes(query) ||
+      t.participants.toLowerCase().includes(query) ||
+      (t.area && t.area.toLowerCase().includes(query)) ||
+      (t.areaTags && t.areaTags.some(tag => tag.name.toLowerCase().includes(query)))
     return matchesTab && matchesSearch
   })
 
@@ -395,14 +404,27 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
   const [replyTo, setReplyTo] = useState(null)
   const [editing, setEditing] = useState(null)
   const [actionTarget, setActionTarget] = useState(null)
+  const [attachments, setAttachments] = useState([])
   const endRef = useRef(null)
   const inputRef = useRef(null)
+  const fileInputRef = useRef(null)
+
+  const handleFileAttach = (e) => {
+    const files = Array.from(e.target.files)
+    setAttachments(prev => [...prev, ...files.map(f => ({ name: f.name, size: formatFileSize(f.size) }))])
+    e.target.value = ''
+  }
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
 
   useEffect(() => {
     setLocalMsgs(messages)
     setEditing(null)
     setInputText('')
     setReplyTo(null)
+    setAttachments([])
   }, [thread.id])
 
   useEffect(() => {
@@ -439,17 +461,19 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         time: 'Just now',
         day: 'Today',
         ...(replyTo ? { replyTo } : {}),
+        ...(attachments.length ? { attachments } : {}),
       }
       setLocalMsgs(prev => [
         ...prev,
         ...(thread.closed ? [{ id: Date.now(), type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' }] : []),
         newMsg,
       ])
-      onSend?.(text)
+      onSend?.(text, attachments)
       setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
     setInputText('')
     setReplyTo(null)
+    setAttachments([])
   }
 
   return (
@@ -533,6 +557,15 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
                     )}
                     <span className="msg-bubble-text">{msg.text}</span>
                     {msg.edited && <span className="msg-edited">(edited)</span>}
+                    {msg.attachments?.map((att, i) => (
+                      <div key={i} className={`msg-attachment-file ${msg.isMe ? 'sent' : 'received'}`}>
+                        <AttachIcon />
+                        <div className="msg-attachment-file-info">
+                          <span className="msg-attachment-file-name">{att.name}</span>
+                          {att.size && <span className="msg-attachment-file-size">{att.size}</span>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                   <div className="msg-meta">
                     <span className="msg-time">{msg.time}</span>
@@ -608,9 +641,28 @@ function ThreadView({ thread, messages, onSend, onClose, onMarkUnread }) {
         </div>
       )}
 
+      {/* Attachments-in-progress strip */}
+      {!thread.isBroadcast && attachments.length > 0 && (
+        <div className="msg-compose-attachments">
+          {attachments.map((att, i) => (
+            <span key={i} className="msg-compose-attachment-chip">
+              <AttachIcon />
+              <span className="msg-compose-attachment-name">{att.name}</span>
+              <button className="msg-chip-remove" onClick={() => removeAttachment(i)}>
+                <CloseIcon size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Compose bar — broadcasts are send-once, so no further messages on this thread */}
       {!thread.isBroadcast && (
         <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
+          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} multiple />
+          <button className="msg-compose-attach" title="Attach file" onClick={e => { e.stopPropagation(); fileInputRef.current.click() }}>
+            <AttachIcon />
+          </button>
           <div className="msg-compose-input-wrap">
             <input
               ref={inputRef}
@@ -656,7 +708,19 @@ function ComposeView({ mode, onSend, onCancel }) {
   const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  const [attachments, setAttachments] = useState([])
   const dropdownRef = useRef(null)
+  const fileInputRef = useRef(null)
+
+  const handleFileAttach = (e) => {
+    const files = Array.from(e.target.files)
+    setAttachments(prev => [...prev, ...files.map(f => ({ name: f.name, size: formatFileSize(f.size) }))])
+    e.target.value = ''
+  }
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index))
+  }
 
   const filteredCarers = CARERS
     .filter(c => c.name.toLowerCase().includes(recipientSearch.toLowerCase()))
@@ -906,6 +970,23 @@ function ComposeView({ mode, onSend, onCancel }) {
           />
         </div>
 
+        {/* Attachments */}
+        <div className="msg-compose-attachments">
+          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} multiple />
+          <button type="button" className="msg-compose-attach-btn" onClick={() => fileInputRef.current.click()}>
+            <AttachIcon /> Attach
+          </button>
+          {attachments.map((att, i) => (
+            <span key={i} className="msg-compose-attachment-chip">
+              <AttachIcon />
+              <span className="msg-compose-attachment-name">{att.name}</span>
+              <button className="msg-chip-remove" onClick={() => removeAttachment(i)}>
+                <CloseIcon size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+
         {/* Actions */}
         <div className="msg-compose-actions">
           <button className="round-btn tertiary-btn" onClick={onCancel}>Cancel</button>
@@ -919,6 +1000,7 @@ function ComposeView({ mode, onSend, onCancel }) {
               recipients: isBroadcast ? (broadcastType === 'individuals' ? selectedCarers : []) : [selectedCarer],
               tags: isBroadcast && broadcastType === 'groups' ? selectedTags : [],
               message,
+              attachments,
             })}
           >
             {isBroadcast ? 'Send broadcast' : 'Send'} <SendIcon />
@@ -985,7 +1067,7 @@ export default function App() {
     setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 0 } : t))
   }
 
-  const handleSend = (text) => {
+  const handleSend = (text, attachments) => {
     const wasClosed = threads.find(t => t.id === activeThreadId)?.closed
     const now = Date.now()
     setThreads(prev => {
@@ -999,12 +1081,13 @@ export default function App() {
     })
     setThreadMessages(prev => {
       const existing = prev[activeThreadId] || []
+      const sentMsg = { id: now + 1, isMe: true, text, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }
       const additions = wasClosed
         ? [
             { id: now, type: 'event', text: 'This thread has been reopened', time: 'Just now', day: 'Today' },
-            { id: now + 1, isMe: true, text, time: 'Just now', day: 'Today' },
+            sentMsg,
           ]
-        : [{ id: now, isMe: true, text, time: 'Just now', day: 'Today' }]
+        : [{ ...sentMsg, id: now }]
       return { ...prev, [activeThreadId]: [...existing, ...additions] }
     })
   }
@@ -1034,7 +1117,7 @@ export default function App() {
     ))
   }
 
-  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message }) => {
+  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message, attachments }) => {
     const baseId = Math.max(...threads.map(t => t.id)) + 1
 
     if (mode === 'broadcast') {
@@ -1066,7 +1149,7 @@ export default function App() {
       setThreads(prev => [newThread, ...prev])
       setThreadMessages(prev => ({
         ...prev,
-        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }],
+        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }],
       }))
       setActiveThreadId(baseId)
       setRightPanel('thread')
@@ -1091,7 +1174,7 @@ export default function App() {
       setThreads(prev => [newThread, ...prev])
       setThreadMessages(prev => ({
         ...prev,
-        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today' }],
+        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }],
       }))
       setActiveThreadId(baseId)
       setRightPanel('thread')

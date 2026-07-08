@@ -620,6 +620,47 @@ body { overflow: hidden; }
   margin-left: 5px;
 }
 
+.msg-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+.msg-attachment-file.received { background: var(--ui-purple-6-lavendar-grey); }
+.msg-attachment-file.sent { background: rgba(255, 255, 255, 0.18); }
+
+.msg-attachment-file svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+  width: 18px;
+  height: 18px;
+}
+
+.msg-attachment-file-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.msg-attachment-file-name {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.msg-attachment-file-size {
+  font-family: Barlow, sans-serif;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
 .msg-reply-quote {
   display: flex;
   flex-direction: column;
@@ -793,34 +834,6 @@ body { overflow: hidden; }
   transition: background 0.12s, color 0.12s;
 }
 .msg-compose-attach:hover { background: var(--ui-purple-6-lavendar-grey); color: var(--brand-purple-3-purple-2); }
-
-.msg-attach-picker {
-  background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-  padding: 4px 0;
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 16px;
-  min-width: 140px;
-  z-index: 20;
-}
-.msg-attach-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px 16px;
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  color: var(--greyscale-2-grey-20);
-  transition: background 0.1s;
-}
-.msg-attach-option:hover { background: var(--ui-purple-7-lightest-lavendar); }
 
 .msg-compose-input-wrap {
   flex: 1;

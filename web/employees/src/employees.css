@@ -1,0 +1,340 @@
+/* ── Page layout ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.emp-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.emp-content {
+  padding: 32px 48px 48px;
+  flex: 1;
+}
+
+.emp-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.emp-page-header h1 {
+  font-size: 28px;
+  font-weight: 500;
+  color: #000;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────── */
+.emp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.emp-search-bar {
+  width: 320px;
+  max-width: 100%;
+}
+
+.emp-notif-filters {
+  display: flex;
+  gap: 8px;
+}
+.emp-notif-filters button {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--greyscale-6-grey-50);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.emp-notif-filters button:hover { border-color: var(--brand-purple-6-purple-4); color: #000; }
+.emp-notif-filters button.active {
+  background: var(--brand-purple-6-purple-4);
+  border-color: var(--brand-purple-6-purple-4);
+  color: #fff;
+}
+
+/* ── Card grid ───────────────────────────────────────────────── */
+.emp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+.emp-card {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  overflow: hidden;
+}
+
+.emp-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+}
+
+.emp-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.emp-card-heading {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emp-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emp-role-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.emp-role-manager { background: var(--ui-purple-6-lavendar-grey); color: var(--brand-purple-6-purple-4); }
+.emp-role-other   { background: var(--greyscale-13-grey-90);      color: var(--greyscale-6-grey-50); }
+
+.emp-status-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.emp-status-active   { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+.emp-status-inactive { background: var(--greyscale-13-grey-90);     color: var(--greyscale-6-grey-50); }
+
+.emp-card-body {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emp-contact-row {
+  font-size: 13px;
+  color: var(--greyscale-6-grey-50);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.emp-contact-label {
+  color: var(--greyscale-8-grey-65);
+  margin-right: 4px;
+}
+
+.emp-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.emp-notification-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.emp-notif-on  { color: var(--rag-green-green-3-aa); }
+.emp-notif-off { color: var(--ui-purple-3-grape-grey); }
+
+.emp-last-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--greyscale-8-grey-65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  justify-content: flex-end;
+}
+.emp-last-login b { font-weight: 500; color: var(--greyscale-6-grey-50); }
+.emp-last-login svg { color: var(--rag-amber-amber-7); flex-shrink: 0; }
+
+/* ── Design comparison layout ───────────────────────────────── */
+.emp-compare-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.emp-compare-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emp-compare-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.emp-compare-cards > * {
+  width: 420px;
+  max-width: 100%;
+}
+
+.emp-compare-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--greyscale-6-grey-50);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Legacy card (current production design) ─────────────────
+   Values pulled from the live #employeesContainer .panel export
+   (main.07f329c6f67b3dc27bfc.css), not hand-approximated. */
+.emp-card-legacy {
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.emp-card-legacy-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid #b2b2b2;
+}
+
+.emp-card-legacy-title {
+  flex-shrink: 0;
+  max-width: 55%;
+  font-size: 16px;
+  font-weight: 700;
+  color: #5a5967;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emp-card-legacy-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.emp-legacy-role-manager { background: #e5b5ff; color: #6d1b98; }
+.emp-legacy-role-other   { background: #fff; color: #656565; border: 1px solid #727272; }
+
+.emp-card-legacy-status {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 2px 8px 3px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.emp-legacy-status-active   { background: #21a621; }
+.emp-legacy-status-inactive { background: #e61c1c; }
+
+.emp-card-legacy-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 12px;
+}
+
+.emp-card-legacy-photo {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  border: 1px solid #6d1b98;
+  border-radius: 50%;
+  padding: 2px;
+  background: #ccc;
+  background-clip: content-box;
+  object-fit: cover;
+}
+
+.emp-card-legacy-contact {
+  min-width: 0;
+  font-size: 13px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.emp-card-legacy-contact div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.emp-card-legacy-contact .emp-legacy-label { color: #9a9890; margin-right: 4px; }
+
+.emp-card-legacy-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 12px;
+}
+
+.emp-card-legacy-lastlogin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 8px 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.emp-card-legacy-lastlogin svg { color: #fff; flex-shrink: 0; }
+.emp-legacy-lastlogin-success { background: #21a621; }
+.emp-legacy-lastlogin-warning { background: #e09600; }
+.emp-legacy-lastlogin-danger  { background: #e61c1c; }
+.emp-legacy-lastlogin-none    { background: #999; }
