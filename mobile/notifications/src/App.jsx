@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
+import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -442,6 +443,7 @@ export default function App() {
   const [selectedNotif, setSelectedNotif] = useState(null)
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
   const [badgeCount, setBadgeCount] = useState(() => NOTIFICATIONS.filter(n => !n.read).length)
+  const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
 
   useEffect(() => {
     setBadgeCount(0)
@@ -486,8 +488,8 @@ export default function App() {
         <AppNav
           activeTab="notifications"
           notifCount={badgeCount}
-          totalUnread={4}
-          links={{ messages: '../messaging/' }}
+          messagesUnread={messagesUnread}
+          links={{ account: '../mileage-pay/' }}
         />
       </div>
     </div>

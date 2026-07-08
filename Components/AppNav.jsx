@@ -10,12 +10,6 @@ const UsersNavIcon = () => (
   </svg>
 )
 
-const MessagesNavIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" clipRule="evenodd" d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM19 18H5C4.45 18 4 17.55 4 17V8L10.94 12.34C11.59 12.75 12.41 12.75 13.06 12.34L20 8V17C20 17.55 19.55 18 19 18ZM12 11L4 6H20L12 11Z"/>
-  </svg>
-)
-
 const BellNavIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
@@ -31,7 +25,7 @@ function NavItem({ id, activeTab, href, children }) {
   return <button className={className}>{children}</button>
 }
 
-export default function AppNav({ activeTab = 'messages', totalUnread = 0, notifCount = 0, links = {} }) {
+export default function AppNav({ activeTab = null, messagesUnread = 0, notifCount = 0, links = {} }) {
   return (
     <div className="app-nav">
       <NavItem id="bookings" activeTab={activeTab} href={links.bookings}>
@@ -42,13 +36,6 @@ export default function AppNav({ activeTab = 'messages', totalUnread = 0, notifC
         <UsersNavIcon />
         <span className="nav-label">Users</span>
       </NavItem>
-      <NavItem id="messages" activeTab={activeTab} href={links.messages}>
-        <div className="nav-messages-wrap">
-          <MessagesNavIcon />
-          {totalUnread > 0 && <span className="nav-badge">{totalUnread}</span>}
-        </div>
-        <span className="nav-label">Messages</span>
-      </NavItem>
       <NavItem id="notifications" activeTab={activeTab} href={links.notifications}>
         <div className="nav-messages-wrap">
           <BellNavIcon />
@@ -57,7 +44,10 @@ export default function AppNav({ activeTab = 'messages', totalUnread = 0, notifC
         <span className="nav-label">Notifications</span>
       </NavItem>
       <NavItem id="account" activeTab={activeTab} href={links.account}>
-        <div className="nav-avatar">AJ</div>
+        <div className="nav-messages-wrap">
+          <div className="nav-avatar">AJ</div>
+          {messagesUnread > 0 && <span className="nav-badge">{messagesUnread}</span>}
+        </div>
       </NavItem>
     </div>
   )

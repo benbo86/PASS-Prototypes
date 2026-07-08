@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 're
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
+import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
 
@@ -197,71 +198,6 @@ const CUSTOMERS = [
   { id: 18, name: 'Leonard Dixon',      initials: 'LD', hasPhoto: false },
   { id: 19, name: 'Gladys Hunt',        initials: 'GH', hasPhoto: false },
   { id: 20, name: 'Cecil Barnes',       initials: 'CB', hasPhoto: true,  photoColor: '#7090d0' },
-]
-
-const THREADS = [
-  {
-    id: 1,
-    title: 'Blue Bird Sheffield — Team Update',
-    isBroadcast: true,
-    careReceiver: null,
-    participants: 'Office',
-    lastSender: 'Office',
-    lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.",
-    time: '10:42 AM',
-    unread: 1,
-    sentByMe: false,
-    archivedByCarer: false,
-  },
-  {
-    id: 2,
-    title: 'Medication Query',
-    careReceiver: null,
-    participants: 'Office',
-    lastSender: 'Office',
-    lastMessage: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit?",
-    time: '9:15 AM',
-    unread: 1,
-    sentByMe: false,
-    archivedByCarer: false,
-  },
-  {
-    id: 3,
-    title: 'Friday Shift — Swap Request',
-    careReceiver: null,
-    participants: 'Office',
-    lastSender: 'Office',
-    lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
-    time: 'Yesterday',
-    unread: 0,
-    sentByMe: false,
-    archivedByCarer: false,
-  },
-  {
-    id: 5,
-    title: 'Attachment Examples',
-    careReceiver: null,
-    participants: 'Office',
-    lastSender: 'Office',
-    lastMessage: 'Please see the training video above.',
-    time: '10:35 AM',
-    unread: 0,
-    sentByMe: false,
-    archivedByCarer: false,
-  },
-  {
-    id: 4,
-    title: 'Annual Leave — July',
-    careReceiver: null,
-    participants: 'Office',
-    lastSender: 'You',
-    lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
-    time: 'Mon',
-    unread: 0,
-    sentByMe: true,
-    deliveredNotRead: true,
-    archivedByCarer: false,
-  },
 ]
 
 const THREAD_MESSAGES = {
@@ -1052,6 +988,7 @@ export default function App() {
 
   useEffect(() => {
     setMessageBadge(0)
+    markMessagesRead()
   }, [])
 
   const totalUnread = threads.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
@@ -1204,8 +1141,8 @@ export default function App() {
           )}
         </div>
         <AppNav
-          activeTab="messages"
-          totalUnread={messageBadge}
+          activeTab={null}
+          messagesUnread={messageBadge}
           notifCount={UNREAD_NOTIFICATIONS_COUNT}
           links={{ notifications: '../notifications/', account: '../mileage-pay/' }}
         />

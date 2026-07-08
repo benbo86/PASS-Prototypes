@@ -3,6 +3,7 @@ import StatusBar from '../../../Components/StatusBar'
 import AppHeader from '../../../Components/AppHeader'
 import AppNav from '../../../Components/AppNav'
 import PhoneFrame from '../../../Components/PhoneFrame'
+import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 /* ── Icons ───────────────────────────────────────────────────────── */
 
@@ -21,6 +22,12 @@ const ChevronDownIcon = ({ open }) => (
 const ChevronRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+
+const MessagesMenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
   </svg>
 )
 
@@ -184,7 +191,7 @@ function Toggle({ on }) {
   )
 }
 
-function AccountScreen({ onGoToMileage }) {
+function AccountScreen({ onGoToMileage, messagesUnread }) {
   return (
     <>
       <StatusBar />
@@ -201,6 +208,17 @@ function AccountScreen({ onGoToMileage }) {
 
         <div className="menu-section-label">Details</div>
         <div className="menu-rows-card">
+          <MenuRow
+            icon={<MessagesMenuIcon />}
+            label="Messages"
+            onClick={() => { window.location.href = '../messaging/' }}
+            right={
+              <>
+                {messagesUnread > 0 && <span className="menu-row-badge">{messagesUnread}</span>}
+                <ChevronRightIcon />
+              </>
+            }
+          />
           <MenuRow icon={<DocumentIcon />}     label="My Documents" />
           <MenuRow icon={<CalendarMenuIcon />} label="Holidays" />
           <MenuRow icon={<CarMenuIcon />}      label="Mileage Pay" onClick={onGoToMileage} />
@@ -234,14 +252,14 @@ function AccountScreen({ onGoToMileage }) {
 
         <div className="account-version">Version 3.6.0</div>
       </div>
-      <AppNav activeTab="account" links={{ messages: '../messaging/' }} />
+      <AppNav activeTab="account" messagesUnread={messagesUnread} />
     </>
   )
 }
 
 /* ── Mileage screen ──────────────────────────────────────────────── */
 
-function MileageScreen({ filter, setFilter, onBack }) {
+function MileageScreen({ filter, setFilter, onBack, messagesUnread }) {
   const state = STATES[filter]
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef(null)
@@ -319,7 +337,7 @@ function MileageScreen({ filter, setFilter, onBack }) {
         ))}
       </div>
 
-      <AppNav activeTab="account" links={{ messages: '../messaging/' }} />
+      <AppNav activeTab="account" messagesUnread={messagesUnread} />
     </>
   )
 }
@@ -329,6 +347,7 @@ function MileageScreen({ filter, setFilter, onBack }) {
 export default function App() {
   const [screen, setScreen] = useState('account')
   const [filter, setFilter] = useState('payPeriod')
+  const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
 
   const goToMileage = () => setScreen('mileage')
   const goBack = () => { setScreen('account'); setFilter('payPeriod') }
@@ -339,10 +358,10 @@ export default function App() {
       <PhoneFrame>
         <div className="screen">
           <div className={`screen-panel${screen === 'mileage' ? ' panel-out-left' : ''}`}>
-            <AccountScreen onGoToMileage={goToMileage} />
+            <AccountScreen onGoToMileage={goToMileage} messagesUnread={messagesUnread} />
           </div>
           <div className={`screen-panel${screen === 'account' ? ' panel-out-right' : ''}`}>
-            <MileageScreen filter={filter} setFilter={setFilter} onBack={goBack} />
+            <MileageScreen filter={filter} setFilter={setFilter} onBack={goBack} messagesUnread={messagesUnread} />
           </div>
         </div>
       </PhoneFrame>
