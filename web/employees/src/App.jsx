@@ -1,5 +1,5 @@
 import WebNav from '../../../Components/WebNav'
-import employeePlaceholder from '../../../Images/Employee Placeholder.png'
+import LegacyEmployeeCard from '../../../Components/LegacyEmployeeCard'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -61,13 +61,6 @@ function initials(name) {
   return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase()
 }
 
-function lastLoginSeverity(lastLogin) {
-  if (!lastLogin) return 'none'
-  if (/month|year/.test(lastLogin)) return 'danger'
-  if (/week/.test(lastLogin)) return 'warning'
-  return 'success'
-}
-
 // ─── Employee card ──────────────────────────────────────────────
 
 function EmployeeCard({ employee }) {
@@ -102,45 +95,6 @@ function EmployeeCard({ employee }) {
             </>
           ) : 'no login information'}
         </span>
-      </div>
-    </div>
-  )
-}
-
-// ─── Legacy employee card (current production design) ──────────
-
-function LegacyEmployeeCard({ employee }) {
-  const { name, role, mobile, email, lastLogin, platform, version, onLatestApp, notificationsEnabled, status } = employee
-
-  return (
-    <div className="emp-card-legacy">
-      <div className="emp-card-legacy-header">
-        <span className="emp-card-legacy-title">{name}</span>
-        <span className={`emp-card-legacy-badge ${role === 'Care Manager' ? 'emp-legacy-role-manager' : 'emp-legacy-role-other'}`}>{role}</span>
-        <span className={`emp-card-legacy-status emp-legacy-status-${status.toLowerCase()}`}>{status}</span>
-      </div>
-
-      <div className="emp-card-legacy-body">
-        <img className="emp-card-legacy-photo" src={employeePlaceholder} alt="" />
-        <div className="emp-card-legacy-contact">
-          <div><span className="emp-legacy-label">Mob:</span>{mobile}</div>
-          <div><span className="emp-legacy-label">Email:</span>{email}</div>
-        </div>
-      </div>
-
-      <div className="emp-card-legacy-footer">
-        <span className={`emp-notification-status ${notificationsEnabled ? 'emp-notif-on' : 'emp-notif-off'}`}>
-          {notificationsEnabled ? <BellIcon size={14} /> : <BellOffIcon size={14} />}
-          {notificationsEnabled ? 'Notifications on' : 'Notifications off'}
-        </span>
-        {lastLogin ? (
-          <span className={`emp-card-legacy-lastlogin emp-legacy-lastlogin-${lastLoginSeverity(lastLogin)}`}>
-            last logged in {lastLogin}{platform && ` on ${platform} ${version}`}
-            {onLatestApp && <StarIcon />}
-          </span>
-        ) : (
-          <span className="emp-card-legacy-lastlogin emp-legacy-lastlogin-none">no login information</span>
-        )}
       </div>
     </div>
   )

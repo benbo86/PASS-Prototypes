@@ -3,14 +3,20 @@
    (main.07f329c6f67b3dc27bfc.css). Everything here is scoped under
    .mar-legacy so it cannot leak into / be overridden by the shared
    prototype design system, and vice versa. Do not convert these
-   values to the project's CSS variables — this is intentional. */
+   values to *our* redesign tokens (colors.css --brand-*/--ui-*) —
+   that's still intentional. The var(--legacy-*) references below
+   are a different thing: Styles/legacy.css, a small set of tokens
+   for the production app's OWN design language, shared with other
+   legacy recreations (e.g. Components/LegacyEmployeeCard) so a
+   confirmed value only has to be corrected in one place. Requires
+   Styles/legacy.css to be imported before this file. */
 
 /* PASS (care planning) runs on Helvetica, not Barlow (our shared
    prototype font used for app chrome like WebNav/CustomerProfileNav).
    Set once here so every legacy-scoped element inherits it, rather
    than repeating the original's redundant per-element declarations
    (e.g. .etlLabel re-stated the same body font-family). */
-.mar-legacy { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding-top: 15px; font-size: 14px; line-height: 1.428571429; }
+.mar-legacy { font-family: var(--legacy-font-family); padding-top: 15px; font-size: 14px; line-height: 1.428571429; }
 .mar-legacy:hover { cursor: grab; }
 .mar-legacy:active { cursor: grabbing; }
 .mar-legacy .today { background-color: #fefbd5 !important; }
@@ -23,7 +29,7 @@
   border-style: none;
   margin: 20px auto auto;
   padding: 0;
-  color: #5a5967;
+  color: var(--legacy-text-color);
 }
 
 /* ── Grid container ──────────────────────────────────────────── */
@@ -150,7 +156,7 @@
 
 .mar-legacy .marsheet_timeline-medication-panel .labelList .etlLabel.med {
   background-color: #f2dede !important;
-  color: #5a5967 !important;
+  color: var(--legacy-text-color) !important;
 }
 
 /* Icon sits in a floated box so the label text flows beside it, same as
@@ -370,7 +376,7 @@
   box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
   min-width: 330px;
   max-width: 360px;
-  color: #5a5967;
+  color: var(--legacy-text-color);
   font-size: 14px;
   font-weight: 400;
   text-align: left;

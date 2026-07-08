@@ -1,0 +1,36 @@
+/* ── Legacy PASS design tokens ───────────────────────────────────
+   Values confirmed against the production app's own export
+   (main.*.css from a browser "Save As" of a live legacy page — see
+   customer-profile/mar-chart and web/employees for the source
+   exports). These describe the OTHER app's design language, not
+   ours — do not use these to restyle new-design prototypes, and
+   don't convert them to (or blend them with) the brand/ui tokens
+   in colors.css. Keep this file's job narrow: give every
+   "recreate a legacy page" prototype one place to pull the same
+   handful of confirmed values from, instead of re-deriving them
+   (and re-making the same mistakes) each time. */
+
+:root {
+  --legacy-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --legacy-text-color: #5a5967;
+  --legacy-page-bg: #f5f5f6;
+
+  /* .label / .customised-label status colors (#employeesContainer
+     scope) — NOT the .carenotesContainer !important overrides,
+     which are a different, unrelated part of the app. */
+  --legacy-success: #21a621;
+  --legacy-warning: #e09600;
+  --legacy-danger: #e61c1c;
+  --legacy-default: #999;
+
+  --legacy-border-grey: #b2b2b2;
+  --legacy-border-grey-light: #ddd;
+
+  --legacy-purple: #6d1b98;
+  --legacy-purple-tint: #e5b5ff;
+  --legacy-other-role-border: #727272;
+  --legacy-other-role-text: #656565;
+
+  --legacy-card-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+  --legacy-card-radius: 2px;
+}

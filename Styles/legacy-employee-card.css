@@ -1,0 +1,129 @@
+/* ── LegacyEmployeeCard (Components/LegacyEmployeeCard.jsx) ──────
+   Recreates the production #employeesContainer .panel employee
+   card. Values pulled from the live export's main.*.css, not
+   hand-approximated — see Styles/legacy.css for the shared tokens
+   this pulls from. Requires Styles/legacy.css to be imported first. */
+
+.legacy-employee-card {
+  background: #fff;
+  border-radius: var(--legacy-card-radius);
+  box-shadow: var(--legacy-card-shadow);
+  font-family: var(--legacy-font-family);
+}
+
+.legacy-employee-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--legacy-border-grey);
+}
+
+.legacy-employee-card-title {
+  flex-shrink: 0;
+  max-width: 55%;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--legacy-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legacy-employee-card-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.legacy-role-manager { background: var(--legacy-purple-tint); color: var(--legacy-purple); }
+.legacy-role-other   { background: #fff; color: var(--legacy-other-role-text); border: 1px solid var(--legacy-other-role-border); }
+
+.legacy-employee-card-status {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 2px 8px 3px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.legacy-status-active   { background: var(--legacy-success); }
+.legacy-status-inactive { background: var(--legacy-danger); }
+
+.legacy-employee-card-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 12px;
+}
+
+.legacy-employee-card-photo {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  border: 1px solid var(--legacy-purple);
+  border-radius: 50%;
+  padding: 2px;
+  background: #ccc;
+  background-clip: content-box;
+  object-fit: cover;
+}
+
+.legacy-employee-card-contact {
+  min-width: 0;
+  font-size: 13px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.legacy-employee-card-contact div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.legacy-employee-card-contact .legacy-employee-card-label { color: #9a9890; margin-right: 4px; }
+
+.legacy-employee-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 12px;
+}
+
+.legacy-employee-card-notification {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.legacy-notif-on  { color: var(--legacy-success); }
+.legacy-notif-off { color: #9a9890; }
+
+.legacy-employee-card-lastlogin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 8px 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.legacy-employee-card-lastlogin svg { color: #fff; flex-shrink: 0; }
+.legacy-lastlogin-success { background: var(--legacy-success); }
+.legacy-lastlogin-warning { background: var(--legacy-warning); }
+.legacy-lastlogin-danger  { background: var(--legacy-danger); }
+.legacy-lastlogin-none    { background: var(--legacy-default); }

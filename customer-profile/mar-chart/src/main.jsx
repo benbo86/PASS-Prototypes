@@ -4,6 +4,7 @@ import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/customer-profile-nav.css'
+import '../../../Styles/legacy.css'
 import './mar-page.css'
 import './mar-legacy.css'
 
