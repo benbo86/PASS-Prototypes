@@ -1,22 +1,9 @@
-/* ── Screen & slide panels ───────────────────────────────────── */
+/* ── Screen ──────────────────────────────────────────────────── */
 .screen {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
-
-.screen-panel {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  transition: transform 0.35s ease-in-out;
-  overflow: hidden;
-}
-
-.panel-out-left  { transform: translateX(-100%); }
-.panel-out-right { transform: translateX(100%); }
 
 /* ── Summary card ────────────────────────────────────────────── */
 .summary-card {

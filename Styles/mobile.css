@@ -165,6 +165,16 @@ html, body {
   animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Whole-screen slide illusion for cross-page nav boundaries (e.g. Account <-> Messages,
+   two separate prototype pages with no shared DOM to animate across). Unlike .screen-slide
+   this has no position:absolute, so it can be applied directly to an existing in-flow flex
+   child (e.g. .screen-area) without disturbing its layout. */
+.page-slide {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-slide.slide-out-right { transform: translateX(100%); }
+.page-slide.slide-entering  { animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
 /* App nav */
 .app-nav {
   background: #fff;

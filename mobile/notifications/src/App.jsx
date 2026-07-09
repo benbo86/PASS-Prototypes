@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
+import ScreenSlider from '../../../Components/ScreenSlider'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -468,22 +469,25 @@ export default function App() {
       </a>
       <div className="phone-frame">
         <div className="screen-area">
-          <div className={`screen-slide ${view === 'list' ? 'slide-active' : 'slide-out-left'}`}>
-            <NotifCentreScreen
-              notifications={notifications}
-              onViewBooking={viewBooking}
-              unreadCount={unreadCount}
-              onMarkAllRead={markAllRead}
-            />
-          </div>
-          <div className={`screen-slide ${view === 'detail' ? 'slide-active' : 'slide-out-right'}`}>
-            {selectedNotif && (
-              <BookingDetailScreen
-                notif={selectedNotif}
-                onBack={() => setView('list')}
+          <ScreenSlider
+            secondaryActive={view === 'detail'}
+            primary={
+              <NotifCentreScreen
+                notifications={notifications}
+                onViewBooking={viewBooking}
+                unreadCount={unreadCount}
+                onMarkAllRead={markAllRead}
               />
-            )}
-          </div>
+            }
+            secondary={
+              selectedNotif && (
+                <BookingDetailScreen
+                  notif={selectedNotif}
+                  onBack={() => setView('list')}
+                />
+              )
+            }
+          />
         </div>
         <AppNav
           activeTab="notifications"

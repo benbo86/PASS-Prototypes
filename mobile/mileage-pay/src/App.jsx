@@ -3,6 +3,7 @@ import StatusBar from '../../../Components/StatusBar'
 import AppHeader from '../../../Components/AppHeader'
 import AppNav from '../../../Components/AppNav'
 import PhoneFrame from '../../../Components/PhoneFrame'
+import ScreenSlider from '../../../Components/ScreenSlider'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 /* ── Icons ───────────────────────────────────────────────────────── */
@@ -252,7 +253,7 @@ function AccountScreen({ onGoToMileage, messagesUnread }) {
 
         <div className="account-version">Version 3.6.0</div>
       </div>
-      <AppNav activeTab="account" messagesUnread={messagesUnread} />
+      <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
     </>
   )
 }
@@ -337,7 +338,7 @@ function MileageScreen({ filter, setFilter, onBack, messagesUnread }) {
         ))}
       </div>
 
-      <AppNav activeTab="account" messagesUnread={messagesUnread} />
+      <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
     </>
   )
 }
@@ -357,12 +358,11 @@ export default function App() {
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
       <PhoneFrame>
         <div className="screen">
-          <div className={`screen-panel${screen === 'mileage' ? ' panel-out-left' : ''}`}>
-            <AccountScreen onGoToMileage={goToMileage} messagesUnread={messagesUnread} />
-          </div>
-          <div className={`screen-panel${screen === 'account' ? ' panel-out-right' : ''}`}>
-            <MileageScreen filter={filter} setFilter={setFilter} onBack={goBack} messagesUnread={messagesUnread} />
-          </div>
+          <ScreenSlider
+            secondaryActive={screen === 'mileage'}
+            primary={<AccountScreen onGoToMileage={goToMileage} messagesUnread={messagesUnread} />}
+            secondary={<MileageScreen filter={filter} setFilter={setFilter} onBack={goBack} messagesUnread={messagesUnread} />}
+          />
         </div>
       </PhoneFrame>
     </>

@@ -150,6 +150,8 @@ const THREADS = [
     time: '10:42 AM',
     unread: 0,
     archivedByOffice: false,
+    broadcastRecipientCount: 15,
+    broadcastReadCount: 9,
   },
   {
     id: 2,
@@ -160,10 +162,10 @@ const THREADS = [
     participants: 'Adrianna Jackson',
     participantList: ['Adrianna Jackson'],
     area: 'North Sheffield',
-    lastSender: 'Adrianna Jackson',
-    lastMessage: "Hi Karen, yes I was there until 5pm and she did take all her medication.",
+    lastSender: 'Office',
+    lastMessage: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.",
     time: '9:15 AM',
-    unread: 1,
+    unread: 0,
     archivedByOffice: false,
   },
   {
@@ -209,29 +211,33 @@ const THREADS = [
     time: 'Yesterday',
     unread: 0,
     archivedByOffice: false,
+    broadcastRecipientCount: 47,
+    broadcastReadCount: 0,
   },
 ]
 
+const CURRENT_OFFICE_USER = 'Karen Ashworth'
+
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: true, text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }] },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }] },
   ],
   2: [
-    { id: 1, isMe: true, text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
     { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
-    { id: 3, isMe: true, text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read' },
-    { id: 4, isMe: true, text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
+    { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read' },
+    { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
   ],
   3: [
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I was wondering if it would be possible to swap my Friday 6th shift? I have a family commitment that afternoon.", time: 'Fri 11:02 AM', day: 'Friday', receipt: 'read' },
-    { id: 2, isMe: true, text: "Hi Adrianna, thanks for letting us know. Let me check who's available to cover and get back to you.", time: 'Fri 11:45 AM', day: 'Friday' },
-    { id: 3, isMe: true, text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
+    { id: 2, isMe: true, senderName: 'Liam Foster', text: "Hi Adrianna, thanks for letting us know. Let me check who's available to cover and get back to you.", time: 'Fri 11:45 AM', day: 'Friday' },
+    { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
   ],
   4: [
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
   ],
   5: [
-    { id: 1, isMe: true, text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
   ],
 }
 
@@ -286,6 +292,7 @@ function ThreadRow({ thread, isActive, onClick }) {
           <span className="msg-thread-name">{thread.title}</span>
           <span className="msg-thread-time">{thread.time}</span>
         </div>
+        {!thread.areaTags && <span className="msg-thread-recipient">{thread.participants}</span>}
         <div className="msg-thread-preview-row">
           <span className="msg-thread-preview">
             <span className="msg-thread-sender">{thread.lastSender}: </span>
@@ -296,14 +303,11 @@ function ThreadRow({ thread, isActive, onClick }) {
             : null
           }
         </div>
-        {(thread.areaTags || thread.area) && (
+        {thread.areaTags && (
           <div className="msg-thread-area-row">
-            {thread.areaTags
-              ? thread.areaTags.map(t => (
-                  <span key={t.name} className="msg-area-badge">{t.name}</span>
-                ))
-              : <span className="msg-area-badge">{thread.area}</span>
-            }
+            {thread.areaTags.map(t => (
+              <span key={t.name} className="msg-area-badge">{t.name}</span>
+            ))}
           </div>
         )}
       </div>
@@ -501,14 +505,12 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
               ? thread.areaTags.map(t => (
                   <span key={t.name} className="msg-area-badge">{t.name} <span className="msg-area-badge-count">{t.memberCount}</span></span>
                 ))
-              : (
-                <>
-                  <span className="msg-thread-header-sub">{thread.participants}</span>
-                  {thread.area && <span className="msg-area-badge">{thread.area}</span>}
-                </>
-              )
+              : <span className="msg-thread-header-sub">{thread.participants}</span>
             }
           </span>
+          {thread.isBroadcast && (
+            <span className="msg-read-count">{thread.broadcastReadCount} of {thread.broadcastRecipientCount} read</span>
+          )}
         </div>
         <div className="msg-thread-header-actions">
           {!thread.archivedByOffice && thread.replyAllowed && (
@@ -550,6 +552,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                   key={msg.id}
                   className={`msg-message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
                 >
+                  {msg.isMe && msg.senderName && <div className="msg-sender-label">{msg.senderName}</div>}
                   <div
                     className={`msg-bubble ${msg.isMe ? 'sent' : 'received'}`}
                     onClick={e => { e.stopPropagation(); setActionTarget(actionTarget?.id === msg.id ? null : msg) }}
@@ -580,28 +583,42 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                   </div>
 
                   {/* Inline action menu on click */}
-                  {actionTarget?.id === msg.id && (
+                  {actionTarget?.id === msg.id && (() => {
+                    const isOwnMessage = msg.isMe && msg.senderName === CURRENT_OFFICE_USER
+                    const broadcastLocked = thread.isBroadcast && thread.broadcastReadCount > 0
+                    const lockTitle = `Can't edit or delete — already read by ${thread.broadcastReadCount} of ${thread.broadcastRecipientCount} recipients`
+                    return (
                     <div className={`msg-action-menu${msg.isMe ? ' from-me' : ' from-them'}`} onClick={e => e.stopPropagation()}>
                       {thread.replyAllowed && (
                         <button onClick={() => { setReplyTo(msg); setActionTarget(null); inputRef.current?.focus() }}>
                           <ReplyIcon /> Reply
                         </button>
                       )}
-                      {msg.isMe && (
-                        <button onClick={() => { setEditing(msg); setInputText(msg.text); setReplyTo(null); setActionTarget(null); inputRef.current?.focus() }}>
+                      {isOwnMessage && (
+                        <button
+                          disabled={broadcastLocked}
+                          title={broadcastLocked ? lockTitle : undefined}
+                          onClick={() => { setEditing(msg); setInputText(msg.text); setReplyTo(null); setActionTarget(null); inputRef.current?.focus() }}
+                        >
                           <EditIcon /> Edit
                         </button>
                       )}
-                      {msg.isMe && (
-                        <button className="danger" onClick={() => {
-                          setLocalMsgs(prev => prev.filter(m => m.id !== msg.id))
-                          setActionTarget(null)
-                        }}>
+                      {isOwnMessage && (
+                        <button
+                          className="danger"
+                          disabled={broadcastLocked}
+                          title={broadcastLocked ? lockTitle : undefined}
+                          onClick={() => {
+                            setLocalMsgs(prev => prev.filter(m => m.id !== msg.id))
+                            setActionTarget(null)
+                          }}
+                        >
                           <DeleteIcon /> Delete
                         </button>
                       )}
                     </div>
-                  )}
+                    )
+                  })()}
                 </div>
               )
             })}

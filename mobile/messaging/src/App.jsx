@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
+import ScreenSlider from '../../../Components/ScreenSlider'
 import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
@@ -267,7 +268,7 @@ function ThreadRow({ thread, onClick, showArchivedTag }) {
   )
 }
 
-function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
+function InboxScreen({ threads, onOpenThread, onCompose, onBack, totalUnread }) {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('inbox')
 
@@ -287,7 +288,9 @@ function InboxScreen({ threads, onOpenThread, onCompose, totalUnread }) {
     <div className="screen">
       <StatusBar />
       <div className="app-header">
-        <div style={{ width: 36 }} />
+        <button className="app-header-back" onClick={onBack} aria-label="Back to Account">
+          <ArrowLeftIcon />
+        </button>
         <span className="app-header-title">Messages</span>
         <button className="app-header-action" onClick={onCompose} aria-label="New message">
           <AddIcon />
@@ -979,8 +982,20 @@ export default function App() {
   const [composeExiting, setComposeExiting] = useState(false)
   const [actionTarget, setActionTarget] = useState(null)
   const [actionMenuY, setActionMenuY] = useState(0)
+  const [entering, setEntering] = useState(true)
+  const [leavingToAccount, setLeavingToAccount] = useState(false)
   const phoneFrameRef = useRef(null)
   const threadScreenRef = useRef(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => setEntering(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  const goToAccount = () => {
+    setLeavingToAccount(true)
+    setTimeout(() => { window.location.href = '../mileage-pay/' }, 300)
+  }
 
   const [messageBadge, setMessageBadge] = useState(() =>
     THREADS.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
@@ -1105,30 +1120,34 @@ export default function App() {
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
       <div className="phone-frame" ref={phoneFrameRef}>
-        <div className="screen-area">
-          <div className={`screen-slide ${view === 'inbox' ? 'slide-active' : 'slide-out-left'}`}>
-            <InboxScreen
-              threads={threads}
-              onOpenThread={openThread}
-              onCompose={openCompose}
-              totalUnread={totalUnread}
-            />
-          </div>
-          <div className={`screen-slide ${view === 'thread' ? 'slide-active' : 'slide-out-right'}`}>
-            <ThreadScreen
-              ref={threadScreenRef}
-              thread={activeThread}
-              messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
-              onBack={() => setView('inbox')}
-              onMessageSent={handleReply}
-              onMarkUnread={handleMarkUnread}
-              onToggleArchive={handleToggleArchive}
-              onMessageDeleted={handleMessageDeleted}
-              totalUnread={totalUnread}
-              onOpenActions={handleOpenActions}
-              onCloseActions={handleCloseActions}
-            />
-          </div>
+        <div className={`screen-area page-slide ${entering ? 'slide-entering' : leavingToAccount ? 'slide-out-right' : ''}`}>
+          <ScreenSlider
+            secondaryActive={view === 'thread'}
+            primary={
+              <InboxScreen
+                threads={threads}
+                onOpenThread={openThread}
+                onCompose={openCompose}
+                onBack={goToAccount}
+                totalUnread={totalUnread}
+              />
+            }
+            secondary={
+              <ThreadScreen
+                ref={threadScreenRef}
+                thread={activeThread}
+                messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
+                onBack={() => setView('inbox')}
+                onMessageSent={handleReply}
+                onMarkUnread={handleMarkUnread}
+                onToggleArchive={handleToggleArchive}
+                onMessageDeleted={handleMessageDeleted}
+                totalUnread={totalUnread}
+                onOpenActions={handleOpenActions}
+                onCloseActions={handleCloseActions}
+              />
+            }
+          />
           {composeVisible && (
             <div className={`compose-overlay ${composeExiting ? 'exiting' : 'entering'}`}>
               <ComposeScreen
