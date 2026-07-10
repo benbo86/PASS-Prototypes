@@ -1088,13 +1088,6 @@ body { overflow: hidden; }
   gap: 2px;
 }
 
-.msg-compose-header h2 {
-  font-family: Barlow, sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #000;
-}
-
 .msg-compose-cancel {
   background: none;
   border: none;
