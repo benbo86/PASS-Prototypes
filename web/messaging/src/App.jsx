@@ -482,7 +482,7 @@ function ThreadRow({ thread, isActive, onClick }) {
             : null
           }
         </div>
-        {thread.areaTags && <AreaTags tags={thread.areaTags} />}
+        {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
       </div>
     </div>
   )
