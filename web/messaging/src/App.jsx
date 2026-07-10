@@ -472,6 +472,7 @@ function ThreadRow({ thread, isActive, onClick }) {
             ? <RecipientNames names={thread.participantList} />
             : <span className="msg-thread-recipient-plain">{thread.participants}</span>
         )}
+        {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
         <div className="msg-thread-preview-row">
           <span className="msg-thread-preview">
             <span className="msg-thread-sender">{thread.lastSender}: </span>
@@ -482,7 +483,6 @@ function ThreadRow({ thread, isActive, onClick }) {
             : null
           }
         </div>
-        {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
       </div>
     </div>
   )

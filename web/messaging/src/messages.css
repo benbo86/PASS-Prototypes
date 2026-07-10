@@ -391,6 +391,7 @@ body { overflow: hidden; }
   justify-content: space-between;
   gap: 8px;
 }
+.msg-thread-area-row + .msg-thread-preview-row { margin-top: 4px; }
 
 .msg-thread-preview {
   font-family: Barlow, sans-serif;
@@ -412,7 +413,7 @@ body { overflow: hidden; }
   font-family: Barlow, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: var(--greyscale-4-grey-40);
+  color:#000;
   margin-bottom: 3px;
 }
 .msg-thread-recipient {
