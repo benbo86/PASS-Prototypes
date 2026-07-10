@@ -13,7 +13,7 @@
 
 .tl-action-bar {
   position: fixed;
-  top: 140px;
+  top: 212px;
   right: 30px;
   display: flex;
   gap: 4px;
@@ -48,6 +48,13 @@
   background: var(--legacy-day-header-bg);
   padding-left:30px;
   margin: 0 -24px 12px;
+  /* Pins to the bottom edge of .context-bar (top:56px + 156px measured
+     height = 212px). Scoped inside its own .tl-day-group, so it naturally
+     hands off to the next day's header once this group's content scrolls
+     past — no JS needed. */
+  position: sticky;
+  top: 212px;
+  z-index: 10;
 }
 
 .tl-day-group { margin-bottom: 28px; }
@@ -56,23 +63,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.tl-now-separator {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: #999;
-  letter-spacing: 0.5px;
-  border-top: 1px dashed #ccc;
-  line-height: 0;
-  margin: 18px 0;
-}
-.tl-now-separator span {
-  background: var(--legacy-page-bg);
-  padding: 0 10px;
-  position: relative;
-  top: -1px;
 }
 
 /* ── Item card ────────────────────────────────────────────────── */

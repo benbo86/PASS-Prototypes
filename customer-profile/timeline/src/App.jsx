@@ -78,8 +78,6 @@ const TYPE_META = {
   outcome:     { icon: OutcomeIcon,     bg: 'var(--legacy-panel-outcome-tracking-bg)', text: 'var(--legacy-panel-outcome-tracking-text)' },
 }
 
-const FUTURE_META = { bg: 'var(--legacy-panel-future-bg)', text: 'var(--legacy-panel-future-text)' }
-
 const STATUS_ICON = { overdue: OverdueIcon, complete: CompleteIcon, partial: PartialIcon }
 
 // ─── Data ─────────────────────────────────────────────────────
@@ -154,16 +152,15 @@ const TODAY_ITEMS = [
     ] },
 ]
 
-const FUTURE_ITEMS = [
-  { id: 21, time: '09:30', type: 'general', title: 'INFECTION CONTROL', bodyType: 'generic', status: null, dueInDays: 20,
-    due: { due: '09:30', completeBy: '10:30' }, notes: [
-      'I would like Care Experts to wear appropriate PPE and change it regularly in line with infection control guidance. Please encourage and support me to wash my hands to maintain good hygiene.',
-      'After use, please dispose of PPE in a disposable hygiene/waste bag along with my incontinence pad, ensuring it is securely sealed and placed in the outside wheelie bin.',
-    ] },
-  { id: 22, time: '09:35', type: 'general', title: 'MORNING PERSONAL CARE / DRESSING', bodyType: 'generic', status: null, dueInDays: 21,
-    due: { due: '09:30', completeBy: '10:30' }, notes: ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'] },
-  { id: 23, time: '09:54', type: 'observation', title: 'Body Map Observation', bodyType: 'generic', status: null, dueInDays: 21,
-    due: { due: '09:30', completeBy: '10:30' }, notes: ['Please document any bruising, marks or pressure sores I may have.'] },
+const PAST_ITEMS = [
+  { id: 21, time: '09:35', type: 'general', title: 'MORNING PERSONAL CARE / DRESSING', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '5 Jul 2026 at 09:50',
+    due: { due: '09:30', completeBy: '10:30' }, notes: ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'],
+    completionNote: 'Assisted with washing and dressing. Patricia chose her own outfit from the options offered.' },
+  { id: 22, time: '09:53', type: 'hydration', title: 'OFFER FLUIDS', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '5 Jul 2026 at 09:55',
+    due: { due: '09:30', completeBy: '10:30' }, notes: ['Prefers a glass of squash rather than water — jug is in the fridge door.'],
+    completionNote: 'Offered a glass of squash from the fridge, which Patricia drank most of.' },
+  { id: 23, time: '09:30', type: 'general', title: 'COMPANIONSHIP', bodyType: 'generic', status: 'overdue',
+    due: { due: '09:30', completeBy: '10:30' }, notes: ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."] },
 ]
 
 function Avatar({ name }) {
@@ -181,10 +178,6 @@ function HeadingRight({ item }) {
         by <Avatar /> {item.by}
       </span>
     ) : null
-  }
-
-  if (!item.status) {
-    return <span className="tl-item-status">Due in {item.dueInDays} days</span>
   }
 
   const StatusIcon = STATUS_ICON[item.status]
@@ -377,15 +370,15 @@ const BODY_COMPONENTS = {
   outcome: OutcomeBody,
 }
 
-function TimelineItem({ item, isFuture, isOpen, onToggle }) {
-  const meta = isFuture ? FUTURE_META : TYPE_META[item.type]
-  const Icon = TYPE_META[item.type].icon
+function TimelineItem({ item, isOpen, onToggle }) {
+  const meta = TYPE_META[item.type]
+  const Icon = meta.icon
   const BodyComponent = BODY_COMPONENTS[item.bodyType]
 
   return (
     <div className="tl-item">
       <div
-        className={`tl-item-heading${TYPE_META[item.type].dark && !isFuture ? ' tl-item-heading-dark' : ''}`}
+        className={`tl-item-heading${meta.dark ? ' tl-item-heading-dark' : ''}`}
         style={{ background: meta.bg, color: meta.text }}
         onClick={onToggle}
         role="button"
@@ -396,7 +389,7 @@ function TimelineItem({ item, isFuture, isOpen, onToggle }) {
           <span className="tl-item-icon"><Icon /></span>
           <span className="tl-item-title">{item.title}</span>
         </div>
-        <HeadingRight item={{ ...item, status: isFuture ? null : item.status, dueInDays: item.dueInDays }} />
+        <HeadingRight item={item} />
       </div>
 
       {isOpen && (
@@ -408,11 +401,21 @@ function TimelineItem({ item, isFuture, isOpen, onToggle }) {
   )
 }
 
+function timeToMinutes(time) {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+// Latest to earliest, top to bottom, within each day.
+function byTimeDesc(items) {
+  return [...items].sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
+}
+
 export default function App() {
   const initialOpen = new Set(TODAY_ITEMS.filter(i => i.expanded).map(i => i.id))
   const [openIds, setOpenIds] = useState(initialOpen)
 
-  const allIds = [...TODAY_ITEMS, ...FUTURE_ITEMS].map(i => i.id)
+  const allIds = [...TODAY_ITEMS, ...PAST_ITEMS].map(i => i.id)
 
   const toggle = (id) => {
     setOpenIds(prev => {
@@ -442,11 +445,10 @@ export default function App() {
         <div className="tl-day-group">
           <div className="tl-day-header">Monday 6 July 2026</div>
           <div className="tl-list">
-            {TODAY_ITEMS.map(item => (
+            {byTimeDesc(TODAY_ITEMS).map(item => (
               <TimelineItem
                 key={item.id}
                 item={item}
-                isFuture={false}
                 isOpen={openIds.has(item.id)}
                 onToggle={() => toggle(item.id)}
               />
@@ -454,16 +456,13 @@ export default function App() {
           </div>
         </div>
 
-        <div className="tl-now-separator"><span>NOW</span></div>
-
         <div className="tl-day-group">
-          <div className="tl-day-header">Tuesday 7 July 2026</div>
+          <div className="tl-day-header">Sunday 5 July 2026</div>
           <div className="tl-list">
-            {FUTURE_ITEMS.map(item => (
+            {byTimeDesc(PAST_ITEMS).map(item => (
               <TimelineItem
                 key={item.id}
                 item={item}
-                isFuture={true}
                 isOpen={openIds.has(item.id)}
                 onToggle={() => toggle(item.id)}
               />
