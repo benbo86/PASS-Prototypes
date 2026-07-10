@@ -10,6 +10,35 @@
    handful of confirmed values from, instead of re-deriving them
    (and re-making the same mistakes) each time. */
 
+/* Real production icon font, pulled from the live app's own network
+   request (2026-07-09) — see customer-profile/timeline. Codepoints
+   for each icon are confirmed against the matching main.*.css export
+   (.icon-<name>-task:before{content:"..."}), not guessed. */
+@font-face {
+  font-family: 'eltico';
+  src: url('../Fonts/eltico.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Real production Font Awesome files, pulled from the live app's own
+   network request (pen.passgenius.com/assets/fonts/, 2026-07-10) — used
+   across legacy pages, not just customer-profile/timeline. See the
+   "PASS legacy icon fonts" specimen artifact for the full confirmed
+   glyph set (class name, codepoint, weight). */
+@font-face {
+  font-family: 'fa-solid';
+  src: url('../Fonts/fa-solid-900.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'fa-regular';
+  src: url('../Fonts/fa-regular-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
 :root {
   --legacy-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --legacy-text-color: #5a5967;
@@ -33,4 +62,46 @@
 
   --legacy-card-shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
   --legacy-card-radius: 2px;
+
+  /* Timeline panel-heading colors, by action type (customer-profile/timeline
+     source export: main.*.css .panel-<type>>.panel-heading rules). Each type
+     is a pale tint background + a matching darker border/text color. */
+  --legacy-panel-task-bg: #f9f1c8;
+  --legacy-panel-task-text: #e7c827;
+  --legacy-panel-observation-bg: #d9edf7;
+  --legacy-panel-observation-text: #31708f;
+  --legacy-panel-outcome-bg: #feefdc;
+  --legacy-panel-outcome-text: #f9a02e;
+  --legacy-panel-medication-bg: #f2dede;
+  --legacy-panel-medication-text: #c05e5e;
+  --legacy-panel-visit-bg: #566b81;
+  --legacy-panel-visit-text: #fff;
+  --legacy-panel-document-bg: #ccdcff;
+  --legacy-panel-document-text: #0e2555;
+  --legacy-panel-careplan-bg: #ffefdc;
+  --legacy-panel-careplan-text: #fba02e;
+  --legacy-panel-role-change-bg: #e7f5e8;
+  --legacy-panel-role-change-text: #2e7d32;
+  --legacy-panel-nutrition-bg: #d6e9c6;
+  --legacy-panel-nutrition-text: #79b646;
+  --legacy-panel-hydration-bg: #d9edf6;
+  --legacy-panel-hydration-text: #46a7d8;
+  --legacy-panel-outcome-tracking-bg: #feefdc;
+  --legacy-panel-outcome-tracking-text: #f9a02e;
+  --legacy-panel-default-bg: #f5f5f5;
+  --legacy-panel-default-text: #5a5967;
+  /* Future (not-yet-due) actions always render flat grey, regardless of type. */
+  --legacy-panel-future-bg: #e6e6e6;
+  --legacy-panel-future-text: gray;
+
+  /* Task-status / alert-rag indicator colors (timeline item header,
+     right-hand side). Values confirmed 2026-07-10 against the export's
+     own .icon-task-status-* / .icon-alert-rag-* rules (icon-alert-rag-GREEN
+     also backs the default/no-alert state — there's no separate grey). */
+  --legacy-status-overdue: #e61c1c;
+  --legacy-status-complete: #21a621;
+  --legacy-status-partial: #e09600;
+
+  /* Day header bar (timeline, and any other legacy list grouped by date). */
+  --legacy-day-header-bg: #4d4d4d;
 }

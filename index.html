@@ -25,17 +25,36 @@
       padding: 40px 48px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       width: 100%;
-      max-width: 640px;
+      max-width: 1160px;
     }
     h1 { font-size: 22px; font-weight: 600; margin-bottom: 24px; }
     ul { list-style: none; }
     ul > li { margin-bottom: 16px; }
     li ul { margin-top: 8px; }
     .subtitle { font-size: 13px; }
-    .section-divider {
-      border: none;
-      border-top: 1px solid #e5e5e8;
-      margin: 8px 0 16px;
+    .columns {
+      display: flex;
+      align-items: stretch;
+      gap: 40px;
+    }
+    .column {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-left: 40px;
+      border-left: 1px solid #e5e5e8;
+    }
+    .column:first-child {
+      padding-left: 0;
+      border-left: none;
+      flex-grow: 1.6;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+      margin-bottom: 16px;
     }
     .proto-row {
       display: flex;
@@ -73,8 +92,9 @@
 <body>
   <div class="card">
     <h1>PASS Prototypes</h1>
-    <ul>
-      <li><b>Web</b>
+    <div class="columns">
+      <div class="column">
+        <h2 class="section-title">Web</h2>
         <ul>
           <li><b class="subtitle">Customer Profile</b>
             <ul>
@@ -85,6 +105,10 @@
               <li class="proto-row">
                 <a class="proto-link" href="./customer-profile/mar-chart/">MAR Chart — Cancelled Visit State</a>
                 <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22638" target="_blank">Jira</a>
+              </li>
+              <li class="proto-row">
+                <a class="proto-link" href="./customer-profile/timeline/">Timeline — Expand/Collapse Items</a>
+                <span class="jira-spacer"></span>
               </li>
             </ul>
           </li>
@@ -162,11 +186,9 @@
             </ul>
           </li>
         </ul>
-      </li>
-    </ul>
-    <hr class="section-divider">
-    <ul>
-      <li><b>Mobile</b>
+      </div>
+      <div class="column">
+        <h2 class="section-title">Mobile</h2>
         <ul>
           <li class="proto-row">
             <a class="proto-link" href="./mobile/messaging/">Staff Messaging</a>
@@ -182,8 +204,17 @@
             <a class="jira-link" href="https://everylifetechnologies.atlassian.net/browse/AIOP-22492" target="_blank">Jira</a>
           </li>
         </ul>
-      </li>
-    </ul>
+      </div>
+      <div class="column">
+        <h2 class="section-title">Components &amp; Icons</h2>
+        <ul>
+          <li class="proto-row">
+            <a class="proto-link" href="./research/legacy-icons/">PASS Legacy Icons</a>
+            <span class="jira-spacer"></span>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </body>
 </html>

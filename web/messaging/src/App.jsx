@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import WebNav from '../../../Components/WebNav'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -96,6 +97,16 @@ const PlusIcon = ({ size = 16 }) => (
     <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
   </svg>
 )
+const FilterIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15,17 C15,16.4477153 14.5522847,16 14,16 L10,16 C9.44771525,16 9,16.4477153 9,17 C9,17.5522847 9.44771525,18 10,18 L14,18 C14.5522847,18 15,17.5522847 15,17 Z M18,12 C18,11.4477153 17.5522847,11 17,11 L7,11 C6.44771525,11 6,11.4477153 6,12 C6,12.5522847 6.44771525,13 7,13 L17,13 C17.5522847,13 18,12.5522847 18,12 Z M4,8 L20,8 C20.5522847,8 21,7.55228475 21,7 C21,6.44771525 20.5522847,6 20,6 L4,6 C3.44771525,6 3,6.44771525 3,7 C3,7.55228475 3.44771525,8 4,8 Z"/>
+  </svg>
+)
+const ChevronRightIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8.29999 7.70005L12.9 12.3L8.29999 16.9L9.69999 18.3L15.7 12.3L9.69999 6.30005L8.29999 7.70005Z"/>
+  </svg>
+)
 
 // ─── Data ─────────────────────────────────────────────────────
 
@@ -138,20 +149,26 @@ const TAGS = [
 const THREADS = [
   {
     id: 1,
-    title: 'Blue Bird Sheffield — Team Update',
+    title: 'Care Homes — Team Update',
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
-    participants: 'Blue Bird Sheffield · 15 employees',
-    participantList: ['Blue Bird Sheffield'],
-    areaTags: [{ name: 'Blue Bird Sheffield', memberCount: 15 }],
+    participants: 'Blue Bird Sheffield, Sunrise Rotherham, Meadow View Leeds, North Sheffield, South Sheffield · 49 employees',
+    participantList: ['Blue Bird Sheffield', 'Sunrise Rotherham', 'Meadow View Leeds', 'North Sheffield', 'South Sheffield'],
+    areaTags: [
+      { name: 'Blue Bird Sheffield', memberCount: 15 },
+      { name: 'Sunrise Rotherham', memberCount: 8 },
+      { name: 'Meadow View Leeds', memberCount: 6 },
+      { name: 'North Sheffield', memberCount: 11 },
+      { name: 'South Sheffield', memberCount: 9 },
+    ],
     lastSender: 'Office',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm.",
     time: '10:42 AM',
     unread: 0,
     archivedByOffice: false,
-    broadcastRecipientCount: 15,
-    broadcastReadCount: 9,
+    broadcastRecipientCount: 49,
+    broadcastReadCount: 31,
   },
   {
     id: 2,
@@ -204,7 +221,7 @@ const THREADS = [
     isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
-    participants: 'All employees · 47 employees',
+    participants: 'All employees (47)',
     participantList: [],
     lastSender: 'Office',
     lastMessage: "Please be aware of road closures on the A57 this week due to utility works.",
@@ -213,6 +230,50 @@ const THREADS = [
     archivedByOffice: false,
     broadcastRecipientCount: 47,
     broadcastReadCount: 0,
+  },
+  {
+    id: 6,
+    title: 'Shift Confirmation',
+    isGroup: false,
+    isBroadcast: false,
+    replyAllowed: true,
+    participants: 'Tom Harris',
+    participantList: ['Tom Harris'],
+    area: 'South Sheffield',
+    lastSender: 'Tom Harris',
+    lastMessage: "Just confirming I'm all set for the Friday cover visit at 6pm.",
+    time: 'Tue',
+    unread: 1,
+    archivedByOffice: false,
+  },
+  {
+    id: 7,
+    title: 'Care Plan Update — Mr. Okonkwo',
+    isGroup: false,
+    isBroadcast: false,
+    replyAllowed: true,
+    participants: 'James Okafor',
+    participantList: ['James Okafor'],
+    area: 'Rotherham Central',
+    lastSender: 'Office',
+    lastMessage: "Thanks for flagging this — the care plan has been updated to reflect the new mobility support.",
+    time: 'Mon',
+    unread: 0,
+    archivedByOffice: false,
+  },
+  {
+    id: 8,
+    title: 'Weekend Rota — Cover Needed',
+    isGroup: true,
+    isBroadcast: false,
+    replyAllowed: true,
+    participants: 'Tom Harris, Priya Sharma, James Okafor, Linda Peters, Olivia Brooks',
+    participantList: ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Linda Peters', 'Olivia Brooks'],
+    lastSender: 'Office',
+    lastMessage: "Thanks everyone — Saturday's cover is now sorted between the five of you.",
+    time: 'Wed',
+    unread: 2,
+    archivedByOffice: false,
   },
 ]
 
@@ -239,6 +300,20 @@ const THREAD_MESSAGES = {
   5: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
   ],
+  6: [
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Tom, can you cover the Friday 6th visit at 6pm? Should be a straightforward personal care call.", time: 'Tue 10:15 AM', day: 'Tuesday', receipt: 'read' },
+    { id: 2, isMe: false, sender: 'Tom Harris', text: "Just confirming I'm all set for the Friday cover visit at 6pm.", time: 'Tue 10:41 AM', day: 'Tuesday' },
+  ],
+  7: [
+    { id: 1, isMe: false, sender: 'James Okafor', text: "Wanted to flag that Mr. Okonkwo's mobility has changed since last week — he now needs the walking frame for all transfers.", time: 'Mon 8:52 AM', day: 'Monday', receipt: 'read' },
+    { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Thanks for flagging this — the care plan has been updated to reflect the new mobility support.", time: 'Mon 1:20 PM', day: 'Monday' },
+  ],
+  8: [
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "We still need cover for Saturday's morning visits — can anyone take an extra shift?", time: 'Wed 9:02 AM', day: 'Wednesday', receipt: 'read' },
+    { id: 2, isMe: false, sender: 'Tom Harris', text: "I can cover the 8am–12pm slot.", time: 'Wed 9:30 AM', day: 'Wednesday' },
+    { id: 3, isMe: false, sender: 'Olivia Brooks', text: "Happy to take the afternoon if needed.", time: 'Wed 9:41 AM', day: 'Wednesday' },
+    { id: 4, isMe: true, senderName: 'Karen Ashworth', text: "Thanks everyone — Saturday's cover is now sorted between the five of you.", time: 'Wed 10:15 AM', day: 'Wednesday' },
+  ],
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -260,6 +335,106 @@ function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+// Measures how many of `items` fit on one line of the real (visible)
+// container before an overflow indicator is needed, re-measuring whenever
+// the container is resized (e.g. the sidebar being dragged wider). Each
+// consumer renders a matching hidden row (via itemRefs/moreRef) purely so
+// real widths can be measured, plus the actual visible row sliced to
+// visibleCount — the hidden row never affects layout.
+function useOverflowFit(items, gap) {
+  const containerRef = useRef(null)
+  const itemRefs = useRef([])
+  const moreRef = useRef(null)
+  const [visibleCount, setVisibleCount] = useState(items.length)
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || items.length === 0) return
+
+    const recalc = () => {
+      const containerWidth = container.offsetWidth
+      const widths = items.map((_, i) => itemRefs.current[i]?.offsetWidth || 0)
+      const totalWidth = widths.reduce((sum, w, i) => sum + w + (i > 0 ? gap : 0), 0)
+      if (totalWidth <= containerWidth) {
+        setVisibleCount(items.length)
+        return
+      }
+      const moreWidth = (moreRef.current?.offsetWidth || 0) + gap
+      const budget = containerWidth - moreWidth
+      let used = 0
+      let fit = 0
+      for (let i = 0; i < items.length; i++) {
+        const next = used + widths[i] + (i > 0 ? gap : 0)
+        if (next > budget) break
+        used = next
+        fit = i + 1
+      }
+      setVisibleCount(Math.max(fit, 1))
+    }
+
+    recalc()
+    const ro = new ResizeObserver(recalc)
+    ro.observe(container)
+    return () => ro.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, items.join(' '), gap])
+
+  return { containerRef, itemRefs, moreRef, visibleCount }
+}
+
+// Comma-separated recipient names, truncated to what fits on one line
+// with a trailing "+N" for the rest.
+function RecipientNames({ names }) {
+  const { containerRef, itemRefs, moreRef, visibleCount } = useOverflowFit(names, 4)
+  const hiddenCount = names.length - visibleCount
+
+  return (
+    <div className="msg-thread-recipient" ref={containerRef}>
+      <div className="msg-thread-overflow-measure" aria-hidden="true">
+        {names.map((name, i) => (
+          <span key={i} ref={el => itemRefs.current[i] = el} className="msg-thread-recipient-name">
+            {name}{i < names.length - 1 ? ',' : ''}
+          </span>
+        ))}
+        <span ref={moreRef} className="msg-thread-more">+{names.length}</span>
+      </div>
+      {names.slice(0, visibleCount).map((name, i) => (
+        <span key={i} className="msg-thread-recipient-name">
+          {name}{i < names.length - 1 ? ',' : ''}
+        </span>
+      ))}
+      {hiddenCount > 0 && <span className="msg-thread-more">+{hiddenCount}</span>}
+    </div>
+  )
+}
+
+// Area/tag pills, truncated the same way — as many badges as fit on one
+// line, then "+N" for the rest.
+// tags: array of { name, memberCount }. showCount also renders each tag's
+// member count (used in the open thread's header; the sidebar row omits it).
+function AreaTags({ tags, showCount = false }) {
+  const names = tags.map(t => t.name)
+  const { containerRef, itemRefs, moreRef, visibleCount } = useOverflowFit(names, 6)
+  const hiddenCount = tags.length - visibleCount
+
+  const renderTag = (t, ref) => (
+    <span key={t.name} ref={ref} className="msg-area-badge">
+      {t.name}{showCount && <span className="msg-area-badge-count"> {t.memberCount}</span>}
+    </span>
+  )
+
+  return (
+    <div className="msg-thread-area-row" ref={containerRef}>
+      <div className="msg-thread-overflow-measure" aria-hidden="true">
+        {tags.map((t, i) => renderTag(t, el => itemRefs.current[i] = el))}
+        <span ref={moreRef} className="msg-area-badge msg-thread-more-pill">+{tags.length}</span>
+      </div>
+      {tags.slice(0, visibleCount).map(t => renderTag(t))}
+      {hiddenCount > 0 && <span className="msg-area-badge msg-thread-more-pill">+{hiddenCount}</span>}
+    </div>
+  )
 }
 
 // ─── Thread Row ────────────────────────────────────────────────
@@ -292,7 +467,11 @@ function ThreadRow({ thread, isActive, onClick }) {
           <span className="msg-thread-name">{thread.title}</span>
           <span className="msg-thread-time">{thread.time}</span>
         </div>
-        {!thread.areaTags && <span className="msg-thread-recipient">{thread.participants}</span>}
+        {!thread.areaTags && (
+          thread.participantList.length > 0
+            ? <RecipientNames names={thread.participantList} />
+            : <span className="msg-thread-recipient-plain">{thread.participants}</span>
+        )}
         <div className="msg-thread-preview-row">
           <span className="msg-thread-preview">
             <span className="msg-thread-sender">{thread.lastSender}: </span>
@@ -303,13 +482,7 @@ function ThreadRow({ thread, isActive, onClick }) {
             : null
           }
         </div>
-        {thread.areaTags && (
-          <div className="msg-thread-area-row">
-            {thread.areaTags.map(t => (
-              <span key={t.name} className="msg-area-badge">{t.name}</span>
-            ))}
-          </div>
-        )}
+        {thread.areaTags && <AreaTags tags={thread.areaTags} />}
       </div>
     </div>
   )
@@ -317,10 +490,196 @@ function ThreadRow({ thread, isActive, onClick }) {
 
 // ─── Sidebar ───────────────────────────────────────────────────
 
+const MESSAGE_TYPE_OPTIONS = ['Message', 'Broadcast']
+
+function threadAreas(t) {
+  if (t.area) return [t.area]
+  if (t.areaTags) return t.areaTags.map(a => a.name)
+  return []
+}
+
+// Checkbox list + in-list search shown in the flyout for one filter category.
+// Ticking an option applies it immediately — there's no separate Apply step,
+// since this is a quick hover-driven pick rather than the FilterDropdown's
+// click-to-open-then-confirm pattern. Portaled to document.body (see
+// FilterMenu below) and positioned off the hovered menu item's rect.
+function FilterCategorySubmenu({ anchorRect, menuRef, options, selected, onToggle }) {
+  const [query, setQuery] = useState('')
+  const visible = options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+
+  return createPortal(
+    <div
+      className="msg-filter-submenu"
+      ref={menuRef}
+      style={{ position: 'fixed', top: anchorRect.top, left: anchorRect.right + 6 }}
+    >
+      <div className="search-bar msg-filter-submenu-search">
+        <SearchIcon />
+        <input
+          placeholder="Search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          autoFocus
+        />
+      </div>
+      <div className="msg-filter-submenu-list">
+        {visible.map(opt => (
+          <div key={opt} className="fd-item" onClick={() => onToggle(opt)}>
+            <span className={`fd-checkbox${selected.has(opt) ? ' checked' : ''}`}>
+              {selected.has(opt) && (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </span>
+            <span className="fd-item-label">{opt}</span>
+          </div>
+        ))}
+        {visible.length === 0 && <span className="fd-empty">No results</span>}
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+const FILTER_CATEGORIES = [
+  { id: 'type', label: 'Type' },
+  { id: 'employee', label: 'Employee' },
+  { id: 'area', label: 'Area' },
+]
+
+// Filter icon → dropdown listing the 3 categories → hovering a category
+// opens its checkbox flyout to the side. Both the dropdown and the flyout
+// are portaled to document.body and positioned off getBoundingClientRect(),
+// same as the shared FilterDropdown component — .msg-sidebar has
+// overflow:hidden (for the resize handle), which would otherwise clip or
+// misplace anything positioned as a plain descendant.
+function FilterMenu({ options, values, setters }) {
+  const [open, setOpen] = useState(false)
+  const [activeCategory, setActiveCategory] = useState(null)
+  const [menuRect, setMenuRect] = useState(null)
+  const [itemRect, setItemRect] = useState(null)
+  const iconRef = useRef(null)
+  const menuRef = useRef(null)
+  const submenuRef = useRef(null)
+  const itemRefs = useRef({})
+
+  const totalCount = values.type.size + values.employee.size + values.area.size
+
+  const toggleOpen = () => {
+    if (!open) setMenuRect(iconRef.current.getBoundingClientRect())
+    setOpen(v => !v)
+    setActiveCategory(null)
+  }
+
+  const hoverCategory = (id) => {
+    setActiveCategory(id)
+    setItemRect(itemRefs.current[id].getBoundingClientRect())
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e) => {
+      const inIcon = iconRef.current?.contains(e.target)
+      const inMenu = menuRef.current?.contains(e.target)
+      const inSubmenu = submenuRef.current?.contains(e.target)
+      if (!inIcon && !inMenu && !inSubmenu) {
+        setOpen(false)
+        setActiveCategory(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  const toggle = (categoryId, value) => {
+    const current = values[categoryId]
+    const next = new Set(current)
+    next.has(value) ? next.delete(value) : next.add(value)
+    setters[categoryId](next)
+  }
+
+  const clearAll = () => {
+    FILTER_CATEGORIES.forEach(cat => setters[cat.id](new Set()))
+    setOpen(false)
+    setActiveCategory(null)
+  }
+
+  return (
+    <div className="msg-filter-wrap">
+      <button
+        ref={iconRef}
+        className={`msg-filter-icon-btn${open ? ' active' : ''}`}
+        onClick={toggleOpen}
+        title="Filter"
+      >
+        <FilterIcon />
+        {totalCount > 0 && <span className="msg-filter-badge">{totalCount}</span>}
+      </button>
+      {open && menuRect && createPortal(
+        <div
+          className="msg-filter-menu"
+          ref={menuRef}
+          style={{ position: 'fixed', top: menuRect.bottom + 6, left: menuRect.right }}
+        >
+          {FILTER_CATEGORIES.map(cat => (
+            <div
+              key={cat.id}
+              ref={el => itemRefs.current[cat.id] = el}
+              className={`msg-filter-menu-item${activeCategory === cat.id ? ' active' : ''}`}
+              onMouseEnter={() => hoverCategory(cat.id)}
+            >
+              <span>{cat.label}</span>
+              <span className="msg-filter-menu-item-right">
+                {values[cat.id].size > 0 && <span className="filter-count">{values[cat.id].size}</span>}
+                <ChevronRightIcon />
+              </span>
+            </div>
+          ))}
+          {totalCount > 0 && (
+            <button
+              className="msg-filter-menu-clear"
+              onMouseEnter={() => setActiveCategory(null)}
+              onClick={clearAll}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>,
+        document.body
+      )}
+      {open && activeCategory && itemRect && (
+        <FilterCategorySubmenu
+          menuRef={submenuRef}
+          anchorRect={itemRect}
+          options={options[activeCategory]}
+          selected={values[activeCategory]}
+          onToggle={v => toggle(activeCategory, v)}
+        />
+      )}
+    </div>
+  )
+}
+
 function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, onCompose, width, onResizeStart }) {
   const [tab, setTab] = useState('inbox')
   const [showComposeMenu, setShowComposeMenu] = useState(false)
   const composeMenuRef = useRef(null)
+
+  const [employeeFilter, setEmployeeFilter] = useState(new Set())
+  const [typeFilter, setTypeFilter] = useState(new Set())
+  const [areaFilter, setAreaFilter] = useState(new Set())
+
+  const employeeOptions = useMemo(() => (
+    [...new Set(threads.filter(t => !t.isBroadcast).flatMap(t => t.participantList))].sort()
+  ), [threads])
+  const areaOptions = useMemo(() => (
+    [...new Set(threads.flatMap(threadAreas))].sort()
+  ), [threads])
+
+  const filterValues = { type: typeFilter, employee: employeeFilter, area: areaFilter }
+  const filterSetters = { type: setTypeFilter, employee: setEmployeeFilter, area: setAreaFilter }
+  const filterOptions = { type: MESSAGE_TYPE_OPTIONS, employee: employeeOptions, area: areaOptions }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -340,7 +699,10 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
       t.participants.toLowerCase().includes(query) ||
       (t.area && t.area.toLowerCase().includes(query)) ||
       (t.areaTags && t.areaTags.some(tag => tag.name.toLowerCase().includes(query)))
-    return matchesTab && matchesSearch
+    const matchesEmployee = employeeFilter.size === 0 || t.participantList.some(p => employeeFilter.has(p))
+    const matchesType = typeFilter.size === 0 || typeFilter.has(t.isBroadcast ? 'Broadcast' : 'Message')
+    const matchesArea = areaFilter.size === 0 || threadAreas(t).some(a => areaFilter.has(a))
+    return matchesTab && matchesSearch && matchesEmployee && matchesType && matchesArea
   })
 
   return (
@@ -348,7 +710,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
       <div className="msg-sidebar-header">
         <h2 className="msg-sidebar-title">Messages</h2>
         <div className="msg-compose-btn-wrap" ref={composeMenuRef}>
-          <button className="msg-compose-btn" onClick={() => setShowComposeMenu(v => !v)} title="New message">
+          <button className="round-btn primary-btn btn-icon-left msg-compose-btn" onClick={() => setShowComposeMenu(v => !v)} title="New message">
             <EditIcon />
             <span>New message</span>
           </button>
@@ -374,12 +736,13 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
             onChange={e => onSearch(e.target.value)}
           />
         </div>
+        <FilterMenu options={filterOptions} values={filterValues} setters={filterSetters} />
       </div>
       <div className="msg-sidebar-tabs">
         <button
           className={`msg-sidebar-tab${tab === 'inbox' ? ' active' : ''}`}
           onClick={() => setTab('inbox')}
-        >Inbox</button>
+        >Messages</button>
         <button
           className={`msg-sidebar-tab${tab === 'archived' ? ' active' : ''}`}
           onClick={() => setTab('archived')}
@@ -499,15 +862,16 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           }
         </div>
         <div className="msg-thread-header-info">
-          <span className="msg-thread-header-title">{thread.title}</span>
-          <span className="msg-thread-header-sub-row">
-            {thread.areaTags
-              ? thread.areaTags.map(t => (
-                  <span key={t.name} className="msg-area-badge">{t.name} <span className="msg-area-badge-count">{t.memberCount}</span></span>
-                ))
-              : <span className="msg-thread-header-sub">{thread.participants}</span>
-            }
-          </span>
+          <h2>{thread.title}</h2>
+          <div className="msg-thread-header-sub-row">
+            {thread.areaTags ? (
+              <AreaTags tags={thread.areaTags} showCount />
+            ) : thread.participantList.length > 0 ? (
+              <RecipientNames names={thread.participantList} />
+            ) : (
+              <span className="msg-thread-header-sub">{thread.participants}</span>
+            )}
+          </div>
           {thread.isBroadcast && (
             <span className="msg-read-count">{thread.broadcastReadCount} of {thread.broadcastRecipientCount} read</span>
           )}
@@ -515,7 +879,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
         <div className="msg-thread-header-actions">
           {!thread.archivedByOffice && thread.replyAllowed && (
             <button
-              className="msg-header-action-btn"
+              className="round-btn secondary-btn btn-icon-left msg-header-action-btn"
               title="Mark as unread"
               onClick={e => { e.stopPropagation(); onMarkUnread?.() }}
             >
@@ -524,12 +888,12 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
             </button>
           )}
           <button
-            className="msg-header-action-btn"
+            className="round-btn secondary-btn btn-icon-left msg-header-action-btn"
             title={thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive thread') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}
             onClick={e => { e.stopPropagation(); onToggleArchive?.() }}
           >
-            {!thread.archivedByOffice && <ArchiveIcon size={18} />}
-            <span>{thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}</span>
+            <ArchiveIcon size={18} />
+            <span>{thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive thread') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}</span>
           </button>
         </div>
       </div>
@@ -1152,7 +1516,7 @@ export default function App() {
     if (mode === 'broadcast') {
       const participantsSummary =
         broadcastType === 'groups' ? tags.map(t => `${t.name} · ${t.memberCount} employees`).join(', ') :
-        broadcastType === 'all'    ? `All employees · ${CARERS.length} employees` :
+        broadcastType === 'all'    ? `All employees (${CARERS.length})` :
         recipients.map(r => r.name).join(', ')
       const participantList =
         broadcastType === 'groups' ? tags.map(t => t.name) :

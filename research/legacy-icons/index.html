@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PASS legacy icon fonts — full specimen</title>
+<style>
+  @font-face { font-family: 'eltico-specimen'; src: url('../../Fonts/eltico.woff') format('woff'); }
+  @font-face { font-family: 'fa-regular-specimen'; src: url('../../Fonts/fa-regular-400.woff2') format('woff2'); }
+  @font-face { font-family: 'fa-solid-specimen'; src: url('../../Fonts/fa-solid-900.woff2') format('woff2'); }
+  @font-face { font-family: 'glyphicons-specimen'; src: url('../../Fonts/glyphicons-halflings-regular.woff') format('woff'); }
+
+
+  :root {
+    --bg: #f6f5f9; --bg-inset: #eeecf3; --card: #ffffff; --border: #e2dfe9;
+    --text: #211f28; --text-muted: #7a7686; --accent: #6d1b98; --accent-soft: #f1e6f9;
+    --warn-bg: #fdeeee; --warn-border: #e8b4b0; --warn-text: #a13a34;
+    --shadow: 0 1px 2px rgba(30,20,50,0.06), 0 2px 8px rgba(30,20,50,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #19171d; --bg-inset: #211f26; --card: #24222a; --border: #35323c;
+      --text: #ece9f1; --text-muted: #a29cae; --accent: #c896ea; --accent-soft: #322938;
+      --warn-bg: #3a2320; --warn-border: #6b3a34; --warn-text: #e2a29c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 10px rgba(0,0,0,0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #19171d; --bg-inset: #211f26; --card: #24222a; --border: #35323c;
+    --text: #ece9f1; --text-muted: #a29cae; --accent: #c896ea; --accent-soft: #322938;
+    --warn-bg: #3a2320; --warn-border: #6b3a34; --warn-text: #e2a29c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 10px rgba(0,0,0,0.25);
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f5f9; --bg-inset: #eeecf3; --card: #ffffff; --border: #e2dfe9;
+    --text: #211f28; --text-muted: #7a7686; --accent: #6d1b98; --accent-soft: #f1e6f9;
+    --warn-bg: #fdeeee; --warn-border: #e8b4b0; --warn-text: #a13a34;
+    --shadow: 0 1px 2px rgba(30,20,50,0.06), 0 2px 8px rgba(30,20,50,0.05);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    padding: 40px 32px 80px; min-height: 100vh;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; text-wrap: balance; letter-spacing: -0.01em; }
+  .sub { font-size: 14.5px; color: var(--text-muted); max-width: 68ch; line-height: 1.55; margin: 0 0 28px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(120,100,150,0.12); padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+
+  section { margin-bottom: 44px; }
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .section-head h2 { font-size: 17px; font-weight: 700; margin: 0; }
+  .section-head .count { font-size: 12.5px; color: var(--text-muted); }
+  .section-desc { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; max-width: 68ch; line-height: 1.5; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+
+  .card {
+    font-family: inherit; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: 10px; padding: 18px 10px 14px; display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 5px; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; color: inherit;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(30,20,50,0.12); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .glyph { font-size: 30px; color: var(--accent); height: 38px; display: flex; align-items: center; justify-content: center; }
+  .glyph.elt { font-family: 'eltico-specimen'; }
+  .glyph.far { font-family: 'fa-regular-specimen'; font-weight: 400; }
+  .glyph.fas { font-family: 'fa-solid-specimen'; font-weight: 900; }
+  .glyph.gly { font-family: 'glyphicons-specimen'; }
+
+  .hex { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .label { font-size: 11.5px; color: var(--text); line-height: 1.3; word-break: break-word; }
+  .weight { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--text); color: var(--bg); font-size: 13px; padding: 9px 16px; border-radius: 7px;
+    opacity: 0; pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { .card, .toast { transition: none; } }
+
+  /* Back link — hand-styled to match the shared .back-link convention
+     without importing main.css, since this page runs its own
+     self-contained palette rather than the app's design system. */
+  .back-link {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #9a26d6;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.15s;
+  }
+  .back-link:hover { background: #8421b8; }
+  .back-link svg { display: block; }
+
+</style>
+</head>
+<body>
+
+<a href="../../" class="back-link">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  Prototypes
+</a>
+
+<div class="wrap">
+  <p class="eyebrow">PASS legacy web app &middot; all pages</p>
+  <h1>Every legacy icon font used by this app</h1>
+  <p class="sub">This isn't scoped to any one page — it covers every icon font loaded by the legacy PASS web app (Timeline, employee cards, MAR chart, care notes, and everywhere else the same build is served from). Below is every glyph pulled live from each real font file, filtered to only the classes actually referenced in the app's own markup/CSS/JS — not the full public libraries, which run into the thousands. Confirmed 2026-07-09 against a saved page export, then expanded 2026-07-10 by scanning the full JS bundles and cross-checking every candidate class against the real font files at <code>pen.passgenius.com/assets/fonts/</code>. Click any tile to copy its codepoint.</p>
+
+  <section>
+    <div class="section-head"><h2>eltico</h2><span class="count">28 glyphs &middot; custom IcoMoon font, used for task-type icons</span></div>
+    <div class="grid"><button class="card" onclick="copyCode(this, 'U+E800')">
+      <span class="glyph elt">&#xe800;</span>
+      <span class="hex">U+E800</span>
+      <span class="label">icon-calendar</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E801')">
+      <span class="glyph elt">&#xe801;</span>
+      <span class="hex">U+E801</span>
+      <span class="label">icon-calendar-empty</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E803')">
+      <span class="glyph elt">&#xe803;</span>
+      <span class="hex">U+E803</span>
+      <span class="label">icon-clock</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E804')">
+      <span class="glyph elt">&#xe804;</span>
+      <span class="hex">U+E804</span>
+      <span class="label">icon-stopwatch</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E805')">
+      <span class="glyph elt">&#xe805;</span>
+      <span class="hex">U+E805</span>
+      <span class="label">icon-old-general-task</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E806')">
+      <span class="glyph elt">&#xe806;</span>
+      <span class="hex">U+E806</span>
+      <span class="label">icon-hydration-task</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E807')">
+      <span class="glyph elt">&#xe807;</span>
+      <span class="hex">U+E807</span>
+      <span class="label">icon-manual</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E808')">
+      <span class="glyph elt">&#xe808;</span>
+      <span class="hex">U+E808</span>
+      <span class="label">icon-nfc</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E809')">
+      <span class="glyph elt">&#xe809;</span>
+      <span class="hex">U+E809</span>
+      <span class="label">icon-nutrition-task</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E80A')">
+      <span class="glyph elt">&#xe80a;</span>
+      <span class="hex">U+E80A</span>
+      <span class="label">icon-general-task</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E80B')">
+      <span class="glyph elt">&#xe80b;</span>
+      <span class="hex">U+E80B</span>
+      <span class="label">panel-icon (default) / icon-dols</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E900')">
+      <span class="glyph elt">&#xe900;</span>
+      <span class="hex">U+E900</span>
+      <span class="label">icon-bodymap-back-empty</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E901')">
+      <span class="glyph elt">&#xe901;</span>
+      <span class="hex">U+E901</span>
+      <span class="label">icon-bodymap-back-marked</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E902')">
+      <span class="glyph elt">&#xe902;</span>
+      <span class="hex">U+E902</span>
+      <span class="label">icon-bodymap-front-empty</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E903')">
+      <span class="glyph elt">&#xe903;</span>
+      <span class="hex">U+E903</span>
+      <span class="label">icon-bodymap-front-marked</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E904')">
+      <span class="glyph elt">&#xe904;</span>
+      <span class="hex">U+E904</span>
+      <span class="label">icon-bodymap-left-empty</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E905')">
+      <span class="glyph elt">&#xe905;</span>
+      <span class="hex">U+E905</span>
+      <span class="label">icon-bodymap-left-marked</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E906')">
+      <span class="glyph elt">&#xe906;</span>
+      <span class="hex">U+E906</span>
+      <span class="label">icon-bodymap-right-empty</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E907')">
+      <span class="glyph elt">&#xe907;</span>
+      <span class="hex">U+E907</span>
+      <span class="label">icon-bodymap-right-marked</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E908')">
+      <span class="glyph elt">&#xe908;</span>
+      <span class="hex">U+E908</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E909')">
+      <span class="glyph elt">&#xe909;</span>
+      <span class="hex">U+E909</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90A')">
+      <span class="glyph elt">&#xe90a;</span>
+      <span class="hex">U+E90A</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90B')">
+      <span class="glyph elt">&#xe90b;</span>
+      <span class="hex">U+E90B</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90C')">
+      <span class="glyph elt">&#xe90c;</span>
+      <span class="hex">U+E90C</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90D')">
+      <span class="glyph elt">&#xe90d;</span>
+      <span class="hex">U+E90D</span>
+      <span class="label">icon-dosage</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90E')">
+      <span class="glyph elt">&#xe90e;</span>
+      <span class="hex">U+E90E</span>
+      <span class="label">unlabeled in CSS</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E90F')">
+      <span class="glyph elt">&#xe90f;</span>
+      <span class="hex">U+E90F</span>
+      <span class="label">icon-star</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E910')">
+      <span class="glyph elt">&#xe910;</span>
+      <span class="hex">U+E910</span>
+      <span class="label">icon-bed</span>
+    </button></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Font Awesome</h2><span class="count">92 glyphs actually used &middot; of 1,966 defined in the stylesheet</span></div>
+    <p class="section-desc">Each tile shows whichever weight (Regular or Solid) actually has that glyph &mdash; some icons only exist in one.</p>
+    <div class="grid"><button class="card" onclick="copyCode(this, 'U+F038')">
+      <span class="glyph fas">&#xf038;</span>
+      <span class="hex">U+F038</span>
+      <span class="label">fa-align-right</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F103')">
+      <span class="glyph fas">&#xf103;</span>
+      <span class="hex">U+F103</span>
+      <span class="label">fa-angle-double-down</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F102')">
+      <span class="glyph fas">&#xf102;</span>
+      <span class="hex">U+F102</span>
+      <span class="label">fa-angle-double-up</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F107')">
+      <span class="glyph fas">&#xf107;</span>
+      <span class="hex">U+F107</span>
+      <span class="label">fa-angle-down</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F106')">
+      <span class="glyph fas">&#xf106;</span>
+      <span class="hex">U+F106</span>
+      <span class="label">fa-angle-up</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F063')">
+      <span class="glyph fas">&#xf063;</span>
+      <span class="hex">U+F063</span>
+      <span class="label">fa-arrow-down</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F060')">
+      <span class="glyph fas">&#xf060;</span>
+      <span class="hex">U+F060</span>
+      <span class="label">fa-arrow-left</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F061')">
+      <span class="glyph fas">&#xf061;</span>
+      <span class="hex">U+F061</span>
+      <span class="label">fa-arrow-right</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F062')">
+      <span class="glyph fas">&#xf062;</span>
+      <span class="hex">U+F062</span>
+      <span class="label">fa-arrow-up</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0C9')">
+      <span class="glyph fas">&#xf0c9;</span>
+      <span class="hex">U+F0C9</span>
+      <span class="label">fa-bars</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F853')">
+      <span class="glyph fas">&#xf853;</span>
+      <span class="hex">U+F853</span>
+      <span class="label">fa-border-style</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F073')">
+      <span class="glyph far">&#xf073;</span>
+      <span class="hex">U+F073</span>
+      <span class="label">fa-calendar-alt</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F271')">
+      <span class="glyph far">&#xf271;</span>
+      <span class="hex">U+F271</span>
+      <span class="label">fa-calendar-plus</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F030')">
+      <span class="glyph fas">&#xf030;</span>
+      <span class="hex">U+F030</span>
+      <span class="label">fa-camera</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F201')">
+      <span class="glyph fas">&#xf201;</span>
+      <span class="hex">U+F201</span>
+      <span class="label">fa-chart-line</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F00C')">
+      <span class="glyph fas">&#xf00c;</span>
+      <span class="hex">U+F00C</span>
+      <span class="label">fa-check</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F058')">
+      <span class="glyph far">&#xf058;</span>
+      <span class="hex">U+F058</span>
+      <span class="label">fa-check-circle</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F560')">
+      <span class="glyph fas">&#xf560;</span>
+      <span class="hex">U+F560</span>
+      <span class="label">fa-check-double</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F078')">
+      <span class="glyph fas">&#xf078;</span>
+      <span class="hex">U+F078</span>
+      <span class="label">fa-chevron-down</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F054')">
+      <span class="glyph fas">&#xf054;</span>
+      <span class="hex">U+F054</span>
+      <span class="label">fa-chevron-right</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F077')">
+      <span class="glyph fas">&#xf077;</span>
+      <span class="hex">U+F077</span>
+      <span class="label">fa-chevron-up</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F111')">
+      <span class="glyph far">&#xf111;</span>
+      <span class="hex">U+F111</span>
+      <span class="label">fa-circle</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F056')">
+      <span class="glyph fas">&#xf056;</span>
+      <span class="hex">U+F056</span>
+      <span class="label">fa-circle-minus</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F055')">
+      <span class="glyph fas">&#xf055;</span>
+      <span class="hex">U+F055</span>
+      <span class="label">fa-circle-plus</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F017')">
+      <span class="glyph far">&#xf017;</span>
+      <span class="hex">U+F017</span>
+      <span class="label">fa-clock</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F24D')">
+      <span class="glyph far">&#xf24d;</span>
+      <span class="hex">U+F24D</span>
+      <span class="label">fa-clone</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F4AD')">
+      <span class="glyph far">&#xf4ad;</span>
+      <span class="hex">U+F4AD</span>
+      <span class="label">fa-comment-dots</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F086')">
+      <span class="glyph far">&#xf086;</span>
+      <span class="hex">U+F086</span>
+      <span class="label">fa-comments</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0C5')">
+      <span class="glyph far">&#xf0c5;</span>
+      <span class="hex">U+F0C5</span>
+      <span class="label">fa-copy</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F125')">
+      <span class="glyph fas">&#xf125;</span>
+      <span class="hex">U+F125</span>
+      <span class="label">fa-crop</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F05B')">
+      <span class="glyph fas">&#xf05b;</span>
+      <span class="hex">U+F05B</span>
+      <span class="label">fa-crosshairs</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+E163')">
+      <span class="glyph fas">&#xe163;</span>
+      <span class="hex">U+E163</span>
+      <span class="label">fa-display</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F019')">
+      <span class="glyph fas">&#xf019;</span>
+      <span class="hex">U+F019</span>
+      <span class="label">fa-download</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F142')">
+      <span class="glyph fas">&#xf142;</span>
+      <span class="hex">U+F142</span>
+      <span class="label">fa-ellipsis-v</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0E0')">
+      <span class="glyph far">&#xf0e0;</span>
+      <span class="hex">U+F0E0</span>
+      <span class="label">fa-envelope</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F071')">
+      <span class="glyph fas">&#xf071;</span>
+      <span class="hex">U+F071</span>
+      <span class="label">fa-exclamation-triangle</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F08E')">
+      <span class="glyph fas">&#xf08e;</span>
+      <span class="hex">U+F08E</span>
+      <span class="label">fa-external-link</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F35D')">
+      <span class="glyph fas">&#xf35d;</span>
+      <span class="hex">U+F35D</span>
+      <span class="label">fa-external-link-alt</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F06E')">
+      <span class="glyph far">&#xf06e;</span>
+      <span class="hex">U+F06E</span>
+      <span class="label">fa-eye</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F15B')">
+      <span class="glyph far">&#xf15b;</span>
+      <span class="hex">U+F15B</span>
+      <span class="label">fa-file</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F15C')">
+      <span class="glyph far">&#xf15c;</span>
+      <span class="hex">U+F15C</span>
+      <span class="label">fa-file-alt</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F1C5')">
+      <span class="glyph far">&#xf1c5;</span>
+      <span class="hex">U+F1C5</span>
+      <span class="label">fa-file-image</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0B0')">
+      <span class="glyph fas">&#xf0b0;</span>
+      <span class="hex">U+F0B0</span>
+      <span class="label">fa-filter</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F119')">
+      <span class="glyph far">&#xf119;</span>
+      <span class="hex">U+F119</span>
+      <span class="label">fa-frown</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F25A')">
+      <span class="glyph far">&#xf25a;</span>
+      <span class="hex">U+F25A</span>
+      <span class="label">fa-hand-pointer</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2B5')">
+      <span class="glyph far">&#xf2b5;</span>
+      <span class="hex">U+F2B5</span>
+      <span class="label">fa-handshake</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F21E')">
+      <span class="glyph fas">&#xf21e;</span>
+      <span class="hex">U+F21E</span>
+      <span class="label">fa-heartbeat</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F1DA')">
+      <span class="glyph fas">&#xf1da;</span>
+      <span class="hex">U+F1DA</span>
+      <span class="label">fa-history</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F254')">
+      <span class="glyph far">&#xf254;</span>
+      <span class="hex">U+F254</span>
+      <span class="label">fa-hourglass</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2C2')">
+      <span class="glyph far">&#xf2c2;</span>
+      <span class="hex">U+F2C2</span>
+      <span class="label">fa-id-card</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F03E')">
+      <span class="glyph far">&#xf03e;</span>
+      <span class="hex">U+F03E</span>
+      <span class="label">fa-image</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F05A')">
+      <span class="glyph fas">&#xf05a;</span>
+      <span class="hex">U+F05A</span>
+      <span class="label">fa-info-circle</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F023')">
+      <span class="glyph fas">&#xf023;</span>
+      <span class="hex">U+F023</span>
+      <span class="label">fa-lock</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F183')">
+      <span class="glyph fas">&#xf183;</span>
+      <span class="hex">U+F183</span>
+      <span class="label">fa-male</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F279')">
+      <span class="glyph far">&#xf279;</span>
+      <span class="hex">U+F279</span>
+      <span class="label">fa-map</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F041')">
+      <span class="glyph fas">&#xf041;</span>
+      <span class="hex">U+F041</span>
+      <span class="label">fa-map-marker</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F6FA')">
+      <span class="glyph fas">&#xf6fa;</span>
+      <span class="hex">U+F6FA</span>
+      <span class="label">fa-mask</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F11A')">
+      <span class="glyph far">&#xf11a;</span>
+      <span class="hex">U+F11A</span>
+      <span class="label">fa-meh</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F068')">
+      <span class="glyph fas">&#xf068;</span>
+      <span class="hex">U+F068</span>
+      <span class="label">fa-minus</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F056')">
+      <span class="glyph fas">&#xf056;</span>
+      <span class="hex">U+F056</span>
+      <span class="label">fa-minus-circle</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0F4')">
+      <span class="glyph fas">&#xf0f4;</span>
+      <span class="hex">U+F0F4</span>
+      <span class="label">fa-mug-saucer</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F481')">
+      <span class="glyph fas">&#xf481;</span>
+      <span class="hex">U+F481</span>
+      <span class="label">fa-notes-medical</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F304')">
+      <span class="glyph fas">&#xf304;</span>
+      <span class="hex">U+F304</span>
+      <span class="label">fa-pen</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F303')">
+      <span class="glyph fas">&#xf303;</span>
+      <span class="hex">U+F303</span>
+      <span class="label">fa-pencil</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F303')">
+      <span class="glyph fas">&#xf303;</span>
+      <span class="hex">U+F303</span>
+      <span class="label">fa-pencil-alt</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F095')">
+      <span class="glyph fas">&#xf095;</span>
+      <span class="hex">U+F095</span>
+      <span class="label">fa-phone</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F067')">
+      <span class="glyph far">&#xf067;</span>
+      <span class="hex">U+F067</span>
+      <span class="label">fa-plus</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F055')">
+      <span class="glyph fas">&#xf055;</span>
+      <span class="hex">U+F055</span>
+      <span class="label">fa-plus-circle</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F029')">
+      <span class="glyph fas">&#xf029;</span>
+      <span class="hex">U+F029</span>
+      <span class="label">fa-qrcode</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F128')">
+      <span class="glyph far">&#xf128;</span>
+      <span class="hex">U+F128</span>
+      <span class="label">fa-question</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F059')">
+      <span class="glyph far">&#xf059;</span>
+      <span class="hex">U+F059</span>
+      <span class="label">fa-question-circle</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F01E')">
+      <span class="glyph fas">&#xf01e;</span>
+      <span class="hex">U+F01E</span>
+      <span class="label">fa-redo</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2F1')">
+      <span class="glyph fas">&#xf2f1;</span>
+      <span class="hex">U+F2F1</span>
+      <span class="label">fa-rotate</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F002')">
+      <span class="glyph fas">&#xf002;</span>
+      <span class="hex">U+F002</span>
+      <span class="label">fa-search</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2F5')">
+      <span class="glyph fas">&#xf2f5;</span>
+      <span class="hex">U+F2F5</span>
+      <span class="label">fa-sign-out-alt</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F118')">
+      <span class="glyph far">&#xf118;</span>
+      <span class="hex">U+F118</span>
+      <span class="label">fa-smile</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0C8')">
+      <span class="glyph far">&#xf0c8;</span>
+      <span class="hex">U+F0C8</span>
+      <span class="label">fa-square</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F005')">
+      <span class="glyph far">&#xf005;</span>
+      <span class="hex">U+F005</span>
+      <span class="label">fa-star</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2C9')">
+      <span class="glyph fas">&#xf2c9;</span>
+      <span class="hex">U+F2C9</span>
+      <span class="label">fa-thermometer-half</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F164')">
+      <span class="glyph far">&#xf164;</span>
+      <span class="hex">U+F164</span>
+      <span class="label">fa-thumbs-up</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F00D')">
+      <span class="glyph fas">&#xf00d;</span>
+      <span class="hex">U+F00D</span>
+      <span class="label">fa-times</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F057')">
+      <span class="glyph far">&#xf057;</span>
+      <span class="hex">U+F057</span>
+      <span class="label">fa-times-circle</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F1F8')">
+      <span class="glyph fas">&#xf1f8;</span>
+      <span class="hex">U+F1F8</span>
+      <span class="label">fa-trash</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2ED')">
+      <span class="glyph far">&#xf2ed;</span>
+      <span class="hex">U+F2ED</span>
+      <span class="label">fa-trash-alt</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0E2')">
+      <span class="glyph fas">&#xf0e2;</span>
+      <span class="hex">U+F0E2</span>
+      <span class="label">fa-undo</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F09C')">
+      <span class="glyph fas">&#xf09c;</span>
+      <span class="hex">U+F09C</span>
+      <span class="label">fa-unlock</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F093')">
+      <span class="glyph fas">&#xf093;</span>
+      <span class="hex">U+F093</span>
+      <span class="label">fa-upload</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F007')">
+      <span class="glyph far">&#xf007;</span>
+      <span class="hex">U+F007</span>
+      <span class="label">fa-user</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2BD')">
+      <span class="glyph far">&#xf2bd;</span>
+      <span class="hex">U+F2BD</span>
+      <span class="label">fa-user-circle</span>
+      <span class="weight">regular</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F507')">
+      <span class="glyph fas">&#xf507;</span>
+      <span class="hex">U+F507</span>
+      <span class="label">fa-user-tag</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F0C0')">
+      <span class="glyph fas">&#xf0c0;</span>
+      <span class="hex">U+F0C0</span>
+      <span class="label">fa-users</span>
+      <span class="weight">solid</span>
+    </button>
+<button class="card" onclick="copyCode(this, 'U+F2E7')">
+      <span class="glyph fas">&#xf2e7;</span>
+      <span class="hex">U+F2E7</span>
+      <span class="label">fa-utensils</span>
+      <span class="weight">solid</span>
+    </button></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Glyphicons Halflings</h2><span class="count">1 glyph used &middot; of 276 defined in the stylesheet</span></div>
+    <p class="section-desc">Bootstrap's old icon font is loaded but barely touched &mdash; only one class from it shows up anywhere in this export.</p>
+    <div class="grid"><button class="card" onclick="copyCode(this, 'U+E109')">
+      <span class="glyph gly">&#xe109;</span>
+      <span class="hex">U+E109</span>
+      <span class="label">glyphicon-calendar</span>
+    </button></div>
+  </section>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+<script>
+  function copyCode(el, code) {
+    navigator.clipboard?.writeText(code);
+    const toast = document.getElementById('toast');
+    toast.textContent = 'Copied ' + code;
+    toast.classList.add('show');
+    clearTimeout(window.__t);
+    window.__t = setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+</script>
+</body>
+</html>
