@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import WebNav from '../../../Components/WebNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 import employeePlaceholder from '../../../Images/Employee Placeholder.png'
@@ -18,8 +18,11 @@ const ChevronLeftIcon = () => (
 // / fa-regular-400 from pen.passgenius.com, and eltico.woff — see
 // Styles/legacy.css for how they're loaded, and the "PASS legacy icon
 // fonts" specimen artifact for the full glyph list). Not guessed.
-const FaIcon = ({ code, weight = 'solid' }) => (
-  <span className={`tl-fa-icon tl-fa-icon-${weight}`}>{code}</span>
+const FaIcon = ({ code, weight = 'solid', color, rotate }) => (
+  <span
+    className={`tl-fa-icon tl-fa-icon-${weight}`}
+    style={{ ...(color ? { color } : null), ...(rotate ? { display: 'inline-block', transform: `rotate(${rotate}deg)` } : null) }}
+  >{code}</span>
 )
 const EltIcon = ({ code, color }) => (
   <span className="tl-eltico-icon" style={color ? { color } : undefined}>{code}</span>
@@ -40,6 +43,10 @@ const OverdueIcon = () => <EltIcon code={''} color="var(--legacy-status-overd
 const CompleteIcon = () => <EltIcon code={''} color="var(--legacy-status-complete)" />
 const PartialIcon = () => <EltIcon code={''} color="var(--legacy-status-partial)" />
 const AlertGreenIcon = () => <EltIcon code={''} color="var(--legacy-success)" />
+// Rotated 90° so the diagonal slash runs bottom-left to top-right,
+// matching MAR Chart's CANCELLED bubble (fa-ban's default slash runs
+// the other way).
+const CancelledIcon = () => <FaIcon code={''} weight="solid" color="var(--legacy-status-cancelled)" rotate={90} /> // fa-ban
 
 // Body icons — Calendar/Info/Cream form/Dosage/Support required/Bodymap/
 // Carer (id-card)/Review note (file) confirmed 2026-07-10 (see header
@@ -78,7 +85,11 @@ const TYPE_META = {
   outcome:     { icon: OutcomeIcon,     bg: 'var(--legacy-panel-outcome-tracking-bg)', text: 'var(--legacy-panel-outcome-tracking-text)' },
 }
 
-const STATUS_ICON = { overdue: OverdueIcon, complete: CompleteIcon, partial: PartialIcon }
+const STATUS_ICON = { overdue: OverdueIcon, complete: CompleteIcon, partial: PartialIcon, cancelled: CancelledIcon }
+
+// Cancelled items always render flat grey, regardless of their type —
+// matches MAR Chart's CANCELLED bubble colors exactly (AIOP-22638).
+const CANCELLED_META = { bg: 'var(--legacy-panel-cancelled-bg)', text: 'var(--legacy-panel-cancelled-text)' }
 
 // ─── Data ─────────────────────────────────────────────────────
 // Titles/types/notes are pulled from the exported page + Ben's
@@ -142,14 +153,16 @@ const TODAY_ITEMS = [
     completionNote: 'Cleaned the bathroom and toilet after use with the products under the sink.' },
   { id: 16, time: '15:37', type: 'outcome', title: 'Care plan updated', bodyType: 'outcome', by: 'pass roster', noStatus: true,
     date: '30 Jun 2026 at 15:37', linkText: 'Open related page (in new tab)' },
-  { id: 17, time: '17:00', type: 'visit', title: 'Evening Visit', bodyType: 'generic', status: 'overdue',
-    due: { due: '17:00', completeBy: '17:30' }, notes: ['Scheduled evening visit — please check in with Patricia before starting any tasks.'] },
-  { id: 18, time: '17:00', type: 'nutrition', title: 'EVENING MEAL', bodyType: 'generic', status: 'overdue',
+  { id: 17, time: '17:00', type: 'visit', title: 'Evening Visit', bodyType: 'generic', status: 'cancelled',
+    due: { due: '17:00', completeBy: '17:30' }, notes: ['Scheduled evening visit — please check in with Patricia before starting any tasks.'],
+    cancellation: { reason: 'Customer cancelled', note: "Patricia's daughter called the office to say she'll be staying over this evening, so the visit isn't needed." } },
+  { id: 18, time: '17:00', type: 'nutrition', title: 'EVENING MEAL', bodyType: 'generic', status: 'cancelled',
     due: { due: '17:00', completeBy: '17:30' }, notes: [
       'Please prepare my evening meal and serve this to me on a tray whilst I am seated comfortably on my sofa. My daughter usually prepares home-cooked meals for me in advance and leaves these in the fridge for reheating.',
       'Please ensure meals are heated thoroughly and served at a safe temperature. Offer me choice where appropriate and present my meal in a way that is appetising and easy for me to manage.',
       'Remain observant for any signs of reduced appetite, difficulty eating, nausea, oral discomfort, or decline in nutritional intake, and escalate concerns appropriately.',
-    ] },
+    ],
+    cancellation: { reason: 'Customer cancelled', note: "Part of the evening visit, which was cancelled — Patricia's daughter is preparing her meal instead." } },
 ]
 
 const PAST_ITEMS = [
@@ -251,14 +264,16 @@ function AlertReviewCol({ item }) {
 }
 
 function GenericBody({ item }) {
+  const isCancelled = item.status === 'cancelled' && item.cancellation
   const showCareNote = item.status === 'complete' && item.completionNote
+  const showSecondCol = showCareNote || isCancelled
   return (
-    <div className={showCareNote ? 'tl-body-columns tl-body-columns-2' : 'tl-body-generic'}>
-      <div className={showCareNote ? 'tl-body-col' : undefined}>
+    <div className={showSecondCol ? 'tl-body-columns tl-body-columns-2' : 'tl-body-generic'}>
+      <div className={showSecondCol ? 'tl-body-col' : undefined}>
         <h4 className="tl-body-heading">Care Plan</h4>
         <DueRow due={item.due} />
         <NotesBlock notes={item.notes} />
-        {!item.reviewNote && (
+        {!item.reviewNote && !isCancelled && (
           <a className="tl-add-review" href="#" onClick={e => e.preventDefault()}><PlusIcon /> Add review note</a>
         )}
       </div>
@@ -272,6 +287,21 @@ function GenericBody({ item }) {
             <InfoCircleFilledIcon />
             <div className="tl-body-notes-text"><p>{item.completionNote}</p></div>
           </div>
+        </div>
+      )}
+      {isCancelled && (
+        // No care note exists — the visit never took place — so this slot
+        // shows the cancellation instead (matches MAR Chart's AIOP-22638
+        // popover: a reason + optional free-text note, nothing else).
+        <div className="tl-body-col">
+          <h4 className="tl-body-heading">Visit cancelled</h4>
+          <div className="tl-body-row"><CancelledIcon /> <span>{item.cancellation.reason}</span></div>
+          {item.cancellation.note && (
+            <div className="tl-body-notes">
+              <InfoCircleFilledIcon />
+              <div className="tl-body-notes-text"><p>{item.cancellation.note}</p></div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -371,8 +401,9 @@ const BODY_COMPONENTS = {
 }
 
 function TimelineItem({ item, isOpen, onToggle }) {
-  const meta = TYPE_META[item.type]
-  const Icon = meta.icon
+  const typeMeta = TYPE_META[item.type]
+  const meta = item.status === 'cancelled' ? CANCELLED_META : typeMeta
+  const Icon = typeMeta.icon
   const BodyComponent = BODY_COMPONENTS[item.bodyType]
 
   return (
@@ -411,9 +442,56 @@ function byTimeDesc(items) {
   return [...items].sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
 }
 
+// A visit item is linked to its tasks by matching planned (due) time, not
+// by when the tasks were actually completed — a visit can run over, so a
+// task's actual completion time doesn't reliably fall inside its visit's
+// window. Within a linked group, the visit always renders last (below
+// every one of its tasks), regardless of the visit's own displayed time
+// (which is its tag-out time, not a sort key). Groups themselves, and any
+// standalone item with no visit sharing its due window, still interleave
+// latest-to-earliest by their own time.
+function dueKey(item) {
+  return item.due ? `${item.due.due}-${item.due.completeBy}` : null
+}
+
+function arrangeDay(items) {
+  const visitByKey = new Map()
+  items.filter(i => i.type === 'visit').forEach(v => visitByKey.set(dueKey(v), v))
+
+  const groups = new Map() // dueKey -> { tasks: [], visit }
+  const standalone = []
+
+  items.filter(i => i.type !== 'visit').forEach(item => {
+    const key = dueKey(item)
+    const visit = key && visitByKey.get(key)
+    if (visit) {
+      if (!groups.has(key)) groups.set(key, { tasks: [], visit })
+      groups.get(key).tasks.push(item)
+    } else {
+      standalone.push(item)
+    }
+  })
+
+  // A visit whose due window matched no task still needs to render somewhere.
+  visitByKey.forEach((visit, key) => {
+    if (!groups.has(key)) standalone.push(visit)
+  })
+
+  const blocks = [
+    ...standalone.map(item => ({ sortTime: timeToMinutes(item.time), items: [item] })),
+    ...[...groups.values()].map(({ tasks, visit }) => ({
+      sortTime: Math.max(...tasks.map(t => timeToMinutes(t.time))),
+      items: [...byTimeDesc(tasks), visit],
+    })),
+  ]
+
+  return blocks.sort((a, b) => b.sortTime - a.sortTime).flatMap(b => b.items)
+}
+
 export default function App() {
   const initialOpen = new Set(TODAY_ITEMS.filter(i => i.expanded).map(i => i.id))
   const [openIds, setOpenIds] = useState(initialOpen)
+  const latestDayRef = useRef(null)
 
   const allIds = [...TODAY_ITEMS, ...PAST_ITEMS].map(i => i.id)
 
@@ -428,6 +506,15 @@ export default function App() {
   const expandAll = () => setOpenIds(new Set(allIds))
   const collapseAll = () => setOpenIds(new Set())
 
+  const goToNow = () => {
+    if (!latestDayRef.current) return
+    // 212px reserves space for the sticky .tl-day-header (see
+    // .tl-action-bar/.tl-day-header top offset) so the day header doesn't
+    // land underneath it.
+    const top = latestDayRef.current.getBoundingClientRect().top + window.scrollY - 212
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+
   return (
     <div>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
@@ -437,15 +524,15 @@ export default function App() {
       <div className="timeline-legacy">
 
         <div className="tl-action-bar">
-          <button className="tl-btn tl-btn-success">Go to now</button>
+          <button className="tl-btn tl-btn-success" onClick={goToNow}>Go to now</button>
           <button className="tl-btn tl-btn-primary" onClick={expandAll}>Expand all</button>
           <button className="tl-btn tl-btn-primary" onClick={collapseAll}>Collapse all</button>
         </div>
 
-        <div className="tl-day-group">
+        <div className="tl-day-group" ref={latestDayRef}>
           <div className="tl-day-header">Monday 6 July 2026</div>
           <div className="tl-list">
-            {byTimeDesc(TODAY_ITEMS).map(item => (
+            {arrangeDay(TODAY_ITEMS).map(item => (
               <TimelineItem
                 key={item.id}
                 item={item}
@@ -459,7 +546,7 @@ export default function App() {
         <div className="tl-day-group">
           <div className="tl-day-header">Sunday 5 July 2026</div>
           <div className="tl-list">
-            {byTimeDesc(PAST_ITEMS).map(item => (
+            {arrangeDay(PAST_ITEMS).map(item => (
               <TimelineItem
                 key={item.id}
                 item={item}
