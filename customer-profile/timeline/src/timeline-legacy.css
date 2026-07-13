@@ -187,6 +187,8 @@
 /* ── Body ─────────────────────────────────────────────────────── */
 
 .tl-item-body {
+  display: flex;
+  flex-direction: column;
   padding: 14px 15px;
   border-top: 1px solid #eee;
   font-size: 14px;
@@ -234,7 +236,13 @@
   font-size: 13px;
   color: #337ab7;
   text-decoration: none;
-  float: right;
+  /* Rendered once per item (see AddReviewNote in App.jsx), as a direct
+     sibling of the body component inside .tl-item-body (display:flex
+     column) — so this pins to the bottom-right of the whole body, not
+     whichever column it would otherwise be nested in. */
+  margin-top: auto;
+  align-self: flex-end;
+  padding-top: 12px;
 }
 .tl-add-review svg { width: 12px; height: 12px; }
 .tl-add-review:hover { text-decoration: underline; }

@@ -235,6 +235,17 @@ function NotesBlock({ notes }) {
   )
 }
 
+// One per item body, regardless of bodyType/column layout — pinned to the
+// bottom-right of the whole body (see .tl-item-body, display:flex column).
+// Hidden once a review note already exists, or for a cancelled visit
+// (nothing to review — it never took place).
+function AddReviewNote({ item }) {
+  if (item.reviewNote || item.status === 'cancelled') return null
+  return (
+    <a className="tl-add-review" href="#" onClick={e => e.preventDefault()}><PlusIcon /> Add review note</a>
+  )
+}
+
 // Shows the resolved-alert block (item.alert) followed by the review note
 // (item.reviewNote), in that order, in a single column — the review note
 // always sits under the alert when both are present.
@@ -269,13 +280,10 @@ function GenericBody({ item }) {
   const showSecondCol = showCareNote || isCancelled
   return (
     <div className={showSecondCol ? 'tl-body-columns tl-body-columns-2' : 'tl-body-generic'}>
-      <div className={showSecondCol ? 'tl-body-col' : undefined}>
+      <div className="tl-body-col">
         <h4 className="tl-body-heading">Care Plan</h4>
         <DueRow due={item.due} />
         <NotesBlock notes={item.notes} />
-        {!item.reviewNote && !isCancelled && (
-          <a className="tl-add-review" href="#" onClick={e => e.preventDefault()}><PlusIcon /> Add review note</a>
-        )}
       </div>
       {showCareNote && (
         <div className="tl-body-col">
@@ -375,9 +383,6 @@ function MedicationBody({ item }) {
         {item.medication.bodymapButton && (
           <div className="tl-body-row"><BodymapIcon /> <button className="tl-legacy-btn-blue">Bodymap</button></div>
         )}
-        {!item.reviewNote && (
-          <a className="tl-add-review" href="#" onClick={e => e.preventDefault()}><PlusIcon /> Add review note</a>
-        )}
       </div>
     </div>
   )
@@ -426,6 +431,7 @@ function TimelineItem({ item, isOpen, onToggle }) {
       {isOpen && (
         <div className="tl-item-body">
           <BodyComponent item={item} />
+          <AddReviewNote item={item} />
         </div>
       )}
     </div>
