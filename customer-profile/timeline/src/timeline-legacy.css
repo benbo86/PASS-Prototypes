@@ -15,7 +15,9 @@
 
 .tl-action-bar {
   position: fixed;
-  top: 212px;
+  /* Sits just below the sticky top-nav (44px) + the customer context bar,
+     whose live height is published as --ctx-bar-height by CustomerProfileNav. */
+  top: calc(44px + var(--ctx-bar-height, 156px));
   right: 30px;
   display: flex;
   gap: 4px;
@@ -50,13 +52,13 @@
   background: var(--legacy-day-header-bg);
   padding-left:30px;
   margin: 0 -24px 12px;
-  /* Pins to the bottom edge of .context-bar (top:56px + 156px measured
-     height = 212px), where the 56px accounts for the sticky .top-nav
-     sitting above it. Scoped inside its own .tl-day-group, so it
-     naturally hands off to the next day's header once this group's
-     content scrolls past — no JS needed. */
+  /* Pins to the bottom edge of .context-bar: the sticky .top-nav (44px)
+     plus the context bar's live height (--ctx-bar-height, published by
+     CustomerProfileNav — tracks its full/condensed states). Scoped inside
+     its own .tl-day-group, so it naturally hands off to the next day's
+     header once this group's content scrolls past — no JS needed. */
   position: sticky;
-  top: 212px;
+  top: calc(44px + var(--ctx-bar-height, 156px));
   z-index: 10;
 }
 

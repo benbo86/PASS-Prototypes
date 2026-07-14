@@ -5,7 +5,7 @@
    SideNav (journal, PASSgenius, messages, help, profile/log out). */
 
 .top-nav {
-  height: 56px;
+  height: 44px;
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
@@ -25,7 +25,7 @@
   border-radius: 50%;
   border: none;
   background: none;
-  color: #9ca3af;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,8 +51,52 @@
 .top-nav-genius-btn:hover,
 .top-nav-genius-btn.active { background: none; }
 
+/* Icon tooltip — fixed-positioned (via portal) and centered under the
+   icon, arrow pointing up. Matches the shared/side-nav tooltip look. */
+.top-nav-tooltip {
+  position: fixed;
+  z-index: 1100;
+  transform: translateX(-50%);
+  background: #fff;
+  color: var(--greyscale-2-grey-20, #333);
+  border: 1px solid var(--ui-purple-5-languid-lavendar, #dcd9e4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: top-nav-tooltip-in 0.1s ease;
+}
+@keyframes top-nav-tooltip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.top-nav-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: var(--ui-purple-5-languid-lavendar, #dcd9e4);
+}
+.top-nav-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: -1px;
+  border: 5px solid transparent;
+  border-bottom-color: #fff;
+}
+
 /* Profile avatar — initials fallback follows the employees card
-   convention, sized down to 32px to sit inside the 56px top bar. */
+   convention, sized down to 32px to sit inside the 44px top bar. */
 .top-nav-avatar {
   width: 32px;
   height: 32px;

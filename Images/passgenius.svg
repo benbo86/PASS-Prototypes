@@ -3,12 +3,12 @@
     <style>
       svg { cursor: pointer; }
 
-      /* Resting state: grey to match the other top-nav icons.
+      /* Resting state: grey to match the other top-nav icons (#333).
          (Was #fff — designed for a dark purple background.) */
       .cls-1,
       .cls-2,
       .cls-3 {
-        fill: #9ca3af;
+        fill: #333;
         transition: fill 0.3s ease-in-out;
       }
 

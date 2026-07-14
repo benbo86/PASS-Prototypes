@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import passgeniusUrl from '../Images/passgenius.svg'
 
 // ─── Nav icons ────────────────────────────────────────────────
@@ -49,14 +50,31 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
 
+  // Custom tooltip, centered under the hovered icon (native title is too
+  // slow). Portaled to <body> so it isn't clipped or stacked below the
+  // sticky bars — same approach as the side-nav tooltip.
+  const [tip, setTip] = useState(null)
+  const showTip = (e, text) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    setTip({ text, top: Math.round(r.bottom + 8), left: Math.round(r.left + r.width / 2) })
+  }
+  const hideTip = () => setTip(null)
+
   return (
     <div className="top-nav">
-      <button className="top-nav-icon-btn" title="Journal">
+      <button
+        className="top-nav-icon-btn"
+        aria-label="Journal"
+        onMouseEnter={(e) => showTip(e, 'Journal')}
+        onMouseLeave={hideTip}
+      >
         <JournalIcon />
       </button>
       <button
         className={`top-nav-icon-btn${activeItem === 'messages' ? ' active' : ''}`}
-        title="Messages"
+        aria-label="Messages"
+        onMouseEnter={(e) => showTip(e, 'Messages')}
+        onMouseLeave={hideTip}
         onClick={() => { window.location.href = '../../web/messaging/' }}
       >
         <MessagesIcon />
@@ -64,10 +82,20 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
           <span className="top-nav-badge">{unreadMessages}</span>
         )}
       </button>
-      <button className="top-nav-icon-btn" title="Help & training">
+      <button
+        className="top-nav-icon-btn"
+        aria-label="Help & training"
+        onMouseEnter={(e) => showTip(e, 'Help & training')}
+        onMouseLeave={hideTip}
+      >
         <HelpIcon />
       </button>
-      <button className="top-nav-icon-btn top-nav-genius-btn" title="PASSgenius">
+      <button
+        className="top-nav-icon-btn top-nav-genius-btn"
+        aria-label="PASSgenius"
+        onMouseEnter={(e) => showTip(e, 'PASSgenius')}
+        onMouseLeave={hideTip}
+      >
         <object
           className="top-nav-genius"
           type="image/svg+xml"
@@ -79,8 +107,10 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
       <div className="top-nav-profile" ref={menuRef}>
         <button
           className={`top-nav-icon-btn top-nav-profile-btn${menuOpen ? ' active' : ''}`}
-          title={userName}
-          onClick={() => setMenuOpen(o => !o)}
+          aria-label={userName}
+          onMouseEnter={(e) => showTip(e, userName)}
+          onMouseLeave={hideTip}
+          onClick={() => { setMenuOpen(o => !o); hideTip() }}
         >
           {userAvatar
             ? <img className="top-nav-avatar" src={userAvatar} alt="" />
@@ -97,6 +127,13 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
           </div>
         )}
       </div>
+
+      {tip && createPortal(
+        <div className="top-nav-tooltip" style={{ top: tip.top, left: tip.left }}>
+          {tip.text}
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
