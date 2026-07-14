@@ -9,16 +9,17 @@ import passEmblemUrl from '../Images/PASS Emblem.png'
 
 const CustomersIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <path d="M16 3.128a4 4 0 0 1 0 7.744" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <circle cx="9" cy="7" r="4" />
   </svg>
 )
 const EmployeesIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-    <path d="M16 3.128a4 4 0 0 1 0 7.744" />
-    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
     <circle cx="9" cy="7" r="4" />
+    <polyline points="16 11 18 13 22 9" />
   </svg>
 )
 const BookingsIcon = () => (
@@ -143,11 +144,23 @@ export default function SideNav({
   defaultCollapsed = true,
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
+  // Custom tooltip for the collapsed rail: fixed-positioned so it escapes
+  // the scrollable list and shows instantly (native `title` is too slow).
+  const [tip, setTip] = useState(null) // { text, top, left } | null
 
   const handleSelect = (key) => {
     if (onSelectItem) { onSelectItem(key); return }
     if (NAV_LINKS[key]) window.location.href = NAV_LINKS[key]
   }
+
+  // `force` shows the tooltip even when expanded (the toggle needs it in
+  // both states; nav items only when collapsed, where labels are hidden).
+  const showTip = (e, text, force = false) => {
+    if (!collapsed && !force) return
+    const r = e.currentTarget.getBoundingClientRect()
+    setTip({ text, top: r.top + r.height / 2, left: r.right + 10 })
+  }
+  const hideTip = () => setTip(null)
 
   return (
     <nav className={`side-nav${collapsed ? ' collapsed' : ''}`}>
@@ -156,8 +169,10 @@ export default function SideNav({
         {!collapsed && <span className="side-nav-title">{appName}</span>}
         <button
           className="side-nav-toggle"
-          onClick={() => setCollapsed(v => !v)}
-          title={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+          onClick={() => { setCollapsed(v => !v); hideTip() }}
+          onMouseEnter={(e) => showTip(e, collapsed ? 'Expand navigation' : 'Collapse navigation', true)}
+          onMouseLeave={hideTip}
+          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
         >
           <ChevronsIcon />
         </button>
@@ -170,8 +185,9 @@ export default function SideNav({
           <button
             key={key}
             className={`side-nav-item${activeItem === key ? ' active' : ''}`}
-            title={collapsed ? label : undefined}
             onClick={() => handleSelect(key)}
+            onMouseEnter={(e) => showTip(e, label)}
+            onMouseLeave={hideTip}
           >
             <span className="side-nav-item-icon"><Icon /></span>
             {!collapsed && <span className="side-nav-item-label">{label}</span>}
@@ -189,6 +205,12 @@ export default function SideNav({
           </div>
         </div>
       </div>
+
+      {tip && (
+        <div className="side-nav-tooltip" style={{ top: tip.top, left: tip.left }}>
+          {tip.text}
+        </div>
+      )}
     </nav>
   )
 }
