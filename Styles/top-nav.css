@@ -37,6 +37,46 @@
 .top-nav-icon-btn:hover,
 .top-nav-icon-btn.active { background: #f3f4f6; }
 
+/* PASSgenius animated logo — embedded via <object> so its own script and
+   CSS animations run. Sized to sit inside the bar; pointer-events stay on
+   so the SVG's internal hover animation fires. */
+.top-nav-genius {
+  width: 22px;
+  height: 22px;
+  display: block;
+  border: none;
+}
+/* The logo has no line-icon stroke to tint on hover, so drop the grey
+   circle — the gradient animation is the hover affordance. */
+.top-nav-genius-btn:hover,
+.top-nav-genius-btn.active { background: none; }
+
+/* Profile avatar — initials fallback follows the employees card
+   convention, sized down to 32px to sit inside the 56px top bar. */
+.top-nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--availability-4-blue-tint, #e3edf7);
+  color: #333;
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  user-select: none;
+}
+/* The avatar carries its own fill, so skip the grey circle hover and
+   show a subtle ring on the avatar itself instead. */
+.top-nav-profile-btn:hover,
+.top-nav-profile-btn.active { background: none; }
+.top-nav-profile-btn:hover .top-nav-avatar,
+.top-nav-profile-btn.active .top-nav-avatar { box-shadow: 0 0 0 2px #e5e7eb; }
+
 .top-nav-badge {
   position: absolute;
   top: 2px;

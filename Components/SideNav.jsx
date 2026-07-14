@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import passEmblemUrl from '../Images/PASS Emblem.png'
 
 // ─── Nav icons ────────────────────────────────────────────────
@@ -206,10 +207,11 @@ export default function SideNav({
         </div>
       </div>
 
-      {tip && (
+      {tip && createPortal(
         <div className="side-nav-tooltip" style={{ top: tip.top, left: tip.left }}>
           {tip.text}
-        </div>
+        </div>,
+        document.body
       )}
     </nav>
   )

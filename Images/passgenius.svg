@@ -1,0 +1,243 @@
+<svg id="animated-logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 231.2 231.13" width="150" height="150">
+  <defs>
+    <style>
+      svg { cursor: pointer; }
+
+      /* Resting state: grey to match the other top-nav icons.
+         (Was #fff — designed for a dark purple background.) */
+      .cls-1,
+      .cls-2,
+      .cls-3 {
+        fill: #9ca3af;
+        transition: fill 0.3s ease-in-out;
+      }
+
+      /* Add this class to switch to animated gradient fill */
+      .gradient-fill .cls-1 {
+        fill: url(#linear-gradient-3);
+      }
+
+      .gradient-fill .cls-2 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .gradient-fill .cls-3 {
+        fill: url(#linear-gradient);
+      }
+
+      #spark {
+        opacity: 0;
+        transform: scale(0);
+        transform-origin: 50% 50%;
+        animation: popIn 0.6s 0.6s ease-out forwards;
+      }
+
+      #burst {
+        opacity: 0;
+        transform: scale(0);
+        transform: rotate(0deg);
+        transform-origin: 50% 50%;
+        animation: popInR 0.5s 0.6s ease-out forwards;
+      }
+
+      #ring {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        transform: scale(0.9);
+        transform-origin: 50% 50%;
+        opacity: 0;
+        animation: draw 1s 0.8s ease-out forwards;
+      }
+
+      @keyframes popIn {
+        0% {
+          opacity: 0;
+          transform: rotate(-30deg) scale(0);
+        }
+
+        60% {
+          opacity: 1;
+          transform: rotate(-15deg) scale(1.2);
+        }
+
+        100% {
+          opacity: 1;
+          transform: rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes popInR {
+        0% {
+          opacity: 0;
+          transform: rotate(-120deg) scale(0);
+        }
+
+        60% {
+          opacity: 1;
+          transform: rotate(-15deg) scale(1.2);
+        }
+
+        100% {
+          opacity: 1;
+          transform: rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .stop1 {
+        animation: gradientFlow1 3s ease-in-out infinite alternate;
+      }
+
+      .stop2 {
+        animation: gradientFlow2 3s 0.3s ease-in-out infinite alternate;
+      }
+
+      .stop3 {
+        animation: gradientFlow3 3s 0.6s ease-in-out infinite alternate;
+      }
+
+      .stop4 {
+        animation: gradientFlow4 3s 0.9s ease-in-out infinite alternate;
+      }
+
+      @keyframes gradientFlow1 {
+        0% {
+          stop-color: #ed1e79;
+        }
+
+        100% {
+          stop-color: #d2368b;
+        }
+      }
+
+      @keyframes gradientFlow2 {
+        0% {
+          stop-color: #d2368b;
+        }
+
+        100% {
+          stop-color: #8d75b9;
+        }
+      }
+
+      @keyframes gradientFlow3 {
+        0% {
+          stop-color: #8d75b9;
+        }
+
+        100% {
+          stop-color: #2ad1fd;
+        }
+      }
+
+      @keyframes gradientFlow4 {
+        0% {
+          stop-color: #2ad1fd;
+        }
+
+        100% {
+          stop-color: #ed1e79;
+        }
+      }
+
+      @keyframes popScale {
+        0% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(0.8);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      #animated-logo.pop {
+        animation: popScale 0.2s ease;
+      }
+    </style>
+
+    <linearGradient id="linear-gradient" x1="229.91" y1="115.57" x2="-1.73" y2="115.57" gradientUnits="userSpaceOnUse">
+      <animateTransform attributeName="gradientTransform" type="rotate" from="0 115.57 115.57" to="360 115.57 115.57" dur="20s" repeatCount="indefinite" />
+      <stop class="stop1" offset=".04" stop-color="#ed1e79" />
+      <stop class="stop2" offset=".19" stop-color="#d2368b" />
+      <stop class="stop3" offset=".51" stop-color="#8d75b9" />
+      <stop class="stop4" offset=".93" stop-color="#2ad1fd" />
+
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="229.91" y1="115.57" x2="-1.73" y2="115.57" xlink:href="#linear-gradient" />
+    <linearGradient id="linear-gradient-3" x1="229.91" y1="64.98" x2="-1.73" y2="64.98" xlink:href="#linear-gradient" />
+  </defs>
+
+  <g id="Layer_1-2">
+    <g>
+      <path id="ring" class="cls-3" d="M229.74,73.98c-2.02-36.73-18.35-60.83-45.72-67.83l-.61-.17h-.03c-11.27-3.3-23.23-4.36-33.49-5C127.03-.12,96.89-.95,66.55,2.28,23.94,6.47,3.16,30.89,1.14,79.15c-1.39,30.34-2.37,62.57,2.4,93.75,8.64,57.07,61.43,57.71,103.87,58.23h8.44c57.69-.17,112.19-.34,114.35-80.51,1.47-27.45,1.33-52.54-.49-76.61l.03-.03ZM218.66,150.13c-1.88,69.12-44.25,69.24-102.85,69.41h-8.27c-41.99-.52-85.4-1.04-92.59-48.41-4.63-30.14-3.67-61.7-2.29-91.5,1.79-42.56,18.24-62.28,55.02-65.89,15.61-1.64,31.18-2.22,45.69-2.22,13.06,0,25.26.46,35.84.96,9.54.58,20.7,1.56,30.87,4.56l.78.23c30.08,7.71,36.27,39.21,37.28,57.45,1.79,23.67,1.93,48.29.49,75.37l.04.02Z" />
+      <path id="burst" class="cls-2" d="M175.95,118.51c-34.51,11.4-46,22.9-57.4,57.4-.94,2.84-4.95,2.84-5.89,0-11.4-34.51-22.9-46-57.4-57.4-2.84-.94-2.84-4.95,0-5.89,34.51-11.4,46-22.9,57.4-57.4.94-2.84,4.95-2.84,5.89,0,11.4,34.51,22.9,46,57.4,57.4,2.84.94,2.84,4.95,0,5.89Z" />
+      <path id="spark" class="cls-1" d="M194.28,66.15c-13.77,4.55-18.35,9.13-22.9,22.9-.37,1.13-1.97,1.13-2.35,0-4.55-13.77-9.13-18.35-22.9-22.9-1.13-.37-1.13-1.97,0-2.35,13.77-4.55,18.35-9.13,22.9-22.9.37-1.13,1.97-1.13,2.35,0,4.55,13.77,9.13,18.35,22.9,22.9,1.13.37,1.13,1.97,0,2.35Z" />
+    </g>
+  </g>
+  <!-- Self-contained: hover plays the gradient, leaving reverts to grey.
+       Listeners bind to the SVG itself so it works embedded via <object>
+       (no external <a> ancestor required). -->
+  <script>
+    <![CDATA[
+    const svg = document.getElementById('animated-logo');
+    let isRunning = false;
+    let isHovering = false;
+    let timeout1, timeout2;
+
+    function runCycle(force = false) {
+      if (isRunning && !force) return;
+      isRunning = true;
+      // Clear any pending timeouts (in case of fast hover)
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      svg.classList.add('gradient-fill');
+      svg.classList.add('pop');
+      timeout1 = setTimeout(() => {
+        svg.classList.remove('pop');
+      }, 400);
+      timeout2 = setTimeout(() => {
+        if (!isHovering) {
+          svg.classList.remove('gradient-fill');
+          svg.classList.add('pop');
+          setTimeout(() => {
+            svg.classList.remove('pop');
+            isRunning = false;
+          }, 400);
+        } else {
+          isRunning = false;
+        }
+      }, 8000);
+    }
+
+    // Hover in — force play the gradient
+    svg.addEventListener('mouseenter', () => {
+      isHovering = true;
+      runCycle(true);
+    });
+    // Hover out — revert to the grey resting state
+    svg.addEventListener('mouseleave', () => {
+      isHovering = false;
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      svg.classList.remove('gradient-fill');
+      svg.classList.add('pop');
+      setTimeout(() => {
+        svg.classList.remove('pop');
+        isRunning = false;
+      }, 400);
+    });
+    ]]>
+  </script>
+
+</svg>
