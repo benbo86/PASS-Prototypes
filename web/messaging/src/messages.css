@@ -342,8 +342,8 @@ body { overflow: hidden; }
   position: absolute;
   bottom: -2px;
   right: -4px;
-  background: var(--brand-purple-6-purple-4);
-  color: #fff;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--ui-purple-3-grape-grey);
   font-family: Barlow, sans-serif;
   font-size: 9px;
   font-weight: 700;
@@ -599,7 +599,7 @@ body { overflow: hidden; }
 .msg-area-badge-count { font-weight: 400; }
 
 .msg-thread-more-pill {
-  background: var(--ui-purple-6-lavendar-grey);
+  background: var(--ui-purple-5-languid-lavendar);
   color: var(--ui-purple-3-grape-grey);
 }
 
@@ -1193,6 +1193,18 @@ body { overflow: hidden; }
   font-family: Barlow, sans-serif;
   font-size: 14px;
   color: #000;
+}
+.msg-roster-person-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.msg-roster-read-at {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--greyscale-8-grey-65);
 }
 
 .msg-roster-avatar {

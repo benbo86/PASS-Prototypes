@@ -167,21 +167,38 @@ function tagMembers(tag) {
 const FILLER_FIRST_NAMES = ['Alice', 'Ben', 'Claire', 'Daniel', 'Ella', 'Frank', 'Grace', 'Henry', 'Isla', 'Jack', 'Kate', 'Liam', 'Maya']
 const FILLER_LAST_NAMES = ['Adams', 'Baxter', 'Chapman', 'Dunn', 'Ellis', 'Foster', 'Gill', 'Hart', 'Ingram', 'Jenkins', 'Knox', 'Lowe', 'Mercer', 'Nash', 'Ogden', 'Pratt', 'Quinn']
 
+// Relative "read X ago" label — staggered per recipient so the read list
+// shows a plausible spread of times rather than one identical timestamp.
+function formatReadAgo(minutesAgo) {
+  if (minutesAgo < 1) return 'Just now'
+  if (minutesAgo < 60) return `${minutesAgo}m ago`
+  const hours = Math.floor(minutesAgo / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
 // Builds a full recipient list matching a broadcast's real total/read counts
 // exactly, so a "31 of 49 read" summary and its expanded list never disagree.
-function generateRecipients(readCount, totalCount) {
+// maxAgoMinutes bounds the OLDEST read timestamp — should reflect how long
+// the message has actually been out (e.g. ~1 day for a message sent
+// yesterday), so read times never imply someone read it before it was sent.
+function generateRecipients(readCount, totalCount, maxAgoMinutes = 180) {
   const names = CARERS.map(c => c.name)
   for (let i = 0; names.length < totalCount; i++) {
     names.push(`${FILLER_FIRST_NAMES[i % FILLER_FIRST_NAMES.length]} ${FILLER_LAST_NAMES[i % FILLER_LAST_NAMES.length]}`)
   }
-  return names.slice(0, totalCount).map((name, i) => ({ name, read: i < readCount }))
+  return names.slice(0, totalCount).map((name, i) => {
+    if (i >= readCount) return { name, read: false }
+    const minutesAgo = readCount === 1 ? maxAgoMinutes : Math.round((i / (readCount - 1)) * maxAgoMinutes)
+    return { name, read: true, readAt: formatReadAgo(minutesAgo) }
+  })
 }
 
 const THREADS = [
   {
     id: 1,
     title: 'Care Homes — Team Update',
-    isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
     participants: 'Blue Bird Sheffield, Sunrise Rotherham, Meadow View Leeds, North Sheffield, South Sheffield · 49 employees',
@@ -201,8 +218,7 @@ const THREADS = [
   },
   {
     id: 2,
-    title: 'Medication Query',
-    isGroup: false,
+    title: 'Adrianna Jackson',
     isBroadcast: false,
     replyAllowed: true,
     participants: 'Adrianna Jackson',
@@ -215,39 +231,8 @@ const THREADS = [
     archivedByOffice: false,
   },
   {
-    id: 3,
-    title: 'Friday Shift — Swap Request',
-    isGroup: false,
-    isBroadcast: false,
-    replyAllowed: true,
-    participants: 'Adrianna Jackson',
-    participantList: ['Adrianna Jackson'],
-    area: 'North Sheffield',
-    lastSender: 'Office',
-    lastMessage: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.",
-    time: 'Yesterday',
-    unread: 0,
-    archivedByOffice: false,
-  },
-  {
-    id: 4,
-    title: 'Annual Leave — July',
-    isGroup: false,
-    isBroadcast: false,
-    replyAllowed: true,
-    participants: 'Adrianna Jackson',
-    participantList: ['Adrianna Jackson'],
-    area: 'North Sheffield',
-    lastSender: 'Adrianna Jackson',
-    lastMessage: "I'd like to request annual leave from 14th July to 18th July if possible.",
-    time: 'Mon',
-    unread: 0,
-    archivedByOffice: false,
-  },
-  {
     id: 5,
     title: 'Road Closures — This Week',
-    isGroup: false,
     isBroadcast: true,
     replyAllowed: false,
     participants: 'All employees (47)',
@@ -261,7 +246,6 @@ const THREADS = [
   {
     id: 6,
     title: 'Shift Confirmation',
-    isGroup: false,
     isBroadcast: false,
     replyAllowed: true,
     participants: 'Tom Harris',
@@ -276,7 +260,6 @@ const THREADS = [
   {
     id: 7,
     title: 'Care Plan Update — Mr. Okonkwo',
-    isGroup: false,
     isBroadcast: false,
     replyAllowed: true,
     participants: 'James Okafor',
@@ -291,15 +274,45 @@ const THREADS = [
   {
     id: 8,
     title: 'Weekend Rota — Cover Needed',
-    isGroup: true,
-    isBroadcast: false,
-    replyAllowed: true,
+    isBroadcast: true,
+    replyAllowed: false,
     participants: 'Tom Harris, Priya Sharma, James Okafor, Linda Peters, Olivia Brooks',
     participantList: ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Linda Peters', 'Olivia Brooks'],
     lastSender: 'Office',
     lastMessage: "Thanks everyone — Saturday's cover is now sorted between the five of you.",
     time: 'Wed',
-    unread: 2,
+    unread: 0,
+    archivedByOffice: false,
+  },
+  // Replies to the "Weekend Rota" broadcast fork into their own private 1:1
+  // threads (per the reply-forking model) — never a shared thread other
+  // recipients can see.
+  {
+    id: 9,
+    title: 'Tom Harris',
+    isBroadcast: false,
+    replyAllowed: true,
+    participants: 'Tom Harris',
+    participantList: ['Tom Harris'],
+    area: 'South Sheffield',
+    lastSender: 'Tom Harris',
+    lastMessage: "I can cover the 8am–12pm slot.",
+    time: 'Wed',
+    unread: 1,
+    archivedByOffice: false,
+  },
+  {
+    id: 10,
+    title: 'Olivia Brooks',
+    isBroadcast: false,
+    replyAllowed: true,
+    participants: 'Olivia Brooks',
+    participantList: ['Olivia Brooks'],
+    area: 'North Sheffield',
+    lastSender: 'Olivia Brooks',
+    lastMessage: "Happy to take the afternoon if needed.",
+    time: 'Wed',
+    unread: 1,
     archivedByOffice: false,
   },
 ]
@@ -308,7 +321,7 @@ const CURRENT_OFFICE_USER = 'Karen Ashworth'
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }], recipients: generateRecipients(31, 49) },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }], recipients: generateRecipients(31, 49, 300) },
   ],
   2: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
@@ -316,17 +329,9 @@ const THREAD_MESSAGES = {
     { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read' },
     { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
   ],
-  3: [
-    { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I was wondering if it would be possible to swap my Friday 6th shift? I have a family commitment that afternoon.", time: 'Fri 11:02 AM', day: 'Friday', receipt: 'read' },
-    { id: 2, isMe: true, senderName: 'Liam Foster', text: "Hi Adrianna, thanks for letting us know. Let me check who's available to cover and get back to you.", time: 'Fri 11:45 AM', day: 'Friday' },
-    { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
-  ],
-  4: [
-    { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
-  ],
   5: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday', recipients: generateRecipients(40, 47) },
-    { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Good news — the A57 road closures near Hillsborough have now been resolved and roads have reopened. Thank you for your patience this week.", time: '11:20 AM', day: 'Today', recipients: generateRecipients(3, 47) },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday', recipients: generateRecipients(40, 47, 1500) },
+    { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Good news — the A57 road closures near Hillsborough have now been resolved and roads have reopened. Thank you for your patience this week.", time: '11:20 AM', day: 'Today', recipients: generateRecipients(3, 47, 20) },
   ],
   6: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Tom, can you cover the Friday 6th visit at 6pm? Should be a straightforward personal care call.", time: 'Tue 10:15 AM', day: 'Tuesday', receipt: 'read' },
@@ -337,10 +342,14 @@ const THREAD_MESSAGES = {
     { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Thanks for flagging this — the care plan has been updated to reflect the new mobility support.", time: 'Mon 1:20 PM', day: 'Monday' },
   ],
   8: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "We still need cover for Saturday's morning visits — can anyone take an extra shift?", time: 'Wed 9:02 AM', day: 'Wednesday', receipt: 'read' },
-    { id: 2, isMe: false, sender: 'Tom Harris', text: "I can cover the 8am–12pm slot.", time: 'Wed 9:30 AM', day: 'Wednesday' },
-    { id: 3, isMe: false, sender: 'Olivia Brooks', text: "Happy to take the afternoon if needed.", time: 'Wed 9:41 AM', day: 'Wednesday' },
-    { id: 4, isMe: true, senderName: 'Karen Ashworth', text: "Thanks everyone — Saturday's cover is now sorted between the five of you.", time: 'Wed 10:15 AM', day: 'Wednesday' },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "We still need cover for Saturday's morning visits — can anyone take an extra shift?", time: 'Wed 9:02 AM', day: 'Wednesday', receipt: 'read', recipients: generateRecipients(4, 5, 500) },
+    { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Thanks everyone — Saturday's cover is now sorted between the five of you.", time: 'Wed 10:15 AM', day: 'Wednesday', recipients: generateRecipients(2, 5, 120) },
+  ],
+  9: [
+    { id: 1, isMe: false, sender: 'Tom Harris', text: "I can cover the 8am–12pm slot.", time: 'Wed 9:30 AM', day: 'Wednesday' },
+  ],
+  10: [
+    { id: 1, isMe: false, sender: 'Olivia Brooks', text: "Happy to take the afternoon if needed.", time: 'Wed 9:41 AM', day: 'Wednesday' },
   ],
 }
 
@@ -474,6 +483,11 @@ function ThreadRow({ thread, isActive, onClick }) {
   const extraCount = !thread.isBroadcast && thread.participantList.length > 1
     ? thread.participantList.length - 1
     : 0
+  // No custom subject was set (title defaulted to the recipient's name) —
+  // showing the recipient line too would just repeat the same name twice.
+  const recipientLineRedundant = !thread.isBroadcast
+    && thread.participantList.length === 1
+    && thread.participantList[0] === thread.title
 
   return (
     <div
@@ -495,7 +509,7 @@ function ThreadRow({ thread, isActive, onClick }) {
           <span className="msg-thread-name">{thread.title}</span>
           <span className="msg-thread-time">{thread.time}</span>
         </div>
-        {!thread.areaTags && (
+        {!thread.areaTags && !recipientLineRedundant && (
           thread.participantList.length > 0
             ? <RecipientNames names={thread.participantList} />
             : <span className="msg-thread-recipient-plain">{thread.participants}</span>
@@ -846,6 +860,11 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
   const headerFirstName = thread.participantList[0] || ''
   const headerInitials = !thread.isBroadcast && headerFirstName ? getInitials(headerFirstName) : ''
   const headerPalette = !thread.isBroadcast && headerFirstName ? nameToColor(headerFirstName) : null
+  // No custom subject was set (title defaulted to the recipient's name) —
+  // showing the recipient line too would just repeat the same name twice.
+  const recipientLineRedundant = !thread.isBroadcast
+    && thread.participantList.length === 1
+    && thread.participantList[0] === thread.title
   const readStatusMsg = localMsgs.find(m => m.id === readStatusMsgId)
 
   const byDay = localMsgs.reduce((acc, msg) => {
@@ -905,7 +924,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           <div className="msg-thread-header-sub-row">
             {thread.areaTags ? (
               <AreaTags tags={thread.areaTags} showCount />
-            ) : thread.participantList.length > 0 ? (
+            ) : recipientLineRedundant ? null : thread.participantList.length > 0 ? (
               <RecipientNames names={thread.participantList} />
             ) : (
               <span className="msg-thread-header-sub">{thread.participants}</span>
@@ -1067,7 +1086,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
       {thread.isBroadcast && (
         <div className="msg-broadcast-notice read-only">
           <BroadcastIcon size={16} />
-          <span>Employees can't reply to this broadcast — you can still send follow-up updates below.</span>
+          <span>Employees can't reply to this broadcast</span>
         </div>
       )}
 
@@ -1096,7 +1115,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           <input
             ref={inputRef}
             className="msg-compose-input"
-            placeholder={thread.isBroadcast ? 'Send a follow-up update...' : 'Reply to this thread...'}
+            placeholder={thread.isBroadcast ? '' : 'Reply to this thread...'}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
@@ -1154,7 +1173,8 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                           <div className="msg-roster-avatar" style={{ background: palette.bg, color: palette.fg }}>
                             {getInitials(r.name)}
                           </div>
-                          <span>{r.name}</span>
+                          <span className="msg-roster-person-name">{r.name}</span>
+                          {r.readAt && <span className="msg-roster-read-at">{r.readAt}</span>}
                         </li>
                       )
                     })}
@@ -1233,7 +1253,7 @@ function ComposeView({ mode, onSend, onCancel }) {
   const hasRecipients = isBroadcast
     ? (broadcastType === 'all' || (broadcastType === 'groups' ? selectedTags.length > 0 : selectedCarers.length > 0))
     : !!selectedCarer
-  const canSend = title.trim() && message.trim() && hasRecipients
+  const canSend = (!isBroadcast || title.trim()) && message.trim() && hasRecipients
 
   // Employee mode: single selection, picking a new one replaces the current one
   const selectCarer = (carer) => {
@@ -1448,7 +1468,9 @@ function ComposeView({ mode, onSend, onCancel }) {
 
         {/* Title */}
         <div className="msg-compose-field">
-          <label className="msg-compose-label">Subject <span className="msg-required">*</span></label>
+          <label className="msg-compose-label">
+            Subject {isBroadcast ? <span className="msg-required">*</span> : '(optional)'}
+          </label>
           <input
             className="form-input"
             placeholder="What is this message about?"
@@ -1683,7 +1705,6 @@ export default function App() {
       const newThread = {
         id: baseId,
         title,
-        isGroup: false,
         isBroadcast: true,
         replyAllowed: false,
         participants: participantsSummary,
@@ -1713,12 +1734,12 @@ export default function App() {
       setActiveThreadId(baseId)
       setRightPanel('thread')
     } else {
-      // Employee mode — always exactly one recipient, normal 1:1 thread
+      // Employee mode — always exactly one recipient, normal 1:1 thread.
+      // Subject is optional here — an empty one falls back to the employee's name.
       const recipient = recipients[0]
       const newThread = {
         id: baseId,
-        title,
-        isGroup: false,
+        title: title.trim() || recipient.name,
         isBroadcast: false,
         replyAllowed: true,
         participants: recipient.name,
