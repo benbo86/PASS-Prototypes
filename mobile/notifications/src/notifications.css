@@ -89,6 +89,39 @@
 
 /* ── Notification Row ──────────────────────────────────────────── */
 
+/* ── Swipe to delete ─────────────────────────────────────────────── */
+
+.notif-swipe-wrap {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  transition: height 200ms ease, opacity 200ms ease;
+}
+
+.notif-swipe-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--rag-red-red-overdue);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 28px;
+}
+
+.notif-swipe-bg-icon {
+  display: flex;
+  transition: transform 150ms ease;
+}
+
+.notif-swipe-bg-icon.armed {
+  transform: scale(1.15);
+}
+
+.notif-swipe-row {
+  position: relative;
+}
+
 .notif-row {
   display: flex;
   align-items: flex-start;

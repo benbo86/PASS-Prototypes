@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
@@ -105,6 +105,16 @@ const TimeGlassDetailIcon = () => <TimeGlassIcon size={16} />
 
 const RunDetailIcon = () => <RunIcon size={16} />
 
+const TrashIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18" />
+    <path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+)
+
 const TYPE_CONFIG = {
   time_changed:           { label: 'Booking time changed',       iconBg: '#fef3dc', iconColor: '#e09000', Icon: ClockIcon },
   duration_changed:       { label: 'Duration changed',           iconBg: '#fef3dc', iconColor: '#e09000', Icon: TimeGlassIcon },
@@ -206,6 +216,104 @@ function NotifRow({ notif }) {
   )
 }
 
+// ─── Swipe-to-delete wrapper ────────────────────────────────────
+// Full swipe left past a distance threshold deletes the notification
+// immediately (no reveal button to tap) — a short tap still opens the
+// booking detail. touch-action: pan-y lets vertical list scrolling stay
+// native while we own horizontal drags via pointer events.
+
+const SWIPE_THRESHOLD_RATIO = 0.35
+const SWIPE_SLIDE_MS = 200
+const SWIPE_COLLAPSE_MS = 200
+
+function SwipeableNotifRow({ notif, onOpen, onDelete }) {
+  const wrapRef = useRef(null)
+  const gestureRef = useRef({ startX: 0, startY: 0, width: 0, locked: null, pointerId: null })
+  const [dragX, setDragX] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const [collapsedHeight, setCollapsedHeight] = useState(null)
+  const [collapsing, setCollapsing] = useState(false)
+
+  const handlePointerDown = (e) => {
+    if (collapsedHeight != null) return
+    const g = gestureRef.current
+    g.startX = e.clientX
+    g.startY = e.clientY
+    g.width = wrapRef.current.offsetWidth
+    g.locked = null
+    g.pointerId = e.pointerId
+    wrapRef.current.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }
+
+  const handlePointerMove = (e) => {
+    const g = gestureRef.current
+    if (g.pointerId !== e.pointerId) return
+    const dx = e.clientX - g.startX
+    const dy = e.clientY - g.startY
+    if (g.locked === null) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return
+      g.locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+    }
+    if (g.locked !== 'x') return
+    setDragX(Math.min(0, Math.max(-g.width, dx)))
+  }
+
+  const finishGesture = (e) => {
+    const g = gestureRef.current
+    if (g.pointerId !== e.pointerId) return
+    setDragging(false)
+
+    if (g.locked === 'x') {
+      const threshold = g.width * SWIPE_THRESHOLD_RATIO
+      if (Math.abs(dragX) >= threshold) {
+        setDragX(-g.width)
+        const height = wrapRef.current.offsetHeight
+        setTimeout(() => {
+          setCollapsedHeight(height)
+          requestAnimationFrame(() => requestAnimationFrame(() => setCollapsing(true)))
+          setTimeout(() => onDelete(notif.id), SWIPE_COLLAPSE_MS + 30)
+        }, SWIPE_SLIDE_MS)
+        g.locked = null
+        g.pointerId = null
+        return
+      }
+      setDragX(0)
+    } else if (g.locked === null) {
+      onOpen(notif)
+    }
+    g.locked = null
+    g.pointerId = null
+  }
+
+  const armed = Math.abs(dragX) >= gestureRef.current.width * SWIPE_THRESHOLD_RATIO
+  const bgOpacity = Math.min(1, Math.abs(dragX) / ((gestureRef.current.width || 1) * SWIPE_THRESHOLD_RATIO))
+
+  return (
+    <div
+      className="notif-swipe-wrap"
+      ref={wrapRef}
+      style={collapsedHeight != null ? { height: collapsing ? 0 : collapsedHeight, opacity: collapsing ? 0 : 1 } : undefined}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={finishGesture}
+      onPointerCancel={finishGesture}
+    >
+      <div className="notif-swipe-bg" style={{ opacity: bgOpacity }}>
+        <div className={`notif-swipe-bg-icon${armed ? ' armed' : ''}`}>
+          <TrashIcon />
+        </div>
+      </div>
+      <div
+        className="notif-swipe-row"
+        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? 'none' : `transform ${SWIPE_SLIDE_MS}ms ease` }}
+      >
+        <NotifRow notif={notif} />
+      </div>
+    </div>
+  )
+}
+
 // ─── Filters ──────────────────────────────────────────────────
 
 // const FILTERS = [
@@ -219,7 +327,7 @@ function NotifRow({ notif }) {
 
 // ─── Notification Centre Screen ────────────────────────────────
 
-function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAllRead }) {
+function NotifCentreScreen({ notifications, onViewBooking, onDeleteNotification, unreadCount, onMarkAllRead }) {
   // const [activeFilter, setActiveFilter] = useState('all')
   // const filter = FILTERS.find(f => f.id === activeFilter)
   // const filtered = filter.types ? notifications.filter(n => filter.types.includes(n.type)) : notifications
@@ -255,9 +363,7 @@ function NotifCentreScreen({ notifications, onViewBooking, unreadCount, onMarkAl
           <div key={group.label}>
             <div className="notif-section-header">{group.label}</div>
             {group.items.map(n => (
-              <div key={n.id} onClick={() => onViewBooking(n)} style={{ cursor: 'pointer' }}>
-                <NotifRow notif={n} />
-              </div>
+              <SwipeableNotifRow key={n.id} notif={n} onOpen={onViewBooking} onDelete={onDeleteNotification} />
             ))}
           </div>
         )) : (
@@ -460,6 +566,10 @@ export default function App() {
     setView('detail')
   }
 
+  const deleteNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
@@ -475,6 +585,7 @@ export default function App() {
               <NotifCentreScreen
                 notifications={notifications}
                 onViewBooking={viewBooking}
+                onDeleteNotification={deleteNotification}
                 unreadCount={unreadCount}
                 onMarkAllRead={markAllRead}
               />
