@@ -4,7 +4,7 @@
 
 body { background: #f5f5f6; min-height: 100vh; }
 
-.page { display: flex; flex-direction: column; min-height: 100vh; }
+.page { display: flex; flex-direction: row; min-height: 100vh; }
 
 /* ── Doc sub-tabs ────────────────────────────────────────────── */
 

@@ -1,0 +1,20 @@
+.top-nav-demo {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.top-nav-demo-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+}
+.top-nav-demo-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.top-nav-demo-content p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 60ch;
+}

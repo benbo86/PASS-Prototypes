@@ -1,5 +1,7 @@
 /* ── Scope wrapper ────────────────────────────────────────────── */
 
+.page { display: flex; flex-direction: row; min-height: 100vh; }
+
 .timeline-legacy {
   font-family: var(--legacy-font-family);
   color: var(--legacy-text-color);
@@ -49,9 +51,10 @@
   padding-left:30px;
   margin: 0 -24px 12px;
   /* Pins to the bottom edge of .context-bar (top:56px + 156px measured
-     height = 212px). Scoped inside its own .tl-day-group, so it naturally
-     hands off to the next day's header once this group's content scrolls
-     past — no JS needed. */
+     height = 212px), where the 56px accounts for the sticky .top-nav
+     sitting above it. Scoped inside its own .tl-day-group, so it
+     naturally hands off to the next day's header once this group's
+     content scrolls past — no JS needed. */
   position: sticky;
   top: 212px;
   z-index: 10;

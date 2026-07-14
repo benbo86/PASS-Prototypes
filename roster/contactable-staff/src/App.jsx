@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 import SlidePanel from '../../../Components/SlidePanel'
 
@@ -229,8 +230,10 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
-      <WebNav />
+      <SideNav activeItem="office" />
 
+      <div className="page-body">
+      <TopNav />
       <OfficeNav active="roster-settings" />
 
       <div className="settings-layout">
@@ -372,6 +375,7 @@ export default function App() {
           </div>
         )}
       </SlidePanel>
+      </div>
     </div>
   )
 }

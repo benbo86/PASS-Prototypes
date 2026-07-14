@@ -1,0 +1,37 @@
+.mobile-shell-demo {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.mobile-shell-demo-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+}
+.mobile-shell-demo-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.mobile-shell-demo-content p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 60ch;
+}
+
+/* Real screens always paint an opaque background on their body content,
+   which is what keeps the outgoing slide fully hidden behind the
+   incoming one. This minimal demo's body has no real content to do
+   that, so paint the whole slide white directly. */
+.mobile-shell-demo .screen-slide {
+  background: #fff;
+}
+
+.shell-demo-body {
+  padding: 24px;
+}
+.shell-demo-body p {
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 16px;
+  font-size: 14px;
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -205,8 +206,10 @@ export default function App() {
     <div className="page">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
 
-      <WebNav activePage="customers" />
+      <SideNav activeItem="customers" />
 
+      <div className="page-body">
+      <TopNav />
       <CustomerProfileNav activeTab="Documents" />
 
       {/* Doc sub-tabs */}
@@ -261,6 +264,7 @@ export default function App() {
           onAdd={handleAdd}
         />
       )}
+      </div>
     </div>
   )
 }

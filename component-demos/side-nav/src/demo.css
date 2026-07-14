@@ -1,0 +1,22 @@
+.side-nav-demo {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+.side-nav-demo-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+}
+.side-nav-demo-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+.side-nav-demo-content p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 60ch;
+}

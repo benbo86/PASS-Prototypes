@@ -7,6 +7,7 @@ body, p {
     line-height: 1.38;
     letter-spacing: normal;
     color: #000;
+    margin:0;
 }
 
 h1 {
@@ -701,6 +702,17 @@ h6 {
   display: flex;
   padding: 4px;
   line-height: 0;
+}
+
+/* ── Side nav page shell ──────────────────────────────────────── */
+/* Wraps everything that used to sit below WebNav, so pages can go from a
+   flex-column (nav on top) to a flex-row (SideNav on the left) layout
+   without each page's inner content needing to change. */
+.page-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Web Navigation ──────────────────────────────────────────── */

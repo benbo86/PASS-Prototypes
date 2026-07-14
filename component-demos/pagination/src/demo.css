@@ -1,0 +1,14 @@
+.demo-page {
+  min-height: 100vh;
+  padding: 48px;
+}
+.demo-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.demo-content p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 60ch;
+  margin-bottom: 32px;
+}

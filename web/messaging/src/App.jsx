@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -1579,7 +1580,9 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
-      <WebNav activePage="messages" unreadMessages={messageBadge} />
+      <SideNav />
+      <div className="page-body">
+      <TopNav activeItem="messages" unreadMessages={messageBadge} />
       <div className="messages-layout">
         <Sidebar
           threads={threads}
@@ -1611,6 +1614,7 @@ export default function App() {
             />
           )}
         </div>
+      </div>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -677,8 +678,10 @@ export default function App() {
         <ChevronLeftIcon /> Prototypes
       </a>
 
-      <WebNav activePage="settings" />
+      <SideNav activeItem="office" />
 
+      <div className="page-body">
+      <TopNav />
       <OfficeNav active="documents" />
 
       <div className="page-content">
@@ -745,6 +748,7 @@ export default function App() {
           onSave={handleSave}
         />
       )}
+      </div>
     </div>
   )
 }

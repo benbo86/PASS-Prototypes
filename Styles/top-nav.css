@@ -1,0 +1,90 @@
+/* ── PASS top navigation ──────────────────────────────────────────
+   Built from a Chrome screenshot (no Figma frame existed for this),
+   so exact colors/spacing are a best-effort read of the screenshot.
+   Houses the utility actions that don't have a home in the left
+   SideNav (journal, PASSgenius, messages, help, profile/log out). */
+
+.top-nav {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.top-nav-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.top-nav-icon-btn svg { width: 20px; height: 20px; }
+.top-nav-icon-btn:hover,
+.top-nav-icon-btn.active { background: #f3f4f6; }
+
+.top-nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  background: var(--rag-red-red-overdue);
+  color: #fff;
+  border-radius: 8px;
+  font-family: Barlow, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  line-height: 1;
+}
+
+.top-nav-profile { position: relative; }
+
+.top-nav-profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  min-width: 140px;
+  z-index: 300;
+  overflow: hidden;
+}
+
+.top-nav-profile-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 16px;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1;
+}
+.top-nav-profile-item:hover { background: var(--ui-purple-7-lightest-lavendar); }

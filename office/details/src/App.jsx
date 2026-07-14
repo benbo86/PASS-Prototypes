@@ -1,4 +1,5 @@
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 
 const ChevronLeftIcon = () => (
@@ -11,7 +12,9 @@ export default function App() {
   return (
     <div className="office-page">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
-      <WebNav activePage="office" />
+      <SideNav activeItem="office" />
+      <div className="page-body">
+      <TopNav />
       <OfficeNav active="details" />
       <main className="office-content">
         <div className="office-placeholder-card">
@@ -19,6 +22,7 @@ export default function App() {
           <p>No prototype built yet — placeholder page.</p>
         </div>
       </main>
+      </div>
     </div>
   )
 }

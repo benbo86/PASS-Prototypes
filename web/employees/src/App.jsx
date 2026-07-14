@@ -1,4 +1,5 @@
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import LegacyEmployeeCard from '../../../Components/LegacyEmployeeCard'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -112,8 +113,10 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
-      <WebNav activePage="employees" />
+      <SideNav activeItem="employees" />
 
+      <div className="page-body">
+      <TopNav />
       <div className="emp-content">
         <div className="emp-page-header">
           <h1>Employees</h1>
@@ -137,6 +140,7 @@ export default function App() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

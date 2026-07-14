@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
-import WebNav from '../../../Components/WebNav'
+import SideNav from '../../../Components/SideNav'
+import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 import employeePlaceholder from '../../../Images/Employee Placeholder.png'
 
@@ -522,9 +523,12 @@ export default function App() {
   }
 
   return (
-    <div>
+    <div className="page">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
-      <WebNav activePage="customers" />
+      <SideNav activeItem="customers" />
+
+      <div className="page-body">
+      <TopNav />
       <CustomerProfileNav activeTab="Timeline" />
 
       <div className="timeline-legacy">
@@ -562,6 +566,7 @@ export default function App() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

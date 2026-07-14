@@ -5,7 +5,7 @@ body { overflow: hidden; }
 
 .messages-page {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   overflow: hidden;
 }
