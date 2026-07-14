@@ -893,11 +893,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
         ...(attachments.length ? { attachments } : {}),
         ...(thread.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
       }
-      setLocalMsgs(prev => [
-        ...prev,
-        ...(thread.archivedByOffice ? [{ id: Date.now(), type: 'event', text: 'This thread has been unarchived', time: 'Just now', day: 'Today' }] : []),
-        newMsg,
-      ])
+      setLocalMsgs(prev => [...prev, newMsg])
       onSend?.(text, attachments)
       setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
     }
@@ -1651,31 +1647,14 @@ export default function App() {
         ...(attachments?.length ? { attachments } : {}),
         ...(activeThread?.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
       }
-      const additions = wasArchived
-        ? [
-            { id: now, type: 'event', text: 'This thread has been unarchived', time: 'Just now', day: 'Today' },
-            sentMsg,
-          ]
-        : [{ ...sentMsg, id: now }]
-      return { ...prev, [activeThreadId]: [...existing, ...additions] }
+      return { ...prev, [activeThreadId]: [...existing, { ...sentMsg, id: now }] }
     })
   }
 
   const handleToggleArchive = () => {
-    const activeThread = threads.find(t => t.id === activeThreadId)
-    const isArchived = activeThread?.archivedByOffice
     setThreads(prev => prev.map(t =>
       t.id === activeThreadId ? { ...t, archivedByOffice: !t.archivedByOffice } : t
     ))
-    if (!activeThread?.isBroadcast) {
-      setThreadMessages(prev => ({
-        ...prev,
-        [activeThreadId]: [
-          ...(prev[activeThreadId] || []),
-          { id: Date.now(), type: 'event', text: isArchived ? 'This thread has been unarchived' : 'This thread has been archived', time: 'Just now', day: 'Today' },
-        ],
-      }))
-    }
     setActiveThreadId(null)
     setRightPanel('empty')
   }
