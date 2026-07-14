@@ -28,10 +28,21 @@
 }
 
 .shell-demo-body {
-  padding: 24px;
+  padding: 24px 24px 95px;
 }
 .shell-demo-body p {
   color: var(--greyscale-4-grey-40);
   margin-bottom: 16px;
   font-size: 14px;
+}
+
+/* AppNav sits outside the ScreenSlider entirely (a sibling of .screen, not
+   inside either slide), pinned to the bottom of the phone frame so it
+   never moves during the primary/secondary transition. */
+.mobile-shell-demo .phone-frame > .app-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
 }

@@ -17,10 +17,9 @@ function HomeScreen({ onOpenDetail }) {
       <StatusBar />
       <AppHeader title="Home" />
       <div className="shell-demo-body">
-        <p>Primary screen — StatusBar + AppHeader (no back button) + AppNav.</p>
+        <p>Primary screen — StatusBar + AppHeader (no back button). AppNav sits outside the slider, fixed at the bottom.</p>
         <button className="round-btn primary-btn" onClick={onOpenDetail}>Open detail screen</button>
       </div>
-      <AppNav activeTab="bookings" />
     </>
   )
 }
@@ -31,9 +30,8 @@ function DetailScreen({ onBack }) {
       <StatusBar />
       <AppHeader title="Detail" onBack={onBack} />
       <div className="shell-demo-body">
-        <p>Secondary screen — same shell, AppHeader now shows a back button. ScreenSlider handles the slide transition between the two.</p>
+        <p>Secondary screen — same shell, AppHeader now shows a back button. ScreenSlider handles the slide transition between the two; AppNav stays put.</p>
       </div>
-      <AppNav activeTab="bookings" />
     </>
   )
 }
@@ -56,6 +54,7 @@ export default function App() {
             secondary={<DetailScreen onBack={() => setDetailOpen(false)} />}
           />
         </div>
+        <AppNav activeTab="bookings" />
       </PhoneFrame>
     </div>
   )

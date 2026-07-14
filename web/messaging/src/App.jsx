@@ -72,6 +72,11 @@ const CheckSentIcon = () => (
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
+const EyeIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+  </svg>
+)
 const UnreadBubbleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
@@ -112,27 +117,27 @@ const ChevronRightIcon = ({ size = 16 }) => (
 // ─── Data ─────────────────────────────────────────────────────
 
 const CARERS = [
-  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', area: 'North Sheffield' },
-  { id: 2,  name: 'Karen Bailey',    initials: 'KB', area: 'North Sheffield' },
-  { id: 3,  name: 'Tom Harris',      initials: 'TH', area: 'South Sheffield' },
-  { id: 4,  name: 'Priya Sharma',    initials: 'PS', area: 'South Sheffield' },
-  { id: 5,  name: 'James Okafor',    initials: 'JO', area: 'Rotherham Central' },
-  { id: 6,  name: 'Linda Peters',    initials: 'LP', area: 'Rotherham Central' },
-  { id: 7,  name: 'David Chen',      initials: 'DC', area: 'North Sheffield' },
-  { id: 8,  name: 'Emma Richardson', initials: 'ER', area: 'South Sheffield' },
-  { id: 9,  name: 'Michael Hughes',  initials: 'MH', area: 'Rotherham Central' },
-  { id: 10, name: 'Olivia Brooks',   initials: 'OB', area: 'North Sheffield' },
-  { id: 11, name: 'Nathan Wells',    initials: 'NW', area: 'South Sheffield' },
-  { id: 12, name: 'Chloe Barker',    initials: 'CB', area: 'Rotherham Central' },
-  { id: 13, name: 'Ryan Sutton',     initials: 'RS', area: 'North Sheffield' },
-  { id: 14, name: 'Fiona Marsh',     initials: 'FM', area: 'South Sheffield' },
-  { id: 15, name: 'Callum Reid',     initials: 'CR', area: 'Rotherham Central' },
+  { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', area: 'North Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Early Shift' },
+  { id: 2,  name: 'Karen Bailey',    initials: 'KB', area: 'North Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Early Shift' },
+  { id: 3,  name: 'Tom Harris',      initials: 'TH', area: 'South Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
+  { id: 4,  name: 'Priya Sharma',    initials: 'PS', area: 'South Sheffield',    careHome: 'Sunrise Rotherham',   shiftPattern: 'Late Shift'  },
+  { id: 5,  name: 'James Okafor',    initials: 'JO', area: 'Rotherham Central',  careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
+  { id: 6,  name: 'Linda Peters',    initials: 'LP', area: 'Rotherham Central',  careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
+  { id: 7,  name: 'David Chen',      initials: 'DC', area: 'North Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
+  { id: 8,  name: 'Emma Richardson', initials: 'ER', area: 'South Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
+  { id: 9,  name: 'Michael Hughes',  initials: 'MH', area: 'Rotherham Central',  careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
+  { id: 10, name: 'Olivia Brooks',   initials: 'OB', area: 'North Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
+  { id: 11, name: 'Nathan Wells',    initials: 'NW', area: 'South Sheffield',    careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
+  { id: 12, name: 'Chloe Barker',    initials: 'CB', area: 'Rotherham Central',  careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
+  { id: 13, name: 'Ryan Sutton',     initials: 'RS', area: 'North Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
+  { id: 14, name: 'Fiona Marsh',     initials: 'FM', area: 'South Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
+  { id: 15, name: 'Callum Reid',     initials: 'CR', area: 'Rotherham Central',  careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
 ]
 
 const TAG_TYPES = [
-  { id: 1, name: 'Care Home' },
-  { id: 2, name: 'Area' },
-  { id: 3, name: 'Shift Pattern' },
+  { id: 1, name: 'Care Home',    field: 'careHome' },
+  { id: 2, name: 'Area',         field: 'area' },
+  { id: 3, name: 'Shift Pattern', field: 'shiftPattern' },
 ]
 
 const TAGS = [
@@ -146,6 +151,31 @@ const TAGS = [
   { id: 108, typeId: 3, name: 'Late Shift',           memberCount: 10 },
   { id: 109, typeId: 3, name: 'Weekend',              memberCount: 7  },
 ]
+
+// Sample of the real employees behind each tag — used to preview names when
+// selecting a broadcast area/group. Deliberately independent of tag.memberCount
+// (which represents the full live roster, larger than this CARERS sample).
+function tagMembers(tag) {
+  const type = TAG_TYPES.find(t => t.id === tag.typeId)
+  return CARERS.filter(c => c[type.field] === tag.name)
+}
+
+// Extra plausible names to pad a broadcast's recipient list out to its real
+// total (a broadcast reaches far more people than the 15-person CARERS
+// sample) — paired combinatorially so the two pool sizes (13 x 17) don't
+// repeat a pairing until index 221, well past any broadcast size used here.
+const FILLER_FIRST_NAMES = ['Alice', 'Ben', 'Claire', 'Daniel', 'Ella', 'Frank', 'Grace', 'Henry', 'Isla', 'Jack', 'Kate', 'Liam', 'Maya']
+const FILLER_LAST_NAMES = ['Adams', 'Baxter', 'Chapman', 'Dunn', 'Ellis', 'Foster', 'Gill', 'Hart', 'Ingram', 'Jenkins', 'Knox', 'Lowe', 'Mercer', 'Nash', 'Ogden', 'Pratt', 'Quinn']
+
+// Builds a full recipient list matching a broadcast's real total/read counts
+// exactly, so a "31 of 49 read" summary and its expanded list never disagree.
+function generateRecipients(readCount, totalCount) {
+  const names = CARERS.map(c => c.name)
+  for (let i = 0; names.length < totalCount; i++) {
+    names.push(`${FILLER_FIRST_NAMES[i % FILLER_FIRST_NAMES.length]} ${FILLER_LAST_NAMES[i % FILLER_LAST_NAMES.length]}`)
+  }
+  return names.slice(0, totalCount).map((name, i) => ({ name, read: i < readCount }))
+}
 
 const THREADS = [
   {
@@ -168,8 +198,6 @@ const THREADS = [
     time: '10:42 AM',
     unread: 0,
     archivedByOffice: false,
-    broadcastRecipientCount: 49,
-    broadcastReadCount: 31,
   },
   {
     id: 2,
@@ -225,12 +253,10 @@ const THREADS = [
     participants: 'All employees (47)',
     participantList: [],
     lastSender: 'Office',
-    lastMessage: "Please be aware of road closures on the A57 this week due to utility works.",
-    time: 'Yesterday',
+    lastMessage: "Good news — the A57 road closures near Hillsborough have now been resolved and roads have reopened.",
+    time: 'Today',
     unread: 0,
     archivedByOffice: false,
-    broadcastRecipientCount: 47,
-    broadcastReadCount: 0,
   },
   {
     id: 6,
@@ -282,7 +308,7 @@ const CURRENT_OFFICE_USER = 'Karen Ashworth'
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }] },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }], recipients: generateRecipients(31, 49) },
   ],
   2: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
@@ -299,7 +325,8 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: false, sender: 'Adrianna Jackson', text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
   ],
   5: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday' },
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday', recipients: generateRecipients(40, 47) },
+    { id: 2, isMe: true, senderName: 'Karen Ashworth', text: "Good news — the A57 road closures near Hillsborough have now been resolved and roads have reopened. Thank you for your patience this week.", time: '11:20 AM', day: 'Today', recipients: generateRecipients(3, 47) },
   ],
   6: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Tom, can you cover the Friday 6th visit at 6pm? Should be a straightforward personal care call.", time: 'Tue 10:15 AM', day: 'Tuesday', receipt: 'read' },
@@ -778,6 +805,8 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
   const [editing, setEditing] = useState(null)
   const [actionTarget, setActionTarget] = useState(null)
   const [attachments, setAttachments] = useState([])
+  const [readStatusMsgId, setReadStatusMsgId] = useState(null)
+  const [readStatusSearch, setReadStatusSearch] = useState('')
   const endRef = useRef(null)
   const inputRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -798,7 +827,12 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
     setInputText('')
     setReplyTo(null)
     setAttachments([])
+    setReadStatusMsgId(null)
   }, [thread.id])
+
+  useEffect(() => {
+    setReadStatusSearch('')
+  }, [readStatusMsgId])
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'auto' })
@@ -812,6 +846,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
   const headerFirstName = thread.participantList[0] || ''
   const headerInitials = !thread.isBroadcast && headerFirstName ? getInitials(headerFirstName) : ''
   const headerPalette = !thread.isBroadcast && headerFirstName ? nameToColor(headerFirstName) : null
+  const readStatusMsg = localMsgs.find(m => m.id === readStatusMsgId)
 
   const byDay = localMsgs.reduce((acc, msg) => {
     const last = acc[acc.length - 1]
@@ -827,14 +862,17 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
       setLocalMsgs(prev => prev.map(m => m.id === editing.id ? { ...m, text, edited: true } : m))
       setEditing(null)
     } else {
+      const broadcastTotal = localMsgs.find(m => m.recipients)?.recipients.length ?? CARERS.length
       const newMsg = {
         id: localMsgs.length + 1,
         isMe: true,
+        senderName: CURRENT_OFFICE_USER,
         text,
         time: 'Just now',
         day: 'Today',
         ...(replyTo ? { replyTo } : {}),
         ...(attachments.length ? { attachments } : {}),
+        ...(thread.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
       }
       setLocalMsgs(prev => [
         ...prev,
@@ -873,9 +911,6 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
               <span className="msg-thread-header-sub">{thread.participants}</span>
             )}
           </div>
-          {thread.isBroadcast && (
-            <span className="msg-read-count">{thread.broadcastReadCount} of {thread.broadcastRecipientCount} read</span>
-          )}
         </div>
         <div className="msg-thread-header-actions">
           {!thread.archivedByOffice && thread.replyAllowed && (
@@ -899,6 +934,8 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
         </div>
       </div>
 
+      <div className="msg-thread-content-row">
+      <div className="msg-thread-main-col">
       {/* Messages */}
       <div className="msg-messages-area" onClick={() => setActionTarget(null)}>
         {byDay.map(group => (
@@ -945,13 +982,19 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                     {msg.isMe && msg.receipt === 'read' && <CheckDoubleIcon read={true} />}
                     {msg.isMe && msg.receipt === 'delivered' && <CheckDoubleIcon read={false} />}
                     {msg.isMe && !msg.receipt && <CheckSentIcon />}
+                    {msg.isMe && thread.isBroadcast && msg.recipients && (
+                      <button className="msg-read-count-inline" onClick={() => setReadStatusMsgId(msg.id)}>
+                        {msg.recipients.filter(r => r.read).length}/{msg.recipients.length} <EyeIcon />
+                      </button>
+                    )}
                   </div>
 
                   {/* Inline action menu on click */}
                   {actionTarget?.id === msg.id && (() => {
                     const isOwnMessage = msg.isMe && msg.senderName === CURRENT_OFFICE_USER
-                    const broadcastLocked = thread.isBroadcast && thread.broadcastReadCount > 0
-                    const lockTitle = `Can't edit or delete — already read by ${thread.broadcastReadCount} of ${thread.broadcastRecipientCount} recipients`
+                    const msgReadCount = msg.recipients?.filter(r => r.read).length ?? 0
+                    const broadcastLocked = thread.isBroadcast && msgReadCount > 0
+                    const lockTitle = `Can't edit or delete — already read by ${msgReadCount} of ${msg.recipients?.length} recipients`
                     return (
                     <div className={`msg-action-menu${msg.isMe ? ' from-me' : ' from-them'}`} onClick={e => e.stopPropagation()}>
                       {thread.replyAllowed && (
@@ -1024,12 +1067,12 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
       {thread.isBroadcast && (
         <div className="msg-broadcast-notice read-only">
           <BroadcastIcon size={16} />
-          <span>This is a read-only broadcast — employees can't reply.</span>
+          <span>Employees can't reply to this broadcast — you can still send follow-up updates below.</span>
         </div>
       )}
 
       {/* Attachments-in-progress strip */}
-      {!thread.isBroadcast && attachments.length > 0 && (
+      {attachments.length > 0 && (
         <div className="msg-compose-attachments">
           {attachments.map((att, i) => (
             <span key={i} className="msg-compose-attachment-chip">
@@ -1043,32 +1086,88 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
         </div>
       )}
 
-      {/* Compose bar — broadcasts are send-once, so no further messages on this thread */}
-      {!thread.isBroadcast && (
-        <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
-          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} multiple />
-          <button className="msg-compose-attach" title="Attach file" onClick={e => { e.stopPropagation(); fileInputRef.current.click() }}>
-            <AttachIcon />
-          </button>
-          <div className="msg-compose-input-wrap">
+      {/* Compose bar — broadcasts can receive follow-up messages, just not replies from employees */}
+      <div className="msg-compose-bar" onClick={e => e.stopPropagation()}>
+        <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} multiple />
+        <button className="msg-compose-attach" title="Attach file" onClick={e => { e.stopPropagation(); fileInputRef.current.click() }}>
+          <AttachIcon />
+        </button>
+        <div className="msg-compose-input-wrap">
+          <input
+            ref={inputRef}
+            className="msg-compose-input"
+            placeholder={thread.isBroadcast ? 'Send a follow-up update...' : 'Reply to this thread...'}
+            value={inputText}
+            onChange={e => setInputText(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+          />
+        </div>
+        <button
+          className={`msg-send-btn${inputText.trim() ? ' active' : ''}`}
+          onClick={handleSend}
+          disabled={!inputText.trim()}
+        >
+          <SendIcon />
+        </button>
+      </div>
+      </div>
+
+      {readStatusMsg && (
+        <div className="msg-read-status-panel">
+          <div className="msg-read-status-panel-header">
+            <div className="msg-read-status-panel-titles">
+              <h3>{readStatusMsg.recipients.filter(r => r.read).length} of {readStatusMsg.recipients.length} read</h3>
+              <span className="msg-read-status-panel-subtitle">
+                {readStatusMsg.text.slice(0, 60)}{readStatusMsg.text.length > 60 ? '…' : ''}
+              </span>
+            </div>
+            <button className="msg-compose-cancel" onClick={() => setReadStatusMsgId(null)} aria-label="Close">
+              <CloseIcon size={20} />
+            </button>
+          </div>
+          <div className="msg-read-status-search">
+            <SearchIcon />
             <input
-              ref={inputRef}
-              className="msg-compose-input"
-              placeholder="Reply to this thread..."
-              value={inputText}
-              onChange={e => setInputText(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
+              type="text"
+              placeholder="Search employees..."
+              value={readStatusSearch}
+              onChange={e => setReadStatusSearch(e.target.value)}
             />
           </div>
-          <button
-            className={`msg-send-btn${inputText.trim() ? ' active' : ''}`}
-            onClick={handleSend}
-            disabled={!inputText.trim()}
-          >
-            <SendIcon />
-          </button>
+          <div className="msg-read-status-groups">
+            {[
+              { label: 'Read', people: readStatusMsg.recipients.filter(r => r.read) },
+              { label: 'Not read', people: readStatusMsg.recipients.filter(r => !r.read) },
+            ].map(({ label, people }) => {
+              const filtered = people.filter(r => r.name.toLowerCase().includes(readStatusSearch.toLowerCase()))
+              return (
+                <div key={label} className="msg-roster-group">
+                  <div className="msg-roster-group-header">
+                    <span>{label}</span>
+                    <span className="msg-roster-group-count">{people.length}</span>
+                  </div>
+                  <ul className="msg-roster-list">
+                    {filtered.map(r => {
+                      const palette = nameToColor(r.name)
+                      return (
+                        <li key={r.name} className="msg-roster-person">
+                          <div className="msg-roster-avatar" style={{ background: palette.bg, color: palette.fg }}>
+                            {getInitials(r.name)}
+                          </div>
+                          <span>{r.name}</span>
+                        </li>
+                      )
+                    })}
+                    {people.length === 0 && <li className="msg-roster-empty">No one yet</li>}
+                    {people.length > 0 && filtered.length === 0 && <li className="msg-roster-empty">No matches</li>}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
@@ -1120,6 +1219,16 @@ function ComposeView({ mode, onSend, onCancel }) {
       tag.name.toLowerCase().includes(recipientSearch.toLowerCase())
     ),
   })).filter(type => type.tags.length > 0)
+
+  const tagNamePreview = (tag) => {
+    const members = tagMembers(tag)
+    const shown = members.slice(0, 3).map(c => c.name)
+    // Overflow is against tag.memberCount (the real full roster for this tag),
+    // not members.length (just this prototype's small CARERS sample) — otherwise
+    // "+N more" undercounts against the "X employees" figure shown above it.
+    const overflow = tag.memberCount - shown.length
+    return overflow > 0 ? `${shown.join(', ')} +${overflow} more` : shown.join(', ')
+  }
 
   const hasRecipients = isBroadcast
     ? (broadcastType === 'all' || (broadcastType === 'groups' ? selectedTags.length > 0 : selectedCarers.length > 0))
@@ -1184,6 +1293,7 @@ function ComposeView({ mode, onSend, onCancel }) {
         </button>
       </div>
 
+      <div className="msg-compose-body">
       <div className="msg-compose-form">
 
         {/* To field */}
@@ -1314,6 +1424,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                               <div className="msg-tag-option-body">
                                 <span>{tag.name}</span>
                                 <span className="msg-tag-member-count">{tag.memberCount} employees</span>
+                                <span className="msg-tag-member-names">{tagNamePreview(tag)}</span>
                               </div>
                             </div>
                           )
@@ -1394,6 +1505,37 @@ function ComposeView({ mode, onSend, onCancel }) {
           </button>
         </div>
       </div>
+
+      {isBroadcast && broadcastType === 'groups' && selectedTags.length > 0 && (
+        <div className="msg-compose-roster-panel">
+          <h3 className="msg-roster-panel-title">Recipients</h3>
+          {selectedTags.map(tag => {
+            const members = tagMembers(tag)
+            return (
+              <div key={tag.id} className="msg-roster-group">
+                <div className="msg-roster-group-header">
+                  <span>{tag.name}</span>
+                  <span className="msg-roster-group-count">{members.length}</span>
+                </div>
+                <ul className="msg-roster-list">
+                  {members.map(c => {
+                    const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
+                    return (
+                      <li key={c.id} className="msg-roster-person">
+                        <div className="msg-roster-avatar" style={{ background: palette.bg, color: palette.fg }}>
+                          {c.initials}
+                        </div>
+                        <span>{c.name}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      </div>
     </div>
   )
 }
@@ -1462,7 +1604,8 @@ export default function App() {
   }
 
   const handleSend = (text, attachments) => {
-    const wasArchived = threads.find(t => t.id === activeThreadId)?.archivedByOffice
+    const activeThread = threads.find(t => t.id === activeThreadId)
+    const wasArchived = activeThread?.archivedByOffice
     const now = Date.now()
     setThreads(prev => {
       const updated = prev.find(t => t.id === activeThreadId)
@@ -1475,7 +1618,17 @@ export default function App() {
     })
     setThreadMessages(prev => {
       const existing = prev[activeThreadId] || []
-      const sentMsg = { id: now + 1, isMe: true, text, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }
+      const broadcastTotal = existing.find(m => m.recipients)?.recipients.length ?? CARERS.length
+      const sentMsg = {
+        id: now + 1,
+        isMe: true,
+        senderName: CURRENT_OFFICE_USER,
+        text,
+        time: 'Just now',
+        day: 'Today',
+        ...(attachments?.length ? { attachments } : {}),
+        ...(activeThread?.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
+      }
       const additions = wasArchived
         ? [
             { id: now, type: 'event', text: 'This thread has been unarchived', time: 'Just now', day: 'Today' },
@@ -1523,6 +1676,10 @@ export default function App() {
         broadcastType === 'groups' ? tags.map(t => t.name) :
         broadcastType === 'all'    ? [] :
         recipients.map(r => r.name)
+      const broadcastTotalCount =
+        broadcastType === 'groups' ? new Set(tags.flatMap(t => tagMembers(t).map(c => c.name))).size :
+        broadcastType === 'all'    ? CARERS.length :
+        recipients.length
       const newThread = {
         id: baseId,
         title,
@@ -1543,7 +1700,15 @@ export default function App() {
       setThreads(prev => [newThread, ...prev])
       setThreadMessages(prev => ({
         ...prev,
-        [baseId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', ...(attachments?.length ? { attachments } : {}) }],
+        [baseId]: [{
+          id: 1,
+          isMe: true,
+          text: message,
+          time: 'Just now',
+          day: 'Today',
+          recipients: generateRecipients(0, broadcastTotalCount),
+          ...(attachments?.length ? { attachments } : {}),
+        }],
       }))
       setActiveThreadId(baseId)
       setRightPanel('thread')
