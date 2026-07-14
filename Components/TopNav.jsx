@@ -35,7 +35,7 @@ const MessagesIcon = () => (
 
 // ─── Component ─────────────────────────────────────────────────
 
-export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userName = 'Alex Morgan', userAvatar }) {
+export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userName = 'Alex Morgan', userAvatar, appName = 'Office Name' }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -62,6 +62,7 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
 
   return (
     <div className="top-nav">
+      <span className="top-nav-title">{appName}</span>
       <button
         className="top-nav-icon-btn"
         aria-label="Journal"

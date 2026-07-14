@@ -19,6 +19,19 @@
   z-index: 100;
 }
 
+/* Left-aligned office title — same treatment as the side nav's app title.
+   margin-right: auto pushes the icon actions to the right. */
+.top-nav-title {
+  margin-right: auto;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .top-nav-icon-btn {
   width: 36px;
   height: 36px;
