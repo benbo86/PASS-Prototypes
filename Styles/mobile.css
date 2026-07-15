@@ -153,6 +153,14 @@ html, body {
 .screen-slide {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  /* Promotes this to its own compositor layer up front, so the very first
+     transform transition after mount animates smoothly instead of the
+     browser jumping straight to the end state while it creates the layer. */
+  will-change: transform;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -170,6 +178,7 @@ html, body {
    this has no position:absolute, so it can be applied directly to an existing in-flow flex
    child (e.g. .screen-area) without disturbing its layout. */
 .page-slide {
+  will-change: transform;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .page-slide.slide-out-right { transform: translateX(100%); }

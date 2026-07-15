@@ -1,0 +1,185 @@
+/* ── Account screen ──────────────────────────────────────────── */
+/* Shared by mobile/account and mobile/messaging — see Components/AccountScreen.jsx */
+
+.account-body {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.account-profile {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+.profile-av {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--availability-6-mauve);
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-family: Barlow, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+}
+
+.profile-role {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  color: var(--greyscale-6-grey-50);
+  margin-top: 2px;
+}
+
+.logout-btn {
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-purple-6-purple-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.04em;
+}
+
+.menu-section-label {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  padding: 16px 20px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.menu-rows-card {
+  background: #fff;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 52px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  box-sizing: border-box;
+  width: 100%;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  text-align: left;
+  cursor: default;
+}
+
+.menu-row:last-child {
+  border-bottom: none;
+}
+
+.menu-row-tap {
+  cursor: pointer;
+}
+
+.menu-row-tap:active {
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.menu-row-icon {
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--ui-purple-3-grape-grey);
+}
+
+.menu-row-label {
+  flex: 1;
+  font-family: Barlow, sans-serif;
+  font-size: 15px;
+  color: #222;
+}
+
+.menu-row-right {
+  flex-shrink: 0;
+  color: var(--greyscale-8-grey-65);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-row-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--rag-red-red-overdue);
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-version {
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  color: var(--greyscale-8-grey-65);
+  text-align: center;
+  padding: 20px 0 32px;
+}
+
+/* ── Toggle ──────────────────────────────────────────────────── */
+.tog {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  background: #d1d5db;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.tog.tog-on {
+  background: var(--brand-purple-6-purple-4);
+}
+
+.tog-thumb {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.tog-on .tog-thumb {
+  transform: translateX(20px);
+}

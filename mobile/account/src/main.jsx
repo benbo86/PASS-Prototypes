@@ -5,7 +5,7 @@ import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
 import '../../../Styles/mobile-account.css'
-import './messaging.css'
+import './account.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

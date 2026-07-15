@@ -756,8 +756,8 @@
   </section>
 
   <section data-section-slug="mileage-pay">
-    <div class="section-head"><h2>Mileage Pay</h2><span class="count">17 icons &middot; mobile/mileage-pay/src/App.jsx</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
-    <p class="section-desc">Account menu items, calendar/car/document glyphs, and the Face ID setup flow.</p>
+    <div class="section-head"><h2>Mileage Pay</h2><span class="count">1 icon &middot; mobile/mileage-pay/src/App.jsx</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <p class="section-desc">Just the (currently unused, commented-out) filter dropdown chevron — the rest of Mileage Pay's former menu icons moved to Account below.</p>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronDownIcon" data-note="Mileage Pay" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -775,7 +775,15 @@
   &lt;/svg&gt;</template>
       </div>
 
-      <div class="card" tabindex="0" role="button" data-name="ChevronRightIcon" data-note="Mileage Pay" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+    </div>
+  </section>
+
+  <section data-section-slug="account">
+    <div class="section-head"><h2>Account</h2><span class="count">16 icons &middot; Components/AccountScreen.jsx</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <p class="section-desc">Shared Account screen menu rows, settings toggles, and the MFA/support/legal sections — used by mobile/account and embedded in mobile/messaging.</p>
+    <div class="grid">
+
+      <div class="card" tabindex="0" role="button" data-name="ChevronRightIcon" data-note="Account" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
         </label>
@@ -783,7 +791,7 @@
         <span class="icon-preview"><svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg></span>
-        <span class="label">ChevronRightIcon <span class="native-size">(Mileage Pay)</span></span>
+        <span class="label">ChevronRightIcon <span class="native-size">(Account)</span></span>
         <span class="native-size">16&times;16</span>
         <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 16 16" fill="none"&gt;
     &lt;path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/&gt;

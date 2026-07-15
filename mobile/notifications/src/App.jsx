@@ -603,7 +603,7 @@ export default function App() {
           activeTab="notifications"
           notifCount={badgeCount}
           messagesUnread={messagesUnread}
-          links={{ account: '../mileage-pay/' }}
+          links={{ account: '../account/' }}
         />
       </div>
     </div>

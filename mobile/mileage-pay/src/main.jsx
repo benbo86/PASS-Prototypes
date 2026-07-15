@@ -4,6 +4,7 @@ import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
+import '../../../Styles/mobile-account.css'
 import './mileage.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
