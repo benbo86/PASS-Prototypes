@@ -6,9 +6,10 @@ import { useState, useEffect, useRef } from 'react'
 // window.location navigation instead of a client-side router. Keeps the
 // existing customer + tab hrefs so all customer-profile pages stay wired up.
 
-const HeartIcon = () => (
-  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
-    <path d="M12 21s-7.5-4.9-10-9.5C.5 8.2 2.2 4.5 5.8 4.5c2 0 3.4 1.1 4.2 2.3.8-1.2 2.2-2.3 4.2-2.3 3.6 0 5.3 3.7 3.8 7C19.5 16.1 12 21 12 21Z" />
+// Font Awesome "heartbeat" (fa-heartbeat / heart-pulse), solid style
+const HeartbeatIcon = () => (
+  <svg viewBox="0 0 512 512" width="12" height="12" fill="currentColor" aria-hidden="true">
+    <path d="M228.3 469.1L47.6 300.4c-4.2-3.9-8.2-8.1-11.9-12.4l87 0c22.6 0 43-13.6 51.7-34.5l10.5-25.2 49.3 109.5c3.8 8.5 12.1 14 21.4 14.1s17.8-5 22-13.3L320 253.7l1.7 3.4c9.5 19 28.9 31 50.1 31l104.5 0c-3.7 4.3-7.7 8.5-11.9 12.4L283.7 469.1c-7.5 7-17.4 10.9-27.7 10.9s-20.2-3.9-27.7-10.9zM503.7 240l-132 0c-3 0-5.8-1.7-7.2-4.4l-23.2-46.3c-4.1-8.1-12.4-13.3-21.5-13.3s-17.4 5.1-21.5 13.3l-41.4 82.8L205.9 158.2c-3.9-8.7-12.7-14.3-22.2-14.1s-18.1 5.9-21.8 14.8l-31.8 76.3c-1.2 3-4.2 4.9-7.4 4.9L16 240c-2.6 0-5 .4-7.3 1.1C3 225.2 0 208.2 0 190.9l0-5.8c0-69.9 50.5-129.5 119.4-141C165 36.5 211.4 51.4 244 84l12 12 12-12c32.6-32.6 79-47.5 124.6-39.9C461.5 55.6 512 115.2 512 185.1l0 5.8c0 16.9-2.8 33.5-8.3 49.1z" />
   </svg>
 )
 
@@ -63,7 +64,7 @@ export default function CustomerProfileNav({ activeTab }) {
         <div className="context-info">
           <div className="context-name-row">
             <h1 className="context-name">Mrs Patricia 'Pat' Allin</h1>
-            <span className="ctx-badge ctx-badge--danger"><HeartIcon /> DNACPR</span>
+            <span className="ctx-badge ctx-badge--danger"><HeartbeatIcon /> DNACPR</span>
             <span className="ctx-badge ctx-badge--danger">HIGH RISK</span>
             <span className="ctx-badge ctx-badge--success">ACTIVE</span>
           </div>

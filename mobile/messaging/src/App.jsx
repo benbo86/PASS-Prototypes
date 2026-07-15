@@ -309,7 +309,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onBack, totalUnread }) 
       </div>
       {!isSearching && (
         <div className="inbox-tabs">
-          <button className={`inbox-tab${tab === 'inbox' ? ' active' : ''}`} onClick={() => setTab('inbox')}>Inbox</button>
+          <button className={`inbox-tab${tab === 'inbox' ? ' active' : ''}`} onClick={() => setTab('inbox')}>Messages</button>
           <button className={`inbox-tab${tab === 'archived' ? ' active' : ''}`} onClick={() => setTab('archived')}>Archived</button>
         </div>
       )}
