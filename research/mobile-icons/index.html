@@ -163,7 +163,7 @@
   <p class="sub">Every distinct inline SVG icon defined in <code>mobile/messaging</code>, <code>mobile/mileage-pay</code>, <code>mobile/notifications</code>, and the shared mobile shell components (<code>AppNav</code>, <code>AppHeader</code>, <code>StatusBar</code>). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 70 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 71 icons (.zip)</button>
   </div>
 
   <section data-section-slug="shared">
@@ -1025,7 +1025,7 @@
   </section>
 
   <section data-section-slug="notifications">
-    <div class="section-head"><h2>Notification Centre</h2><span class="count">13 icons &middot; mobile/notifications/src/App.jsx</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Notification Centre</h2><span class="count">14 icons &middot; mobile/notifications/src/App.jsx</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <p class="section-desc">Notification type badges (list size) and their matching detail-view variants (fixed 16&times;16).</p>
     <div class="grid">
 
@@ -1229,6 +1229,29 @@
         <span class="native-size">16&times;16</span>
         <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="TrashIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download TrashIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6h18" />
+    <path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg></span>
+        <span class="label">TrashIcon</span>
+        <span class="native-size">20&times;20</span>
+        <template class="svg-src">&lt;svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;path d="M3 6h18" /&gt;
+    &lt;path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" /&gt;
+    &lt;path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" /&gt;
+    &lt;line x1="10" y1="11" x2="10" y2="17" /&gt;
+    &lt;line x1="14" y1="11" x2="14" y2="17" /&gt;
   &lt;/svg&gt;</template>
       </div>
 

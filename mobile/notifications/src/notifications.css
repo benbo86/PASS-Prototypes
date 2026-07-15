@@ -103,6 +103,7 @@
   position: absolute;
   inset: 0;
   background: var(--rag-red-red-overdue);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: flex-end;
