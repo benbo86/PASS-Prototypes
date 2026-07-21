@@ -4,6 +4,7 @@ import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
+import '../../../Styles/dev-mode.css'
 import './notifications.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

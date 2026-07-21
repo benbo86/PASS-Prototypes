@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import PhoneFrame from '../../../Components/PhoneFrame'
 import AccountScreen from '../../../Components/AccountScreen'
+import DevMode from '../../../Components/DevMode'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -11,11 +12,12 @@ const ChevronLeftIcon = ({ size = 24 }) => (
 
 export default function App() {
   const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
+  const phoneFrameRef = useRef(null)
 
   return (
     <>
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
-      <PhoneFrame>
+      <PhoneFrame ref={phoneFrameRef}>
         <div className="screen">
           <AccountScreen
             // Both destinations embed Account locally themselves (see
@@ -28,6 +30,7 @@ export default function App() {
           />
         </div>
       </PhoneFrame>
+      <DevMode containerRef={phoneFrameRef} />
     </>
   )
 }

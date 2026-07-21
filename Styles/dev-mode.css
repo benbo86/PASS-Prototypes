@@ -1,0 +1,434 @@
+/* ── Dev Mode inspector ──────────────────────────────────────────
+   Toggle button lives in normal flow (no clipping issue — .phone-wrap
+   has no transform, so a position:fixed descendant isn't affected by its
+   overflow:hidden). Everything else (highlight/measurement overlay, the
+   inspect panel) is rendered via a portal to document.body, since
+   .phone-frame's transform:translateZ(0) would otherwise make it the
+   containing block for position:fixed content and its overflow:hidden
+   would clip anything extending past the frame. z-index sits above the
+   rest of the app's existing ceiling (side-nav/top-nav 1100, tooltip 1000,
+   FilterDropdown's portal 9999). */
+
+.devmode-toggle-group {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  /* Must stay above the inspect panel (9600) — the panel spans the full
+     right edge and would otherwise cover these buttons, making it
+     impossible to exit Dev Mode while something is selected. */
+  z-index: 9700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devmode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  background: #1c1c1e;
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.devmode-toggle:hover { background: #2c2c2e; }
+
+.devmode-toggle.active {
+  background: var(--brand-purple-6-purple-4, #9a26d6);
+}
+
+.devmode-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #666;
+  flex-shrink: 0;
+}
+
+.devmode-toggle.active .devmode-toggle-dot {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+}
+
+.devmode-help-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: #1c1c1e;
+  color: #f2f2f2;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.devmode-help-btn:hover { background: #2c2c2e; color: #fff; }
+
+/* ── Highlight boxes (hover / select / multi-select) ── */
+
+.devmode-highlight {
+  position: fixed;
+  z-index: 9500;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 2px;
+}
+
+.devmode-highlight-hover {
+  border: 1.5px solid #2196f3;
+  background: rgba(33, 150, 243, 0.08);
+}
+
+.devmode-highlight-selected {
+  border: 2px solid var(--brand-purple-6-purple-4, #9a26d6);
+  background: rgba(154, 38, 214, 0.06);
+}
+
+.devmode-highlight-label {
+  position: fixed;
+  z-index: 9501;
+  pointer-events: none;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transform: translateY(-100%);
+}
+
+.devmode-highlight-label.hover { background: #2196f3; }
+.devmode-highlight-label.selected { background: var(--brand-purple-6-purple-4, #9a26d6); }
+
+/* ── Distance / gap measurement ── */
+
+.devmode-gap-line {
+  position: fixed;
+  z-index: 9500;
+  pointer-events: none;
+  background: #ff5a5f;
+}
+
+.devmode-gap-line.horizontal { height: 1.5px; }
+.devmode-gap-line.vertical { width: 1.5px; }
+
+.devmode-gap-label {
+  position: fixed;
+  z-index: 9501;
+  pointer-events: none;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #ff5a5f;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Inspect panel ── */
+
+.devmode-panel {
+  position: fixed;
+  /* Leaves clear room for the toggle button above (top:20px + its own
+     height) rather than relying on z-index layering alone, which would
+     otherwise put the panel's own close button right under the toggle
+     in that corner. */
+  top: 72px;
+  right: 0;
+  bottom: 0;
+  z-index: 9600;
+  width: 300px;
+  background: #1c1c1e;
+  color: #f2f2f2;
+  font-family: Barlow, sans-serif;
+  overflow-y: auto;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.devmode-panel-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid #3a3a3c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.devmode-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.devmode-panel-tag {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  color: #9a26d6;
+  background: rgba(154, 38, 214, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.devmode-panel-body {
+  padding: 4px 18px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.devmode-panel-section {
+  padding: 14px 0;
+  border-bottom: 1px solid #2e2e30;
+}
+
+.devmode-panel-section:last-child { border-bottom: none; }
+
+.devmode-panel-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.devmode-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12.5px;
+}
+
+.devmode-panel-row-label { color: #9a9a9e; flex-shrink: 0; }
+
+.devmode-panel-row-value {
+  font-family: 'SF Mono', Menlo, monospace;
+  color: #f2f2f2;
+  text-align: right;
+  word-break: break-word;
+}
+
+.devmode-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devmode-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  background-image:
+    linear-gradient(45deg, #444 25%, transparent 25%), linear-gradient(-45deg, #444 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #444 75%), linear-gradient(-45deg, transparent 75%, #444 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
+/* display: block is required here — a bare <span> defaults to inline,
+   which ignores width/height entirely, so the fill collapsed to nothing
+   and the parent's transparency checkerboard showed through underneath. */
+.devmode-swatch-fill { display: block; width: 100%; height: 100%; border-radius: 3px; }
+
+.devmode-copy-btn {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.devmode-copy-btn:hover { color: #fff; }
+
+.devmode-copy-btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a9a9e;
+}
+
+.devmode-copy-btn-text:hover { color: #fff; }
+
+.devmode-panel-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.devmode-panel-section-title-row .devmode-panel-section-title { margin-bottom: 0; }
+
+.devmode-code-block {
+  margin: 0;
+  background: #131314;
+  border: 1px solid #2e2e30;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #d8d8dc;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
+/* ── Export controls ── */
+
+.devmode-export-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.devmode-select {
+  flex: 1;
+  background: #2c2c2e;
+  color: #f2f2f2;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-family: Barlow, sans-serif;
+  font-size: 12.5px;
+}
+
+.devmode-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.devmode-export-btn {
+  width: 100%;
+  background: var(--brand-purple-6-purple-4, #9a26d6);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.devmode-export-btn:hover { background: var(--brand-purple-7-purple-5, #b02cf7); }
+.devmode-export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.devmode-panel-empty {
+  padding: 24px 18px;
+  color: #8e8e93;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.devmode-panel-close {
+  background: none;
+  border: none;
+  color: #9a9a9e;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.devmode-panel-close:hover { color: #fff; }
+
+/* ── Help modal ── */
+
+.devmode-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--web-skrim, rgba(60, 57, 72, 0.7));
+  /* Above everything else Dev Mode renders (toggle group is the previous
+     highest at 9700) so it's never hidden behind the inspect panel or the
+     toggle/help buttons themselves. */
+  z-index: 9800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.devmode-help-box {
+  background: #1c1c1e;
+  color: #f2f2f2;
+  border-radius: 10px;
+  width: 420px;
+  max-width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: Barlow, sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.devmode-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #3a3a3c;
+}
+
+.devmode-help-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.devmode-help-body { padding: 4px 20px 20px; }
+
+.devmode-help-section {
+  padding: 16px 0;
+  border-bottom: 1px solid #2e2e30;
+}
+
+.devmode-help-section:last-child { border-bottom: none; }
+
+.devmode-help-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.devmode-help-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #d8d8dc;
+}
+
+.devmode-help-key {
+  flex-shrink: 0;
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}

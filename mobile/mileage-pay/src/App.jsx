@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import AppNav from '../../../Components/AppNav'
 import PhoneFrame from '../../../Components/PhoneFrame'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import AccountScreen from '../../../Components/AccountScreen'
 import MileageScreen from '../../../Components/MileageScreen'
+import DevMode from '../../../Components/DevMode'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -33,11 +34,12 @@ export default function App() {
   )
   const [filter, setFilter] = useState('payPeriod')
   const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
+  const phoneFrameRef = useRef(null)
 
   return (
     <>
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
-      <PhoneFrame>
+      <PhoneFrame ref={phoneFrameRef}>
         <div className={`screen-area page-slide ${entering ? 'slide-entering' : ''}`}>
           <ScreenSlider
             secondaryActive={outerView === 'mileage'}
@@ -56,6 +58,7 @@ export default function App() {
         </div>
         <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
       </PhoneFrame>
+      <DevMode containerRef={phoneFrameRef} />
     </>
   )
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
+import DevMode from '../../../Components/DevMode'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -590,6 +591,7 @@ export default function App() {
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
   const [badgeCount, setBadgeCount] = useState(() => NOTIFICATIONS.filter(n => !n.read).length)
   const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
+  const phoneFrameRef = useRef(null)
 
   useEffect(() => {
     setBadgeCount(0)
@@ -616,7 +618,7 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
-      <div className="phone-frame">
+      <div className="phone-frame" ref={phoneFrameRef}>
         <div className="screen-area">
           <ScreenSlider
             secondaryActive={view === 'detail'}
@@ -646,6 +648,7 @@ export default function App() {
           links={{ account: '../account/' }}
         />
       </div>
+      <DevMode containerRef={phoneFrameRef} />
     </div>
   )
 }
