@@ -73,6 +73,14 @@ export const NOTIFICATIONS = [
     shadowName: 'James Okafor', shadowInitials: 'JO',
     duration: '1 hr 30 min', address: '32 Oak Avenue, Sheffield, S11 8LG',
   },
+  // Non-contact event — Today
+  {
+    id: 14, type: 'event_time_changed', read: false, receivedAt: '1 hour ago', section: 'Today',
+    eventName: 'Staff Meeting', isEvent: true,
+    eventDate: 'Thu 27 Jun',
+    originalTime: '2:00pm', newTime: '3:30pm',
+    duration: '1 hour', address: 'Meeting Room 1, Head Office',
+  },
   // New shift — Today
   {
     id: 13, type: 'shift_new', read: false, receivedAt: '2 hours ago', section: 'Today',
@@ -129,6 +137,20 @@ export const NOTIFICATIONS = [
     bookingDate: 'Wed 18 Jun', bookingTime: '3:30pm',
     newTime: '3:30pm',
     duration: '1 hour', address: '22 Castle Road, Sheffield, S1 2GH',
+  },
+  // Non-contact events — Yesterday
+  {
+    id: 15, type: 'event_date_changed', read: true, receivedAt: 'Yesterday', section: 'Yesterday',
+    eventName: 'Manual Handling Training', isEvent: true,
+    originalDate: 'Mon 30 Jun', newDate: 'Wed 2 Jul', eventTime: '9:00am',
+    duration: '2 hours', address: 'Training Room 2, Head Office',
+  },
+  {
+    id: 16, type: 'event_duration_changed', read: true, receivedAt: 'Yesterday', section: 'Yesterday',
+    eventName: 'Supervision — J. Okafor', isEvent: true,
+    eventDate: 'Fri 28 Jun', eventTime: '11:00am',
+    originalDuration: '30 minutes', newDuration: '45 minutes',
+    address: 'Office 3, Head Office',
   },
 ]
 

@@ -18,3 +18,16 @@
   padding: 2px 6px;
   font-size: 0.9em;
 }
+
+.demo-preview {
+  display: flex;
+  justify-content: center;
+}
+
+/* main.css sets .react-datepicker-wrapper { width: 100% } globally; every
+   real consumer (timesheets, gross-pay-advice, holiday-pay-deduction) resets
+   it back to auto scoped to its own container, so the popper centers on the
+   visible trigger button instead of the full-width wrapper. Match that here. */
+.demo-preview .react-datepicker-wrapper {
+  width: auto;
+}

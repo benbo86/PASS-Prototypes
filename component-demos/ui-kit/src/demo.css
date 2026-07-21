@@ -1,0 +1,149 @@
+.uk-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 48px 120px;
+}
+
+.uk-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.uk-header p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 68ch;
+  margin-bottom: 8px;
+}
+.uk-header code {
+  background: var(--ui-purple-6-lavendar-grey);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+}
+
+.uk-section {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+.uk-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.uk-section-desc {
+  color: var(--greyscale-4-grey-40);
+  font-size: 14px;
+  max-width: 68ch;
+  margin-bottom: 20px;
+}
+
+.uk-caption {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 20px 0 10px;
+}
+.uk-caption:first-of-type { margin-top: 0; }
+.uk-caption em { text-transform: none; font-style: italic; font-weight: 400; letter-spacing: 0; }
+
+.uk-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.uk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.uk-field-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.uk-field {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+.uk-field.uk-field--narrow { width: 110px; }
+.uk-field .uk-caption { margin: 0 0 8px; }
+
+/* ── Field label (bare `label` selector) — copied from Styles/modal.css:
+   the real label styling used by every field in the holiday-absences
+   dialog (and other .modal forms). Scoped to .uk-field so it doesn't
+   affect .uk-caption's use as a section group-label elsewhere. ── */
+.uk-field-label {
+  display: block;
+  font-size: 14px;
+  color: var(--greyscale-2-grey-20);
+  margin-bottom: 6px;
+}
+
+/* ── .input-wrap / .input-icon — copied from Styles/modal.css:74-85,
+   the real readonly-text + trailing-icon pattern used for date/time
+   fields in the holiday-absences dialog. ── */
+.input-wrap { position: relative; }
+.input-wrap input { padding-right: 40px; }
+.input-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ui-purple-3-grape-grey);
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Mimics a table header cell just enough to show the FilterDropdown trigger
+   in context, without pulling in a whole data-table. */
+.uk-th-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* ── Tabs (.ep-tabs / .ep-tab) — copied from
+   schedule/assign-visit-absent-employee-event-panel/src/EventPanel.css:450-485,
+   a local pattern not yet promoted to Styles/main.css. ── */
+.ep-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.ep-tab {
+  padding: 14px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: #000;
+  position: relative;
+  white-space: nowrap;
+}
+.ep-tab:hover:not(.ep-tab--active) { opacity: 0.6; }
+.ep-tab--active { font-weight: 500; }
+.ep-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--brand-purple-4-purple-2-tint);
+}

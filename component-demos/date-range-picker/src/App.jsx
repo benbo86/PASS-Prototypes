@@ -24,6 +24,8 @@ export default function App() {
       <div className="demo-content">
         <h1>Date Range Picker</h1>
         <p>Exports a calendar-icon trigger button (<code>DateRangeInput</code>) and a date formatter (<code>fmtDate</code>) for use as react-datepicker's <code>customInput</code>.</p>
+      </div>
+      <div className="demo-preview">
         <DatePicker
           selectsRange
           startDate={startDate}
@@ -32,6 +34,8 @@ export default function App() {
           customInput={<DateRangeInput label={rangeLabel} />}
           calendarStartDay={1}
           formatWeekDay={d => d.slice(0, 1)}
+          popperPlacement="bottom"
+          portalId="drp-demo-datepicker-portal"
         />
       </div>
     </div>

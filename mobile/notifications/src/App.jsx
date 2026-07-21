@@ -105,6 +105,15 @@ const TimeGlassDetailIcon = () => <TimeGlassIcon size={16} />
 
 const RunDetailIcon = () => <RunIcon size={16} />
 
+const EventIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    <rect width="20" height="14" x="2" y="6" rx="2" />
+  </svg>
+)
+
+const EventDetailIcon = () => <EventIcon size={16} />
+
 const TrashIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 6h18" />
@@ -115,20 +124,24 @@ const TrashIcon = ({ size = 20 }) => (
   </svg>
 )
 const TYPE_CONFIG = {
-  time_changed:           { label: 'Booking time changed',       iconBg: '#fef3dc', iconColor: '#e09000', Icon: ClockIcon },
-  duration_changed:       { label: 'Duration changed',           iconBg: '#fef3dc', iconColor: '#e09000', Icon: TimeGlassIcon },
+  time_changed:           { label: 'Booking time changed',       iconBg: '#fef3dc', iconColor: '#e09600', Icon: ClockIcon },
+  duration_changed:       { label: 'Duration changed',           iconBg: '#fef3dc', iconColor: '#e09600', Icon: TimeGlassIcon },
   date_changed:           { label: 'Date changed',               iconBg: '#e8f0fe', iconColor: '#1a73e8', Icon: CalendarIcon },
   cancelled:              { label: 'Booking cancelled',          iconBg: '#fdeaea', iconColor: '#c0392b', Icon: CancelIcon },
   new:                    { label: 'New booking',                iconBg: '#e6f4ec', iconColor: '#27ae60', Icon: AddCircleIcon },
-  shadow_added:           { label: 'Shadow careworker added',    iconBg: '#ede7f6', iconColor: '#7b1fa2', Icon: PersonAddIcon },
-  shadow_removed:         { label: 'Shadow careworker removed',  iconBg: '#f0f0f0', iconColor: '#555',    Icon: PersonRemoveIcon },
-  shift_visit_changed:    { label: 'Booking time changed',       iconBg: '#fef3dc', iconColor: '#e09000', Icon: ClockIcon },
-  shift_duration_changed: { label: 'Shift duration changed',     iconBg: '#fef3dc', iconColor: '#e09000', Icon: TimeGlassIcon },
+  shadow_added:           { label: 'Shadow careworker added',    iconBg: '#ede7f6', iconColor: '#8421b8', Icon: PersonAddIcon },
+  shadow_removed:         { label: 'Shadow careworker removed',  iconBg: '#f0f0f0', iconColor: '#4d4d4d', Icon: PersonRemoveIcon },
+  shift_visit_changed:    { label: 'Booking time changed',       iconBg: '#fef3dc', iconColor: '#e09600', Icon: ClockIcon },
+  shift_duration_changed: { label: 'Shift duration changed',     iconBg: '#fef3dc', iconColor: '#e09600', Icon: TimeGlassIcon },
   shift_summary:          { label: 'Shift updated',              iconBg: '#f0ecf5', iconColor: '#6d1b98', Icon: RunIcon },
   shift_new:              { label: 'New shift',                  iconBg: '#e6f4ec', iconColor: '#27ae60', Icon: AddCircleIcon },
+  event_date_changed:     { label: 'Event date changed',         iconBg: '#e8f0fe', iconColor: '#1a73e8', Icon: CalendarIcon },
+  event_time_changed:     { label: 'Event time changed',         iconBg: '#fef3dc', iconColor: '#e09600', Icon: ClockIcon },
+  event_duration_changed: { label: 'Event duration changed',     iconBg: '#fef3dc', iconColor: '#e09600', Icon: TimeGlassIcon },
 }
 
 const SHIFT_TYPES = ['shift_visit_changed', 'shift_duration_changed', 'shift_summary', 'shift_new']
+const EVENT_TYPES = ['event_date_changed', 'event_time_changed', 'event_duration_changed']
 
 const renderDetail = (notif) => {
   switch (notif.type) {
@@ -161,6 +174,12 @@ const renderDetail = (notif) => {
     }
     case 'shift_new':
       return `${notif.bookings.length} bookings, ${notif.shiftStartTime}, ${notif.shiftDate}`
+    case 'event_date_changed':
+      return <><s>{notif.originalDate}</s>{` ${notif.newDate}, ${notif.eventTime}`}</>
+    case 'event_time_changed':
+      return <><s>{notif.originalTime}</s>{` ${notif.newTime}, ${notif.eventDate}`}</>
+    case 'event_duration_changed':
+      return <><s>{notif.originalDuration}</s>{` ${notif.newDuration}, ${notif.eventDate}, ${notif.eventTime}`}</>
     default:
       return ''
   }
@@ -171,7 +190,7 @@ const renderDetail = (notif) => {
 function NotifRow({ notif }) {
   const config = TYPE_CONFIG[notif.type]
   const { Icon } = config
-  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.customer)
+  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.eventName || notif.customer)
 
   return (
     <div className={`notif-row${notif.read ? '' : ' unread'}`}>
@@ -181,11 +200,11 @@ function NotifRow({ notif }) {
           : <div
               className="notif-avatar notif-avatar-initials"
               style={{
-                background: notif.shiftInitials ? '#dcd9e4' : notif.avatarColor,
-                color:      notif.shiftInitials ? '#6d1b98' : '#fff',
+                background: (notif.shiftInitials || notif.isEvent) ? '#dcd9e4' : notif.avatarColor,
+                color:      (notif.shiftInitials || notif.isEvent) ? '#6d1b98' : '#fff',
               }}
             >
-              {notif.shiftInitials ? <RunIcon size={22} /> : notif.initials}
+              {notif.shiftInitials ? <RunIcon size={22} /> : notif.isEvent ? <EventIcon size={22} /> : notif.initials}
             </div>
         }
         {notif.type !== 'shift_summary' && (
@@ -381,12 +400,15 @@ const STATUS_CONFIG = {
   date_changed:           { label: 'Date changed',              bg: '#e8f0fe', color: '#1557b0' },
   cancelled:              { label: 'Cancelled',                 bg: '#fdeaea', color: '#c0392b' },
   new:                    { label: 'New booking',               bg: '#e6f4ec', color: '#1e7e45' },
-  shadow_added:           { label: 'Shadow careworker added',   bg: '#ede7f6', color: '#6a1b9a' },
-  shadow_removed:         { label: 'Shadow careworker removed', bg: '#f0f0f0', color: '#555'    },
+  shadow_added:           { label: 'Shadow careworker added',   bg: '#ede7f6', color: '#6d1b98' },
+  shadow_removed:         { label: 'Shadow careworker removed', bg: '#f0f0f0', color: '#4d4d4d' },
   shift_visit_changed:    { label: 'Booking time changed',      bg: '#fef3dc', color: '#b37a00' },
   shift_duration_changed: { label: 'Shift duration changed',    bg: '#fef3dc', color: '#b37a00' },
   shift_summary:          { label: 'Shift updated',             bg: '#f0ecf5', color: '#6d1b98' },
   shift_new:              { label: 'New shift',                 bg: '#e6f4ec', color: '#1e7e45' },
+  event_date_changed:     { label: 'Event date changed',        bg: '#e8f0fe', color: '#1557b0' },
+  event_time_changed:     { label: 'Event time changed',        bg: '#fef3dc', color: '#b37a00' },
+  event_duration_changed: { label: 'Event duration changed',    bg: '#fef3dc', color: '#b37a00' },
 }
 
 function DetailRow({ icon, label, value, strikethrough = false, iconColor = '#726694' }) {
@@ -408,8 +430,9 @@ function DetailSectionLabel({ children }) {
 function BookingDetailScreen({ notif, onBack }) {
   const status = STATUS_CONFIG[notif.type]
   const isShift = notif.type === 'shift_duration_changed' || notif.type === 'shift_summary' || notif.type === 'shift_new'
-  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.customer)
-  const headerTitle = isShift ? 'Shift update' : 'Booking update'
+  const isEvent = EVENT_TYPES.includes(notif.type)
+  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.eventName || notif.customer)
+  const headerTitle = isShift ? 'Shift update' : isEvent ? 'Event update' : 'Booking update'
 
   return (
     <div className="screen">
@@ -429,11 +452,11 @@ function BookingDetailScreen({ notif, onBack }) {
             : <div
                 className="booking-detail-avatar"
                 style={{
-                  background: notif.shiftInitials ? '#dcd9e4' : notif.avatarColor,
-                  color:      notif.shiftInitials ? '#6d1b98' : '#fff',
+                  background: (notif.shiftInitials || notif.isEvent) ? '#dcd9e4' : notif.avatarColor,
+                  color:      (notif.shiftInitials || notif.isEvent) ? '#6d1b98' : '#fff',
                 }}
               >
-                {notif.shiftInitials ? <RunIcon size={32} /> : notif.initials}
+                {notif.shiftInitials ? <RunIcon size={32} /> : notif.isEvent ? <EventIcon size={32} /> : notif.initials}
               </div>
           }
           <div className="booking-detail-name">{displayName}</div>
@@ -449,13 +472,13 @@ function BookingDetailScreen({ notif, onBack }) {
           {/* ── Booking types ── */}
           {notif.type === 'time_changed' && <>
             <DetailRow icon={<ClockDetailIcon />} label="Original time" value={`${notif.originalTime}, ${notif.bookingDate}`} strikethrough iconColor="#bbb" />
-            <DetailRow icon={<ClockDetailIcon />} label="Updated time"  value={`${notif.newTime}, ${notif.bookingDate}`} iconColor="#e09000" />
+            <DetailRow icon={<ClockDetailIcon />} label="Updated time"  value={`${notif.newTime}, ${notif.bookingDate}`} iconColor="#e09600" />
           </>}
 
           {notif.type === 'duration_changed' && <>
             <DetailRow icon={<ClockDetailIcon />} label="Booking time"        value={`${notif.bookingTime}, ${notif.bookingDate}`} />
             <DetailRow icon={<TimeGlassDetailIcon />} label="Original duration" value={notif.originalDuration} strikethrough iconColor="#bbb" />
-            <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newDuration} iconColor="#e09000" />
+            <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newDuration} iconColor="#e09600" />
           </>}
 
           {notif.type === 'date_changed' && <>
@@ -475,7 +498,7 @@ function BookingDetailScreen({ notif, onBack }) {
           )}
 
           {notif.type === 'shadow_added' && <>
-            <DetailRow icon={<PersonDetailIcon />} label="Shadow careworker added" value={notif.shadowName} iconColor="#7b1fa2" />
+            <DetailRow icon={<PersonDetailIcon />} label="Shadow careworker added" value={notif.shadowName} iconColor="#8421b8" />
             <DetailRow icon={<ClockDetailIcon />}  label="Booking time" value={`${notif.bookingTime}, ${notif.bookingDate}`} />
           </>}
 
@@ -487,7 +510,7 @@ function BookingDetailScreen({ notif, onBack }) {
           {/* ── Shift: single visit changed ── */}
           {notif.type === 'shift_visit_changed' && <>
             <DetailRow icon={<ClockDetailIcon />}  label="Original time" value={`${notif.originalVisitTime}, ${notif.shiftDate}`} strikethrough iconColor="#bbb" />
-            <DetailRow icon={<ClockDetailIcon />}  label="Updated time"  value={`${notif.newVisitTime}, ${notif.newVisitDate || notif.shiftDate}`} iconColor="#e09000" />
+            <DetailRow icon={<ClockDetailIcon />}  label="Updated time"  value={`${notif.newVisitTime}, ${notif.newVisitDate || notif.shiftDate}`} iconColor="#e09600" />
             <DetailRow icon={<RunDetailIcon />}    label="Shift"               value={notif.shiftName} iconColor="#726694" />
             <DetailRow icon={<ClockDetailIcon />}  label="Shift time"    value={`${notif.shiftStartTime}, ${notif.shiftDate}`} />
             <DetailRow icon={<TimeGlassDetailIcon />}  label="Shift duration"      value={notif.shiftDuration} />
@@ -496,7 +519,7 @@ function BookingDetailScreen({ notif, onBack }) {
           {/* ── Shift: duration only ── */}
           {notif.type === 'shift_duration_changed' && <>
             <DetailRow icon={<TimeGlassDetailIcon />}  label="Original duration" value={notif.originalShiftDuration} strikethrough iconColor="#bbb" />
-            <DetailRow icon={<TimeGlassDetailIcon />}  label="Updated duration"  value={notif.newShiftDuration} iconColor="#e09000" />
+            <DetailRow icon={<TimeGlassDetailIcon />}  label="Updated duration"  value={notif.newShiftDuration} iconColor="#e09600" />
             <DetailRow icon={<ClockDetailIcon />}  label="Time"        value={`${notif.shiftStartTime}, ${notif.shiftDate}`} />
             <DetailRow icon={<RunDetailIcon />}    label="Bookings"         value={notif.visitCount} iconColor="#726694" />
           </>}
@@ -506,19 +529,19 @@ function BookingDetailScreen({ notif, onBack }) {
             <DetailSectionLabel>Booking changes ({notif.changes.length})</DetailSectionLabel>
             {notif.changes.map((c, i) => {
               if (c.changeType === 'time_changed') return (
-                <DetailRow key={i} icon={<ClockDetailIcon />}      label={`Time changed, ${c.customer}`}     value={<><s>{c.originalTime}</s>{` ${c.newTime}`}</>}                   iconColor="#e09000" />
+                <DetailRow key={i} icon={<ClockDetailIcon />}      label={`Time changed, ${c.customer}`}     value={<><s>{c.originalTime}</s>{` ${c.newTime}`}</>}                   iconColor="#e09600" />
               )
               if (c.changeType === 'visit_added') return (
                 <DetailRow key={i} icon={<AddCircleDetailIcon />}  label={`Booking added, ${c.customer}`}      value={`${c.time}, ${c.duration}`}                                    iconColor="#27ae60" />
               )
               if (c.changeType === 'duration_changed') return (
-                <DetailRow key={i} icon={<TimeGlassDetailIcon />}      label={`Duration changed, ${c.customer}`} value={<><s>{c.originalDuration}</s>{` ${c.newDuration}`}</>}           iconColor="#e09000" />
+                <DetailRow key={i} icon={<TimeGlassDetailIcon />}      label={`Duration changed, ${c.customer}`} value={<><s>{c.originalDuration}</s>{` ${c.newDuration}`}</>}           iconColor="#e09600" />
               )
               return null
             })}
             <DetailSectionLabel>Shift</DetailSectionLabel>
             <DetailRow icon={<TimeGlassDetailIcon />} label="Original duration" value={notif.originalShiftDuration} strikethrough iconColor="#bbb" />
-            <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newShiftDuration} iconColor="#e09000" />
+            <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newShiftDuration} iconColor="#e09600" />
             <DetailRow icon={<ClockDetailIcon />} label="Shift time"        value={`${notif.shiftStartTime}, ${notif.shiftDate}`} />
           </>}
 
@@ -533,7 +556,24 @@ function BookingDetailScreen({ notif, onBack }) {
             <DetailRow icon={<TimeGlassDetailIcon />} label="Shift duration" value={notif.shiftDuration} />
           </>}
 
-          {notif.duration && notif.type !== 'duration_changed' && <DetailRow icon={<TimeGlassDetailIcon />} label="Duration" value={notif.duration} />}
+          {/* ── Non-contact event types ── */}
+          {notif.type === 'event_date_changed' && <>
+            <DetailRow icon={<CalendarDetailIcon />} label="Original date" value={`${notif.originalDate}, ${notif.eventTime}`} strikethrough iconColor="#bbb" />
+            <DetailRow icon={<CalendarDetailIcon />} label="Updated date"  value={`${notif.newDate}, ${notif.eventTime}`} iconColor="#1a73e8" />
+          </>}
+
+          {notif.type === 'event_time_changed' && <>
+            <DetailRow icon={<ClockDetailIcon />} label="Original time" value={`${notif.originalTime}, ${notif.eventDate}`} strikethrough iconColor="#bbb" />
+            <DetailRow icon={<ClockDetailIcon />} label="Updated time"  value={`${notif.newTime}, ${notif.eventDate}`} iconColor="#e09600" />
+          </>}
+
+          {notif.type === 'event_duration_changed' && <>
+            <DetailRow icon={<ClockDetailIcon />} label="Event time" value={`${notif.eventTime}, ${notif.eventDate}`} />
+            <DetailRow icon={<TimeGlassDetailIcon />} label="Original duration" value={notif.originalDuration} strikethrough iconColor="#bbb" />
+            <DetailRow icon={<TimeGlassDetailIcon />} label="Updated duration"  value={notif.newDuration} iconColor="#e09600" />
+          </>}
+
+          {notif.duration && notif.type !== 'duration_changed' && notif.type !== 'event_duration_changed' && <DetailRow icon={<TimeGlassDetailIcon />} label="Duration" value={notif.duration} />}
           {notif.address  && <DetailRow icon={<MapPinIcon />}       label="Address"  value={notif.address} />}
         </div>
 

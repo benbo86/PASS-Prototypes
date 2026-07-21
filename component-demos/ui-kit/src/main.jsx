@@ -1,0 +1,14 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import '../../../Styles/colors.css'
+import '../../../Styles/main.css'
+import '../../../Styles/filter-dropdown.css'
+import '../../../Styles/mobile-account.css'
+import './demo.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
