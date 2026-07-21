@@ -10,6 +10,14 @@ import harryImg    from '../Images/Customer=Harinder Kulkarni.png'
 import samImg      from '../Images/Customer=Sam Malone.png'
 
 export const NOTIFICATIONS = [
+  // Non-contact event — Today (most recent)
+  {
+    id: 14, type: 'event_time_changed', read: false, receivedAt: '5 mins ago', section: 'Today',
+    eventName: 'Staff Meeting', isEvent: true,
+    eventDate: 'Thu 27 Jun',
+    originalTime: '2:00pm', newTime: '3:30pm',
+    duration: '1 hour', address: 'Meeting Room 1, Head Office',
+  },
   // Midnight-spanning examples — Today
   {
     id: 11, type: 'new', read: false, receivedAt: '20 mins ago', section: 'Today',
@@ -17,18 +25,6 @@ export const NOTIFICATIONS = [
     bookingDate: 'Tue 24 Jun', newTime: '11:30pm',
     bookingEndTime: '1:30am', bookingEndDate: 'Wed 25 Jun',
     duration: '2 hours', address: '89 Birch Street, Sheffield, S2 4PQ',
-  },
-  {
-    id: 12, type: 'shift_visit_changed', read: false, receivedAt: '40 mins ago', section: 'Today',
-    customer: 'Sam Malone', initials: 'SM', photo: samImg,
-    shiftName: 'Night Round C',
-    shiftDate: 'Tue 24 Jun',
-    shiftStartTime: '10:30pm',
-    shiftDuration: '4 hrs 30 min',
-    originalVisitTime: '11:30pm',
-    newVisitTime: '12:15am', newVisitDate: 'Wed 25 Jun',
-    visitDuration: '45 min',
-    address: '22 Castle Road, Sheffield, S1 2GH',
   },
   // Shift notifications — Today
   {
@@ -41,6 +37,18 @@ export const NOTIFICATIONS = [
     visitDuration: '1 hr 30 min',
     shiftDuration: '4 hrs 30 min',
     address: '32 Oak Avenue, Sheffield, S11 8LG',
+  },
+  {
+    id: 12, type: 'shift_visit_changed', read: false, receivedAt: '40 mins ago', section: 'Today',
+    customer: 'Sam Malone', initials: 'SM', photo: samImg,
+    shiftName: 'Night Round C',
+    shiftDate: 'Tue 24 Jun',
+    shiftStartTime: '10:30pm',
+    shiftDuration: '4 hrs 30 min',
+    originalVisitTime: '11:30pm',
+    newVisitTime: '12:15am', newVisitDate: 'Wed 25 Jun',
+    visitDuration: '45 min',
+    address: '22 Castle Road, Sheffield, S1 2GH',
   },
   {
     id: 9, type: 'shift_duration_changed', read: false, receivedAt: '1 hour ago', section: 'Today',
@@ -59,28 +67,6 @@ export const NOTIFICATIONS = [
     originalTime: '9:00am', newTime: '10:30am',
     duration: '1 hour', address: '14 Meadow Lane, Sheffield, S6 4RN',
   },
-  {
-    id: 2, type: 'cancelled', read: false, receivedAt: '2 hours ago', section: 'Today',
-    customer: 'Anthony Brown', initials: 'AB', photo: anthonyImg,
-    bookingDate: 'Wed 25 Jun', bookingTime: '2:00pm',
-    originalTime: '2:00pm',
-    duration: '45 minutes', address: '7 Park Road, Sheffield, S10 2TH',
-  },
-  {
-    id: 3, type: 'shadow_added', read: false, receivedAt: '3 hours ago', section: 'Today',
-    customer: 'Hilary Buxton', initials: 'HB', photo: hilaryImg,
-    bookingDate: 'Thu 26 Jun', bookingTime: '10:00am',
-    shadowName: 'James Okafor', shadowInitials: 'JO',
-    duration: '1 hr 30 min', address: '32 Oak Avenue, Sheffield, S11 8LG',
-  },
-  // Non-contact event — Today
-  {
-    id: 14, type: 'event_time_changed', read: false, receivedAt: '1 hour ago', section: 'Today',
-    eventName: 'Staff Meeting', isEvent: true,
-    eventDate: 'Thu 27 Jun',
-    originalTime: '2:00pm', newTime: '3:30pm',
-    duration: '1 hour', address: 'Meeting Room 1, Head Office',
-  },
   // New shift — Today
   {
     id: 13, type: 'shift_new', read: false, receivedAt: '2 hours ago', section: 'Today',
@@ -94,6 +80,20 @@ export const NOTIFICATIONS = [
       { customer: 'Tom Baker',  time: '6:00pm', duration: '30 min' },
       { customer: 'Ellen Rees', time: '7:15pm', duration: '45 min' },
     ],
+  },
+  {
+    id: 2, type: 'cancelled', read: false, receivedAt: '2 hours ago', section: 'Today',
+    customer: 'Anthony Brown', initials: 'AB', photo: anthonyImg,
+    bookingDate: 'Wed 25 Jun', bookingTime: '2:00pm',
+    originalTime: '2:00pm',
+    duration: '45 minutes', address: '7 Park Road, Sheffield, S10 2TH',
+  },
+  {
+    id: 3, type: 'shadow_added', read: false, receivedAt: '3 hours ago', section: 'Today',
+    customer: 'Hilary Buxton', initials: 'HB', photo: hilaryImg,
+    bookingDate: 'Thu 26 Jun', bookingTime: '10:00am',
+    shadowName: 'James Okafor', shadowInitials: 'JO',
+    duration: '1 hr 30 min', address: '32 Oak Avenue, Sheffield, S11 8LG',
   },
   // Shift summary — Yesterday
   {
