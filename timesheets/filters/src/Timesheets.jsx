@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import DevMode from '../../../Components/DevMode';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
@@ -208,6 +209,7 @@ function HolidayPanel({ record, onClose }) {
 // ─── Level 2 – Visit Detail ─────────────────────────────────────────────────
 
 function VisitDetail({ employee, visits, onBack, period = '' }) {
+  const pageRef = useRef(null);
   const [payAll,  setPayAll]  = useState(false);
   const [invAll,  setInvAll]  = useState(false);
   const [payRows, setPayRows] = useState({});
@@ -331,7 +333,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
     s === 'Completed' ? 'status-completed' : s === 'Missed' ? 'status-missed' : 'status-cancelled';
 
   return (
-    <div className="ts-page">
+    <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="ts-body">
         <div className="ts-l2-header">
@@ -424,6 +426,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <span>Customer</span>
                   <button
                     ref={el => anchorRefs.current['customer'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${customerFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('customer')}
                   >
@@ -457,6 +460,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <span>Type</span>
                   <button
                     ref={el => anchorRefs.current['type'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${typeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('type')}
                   >
@@ -503,6 +507,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <span>Status</span>
                   <button
                     ref={el => anchorRefs.current['status'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${statusFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('status')}
                   >
@@ -557,6 +562,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <span>Pay ref</span>
                   <button
                     ref={el => anchorRefs.current['payRef'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${payRefFilter.search || payRefFilter.sortDir ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('payRef')}
                   >
@@ -582,6 +588,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <span>Invoice ref</span>
                   <button
                     ref={el => anchorRefs.current['invRef'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${invRefFilter.search || invRefFilter.sortDir ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('invRef')}
                   >
@@ -712,6 +719,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
       {selectedHoliday && (
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
+      <DevMode containerRef={pageRef} />
     </div>
   );
 }
@@ -719,6 +727,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
 // ─── Level 1 – Timesheets ───────────────────────────────────────────────────
 
 export default function Timesheets() {
+  const pageRef = useRef(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
@@ -927,7 +936,7 @@ export default function Timesheets() {
   }
 
   return (
-    <div className="ts-page">
+    <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
 
       <div className="ts-body">
@@ -986,6 +995,7 @@ export default function Timesheets() {
             <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['funder'] = el}
+                data-devmode-passthrough="true"
                 className={`filter-pill ${funderFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('funder')}
               >
@@ -1009,6 +1019,7 @@ export default function Timesheets() {
             <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['customer'] = el}
+                data-devmode-passthrough="true"
                 className={`filter-pill ${customerFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('customer')}
               >
@@ -1032,6 +1043,7 @@ export default function Timesheets() {
             <div className="filter-pill-wrap">
               <button
                 ref={el => anchorRefs.current['status'] = el}
+                data-devmode-passthrough="true"
                 className={`filter-pill ${statusFilter.size ? 'active' : ''}`}
                 onClick={() => openDropdown('status')}
               >
@@ -1082,6 +1094,7 @@ export default function Timesheets() {
                   <span>Employee</span>
                   <button
                     ref={el => anchorRefs.current['emp'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${empColFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('emp')}
                   >
@@ -1104,6 +1117,7 @@ export default function Timesheets() {
                   <span>Contract</span>
                   <button
                     ref={el => anchorRefs.current['contract'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${contractFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('contract')}
                   >
@@ -1135,6 +1149,7 @@ export default function Timesheets() {
                   <span>Pay verified</span>
                   <button
                     ref={el => anchorRefs.current['payVer'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${payVerFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('payVer')}
                   >
@@ -1157,6 +1172,7 @@ export default function Timesheets() {
                   <span>Invoice verified</span>
                   <button
                     ref={el => anchorRefs.current['invVer'] = el}
+                    data-devmode-passthrough="true"
                     className={`col-icon-btn ${invVerFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     onClick={() => openDropdown('invVer')}
                   >
@@ -1251,6 +1267,7 @@ export default function Timesheets() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   );
 }

@@ -32,6 +32,29 @@ export function firstFont(fontFamily) {
   return fontFamily ? fontFamily.split(',')[0].replace(/["']/g, '').trim() : ''
 }
 
+// Reads padding as plain numbers (px) — used both for the inspect panel's
+// Padding row and for the live padding-band overlay, which needs to
+// recompute this on every render of whatever's currently hovered/selected.
+// Accepts an already-fetched computedStyle to avoid a second
+// getComputedStyle call at sites that already have one (getElementMetrics).
+export function getPaddingInsets(el, cs = getComputedStyle(el)) {
+  return {
+    top: parseFloat(cs.paddingTop) || 0,
+    right: parseFloat(cs.paddingRight) || 0,
+    bottom: parseFloat(cs.paddingBottom) || 0,
+    left: parseFloat(cs.paddingLeft) || 0,
+  }
+}
+
+// Formats a padding inset object as a CSS-shorthand-style string — a single
+// value if all 4 sides match, otherwise "top right bottom left" in the same
+// order the `padding` CSS property itself uses.
+export function formatPadding(padding) {
+  const { top, right, bottom, left } = padding
+  if (top === right && right === bottom && bottom === left) return `${top}px`
+  return `${top}px ${right}px ${bottom}px ${left}px`
+}
+
 export function getElementMetrics(el) {
   const rect = el.getBoundingClientRect()
   const cs = getComputedStyle(el)
@@ -56,6 +79,7 @@ export function getElementMetrics(el) {
     letterSpacing: cs.letterSpacing,
     borderRadius: uniformRadius ? cs.borderTopLeftRadius : radii,
     boxShadow: cs.boxShadow === 'none' ? null : cs.boxShadow,
+    padding: getPaddingInsets(el, cs),
   }
 }
 
@@ -85,6 +109,8 @@ export function generateCssSnippet(metrics) {
   const radius = Array.isArray(metrics.borderRadius) ? metrics.borderRadius.join(' ') : metrics.borderRadius
   if (radius && parseFloat(radius) > 0) lines.push(`border-radius: ${radius};`)
   if (metrics.boxShadow) lines.push(`box-shadow: ${metrics.boxShadow};`)
+  const { top, right, bottom, left } = metrics.padding
+  if (top || right || bottom || left) lines.push(`padding: ${formatPadding(metrics.padding)};`)
   return lines.join('\n')
 }
 

@@ -1,6 +1,7 @@
-import { useState, forwardRef } from 'react'
+import { useState, useRef, forwardRef } from 'react'
 import Select, { components } from 'react-select'
 import DatePicker from 'react-datepicker'
+import DevMode from '../../../Components/DevMode'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,7 @@ const ABSENCE_TYPES = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function HolidayAbsenceDialog() {
+  const pageRef = useRef(null)
   const [step,        setStep]        = useState(1)
   const [employee,    setEmployee]    = useState(EMPLOYEES[0])
   const [absenceType, setAbsenceType] = useState(ABSENCE_TYPES[0])
@@ -174,7 +176,7 @@ export default function HolidayAbsenceDialog() {
   const [option,      setOption]      = useState('keep')
 
   return (
-    <>
+    <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="modal modal-add-absence">
       <button className="modal-close-btn" aria-label="Close"><CloseIcon /></button>
@@ -326,6 +328,7 @@ export default function HolidayAbsenceDialog() {
         </div>
       )}
     </div>
-    </>
+    <DevMode containerRef={pageRef} />
+    </div>
   )
 }

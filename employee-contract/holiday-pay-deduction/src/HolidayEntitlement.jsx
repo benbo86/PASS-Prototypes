@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Tooltip from '../../../Components/Tooltip'
+import DevMode from '../../../Components/DevMode'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -88,13 +89,14 @@ function DeductionBody({ overpaidDays, deduction, deductionAdded, onAdd }) {
 
 export default function HolidayEntitlement() {
   const [deductionAdded, setDeductionAdded] = useState(false)
+  const pageRef = useRef(null)
 
   const remaining    = LEAVER_YEAR.entitlement + LEAVER_YEAR.adjustment - LEAVER_YEAR.booked
   const overpaidDays = Math.abs(remaining)
   const deduction    = overpaidDays * AVG_DAILY_PAY
 
   return (
-    <div className="he-page">
+    <div className="he-page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeft /> Prototypes</a>
 
       <div className="he-scenarios">
@@ -151,6 +153,7 @@ export default function HolidayEntitlement() {
         </div>
 
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

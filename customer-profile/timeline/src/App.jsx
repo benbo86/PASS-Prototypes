@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
+import DevMode from '../../../Components/DevMode'
 import employeePlaceholder from '../../../Images/Employee Placeholder.png'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -496,6 +497,7 @@ function arrangeDay(items) {
 }
 
 export default function App() {
+  const pageRef = useRef(null)
   const initialOpen = new Set(TODAY_ITEMS.filter(i => i.expanded).map(i => i.id))
   const [openIds, setOpenIds] = useState(initialOpen)
   const latestDayRef = useRef(null)
@@ -523,7 +525,7 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div className="page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <SideNav activeItem="customers" />
 
@@ -568,6 +570,7 @@ export default function App() {
         </div>
       </div>
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

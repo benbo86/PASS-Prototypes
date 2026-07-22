@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 import SlidePanel from '../../../Components/SlidePanel'
+import DevMode from '../../../Components/DevMode'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -187,6 +188,7 @@ function ContactAvatar({ contact }) {
 // ─── App ──────────────────────────────────────────────────────
 
 export default function App() {
+  const pageRef = useRef(null)
   const [contacts, setContacts] = useState(INITIAL_CONTACTS)
   const [panelOpen, setPanelOpen] = useState(false)
   const [pendingContacts, setPendingContacts] = useState([])
@@ -226,7 +228,7 @@ export default function App() {
     setPendingContacts(prev => prev.map(c => c.id === id ? { ...c, reachMeFor: value } : c))
 
   return (
-    <div className="settings-page">
+    <div className="settings-page" ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -376,6 +378,7 @@ export default function App() {
         )}
       </SlidePanel>
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

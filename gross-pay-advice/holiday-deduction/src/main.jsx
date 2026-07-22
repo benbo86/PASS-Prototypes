@@ -8,6 +8,7 @@ import '../../../Styles/filter-dropdown.css'
 import '../../../Styles/date-range-picker.css'
 import '../gross-pay-advice.css'
 import 'react-datepicker/dist/react-datepicker.css'
+import '../../../Styles/dev-mode.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

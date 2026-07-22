@@ -6,17 +6,25 @@
    .phone-frame's transform:translateZ(0) would otherwise make it the
    containing block for position:fixed content and its overflow:hidden
    would clip anything extending past the frame. z-index sits above the
-   rest of the app's existing ceiling (side-nav/top-nav 1100, tooltip 1000,
-   FilterDropdown's portal 9999). */
+   rest of the app's existing ceiling — including FilterDropdown's own
+   portal (.fd-wrap, 9999) and the react-datepicker popper prototypes pin to
+   9999 (#gpa-datepicker-portal/#ts-datepicker-portal .react-datepicker-
+   popper, in gross-pay-advice.css/timesheets.css) — starting at 10500.
+   Without this, once Dev Mode made those portals' own content genuinely
+   inspectable (hover/select working on calendar days, dropdown items),
+   the highlight box and gap-line overlays for anything inside them would
+   be computed correctly but rendered *underneath* the popup/dropdown's own
+   opaque UI, invisible even though functioning — exactly what "revealing
+   the panel but not the distances" looks like from the outside. */
 
 .devmode-toggle-group {
   position: fixed;
   top: 20px;
   right: 24px;
-  /* Must stay above the inspect panel (9600) — the panel spans the full
+  /* Must stay above the inspect panel (10600) — the panel spans the full
      right edge and would otherwise cover these buttons, making it
      impossible to exit Dev Mode while something is selected. */
-  z-index: 9700;
+  z-index: 10700;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -78,7 +86,7 @@
 
 .devmode-highlight {
   position: fixed;
-  z-index: 9500;
+  z-index: 10500;
   pointer-events: none;
   box-sizing: border-box;
   border-radius: 2px;
@@ -96,7 +104,7 @@
 
 .devmode-highlight-label {
   position: fixed;
-  z-index: 9501;
+  z-index: 10501;
   pointer-events: none;
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 11px;
@@ -115,7 +123,7 @@
 
 .devmode-gap-line {
   position: fixed;
-  z-index: 9500;
+  z-index: 10500;
   pointer-events: none;
   background: #ff5a5f;
 }
@@ -123,9 +131,22 @@
 .devmode-gap-line.horizontal { height: 1.5px; }
 .devmode-gap-line.vertical { width: 1.5px; }
 
+/* ── Padding band (box-model overlay) ──
+   A distinct green tint from the blue hover / purple select highlight tint,
+   so padding reads clearly even layered on top of them. */
+.devmode-padding-band {
+  position: fixed;
+  /* Same tier as .devmode-highlight (10500) — rendered after it in the DOM,
+     so its tint paints on top rather than being washed out underneath the
+     highlight box's own translucent background. */
+  z-index: 10500;
+  pointer-events: none;
+  background: rgba(76, 175, 80, 0.3);
+}
+
 .devmode-gap-label {
   position: fixed;
-  z-index: 9501;
+  z-index: 10501;
   pointer-events: none;
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 10.5px;
@@ -149,7 +170,7 @@
   top: 72px;
   right: 0;
   bottom: 0;
-  z-index: 9600;
+  z-index: 10600;
   width: 300px;
   background: #1c1c1e;
   color: #f2f2f2;
@@ -360,9 +381,9 @@
   inset: 0;
   background: var(--web-skrim, rgba(60, 57, 72, 0.7));
   /* Above everything else Dev Mode renders (toggle group is the previous
-     highest at 9700) so it's never hidden behind the inspect panel or the
+     highest at 10700) so it's never hidden behind the inspect panel or the
      toggle/help buttons themselves. */
-  z-index: 9800;
+  z-index: 10800;
   display: flex;
   align-items: center;
   justify-content: center;

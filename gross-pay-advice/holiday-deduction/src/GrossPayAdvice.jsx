@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import DevMode from '../../../Components/DevMode';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { GPA_RECORDS, GPA_EMPLOYEE_NAMES, GPA_L2_VISITS, HOLIDAY_RECORDS_L2, fmtGBP } from './data';
 
@@ -172,6 +173,7 @@ const L2_NUM_COLS = ['pay', 'mileage', 'total'];
 const statusClass = s => s === 'Completed' ? 'status-completed' : s === 'Missed' ? 'status-missed' : 'status-cancelled';
 
 function GPADetail({ record, onBack }) {
+  const pageRef = useRef(null);
   const [selectedHoliday, setSelectedHoliday] = useState(null);
   const [custFilter, setCustFilter] = useState({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
   const [typeFilter, setTypeFilter] = useState({ search: '' });
@@ -235,7 +237,7 @@ function GPADetail({ record, onBack }) {
   const anyFilter  = !!(custFilter.selected.size || typeFilter.search);
 
   return (
-    <div className="gpa-page">
+    <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="gpa-body">
 
@@ -298,6 +300,7 @@ function GPADetail({ record, onBack }) {
                   <span>Customer</span>
                   <button ref={el => anchorRefs.current['cust'] = el}
                     className={`col-icon-btn ${custFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                    data-devmode-passthrough="true"
                     onClick={() => openDropdown('cust')}>
                     <FilterIcon active={custFilter.selected.size > 0} />
                   </button>
@@ -327,6 +330,7 @@ function GPADetail({ record, onBack }) {
                   <span>Type</span>
                   <button ref={el => anchorRefs.current['type'] = el}
                     className={`col-icon-btn ${typeFilter.search ? 'col-icon-btn--active' : ''}`}
+                    data-devmode-passthrough="true"
                     onClick={() => openDropdown('type')}>
                     <FilterIcon active={!!typeFilter.search} />
                   </button>
@@ -440,6 +444,7 @@ function GPADetail({ record, onBack }) {
       {selectedHoliday && (
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
+      <DevMode containerRef={pageRef} />
     </div>
   );
 }
@@ -479,6 +484,7 @@ export default function GrossPayAdvice() {
   const anchorRefs                          = useRef({});
   const [page, setPage]                     = useState(1);
   const [rowsPerPage, setRowsPerPage]       = useState(12);
+  const pageRef = useRef(null);
 
   const [startDate, endDate] = dateRange;
 
@@ -549,7 +555,7 @@ export default function GrossPayAdvice() {
   }
 
   return (
-    <div className="gpa-page">
+    <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="gpa-body">
 
@@ -596,6 +602,7 @@ export default function GrossPayAdvice() {
                   <span>GPA Reference</span>
                   <button ref={el => anchorRefs.current['gpaRef'] = el}
                     className={`col-icon-btn ${gpaRefFilter.search ? 'col-icon-btn--active' : ''}`}
+                    data-devmode-passthrough="true"
                     onClick={() => openDropdown('gpaRef')}>
                     <FilterIcon active={!!gpaRefFilter.search} />
                   </button>
@@ -610,6 +617,7 @@ export default function GrossPayAdvice() {
                   <span>Employee</span>
                   <button ref={el => anchorRefs.current['emp'] = el}
                     className={`col-icon-btn ${empFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                    data-devmode-passthrough="true"
                     onClick={() => openDropdown('emp')}>
                     <FilterIcon active={empFilter.selected.size > 0} />
                   </button>
@@ -661,6 +669,7 @@ export default function GrossPayAdvice() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   );
 }

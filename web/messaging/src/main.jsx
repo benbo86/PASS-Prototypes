@@ -5,6 +5,7 @@ import '../../../Styles/main.css'
 import '../../../Styles/side-nav.css'
 import '../../../Styles/top-nav.css'
 import '../../../Styles/filter-dropdown.css'
+import '../../../Styles/dev-mode.css'
 import './messages.css'
 import App from './App.jsx'
 

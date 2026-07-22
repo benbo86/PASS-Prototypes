@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import DevMode from '../../../Components/DevMode'
+
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
@@ -23,8 +26,9 @@ const ChevronLeftIcon = () => (
 )
 
 export default function AssignVisitWarning() {
+  const pageRef = useRef(null)
   return (
-    <>
+    <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="modal">
       <button className="modal-close-btn" aria-label="Close"><CloseIcon /></button>
@@ -46,6 +50,7 @@ export default function AssignVisitWarning() {
         <button className="round-btn primary-btn">Assign visits</button>
       </div>
     </div>
-    </>
+    <DevMode containerRef={pageRef} />
+    </div>
   )
 }

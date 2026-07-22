@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
+import DevMode from '../../../Components/DevMode'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -185,6 +186,7 @@ function AddOptionalModal({ available, onClose, onAdd }) {
 // ─── App ──────────────────────────────────────────────────────
 
 export default function App() {
+  const pageRef = useRef(null)
   const [optionalAdded, setOptionalAdded] = useState(INITIAL_OPTIONAL)
   const [showModal, setShowModal] = useState(false)
 
@@ -203,7 +205,7 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div className="page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
 
       <SideNav activeItem="customers" />
@@ -265,6 +267,7 @@ export default function App() {
         />
       )}
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

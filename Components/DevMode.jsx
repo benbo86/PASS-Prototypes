@@ -4,6 +4,7 @@ import {
   toPlainRect, getElementMetrics, computeElementGap, uniformDirs,
   computeNearestGaps, isAncestorOrDescendant, findVisibleAncestor,
   exportElement, exportSelection, firstFont, generateCssSnippet,
+  getPaddingInsets, formatPadding,
 } from './devModeUtils'
 
 const CloseIcon = () => (
@@ -82,16 +83,54 @@ export default function DevMode({ containerRef }) {
   }, [])
 
   // ── Capture-phase event interception ──
-  // Must intercept before the real app's own handlers fire (link nav,
-  // swipe-to-delete's setPointerCapture, row-tap navigation, etc.) — see
-  // plan doc. mousemove doesn't need prevention, nothing to block there.
+  // Single unified set of document-level listeners (capture phase, so they
+  // run before the real app's own handlers — link nav, swipe-to-delete's
+  // setPointerCapture, row-tap navigation, etc.). Attached to `document`
+  // rather than just containerRef, because "recognized scope" now spans two
+  // disjoint DOM regions: containerRef's own subtree, AND whatever's
+  // currently portaled to document.body by react-datepicker/FilterDropdown
+  // (that content is NOT a DOM descendant of containerRef, so a
+  // container-scoped listener would never see it at all — document-level
+  // capture sees every event regardless of where its target lives).
   useEffect(() => {
     if (!isActive) return
     const container = containerRef.current
     if (!container) return
 
+    // Dev Mode's own toggle/help/panel chrome isn't always rendered as a
+    // sibling outside containerRef — some prototypes have no separate shell
+    // to hang it from, so it ends up nested inside the very container
+    // being inspected. Always exempt it entirely, or hovering/clicking the
+    // toggle button would get treated as inspecting an element instead of
+    // operating Dev Mode itself.
+    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui]')
+
+    // "Recognized" = containerRef's own subtree, OR content react-datepicker/
+    // FilterDropdown have portaled to document.body — both are conceptually
+    // part of this prototype, just rendered elsewhere for stacking/position
+    // reasons. Anything NOT recognized (the back-link, other page chrome)
+    // gets the simple "block real navigation, clear selection" treatment.
+    const isRecognized = (target) =>
+      container.contains(target) ||
+      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap'))
+
+    // A trigger that opens a portaled popup (react-datepicker's own
+    // `.react-datepicker-wrapper` around its customInput — a stable,
+    // library-wide marker regardless of portalId — or anything a prototype
+    // tags `data-devmode-passthrough`, e.g. a FilterDropdown trigger button,
+    // which lives in each consuming prototype rather than a single shared
+    // component so there's no library-wide class to key off instead).
+    // A plain click on one performs its real action (opens the calendar/
+    // dropdown) same as if Dev Mode weren't active — otherwise you could
+    // never reach the content inside to inspect it at all. Shift+click
+    // still selects it for inspection, matching the multi-select modifier
+    // used everywhere else, so the trigger itself stays fully inspectable.
+    const isPassthroughTrigger = (target) =>
+      target.closest && target.closest('.react-datepicker-wrapper, [data-devmode-passthrough]')
+
     const handleMove = (e) => {
-      const target = e.target
+      if (isDevModeUi(e.target)) return
+      const target = isRecognized(e.target) ? e.target : null
       if (target !== hoveredElRef.current) {
         hoveredElRef.current = target
         setHoveredEl(target)
@@ -104,15 +143,33 @@ export default function DevMode({ containerRef }) {
     }
 
     const handleSuppress = (e) => {
+      if (isDevModeUi(e.target)) return
+      if (isRecognized(e.target) && isPassthroughTrigger(e.target) && !e.shiftKey) return
       e.preventDefault()
       e.stopPropagation()
     }
 
     const handleClick = (e) => {
-      e.preventDefault()
-      e.stopPropagation()
+      if (isDevModeUi(e.target)) return
       const target = e.target
 
+      if (!isRecognized(target)) {
+        // Outside recognized scope entirely (e.g. the back-link) — block
+        // real navigation and clear the current selection, mirroring
+        // clicking empty canvas to deselect in Figma.
+        e.preventDefault()
+        e.stopPropagation()
+        if (selectedElsRef.current.length > 0) {
+          selectedElsRef.current = []
+          setSelectedEls([])
+        }
+        return
+      }
+
+      if (isPassthroughTrigger(target) && !e.shiftKey) return
+
+      e.preventDefault()
+      e.stopPropagation()
       setSelectedEls(prev => {
         let next
         if (e.shiftKey) {
@@ -125,65 +182,18 @@ export default function DevMode({ containerRef }) {
       })
     }
 
-    container.addEventListener('mousemove', handleMove, true)
-    container.addEventListener('mouseleave', handleLeave, true)
-    container.addEventListener('pointerdown', handleSuppress, true)
-    container.addEventListener('mousedown', handleSuppress, true)
-    container.addEventListener('click', handleClick, true)
+    document.addEventListener('mousemove', handleMove, true)
+    document.addEventListener('mouseleave', handleLeave, true)
+    document.addEventListener('pointerdown', handleSuppress, true)
+    document.addEventListener('mousedown', handleSuppress, true)
+    document.addEventListener('click', handleClick, true)
 
     return () => {
-      container.removeEventListener('mousemove', handleMove, true)
-      container.removeEventListener('mouseleave', handleLeave, true)
-      container.removeEventListener('pointerdown', handleSuppress, true)
-      container.removeEventListener('mousedown', handleSuppress, true)
-      container.removeEventListener('click', handleClick, true)
-    }
-  }, [isActive, containerRef])
-
-  // ── Outer guard against accidental navigation ──
-  // containerRef only covers the inspectable subtree (e.g. .phone-frame),
-  // but sibling chrome like the prototype's "back to index" link sits
-  // outside it — clicking that while Dev Mode is active would navigate
-  // away and kill the whole session with no warning. Block default
-  // actions on anything outside both the inspectable container AND Dev
-  // Mode's own UI, without doing any of the hover/select logic for it.
-  useEffect(() => {
-    if (!isActive) return
-    const container = containerRef.current
-
-    const isInScope = (target) => {
-      if (container && container.contains(target)) return true
-      if (target.closest && target.closest('[data-devmode-ui]')) return true
-      return false
-    }
-
-    const guardBlock = (e) => {
-      if (isInScope(e.target)) return
-      e.preventDefault()
-      e.stopPropagation()
-    }
-
-    // click (not mousedown/pointerdown) additionally clears the current
-    // selection when it lands outside the inspectable frame — mirrors
-    // clicking empty canvas to deselect in Figma, rather than the click
-    // just being silently swallowed.
-    const guardClick = (e) => {
-      if (isInScope(e.target)) return
-      e.preventDefault()
-      e.stopPropagation()
-      if (selectedElsRef.current.length > 0) {
-        selectedElsRef.current = []
-        setSelectedEls([])
-      }
-    }
-
-    document.addEventListener('click', guardClick, true)
-    document.addEventListener('mousedown', guardBlock, true)
-    document.addEventListener('pointerdown', guardBlock, true)
-    return () => {
-      document.removeEventListener('click', guardClick, true)
-      document.removeEventListener('mousedown', guardBlock, true)
-      document.removeEventListener('pointerdown', guardBlock, true)
+      document.removeEventListener('mousemove', handleMove, true)
+      document.removeEventListener('mouseleave', handleLeave, true)
+      document.removeEventListener('pointerdown', handleSuppress, true)
+      document.removeEventListener('mousedown', handleSuppress, true)
+      document.removeEventListener('click', handleClick, true)
     }
   }, [isActive, containerRef])
 
@@ -354,18 +364,23 @@ export default function DevMode({ containerRef }) {
       {isActive && createPortal(
         <div data-devmode-ui="true">
           {showHoverHighlight && (
-            <div
-              className="devmode-highlight devmode-highlight-hover"
-              style={{ top: hoverRect.top, left: hoverRect.left, width: hoverRect.width, height: hoverRect.height }}
-            />
+            <>
+              <div
+                className="devmode-highlight devmode-highlight-hover"
+                style={{ top: hoverRect.top, left: hoverRect.left, width: hoverRect.width, height: hoverRect.height }}
+              />
+              <PaddingOverlay el={hoveredEl} rect={hoverRect} />
+            </>
           )}
 
           {selectedRects.map((r, i) => (
-            <div
-              key={i}
-              className="devmode-highlight devmode-highlight-selected"
-              style={{ top: r.top, left: r.left, width: r.width, height: r.height }}
-            />
+            <div key={i}>
+              <div
+                className="devmode-highlight devmode-highlight-selected"
+                style={{ top: r.top, left: r.left, width: r.width, height: r.height }}
+              />
+              <PaddingOverlay el={selectedEls[i]} rect={r} />
+            </div>
           ))}
 
           {gapInfo && selectedEls.length <= 1 && <GapOverlay gapInfo={gapInfo} />}
@@ -409,7 +424,7 @@ export default function DevMode({ containerRef }) {
 
 const HOW_TO_USE = [
   { key: 'Click', text: 'Select an element to inspect its dimensions, colours, typography, and more' },
-  { key: 'Shift + Click', text: 'Add or remove elements from a multi-selection' },
+  { key: 'Shift + Click', text: 'Add or remove elements from a multi-selection — also how you inspect a calendar/filter trigger, since a plain click on one opens it as normal instead' },
   { key: 'Hover', text: 'See the distance from that element to whatever is nearest to it' },
   { key: 'Select, then Hover', text: 'Measure the distance between the selected element and whatever you hover next' },
   { key: 'Esc', text: 'Clear the current selection — press again to exit Dev Mode' },
@@ -418,6 +433,8 @@ const HOW_TO_USE = [
 
 const WHAT_YOU_CAN_DO = [
   'Copy any colour value, or copy the element’s full styling as a CSS snippet',
+  'See a table cell or button\'s padding, visually and in the panel — useful when its content is plain text with nothing else to hover',
+  'Inspect date pickers and filter dropdowns, including their open calendar/menu content, not just the trigger',
   'Export a single element as a PNG, JPG or SVG, at up to 4x scale',
   'Select multiple elements and export them together as one combined image',
 ]
@@ -559,6 +576,38 @@ function GapLabel({ value, x, y, orientation = 'center' }) {
   return <div className="devmode-gap-label" style={{ left, top, transform }}>{value}px</div>
 }
 
+// ─── Padding overlay ──────────────────────────────────────────────
+// Shades the padding region (between the border-box edge and the content)
+// distinctly from the highlight box's own tint — the same box-model idea as
+// Chrome DevTools, so padding on a table cell or button is visible even
+// when its content is a bare text node with nothing else to hover/select.
+// Recomputed from getComputedStyle on every render rather than in the rAF
+// loop — cheap enough for the handful of hovered/selected elements at a
+// time, and it naturally stays in sync since it only re-renders when
+// hoverRect/selectedRects themselves change.
+
+function PaddingOverlay({ el, rect }) {
+  if (!el || !rect) return null
+  const p = getPaddingInsets(el)
+  if (!p.top && !p.right && !p.bottom && !p.left) return null
+
+  const innerHeight = Math.max(0, rect.height - p.top - p.bottom)
+  const pieces = []
+  if (p.top > 0) {
+    pieces.push(<div key="pad-top" className="devmode-padding-band" style={{ left: rect.left, top: rect.top, width: rect.width, height: p.top }} />)
+  }
+  if (p.bottom > 0) {
+    pieces.push(<div key="pad-bottom" className="devmode-padding-band" style={{ left: rect.left, top: rect.bottom - p.bottom, width: rect.width, height: p.bottom }} />)
+  }
+  if (p.left > 0) {
+    pieces.push(<div key="pad-left" className="devmode-padding-band" style={{ left: rect.left, top: rect.top + p.top, width: p.left, height: innerHeight }} />)
+  }
+  if (p.right > 0) {
+    pieces.push(<div key="pad-right" className="devmode-padding-band" style={{ left: rect.right - p.right, top: rect.top + p.top, width: p.right, height: innerHeight }} />)
+  }
+  return <>{pieces}</>
+}
+
 // ─── Inspect panel (single-select) ───────────────────────────────
 
 function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExport, isExporting }) {
@@ -579,6 +628,11 @@ function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExpor
           <div className="devmode-panel-section-title">Dimensions</div>
           <Row label="Width" value={`${metrics.width}px`} />
           <Row label="Height" value={`${metrics.height}px`} />
+        </div>
+
+        <div className="devmode-panel-section">
+          <div className="devmode-panel-section-title">Padding</div>
+          <Row label="Padding" value={formatPadding(metrics.padding)} />
         </div>
 
         <div className="devmode-panel-section">

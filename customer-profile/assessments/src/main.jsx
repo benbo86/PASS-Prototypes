@@ -6,6 +6,7 @@ import '../../../Styles/main.css'
 import '../../../Styles/side-nav.css'
 import '../../../Styles/top-nav.css'
 import '../../../Styles/customer-profile-nav.css'
+import '../../../Styles/dev-mode.css'
 import './profile.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

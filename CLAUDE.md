@@ -49,6 +49,9 @@ employee-contract/
 | `Components/FilterDropdown.jsx` | Column/above-table filter dropdown |
 | `Components/DateRangePicker.jsx` | Exports `CalendarIcon`, `fmtDate`, `DateRangeInput` |
 | `Icons/` | Shared SVGs: Calendar, Chevron Down, Clock, Close, Delete, Document, Edit, Filter Active, Filters, Recurs, Right Arrow, Search, Sort, Warning |
+| `Components/DevMode.jsx` | Dev Mode element inspector — wire into every new prototype, see Prototype conventions below |
+| `Components/devModeUtils.js` | Pure geometry/colour/export helpers backing Dev Mode |
+| `Styles/dev-mode.css` | Dev Mode's own dark-themed UI (toggle, panel, help modal) — self-contained, not part of the main design system |
 
 **Always read `Styles/main.css` before adding local CSS.**
 
@@ -67,6 +70,30 @@ employee-contract/
 2. **Index entry** — add a link under the correct heading in the root `index.html`.
 
 3. **Scrim / overlay context** — if the prototype opens over a background (e.g. a panel with a scrim), the back link needs `z-index` above the overlay so it remains clickable and visible. Set its colour to white when it sits over a dark scrim.
+
+4. **Dev Mode** — wire the element inspector into every new prototype (mobile or web). Fully rolled out across every existing prototype (all `mobile/*`, plus every web prototype under `customer-profile/`, `office/`, `roster/`, `web/`, `employee-contract/`, `gross-pay-advice/`, `timesheets/`, `schedule/`, `holiday-absences/`) — this is the reference pattern for any new one:
+   ```jsx
+   import { useRef } from 'react'
+   import DevMode from '../../../Components/DevMode'
+
+   const pageRef = useRef(null)
+   // attach pageRef to the prototype's outermost real-content frame —
+   // .phone-frame for mobile prototypes, or the prototype's own top-level
+   // wrapper div for web prototypes (e.g. the `.page`/`.he-page`/etc. div
+   // that already wraps the back-link). A narrower ref makes anything
+   // outside it (e.g. a bottom nav bar) uninspectable.
+   <DevMode containerRef={pageRef} />
+   ```
+   Also add `import '../../../Styles/dev-mode.css'` to the prototype's `main.jsx`, alongside its other style imports. `DevMode` is safe to render either as a sibling of the ref'd frame OR nested inside it (most web prototypes nest it, since there's usually no separate shell to hang it outside of) — its own toggle/help/panel chrome is auto-exempted from being treated as an inspectable target either way.
+
+   If the prototype has no single wrapping element (a fragment `<>...</>` root, common in small modal-style prototypes), wrap it in `<div ref={pageRef} style={{ display: 'contents' }}>...</div>` instead — `display: contents` keeps it invisible to layout, it just gives Dev Mode a real node to scope to.
+
+   If the prototype goes through a shared wrapper component (like `Components/PhoneFrame.jsx`) rather than raw markup, that wrapper needs to forward its own ref via `forwardRef` onto its outermost element so a `containerRef` can reach it.
+
+   **Portaled popups (react-datepicker, FilterDropdown, react-select):** these render outside `containerRef` (via `document.body`) and aren't inspectable there, but must stay fully usable while Dev Mode is active:
+   - `react-datepicker`'s own trigger wrapper (`.react-datepicker-wrapper`, added automatically by the library regardless of `portalId`) and its popup (`.react-datepicker-popper`) are auto-exempted — no action needed.
+   - `Components/FilterDropdown`'s portaled menu (`.fd-wrap`) is auto-exempted, but its **trigger button is prototype-specific** (each prototype renders its own filter-icon button) — add `data-devmode-passthrough="true"` to that trigger button, or Dev Mode will swallow the click meant to open it. See `gross-pay-advice/holiday-deduction` or `timesheets/filters` for the pattern.
+   - `react-select` isn't used by any prototype yet — if one adds it, its portaled menu will need the same treatment (check its rendered class name and add it alongside `.react-datepicker-popper, .fd-wrap` in `Components/DevMode.jsx`'s `isInScope`/`isExemptFromCapture` checks).
 
 ---
 

@@ -1,6 +1,8 @@
+import { useRef } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import LegacyEmployeeCard from '../../../Components/LegacyEmployeeCard'
+import DevMode from '../../../Components/DevMode'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -107,9 +109,10 @@ export default function App() {
   const newDesignEmployee = EMPLOYEES[0]
   const legacyOffEmployee = EMPLOYEES[3]
   const legacyOnEmployee = EMPLOYEES[1]
+  const pageRef = useRef(null)
 
   return (
-    <div className="emp-page">
+    <div className="emp-page" ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -142,6 +145,7 @@ export default function App() {
         </div>
       </div>
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

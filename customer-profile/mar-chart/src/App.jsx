@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
+import DevMode from '../../../Components/DevMode'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -282,6 +283,7 @@ function TaskInstancePopover({ task, cell, rect, onClose }) {
 // ─── App ──────────────────────────────────────────────────────
 
 export default function App() {
+  const pageRef = useRef(null)
   const [popover, setPopover] = useState(null) // { task, cell, rect }
 
   const handleBubbleClick = (e, task, cell) => {
@@ -291,7 +293,7 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div className="page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
 
       <SideNav activeItem="customers" />
@@ -437,6 +439,7 @@ export default function App() {
         </div>
       </div>
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

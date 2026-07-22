@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import DevMode from '../../../Components/DevMode'
 
 // ── Icons (all 24×24 unless noted) ───────────────────────────────────────────
 
@@ -262,6 +263,7 @@ function AssignBar({ employee, onAssign, disabled }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function EventPanel() {
+  const pageRef = useRef(null)
   const [activeTab, setActiveTab] = useState('Assigned Today')
   const [slots, setSlots] = useState(Array(TOTAL_SLOTS).fill(null))
   const [openMenu, setOpenMenu] = useState(null)
@@ -359,7 +361,7 @@ export default function EventPanel() {
     .join(' and ')
 
   return (
-    <>
+    <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link ep-back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -617,6 +619,7 @@ export default function EventPanel() {
         </div>
 
       </div>
-    </>
+      <DevMode containerRef={pageRef} />
+    </div>
   )
 }

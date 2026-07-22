@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
+import DevMode from '../../../Components/DevMode'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -1583,6 +1584,7 @@ export default function App() {
   const [composeMode, setComposeMode] = useState(null)
   const [search, setSearch] = useState('')
   const [sidebarWidth, setSidebarWidth] = useState(320)
+  const pageRef = useRef(null)
 
   const handleSidebarResizeStart = (e) => {
     e.preventDefault()
@@ -1741,7 +1743,7 @@ export default function App() {
   }
 
   return (
-    <div className="messages-page">
+    <div className="messages-page" ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -1781,6 +1783,7 @@ export default function App() {
         </div>
       </div>
       </div>
+      <DevMode containerRef={pageRef} />
     </div>
   )
 }

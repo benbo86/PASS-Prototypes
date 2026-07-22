@@ -5,6 +5,7 @@ import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/side-nav.css'
 import '../../../Styles/top-nav.css'
+import '../../../Styles/dev-mode.css'
 import './details.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
