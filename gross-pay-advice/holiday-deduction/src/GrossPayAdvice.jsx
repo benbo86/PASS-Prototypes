@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import DevMode from '../../../Components/DevMode';
+import DevComments from '../../../Components/DevComments';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { GPA_RECORDS, GPA_EMPLOYEE_NAMES, GPA_L2_VISITS, HOLIDAY_RECORDS_L2, fmtGBP } from './data';
 
@@ -445,6 +446,7 @@ function GPADetail({ record, onBack }) {
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   );
 }
@@ -670,6 +672,7 @@ export default function GrossPayAdvice() {
         />
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   );
 }

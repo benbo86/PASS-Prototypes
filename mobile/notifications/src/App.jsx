@@ -3,6 +3,7 @@ import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -649,6 +650,7 @@ export default function App() {
         />
       </div>
       <DevMode containerRef={phoneFrameRef} />
+      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

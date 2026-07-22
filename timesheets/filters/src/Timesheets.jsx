@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import DevMode from '../../../Components/DevMode';
+import DevComments from '../../../Components/DevComments';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
@@ -720,6 +721,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   );
 }
@@ -1268,6 +1270,7 @@ export default function Timesheets() {
         />
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   );
 }

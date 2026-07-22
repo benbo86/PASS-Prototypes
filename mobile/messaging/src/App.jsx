@@ -4,6 +4,7 @@ import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import AccountScreen from '../../../Components/AccountScreen'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
@@ -1221,6 +1222,7 @@ export default function App() {
         )}
       </div>
       <DevMode containerRef={phoneFrameRef} />
+      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

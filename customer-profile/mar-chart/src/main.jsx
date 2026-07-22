@@ -8,6 +8,7 @@ import '../../../Styles/top-nav.css'
 import '../../../Styles/customer-profile-nav.css'
 import '../../../Styles/legacy.css'
 import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
 import './mar-page.css'
 import './mar-legacy.css'
 

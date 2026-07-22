@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 
 // ── Icons (all 24×24 unless noted) ───────────────────────────────────────────
 
@@ -620,6 +621,7 @@ export default function EventPanel() {
 
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

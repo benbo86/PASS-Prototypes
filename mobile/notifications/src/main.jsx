@@ -5,6 +5,7 @@ import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
 import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
 import './notifications.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

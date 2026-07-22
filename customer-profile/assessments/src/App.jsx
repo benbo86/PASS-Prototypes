@@ -3,6 +3,7 @@ import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -268,6 +269,7 @@ export default function App() {
       )}
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

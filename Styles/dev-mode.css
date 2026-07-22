@@ -17,20 +17,55 @@
    opaque UI, invisible even though functioning — exactly what "revealing
    the panel but not the distances" looks like from the outside. */
 
-.devmode-toggle-group {
+/* Round, icon-only — sits immediately left of Dev Comments' own toggle
+   (`.devcomments-toggle`, at right:24px) so the two form one visual
+   toolbar: right:76px = 24px + 44px width + 8px gap. Both toolbar buttons
+   share the same active-state purple (--brand-purple-6-purple-4) so they
+   read as one consistent set, even though the rest of each feature's UI
+   (Dev Mode's blue/purple/green/red vs Dev Comments' amber) stays distinct. */
+.devmode-toggle {
   position: fixed;
   top: 20px;
-  right: 24px;
-  /* Must stay above the inspect panel (10600) — the panel spans the full
-     right edge and would otherwise cover these buttons, making it
-     impossible to exit Dev Mode while something is selected. */
+  right: 76px;
   z-index: 10700;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: #1c1c1e;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
-.devmode-toggle {
+.devmode-toggle:hover { background: #2c2c2e; }
+
+.devmode-toggle.active {
+  background: var(--brand-purple-6-purple-4, #9a26d6);
+}
+
+.devmode-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+  flex-shrink: 0;
+}
+
+/* Bottom-right status pill — only rendered while Dev Mode is active, so it
+   doubles as both "yes, Dev Mode is on" confirmation (the toggle itself
+   lost its text label to become an icon-only toolbar button) and the entry
+   point into the help modal. Mirrors .back-link's bottom-corner placement,
+   opposite side. */
+.devmode-status-pill {
+  position: fixed;
+  bottom: 20px;
+  right: 24px;
+  z-index: 10700;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -46,41 +81,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
-.devmode-toggle:hover { background: #2c2c2e; }
-
-.devmode-toggle.active {
-  background: var(--brand-purple-6-purple-4, #9a26d6);
-}
-
-.devmode-toggle-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #666;
-  flex-shrink: 0;
-}
-
-.devmode-toggle.active .devmode-toggle-dot {
-  background: #4ade80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
-}
-
-.devmode-help-btn {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: #1c1c1e;
-  color: #f2f2f2;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.devmode-help-btn:hover { background: #2c2c2e; color: #fff; }
+.devmode-status-pill:hover { background: #2c2c2e; }
 
 /* ── Highlight boxes (hover / select / multi-select) ── */
 

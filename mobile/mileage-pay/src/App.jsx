@@ -5,6 +5,7 @@ import ScreenSlider from '../../../Components/ScreenSlider'
 import AccountScreen from '../../../Components/AccountScreen'
 import MileageScreen from '../../../Components/MileageScreen'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -59,6 +60,7 @@ export default function App() {
         <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
       </PhoneFrame>
       <DevMode containerRef={phoneFrameRef} />
+      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </>
   )
 }

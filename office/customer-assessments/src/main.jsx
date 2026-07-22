@@ -6,6 +6,7 @@ import '../../../Styles/main.css'
 import '../../../Styles/side-nav.css'
 import '../../../Styles/top-nav.css'
 import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
 import './assessments.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

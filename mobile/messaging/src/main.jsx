@@ -6,6 +6,7 @@ import '../../../Styles/main.css'
 import '../../../Styles/mobile.css'
 import '../../../Styles/mobile-account.css'
 import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
 import './messaging.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

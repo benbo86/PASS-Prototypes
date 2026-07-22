@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -1784,6 +1785,7 @@ export default function App() {
       </div>
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

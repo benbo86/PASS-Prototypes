@@ -3,6 +3,7 @@ import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -27,6 +28,7 @@ export default function App() {
       </main>
       </div>
       <DevMode containerRef={pageRef} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

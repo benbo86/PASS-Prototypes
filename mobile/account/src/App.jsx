@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import PhoneFrame from '../../../Components/PhoneFrame'
 import AccountScreen from '../../../Components/AccountScreen'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -31,6 +32,7 @@ export default function App() {
         </div>
       </PhoneFrame>
       <DevMode containerRef={phoneFrameRef} />
+      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </>
   )
 }

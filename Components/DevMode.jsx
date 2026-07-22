@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { announceState, subscribeToState } from './devToolbarBus'
 import {
   toPlainRect, getElementMetrics, computeElementGap, uniformDirs,
   computeNearestGaps, isAncestorOrDescendant, findVisibleAncestor,
@@ -26,11 +27,10 @@ const CheckIcon = () => (
   </svg>
 )
 
-const HelpIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-    <line x1="12" y1="17" x2="12.01" y2="17" />
+const CodeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="16 18 22 12 16 6" />
+    <polyline points="8 6 2 12 8 18" />
   </svg>
 )
 
@@ -82,6 +82,33 @@ export default function DevMode({ containerRef }) {
     })
   }, [])
 
+  // Announce our own state changes for Dev Comments to react to — as an
+  // effect (after the state commit), not inside the updater above.
+  // Dispatching a synchronous event from within a setState updater, where
+  // a listener elsewhere calls a DIFFERENT component's setState, is
+  // exactly the "Cannot update a component while rendering a different
+  // component" React warning — updaters must stay pure.
+  useEffect(() => {
+    announceState('devmode', isActive)
+  }, [isActive])
+
+  // ── Mutual exclusivity with Dev Comments ──
+  // Only one dev-toolbar feature is active at a time — activating this one
+  // announces it, and this listens for the *other* feature doing the same
+  // to turn itself off. See devToolbarBus.js for why this is a window
+  // event rather than lifted state (no shared parent across 18 prototypes).
+  useEffect(() => {
+    return subscribeToState((feature, otherActive) => {
+      if (feature !== 'devmode' && otherActive && isActive) {
+        setIsActive(false)
+        hoveredElRef.current = null
+        selectedElsRef.current = []
+        setHoveredEl(null)
+        setSelectedEls([])
+      }
+    })
+  }, [isActive])
+
   // ── Capture-phase event interception ──
   // Single unified set of document-level listeners (capture phase, so they
   // run before the real app's own handlers — link nav, swipe-to-delete's
@@ -103,7 +130,14 @@ export default function DevMode({ containerRef }) {
     // being inspected. Always exempt it entirely, or hovering/clicking the
     // toggle button would get treated as inspecting an element instead of
     // operating Dev Mode itself.
-    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui]')
+    //
+    // Also exempt Dev Comments' chrome ([data-devcomments-ui]) — the two
+    // toggles sit as one toolbar, both outside containerRef, so without
+    // this, activating Dev Mode first would make its own "outside
+    // recognized scope" guard swallow every click on the Comments toggle
+    // (or any other Dev Comments UI), silently preventing it from ever
+    // opening — a real bug hit while testing both active at once.
+    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui]')
 
     // "Recognized" = containerRef's own subtree, OR content react-datepicker/
     // FilterDropdown have portaled to document.body — both are conceptually
@@ -346,15 +380,21 @@ export default function DevMode({ containerRef }) {
 
   return (
     <>
-      <div className="devmode-toggle-group" data-devmode-ui="true">
-        <button className={`devmode-toggle${isActive ? ' active' : ''}`} onClick={toggleActive} data-devmode-ui="true">
+      <button
+        className={`devmode-toggle${isActive ? ' active' : ''}`}
+        onClick={toggleActive}
+        data-devmode-ui="true"
+        aria-label={isActive ? 'Exit Dev Mode' : 'Dev Mode'}
+      >
+        <CodeIcon />
+      </button>
+
+      {isActive && (
+        <button className="devmode-status-pill" onClick={() => setShowHelp(true)} data-devmode-ui="true">
           <span className="devmode-toggle-dot" />
-          {isActive ? 'Exit Dev Mode' : 'Dev Mode'}
+          Using dev mode
         </button>
-        <button className="devmode-help-btn" onClick={() => setShowHelp(true)} aria-label="Dev Mode help" data-devmode-ui="true">
-          <HelpIcon />
-        </button>
-      </div>
+      )}
 
       {showHelp && createPortal(
         <DevModeHelpModal onClose={() => setShowHelp(false)} />,

@@ -2,6 +2,7 @@ import { useState, useRef, forwardRef } from 'react'
 import Select, { components } from 'react-select'
 import DatePicker from 'react-datepicker'
 import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -329,6 +330,7 @@ export default function HolidayAbsenceDialog() {
       )}
     </div>
     <DevMode containerRef={pageRef} />
+    <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }
