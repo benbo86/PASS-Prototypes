@@ -151,6 +151,10 @@
 
 .devcomments-name-input,
 .devcomments-text-input {
+  box-sizing: border-box; /* width:100% + padding/border must not add extra
+    width on top of that — there's no repo-wide box-sizing reset, so this
+    needs to be explicit or the input overflows its container by exactly
+    its own padding+border. */
   width: 100%;
   background: #2c2c2e;
   color: #f2f2f2;

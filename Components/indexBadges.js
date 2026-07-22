@@ -23,13 +23,17 @@ function toMillis(value) {
   return 0
 }
 
-// Resolves a prototype link's href (relative, sometimes with a query
-// string like ?employee=...) to the same pathname DevComments uses as
-// prototypeId (window.location.pathname on that prototype's own page,
-// which never includes the query string either) — so a link and the
-// comments filed against that page always match up.
+// Resolves a prototype link's href to the same prototypeId DevComments
+// uses at runtime. Most prototypes key off pathname alone, but multi-view
+// prototypes reached via a query string (Timesheets, Gross Pay Advice —
+// level 1 list vs level 2 detail, e.g. ?employee=stephen-nicholls) key off
+// pathname+search instead, so a comment left on one level doesn't leak
+// into the other — see the matching prototypeId props in Timesheets.jsx/
+// GrossPayAdvice.jsx. Including search here unconditionally is safe for
+// every other link too: with no query string, `url.search` is just `''`.
 function pathnameForHref(href) {
-  return new URL(href, window.location.href).pathname
+  const url = new URL(href, window.location.href)
+  return url.pathname + url.search
 }
 
 function countUnseen(comments, seenAt) {

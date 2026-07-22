@@ -508,6 +508,10 @@ function ThreadPanel({ comment, position, authorName, setAuthorName, onClose, on
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const canReply = replyText.trim() && authorName.trim()
+  // Same non-authoritative identity model as editing (see EditableMessage)
+  // — only whoever's currently-typed name matches the comment's original
+  // author sees the delete action at all.
+  const canDelete = !!authorName.trim() && comment.authorName === authorName
 
   const handleReply = async () => {
     if (!canReply || submitting) return
@@ -532,9 +536,11 @@ function ThreadPanel({ comment, position, authorName, setAuthorName, onClose, on
       <div className="devcomments-panel-header">
         <div className="devcomments-panel-title">Comment</div>
         <div className="devcomments-panel-header-actions">
-          <button className="devcomments-icon-btn danger" onClick={handleDelete} aria-label="Delete comment">
-            <TrashIcon />
-          </button>
+          {canDelete && (
+            <button className="devcomments-icon-btn danger" onClick={handleDelete} aria-label="Delete comment">
+              <TrashIcon />
+            </button>
+          )}
           <button
             className={`devcomments-icon-btn${comment.resolved ? ' active' : ''}`}
             onClick={onToggleResolved}

@@ -328,6 +328,7 @@
 }
 
 .devmode-select {
+  box-sizing: border-box;
   flex: 1;
   background: #2c2c2e;
   color: #f2f2f2;
@@ -341,6 +342,7 @@
 .devmode-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .devmode-export-btn {
+  box-sizing: border-box;
   width: 100%;
   background: var(--brand-purple-6-purple-4, #9a26d6);
   color: #fff;

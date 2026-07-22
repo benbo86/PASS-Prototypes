@@ -446,7 +446,7 @@ function GPADetail({ record, onBack }) {
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
       <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }
@@ -672,7 +672,7 @@ export default function GrossPayAdvice() {
         />
       </div>
       <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }
