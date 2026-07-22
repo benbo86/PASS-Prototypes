@@ -1,0 +1,407 @@
+/* ── Dev Edit ──────────────────────────────────────────────────
+   Live element-style editor, third member of the dev toolbar — sits to
+   the left of Dev Mode's own toggle (right:76px), so this one is
+   right:128px, all three top:20px. Toggle chrome matches Dev Mode/Dev
+   Comments (dark, active-state purple) for toolbar consistency, but the
+   selection highlight/hover box uses its own accent (blue) rather than
+   Dev Mode's blue-highlight-on-hover or Dev Comments' amber pin — a
+   fresh colour was picked deliberately so "this element's styles are
+   being live-edited" reads as distinct from either of the other two
+   tools' own in-context indicators. */
+
+.devedit-toggle {
+  position: fixed;
+  top: 20px;
+  right: 128px;
+  z-index: 10700;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: #1c1c1e;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.devedit-toggle:hover { background: #2c2c2e; }
+
+.devedit-toggle.active {
+  background: var(--brand-purple-6-purple-4, #9a26d6);
+  color: #fff;
+}
+
+/* ── Highlight boxes ── */
+
+.devedit-highlight {
+  position: fixed;
+  z-index: 10500;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 2px;
+}
+
+.devedit-highlight-hover {
+  border: 1.5px solid rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.devedit-highlight-selected {
+  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* ── Edit panel ── */
+
+.devedit-panel {
+  position: fixed;
+  z-index: 10700;
+  width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  font-family: Barlow, sans-serif;
+  background: #1c1c1e;
+  color: #f2f2f2;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.devedit-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #3a3a3c;
+  flex-shrink: 0;
+}
+
+.devedit-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.devedit-panel-close {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+.devedit-panel-close:hover { color: #fff; }
+
+.devedit-panel-tag {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  color: #8e8e93;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.devedit-panel-body {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.devedit-panel-empty {
+  font-size: 12.5px;
+  color: #8e8e93;
+}
+
+.devedit-rule-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.devedit-rule-selector {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11.5px;
+  color: #3b82f6;
+  word-break: break-word;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.devedit-rule-media {
+  font-family: Barlow, sans-serif;
+  font-size: 10.5px;
+  color: #8e8e93;
+}
+
+.devedit-rule-loading {
+  font-family: Barlow, sans-serif;
+  font-size: 10.5px;
+  font-style: italic;
+  color: #8e8e93;
+}
+
+.devedit-rule-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  background: #131314;
+  color: #d8d8dc;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.devedit-rule-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.devedit-rule-textarea:disabled {
+  opacity: 0.5;
+}
+
+.devedit-rule-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.devedit-error {
+  font-size: 12px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.devedit-btn-primary,
+.devedit-btn-secondary {
+  box-sizing: border-box;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: Barlow, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.devedit-btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+.devedit-btn-primary:hover { background: #2f6fd6; }
+.devedit-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.devedit-btn-secondary {
+  background: #2c2c2e;
+  color: #f2f2f2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.devedit-btn-secondary:hover { background: #3a3a3c; }
+.devedit-btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+.devedit-btn-secondary.active {
+  background: var(--brand-purple-6-purple-4, #9a26d6);
+  color: #fff;
+}
+
+.devedit-link-btn {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  font-family: Barlow, sans-serif;
+  font-size: 11.5px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+.devedit-link-btn:hover { color: #fff; }
+
+/* ── Password / name gate, Save-as-version dialog ── */
+/* Reuses the same small centered-box treatment for both — they're never
+   shown at the same time as each other. */
+
+.devedit-gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10800;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.devedit-gate-box {
+  width: 280px;
+  background: #1c1c1e;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: Barlow, sans-serif;
+}
+
+.devedit-gate-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.devedit-gate-input {
+  box-sizing: border-box;
+  width: 100%;
+  background: #131314;
+  color: #f2f2f2;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+}
+.devedit-gate-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.devedit-gate-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── Session bar ── */
+/* Fixed bottom-right while active, mirroring Dev Mode's own status-pill
+   corner (opposite the toolbar, which lives top-right) — the one
+   persistent place to save/discard/reach history regardless of whether an
+   element is currently selected. */
+
+.devedit-session-bar {
+  position: fixed;
+  z-index: 10700;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1c1c1e;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  font-family: Barlow, sans-serif;
+  flex-wrap: wrap;
+  max-width: 90vw;
+}
+
+.devedit-session-count {
+  font-size: 12.5px;
+  color: #f2f2f2;
+  white-space: nowrap;
+}
+
+.devedit-session-previewing {
+  font-size: 12.5px;
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.devedit-session-identity {
+  font-size: 11.5px;
+  color: #8e8e93;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1px solid #3a3a3c;
+}
+
+/* ── Version history panel ── */
+
+.devedit-history-panel {
+  position: fixed;
+  z-index: 10700;
+  bottom: 76px;
+  right: 20px;
+  width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  font-family: Barlow, sans-serif;
+  background: #1c1c1e;
+  color: #f2f2f2;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.devedit-version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #2c2c2e;
+}
+.devedit-version-row:last-child { border-bottom: none; }
+.devedit-version-row.previewing { background: rgba(59, 130, 246, 0.08); }
+
+.devedit-version-info { min-width: 0; }
+
+.devedit-version-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.devedit-version-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #1c1c1e;
+  background: #4ade80;
+  border-radius: 8px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+.devedit-version-meta {
+  font-size: 10.5px;
+  color: #8e8e93;
+  margin-top: 2px;
+}
+
+.devedit-version-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}

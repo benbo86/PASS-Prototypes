@@ -4,6 +4,7 @@ import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
+import DevEdit from '../../../Components/DevEdit'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { GPA_RECORDS, GPA_EMPLOYEE_NAMES, GPA_L2_VISITS, HOLIDAY_RECORDS_L2, fmtGBP } from './data';
 
@@ -447,6 +448,7 @@ function GPADetail({ record, onBack }) {
       )}
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }
@@ -673,6 +675,7 @@ export default function GrossPayAdvice() {
       </div>
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -53,6 +54,7 @@ export default function AssignVisitWarning() {
     </div>
     <DevMode containerRef={pageRef} />
     <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+    <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

@@ -57,6 +57,10 @@ employee-contract/
 | `Components/devToolbarBus.js` | Tiny `window` event pub/sub making Dev Mode and Dev Comments mutually exclusive — see Firebase section below |
 | `Components/indexBadges.js` | Plain JS (not React) — notification pills on root `index.html`, loaded via `<script type="module">` — see Firebase section below |
 | `Styles/dev-comments.css` | Dev Comments' own UI (toggle, pins, composer, thread panel) — amber accent, distinct from Dev Mode's palette |
+| `Components/DevEdit.jsx` | Dev Edit — live CSS rule editor, wire into every new prototype alongside Dev Mode/Dev Comments (always mounted, not dev-only — see Prototype conventions below) |
+| `Components/authorIdentity.js` | Shared name-prompt storage (`getStoredAuthor`/`storeAuthor`) — used by both Dev Comments and Dev Edit, so a name is only ever asked for once per browser |
+| `devEditPlugin.js` | Vite dev-server plugin backing Dev Edit — repo-root, not under `Components/` (it's Node-side server code, not a React component) — see Dev Edit section below |
+| `Styles/dev-edit.css` | Dev Edit's own dark-themed UI (toggle, highlight boxes, edit panel) — blue accent, distinct from both Dev Mode and Dev Comments' palettes |
 
 **Always read `Styles/main.css` before adding local CSS.**
 
@@ -112,6 +116,16 @@ employee-contract/
    If the prototype has a fragment root wrapped in `<div ref={pageRef} style={{ display: 'contents' }}>` (see Dev Mode's own convention above for when this applies), note that `display: contents` elements always report an all-zero `getBoundingClientRect()` — `DevComments` already handles this generically (falls back to viewport-relative positioning when the container has no real box), so no per-prototype action is needed, just be aware pins on these particular prototypes are positioned relative to the viewport rather than a container box.
 
    **Multi-view prototypes** (a list view and a detail view reached via a different URL/query-param, e.g. `gross-pay-advice/holiday-deduction`, `timesheets/filters`) need Dev Mode *and* Dev Comments wired into **each** view's own component separately — an early `return <OtherComponent />` before the main JSX means the outer wiring never runs for that view. This bit Dev Mode itself once already (see the Dev Mode memory/history) — check for early-return view switching before assuming one wiring pass covers a whole prototype.
+
+6. **Dev Edit** — wire the live style editor into every new prototype alongside Dev Mode/Dev Comments, same ref, same "wire every view separately" rule as Dev Comments above, and the **same `prototypeId` expression as the adjacent `DevComments` call** (plain pathname, or `pathname + search` for a multi-view prototype — must match exactly, or the shared/versioned overrides and the comments end up scoped differently for what's meant to be the same page):
+   ```jsx
+   import DevEdit from '../../../Components/DevEdit'
+   // ...
+   <DevMode containerRef={pageRef} />
+   <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+   <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+   ```
+   Also add `import '../../../Styles/dev-edit.css'` to `main.jsx`. **Not** gated behind `import.meta.env.DEV` — always mounted, in every environment, because ordinary (unauthenticated, production) visitors need the always-on "apply whichever version is currently active" effect to run too. Only the `Apply to file` button inside the panel is dev-only (gated at the button itself, not the component) — see the Dev Edit section below for the full architecture.
 
 ---
 
@@ -302,7 +316,37 @@ When implementing from Figma:
 
 **Delete is a real, user-facing action** (bin icon in the thread panel header, with a `window.confirm()` guard) — removes the whole comment doc, replies included. This changes the security-rules shape needed once test mode expires (see below): rules must allow `delete`, not just `create`/`update`.
 
-**⚠️ Security rules status:** created in **test mode** (open read/write, no auth check) on 2026-07-22 — this expires automatically after 30 days (~2026-08-21). Before then, tighten the rules in the Firebase console (Firestore → Rules) to something like: allow `create` only with the required fields present and correctly typed (including non-empty `authorName`), allow `update` only to append to `replies` or toggle `resolved` (not rewrite `text`/`authorName` on the original), allow `delete` (the UI now depends on this). If comments suddenly stop working after that date, this is why — check the Rules tab first.
+**✅ Security rules status:** published and confirmed enforcing as of 2026-07-22 (not just assumed from a successful sign-in — verified with a battery of direct, no-UI Firestore calls: unauthenticated writes to `devedit_versions`/`devedit_active` are rejected with `permission-denied`, unauthenticated reads and `devmode_comments` create/update/delete all still work exactly as before, and even an *authenticated* attempt to modify an existing `devedit_versions` doc is correctly rejected — versions really are immutable once created, not just by convention). Current rules (covers `devmode_comments` and Dev Edit's two collections together):
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /devmode_comments/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.authorName is string
+                    && request.resource.data.authorName.size() > 0
+                    && request.resource.data.text is string
+                    && request.resource.data.prototypeId is string
+                    && request.resource.data.resolved == false
+                    && request.resource.data.replies == [];
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['replies', 'resolved', 'text', 'edited']);
+      allow delete: if true;
+    }
+    match /devedit_versions/{id} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+    match /devedit_active/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if false;
+    }
+  }
+}
+```
+Re-verify afterward by attempting an **unauthenticated** write and confirming it's rejected — don't just confirm sign-in works, since test-mode rules allow authenticated writes too and wouldn't tell the two states apart.
 
 **Pins are visible whenever Dev Mode isn't active**, regardless of whether comment mode itself is on — anyone browsing a prototype normally should be able to see existing feedback without turning anything on. `active` (the comment-mode toggle) only gates the "click anywhere to drop a new pin" interception; viewing a thread, replying, resolving, editing, and deleting all work regardless of whether comment mode is on. Pins hide entirely while Dev Mode is active (see the mutual-exclusivity/state-sharing entry below) so they don't clutter element inspection. Each pin shows its own reply-count badge (red circle, top-right of the pin) when it has replies — there's no aggregate "unresolved count" badge on the toggle itself anymore, since with pins always visible that count is redundant (just look at the pins).
 
@@ -333,3 +377,47 @@ Getting "seen" right took one real fix: the natural approach — call `Date.now(
 **Known limitation, not yet addressed:** internal screen transitions that use component state only (no URL change) — e.g. `mobile/notifications`'/`mobile/messaging`'s `ScreenSlider`-based list→detail transitions — still share one `prototypeId` per visit-count-as-one-page, since there's no URL signal to key off. Not yet reported as an issue; would need each such prototype to start reflecting its current internal screen in the URL (query string or hash) before it could be scoped the same way Timesheets/GPA now are.
 
 **Delete is restricted to the comment's original author** (same non-authoritative, typed-name identity model as editing) — the bin icon in the thread panel header only renders when the currently-typed `authorName` matches `comment.authorName` (`canDelete` in `ThreadPanel`), same check shape as `EditableMessage`'s `canEdit`. Resolve stays unrestricted (anyone can mark resolved/reopen) — only delete is creator-gated, since it's destructive and irreversible.
+
+---
+
+## Dev Edit (live style editor)
+
+Third member of the dev toolbar (`Components/DevEdit.jsx`, `right: 128px`, left of Dev Mode's own toggle) — select an element, edit the actual CSS rule(s) that apply to it, see every matching element update instantly. Two independent capabilities, both reachable from the same select-and-edit mechanic:
+- **Apply to file** (dev-only, per-rule) — writes one rule's edit straight into its real source `.css` file.
+- **Save as version** (requires the shared password) — bundles every edit made across a whole editing session into a named, Firestore-backed snapshot that becomes the prototype's *active* version, which every visitor's page then applies live — signed in or not, dev or production. This is the feature that makes edits visible to people other than whoever made them.
+
+**Always mounted, in every environment.** Unlike the original (dev-only) build of this feature, every prototype now renders `<DevEdit containerRef={...} prototypeId={...} />` unconditionally (no `import.meta.env.DEV` gate on the component itself) — production visitors need the always-on "apply the active version" effect described below, and the design team needs the toggle to exist on the deployed site at all. Only the `Apply to file` *button* stays gated on `import.meta.env.DEV` (per rule-block, in `EditPanel`), since its backing endpoint only exists under `vite dev` anyway.
+
+**Auth: one shared Firebase Auth account, not per-person credentials.** `Components/firebase.js` exports `auth` (`getAuth(app)`). `SHARED_EMAIL` in `DevEdit.jsx` is a fixed constant that must exactly match whatever account was created in the Firebase console — the design team never sees or types it, only the account's password. Clicking the toggle while signed out shows a password prompt (`signInWithEmailAndPassword`); on success, if no name is stored yet, a name prompt follows next, reusing `Components/authorIdentity.js` (`getStoredAuthor`/`storeAuthor`, extracted from Dev Comments so the two features share one identity — a name is only ever asked for once per browser, whichever feature prompts for it first). Firebase Auth persists sign-in across reloads by default, so this is a one-time thing per browser, not per session.
+
+**Data model — two Firestore collections, both queried by `prototypeId` field (not doc ID, since `prototypeId` is a pathname containing `/`, which Firestore IDs can't contain), same pattern as `devmode_comments`:**
+- `devedit_versions` — one immutable doc per saved version: `{ prototypeId, name, authorName, createdAt, overrides: [{selector, mediaText, declarations, filePath}] }`.
+- `devedit_active` — one doc per prototype, denormalized (carries its own copy of `overrides`, not just a reference) so applying it on page load is a single read: `{ prototypeId, versionId, versionName, overrides, updatedAt }`. "Revert to version X" just overwrites this doc's fields with X's — no new version doc gets created by reverting.
+
+**Applying overrides live matches purely by selector text (+ enclosing `@media`), never by file path.** `findRulesForSelector`/`applyOverridesLive` in `DevEdit.jsx` walk `document.styleSheets` looking for a matching `selectorText`, then set `rule.style.cssText`. This is deliberate: Vite's `data-vite-dev-id` attribute (see below) simply doesn't exist in a production build — Vite bundles CSS into hashed files there, no per-rule source mapping at all — so `filePath` can only ever be used for the dev-only Apply-to-file path, never for the shared/versioned one. `filePath` is still stored on each override as metadata (useful context, and available if a future dev-convenience wants it), just not read by the live-apply code.
+
+**Session-accumulated edits, not one-shot per-element Apply/Cancel.** `sessionEdits` is a map keyed by `selector|mediaText` (`ruleKey`), not by DOM element or by "the currently open panel" — selecting a *different* element no longer reverts whatever was left edited on the previous one; it's carried forward as part of the same ongoing session instead, since `rule` in each entry is the live CSSOM object and mutating its `cssText` persists regardless of what's currently selected. Re-selecting an *already-edited* element reuses its existing entry (and in-progress draft) rather than re-initializing it. The per-element panel's only self-contained action is closing itself (no revert) — discarding the whole session is a separate, explicit action in the always-visible session bar (bottom-right while active), which also shows the unsaved-edit count and Save as version / History.
+
+**Why applying an active version can't just read `rule.style.cssText` off the CSSOM for the "original" reference, unlike Apply-to-file's `/lookup` round-trip below.** Apply-to-file cares about preserving authored shorthand in a real file; the shared/versioned path never writes to a file at all (only replays `cssText` on load), so there's nothing to preserve formatting-wise — using the browser's own (possibly longhand-expanded) serialization is completely fine there. The two paths intentionally use different levels of rigor for this reason.
+
+**Architecture for Apply-to-file — reads/writes real files via a Vite dev-server plugin (`devEditPlugin.js`).** Vite injects each imported stylesheet in dev mode as its own `<style data-vite-dev-id="/absolute/path/to/file.css">` tag — that attribute is the whole trick, giving the client a direct line from a live CSSOM rule back to its source file on disk. Two POST-only endpoints, registered via `configureServer` (which Vite only calls for `vite dev`/`vite serve`, never a production build):
+- `/__dev-edit/lookup` — given the rule(s) the client found via the live CSSOM, parses each source file with `postcss` and returns the declarations exactly as authored. Also used (and gracefully no-ops via its existing `.catch()` in production, where the route doesn't exist) to populate a freshly-selected rule's textarea with nicer, non-expanded text — a UX nicety in dev, irrelevant but harmless in prod.
+- `/__dev-edit/apply` — same lookup, then replaces that rule's declarations with the edited text and writes the file back.
+
+Both restrict themselves to `.css` paths inside the project root (`assertSafePath` in `devEditPlugin.js`) — a basic guard against a stray/malformed request writing somewhere it shouldn't, not a hardened security boundary (this only ever runs on a developer's own machine).
+
+**Why there's a `/lookup` round-trip instead of just reading `rule.style.cssText` off the CSSOM directly, for Apply-to-file specifically.** First version did exactly that, and it seemed to work — until a real edit exposed the problem: `cssText` re-serializes from the browser's *computed* style object, so a hand-written `border: none` comes back as four expanded longhand properties (`border-width: medium; border-style: none; border-color: currentcolor; border-image: initial;`). Editing one property and hitting Apply would've silently expanded every other untouched shorthand in that rule, permanently degrading the source file's formatting on every single edit. Reading through `postcss` instead preserves exactly what's in the file — shorthand stays shorthand. The CSSOM is still used for the *live preview* (`rule.style.cssText = draft` on every keystroke — this is what makes every matching element update in realtime), just not as the source of truth for what gets written to a file.
+
+**Selector/rule matching, both client and server side, is whitespace-normalized** (`normalizeSelectorText`/`ruleKey` in `DevEdit.jsx`, `normalizeSelector` in `devEditPlugin.js`) — `CSSStyleRule.selectorText` (browser) and a selector as actually formatted in a source file (sometimes split across lines for grouped selectors, e.g. `.devcomments-composer,\n.devcomments-panel` in `dev-comments.css`) differ only in whitespace, and both are collapsed to the same form before comparing. `@media`-nested rules are matched too, considering the immediate parent at-rule's `params`/`media.mediaText` alongside the selector — a rule with the same selector inside vs. outside a media query are treated as distinct.
+
+**Indentation is preserved on Apply-to-file**, not just correctness of values — `applyEdit` in `devEditPlugin.js` captures the original declarations' `raws.before` (each decl's leading whitespace) and the rule's own `raws.after` (before the closing `}`) *before* removing and re-adding declarations, re-applying them to the new/edited decl nodes (matched back to the original by property name, falling back to a sensible default for genuinely new properties). Skipping this step was an early bug — postcss's default raws for a declaration parsed from a bare `a{...}` wrapper (used to turn the edited textarea text into clean AST nodes) have no leading newline/indent at all, so every edit would've flattened an entire nicely-indented rule onto ragged, unindented lines even though only one property in it actually changed.
+
+**"Changed" detection compares against the same reformatted string the textarea starts from, not the CSSOM's raw form** — an entry's `original` and `draft` are both initialized from the same source, so an untouched rule's `draft === original` stays true and never gets included in a Save-as-version or Apply-to-file request. Comparing against the raw, un-reformatted `rule.style.cssText` instead was an early bug: reformatting-for-display alone made every matched rule look "changed" the instant it was shown, silently including untouched (and sometimes unmatchable, e.g. a bare `*, ::before, ::after` rule) rules in every request.
+
+**Selecting an element can match more than one CSS rule** (e.g. `.round-btn` and `.primary-btn` both apply to a primary button) — each shows as its own editable block in the panel. A rule this broad (`*`) matching literally every element on the page is expected, not a bug — it does apply, same as it would in browser DevTools.
+
+**Highlight/select follows Dev Mode's own established patterns**: capture-phase `mousemove`/`click` interception on `document` while active (so selecting an element to edit never triggers real navigation/clicks underneath it), a small `requestAnimationFrame` loop to keep the selected element's highlight/panel glued to it across scroll (and to detect + clean up if the element gets removed from the DOM while selected), and the same three-way `[data-devmode-ui]`/`[data-devcomments-ui]`/`[data-devedit-ui]` exemption every toolbar feature needs for the others' chrome. Participates in the same mutual-exclusivity bus (`devToolbarBus.js`) as the other two — only one of the three tools is ever active at once; being deactivated this way does **not** discard the session, only hides the select-mode overlay (matches manually toggling off).
+
+**Version history and preview.** Shown only once signed in (a separate panel, opened from the session bar). Lists `devedit_versions` for the current `prototypeId`, newest first. **Preview** applies a past version's overrides live via the same `applyOverridesLive` used for the always-on effect, without touching `devedit_active` — a non-destructive look. **Revert** actually updates `devedit_active`. Known simplification: exiting a preview re-applies the *currently active* version's overrides (correct for the common case, since versions for one prototype tend to touch a highly overlapping set of rules) but doesn't independently restore a rule that only the previewed-but-not-reverted-to version touched — a rare edge case, not yet worth the complexity of a full pristine-CSS snapshot to solve properly.
+
+**Firestore security rules require `request.auth != null` for `devedit_versions`/`devedit_active` writes** (real enforcement, not just a client-side UI gate — a bare client-side password check can be bypassed entirely, and can't stop a direct Firestore write). See the Firebase section above for the exact rule text — published and confirmed actually enforcing via direct (no-UI) Firestore calls, not just a successful sign-in through the app.

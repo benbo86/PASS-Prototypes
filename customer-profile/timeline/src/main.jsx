@@ -9,6 +9,7 @@ import '../../../Styles/customer-profile-nav.css'
 import '../../../Styles/legacy.css'
 import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
+import '../../../Styles/dev-edit.css'
 import './timeline-legacy.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

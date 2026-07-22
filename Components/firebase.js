@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 
 // Shared across every prototype — one Firebase project backs the Dev
 // Comments feature repo-wide. This config is meant to be public in client
@@ -17,3 +18,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+// Backs Dev Edit's shared/versioned mode — one shared email/password
+// account (created in the Firebase console, not per-person) gates who can
+// save/revert a version. See CLAUDE.md's Dev Edit section for the account
+// setup and security-rule shape this depends on.
+export const auth = getAuth(app)

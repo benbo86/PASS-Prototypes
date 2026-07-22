@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { announceState, subscribeToState } from './devToolbarBus'
+import { getStoredAuthor, storeAuthor } from './authorIdentity'
 
 // ─── Icons ────────────────────────────────────────────────────────
 
@@ -43,14 +44,6 @@ const TrashIcon = () => (
   </svg>
 )
 
-// ─── Author identity (no real auth — a remembered display name) ──
-
-const AUTHOR_KEY = 'devcomments-author-name'
-
-function getStoredAuthor() {
-  try { return localStorage.getItem(AUTHOR_KEY) || '' } catch { return '' }
-}
-
 // ─── Read tracking (drives the notification pill on the prototype index) ──
 // Visiting a prototype's page marks everything currently there as "seen" —
 // pins are always visible now, so landing on the page is treated as having
@@ -84,10 +77,6 @@ function markSeenAt(prototypeId, timestamp) {
       localStorage.setItem(LAST_SEEN_KEY, JSON.stringify(map))
     }
   } catch { /* ignore */ }
-}
-
-function storeAuthor(name) {
-  try { localStorage.setItem(AUTHOR_KEY, name) } catch { /* ignore */ }
 }
 
 // Some prototypes have no single wrapping element for containerRef to
@@ -252,13 +241,14 @@ export default function DevComments({ containerRef, prototypeId }) {
     const container = containerRef.current
     if (!container) return
 
-    // Also exempt Dev Mode's own chrome ([data-devmode-ui]) — the two
-    // toggles sit as one toolbar, both outside containerRef. Without this,
-    // activating Dev Comments while Dev Mode is also active would swallow
-    // clicks on Dev Mode's own toggle/status-pill (treating them as
-    // "click the page to drop a pin" instead) — the same class of bug as
-    // Dev Mode not recognizing Dev Comments' chrome, just the mirror case.
-    const isOtherFeatureUi = (target) => target.closest && target.closest('[data-devcomments-ui], [data-devmode-ui]')
+    // Also exempt Dev Mode's and Dev Edit's own chrome ([data-devmode-ui],
+    // [data-devedit-ui]) — all three toggles sit as one toolbar, all
+    // outside containerRef. Without this, activating Dev Comments while
+    // another tool is also active would swallow clicks on its toggle/panel
+    // (treating them as "click the page to drop a pin" instead) — the same
+    // class of bug as Dev Mode not recognizing Dev Comments' chrome, just
+    // the mirror case, now extended to a third tool.
+    const isOtherFeatureUi = (target) => target.closest && target.closest('[data-devcomments-ui], [data-devmode-ui], [data-devedit-ui]')
 
     const handleClick = (e) => {
       if (isOtherFeatureUi(e.target)) return

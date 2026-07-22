@@ -6,6 +6,7 @@ import AccountScreen from '../../../Components/AccountScreen'
 import MileageScreen from '../../../Components/MileageScreen'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -61,6 +62,7 @@ export default function App() {
       </PhoneFrame>
       <DevMode containerRef={phoneFrameRef} />
       <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+      <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </>
   )
 }

@@ -4,6 +4,7 @@ import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 import employeePlaceholder from '../../../Images/Employee Placeholder.png'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -573,6 +574,7 @@ export default function App() {
       </div>
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

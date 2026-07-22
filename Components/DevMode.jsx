@@ -131,13 +131,14 @@ export default function DevMode({ containerRef }) {
     // toggle button would get treated as inspecting an element instead of
     // operating Dev Mode itself.
     //
-    // Also exempt Dev Comments' chrome ([data-devcomments-ui]) — the two
-    // toggles sit as one toolbar, both outside containerRef, so without
-    // this, activating Dev Mode first would make its own "outside
-    // recognized scope" guard swallow every click on the Comments toggle
-    // (or any other Dev Comments UI), silently preventing it from ever
-    // opening — a real bug hit while testing both active at once.
-    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui]')
+    // Also exempt Dev Comments' and Dev Edit's chrome ([data-devcomments-ui],
+    // [data-devedit-ui]) — all three toggles sit as one toolbar, all
+    // outside containerRef, so without this, activating Dev Mode first
+    // would make its own "outside recognized scope" guard swallow every
+    // click on the other toggles (or any of their panels), silently
+    // preventing them from ever opening — a real bug hit while testing two
+    // of these active at once, before a third tool existed.
+    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui], [data-devedit-ui]')
 
     // "Recognized" = containerRef's own subtree, OR content react-datepicker/
     // FilterDropdown have portaled to document.body — both are conceptually

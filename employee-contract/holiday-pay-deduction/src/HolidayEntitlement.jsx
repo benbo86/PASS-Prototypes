@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import Tooltip from '../../../Components/Tooltip'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -156,6 +157,7 @@ export default function HolidayEntitlement() {
       </div>
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

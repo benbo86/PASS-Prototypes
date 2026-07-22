@@ -4,6 +4,7 @@ import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -651,6 +652,7 @@ export default function App() {
       </div>
       <DevMode containerRef={phoneFrameRef} />
       <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+      <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

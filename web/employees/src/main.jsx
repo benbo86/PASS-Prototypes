@@ -8,6 +8,7 @@ import '../../../Styles/legacy.css'
 import '../../../Styles/legacy-employee-card.css'
 import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
+import '../../../Styles/dev-edit.css'
 import './employees.css'
 import App from './App.jsx'
 

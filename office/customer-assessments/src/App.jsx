@@ -4,6 +4,7 @@ import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -754,6 +755,7 @@ export default function App() {
       </div>
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
     </div>
   )
 }

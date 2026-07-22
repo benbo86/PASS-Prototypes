@@ -4,6 +4,7 @@ import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
+import DevEdit from '../../../Components/DevEdit'
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
@@ -722,6 +723,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
       )}
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }
@@ -1271,6 +1273,7 @@ export default function Timesheets() {
       </div>
       <DevMode containerRef={pageRef} />
       <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { readdirSync, existsSync } from 'fs'
+import devEditPlugin from './devEditPlugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -24,7 +25,7 @@ const prototypeInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/PASS-Prototypes/',
-  plugins: [react()],
+  plugins: [react(), devEditPlugin()],
   build: {
     rollupOptions: {
       input: {
