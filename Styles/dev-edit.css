@@ -178,6 +178,7 @@
 .devedit-rule-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .devedit-error {
@@ -367,6 +368,7 @@
 }
 .devedit-version-row:last-child { border-bottom: none; }
 .devedit-version-row.previewing { background: rgba(59, 130, 246, 0.08); }
+.devedit-version-row.original .devedit-version-name { color: #b8b8bd; font-style: italic; }
 
 .devedit-version-info { min-width: 0; }
 
@@ -405,3 +407,16 @@
   gap: 6px;
   flex-shrink: 0;
 }
+
+.devedit-icon-btn {
+  background: none;
+  border: none;
+  color: #9a9a9e;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+.devedit-icon-btn:hover { color: #fff; background: #2c2c2e; }
+.devedit-icon-btn.danger:hover { color: #fff; background: #c0392b; }

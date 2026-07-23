@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  collection, query, where, onSnapshot, addDoc, updateDoc, getDocs, serverTimestamp,
+  collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs, serverTimestamp,
 } from 'firebase/firestore'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { announceState, subscribeToState } from './devToolbarBus'
@@ -26,6 +26,16 @@ const HistoryIcon = () => (
     <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
     <path d="M3 3v5h5" />
     <path d="M12 7v5l4 2" />
+  </svg>
+)
+
+const TrashIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18" />
+    <path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
   </svg>
 )
 
@@ -115,6 +125,86 @@ function applyOverridesLive(overrides) {
   })
 }
 
+// Always re-resolves the live rule(s) for a selector fresh, rather than
+// mutating a previously-captured CSSStyleRule reference directly — see the
+// comment on buildPristineSnapshot below for why holding onto an old
+// reference is actually broken, not just extra-cautious.
+function setLiveRuleText(selectorText, mediaText, cssText) {
+  findRulesForSelector(selectorText, mediaText).forEach(rule => { rule.style.cssText = cssText })
+}
+
+// A pinned pseudo-version, always present in history, representing "no
+// overrides at all" — the true base styling as originally shipped, before
+// Dev Edit ever touched anything. Not a real Firestore doc (nothing to
+// save — it's definitionally always the same), just a sentinel id/name so
+// it can flow through the same preview/revert code paths as a real one.
+const ORIGINAL_VERSION_ID = '__original__'
+const ORIGINAL_VERSION = { id: ORIGINAL_VERSION_ID, name: 'Original', authorName: null, createdAt: null, overrides: [] }
+
+// One-time-per-page-load snapshot of every rule's cssText exactly as it
+// was before Dev Edit (or any saved version) ever touched it — needed
+// because there was otherwise no way to answer "what was this rule before
+// any override existed at all," in dev *or* production (the dev-only
+// /lookup endpoint reads the source file, but there's no file to read in
+// a static production build). Captured via useLayoutEffect at mount, which
+// runs synchronously before the always-on active-version effect ever gets
+// a chance to apply anything — see the effect below for why the ordering
+// matters.
+//
+// Deliberately stores `selectorText`/`mediaText`, NOT the live
+// CSSStyleRule object itself, even though holding the reference directly
+// would be cheaper. Real bug found: using the dev-only Apply action writes
+// to the actual source .css file, which triggers Vite's HMR to swap in a
+// brand-new <style> tag for that file — genuinely new rule objects, while
+// the *old* tag (and every rule object captured from it) gets detached
+// from the document. Mutating a detached rule's .style.cssText has zero
+// visual effect, since the browser no longer renders anything from a
+// removed <style> tag — so a snapshot (or session entry, see below) taken
+// before that swap silently lost the ability to affect the page at all,
+// even though the JS reference itself remained perfectly readable/
+// writable. Re-resolving the live rule fresh via findRulesForSelector on
+// every use (setLiveRuleText) sidesteps this entirely.
+function buildPristineSnapshot() {
+  const snapshot = new Map()
+  function collect(ruleList, mediaText) {
+    for (const rule of Array.from(ruleList)) {
+      if (rule.type === CSSRule.MEDIA_RULE) {
+        collect(rule.cssRules, rule.media.mediaText)
+      } else if (rule.type === CSSRule.STYLE_RULE) {
+        const key = ruleKey(rule.selectorText, mediaText || null)
+        if (!snapshot.has(key)) snapshot.set(key, { selectorText: rule.selectorText, mediaText: mediaText || null, cssText: rule.style.cssText })
+      }
+    }
+  }
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules
+    try { rules = sheet.cssRules } catch { continue }
+    if (rules) collect(rules, null)
+  }
+  return snapshot
+}
+
+// Reconciles the live page to *exactly* match `overrides` — restores any
+// pristine-known rule not covered by `overrides` back to its true original
+// first, then applies each override. This is what makes switching between
+// versions (including "Original", whose overrides is always []) correct
+// regardless of what was showing before, rather than only ever being able
+// to *add* overrides and never take one away. `excludeKeys` skips rules
+// the user is actively mid-editing right now, so this never stomps an
+// in-progress session edit.
+function applyOverrideSet(overrides, pristineMap, excludeKeys) {
+  const newKeys = new Set(overrides.map(o => ruleKey(o.selector, o.mediaText)))
+  pristineMap.forEach((entry, key) => {
+    if (newKeys.has(key) || (excludeKeys && excludeKeys.has(key))) return
+    setLiveRuleText(entry.selectorText, entry.mediaText, entry.cssText)
+  })
+  overrides.forEach(o => {
+    const key = ruleKey(o.selector, o.mediaText)
+    if (excludeKeys && excludeKeys.has(key)) return
+    setLiveRuleText(o.selector, o.mediaText, o.declarations)
+  })
+}
+
 function formatDeclarations(cssText) {
   return cssText
     .split(';')
@@ -177,6 +267,31 @@ function classNameOf(el) {
   return typeof el.className === 'string' ? el.className : (el.className?.baseVal || '')
 }
 
+// ─── Session expiry ──────────────────────────────────────────────────
+// Firebase Auth's own session doesn't expire on its own — the SDK
+// silently refreshes the underlying ID token forever, so someone stays
+// signed in indefinitely unless something else forces a sign-out. This
+// tracks "signed in at" ourselves (a plain localStorage timestamp,
+// separate from Firebase's own session state) and forces a sign-out once
+// a week has passed, so the shared password doesn't grant indefinite
+// access from a browser that once had it entered.
+const SIGNIN_AT_KEY = 'devedit-signin-at'
+const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // one week
+
+function getSignInAt() {
+  try { const v = localStorage.getItem(SIGNIN_AT_KEY); return v ? Number(v) : null } catch { return null }
+}
+function setSignInAt(ts) {
+  try { localStorage.setItem(SIGNIN_AT_KEY, String(ts)) } catch { /* ignore */ }
+}
+function clearSignInAt() {
+  try { localStorage.removeItem(SIGNIN_AT_KEY) } catch { /* ignore */ }
+}
+function isSessionExpired() {
+  const signInAt = getSignInAt()
+  return signInAt !== null && (Date.now() - signInAt) > SESSION_DURATION_MS
+}
+
 // ─── Dev Edit ────────────────────────────────────────────────────────
 // Toggleable live style editor. Two independent capabilities layered on
 // the same select-an-element-and-edit-its-CSS mechanic:
@@ -209,7 +324,32 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const isAuthed = !!authUser
 
   useEffect(() => {
-    return onAuthStateChanged(auth, user => { setAuthUser(user); setAuthReady(true) })
+    return onAuthStateChanged(auth, user => {
+      if (user) {
+        if (isSessionExpired()) {
+          // Week's up — force a real sign-out rather than just hiding the
+          // UI, so a stale still-valid Firebase session can't silently
+          // keep working if something else in the page checked auth.currentUser
+          // directly. signOut() triggers this same callback again with
+          // user === null, which the else branch below handles.
+          clearSignInAt()
+          signOut(auth)
+          return
+        }
+        if (getSignInAt() === null) {
+          // Either a brand-new sign-in (submitPassword doesn't set this
+          // itself — this covers both that and legacy sessions from
+          // before this expiry existed) — start the week's clock now
+          // rather than force an immediate, surprising sign-out for
+          // someone already using it.
+          setSignInAt(Date.now())
+        }
+      } else {
+        clearSignInAt()
+      }
+      setAuthUser(user)
+      setAuthReady(true)
+    })
   }, [])
 
   // ── Session-accumulated edits ──
@@ -227,12 +367,76 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const selectionRef = useRef(null)
   selectionRef.current = selection
 
-  const editedEntries = useCallback(() => Object.values(sessionEditsRef.current).filter(e => e.draft !== e.original), [])
+  // Each entry tracks three states, not two — this distinction is what
+  // makes Cancel/click-away and Save-as-version both work correctly at
+  // once: `original` (the true pre-session baseline, immutable once set,
+  // used by Discard and by Save-as-version's "has this rule *ever* been
+  // confirmed different" check), `committed` (the last value explicitly
+  // confirmed via Apply — starts equal to original, and is what Cancel/
+  // click-away revert back to, NOT all the way to original, since undoing
+  // a second edit on an already-applied rule shouldn't also throw away the
+  // first one), and `draft` (whatever's currently live in the textarea,
+  // possibly not yet confirmed at all). An earlier version conflated
+  // `original` with "last confirmed value" (Apply set original = draft
+  // directly) — that made Save-as-version's `draft !== original` check
+  // permanently blind to any rule the moment it was Applied, since nothing
+  // ever looked "different" from its own already-updated baseline again.
+  const editedEntries = useCallback(() => Object.values(sessionEditsRef.current).filter(e => e.committed !== e.original), [])
 
   const discardSession = useCallback(() => {
-    Object.values(sessionEditsRef.current).forEach(entry => { entry.rule.style.cssText = entry.original })
+    Object.values(sessionEditsRef.current).forEach(entry => { setLiveRuleText(entry.selectorText, entry.mediaText, entry.original) })
     setSessionEdits({})
     setSelection(null)
+  }, [])
+
+  // Reverts only the *unconfirmed* rules among `keys` (draft !== committed)
+  // back to their last committed value — leaves anything already confirmed
+  // via Apply alone, since that's meant to survive as part of the ongoing
+  // session. Used whenever the currently-open panel closes without an
+  // explicit Apply: clicking away, clicking a different element, Escape,
+  // or the panel's own close button — an edit you never confirmed
+  // shouldn't silently persist just because you clicked elsewhere.
+  const revertDirtyRules = useCallback((keys) => {
+    if (!keys || keys.length === 0) return
+    let changed = false
+    keys.forEach(key => {
+      const entry = sessionEditsRef.current[key]
+      if (entry && entry.draft !== entry.committed) {
+        setLiveRuleText(entry.selectorText, entry.mediaText, entry.committed)
+        changed = true
+      }
+    })
+    if (!changed) return
+    setSessionEdits(prev => {
+      const next = { ...prev }
+      keys.forEach(key => {
+        if (next[key] && next[key].draft !== next[key].committed) {
+          next[key] = { ...next[key], draft: next[key].committed }
+        }
+      })
+      return next
+    })
+  }, [])
+
+  const closeSelection = useCallback(() => {
+    revertDirtyRules(selectionRef.current ? selectionRef.current.keys : [])
+    setSelection(null)
+  }, [revertDirtyRules])
+
+  // ── Pristine snapshot: every rule's cssText exactly as shipped, before
+  // Dev Edit or any saved version ever touches it. useLayoutEffect (not
+  // useEffect) so this runs synchronously right after mount, guaranteed to
+  // complete before the always-on active-version effect below gets its
+  // first chance to apply anything (that effect's Firestore subscription
+  // is inherently async — at minimum a microtask away — so ordering here
+  // is safe in practice, but useLayoutEffect makes the *intent* explicit:
+  // this must happen first). Without this, there would be no way to
+  // answer "what was this rule before any override existed at all," in
+  // dev or production — the dev-only /lookup endpoint reads the source
+  // file, but there's no file to read on a static production build.
+  const pristineRef = useRef(null)
+  useLayoutEffect(() => {
+    if (!pristineRef.current) pristineRef.current = buildPristineSnapshot()
   }, [])
 
   // ── Always-on: apply whatever version is currently active for this
@@ -255,23 +459,60 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }, [prototypeId])
 
   useEffect(() => {
-    if (!activeOverrides) return
-    // Don't stomp a rule the user is actively mid-editing right now.
-    applyOverridesLive(activeOverrides.overrides.filter(o => !sessionEditsRef.current[ruleKey(o.selector, o.mediaText)]))
+    if (!pristineRef.current) return // shouldn't happen (layout effect runs first), but don't reconcile against nothing
+    const overrides = activeOverrides ? activeOverrides.overrides : []
+    // Don't stomp whatever's currently open in the edit panel right now —
+    // deliberately NOT the whole sessionEdits history (every rule ever
+    // touched this session, including already-saved ones), which would
+    // permanently block this effect from ever reconciling those rules
+    // again (e.g. reverting to a version/Original that doesn't include a
+    // rule you'd previously edited and saved would silently no-op on it).
+    const exclude = new Set(selectionRef.current ? selectionRef.current.keys : [])
+    applyOverrideSet(overrides, pristineRef.current, exclude)
   }, [activeOverrides])
+
+  // 'deactivate' | 'signout' | null — which exit path is waiting on the
+  // user's save-or-discard decision. A ref, not state, since it needs to
+  // survive across the Save Version dialog's own lifecycle (opened from
+  // inside the exit prompt) without re-showing the exit prompt itself.
+  const [exitPrompt, setExitPrompt] = useState(null)
+  const pendingExitRef = useRef(null)
+
+  const finishExit = useCallback(async (intent) => {
+    if (intent === 'signout') {
+      setActive(false)
+      setShowHistory(false)
+      await signOut(auth)
+    } else {
+      setActive(false)
+      setSelection(null)
+      setHoveredEl(null)
+    }
+  }, [])
 
   const toggleActive = useCallback(() => {
     if (active) {
+      if (editedEntries().length > 0) { setExitPrompt('deactivate'); return }
       setActive(false)
       setSelection(null)
       setHoveredEl(null)
       return
     }
     if (!authReady) return // ignore clicks before Firebase has restored any persisted session
+    // Catches a tab left open across the week boundary without a reload —
+    // onAuthStateChanged's own expiry check only runs on actual auth-state
+    // transitions (load/sign-in/sign-out), not continuously, so a long-
+    // lived tab could otherwise still show as "signed in" past a week.
+    if (isAuthed && isSessionExpired()) {
+      clearSignInAt()
+      signOut(auth)
+      setGateStep('password')
+      return
+    }
     if (!isAuthed) { setGateStep('password'); return }
     if (!authorName.trim()) { setGateStep('name'); return }
     setActive(true)
-  }, [active, authReady, isAuthed, authorName])
+  }, [active, authReady, isAuthed, authorName, editedEntries])
 
   const submitPassword = async () => {
     if (!passwordInput || signingIn) return
@@ -303,11 +544,27 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }
 
   const handleSignOut = async () => {
-    discardSession()
-    setActive(false)
-    setShowHistory(false)
-    await signOut(auth)
+    if (editedEntries().length > 0) { setExitPrompt('signout'); return }
+    await finishExit('signout')
   }
+
+  // ── Exit prompt actions ── (shown when leaving edit mode — toggling off
+  // or signing out — while unsaved edits exist, instead of silently
+  // leaving them applied-but-unmanaged or silently discarding them)
+  const handleExitDiscard = () => {
+    const intent = exitPrompt
+    discardSession()
+    setExitPrompt(null)
+    finishExit(intent)
+  }
+
+  const handleExitSaveAsVersion = () => {
+    pendingExitRef.current = exitPrompt
+    setExitPrompt(null)
+    setShowSaveDialog(true)
+  }
+
+  const handleExitCancel = () => setExitPrompt(null)
 
   // Announce our own state changes as an effect, not inside the updater
   // above — see the matching comment in DevMode.jsx/DevComments.jsx for
@@ -372,8 +629,21 @@ export default function DevEdit({ containerRef, prototypeId }) {
       e.preventDefault()
       e.stopPropagation()
       const target = e.target
-      if (!isRecognized(target)) return
+
+      if (!isRecognized(target)) {
+        // Clicking outside the recognized page entirely — same as
+        // dismissing the panel any other way, so an unconfirmed edit
+        // doesn't survive just because the click landed somewhere else.
+        closeSelection()
+        return
+      }
       if (selectionRef.current && selectionRef.current.el === target) return // already open on this element
+
+      // Switching to a different element — revert whatever was left
+      // unconfirmed (draft !== committed) on the previous one first.
+      // Anything already confirmed via Apply is untouched, so it still
+      // carries forward as part of the session.
+      revertDirtyRules(selectionRef.current ? selectionRef.current.keys : [])
 
       const rawMatches = findMatchingRules(target)
       const keys = []
@@ -385,7 +655,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
         keys.push(key)
         if (sessionEditsRef.current[key] || newEntries[key]) return // already tracked from a prior selection — keep its draft as-is
         const original = formatDeclarations(m.rule.style.cssText)
-        newEntries[key] = { rule: m.rule, selectorText: m.selectorText, mediaText: m.mediaText, filePath: m.filePath, original, draft: original, loading: true }
+        newEntries[key] = { selectorText: m.selectorText, mediaText: m.mediaText, filePath: m.filePath, original, committed: original, draft: original, loading: true }
         toLookup.push({ key, filePath: m.filePath, selector: m.selectorText, mediaText: m.mediaText })
       })
 
@@ -419,10 +689,17 @@ export default function DevEdit({ containerRef, prototypeId }) {
               const result = data.results[i]
               if (!entry) return
               if (!result || !result.found) { next[item.key] = { ...entry, loading: false }; return }
-              const untouched = entry.draft === entry.original
+              // All three still equal means nothing (typing, Apply, or
+              // Cancel) has happened to this entry since it was created —
+              // safe to refresh all three to the more accurate lookup
+              // text. If the user's already interacted with it, leave
+              // draft/committed alone and just note the accurate original
+              // for Discard/Save-as-version's own baseline comparison.
+              const untouched = entry.draft === entry.original && entry.committed === entry.original
               next[item.key] = {
                 ...entry,
                 original: result.declarations,
+                committed: untouched ? result.declarations : entry.committed,
                 draft: untouched ? result.declarations : entry.draft,
                 loading: false,
               }
@@ -451,22 +728,24 @@ export default function DevEdit({ containerRef, prototypeId }) {
       document.removeEventListener('mousedown', handleSuppress, true)
       document.removeEventListener('click', handleClick, true)
     }
-  }, [active, containerRef])
+  }, [active, containerRef, closeSelection, revertDirtyRules])
 
   // ── Escape: close whatever's open, then exit on a further press ──
-  // Never reverts anything by itself — discarding the session is now an
-  // explicit, separate action, not something a stray Escape should do.
+  // Reverts unconfirmed edits on the currently-open panel (same as
+  // clicking away), but never discards the whole session by itself —
+  // discarding already-confirmed edits stays an explicit, separate action.
   const [showHistory, setShowHistory] = useState(false)
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key !== 'Escape') return
-      if (selectionRef.current) { setSelection(null); return }
+      if (exitPrompt) { setExitPrompt(null); return }
+      if (selectionRef.current) { closeSelection(); return }
       if (showHistory) { setShowHistory(false); return }
-      if (active) setActive(false)
+      if (active) toggleActive()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [active, showHistory])
+  }, [active, showHistory, closeSelection, exitPrompt, toggleActive])
 
   // ── Keep the selected element's highlight/panel glued to it across
   // scroll/layout changes, and clean up if it gets removed from the DOM
@@ -476,13 +755,13 @@ export default function DevEdit({ containerRef, prototypeId }) {
     let rafId
     const tick = () => {
       const el = selectionRef.current?.el
-      if (!el || !el.isConnected) { setSelection(null); return }
+      if (!el || !el.isConnected) { closeSelection(); return }
       setSelection(sel => (sel ? { ...sel, rect: el.getBoundingClientRect() } : sel))
       rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafId)
-  }, [selection?.el])
+  }, [selection?.el, closeSelection])
 
   // Live preview: mutate the actual CSSOM rule directly here (a normal
   // event handler), not inside the setState updater below — keeps the
@@ -491,16 +770,36 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const updateDraft = (key, value) => {
     const entry = sessionEditsRef.current[key]
     if (!entry) return
-    entry.rule.style.cssText = value
+    setLiveRuleText(entry.selectorText, entry.mediaText, value)
     setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], draft: value } }))
   }
 
-  // ── Apply to file: dev-only, unchanged in behavior from the original
-  // build — writes one rule's edit straight into its source .css file. ──
+  // ── Apply: confirms this one rule's edit (committed = draft) and closes
+  // the panel — when running locally with a resolvable source file, it
+  // *also* writes straight into that file via devEditPlugin.js (unchanged
+  // behavior from the original build, just no longer the only thing this
+  // button does; in production, no file to write to, it's just the
+  // confirm step, no network call). Any *other* rule block still open in
+  // this same panel that hasn't been confirmed reverts to its own last-
+  // committed value, same as any other way of leaving the panel without
+  // an explicit Apply (click-away, Escape, ×). ──
   const [applyingKey, setApplyingKey] = useState(null)
-  const handleApplyToFile = async (key) => {
+  const handleApply = async (key) => {
     const entry = sessionEditsRef.current[key]
-    if (!entry || !entry.filePath) return
+    if (!entry) return
+    const sel = selectionRef.current
+    const canWriteToFile = import.meta.env.DEV && entry.filePath
+
+    const finishApply = () => {
+      setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], committed: prev[key].draft } }))
+      if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
+      setSelection(null)
+    }
+
+    if (!canWriteToFile) {
+      finishApply()
+      return
+    }
     setApplyingKey(key)
     setError(null)
     try {
@@ -511,12 +810,34 @@ export default function DevEdit({ containerRef, prototypeId }) {
       })
       const data = await res.json()
       if (!data.ok) throw new Error(data.error || 'Failed to apply')
-      setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], original: prev[key].draft } }))
+      finishApply()
     } catch (err) {
       setError(err.message)
+      // Leave the panel open on failure, so the error is visible and the
+      // edit can be retried, rather than closing on top of a failed write.
     } finally {
       setApplyingKey(null)
     }
+  }
+
+  // ── Cancel: reverts this one rule all the way back to its true
+  // original (not just its last-committed value — Cancel means "I don't
+  // want this edit at all," a stronger action than just leaving the panel
+  // without confirming) and closes the panel. Any *other* rule block still
+  // open in this same panel that hasn't been confirmed reverts to its own
+  // last-committed value, same as Apply above. ──
+  const handleCancelRule = (key) => {
+    const sel = selectionRef.current
+    const entry = sessionEditsRef.current[key]
+    if (!entry) return
+
+    setLiveRuleText(entry.selectorText, entry.mediaText, entry.original)
+    setSessionEdits(prev => ({
+      ...prev,
+      [key]: { ...prev[key], committed: prev[key].original, draft: prev[key].original },
+    }))
+    if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
+    setSelection(null)
   }
 
   // ── Save as version ──
@@ -536,26 +857,38 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setSaving(true)
     setError(null)
     try {
-      const overrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.draft, filePath: e.filePath || null }))
+      // Only *confirmed* (Applied) edits go into a version — `committed`,
+      // not `draft`. A rule sitting mid-edit in a still-open, unconfirmed
+      // panel is deliberately left out, same as it wouldn't survive a
+      // click-away either.
+      const overrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.committed, filePath: e.filePath || null }))
       const versionRef = await addDoc(collection(db, 'devedit_versions'), {
         prototypeId, name, authorName, createdAt: serverTimestamp(), overrides,
       })
       await upsertActiveVersion(prototypeId, versionRef.id, name, overrides)
-      // The session's edits are now the committed/active state — reset
-      // each edited entry's baseline to its own draft, so further edits
-      // diff against this new committed point rather than the pre-session
-      // original (which would otherwise make an already-saved rule look
-      // "changed" forever).
+      // The session's committed edits are now the saved/active state —
+      // reset each edited entry's `original` baseline to its own
+      // `committed` value, so further edits diff against this new
+      // checkpoint rather than the pre-session original (which would
+      // otherwise make an already-saved rule look "changed" forever).
       setSessionEdits(prev => {
         const next = { ...prev }
         edited.forEach(e => {
           const key = ruleKey(e.selectorText, e.mediaText)
-          if (next[key]) next[key] = { ...next[key], original: next[key].draft }
+          if (next[key]) next[key] = { ...next[key], original: next[key].committed }
         })
         return next
       })
       setShowSaveDialog(false)
       setVersionNameInput('')
+      // If this save was triggered from the exit prompt ("Save as
+      // version" chosen while trying to leave edit mode), completing it
+      // is also what finally completes the exit.
+      if (pendingExitRef.current) {
+        const intent = pendingExitRef.current
+        pendingExitRef.current = null
+        finishExit(intent)
+      }
     } catch (err) {
       console.error('Dev Edit: failed to save version', err)
       setError('Failed to save version')
@@ -582,18 +915,51 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const previewVersion = (version) => {
     if (editedEntries().length > 0 && !window.confirm('Discard your unsaved edits to preview a past version?')) return
     if (editedEntries().length > 0) discardSession()
-    applyOverridesLive(version.overrides)
+    if (pristineRef.current) applyOverrideSet(version.overrides, pristineRef.current)
     setPreviewVersionId(version.id)
   }
 
   const stopPreview = () => {
-    if (activeOverridesRef.current) applyOverridesLive(activeOverridesRef.current.overrides)
+    if (pristineRef.current) {
+      applyOverrideSet(activeOverridesRef.current ? activeOverridesRef.current.overrides : [], pristineRef.current)
+    }
     setPreviewVersionId(null)
   }
 
+  // Own error slot, separate from the per-element edit panel's `error` —
+  // the history panel can be open at the same time as an edit panel, and a
+  // shared single error string would risk a delete failure here showing up
+  // (confusingly) inside an unrelated open edit panel, or vice versa.
+  const [historyError, setHistoryError] = useState(null)
+
   const revertToVersion = async (version) => {
-    await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides)
-    setPreviewVersionId(null)
+    setHistoryError(null)
+    try {
+      await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides)
+      setPreviewVersionId(null)
+    } catch (err) {
+      console.error('Dev Edit: failed to revert', err)
+      setHistoryError('Failed to revert to this version')
+    }
+  }
+
+  // Deleting the currently-active version is intentionally not offered —
+  // VersionRow only renders this action for non-active rows in the first
+  // place — since devedit_active carries its own denormalized copy of the
+  // overrides (not just a reference), deleting the active version's own
+  // doc wouldn't actually break the live styling, but it *would* silently
+  // remove the only record of what's currently showing, with no way back
+  // to it later. Requires being signed in, same as any devedit_versions
+  // write — see the Firestore rules in CLAUDE.md's Firebase section.
+  const deleteVersion = async (version) => {
+    if (!window.confirm(`Delete "${version.name}"? This can't be undone.`)) return
+    setHistoryError(null)
+    try {
+      await deleteDoc(doc(db, 'devedit_versions', version.id))
+    } catch (err) {
+      console.error('Dev Edit: failed to delete version', err)
+      setHistoryError('Failed to delete version')
+    }
   }
 
   const showHoverHighlight = hoverRect && (!selection || hoveredEl !== selection.el)
@@ -640,9 +1006,10 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 selection={selection}
                 rows={rows}
                 onDraftChange={updateDraft}
-                onApplyToFile={handleApplyToFile}
+                onApply={handleApply}
+                onCancelRule={handleCancelRule}
                 applyingKey={applyingKey}
-                onClose={() => setSelection(null)}
+                onClose={closeSelection}
                 error={error}
               />
             </>
@@ -652,7 +1019,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
             dirtyCount={dirtyCount}
             onSave={openSaveDialog}
             onDiscard={discardSession}
-            onToggleHistory={() => setShowHistory(h => !h)}
+            onToggleHistory={() => { setShowHistory(h => !h); setHistoryError(null) }}
             historyOpen={showHistory}
             authorName={authorName}
             onSignOut={handleSignOut}
@@ -665,19 +1032,36 @@ export default function DevEdit({ containerRef, prototypeId }) {
               name={versionNameInput}
               setName={setVersionNameInput}
               onSubmit={submitSaveVersion}
-              onCancel={() => setShowSaveDialog(false)}
+              onCancel={() => {
+                // Backing out of saving also aborts the whole exit attempt
+                // (if this dialog was opened from the exit prompt) — never
+                // force an exit/discard the user didn't explicitly confirm.
+                pendingExitRef.current = null
+                setShowSaveDialog(false)
+              }}
               saving={saving}
+            />
+          )}
+
+          {exitPrompt && (
+            <ExitPrompt
+              dirtyCount={editedEntries().length}
+              onSave={handleExitSaveAsVersion}
+              onDiscard={handleExitDiscard}
+              onCancel={handleExitCancel}
             />
           )}
 
           {showHistory && (
             <VersionHistoryPanel
               versions={versions}
-              activeVersionId={activeOverrides?.versionId}
+              activeVersionId={activeOverrides?.versionId || ORIGINAL_VERSION_ID}
               previewVersionId={previewVersionId}
               onPreview={previewVersion}
               onRevert={revertToVersion}
-              onClose={() => { setShowHistory(false); if (previewVersionId) stopPreview() }}
+              onDelete={deleteVersion}
+              error={historyError}
+              onClose={() => { setShowHistory(false); setHistoryError(null); if (previewVersionId) stopPreview() }}
             />
           )}
         </div>,
@@ -787,9 +1171,30 @@ function SaveVersionDialog({ name, setName, onSubmit, onCancel, saving }) {
   )
 }
 
+// Shown when leaving edit mode (toggling off, or signing out) while
+// unsaved (committed-but-not-yet-versioned) edits exist — asks explicitly
+// rather than either silently discarding them or silently leaving them
+// applied-but-unmanaged after the toolbar itself says you're no longer
+// editing. Clicking the backdrop (same convention as the other overlay
+// dialogs) cancels the exit attempt entirely and returns to editing,
+// without needing a third explicit button for that.
+function ExitPrompt({ dirtyCount, onSave, onDiscard, onCancel }) {
+  return (
+    <div className="devedit-gate-overlay" data-devedit-ui="true" onClick={(e) => { if (e.target === e.currentTarget) onCancel() }}>
+      <div className="devedit-gate-box">
+        <div className="devedit-gate-title">You have {dirtyCount} unsaved edit{dirtyCount === 1 ? '' : 's'}</div>
+        <div className="devedit-gate-actions">
+          <button className="devedit-btn-secondary" onClick={onDiscard}>Discard changes</button>
+          <button className="devedit-btn-primary" onClick={onSave}>Save as version</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Version history panel ───────────────────────────────────────────
 
-function VersionHistoryPanel({ versions, activeVersionId, previewVersionId, onPreview, onRevert, onClose }) {
+function VersionHistoryPanel({ versions, activeVersionId, previewVersionId, onPreview, onRevert, onDelete, error, onClose }) {
   return (
     <div className="devedit-history-panel" data-devedit-ui="true">
       <div className="devedit-panel-header">
@@ -797,24 +1202,51 @@ function VersionHistoryPanel({ versions, activeVersionId, previewVersionId, onPr
         <button className="devedit-panel-close" onClick={onClose} aria-label="Close version history">×</button>
       </div>
       <div className="devedit-panel-body">
+        {error && <div className="devedit-error">{error}</div>}
         {versions.length === 0 && <div className="devedit-panel-empty">No versions saved yet for this page.</div>}
         {versions.map(v => (
-          <div key={v.id} className={`devedit-version-row${v.id === activeVersionId ? ' active' : ''}${v.id === previewVersionId ? ' previewing' : ''}`}>
-            <div className="devedit-version-info">
-              <div className="devedit-version-name">
-                {v.name}
-                {v.id === activeVersionId && <span className="devedit-version-badge">active</span>}
-              </div>
-              <div className="devedit-version-meta">{v.authorName} · {fmtTime(v.createdAt)}</div>
-            </div>
-            <div className="devedit-version-actions">
-              <button className="devedit-btn-secondary" onClick={() => onPreview(v)}>Preview</button>
-              {v.id !== activeVersionId && (
-                <button className="devedit-btn-primary" onClick={() => onRevert(v)}>Revert to this</button>
-              )}
-            </div>
-          </div>
+          <VersionRow key={v.id} version={v} isActive={v.id === activeVersionId} isPreviewing={v.id === previewVersionId} onPreview={onPreview} onRevert={onRevert} onDelete={onDelete} />
         ))}
+        <VersionRow
+          version={ORIGINAL_VERSION}
+          isActive={activeVersionId === ORIGINAL_VERSION_ID}
+          isPreviewing={previewVersionId === ORIGINAL_VERSION_ID}
+          onPreview={onPreview}
+          onRevert={onRevert}
+          onDelete={onDelete}
+          isOriginal
+        />
+      </div>
+    </div>
+  )
+}
+
+function VersionRow({ version, isActive, isPreviewing, onPreview, onRevert, onDelete, isOriginal }) {
+  return (
+    <div className={`devedit-version-row${isActive ? ' active' : ''}${isPreviewing ? ' previewing' : ''}${isOriginal ? ' original' : ''}`}>
+      <div className="devedit-version-info">
+        <div className="devedit-version-name">
+          {version.name}
+          {isActive && <span className="devedit-version-badge">active</span>}
+        </div>
+        <div className="devedit-version-meta">
+          {isOriginal ? 'Base styling, no overrides' : `${version.authorName} · ${fmtTime(version.createdAt)}`}
+        </div>
+      </div>
+      <div className="devedit-version-actions">
+        {!isActive && (
+          <>
+            {/* Original has no real doc behind it — nothing to delete,
+                and it must always exist as the fallback baseline. */}
+            {!isOriginal && (
+              <button className="devedit-icon-btn danger" onClick={() => onDelete(version)} aria-label="Delete version">
+                <TrashIcon />
+              </button>
+            )}
+            <button className="devedit-btn-secondary" onClick={() => onPreview(version)}>Preview</button>
+            <button className="devedit-btn-primary" onClick={() => onRevert(version)}>Revert to this</button>
+          </>
+        )}
       </div>
     </div>
   )
@@ -822,7 +1254,7 @@ function VersionHistoryPanel({ versions, activeVersionId, previewVersionId, onPr
 
 // ─── Edit panel (per selected element) ───────────────────────────────
 
-function EditPanel({ selection, rows, onDraftChange, onApplyToFile, applyingKey, onClose, error }) {
+function EditPanel({ selection, rows, onDraftChange, onApply, onCancelRule, applyingKey, onClose, error }) {
   const pos = computeEditPanelPosition(selection.rect)
   const cls = classNameOf(selection.el).trim()
   const tagLabel = selection.el.tagName.toLowerCase() + (cls ? '.' + cls.split(/\s+/).join('.') : '')
@@ -856,17 +1288,22 @@ function EditPanel({ selection, rows, onDraftChange, onApplyToFile, applyingKey,
                 spellCheck={false}
                 disabled={m.loading}
               />
-              {import.meta.env.DEV && m.filePath && (
-                <div className="devedit-rule-actions">
-                  <button
-                    className="devedit-btn-secondary"
-                    onClick={() => onApplyToFile(key)}
-                    disabled={m.loading || m.draft === m.original || applyingKey === key}
-                  >
-                    {applyingKey === key ? 'Applying…' : 'Apply to file'}
-                  </button>
-                </div>
-              )}
+              <div className="devedit-rule-actions">
+                <button
+                  className="devedit-btn-secondary"
+                  onClick={() => onCancelRule(key)}
+                  disabled={m.loading || (m.draft === m.original && m.committed === m.original)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="devedit-btn-primary"
+                  onClick={() => onApply(key)}
+                  disabled={m.loading || m.draft === m.committed || applyingKey === key}
+                >
+                  {applyingKey === key ? 'Applying…' : 'Apply'}
+                </button>
+              </div>
             </div>
           )
         })}
