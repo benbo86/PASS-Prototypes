@@ -141,6 +141,37 @@ function setLiveRuleText(selectorText, mediaText, cssText) {
 const ORIGINAL_VERSION_ID = '__original__'
 const ORIGINAL_VERSION = { id: ORIGINAL_VERSION_ID, name: 'Original', authorName: null, createdAt: null, overrides: [] }
 
+// Re-resolves a rule within one *specific* stylesheet (by its index in
+// document.styleSheets), rather than the first match anywhere on the page —
+// see buildPristineSnapshot below for why matching by selector text alone
+// across the whole page is actively wrong for the pristine-restore path.
+function findRuleInSheet(sheetIndex, selectorText, mediaText) {
+  const sheet = document.styleSheets[sheetIndex]
+  if (!sheet) return null
+  let rules
+  try { rules = sheet.cssRules } catch { return null }
+  if (!rules) return null
+  const wantKey = ruleKey(selectorText, mediaText)
+  let found = null
+  function walk(ruleList, currentMediaText) {
+    for (const rule of Array.from(ruleList)) {
+      if (found) return
+      if (rule.type === CSSRule.MEDIA_RULE) {
+        walk(rule.cssRules, rule.media.mediaText)
+      } else if (rule.type === CSSRule.STYLE_RULE) {
+        if (ruleKey(rule.selectorText, currentMediaText || null) === wantKey) { found = rule; return }
+      }
+    }
+  }
+  walk(rules, null)
+  return found
+}
+
+function setLiveRuleTextInSheet(sheetIndex, selectorText, mediaText, cssText) {
+  const rule = findRuleInSheet(sheetIndex, selectorText, mediaText)
+  if (rule) rule.style.cssText = cssText
+}
+
 // One-time-per-page-load snapshot of every rule's cssText exactly as it
 // was before Dev Edit (or any saved version) ever touched it — needed
 // because there was otherwise no way to answer "what was this rule before
@@ -164,23 +195,43 @@ const ORIGINAL_VERSION = { id: ORIGINAL_VERSION_ID, name: 'Original', authorName
 // even though the JS reference itself remained perfectly readable/
 // writable. Re-resolving the live rule fresh via findRulesForSelector on
 // every use (setLiveRuleText) sidesteps this entirely.
+//
+// Keyed by `${sheetIndex}::${selector}|${mediaText}`, NOT selector text
+// alone — a real, severe bug found live on customer-profile/timeline: this
+// repo deliberately gives more than one stylesheet its own `:root { ... }`
+// block (colors.css's design-system tokens, legacy.css's separate legacy
+// tokens — see CLAUDE.md). Keying purely by selector text collapsed both
+// into a single map entry (first-seen-wins, i.e. colors.css's), silently
+// dropping legacy.css's own `:root` properties from the snapshot entirely.
+// Since Dev Edit is now mounted on every page, the always-on reconciliation
+// effect below then found *every* rule matching `:root` anywhere on the
+// page and overwrote all of them with that one captured (colors.css-only)
+// cssText — permanently wiping legacy.css's tokens (--legacy-status-
+// complete etc.) from the live CSSOM on every load, even though the raw
+// served file was always correct (which is why it visibly flashed correct
+// for an instant on refresh, before this effect ran and clobbered it).
+// Including sheetIndex keeps same-selector rules from different files as
+// distinct snapshot/restore targets instead of conflating them.
 function buildPristineSnapshot() {
   const snapshot = new Map()
-  function collect(ruleList, mediaText) {
-    for (const rule of Array.from(ruleList)) {
-      if (rule.type === CSSRule.MEDIA_RULE) {
-        collect(rule.cssRules, rule.media.mediaText)
-      } else if (rule.type === CSSRule.STYLE_RULE) {
-        const key = ruleKey(rule.selectorText, mediaText || null)
-        if (!snapshot.has(key)) snapshot.set(key, { selectorText: rule.selectorText, mediaText: mediaText || null, cssText: rule.style.cssText })
+  Array.from(document.styleSheets).forEach((sheet, sheetIndex) => {
+    let rules
+    try { rules = sheet.cssRules } catch { return }
+    if (!rules) return
+    function collect(ruleList, mediaText) {
+      for (const rule of Array.from(ruleList)) {
+        if (rule.type === CSSRule.MEDIA_RULE) {
+          collect(rule.cssRules, rule.media.mediaText)
+        } else if (rule.type === CSSRule.STYLE_RULE) {
+          const uniqueKey = `${sheetIndex}::${ruleKey(rule.selectorText, mediaText || null)}`
+          if (!snapshot.has(uniqueKey)) {
+            snapshot.set(uniqueKey, { sheetIndex, selectorText: rule.selectorText, mediaText: mediaText || null, cssText: rule.style.cssText })
+          }
+        }
       }
     }
-  }
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules
-    try { rules = sheet.cssRules } catch { continue }
-    if (rules) collect(rules, null)
-  }
+    collect(rules, null)
+  })
   return snapshot
 }
 
@@ -192,11 +243,23 @@ function buildPristineSnapshot() {
 // to *add* overrides and never take one away. `excludeKeys` skips rules
 // the user is actively mid-editing right now, so this never stomps an
 // in-progress session edit.
+//
+// The restore step resolves each pristine entry back within its OWN
+// sheet (setLiveRuleTextInSheet) — see buildPristineSnapshot for why that
+// matters. The override-*application* step below still matches by selector
+// text across every sheet (setLiveRuleText/findRulesForSelector), since a
+// saved override doesn't carry sheet identity (only `filePath`, which is a
+// local dev filesystem path, meaningless for this in production). In
+// practice this is a much smaller residual risk than the restore path was:
+// real saved overrides target prototype-specific classes (e.g.
+// `.notif-unread-dot`), which only exist in one file, not broadly-shared
+// selectors like `:root`.
 function applyOverrideSet(overrides, pristineMap, excludeKeys) {
-  const newKeys = new Set(overrides.map(o => ruleKey(o.selector, o.mediaText)))
-  pristineMap.forEach((entry, key) => {
-    if (newKeys.has(key) || (excludeKeys && excludeKeys.has(key))) return
-    setLiveRuleText(entry.selectorText, entry.mediaText, entry.cssText)
+  const newSelKeys = new Set(overrides.map(o => ruleKey(o.selector, o.mediaText)))
+  pristineMap.forEach((entry) => {
+    const selKey = ruleKey(entry.selectorText, entry.mediaText)
+    if (newSelKeys.has(selKey) || (excludeKeys && excludeKeys.has(selKey))) return
+    setLiveRuleTextInSheet(entry.sheetIndex, entry.selectorText, entry.mediaText, entry.cssText)
   })
   overrides.forEach(o => {
     const key = ruleKey(o.selector, o.mediaText)
