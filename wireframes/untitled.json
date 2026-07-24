@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "name": "Untitled",
+  "elements": [
+    {
+      "id": "el_2_317849",
+      "type": "text",
+      "x": 800,
+      "y": 608,
+      "w": 109,
+      "h": 25,
+      "autoSize": true,
+      "label": "eafwefweffwf",
+      "fill": null,
+      "stroke": null,
+      "strokeWidth": 0,
+      "fontFamily": "Barlow",
+      "fontWeight": 400,
+      "fontSize": 16,
+      "textAlign": "left",
+      "textColor": "#333333",
+      "groupId": null
+    }
+  ]
+}

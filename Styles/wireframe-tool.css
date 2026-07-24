@@ -1,0 +1,711 @@
+/* Wireframe tool (tools/wireframe/) — its own self-contained stylesheet,
+   deliberately not built on Styles/main.css: this tool's visual language
+   (canvas grid, resize handles, tool-select toolbar, SVG arrow chrome) has
+   nothing in common with the product design system main.css represents,
+   much closer in spirit to Dev Mode/Dev Edit/Dev Comments' own bespoke
+   stylesheets. Only Styles/colors.css is imported (for live-linked swatch
+   previews via var(--token)) — see Components/colorTokens usage.
+
+   No repo-wide box-sizing:border-box reset reaches this page's React DOM
+   (only index.html's own page-local <style> has one) — every control here
+   combining width/percent sizing with padding or a border sets
+   box-sizing:border-box explicitly. */
+
+* { margin: 0; padding: 0; }
+
+.wf-page {
+  /* A fixed height (not min-height) is required so .wf-canvas-scroll's
+     flex:1 resolves to a bounded box and its own overflow:auto actually
+     scrolls internally — with min-height, a canvas taller than one
+     viewport (see CANVAS_HEIGHT in Canvas.jsx) made the whole *page* grow
+     and scroll instead, leaving .wf-canvas-scroll with clientHeight ===
+     scrollHeight (no internal vertical scroll at all) and silently
+     breaking vertical zoom-to-cursor (nothing to adjust scrollTop on). */
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Barlow', sans-serif;
+  background: #f3f4f6;
+}
+
+.wf-back-link {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  color: #666666;
+  font-size: 13px;
+  text-decoration: none;
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.wf-back-link:hover { color: #9a26d6; }
+
+/* ── Toolbar — v2: centered bottom icon bar (Frame / Shapes / Colour
+   Fill only; Select/Delete/z-order buttons removed — Select had no
+   remaining purpose once Escape + re-clicking an active icon both return
+   to pointer, Delete is Backspace-only, z-order moved to the right-click
+   ContextMenu). ── */
+
+.wf-toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.wf-toolbar-item { position: relative; display: flex; }
+
+.wf-icon-btn {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #4d4d4d;
+  cursor: pointer;
+}
+.wf-icon-btn:hover:not(:disabled) { background: #f5f5f6; }
+.wf-icon-btn.active { background: #9a26d6; color: #ffffff; }
+.wf-icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Popups (Shapes / Colour Fill) open *above* their button, since the
+   toolbar itself now sits at the bottom of the screen. */
+.wf-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+}
+
+.wf-popup-shapes { display: flex; gap: 4px; }
+.wf-popup-shape-btn {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #4d4d4d;
+  cursor: pointer;
+}
+.wf-popup-shape-btn:hover { background: #f5f5f6; color: #9a26d6; }
+
+.wf-popup-fill { width: 220px; }
+.wf-popup-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.wf-popup-tab {
+  box-sizing: border-box;
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  background: #f5f5f6;
+  color: #666666;
+  cursor: pointer;
+}
+.wf-popup-tab.active { background: #9a26d6; color: #ffffff; }
+
+.wf-popup-picker { display: flex; flex-direction: column; gap: 8px; }
+.wf-popup-swatches { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+
+.wf-swatch-group + .wf-swatch-group { margin-top: 6px; }
+.wf-swatch-group-label {
+  padding: 6px 8px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #968caf;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wf-swatch-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #333333;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.wf-swatch-row:hover { background: #f5f5f6; }
+
+.wf-swatch-dot {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid #cac6d7;
+}
+.wf-swatch-dot.wf-swatch-none {
+  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 3px, #e6b3ac 3px, #e6b3ac 4px);
+}
+
+.wf-color-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid #cac6d7;
+  border-radius: 6px;
+}
+
+/* ── File controls — top-right cluster, separate from the bottom icon
+   toolbar (kept as its own small group so the bottom bar stays purely
+   about drawing tools/colour). ── */
+
+.wf-file-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.wf-tool-btn {
+  box-sizing: border-box;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #cac6d7;
+  border-radius: 4px;
+  background: #ffffff;
+  cursor: pointer;
+}
+.wf-tool-btn.wf-primary { background: #9a26d6; color: #ffffff; border-color: #9a26d6; }
+.wf-tool-btn.wf-danger { color: #c0392b; border-color: #e6b3ac; }
+.wf-tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.wf-name-input,
+.wf-load-select {
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #cac6d7;
+  border-radius: 4px;
+}
+.wf-name-input { width: 150px; }
+.wf-load-select { max-width: 140px; }
+
+.wf-toolbar-error { color: #c0392b; font-size: 12px; }
+.wf-toolbar-status { color: #21a621; font-size: 12px; }
+
+/* ── Context menu (right-click) ── */
+
+.wf-context-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+}
+
+.wf-context-menu {
+  position: fixed;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  overflow: hidden;
+}
+.wf-context-menu button {
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #333333;
+  cursor: pointer;
+}
+.wf-context-menu button:hover { background: #f5f5f6; }
+.wf-context-menu button.wf-danger { color: #c0392b; }
+
+/* ── Marquee selection rectangle ── */
+
+.wf-marquee {
+  position: absolute;
+  border: 1px solid #9a26d6;
+  background: rgba(154, 38, 214, 0.08);
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* ── Canvas ── */
+
+.wf-canvas-scroll { flex: 1; overflow: auto; position: relative; }
+
+/* ── Zoom control — fixed to the viewport (a sibling of the scaled
+   .wf-canvas, not a descendant, so its own position:fixed isn't affected
+   by that transform), bottom-right, clear of the bottom-center Toolbar and
+   top-right FileControls. ── */
+.wf-zoom-control {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.wf-zoom-btn {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #4d4d4d;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.wf-zoom-btn:hover { background: #f5f5f6; }
+.wf-zoom-percent {
+  box-sizing: border-box;
+  min-width: 48px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  color: #4d4d4d;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.wf-zoom-percent:hover { color: #9a26d6; }
+
+.wf-canvas {
+  position: relative;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, #f0f0f2 1px, transparent 1px),
+    linear-gradient(to bottom, #f0f0f2 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+.wf-canvas.wf-tool-pointer { cursor: default; }
+.wf-canvas.wf-tool-frame,
+.wf-canvas.wf-tool-rect,
+.wf-canvas.wf-tool-ellipse,
+.wf-canvas.wf-tool-arrow { cursor: crosshair; }
+.wf-canvas.wf-tool-text { cursor: text; }
+
+/* ── Box elements (frame/rect/ellipse/text) ── */
+
+.wf-el {
+  box-sizing: border-box;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.wf-el-selected { outline: 1.5px dashed #9a26d6; outline-offset: 2px; }
+
+/* Text elements top/left-anchor their content — the other three types stay
+   centered as before. A *bound* text box (autoSize: false — created by a
+   click-drag) additionally stretches its content to the full box width so
+   left/center/right alignment (set via the font panel) is actually
+   visible and text wraps within the drawn box, same as any fixed-size
+   container. An *autoSize* text (autoSize: true — a plain click, no
+   fixed w/h at all, see .wf-el-text-auto below) does neither — it has no
+   "full width" to stretch to, since it has no fixed width in the first
+   place; it just shrinks/grows to fit its own content. */
+.wf-el-text { align-items: flex-start; justify-content: flex-start; }
+.wf-el-text:not(.wf-el-text-auto) .wf-el-label,
+.wf-el-text:not(.wf-el-text-auto) .wf-label-input { width: 100%; text-align: inherit; }
+
+/* The text colour set via the font panel is applied inline on the outer
+   .wf-el-text box (ElementRenderer.jsx) — both the display label and the
+   editing input/textarea otherwise have their own fixed default `color`
+   (below), which would block inheriting it. */
+.wf-el-text .wf-el-label,
+.wf-el-text .wf-label-input { color: inherit; }
+
+/* No fixed width/height at all (ElementRenderer omits both from the
+   inline style while autoSize) — content determines size, matching a
+   plain floating text label rather than a bordered container. Single-line
+   only (an <input> can't wrap anyway; explicit resizing — which converts
+   it to a bound box, see geometry.js's transformSelection — is the only
+   way to get a multi-line text area). */
+.wf-el-text-auto { width: auto; height: auto; white-space: nowrap; }
+.wf-el-text-auto .wf-el-label,
+.wf-el-text-auto .wf-label-input { width: auto; white-space: pre; }
+
+.wf-frame-label {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-size: 12px;
+  color: #4d4d4d;
+  white-space: nowrap;
+}
+
+.wf-frame-label-input {
+  box-sizing: border-box;
+  position: absolute;
+  top: -22px;
+  left: 0;
+  width: 160px;
+  font-size: 12px;
+  font-family: inherit;
+  border: 1px solid #9a26d6;
+  border-radius: 2px;
+  padding: 1px 4px;
+  outline: none;
+}
+
+.wf-el-label {
+  font-size: inherit;
+  color: #333333;
+  text-align: center;
+  padding: 4px;
+  pointer-events: none;
+  word-break: break-word;
+  /* Preserves explicit line breaks typed into a bound text box's
+     <textarea> (see ElementRenderer.jsx) in the committed display too —
+     a no-op for the other types, which never contain a literal newline
+     (their editors are single-line <input>s). */
+  white-space: pre-wrap;
+}
+
+.wf-label-input {
+  box-sizing: border-box;
+  width: 90%;
+  font-size: inherit;
+  font-family: inherit;
+  text-align: center;
+  border: 1px solid #9a26d6;
+  border-radius: 2px;
+  padding: 2px 4px;
+  /* Suppresses the browser's own default focus ring (renders as a
+     conspicuous orange/blue halo depending on OS/browser) — this
+     component already draws its own purple border to indicate active
+     editing, so the native ring is redundant and visually clashes. */
+  outline: none;
+}
+
+/* A bound text box's editor is a <textarea> (see ElementRenderer.jsx),
+   not an <input> — needed so typed text wraps within the drawn box in
+   real time, matching the wrapped look the committed <div> display
+   already had (a single-line <input> can't wrap at all, which is what
+   let text spill past the box's edge until you clicked away). Fills the
+   box vertically too (not just the width:100% every text input already
+   gets, below) and disables the browser's manual resize-corner handle,
+   which would look out of place here since resizing is done via the
+   shared SelectionOverlay instead. */
+textarea.wf-label-input {
+  height: 100%;
+  resize: none;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* While a freshly-placed text element's draft is still empty, render the
+   input with no border/background at all — just a caret — so no bounding
+   box is visible until the first character actually lands. Switches back
+   to the normal bordered .wf-label-input the instant draft.length > 0 (see
+   ElementRenderer.jsx's conditional className). */
+.wf-label-input-bare {
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+}
+
+/* ── Shared selection overlay (v2) — one bounding box + 8 handles for
+   the entire current selection (single element, multi-select, or
+   persistent group), replacing v1's per-element handles. Not rendered at
+   all when exactly one arrow is selected alone (ArrowLayer keeps its own
+   2-endpoint handles for that case instead). ── */
+
+.wf-selection-overlay {
+  position: absolute;
+  outline: 1.5px dashed #9a26d6;
+  outline-offset: 2px;
+  z-index: 5;
+  /* Sits visually on top of every selected element's own bounding box —
+     without this, clicking directly on an already-selected element would
+     hit this overlay's body first (not the element underneath), bubble up
+     to the canvas as a plain click, and incorrectly deselect everything.
+     Only the 8 handles (a real bug fix) need to opt back into receiving
+     events. */
+  pointer-events: none;
+}
+
+/* ── Resize handles ── */
+
+.wf-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1.5px solid #9a26d6;
+  border-radius: 2px;
+  z-index: 5;
+  pointer-events: auto;
+}
+.wf-handle-nw { top: -5px; left: -5px; }
+.wf-handle-n  { top: -5px; left: 50%; transform: translateX(-50%); }
+.wf-handle-ne { top: -5px; right: -5px; }
+.wf-handle-e  { top: 50%; right: -5px; transform: translateY(-50%); }
+.wf-handle-se { bottom: -5px; right: -5px; }
+.wf-handle-s  { bottom: -5px; left: 50%; transform: translateX(-50%); }
+.wf-handle-sw { bottom: -5px; left: -5px; }
+.wf-handle-w  { top: 50%; left: -5px; transform: translateY(-50%); }
+
+/* ── Arrows (SVG overlay) ── */
+
+.wf-arrow-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.wf-arrow-endpoint {
+  fill: #ffffff;
+  stroke: #9a26d6;
+  stroke-width: 2;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.wf-arrow-selected-highlight {
+  stroke: #9a26d6;
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.wf-arrow-label-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #9a26d6;
+  border-radius: 2px;
+  padding: 2px 4px;
+  outline: none;
+}
+
+/* ── Font panel — deliberately styled to match Components/DevMode.jsx's
+   own dark inspector panel (Styles/dev-mode.css's .devmode-panel), not
+   this tool's own light toolbar/popup look, per the "similar to dev mode"
+   ask. Shown while the Text tool is armed or a text element is selected
+   (see App.jsx). top/bottom offsets clear the top-right FileControls
+   cluster and the bottom-center Toolbar, both fixed elsewhere on the
+   page. ── */
+
+.wf-font-panel {
+  position: fixed;
+  top: 80px;
+  right: 0;
+  bottom: 100px;
+  z-index: 15;
+  width: 260px;
+  background: #1c1c1e;
+  color: #f2f2f2;
+  font-family: 'Barlow', sans-serif;
+  overflow-y: auto;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.wf-font-panel-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid #3a3a3c;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.wf-font-panel-body { padding: 4px 18px 18px; }
+
+.wf-font-panel-section {
+  padding: 14px 0;
+  border-bottom: 1px solid #2e2e30;
+}
+.wf-font-panel-section:last-child { border-bottom: none; }
+
+.wf-font-panel-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.wf-font-panel-select,
+.wf-font-panel-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #f2f2f2;
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+}
+
+.wf-font-panel-align-group { display: flex; gap: 4px; }
+.wf-font-panel-align-btn {
+  box-sizing: border-box;
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #f2f2f2;
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.wf-font-panel-align-btn.active { background: #9a26d6; border-color: #9a26d6; }
+
+.wf-font-panel-swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.wf-font-panel-swatch {
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #3a3a3c;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.wf-font-panel-swatch.active { outline: 2px solid #9a26d6; outline-offset: 1px; }
+
+.wf-font-panel-color-input {
+  box-sizing: border-box;
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #3a3a3c;
+  border-radius: 5px;
+  background: #2c2c2e;
+}
+
+/* ── Exit confirmation — mirrors Components/DevEdit.jsx's own ExitPrompt
+   exactly (message shape, Discard/Save, backdrop-click cancels, no
+   separate Cancel button). Reuses .wf-context-backdrop for the full-
+   screen overlay; this box is centered rather than cursor-positioned. ── */
+
+.wf-exit-prompt-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 26;
+  width: 320px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 20px;
+}
+
+.wf-exit-prompt-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 16px;
+}
+
+.wf-exit-prompt-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.wf-exit-prompt-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #968caf;
+}
+
+/* ── Save gate (password / name) — v7. Shown when requestSave() needs the
+   shared password (or a remembered display name) before a Firestore save
+   can proceed. Same shared Firebase Auth session as Components/DevEdit.jsx's
+   own AuthGate, but styled to match this tool's light theme (reuses
+   .wf-context-backdrop and .wf-tool-btn) rather than dev-edit.css's dark
+   one — a different tool's chrome. ── */
+
+.wf-gate-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 26;
+  width: 280px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 20px;
+}
+
+.wf-gate-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12px;
+}
+
+.wf-gate-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #cac6d7;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.wf-gate-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }

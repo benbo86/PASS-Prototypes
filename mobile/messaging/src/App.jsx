@@ -207,28 +207,28 @@ const CUSTOMERS = [
 
 const THREAD_MESSAGES = {
   1: [
-    { id: 1, isMe: false, sender: 'Office', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today' },
   ],
   2: [
-    { id: 1, isMe: false, sender: 'Office', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
     { id: 2, isMe: true, text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday', receipt: 'read', attachments: [{ type: 'file', name: 'Visit_Notes_Margaret_12May.pdf', size: '148 KB' }] },
-    { id: 3, isMe: false, sender: 'Office', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday' },
-    { id: 4, isMe: false, sender: 'Office', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today' },
+    { id: 3, isMe: false, sender: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday' },
+    { id: 4, isMe: false, sender: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today' },
   ],
   3: [
     { id: 1, isMe: true, text: "Hi, I was wondering if it would be possible to swap my Friday 6th shift? I have a family commitment that afternoon.", time: 'Fri 11:02 AM', day: 'Friday', receipt: 'read' },
-    { id: 2, isMe: false, sender: 'Office', text: "Hi Adrianna, thanks for letting us know. Let me check who's available to cover and get back to you.", time: 'Fri 11:45 AM', day: 'Friday' },
-    { id: 3, isMe: false, sender: 'Office', text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
+    { id: 2, isMe: false, sender: 'Karen Ashworth', text: "Hi Adrianna, thanks for letting us know. Let me check who's available to cover and get back to you.", time: 'Fri 11:45 AM', day: 'Friday' },
+    { id: 3, isMe: false, sender: 'Karen Ashworth', text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
   ],
   4: [
     { id: 1, isMe: true, text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
   ],
   5: [
-    { id: 1, isMe: false, sender: 'Office', text: "Photo from our CQC inspection, Well done everyone.", time: '10:01 AM', day: 'Today', attachments: [{ type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg }] },
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Photo from our CQC inspection, Well done everyone.", time: '10:01 AM', day: 'Today', attachments: [{ type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg }] },
     { id: 3, isMe: true, time: '10:12 AM', day: 'Today', receipt: 'read', attachments: [{ type: 'file', name: 'Timesheet_May_Week3.pdf', size: '56 KB' }] },
     { id: 4, isMe: true, text: "Please find this week's timesheet attached.", time: '10:13 AM', day: 'Today', receipt: 'delivered', attachments: [{ type: 'file', name: 'Timesheet_May_Week4.pdf', size: '62 KB' }] },
-    { id: 5, isMe: false, sender: 'Office', text: 'Please make sure everyone watches the Moving and Handling Guide for Carers.', time: '10:30 AM', day: 'Today', attachments: [{ type: 'video', name: 'Manual_Handling_Training.mp4', duration: '4:12', poster: handlingImg }] },
-    { id: 6, isMe: false, sender: 'Office', text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
+    { id: 5, isMe: false, sender: 'Karen Ashworth', text: 'Please make sure everyone watches the Moving and Handling Guide for Carers.', time: '10:30 AM', day: 'Today', attachments: [{ type: 'video', name: 'Manual_Handling_Training.mp4', duration: '4:12', poster: handlingImg }] },
+    { id: 6, isMe: false, sender: 'Karen Ashworth', text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
   ],
 }
 
@@ -930,7 +930,7 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
 
         {/* Message */}
         <div className="compose-field-group">
-          <label className="compose-field-label">Message <span className="required">*</span></label>
+          <label className="compose-field-label">Message (optional)</label>
           <textarea
             className="message-textarea"
             placeholder="Write your message..."

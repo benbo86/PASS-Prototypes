@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
+import Tooltip from '../../../Components/Tooltip'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
@@ -172,6 +173,14 @@ const FILLER_LAST_NAMES = ['Adams', 'Baxter', 'Chapman', 'Dunn', 'Ellis', 'Foste
 
 // Relative "read X ago" label — staggered per recipient so the read list
 // shows a plausible spread of times rather than one identical timestamp.
+// Wraps an action-menu button in the shared Tooltip component only when
+// there's actually a reason to explain (a lock reason) — an unconditional
+// wrap would show an empty hover box for every enabled button that has
+// nothing to say.
+function maybeWithTooltip(text, button) {
+  return text ? <Tooltip text={text}>{button}</Tooltip> : button
+}
+
 function formatReadAgo(minutesAgo) {
   if (minutesAgo < 1) return 'Just now'
   if (minutesAgo < 60) return `${minutesAgo}m ago`
@@ -329,7 +338,12 @@ const THREAD_MESSAGES = {
   2: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
     { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
-    { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read' },
+    // editWindowExpired: true is a hand-picked example of the 15-minute
+    // edit window (a real product rule, not modeled as literal elapsed
+    // time across this static demo data — every other message here keeps
+    // working exactly as before) — see the action-menu logic below for
+    // where this drives the greyed-out Edit button + tooltip.
+    { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read', editWindowExpired: true },
     { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
   ],
   5: [
@@ -1013,6 +1027,14 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                     const msgReadCount = msg.recipients?.filter(r => r.read).length ?? 0
                     const broadcastLocked = thread.isBroadcast && msgReadCount > 0
                     const lockTitle = `Can't edit or delete — already read by ${msgReadCount} of ${msg.recipients?.length} recipients`
+                    // A separate lock reason from broadcastLocked above —
+                    // messages can only be edited within 15 minutes of
+                    // sending. Only gates Edit (not Delete); broadcastLocked
+                    // still gates both, unrelated to this.
+                    const editWindowExpired = msg.editWindowExpired === true
+                    const editWindowTitle = 'Editable for 15 min after sending'
+                    const editDisabled = broadcastLocked || editWindowExpired
+                    const editTitle = broadcastLocked ? lockTitle : editWindowExpired ? editWindowTitle : undefined
                     return (
                     <div className={`msg-action-menu${msg.isMe ? ' from-me' : ' from-them'}`} onClick={e => e.stopPropagation()}>
                       {thread.replyAllowed && (
@@ -1020,20 +1042,18 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                           <ReplyIcon /> Reply
                         </button>
                       )}
-                      {isOwnMessage && (
+                      {isOwnMessage && maybeWithTooltip(editTitle,
                         <button
-                          disabled={broadcastLocked}
-                          title={broadcastLocked ? lockTitle : undefined}
+                          disabled={editDisabled}
                           onClick={() => { setEditing(msg); setInputText(msg.text); setReplyTo(null); setActionTarget(null); inputRef.current?.focus() }}
                         >
                           <EditIcon /> Edit
                         </button>
                       )}
-                      {isOwnMessage && (
+                      {isOwnMessage && maybeWithTooltip(broadcastLocked ? lockTitle : undefined,
                         <button
                           className="danger"
                           disabled={broadcastLocked}
-                          title={broadcastLocked ? lockTitle : undefined}
                           onClick={() => {
                             setLocalMsgs(prev => prev.filter(m => m.id !== msg.id))
                             setActionTarget(null)
@@ -1751,7 +1771,11 @@ export default function App() {
       </a>
       <SideNav />
       <div className="page-body">
-      <TopNav activeItem="messages" unreadMessages={messageBadge} />
+      {/* Explicit override, not TopNav's shared 'Alex Morgan' default —
+          messages are composed/sent as CURRENT_OFFICE_USER (below), so the
+          nav's own logged-in-user identity needs to match that, not the
+          default every other web prototype still uses. */}
+      <TopNav activeItem="messages" unreadMessages={messageBadge} userName={CURRENT_OFFICE_USER} />
       <div className="messages-layout">
         <Sidebar
           threads={threads}

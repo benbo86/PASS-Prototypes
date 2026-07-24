@@ -23,3 +23,12 @@ export const db = getFirestore(app)
 // save/revert a version. See CLAUDE.md's Dev Edit section for the account
 // setup and security-rule shape this depends on.
 export const auth = getAuth(app)
+
+// The one shared account's email — never shown to anyone; must match
+// whatever account was created in the Firebase console. The "password"
+// anyone (Ben, the design team) types in is that account's password.
+// Co-located here (not in DevEdit.jsx, where it originated) so every
+// feature gating writes behind this same shared sign-in — currently Dev
+// Edit and the wireframe tool's shared save — references one definition
+// rather than risking two copies drifting apart.
+export const SHARED_EMAIL = 'designteam@pass-prototypes.internal'

@@ -6,14 +6,8 @@ import {
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { announceState, subscribeToState } from './devToolbarBus'
 import { getStoredAuthor, storeAuthor } from './authorIdentity'
-import { auth, db } from './firebase'
-
-// One shared Firebase Auth account gates who can save/revert a version —
-// not per-person credentials. This email is never shown to anyone; it must
-// match whatever account was created in the Firebase console (see
-// CLAUDE.md's Dev Edit section). The "password" handed to the design team
-// is that account's password.
-const SHARED_EMAIL = 'designteam@pass-prototypes.internal'
+import { auth, db, SHARED_EMAIL } from './firebase'
+import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from './sharedAuthSession'
 
 const PenIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -328,31 +322,6 @@ function classNameOf(el) {
   // string — guard rather than assume every element matches HTMLElement's
   // shape.
   return typeof el.className === 'string' ? el.className : (el.className?.baseVal || '')
-}
-
-// ─── Session expiry ──────────────────────────────────────────────────
-// Firebase Auth's own session doesn't expire on its own — the SDK
-// silently refreshes the underlying ID token forever, so someone stays
-// signed in indefinitely unless something else forces a sign-out. This
-// tracks "signed in at" ourselves (a plain localStorage timestamp,
-// separate from Firebase's own session state) and forces a sign-out once
-// a week has passed, so the shared password doesn't grant indefinite
-// access from a browser that once had it entered.
-const SIGNIN_AT_KEY = 'devedit-signin-at'
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // one week
-
-function getSignInAt() {
-  try { const v = localStorage.getItem(SIGNIN_AT_KEY); return v ? Number(v) : null } catch { return null }
-}
-function setSignInAt(ts) {
-  try { localStorage.setItem(SIGNIN_AT_KEY, String(ts)) } catch { /* ignore */ }
-}
-function clearSignInAt() {
-  try { localStorage.removeItem(SIGNIN_AT_KEY) } catch { /* ignore */ }
-}
-function isSessionExpired() {
-  const signInAt = getSignInAt()
-  return signInAt !== null && (Date.now() - signInAt) > SESSION_DURATION_MS
 }
 
 // ─── Dev Edit ────────────────────────────────────────────────────────

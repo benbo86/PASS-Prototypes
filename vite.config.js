@@ -4,10 +4,11 @@ import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { readdirSync, existsSync } from 'fs'
 import devEditPlugin from './devEditPlugin.js'
+import wireframePlugin from './wireframePlugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const SKIP = new Set(['node_modules', 'Styles', 'Icons', 'Components', 'dist', '.git', '.github'])
+const SKIP = new Set(['node_modules', 'Styles', 'Icons', 'Components', 'dist', '.git', '.github', 'wireframes'])
 
 // Auto-discovers any two-level nested subfolder that contains an index.html
 // e.g. schedule/assign-visit-absent-employee/index.html
@@ -25,7 +26,7 @@ const prototypeInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/PASS-Prototypes/',
-  plugins: [react(), devEditPlugin()],
+  plugins: [react(), devEditPlugin(), wireframePlugin()],
   build: {
     rollupOptions: {
       input: {

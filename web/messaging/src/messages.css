@@ -922,7 +922,6 @@ body { overflow: hidden; }
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.14);
-  overflow: hidden;
   min-width: 140px;
 }
 .msg-action-menu.from-me { right: 0; }
@@ -944,7 +943,6 @@ body { overflow: hidden; }
   border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
   transition: background 0.1s;
 }
-.msg-action-menu button:last-child { border-bottom: none; }
 .msg-action-menu button:hover { background: var(--ui-purple-7-lightest-lavendar); }
 .msg-action-menu button.danger { color: var(--rag-red-red-overdue); }
 .msg-action-menu button:disabled {
@@ -952,6 +950,34 @@ body { overflow: hidden; }
   cursor: not-allowed;
 }
 .msg-action-menu button:disabled:hover { background: none; }
+
+/* A locked (disabled) button is wrapped in Components/Tooltip.jsx's own
+   .tooltip-wrap — an enabled button renders plain, no wrapper (see
+   maybeWithTooltip in App.jsx). .tooltip-wrap's own default sizing is
+   inline-flex/shrink-to-content (right for its usual inline-with-text
+   usage elsewhere), which would otherwise collapse a wrapped button down
+   to its own content width instead of the full menu row width every other
+   button gets — restores that. */
+.msg-action-menu .tooltip-wrap { display: flex; width: 100%; }
+
+/* .msg-action-menu no longer clips its own overflow (see above) — it used
+   to (only so a hovered first/last button's square corners didn't poke
+   past the menu's own rounded corners), but that also clipped a locked
+   button's Tooltip popup, which needs to render *outside* the menu's
+   bounds to appear above it. Matching the corner radius directly on the
+   first/last actual button (covering both the plain and Tooltip-wrapped
+   cases) achieves the same visual rounding without clipping anything. */
+.msg-action-menu > button:first-child,
+.msg-action-menu > .tooltip-wrap:first-child button {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.msg-action-menu > button:last-child,
+.msg-action-menu > .tooltip-wrap:last-child button {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom: none;
+}
 
 /* ── Context strip (reply) ───────────────────────────────────── */
 .msg-context-strip {
