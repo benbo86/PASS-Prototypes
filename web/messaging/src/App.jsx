@@ -336,13 +336,18 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }], recipients: generateRecipients(31, 49, 300) },
   ],
   2: [
-    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read' },
-    { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
     // editWindowExpired: true is a hand-picked example of the 15-minute
     // edit window (a real product rule, not modeled as literal elapsed
     // time across this static demo data — every other message here keeps
     // working exactly as before) — see the action-menu logic below for
-    // where this drives the greyed-out Edit button + tooltip.
+    // where this drives the greyed-out Edit button + tooltip. Applied to
+    // every one of Karen's own messages in this specific thread (not just
+    // one) since they're all from "Yesterday" — leaving an earlier one
+    // still editable while a later one in the same thread was locked read
+    // as a real inconsistency (an older message editable, a newer one
+    // not), not an intentional contrast.
+    { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read', editWindowExpired: true },
+    { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
     { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read', editWindowExpired: true },
     { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
   ],
@@ -500,9 +505,16 @@ function ThreadRow({ thread, isActive, onClick }) {
   const extraCount = !thread.isBroadcast && thread.participantList.length > 1
     ? thread.participantList.length - 1
     : 0
-  // No custom subject was set (title defaulted to the recipient's name) —
-  // showing the recipient line too would just repeat the same name twice.
-  const recipientLineRedundant = !thread.isBroadcast
+  // Non-broadcast rows swap the usual title/recipient positions — the
+  // employee name takes the top (.msg-thread-name) slot, the subject takes
+  // the second-line (.msg-thread-recipient-plain) slot below it. Only the
+  // *content* moves; each slot keeps its own pre-existing styling. No
+  // custom subject was set (title defaulted to the recipient's own name)
+  // — showing it again on the second line would just repeat the same name
+  // twice, so it's hidden in that case (same redundancy this row already
+  // guarded against before the swap, just on the other line now).
+  const employeeNameLine = thread.participantList.length > 0 ? thread.participantList.join(', ') : thread.participants
+  const subjectLineRedundant = !thread.isBroadcast
     && thread.participantList.length === 1
     && thread.participantList[0] === thread.title
 
@@ -523,15 +535,21 @@ function ThreadRow({ thread, isActive, onClick }) {
       </div>
       <div className="msg-thread-body">
         <div className="msg-thread-top">
-          <span className="msg-thread-name">{thread.title}</span>
+          <span className="msg-thread-name">{thread.isBroadcast ? thread.title : employeeNameLine}</span>
           <span className="msg-thread-time">{thread.time}</span>
         </div>
-        {!thread.areaTags && !recipientLineRedundant && (
-          thread.participantList.length > 0
-            ? <RecipientNames names={thread.participantList} />
-            : <span className="msg-thread-recipient-plain">{thread.participants}</span>
+        {thread.isBroadcast ? (
+          <>
+            {!thread.areaTags && (
+              thread.participantList.length > 0
+                ? <RecipientNames names={thread.participantList} />
+                : <span className="msg-thread-recipient-plain">{thread.participants}</span>
+            )}
+            {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
+          </>
+        ) : (
+          !subjectLineRedundant && <span className="msg-thread-recipient-plain">{thread.title}</span>
         )}
-        {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
         <div className="msg-thread-preview-row">
           <span className="msg-thread-preview">
             <span className="msg-thread-sender">{thread.lastSender}: </span>
@@ -877,9 +895,14 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
   const headerFirstName = thread.participantList[0] || ''
   const headerInitials = !thread.isBroadcast && headerFirstName ? getInitials(headerFirstName) : ''
   const headerPalette = !thread.isBroadcast && headerFirstName ? nameToColor(headerFirstName) : null
-  // No custom subject was set (title defaulted to the recipient's name) —
-  // showing the recipient line too would just repeat the same name twice.
-  const recipientLineRedundant = !thread.isBroadcast
+  // Non-broadcast headers swap the usual title/recipient positions — same
+  // content swap as ThreadRow above (see its comment): the employee name
+  // takes the <h2> slot, the subject takes the sub-row slot below it, each
+  // keeping its own pre-existing styling. Hidden when there's no custom
+  // subject (title defaulted to the recipient's own name) — showing it
+  // again below would just repeat the same name twice.
+  const headerEmployeeNameLine = thread.participantList.length > 0 ? thread.participantList.join(', ') : thread.participants
+  const subjectLineRedundant = !thread.isBroadcast
     && thread.participantList.length === 1
     && thread.participantList[0] === thread.title
   const readStatusMsg = localMsgs.find(m => m.id === readStatusMsgId)
@@ -933,14 +956,18 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           }
         </div>
         <div className="msg-thread-header-info">
-          <h2>{thread.title}</h2>
+          <h2>{thread.isBroadcast ? thread.title : headerEmployeeNameLine}</h2>
           <div className="msg-thread-header-sub-row">
-            {thread.areaTags ? (
-              <AreaTags tags={thread.areaTags} showCount />
-            ) : recipientLineRedundant ? null : thread.participantList.length > 0 ? (
-              <RecipientNames names={thread.participantList} />
+            {thread.isBroadcast ? (
+              thread.areaTags ? (
+                <AreaTags tags={thread.areaTags} showCount />
+              ) : thread.participantList.length > 0 ? (
+                <RecipientNames names={thread.participantList} />
+              ) : (
+                <span className="msg-thread-header-sub">{thread.participants}</span>
+              )
             ) : (
-              <span className="msg-thread-header-sub">{thread.participants}</span>
+              !subjectLineRedundant && <span className="msg-thread-header-sub">{thread.title}</span>
             )}
           </div>
         </div>
@@ -1032,7 +1059,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                     // sending. Only gates Edit (not Delete); broadcastLocked
                     // still gates both, unrelated to this.
                     const editWindowExpired = msg.editWindowExpired === true
-                    const editWindowTitle = 'Editable for 15 min after sending'
+                    const editWindowTitle = 'Edit window passed (15 min)'
                     const editDisabled = broadcastLocked || editWindowExpired
                     const editTitle = broadcastLocked ? lockTitle : editWindowExpired ? editWindowTitle : undefined
                     return (
