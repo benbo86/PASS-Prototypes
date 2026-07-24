@@ -1,0 +1,95 @@
+/* ── Dev toolbar ───────────────────────────────────────────────
+   Components/DevToolbar.jsx — a real, full-width bar hosting Dev Mode/Dev
+   Comments/Dev Edit/Wireframe access (and Sign Out) as one cohesive
+   toolbar, rather than 4 independently floating circular buttons.
+
+   position: sticky (not fixed), deliberately — a sticky element still
+   occupies its own box in normal document flow (so it genuinely reserves
+   space at the top of the page and pushes whatever renders after it
+   down), while also staying visually pinned to the viewport during
+   scroll, exactly like Styles/top-nav.css's own .top-nav already does.
+   A fixed bar would only achieve the second half of that — content would
+   still render underneath it, just visually covered, not actually pushed
+   below it.
+
+   --dev-toolbar-height is the single source of truth for the bar's
+   height — referenced from several other stylesheets (Styles/mobile.css,
+   web/messaging/src/messages.css, roster/contactable-staff/src/
+   contactable-staff.css, schedule/assign-visit-absent-employee-event-
+   panel/src/EventPanel.css, Styles/modal.css) wherever a prototype's own
+   layout needs to subtract the bar's height to avoid clipping content
+   that assumed it owned the full 100vh before this bar existed. */
+:root {
+  --dev-toolbar-height: 48px;
+}
+
+.dev-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10700;
+  height: var(--dev-toolbar-height);
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+/* Compact variant (mobile prototypes) — a fixed top-right pill, not a
+   full-width in-flow bar. Overrides .dev-toolbar's position/top so it no
+   longer reserves layout space; sized to its own content (no explicit
+   width) since position:fixed takes it out of normal flow entirely. Must
+   come after the base .dev-toolbar rule above so it wins at equal
+   specificity. */
+.dev-toolbar-floating {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+.dev-toolbar-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Shared visual language for the 4 tools' own toggle buttons — plain
+   icons, no circle/dark-fill chrome (that lived on .devmode-toggle etc.
+   directly before this round; each of those classes now only carries
+   this same shape, referencing these custom properties so all 4 stay
+   visually identical without duplicating the same six declarations four
+   times over). */
+.dev-toolbar-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.dev-toolbar-icon-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.dev-toolbar-icon-btn.active { color: var(--brand-purple-7-purple-5, #b02cf7); }
+
+.dev-toolbar-signout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+.dev-toolbar-signout:hover { background: rgba(255, 255, 255, 0.12); }

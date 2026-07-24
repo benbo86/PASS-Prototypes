@@ -4,9 +4,11 @@ import PhoneFrame from '../../../Components/PhoneFrame'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import AccountScreen from '../../../Components/AccountScreen'
 import MileageScreen from '../../../Components/MileageScreen'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -40,6 +42,12 @@ export default function App() {
 
   return (
     <>
+      <DevToolbar floating>
+        <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={phoneFrameRef} />
+      </DevToolbar>
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
       <PhoneFrame ref={phoneFrameRef}>
         <div className={`screen-area page-slide ${entering ? 'slide-entering' : ''}`}>
@@ -60,9 +68,6 @@ export default function App() {
         </div>
         <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
       </PhoneFrame>
-      <DevMode containerRef={phoneFrameRef} />
-      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
     </>
   )
 }

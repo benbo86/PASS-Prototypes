@@ -1,9 +1,11 @@
 import { useState, useRef, forwardRef } from 'react'
 import Select, { components } from 'react-select'
 import DatePicker from 'react-datepicker'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -178,7 +180,14 @@ export default function HolidayAbsenceDialog() {
   const [option,      setOption]      = useState('keep')
 
   return (
-    <div ref={pageRef} style={{ display: 'contents' }}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div ref={pageRef} className="modal-page-wrap">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="modal modal-add-absence">
       <button className="modal-close-btn" aria-label="Close"><CloseIcon /></button>
@@ -329,10 +338,8 @@ export default function HolidayAbsenceDialog() {
           </div>
         </div>
       )}
-    </div>
-    <DevMode containerRef={pageRef} />
-    <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-    <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+      </div>
+    </>
   )
 }

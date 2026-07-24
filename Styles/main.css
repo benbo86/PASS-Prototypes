@@ -593,6 +593,31 @@ h6 {
   border: 6px solid transparent;
   border-top-color: #fff;
 }
+
+/* placement="bottom" (Components/Tooltip.jsx) — for a trigger with no room
+   above it (e.g. the dev toolbar, pinned to top:20px, where the default
+   "appears above" placement would render partly above the viewport,
+   invisible). Flips both the box position and the arrow, which otherwise
+   would still point the wrong way (down, as if the trigger were above it,
+   when the trigger is now above the box instead). */
+.tooltip-wrap.tooltip-below .tooltip {
+  bottom: auto;
+  top: calc(100% + 10px);
+}
+.tooltip-wrap.tooltip-below .tooltip::before {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--ui-purple-5-languid-lavendar);
+}
+.tooltip-wrap.tooltip-below .tooltip::after {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: -1px;
+  border-top-color: transparent;
+  border-bottom-color: #fff;
+}
 .tooltip-wrap:hover .tooltip { opacity: 1; }
 
 /* ── Shared L2 header patterns ───────────────────────────────── */

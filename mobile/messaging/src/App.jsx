@@ -3,9 +3,11 @@ import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import AccountScreen from '../../../Components/AccountScreen'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
@@ -1119,7 +1121,14 @@ export default function App() {
   const canReplyInThread = !activeThread?.isBroadcast
 
   return (
-    <div className="phone-wrap">
+    <>
+      <DevToolbar floating>
+        <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={phoneFrameRef} />
+      </DevToolbar>
+      <div className="phone-wrap">
       <a href="../../" className="back-link">
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
@@ -1222,9 +1231,7 @@ export default function App() {
           </div>
         )}
       </div>
-      <DevMode containerRef={phoneFrameRef} />
-      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+    </>
   )
 }

@@ -55,6 +55,29 @@ export function formatPadding(padding) {
   return `${top}px ${right}px ${bottom}px ${left}px`
 }
 
+// Same shape as getPaddingInsets, for margin — negative margins (a real,
+// meaningful CSS value, e.g. intentionally overlapping elements) are kept
+// as-is rather than clamped to 0, since this is inspector output, not a
+// layout calculation. `parseFloat('auto')` is NaN, so an unresolved `auto`
+// margin (getComputedStyle usually resolves it to a used pixel value once
+// laid out, but falls back here if it somehow doesn't) reads as 0 rather
+// than throwing/showing NaN.
+export function getMarginInsets(el, cs = getComputedStyle(el)) {
+  return {
+    top: parseFloat(cs.marginTop) || 0,
+    right: parseFloat(cs.marginRight) || 0,
+    bottom: parseFloat(cs.marginBottom) || 0,
+    left: parseFloat(cs.marginLeft) || 0,
+  }
+}
+
+// Same shorthand-collapsing behavior as formatPadding.
+export function formatMargin(margin) {
+  const { top, right, bottom, left } = margin
+  if (top === right && right === bottom && bottom === left) return `${top}px`
+  return `${top}px ${right}px ${bottom}px ${left}px`
+}
+
 export function getElementMetrics(el) {
   const rect = el.getBoundingClientRect()
   const cs = getComputedStyle(el)
@@ -80,6 +103,7 @@ export function getElementMetrics(el) {
     borderRadius: uniformRadius ? cs.borderTopLeftRadius : radii,
     boxShadow: cs.boxShadow === 'none' ? null : cs.boxShadow,
     padding: getPaddingInsets(el, cs),
+    margin: getMarginInsets(el, cs),
   }
 }
 
@@ -111,6 +135,8 @@ export function generateCssSnippet(metrics) {
   if (metrics.boxShadow) lines.push(`box-shadow: ${metrics.boxShadow};`)
   const { top, right, bottom, left } = metrics.padding
   if (top || right || bottom || left) lines.push(`padding: ${formatPadding(metrics.padding)};`)
+  const mg = metrics.margin
+  if (mg.top || mg.right || mg.bottom || mg.left) lines.push(`margin: ${formatMargin(mg)};`)
   return lines.join('\n')
 }
 

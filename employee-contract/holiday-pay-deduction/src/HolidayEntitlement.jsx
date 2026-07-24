@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react'
 import Tooltip from '../../../Components/Tooltip'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -98,7 +100,14 @@ export default function HolidayEntitlement() {
   const deduction    = overpaidDays * AVG_DAILY_PAY
 
   return (
-    <div className="he-page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="he-page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeft /> Prototypes</a>
 
       <div className="he-scenarios">
@@ -155,9 +164,7 @@ export default function HolidayEntitlement() {
         </div>
 
       </div>
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+    </>
   )
 }

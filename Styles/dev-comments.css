@@ -1,40 +1,16 @@
 /* ── Dev Comments ──────────────────────────────────────────────
    Figma-style pin comments, backed by Firestore. Independent of Dev Mode
-   itself, but the two toggles sit together as one toolbar, top-right:
-   this one at right:24px (rightmost), Dev Mode's own toggle immediately to
-   its left at right:76px (see dev-mode.css). The toggle and the rest of
-   Dev Comments' own chrome (composer/panel accents, focus borders, primary
-   buttons) use the same purple as Dev Mode's active state
-   (--brand-purple-6-purple-4) for toolbar consistency — but the pin itself
-   (and its matching cursor) stays amber/orange deliberately, since that's
-   the one place a distinct "this is a comment, not a Dev Mode selection"
-   colour actually earns its keep visually. Resolved stays green — that's a
-   status colour, not a decorative one. */
-
-.devcomments-toggle {
-  position: fixed;
-  top: 20px;
-  right: 24px;
-  z-index: 10700;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: #1c1c1e;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.devcomments-toggle:hover { background: #2c2c2e; }
-
-.devcomments-toggle.active {
-  background: var(--brand-purple-6-purple-4, #9a26d6);
-  color: #fff;
-}
+   itself, but the two toggles sit together in Components/DevToolbar.jsx's
+   shared bar now (Styles/dev-toolbar.css's .dev-toolbar-icon-btn provides
+   the toggle's own shape/colour — .devcomments-toggle carries no CSS of
+   its own anymore, kept only as a class name for identifying this
+   specific button). The rest of Dev Comments' own chrome (composer/panel
+   accents, focus borders, primary buttons) still uses the same purple as
+   Dev Mode's active state (--brand-purple-6-purple-4) for consistency —
+   but the pin itself (and its matching cursor) stays amber/orange
+   deliberately, since that's the one place a distinct "this is a comment,
+   not a Dev Mode selection" colour actually earns its keep visually.
+   Resolved stays green — that's a status colour, not a decorative one. */
 
 /* ── Pins ── */
 

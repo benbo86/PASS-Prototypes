@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { announceState, subscribeToState } from './devToolbarBus'
+import Tooltip from './Tooltip'
 import {
   toPlainRect, getElementMetrics, computeElementGap, uniformDirs,
   computeNearestGaps, isAncestorOrDescendant, findVisibleAncestor,
   exportElement, exportSelection, firstFont, generateCssSnippet,
-  getPaddingInsets, formatPadding,
+  getPaddingInsets, formatPadding, getMarginInsets, formatMargin,
 } from './devModeUtils'
 
 const CloseIcon = () => (
@@ -31,6 +32,12 @@ const CodeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="16 18 22 12 16 6" />
     <polyline points="8 6 2 12 8 18" />
+  </svg>
+)
+
+const SupportIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM19.46 9.12L16.68 10.27C16.17 8.91 15.1 7.83 13.73 7.33L14.88 4.55C16.98 5.35 18.65 7.02 19.46 9.12ZM12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15ZM9.13 4.54L10.3 7.32C8.92 7.82 7.83 8.91 7.32 10.29L4.54 9.13C5.35 7.02 7.02 5.35 9.13 4.54ZM4.54 14.87L7.32 13.72C7.83 15.1 8.91 16.18 10.29 16.68L9.12 19.46C7.02 18.65 5.35 16.98 4.54 14.87ZM14.88 19.46L13.73 16.68C15.1 16.17 16.18 15.09 16.68 13.71L19.46 14.88C18.65 16.98 16.98 18.65 14.88 19.46Z" />
   </svg>
 )
 
@@ -131,14 +138,15 @@ export default function DevMode({ containerRef }) {
     // toggle button would get treated as inspecting an element instead of
     // operating Dev Mode itself.
     //
-    // Also exempt Dev Comments' and Dev Edit's chrome ([data-devcomments-ui],
-    // [data-devedit-ui]) — all three toggles sit as one toolbar, all
+    // Also exempt Dev Comments', Dev Edit's, and the Wireframe toggle's
+    // chrome ([data-devcomments-ui], [data-devedit-ui],
+    // [data-wireframeaccess-ui]) — all four toggles sit as one toolbar, all
     // outside containerRef, so without this, activating Dev Mode first
     // would make its own "outside recognized scope" guard swallow every
     // click on the other toggles (or any of their panels), silently
     // preventing them from ever opening — a real bug hit while testing two
     // of these active at once, before a third tool existed.
-    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui], [data-devedit-ui]')
+    const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui], [data-devedit-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
 
     // "Recognized" = containerRef's own subtree, OR content react-datepicker/
     // FilterDropdown have portaled to document.body — both are conceptually
@@ -381,19 +389,26 @@ export default function DevMode({ containerRef }) {
 
   return (
     <>
-      <button
-        className={`devmode-toggle${isActive ? ' active' : ''}`}
-        onClick={toggleActive}
-        data-devmode-ui="true"
-        aria-label={isActive ? 'Exit Dev Mode' : 'Dev Mode'}
-      >
-        <CodeIcon />
-      </button>
+      <Tooltip text="Dev Mode" wrapClassName="devmode-toggle-wrap" placement="bottom">
+        <button
+          className={`dev-toolbar-icon-btn devmode-toggle${isActive ? ' active' : ''}`}
+          onClick={toggleActive}
+          data-devmode-ui="true"
+          aria-label={isActive ? 'Exit Dev Mode' : 'Dev Mode'}
+        >
+          <CodeIcon />
+        </button>
+      </Tooltip>
 
       {isActive && (
-        <button className="devmode-status-pill" onClick={() => setShowHelp(true)} data-devmode-ui="true">
+        <button
+          className={`devmode-status-pill${selectedEls.length > 0 ? ' devmode-status-pill-clear-panel' : ''}`}
+          onClick={() => setShowHelp(true)}
+          data-devmode-ui="true"
+        >
           <span className="devmode-toggle-dot" />
-          Using dev mode
+          Dev mode
+          <SupportIcon />
         </button>
       )}
 
@@ -406,6 +421,7 @@ export default function DevMode({ containerRef }) {
         <div data-devmode-ui="true">
           {showHoverHighlight && (
             <>
+              <MarginOverlay el={hoveredEl} rect={hoverRect} />
               <div
                 className="devmode-highlight devmode-highlight-hover"
                 style={{ top: hoverRect.top, left: hoverRect.left, width: hoverRect.width, height: hoverRect.height }}
@@ -416,6 +432,7 @@ export default function DevMode({ containerRef }) {
 
           {selectedRects.map((r, i) => (
             <div key={i}>
+              <MarginOverlay el={selectedEls[i]} rect={r} />
               <div
                 className="devmode-highlight devmode-highlight-selected"
                 style={{ top: r.top, left: r.left, width: r.width, height: r.height }}
@@ -474,7 +491,7 @@ const HOW_TO_USE = [
 
 const WHAT_YOU_CAN_DO = [
   'Copy any colour value, or copy the element’s full styling as a CSS snippet',
-  'See a table cell or button\'s padding, visually and in the panel — useful when its content is plain text with nothing else to hover',
+  'See a table cell or button\'s padding and margin, visually and in the panel — useful when its content is plain text with nothing else to hover',
   'Inspect date pickers and filter dropdowns, including their open calendar/menu content, not just the trigger',
   'Export a single element as a PNG, JPG or SVG, at up to 4x scale',
   'Select multiple elements and export them together as one combined image',
@@ -649,6 +666,39 @@ function PaddingOverlay({ el, rect }) {
   return <>{pieces}</>
 }
 
+// ─── Margin overlay ────────────────────────────────────────────────
+// Same box-model idea as PaddingOverlay, mirrored outward instead of
+// inward — margin is the space *outside* the border-box (what
+// getBoundingClientRect() returns), so top/bottom bands span the full
+// outer width (rect width + left/right margins) while left/right bands
+// span just rect's own height, exactly matching how PaddingOverlay's
+// top/bottom bands claim the corners so left/right don't need to.
+// Negative margins (a real, meaningful CSS value) aren't rendered as a
+// band — there's no sensible outward shading for negative space — same
+// simplification PaddingOverlay already makes for padding.
+function MarginOverlay({ el, rect }) {
+  if (!el || !rect) return null
+  const m = getMarginInsets(el)
+  if (!(m.top > 0) && !(m.right > 0) && !(m.bottom > 0) && !(m.left > 0)) return null
+
+  const outerLeft = rect.left - m.left
+  const outerWidth = rect.width + Math.max(0, m.left) + Math.max(0, m.right)
+  const pieces = []
+  if (m.top > 0) {
+    pieces.push(<div key="margin-top" className="devmode-margin-band" style={{ left: outerLeft, top: rect.top - m.top, width: outerWidth, height: m.top }} />)
+  }
+  if (m.bottom > 0) {
+    pieces.push(<div key="margin-bottom" className="devmode-margin-band" style={{ left: outerLeft, top: rect.bottom, width: outerWidth, height: m.bottom }} />)
+  }
+  if (m.left > 0) {
+    pieces.push(<div key="margin-left" className="devmode-margin-band" style={{ left: rect.left - m.left, top: rect.top, width: m.left, height: rect.height }} />)
+  }
+  if (m.right > 0) {
+    pieces.push(<div key="margin-right" className="devmode-margin-band" style={{ left: rect.right, top: rect.top, width: m.right, height: rect.height }} />)
+  }
+  return <>{pieces}</>
+}
+
 // ─── Inspect panel (single-select) ───────────────────────────────
 
 function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExport, isExporting }) {
@@ -672,8 +722,9 @@ function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExpor
         </div>
 
         <div className="devmode-panel-section">
-          <div className="devmode-panel-section-title">Padding</div>
+          <div className="devmode-panel-section-title">Padding &amp; margin</div>
           <Row label="Padding" value={formatPadding(metrics.padding)} />
+          <Row label="Margin" value={formatMargin(metrics.margin)} />
         </div>
 
         <div className="devmode-panel-section">

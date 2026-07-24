@@ -1,8 +1,21 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* This page has no root wrapper div of its own (it's a bare back-link +
+   .modal), so centering used to live directly on body. Components/
+   DevToolbar.jsx now renders as a real sibling before that content, so
+   the centering moves onto .modal-page-wrap instead — body just stacks
+   [bar, wrap] in a column; the wrap re-establishes the exact same
+   center-on-both-axes behavior, scoped to just the modal, in whatever
+   height remains below the bar. */
 body {
   background: #f3f4f6;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-page-wrap {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -2,9 +2,11 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
@@ -335,7 +337,14 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
     s === 'Completed' ? 'status-completed' : s === 'Missed' ? 'status-missed' : 'status-cancelled';
 
   return (
-    <div className="ts-page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="ts-body">
         <div className="ts-l2-header">
@@ -721,10 +730,8 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
       {selectedHoliday && (
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -940,7 +947,14 @@ export default function Timesheets() {
   }
 
   return (
-    <div className="ts-page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
 
       <div className="ts-body">
@@ -1271,9 +1285,7 @@ export default function Timesheets() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-    </div>
+      </div>
+    </>
   );
 }

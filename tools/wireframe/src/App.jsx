@@ -105,6 +105,26 @@ export default function App() {
   const savedSnapshotRef = useRef(elements)
   const isDirty = elements !== savedSnapshotRef.current
 
+  // Reached via a prototype's own Wireframe toggle (Components/
+  // WireframeToggle.jsx), which opens this page inside an iframe within a
+  // modal rather than navigating — ?embedded=1 marks that case. The
+  // back-link/exit-flow behave completely differently then (see below):
+  // there's no "navigate back," closing means asking the parent page to
+  // remove the iframe, via postMessage.
+  const isEmbedded = new URLSearchParams(window.location.search).get('embedded') === '1'
+
+  // The one place "leaving this tool" actually happens, however it was
+  // reached — every exit call-site (Discard, a save the exit flow
+  // triggered, a parent's close request once nothing's unsaved) funnels
+  // through this instead of duplicating the isEmbedded branch each time.
+  const exitTool = () => {
+    if (isEmbedded) {
+      window.parent.postMessage({ type: 'wireframe:close' }, window.location.origin)
+    } else {
+      window.location.href = '../../'
+    }
+  }
+
   const selectedFillable = elements.filter((el) => selectedIds.includes(el.id) && FILLABLE_TYPES.has(el.type))
   const canFill = selectedFillable.length > 0
   const currentFill = selectedFillable[0]?.fill || null
@@ -223,6 +243,25 @@ export default function App() {
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isDirty])
+
+  // Embedded-in-a-modal only: the parent (Components/WireframeToggle.jsx)
+  // owns the modal's visibility, but only this page knows whether it's
+  // actually safe to close — so a close attempt (×, scrim, Escape) on the
+  // parent side asks first rather than deciding unilaterally. Reuses the
+  // exact same isDirty check and exit-prompt UI the standalone back-link
+  // already uses; only the *destination* once confirmed (postMessage vs
+  // navigate) differs, via exitTool.
+  useEffect(() => {
+    if (!isEmbedded) return
+    function handleMessage(e) {
+      if (e.origin !== window.location.origin) return
+      if (e.data?.type !== 'wireframe:requestClose') return
+      if (isDirty) setShowExitPrompt(true)
+      else exitTool()
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [isEmbedded, isDirty])
 
   // ── Keyboard shortcuts ──
   // Escape precedence: close an open context menu → clear the selection →
@@ -408,13 +447,13 @@ export default function App() {
   }
 
   // If a save this function triggers succeeds and it was requested on
-  // behalf of the exit flow (pendingExitAfterSaveRef), navigate away —
-  // mirrors Components/DevEdit.jsx's own pendingExitRef/finishExit pairing.
+  // behalf of the exit flow (pendingExitAfterSaveRef), leave — mirrors
+  // Components/DevEdit.jsx's own pendingExitRef/finishExit pairing.
   const saveAndMaybeExit = async () => {
     const ok = await performSave()
     if (ok && pendingExitAfterSaveRef.current) {
       pendingExitAfterSaveRef.current = false
-      window.location.href = '../../'
+      exitTool()
     }
     return ok
   }
@@ -539,7 +578,7 @@ export default function App() {
     e.preventDefault()
     setShowExitPrompt(true)
   }
-  const handleExitDiscard = () => { window.location.href = '../../' }
+  const handleExitDiscard = () => { exitTool() }
   const handleExitSave = () => {
     pendingExitAfterSaveRef.current = true
     setShowExitPrompt(false)
@@ -548,7 +587,13 @@ export default function App() {
 
   return (
     <div className="wf-page">
-      <a href="../../" className="wf-back-link" onClick={handleBackLinkClick}>← Prototypes</a>
+      {/* No back-link at all when embedded in a prototype's modal (see
+          Components/WireframeToggle.jsx) — the modal's own close button is
+          the affordance there; a "← Prototypes" link inside an iframe that
+          isn't really the prototype index would be confusing. */}
+      {!isEmbedded && (
+        <a href="../../" className="wf-back-link" onClick={handleBackLinkClick}>← Prototypes</a>
+      )}
 
       <FileControls
         wireframeName={wireframeName}

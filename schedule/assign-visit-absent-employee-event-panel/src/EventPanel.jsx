@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 
 // ── Icons (all 24×24 unless noted) ───────────────────────────────────────────
 
@@ -363,7 +365,14 @@ export default function EventPanel() {
     .join(' and ')
 
   return (
-    <div ref={pageRef} style={{ display: 'contents' }}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link ep-back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -621,9 +630,7 @@ export default function EventPanel() {
         </div>
 
       </div>
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+    </>
   )
 }

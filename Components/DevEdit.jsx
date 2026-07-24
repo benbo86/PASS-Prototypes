@@ -4,10 +4,11 @@ import {
   collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs, serverTimestamp,
 } from 'firebase/firestore'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { announceState, subscribeToState } from './devToolbarBus'
+import { announceState, subscribeToState, subscribeToSignOutRequest } from './devToolbarBus'
 import { getStoredAuthor, storeAuthor } from './authorIdentity'
 import { auth, db, SHARED_EMAIL } from './firebase'
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from './sharedAuthSession'
+import Tooltip from './Tooltip'
 
 const PenIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -580,6 +581,15 @@ export default function DevEdit({ containerRef, prototypeId }) {
     await finishExit('signout')
   }
 
+  // Components/DevToolbar.jsx's own Sign Out button lives outside this
+  // component and has no access to editedEntries() — it just announces a
+  // request and leaves the actual (guarded) sign-out to us, exactly as if
+  // our own (now-removed) session-bar Sign Out button had been clicked.
+  useEffect(() => {
+    return subscribeToSignOutRequest(() => { handleSignOut() })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // ── Exit prompt actions ── (shown when leaving edit mode — toggling off
   // or signing out — while unsaved edits exist, instead of silently
   // leaving them applied-but-unmanaged or silently discarding them)
@@ -629,11 +639,11 @@ export default function DevEdit({ containerRef, prototypeId }) {
     const container = containerRef.current
     if (!container) return
 
-    // Exempt all three toolbar features' own chrome, not just this one —
-    // same two-way (now three-way) rule Dev Mode/Dev Comments already
+    // Exempt all four toolbar features' own chrome, not just this one —
+    // same two-way (now four-way) rule Dev Mode/Dev Comments already
     // follow, or activating this tool would swallow clicks meant for the
     // other toggles/panels.
-    const isOtherUi = (target) => target.closest && target.closest('[data-devedit-ui], [data-devmode-ui], [data-devcomments-ui]')
+    const isOtherUi = (target) => target.closest && target.closest('[data-devedit-ui], [data-devmode-ui], [data-devcomments-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
     const isRecognized = (target) =>
       container.contains(target) ||
       (target.closest && target.closest('.react-datepicker-popper, .fd-wrap'))
@@ -857,7 +867,13 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // want this edit at all," a stronger action than just leaving the panel
   // without confirming) and closes the panel. Any *other* rule block still
   // open in this same panel that hasn't been confirmed reverts to its own
-  // last-committed value, same as Apply above. ──
+  // last-committed value, same as Apply above. Always enabled (once the
+  // rule has finished loading) regardless of whether anything's actually
+  // been edited — Cancel doubles as a plain "close the panel" action, so a
+  // user who opened the panel and changed their mind needs a way to back
+  // out via this exact button, not just the panel's own × / Escape /
+  // click-away. When nothing has changed this is a harmless no-op revert
+  // that still closes the panel. ──
   const handleCancelRule = (key) => {
     const sel = selectionRef.current
     const entry = sessionEditsRef.current[key]
@@ -1000,14 +1016,16 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   return (
     <>
-      <button
-        className={`devedit-toggle${active ? ' active' : ''}`}
-        onClick={toggleActive}
-        data-devedit-ui="true"
-        aria-label={active ? 'Exit Dev Edit' : 'Dev Edit'}
-      >
-        <PenIcon />
-      </button>
+      <Tooltip text="Edit" wrapClassName="devedit-toggle-wrap" placement="bottom">
+        <button
+          className={`dev-toolbar-icon-btn devedit-toggle${active ? ' active' : ''}`}
+          onClick={toggleActive}
+          data-devedit-ui="true"
+          aria-label={active ? 'Exit Dev Edit' : 'Dev Edit'}
+        >
+          <PenIcon />
+        </button>
+      </Tooltip>
 
       {gateStep && createPortal(
         <AuthGate
@@ -1054,7 +1072,6 @@ export default function DevEdit({ containerRef, prototypeId }) {
             onToggleHistory={() => { setShowHistory(h => !h); setHistoryError(null) }}
             historyOpen={showHistory}
             authorName={authorName}
-            onSignOut={handleSignOut}
             previewing={!!previewVersionId}
             onStopPreview={stopPreview}
           />
@@ -1156,7 +1173,7 @@ function AuthGate({ step, password, setPassword, passwordError, signingIn, onSub
 // discard the current session and reach version history, independent of
 // whether any element is currently selected.
 
-function SessionBar({ dirtyCount, onSave, onDiscard, onToggleHistory, historyOpen, authorName, onSignOut, previewing, onStopPreview }) {
+function SessionBar({ dirtyCount, onSave, onDiscard, onToggleHistory, historyOpen, authorName, previewing, onStopPreview }) {
   return (
     <div className="devedit-session-bar" data-devedit-ui="true">
       {previewing && (
@@ -1171,10 +1188,12 @@ function SessionBar({ dirtyCount, onSave, onDiscard, onToggleHistory, historyOpe
       <button className={`devedit-btn-secondary${historyOpen ? ' active' : ''}`} onClick={onToggleHistory}>
         <HistoryIcon /> History
       </button>
-      <span className="devedit-session-identity">
-        {authorName}
-        <button className="devedit-link-btn" onClick={onSignOut}>Sign out</button>
-      </span>
+      {/* Sign Out itself moved to Components/DevToolbar.jsx, reachable any
+          time the shared session is active rather than only while Dev
+          Edit's own edit mode is open — see subscribeToSignOutRequest
+          above for how a click there still reaches this component's own
+          guarded handleSignOut. */}
+      <span className="devedit-session-identity">{authorName}</span>
     </div>
   )
 }
@@ -1324,7 +1343,7 @@ function EditPanel({ selection, rows, onDraftChange, onApply, onCancelRule, appl
                 <button
                   className="devedit-btn-secondary"
                   onClick={() => onCancelRule(key)}
-                  disabled={m.loading || (m.draft === m.original && m.committed === m.original)}
+                  disabled={m.loading}
                 >
                   Cancel
                 </button>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  boxFromDrag, moveArrow, moveArrowPoint, moveBox, resizeBox, resizeBoxAspectLocked,
+  boxFromDrag, boxFromDragAspectLocked, moveArrow, moveArrowPoint, moveBox, resizeBox, resizeBoxAspectLocked,
   snap, distance, CLICK_THRESHOLD, DEFAULT_SIZE, makeId,
   groupMembersOf, computeBoundingBox, transformSelection, getElementBox, rectsIntersect, cloneElements,
 } from './geometry'
@@ -277,7 +277,15 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
             updateElement(drag.id, { autoSize: false, ...boxFromDrag(drag.startPoint.x, drag.startPoint.y, pt.x, pt.y) })
           }
         } else {
-          updateElement(drag.id, boxFromDrag(drag.startPoint.x, drag.startPoint.y, pt.x, pt.y))
+          // Frame/Rect/Ellipse — shift+drag locks the drawn box to a 1:1
+          // aspect ratio. Checked live on every tick (not captured once at
+          // mousedown) since real usage often starts the drag before
+          // pressing Shift — same reasoning as resizeGroup's own
+          // lockAspect check below.
+          const box = e.shiftKey
+            ? boxFromDragAspectLocked(drag.startPoint.x, drag.startPoint.y, pt.x, pt.y)
+            : boxFromDrag(drag.startPoint.x, drag.startPoint.y, pt.x, pt.y)
+          updateElement(drag.id, box)
         }
       } else if (drag.kind === 'moveGroup') {
         const patches = {}
@@ -318,7 +326,8 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         // click-vs-drag.
         onDragStart(drag.preDragSnapshot)
         const dragDistance = distance(drag.startMouse.x, drag.startMouse.y, pt.x, pt.y)
-        if (dragDistance < CLICK_THRESHOLD) {
+        const isRealDrag = dragDistance >= CLICK_THRESHOLD
+        if (!isRealDrag) {
           // A click, not a drag — a near-invisible speck isn't useful, so
           // anchor a sensible per-type default size at the click point.
           // Text is the one exception: it *stays* autoSize (no fixed size
@@ -336,8 +345,12 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         setActiveTool('pointer')
         // Text, whether placed by click (autoSize) or drag (bound box),
         // always opens straight into typing — no double-click needed
-        // either way.
-        if (drag.isText) onTextPlaced(drag.id)
+        // either way. Frame/Rect/Ellipse ("Shapes") only get the same
+        // auto-edit after a genuine drag, not a plain click — a click just
+        // places a default-size, unlabeled box, matching the existing
+        // double-click-to-edit convention for that case. Arrow is excluded
+        // either way (no auto-edit at all).
+        if (drag.isText || (isRealDrag && !drag.isArrow)) onTextPlaced(drag.id)
       } else if (drag.kind === 'moveGroup' || drag.kind === 'resizeGroup' || drag.kind === 'arrowEndpoint') {
         // Only commit a history entry if the mouse actually moved — a
         // plain click-to-select (mousedown+mouseup with no movement, which

@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import ScreenSlider from '../../../Components/ScreenSlider'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -616,7 +618,14 @@ export default function App() {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <div className="phone-wrap">
+    <>
+      <DevToolbar floating>
+        <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={phoneFrameRef} />
+      </DevToolbar>
+      <div className="phone-wrap">
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -650,9 +659,7 @@ export default function App() {
           links={{ account: '../account/' }}
         />
       </div>
-      <DevMode containerRef={phoneFrameRef} />
-      <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+    </>
   )
 }

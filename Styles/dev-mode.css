@@ -1,51 +1,23 @@
 /* ── Dev Mode inspector ──────────────────────────────────────────
-   Toggle button lives in normal flow (no clipping issue — .phone-wrap
-   has no transform, so a position:fixed descendant isn't affected by its
-   overflow:hidden). Everything else (highlight/measurement overlay, the
-   inspect panel) is rendered via a portal to document.body, since
-   .phone-frame's transform:translateZ(0) would otherwise make it the
-   containing block for position:fixed content and its overflow:hidden
-   would clip anything extending past the frame. z-index sits above the
-   rest of the app's existing ceiling — including FilterDropdown's own
-   portal (.fd-wrap, 9999) and the react-datepicker popper prototypes pin to
-   9999 (#gpa-datepicker-portal/#ts-datepicker-portal .react-datepicker-
-   popper, in gross-pay-advice.css/timesheets.css) — starting at 10500.
-   Without this, once Dev Mode made those portals' own content genuinely
+   The toggle button itself lives inside Components/DevToolbar.jsx's
+   shared bar now (Styles/dev-toolbar.css's .dev-toolbar-icon-btn provides
+   its shape/colour — .devmode-toggle carries no CSS of its own anymore,
+   kept only as a class name for identifying this specific button).
+   Everything else (highlight/measurement overlay, the inspect panel) is
+   still rendered via a portal to document.body, since .phone-frame's
+   transform:translateZ(0) would otherwise make it the containing block
+   for position:fixed content and its overflow:hidden would clip anything
+   extending past the frame. z-index sits above the rest of the app's
+   existing ceiling — including FilterDropdown's own portal (.fd-wrap,
+   9999) and the react-datepicker popper prototypes pin to 9999
+   (#gpa-datepicker-portal/#ts-datepicker-portal .react-datepicker-popper,
+   in gross-pay-advice.css/timesheets.css) — starting at 10500. Without
+   this, once Dev Mode made those portals' own content genuinely
    inspectable (hover/select working on calendar days, dropdown items),
    the highlight box and gap-line overlays for anything inside them would
    be computed correctly but rendered *underneath* the popup/dropdown's own
    opaque UI, invisible even though functioning — exactly what "revealing
    the panel but not the distances" looks like from the outside. */
-
-/* Round, icon-only — sits immediately left of Dev Comments' own toggle
-   (`.devcomments-toggle`, at right:24px) so the two form one visual
-   toolbar: right:76px = 24px + 44px width + 8px gap. Both toolbar buttons
-   share the same active-state purple (--brand-purple-6-purple-4) so they
-   read as one consistent set, even though the rest of each feature's UI
-   (Dev Mode's blue/purple/green/red vs Dev Comments' amber) stays distinct. */
-.devmode-toggle {
-  position: fixed;
-  top: 20px;
-  right: 76px;
-  z-index: 10700;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: #1c1c1e;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.devmode-toggle:hover { background: #2c2c2e; }
-
-.devmode-toggle.active {
-  background: var(--brand-purple-6-purple-4, #9a26d6);
-}
 
 .devmode-toggle-dot {
   width: 8px;
@@ -79,6 +51,18 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Whenever the Inspect/MultiSelect panel is open (.devmode-panel, 300px
+   wide, right:0), the status pill's own right:24px would otherwise fall
+   directly inside the panel's own footprint and overlap its content
+   (confirmed via bounding-box check — real, not cosmetic: it sat on top
+   of the Export section's format/scale dropdowns). Shifting it further
+   left — clear of the panel's width plus the same 24px gap — keeps it
+   fully clickable/visible without needing to shrink the panel's own
+   usable height to dodge it. */
+.devmode-status-pill.devmode-status-pill-clear-panel {
+  right: 324px;
 }
 
 .devmode-status-pill:hover { background: #2c2c2e; }
@@ -145,6 +129,18 @@
   background: rgba(76, 175, 80, 0.3);
 }
 
+/* ── Margin band (box-model overlay) ──
+   Orange tint (the Chrome DevTools convention for margin, distinct from
+   padding's green) — rendered *outside* the highlight box's own edges, so
+   it never visually competes with the green padding tint, which stays
+   inside. */
+.devmode-margin-band {
+  position: fixed;
+  z-index: 10500;
+  pointer-events: none;
+  background: rgba(255, 152, 0, 0.25);
+}
+
 .devmode-gap-label {
   position: fixed;
   z-index: 10501;
@@ -183,7 +179,7 @@
 }
 
 .devmode-panel-header {
-  padding: 16px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid #3a3a3c;
   display: flex;
   align-items: center;
@@ -207,13 +203,13 @@
 }
 
 .devmode-panel-body {
-  padding: 4px 18px 18px;
+  padding: 2px 16px 14px;
   overflow-y: auto;
   flex: 1;
 }
 
 .devmode-panel-section {
-  padding: 14px 0;
+  padding: 6px 0;
   border-bottom: 1px solid #2e2e30;
 }
 
@@ -225,7 +221,7 @@
   color: #8e8e93;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .devmode-panel-row {
@@ -233,7 +229,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 3px 0;
+  padding: 2px 0;
   font-size: 12.5px;
 }
 
@@ -299,7 +295,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .devmode-panel-section-title-row .devmode-panel-section-title { margin-bottom: 0; }
@@ -309,10 +305,10 @@
   background: #131314;
   border: 1px solid #2e2e30;
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 11.5px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #d8d8dc;
   white-space: pre-wrap;
   word-break: break-word;
@@ -324,7 +320,7 @@
 .devmode-export-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .devmode-select {

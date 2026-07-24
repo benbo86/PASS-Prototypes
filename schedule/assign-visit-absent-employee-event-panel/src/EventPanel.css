@@ -32,9 +32,15 @@ body {
 
 .ep-panel {
   position: fixed;
-  top: 0;
+  /* Components/DevToolbar.jsx's own bar sits above everything (z-index
+     10700, higher than this panel's 200) as a real sibling before this
+     prototype's root content — top/height offset by --dev-toolbar-height
+     so the panel's own top edge renders below the bar instead of hidden
+     underneath it. .ep-scrim (inset:0, below) is left alone — a
+     translucent backdrop extending behind an opaque bar is imperceptible. */
+  top: var(--dev-toolbar-height, 0px);
   right: 0;
-  height: 100vh;
+  height: calc(100vh - var(--dev-toolbar-height, 0px));
   width: 80vw;
   background: #fff;
   z-index: 200;

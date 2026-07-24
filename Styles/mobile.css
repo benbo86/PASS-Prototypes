@@ -10,6 +10,11 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* Mobile prototypes use DevToolbar's floating=true variant (a fixed
+     top-right pill, not a full-width in-flow bar) — it reserves no
+     document-flow space, so unlike every full-width-bar consumer, this
+     doesn't need to subtract --dev-toolbar-height. Plain 100vh is correct
+     here. */
   height: 100vh;
   overflow: hidden;
   padding: 24px;

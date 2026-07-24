@@ -1,7 +1,9 @@
 import { useRef } from 'react'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +32,14 @@ const ChevronLeftIcon = () => (
 export default function AssignVisitWarning() {
   const pageRef = useRef(null)
   return (
-    <div ref={pageRef} style={{ display: 'contents' }}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div ref={pageRef} className="modal-page-wrap">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="modal">
       <button className="modal-close-btn" aria-label="Close"><CloseIcon /></button>
@@ -51,10 +60,8 @@ export default function AssignVisitWarning() {
         <button className="round-btn tertiary-btn">Cancel</button>
         <button className="round-btn primary-btn">Assign visits</button>
       </div>
-    </div>
-    <DevMode containerRef={pageRef} />
-    <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-    <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+      </div>
+    </>
   )
 }

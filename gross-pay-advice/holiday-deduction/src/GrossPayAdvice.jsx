@@ -2,9 +2,11 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { GPA_RECORDS, GPA_EMPLOYEE_NAMES, GPA_L2_VISITS, HOLIDAY_RECORDS_L2, fmtGBP } from './data';
 
@@ -239,7 +241,14 @@ function GPADetail({ record, onBack }) {
   const anyFilter  = !!(custFilter.selected.size || typeFilter.search);
 
   return (
-    <div className="gpa-page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="gpa-body">
 
@@ -446,10 +455,8 @@ function GPADetail({ record, onBack }) {
       {selectedHoliday && (
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -559,7 +566,14 @@ export default function GrossPayAdvice() {
   }
 
   return (
-    <div className="gpa-page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <div className="gpa-body">
 
@@ -673,9 +687,7 @@ export default function GrossPayAdvice() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-    </div>
+      </div>
+    </>
   );
 }

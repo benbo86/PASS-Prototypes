@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
+import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
 
 // ─── Icons ────────────────────────────────────────────────────
 
@@ -677,7 +679,14 @@ export default function App() {
   )
 
   return (
-    <div className="page" ref={pageRef}>
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+      </DevToolbar>
+      <div className="page" ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>
@@ -753,9 +762,7 @@ export default function App() {
         />
       )}
       </div>
-      <DevMode containerRef={pageRef} />
-      <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-      <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,38 +1,14 @@
 /* ── Dev Edit ──────────────────────────────────────────────────
-   Live element-style editor, third member of the dev toolbar — sits to
-   the left of Dev Mode's own toggle (right:76px), so this one is
-   right:128px, all three top:20px. Toggle chrome matches Dev Mode/Dev
-   Comments (dark, active-state purple) for toolbar consistency, but the
-   selection highlight/hover box uses its own accent (blue) rather than
-   Dev Mode's blue-highlight-on-hover or Dev Comments' amber pin — a
-   fresh colour was picked deliberately so "this element's styles are
-   being live-edited" reads as distinct from either of the other two
-   tools' own in-context indicators. */
-
-.devedit-toggle {
-  position: fixed;
-  top: 20px;
-  right: 128px;
-  z-index: 10700;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: none;
-  background: #1c1c1e;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.devedit-toggle:hover { background: #2c2c2e; }
-
-.devedit-toggle.active {
-  background: var(--brand-purple-6-purple-4, #9a26d6);
-  color: #fff;
-}
+   Live element-style editor, a member of the shared dev toolbar
+   (Components/DevToolbar.jsx — Styles/dev-toolbar.css's
+   .dev-toolbar-icon-btn provides the toggle's own shape/colour;
+   .devedit-toggle carries no CSS of its own anymore, kept only as a class
+   name for identifying this specific button). The selection highlight/
+   hover box uses its own accent (blue) rather than Dev Mode's
+   blue-highlight-on-hover or Dev Comments' amber pin — a fresh colour was
+   picked deliberately so "this element's styles are being live-edited"
+   reads as distinct from either of the other two tools' own in-context
+   indicators. */
 
 /* ── Highlight boxes ── */
 

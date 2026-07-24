@@ -65,6 +65,21 @@ export function boxFromDrag(x0, y0, x1, y1) {
   return { x: l, y: t, w: Math.max(GRID, r - l), h: Math.max(GRID, b - t) }
 }
 
+// Same as boxFromDrag, but locks the drawn box to a 1:1 aspect ratio
+// (shift+drag while drawing a new Frame/Rect/Ellipse) — whichever axis has
+// moved further becomes the driving dimension, applied to both, in the
+// correct direction per quadrant (so dragging up-left grows the square up
+// and to the left, not always down-right). Reuses boxFromDrag for the
+// actual snap-to-grid math once the square's far corner is derived.
+export function boxFromDragAspectLocked(x0, y0, x1, y1) {
+  const dx = x1 - x0
+  const dy = y1 - y0
+  const size = Math.max(Math.abs(dx), Math.abs(dy))
+  const signX = dx < 0 ? -1 : 1
+  const signY = dy < 0 ? -1 : 1
+  return boxFromDrag(x0, y0, x0 + signX * size, y0 + signY * size)
+}
+
 // Translate only — w/h untouched.
 export function moveBox(startBox, dx, dy) {
   return { ...startBox, x: snap(startBox.x + dx), y: snap(startBox.y + dy) }

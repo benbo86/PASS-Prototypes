@@ -4,9 +4,11 @@ import EventPanel from './EventPanel'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
 import './EventPanel.css'
+import '../../../Styles/dev-toolbar.css'
 import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
 import '../../../Styles/dev-edit.css'
+import '../../../Styles/wireframe-access.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

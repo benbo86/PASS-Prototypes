@@ -6,6 +6,7 @@ import {
 import { db } from './firebase'
 import { announceState, subscribeToState } from './devToolbarBus'
 import { getStoredAuthor, storeAuthor } from './authorIdentity'
+import Tooltip from './Tooltip'
 
 // ─── Icons ────────────────────────────────────────────────────────
 
@@ -241,14 +242,15 @@ export default function DevComments({ containerRef, prototypeId }) {
     const container = containerRef.current
     if (!container) return
 
-    // Also exempt Dev Mode's and Dev Edit's own chrome ([data-devmode-ui],
-    // [data-devedit-ui]) — all three toggles sit as one toolbar, all
+    // Also exempt Dev Mode's, Dev Edit's, and the Wireframe toggle's own
+    // chrome ([data-devmode-ui], [data-devedit-ui],
+    // [data-wireframeaccess-ui]) — all four toggles sit as one toolbar, all
     // outside containerRef. Without this, activating Dev Comments while
     // another tool is also active would swallow clicks on its toggle/panel
     // (treating them as "click the page to drop a pin" instead) — the same
     // class of bug as Dev Mode not recognizing Dev Comments' chrome, just
-    // the mirror case, now extended to a third tool.
-    const isOtherFeatureUi = (target) => target.closest && target.closest('[data-devcomments-ui], [data-devmode-ui], [data-devedit-ui]')
+    // the mirror case, now extended to a fourth tool.
+    const isOtherFeatureUi = (target) => target.closest && target.closest('[data-devcomments-ui], [data-devmode-ui], [data-devedit-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
 
     const handleClick = (e) => {
       if (isOtherFeatureUi(e.target)) return
@@ -354,14 +356,16 @@ export default function DevComments({ containerRef, prototypeId }) {
 
   return (
     <>
-      <button
-        className={`devcomments-toggle${active ? ' active' : ''}`}
-        onClick={toggleActive}
-        data-devcomments-ui="true"
-        aria-label="Toggle comments"
-      >
-        <CommentIcon />
-      </button>
+      <Tooltip text="Comment" wrapClassName="devcomments-toggle-wrap" placement="bottom">
+        <button
+          className={`dev-toolbar-icon-btn devcomments-toggle${active ? ' active' : ''}`}
+          onClick={toggleActive}
+          data-devcomments-ui="true"
+          aria-label="Toggle comments"
+        >
+          <CommentIcon />
+        </button>
+      </Tooltip>
 
       {containerRect && createPortal(
         <div data-devcomments-ui="true">

@@ -22,3 +22,23 @@ export function subscribeToState(callback) {
   window.addEventListener(EVENT_NAME, handler)
   return () => window.removeEventListener(EVENT_NAME, handler)
 }
+
+// Same pattern, separate event — Components/DevToolbar.jsx's own Sign Out
+// button doesn't own the shared session's dirty-state (only Dev Edit does,
+// via its own sessionEdits), so it can't just call signOut(auth) directly:
+// signing out with unsaved Dev Edit work needs the exact same guard Dev
+// Edit's own (now-removed) session-bar Sign Out button already had. This
+// lets DevToolbar *ask* for a sign-out without knowing anything about Dev
+// Edit's internal state — Dev Edit.jsx subscribes and runs its existing
+// handleSignOut (dirty-check → exit-prompt if needed, real signOut once
+// safe) exactly as if its own button had been clicked.
+const SIGNOUT_EVENT_NAME = 'pass-devtoolbar-signout-request'
+
+export function announceSignOutRequest() {
+  window.dispatchEvent(new CustomEvent(SIGNOUT_EVENT_NAME))
+}
+
+export function subscribeToSignOutRequest(callback) {
+  window.addEventListener(SIGNOUT_EVENT_NAME, callback)
+  return () => window.removeEventListener(SIGNOUT_EVENT_NAME, callback)
+}

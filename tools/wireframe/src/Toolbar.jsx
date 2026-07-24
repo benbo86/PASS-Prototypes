@@ -111,31 +111,31 @@ export default function Toolbar({ activeTool, setActiveTool, canFill, currentFil
       <div className="wf-toolbar-item">
         <button
           className={`wf-icon-btn${activeTool === 'frame' ? ' active' : ''}`}
-          title="Frame"
           onClick={toggleFrame}
         >
           <FrameIcon />
         </button>
+        {!openPopup && <span className="wf-toolbar-tooltip">Frame</span>}
       </div>
 
       <div className="wf-toolbar-item">
         <button
           className={`wf-icon-btn${activeTool === 'text' ? ' active' : ''}`}
-          title="Text"
           onClick={toggleText}
         >
           <TextIcon />
         </button>
+        {!openPopup && <span className="wf-toolbar-tooltip">Text</span>}
       </div>
 
       <div className="wf-toolbar-item">
         <button
           className={`wf-icon-btn${shapeToolActive ? ' active' : ''}`}
-          title="Shapes"
           onClick={toggleShapesPopup}
         >
           <ShapesIcon />
         </button>
+        {!openPopup && <span className="wf-toolbar-tooltip">Shapes</span>}
         {openPopup === 'shapes' && (
           <div className="wf-popup wf-popup-shapes">
             {SHAPE_TOOLS.map(({ key, label, Icon }) => (
@@ -150,12 +150,12 @@ export default function Toolbar({ activeTool, setActiveTool, canFill, currentFil
       <div className="wf-toolbar-item">
         <button
           className={`wf-icon-btn${openPopup === 'fill' ? ' active' : ''}`}
-          title="Colour Fill"
           disabled={!canFill}
           onClick={toggleFillPopup}
         >
           <FillIcon />
         </button>
+        {!openPopup && <span className="wf-toolbar-tooltip">Colour Fill</span>}
         {openPopup === 'fill' && (
           <div className="wf-popup wf-popup-fill">
             <div className="wf-popup-tabs">

@@ -67,6 +67,32 @@
 
 .wf-toolbar-item { position: relative; display: flex; }
 
+/* Self-contained equivalent of Components/Tooltip.jsx's own look (this
+   tool deliberately doesn't import Styles/main.css, so that component's
+   .tooltip/.tooltip-wrap classes aren't available here) — a plain hover-
+   shown label above each main toolbar icon. Not rendered at all while a
+   popup (Shapes/Colour Fill) is open, so it never stacks visually with
+   that popup's own position just above the same button. */
+.wf-toolbar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #333333;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 5;
+}
+.wf-toolbar-item:hover .wf-toolbar-tooltip { opacity: 1; }
+
 .wf-icon-btn {
   box-sizing: border-box;
   width: 44px;
@@ -275,7 +301,24 @@
 
 /* ── Canvas ── */
 
-.wf-canvas-scroll { flex: 1; overflow: auto; position: relative; }
+/* The white+grid background lives here too, not just on .wf-canvas itself
+   — .wf-canvas is a fixed 4000x2800 box that shrinks visually when zoomed
+   out (transform: scale, see below), so whenever the visible viewport is
+   bigger than the current zoomed-out canvas, .wf-canvas-scroll's own
+   background is what actually shows through in the gap. Previously this
+   had no background at all, letting .wf-page's grey page background bleed
+   through around/beyond the canvas instead of it looking like one
+   continuous white workspace. */
+.wf-canvas-scroll {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, #f0f0f2 1px, transparent 1px),
+    linear-gradient(to bottom, #f0f0f2 1px, transparent 1px);
+  background-size: 8px 8px;
+}
 
 /* ── Zoom control — fixed to the viewport (a sibling of the scaled
    .wf-canvas, not a descendant, so its own position:fixed isn't affected

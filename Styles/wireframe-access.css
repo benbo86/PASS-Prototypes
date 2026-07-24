@@ -1,0 +1,66 @@
+/* ── Wireframe access ─────────────────────────────────────────
+   A member of the shared dev toolbar (Components/WireframeToggle.jsx,
+   hosted inside Components/DevToolbar.jsx — Styles/dev-toolbar.css's
+   .dev-toolbar-icon-btn provides the toggle's own shape/colour;
+   .wireframeaccess-toggle carries no CSS of its own anymore, kept only as
+   a class name for identifying this specific button) — a doorway into
+   the standalone Wireframe tool (tools/wireframe/), opened as a modal
+   (below). The password gate itself reuses Styles/dev-edit.css's own
+   .devedit-gate-* classes rather than duplicating that CSS a second time
+   here. */
+
+/* ── Modal (opened from a prototype) ──────────────────────────
+   Covers 90% of the viewport, centered — deliberately not a full-page
+   navigation, so the originating prototype stays visibly present (dimmed)
+   behind the scrim, giving the impression of still being on that page. The
+   tool itself renders inside an iframe (see WireframeToggle.jsx for why),
+   which is what makes its own height:100vh/position:fixed chrome correctly
+   scope to this box instead of the real browser viewport, with no changes
+   needed on that side. z-index sits above the toolbar's own 10700. */
+.wireframeaccess-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10800;
+  background: var(--web-skrim, rgba(60, 57, 72, 0.7));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wireframeaccess-modal-box {
+  position: relative;
+  width: 90vw;
+  height: 90vh;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.wireframeaccess-modal-iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* Positioned overflowing the box's own top-right corner (a standard modal-
+   close convention) — the box itself has no overflow:hidden (only the
+   iframe carries the corner radius), so this renders un-clipped there. */
+.wireframeaccess-modal-close {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: #1c1c1e;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.wireframeaccess-modal-close:hover { background: #2c2c2e; }
