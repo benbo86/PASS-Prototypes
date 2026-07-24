@@ -1,4 +1,4 @@
-import { readFile, writeFile, readdir, mkdir } from 'fs/promises'
+import { readFile, writeFile, readdir, mkdir, stat, unlink } from 'fs/promises'
 import { resolve, sep } from 'path'
 
 // Backs the Wireframe tool (tools/wireframe/). Dev-server only, via
@@ -17,7 +17,10 @@ export default function wireframePlugin() {
           const { fileName, name, elements } = JSON.parse(body)
           const resolvedPath = assertSafePath(fileName)
           await mkdir(WIREFRAMES_DIR, { recursive: true })
-          await writeFile(resolvedPath, JSON.stringify({ version: 1, name, elements }, null, 2), 'utf-8')
+          // updatedAt lets the client merge local saves into one
+          // chronological list alongside Firestore's own updatedAt —
+          // previously this file had no timestamp of any kind.
+          await writeFile(resolvedPath, JSON.stringify({ version: 1, name, elements, updatedAt: new Date().toISOString() }, null, 2), 'utf-8')
           return { ok: true, fileName }
         })
       })
@@ -33,12 +36,17 @@ export default function wireframePlugin() {
           const jsonFiles = entries.filter(f => f.endsWith('.json'))
           const files = await Promise.all(jsonFiles.map(async (f) => {
             const fileName = f.slice(0, -'.json'.length)
+            const filePath = resolve(WIREFRAMES_DIR, f)
             try {
-              const raw = await readFile(resolve(WIREFRAMES_DIR, f), 'utf-8')
+              const raw = await readFile(filePath, 'utf-8')
               const data = JSON.parse(raw)
-              return { fileName, name: data.name || fileName }
+              // Falls back to the file's own mtime for any file saved
+              // before updatedAt existed — no migration needed, and this
+              // is still a genuine "last modified" timestamp either way.
+              const updatedAt = data.updatedAt || (await stat(filePath)).mtime.toISOString()
+              return { fileName, name: data.name || fileName, updatedAt }
             } catch {
-              return { fileName, name: fileName }
+              return { fileName, name: fileName, updatedAt: null }
             }
           }))
           return { ok: true, files }
@@ -51,6 +59,15 @@ export default function wireframePlugin() {
           const resolvedPath = assertSafePath(fileName)
           const raw = await readFile(resolvedPath, 'utf-8')
           return { ok: true, data: JSON.parse(raw) }
+        })
+      })
+
+      server.middlewares.use('/__wireframe/delete', (req, res) => {
+        handleJsonPost(req, res, async (body) => {
+          const { fileName } = JSON.parse(body)
+          const resolvedPath = assertSafePath(fileName)
+          await unlink(resolvedPath)
+          return { ok: true, fileName }
         })
       })
     },

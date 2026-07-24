@@ -226,8 +226,8 @@ export default function Canvas({
     </div>
 
       {/* Fixed to the viewport (not the scrolled/scaled canvas), bottom-
-          right — clear of the bottom-center Toolbar and top-right
-          FileControls. Clicking the percentage resets to 100%. */}
+          right — clear of the bottom-center Toolbar and top-left
+          WireframeMenu. Clicking the percentage resets to 100%. */}
       <div className="wf-zoom-control">
         <button className="wf-zoom-btn" onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))} aria-label="Zoom out">−</button>
         <button className="wf-zoom-percent" onClick={() => setZoom(1)} title="Reset to 100%">{Math.round(zoom * 100)}%</button>

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Toolbar from './Toolbar'
-import FileControls from './FileControls'
+import WireframeMenu from './WireframeMenu'
 import FontPanel from './FontPanel'
 import Canvas from './Canvas'
 import { cloneElements, clampZoom, ZOOM_STEP } from './geometry'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { collection, query, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { auth, db, SHARED_EMAIL } from '../../../Components/firebase'
 import { getStoredAuthor, storeAuthor } from '../../../Components/authorIdentity'
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from '../../../Components/sharedAuthSession'
@@ -52,11 +52,10 @@ export default function App() {
   const [currentFileName, setCurrentFileName] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
-  const [saveStatus, setSaveStatus] = useState(null)
   const [showExitPrompt, setShowExitPrompt] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const [savedFiles, setSavedFiles] = useState([])
-  const [selectedLoadFile, setSelectedLoadFile] = useState('')
 
   // ── Shared save (Firestore) ── same shared password/Firebase Auth
   // session Components/DevEdit.jsx uses (Components/firebase.js's `auth`,
@@ -90,11 +89,21 @@ export default function App() {
   // render, only to be read back on the next ⌘V.
   const clipboardRef = useRef(null)
 
-  // Set right before requestSave() opens the gate for an exit-triggered
-  // save — resumed by submitPassword/submitName once the gate completes,
-  // so navigation only happens once a save the exit flow triggered has
-  // actually succeeded (mirrors Components/DevEdit.jsx's own pendingExitRef).
-  const pendingExitAfterSaveRef = useRef(false)
+  // What to do once the dirty-check (showExitPrompt) resolves — set by
+  // requestSwitch() before showing the prompt, read by handleExitDiscard/
+  // handleExitSave (via saveAndMaybeContinue) once the user decides.
+  // { type: 'exit' } | { type: 'load', source, id } | { type: 'new' } | null.
+  // Generalizes what used to be a single boolean (pendingExitAfterSaveRef)
+  // only ever meaning "exit" — now the same gate also covers switching to a
+  // different saved wireframe or starting a new one.
+  const pendingActionRef = useRef(null)
+
+  // What to do once the *auth* gate (gateStep) resolves — separate from the
+  // dirty-check above, since it can now be reached from two different
+  // places: Save (needs password + a stored author name) and a cloud
+  // delete (needs only the password, no name/attribution required to
+  // remove something). { type: 'save' } | { type: 'delete', id, name } | null.
+  const pendingAuthActionRef = useRef(null)
 
   // ── Dirty tracking for the exit-confirmation prompt ── captures the
   // mount-time elements reference once, then compares by reference — every
@@ -256,7 +265,7 @@ export default function App() {
     function handleMessage(e) {
       if (e.origin !== window.location.origin) return
       if (e.data?.type !== 'wireframe:requestClose') return
-      if (isDirty) setShowExitPrompt(true)
+      if (isDirty) { pendingActionRef.current = { type: 'exit' }; setShowExitPrompt(true) }
       else exitTool()
     }
     window.addEventListener('message', handleMessage)
@@ -288,6 +297,7 @@ export default function App() {
 
       if (e.key === 'Escape') {
         if (showExitPrompt) { setShowExitPrompt(false); return }
+        if (menuOpen) { setMenuOpen(false); return }
         if (contextMenu) { setContextMenu(null); return }
         if (selectedIdsRef.current.length > 0) { setSelectedIds([]); return }
         setActiveTool('pointer')
@@ -370,7 +380,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [contextMenu, showExitPrompt, pushHistory, undo])
+  }, [contextMenu, showExitPrompt, menuOpen, pushHistory, undo])
 
   const handleFillChange = (hex) => {
     if (selectedIds.length === 0) return
@@ -421,7 +431,6 @@ export default function App() {
     const name = wireframeName.trim() || 'Untitled'
     setSaving(true)
     setSaveError(null)
-    setSaveStatus(null)
     try {
       const payload = { name, authorName: authorName.trim(), elements, updatedAt: serverTimestamp() }
       if (currentFirestoreId) {
@@ -431,7 +440,6 @@ export default function App() {
         setCurrentFirestoreId(ref.id)
       }
       setWireframeName(name)
-      setSaveStatus('Saved')
       savedSnapshotRef.current = elements
       const fileName = currentFileName || slugify(name)
       postJson('/__wireframe/save', { fileName, name, elements })
@@ -446,25 +454,52 @@ export default function App() {
     }
   }
 
-  // If a save this function triggers succeeds and it was requested on
-  // behalf of the exit flow (pendingExitAfterSaveRef), leave — mirrors
-  // Components/DevEdit.jsx's own pendingExitRef/finishExit pairing.
-  const saveAndMaybeExit = async () => {
+  // Dispatches whatever requestSwitch() stashed once it's actually safe to
+  // proceed (either there was nothing to lose, or Discard/Save already
+  // resolved that). The single place all three "switch away from the
+  // current wireframe" flows converge.
+  const runAction = (action) => {
+    if (!action) return
+    if (action.type === 'exit') exitTool()
+    else if (action.type === 'new') performNew()
+    else if (action.type === 'load') performLoad(action.source, action.id)
+  }
+
+  // The one gate every "this would discard unsaved changes" flow goes
+  // through — back-link exit, picking a different saved wireframe from the
+  // menu, and New. Nothing to lose → just do it; otherwise stash what was
+  // requested and show the same Discard/Save prompt exit already used.
+  const requestSwitch = (action) => {
+    if (isDirty) {
+      pendingActionRef.current = action
+      setShowExitPrompt(true)
+    } else {
+      runAction(action)
+    }
+  }
+
+  // If a save this function triggers succeeds and something was waiting on
+  // it (requestSwitch stashed it before opening the prompt/gate), continue
+  // on to that now — mirrors Components/DevEdit.jsx's own
+  // pendingExitRef/finishExit pairing, generalized beyond just "exit."
+  const saveAndMaybeContinue = async () => {
     const ok = await performSave()
-    if (ok && pendingExitAfterSaveRef.current) {
-      pendingExitAfterSaveRef.current = false
-      exitTool()
+    if (ok && pendingActionRef.current) {
+      const action = pendingActionRef.current
+      pendingActionRef.current = null
+      runAction(action)
     }
     return ok
   }
 
-  // The one entry point both FileControls' Save button and the exit
-  // prompt's Save button call. Saves immediately if already signed in (and
-  // a remembered name is on file); otherwise opens the password/name gate,
-  // which resumes the save itself once satisfied (submitPassword/
-  // submitName below) — mirrors Components/DevEdit.jsx's toggleActive gate
-  // logic exactly.
+  // The one entry point the exit prompt's Save button calls (there's no
+  // longer a standalone Save button in the main UI — see WireframeMenu).
+  // Saves immediately if already signed in (and a remembered name is on
+  // file); otherwise opens the password/name gate, which resumes the save
+  // itself once satisfied (submitPassword/submitName below) — mirrors
+  // Components/DevEdit.jsx's toggleActive gate logic exactly.
   const requestSave = () => {
+    pendingAuthActionRef.current = { type: 'save' }
     if (!authReady) return
     if (isAuthed && isSessionExpired()) {
       clearSignInAt()
@@ -474,7 +509,22 @@ export default function App() {
     }
     if (!isAuthed) { setGateStep('password'); return }
     if (!authorName.trim()) { setGateStep('name'); return }
-    saveAndMaybeExit()
+    saveAndMaybeContinue()
+  }
+
+  // Cloud delete needs the same shared sign-in as Save, but never the name
+  // step — deleting doesn't attribute anything to anyone.
+  const requestDeleteCloud = (id, name) => {
+    pendingAuthActionRef.current = { type: 'delete', id, name }
+    if (!authReady) return
+    if (isAuthed && isSessionExpired()) {
+      clearSignInAt()
+      signOut(auth)
+      setGateStep('password')
+      return
+    }
+    if (!isAuthed) { setGateStep('password'); return }
+    performDeleteCloud(id)
   }
 
   const submitPassword = async () => {
@@ -484,9 +534,14 @@ export default function App() {
     try {
       await signInWithEmailAndPassword(auth, SHARED_EMAIL, passwordInput)
       setPasswordInput('')
-      if (authorName.trim()) {
+      const pending = pendingAuthActionRef.current
+      if (pending?.type === 'delete') {
         setGateStep(null)
-        saveAndMaybeExit()
+        pendingAuthActionRef.current = null
+        performDeleteCloud(pending.id)
+      } else if (authorName.trim()) {
+        setGateStep(null)
+        saveAndMaybeContinue()
       } else {
         setGateStep('name')
       }
@@ -503,25 +558,22 @@ export default function App() {
     storeAuthor(trimmed)
     setAuthorName(trimmed)
     setGateStep(null)
-    saveAndMaybeExit()
+    pendingAuthActionRef.current = null
+    saveAndMaybeContinue()
   }
 
   const closeGate = () => {
-    pendingExitAfterSaveRef.current = false
+    pendingActionRef.current = null
+    pendingAuthActionRef.current = null
     setGateStep(null)
   }
 
-  // Load dropdown values are prefixed (`local:<fileName>` /
-  // `cloud:<docId>`, see the merged options built in the render below) so
-  // this can dispatch to the right backend and clear the *other* backend's
-  // tracking id, same as loading a local file already cleared currentFileName.
-  const handleLoad = async () => {
-    if (!selectedLoadFile) return
+  // The actual load — no dirty-check here, requestLoad (called from
+  // WireframeMenu) always routes through requestSwitch first. `source`/
+  // `id` come directly from whichever row was clicked (`cloud`/`local`),
+  // replacing the old prefixed-dropdown-value parsing.
+  const performLoad = async (source, id) => {
     setSaveError(null)
-    setSaveStatus(null)
-    const sepIndex = selectedLoadFile.indexOf(':')
-    const source = selectedLoadFile.slice(0, sepIndex)
-    const id = selectedLoadFile.slice(sepIndex + 1)
 
     if (source === 'cloud') {
       const match = firestoreFiles.find((f) => f.id === id)
@@ -535,6 +587,7 @@ export default function App() {
       setSelectedIds([])
       setActiveTool('pointer')
       historyRef.current = []
+      setMenuOpen(false)
       return
     }
 
@@ -550,13 +603,14 @@ export default function App() {
       setSelectedIds([])
       setActiveTool('pointer')
       historyRef.current = []
+      setMenuOpen(false)
     } catch (err) {
       setSaveError(err.message || 'Failed to load')
     }
   }
+  const requestLoad = (source, id) => requestSwitch({ type: 'load', source, id })
 
-  const handleNew = () => {
-    if (elements.length > 0 && !window.confirm('Clear the canvas and start a new wireframe?')) return
+  const performNew = () => {
     const empty = []
     setElements(empty)
     savedSnapshotRef.current = empty
@@ -566,8 +620,40 @@ export default function App() {
     setCurrentFirestoreId(null)
     setActiveTool('pointer')
     setSaveError(null)
-    setSaveStatus(null)
     historyRef.current = []
+    setMenuOpen(false)
+  }
+  const requestNew = () => requestSwitch({ type: 'new' })
+
+  // Local delete is ungated (same trust level as the local save-to-disk
+  // endpoint already has — dev-only, Ben's own machine). Cloud delete goes
+  // through requestDeleteCloud above since it needs the shared sign-in.
+  const performDeleteLocal = async (fileName) => {
+    setSaveError(null)
+    try {
+      const data = await postJson('/__wireframe/delete', { fileName })
+      if (!data.ok) throw new Error(data.error || 'Failed to delete')
+      if (currentFileName === fileName) setCurrentFileName(null)
+      refreshFileList()
+    } catch (err) {
+      setSaveError(err.message || 'Failed to delete')
+    }
+  }
+  const performDeleteCloud = async (id) => {
+    setSaveError(null)
+    try {
+      await deleteDoc(doc(db, 'wireframe_saves', id))
+      if (currentFirestoreId === id) setCurrentFirestoreId(null)
+    } catch (err) {
+      setSaveError(err.message || 'Failed to delete')
+    }
+  }
+  // Single entry point WireframeMenu calls for either source — confirms
+  // once, then dispatches to the right backend.
+  const requestDelete = (source, id, name) => {
+    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
+    if (source === 'local') performDeleteLocal(id)
+    else requestDeleteCloud(id, name)
   }
 
   // ── Exit confirmation ── mirrors Components/DevEdit.jsx's own
@@ -576,14 +662,38 @@ export default function App() {
   const handleBackLinkClick = (e) => {
     if (!isDirty) return
     e.preventDefault()
+    pendingActionRef.current = { type: 'exit' }
     setShowExitPrompt(true)
   }
-  const handleExitDiscard = () => { exitTool() }
+  const handleExitDiscard = () => {
+    const action = pendingActionRef.current
+    pendingActionRef.current = null
+    setShowExitPrompt(false)
+    runAction(action)
+  }
   const handleExitSave = () => {
-    pendingExitAfterSaveRef.current = true
     setShowExitPrompt(false)
     requestSave()
   }
+
+  // Merges the two backends into one flat, newest-first list for the menu
+  // panel — the wireframe that drove this design draws a single
+  // undifferentiated list, not grouped sections like the old dropdown's
+  // "Shared"/"Local" optgroups. Firestore's updatedAt is a Timestamp
+  // (.toMillis()); the local plugin's is a plain ISO string (or null for a
+  // file whose own stat() lookup failed) — both normalized to epoch ms so
+  // they sort against each other correctly.
+  const mergedFiles = [
+    ...firestoreFiles.map((f) => ({
+      source: 'cloud', id: f.id, name: f.name || 'Untitled',
+      updatedAtMs: f.updatedAt?.toMillis?.() ?? 0,
+    })),
+    ...savedFiles.map((f) => ({
+      source: 'local', id: f.fileName, name: f.name || f.fileName,
+      updatedAtMs: f.updatedAt ? new Date(f.updatedAt).getTime() : 0,
+    })),
+  ].sort((a, b) => b.updatedAtMs - a.updatedAtMs)
+  const currentFileKey = currentFirestoreId ? `cloud:${currentFirestoreId}` : currentFileName ? `local:${currentFileName}` : null
 
   return (
     <div className="wf-page">
@@ -595,19 +705,17 @@ export default function App() {
         <a href="../../" className="wf-back-link" onClick={handleBackLinkClick}>← Prototypes</a>
       )}
 
-      <FileControls
+      <WireframeMenu
         wireframeName={wireframeName}
         setWireframeName={setWireframeName}
-        onSave={requestSave}
-        saving={saving}
-        saveError={saveError}
-        saveStatus={saveStatus}
-        savedFiles={savedFiles}
-        firestoreFiles={firestoreFiles}
-        selectedLoadFile={selectedLoadFile}
-        setSelectedLoadFile={setSelectedLoadFile}
-        onLoad={handleLoad}
-        onNew={handleNew}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        files={mergedFiles}
+        currentFileKey={currentFileKey}
+        onSelectFile={requestLoad}
+        onNew={requestNew}
+        onDelete={requestDelete}
+        error={saveError}
       />
 
       {showFontPanel && (
