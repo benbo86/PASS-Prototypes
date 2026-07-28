@@ -2667,6 +2667,34 @@
       "usageCount": 1
     },
     {
+      "hash": "83e17a13",
+      "name": "Back",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
+          "name": "BackIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "7431a481",
+      "name": "Ellipsis",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#EllipsisIcon",
+          "name": "EllipsisIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "c2fcd0e8",
       "name": "Search",
       "group": "Inline",
@@ -2891,5 +2919,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-07-28T13:04:16.670Z"
+  "generatedAt": "2026-07-28T15:47:47.522Z"
 }

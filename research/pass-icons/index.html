@@ -163,7 +163,7 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 186 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 188 icons (.zip)</button>
   </div>
 
   <section data-section-slug="buttons-round-tertiary">
@@ -1374,7 +1374,7 @@
   </section>
 
   <section data-section-slug="inline">
-    <div class="section-head"><h2>Inline</h2><span class="count">108 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Inline</h2><span class="count">110 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -2944,6 +2944,36 @@
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="-4 -3 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
     &lt;path fill="currentColor" d="M3 18C2.45 18 1.97917 17.8042 1.5875 17.4125C1.19583 17.0208 1 16.55 1 16V3H0V1H5V0H11V1H16V3H15V16C15 16.55 14.8042 17.0208 14.4125 17.4125C14.0208 17.8042 13.55 18 13 18H3ZM13 3H3V16H13V3ZM5 14H7V5H5V14ZM9 14H11V5H9V14Z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="BackIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download BackIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+  </svg></span>
+        <span class="label">BackIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="EllipsisIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download EllipsisIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+  </svg></span>
+        <span class="label">EllipsisIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /&gt;
   &lt;/svg&gt;</template>
       </div>
 
