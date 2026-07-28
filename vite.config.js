@@ -6,10 +6,11 @@ import { readdirSync, existsSync } from 'fs'
 import devEditPlugin from './devEditPlugin.js'
 import wireframePlugin from './wireframePlugin.js'
 import iconLibraryPlugin from './iconLibraryPlugin.js'
+import auditPlugin from './auditPlugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const SKIP = new Set(['node_modules', 'Styles', 'Icons', 'Components', 'dist', '.git', '.github', 'wireframes'])
+const SKIP = new Set(['node_modules', 'Styles', 'Icons', 'Components', 'dist', '.git', '.github', 'wireframes', 'audit-captures'])
 
 // Auto-discovers any two-level nested subfolder that contains an index.html
 // e.g. schedule/assign-visit-absent-employee/index.html
@@ -27,7 +28,7 @@ const prototypeInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/PASS-Prototypes/',
-  plugins: [react(), devEditPlugin(), wireframePlugin(), iconLibraryPlugin()],
+  plugins: [react(), devEditPlugin(), wireframePlugin(), iconLibraryPlugin(), auditPlugin()],
   build: {
     rollupOptions: {
       input: {

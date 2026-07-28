@@ -4,7 +4,7 @@ import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
-
+import AuditCapture from '../../../Components/AuditCapture'
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
@@ -38,6 +38,7 @@ export default function AssignVisitWarning() {
         <DevMode containerRef={pageRef} />
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
       </DevToolbar>
       <div ref={pageRef} className="modal-page-wrap">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>

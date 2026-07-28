@@ -67,7 +67,9 @@ employee-contract/
 | `Components/WireframeToggle.jsx` | 4th member of the dev toolbar — password-gated doorway that opens `tools/wireframe/` in a modal (iframe, not a navigation) from any prototype, wire into every new prototype alongside Dev Mode/Dev Comments/Dev Edit (no `containerRef`/`prototypeId` needed) — see Prototype conventions below and Wireframe tool section |
 | `Styles/wireframe-access.css` | `WireframeToggle`'s own toggle-button styling (matches Dev Mode/Comments/Edit's shared dark/active-purple convention) — its password gate reuses `Styles/dev-edit.css`'s own `.devedit-gate-*` classes rather than duplicating them |
 | `Components/DevToolbar.jsx` | Unified full-width dev toolbar bar — wraps Dev Mode/Dev Comments/Dev Edit/Wireframe access as children and renders the shared Sign Out control; wire into every new prototype as a sibling *before* the prototype's own root element — see Dev Toolbar section below |
-| `Styles/dev-toolbar.css` | `DevToolbar`'s own styling — full-width sticky black bar, `--dev-toolbar-height` custom property, plain icon-button styling for the 4 tool toggles (no circles) — see Dev Toolbar section below |
+| `Styles/dev-toolbar.css` | `DevToolbar`'s own styling — full-width sticky black bar, `--dev-toolbar-height` custom property, plain icon-button styling for the 4 tool toggles (no circles) — see Dev Toolbar section below; also holds the 6th tool's `.audit-capture-wrap`/`.audit-toast` styles rather than a dedicated stylesheet, since it's just one button + one toast |
+| `Components/AuditCapture.jsx` | 6th, dev-only member of the dev toolbar — one-shot "capture this screen" button, bundles the prototype's own source files plus a live-rendered DOM snapshot into a file for a human to hand to Claude afterward to actually question the logic (never judges anything itself) — see Audit tool section below |
+| `auditPlugin.js` | Vite dev-server plugin backing Audit (`/__audit/capture` endpoint) — repo-root, not under `Components/`, same reasoning as `devEditPlugin.js`/`wireframePlugin.js` — see Audit tool section below |
 
 **Always read `Styles/main.css` before adding local CSS.**
 
@@ -160,6 +162,20 @@ employee-contract/
    </DevToolbar>
    ```
    Also add `import '../../../Styles/wireframe-access.css'` to `main.jsx`. See the Wireframe tool section below for the password gate and the `?from=` back-navigation protocol.
+
+8. **Audit** — wire the 6th toolbar tool into every new prototype alongside the other five, same "wire every view separately" rule for multi-view prototypes. Takes `containerRef` only (no `prototypeId` — it doesn't scope any Firestore query, it just names the output file from the current URL):
+   ```jsx
+   import AuditCapture from '../../../Components/AuditCapture'
+   // ...
+   <DevToolbar>
+     <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+     <DevMode containerRef={pageRef} />
+     <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+     <WireframeToggle />
+     <AuditCapture containerRef={pageRef} />
+   </DevToolbar>
+   ```
+   No new style import needed — its CSS lives in `Styles/dev-toolbar.css`, already imported everywhere. See the Audit tool section below for what actually gets captured and why.
 
 ---
 
@@ -754,6 +770,26 @@ Ben: "Do we have examples of this elsewhere that we need to update? I'd like to 
 - **`customer-profile/timeline/src/App.jsx`** (+ `timeline-legacy.css`) — `TYPE_META`/`CANCELLED_META`'s `bg`/`text` (7 types + cancelled, already CSS-custom-property references, just applied inline) became a `tone` field mapped to `.tl-item-heading--{tone}`; `EltIcon`/`FaIcon`'s `color` props (4 status icons + 1 cancelled-specific) became a `tone` prop mapped to `.tl-eltico-icon--{tone}`/`.tl-fa-icon--{tone}` — `FaIcon`'s `rotate` prop (only ever called once, fixed at 90°) was folded into `.tl-fa-icon--cancelled`'s own `transform` and removed from the component's signature entirely, since nothing else used it.
 
 **Verified via Playwright** across all 6 touched prototypes (zero console errors); confirmed the Dev Edit password gate still appears correctly (no leftover test bypass); screenshot-confirmed both `mobile/notifications` and `customer-profile/timeline` render visually identical to before across every tone; directly exercised the actual point of this round on two representative multi-instance cases — selecting one `.notif-type-badge--amber` (7 instances on the page) and editing its background via the real Apply-to-file flow updated **all 7** instances at once, not just the clicked one; same confirmed for `.tl-item-heading--cancelled` (2 instances). `.slide-panel-body` confirmed to have no inline `style` attribute left and the correct computed background purely from CSS. Same lesson as the `.notif-avatar` fix's own diagnosis: a click needs to land on the target's own background, not merely inside its native bounding box, when that box happens to contain an icon — several of these spot-checks initially "failed" only because the test's own click coordinates landed on an inner icon instead of the badge/div itself, not because of any actual regression.
+
+---
+
+## Audit tool (6th dev toolbar member)
+
+Ben: wanted a "review feature button" available only locally, whose job is "scrutinize and surface any unknowns that we might have missed" — then, on reflection, clarified the actual intent further: "its not so much checking against rules, thats less important, its more questioning the logic e.g. we included this but what does it actually do or mean" and "also identifying things that aren't fully defined." That rules out a deterministic linter (checking spacing/tokens/wiring against CLAUDE.md's own rules) as the wrong shape entirely — questioning *why* something exists or what an element actually does when clicked is a judgment call, not a rule check, and genuinely needs an LLM reading the result, not pattern-matching.
+
+**Confirmed via `AskUserQuestion` before building**: capture scope is source files *plus* a live-rendered DOM snapshot (not source alone — a hardcoded value or a condition that happens to be active right now is only visible in what's actually rendered, not in the source in isolation); output goes to a new gitignored `audit-captures/` folder at the repo root (not committed, unlike `wireframes/*.json` — these are one-off working files meant for an immediate handoff into a Claude conversation, not something the team needs in version control); the feature is named **Audit** (over "Review," which reads as code-review, and "Question/Questions," which names the output rather than the action).
+
+**What it actually does, deliberately narrow**: `Components/AuditCapture.jsx` is a one-shot button, not an ongoing mode like Dev Mode/Comments/Edit — clicking it doesn't review or judge anything itself. It POSTs the current `pathname`/`search` plus `containerRef.current.outerHTML` to a new dev-only endpoint (`auditPlugin.js`'s `/__audit/capture`, same `configureServer`-only shape as `devEditPlugin.js`/`wireframePlugin.js` — never exists outside `vite dev`), which resolves the prototype's own folder from the pathname (stripping Vite's `base` config first, then reading the first two path segments — the same `location/prototype-name` convention the Vite config's own prototype-discovery scan already relies on), recursively bundles every `.jsx`/`.js`/`.css`/`.html` file under that folder, and writes one combined Markdown file to `audit-captures/<location>--<prototype>[--<query>]--<timestamp>.md` containing: a short reviewer preamble (restating the "question the logic, not the rules" framing so a fresh Claude conversation reading the file gets the right lens without Ben having to re-explain it each time), the DOM snapshot, then every source file with its own path heading. **The reasoning itself — "what does this actually do," "is this fully defined" — happens afterward, in conversation, when the resulting file is handed to Claude.** No API key, no live LLM call from the browser; that was the explicitly rejected alternative (a dev-only endpoint calling the Anthropic API directly), traded off against this simpler, infra-free version given this repo's workflow already runs through Claude Code sessions.
+
+**Dev-only in a stronger sense than Dev Edit's own "Apply to file" button**: the whole `AuditCapture` component returns `null` unless `import.meta.env.DEV`, not just one button inside an always-mounted component — because unlike Dev Edit (where production visitors need the always-on "apply the active version" effect regardless of environment), there is no production-facing behavior here at all; the entire feature is a local authoring aid. Confirmed via a real `npm run build` that grepping the built `dist/assets/*.js` for `audit-toggle`/`__audit` returns zero matches — Vite's static `import.meta.env.DEV` replacement means the whole component (button, fetch call, endpoint string) is tree-shaken out of the production bundle, not merely hidden behind a runtime check.
+
+**Multi-view prototypes bundle the whole folder regardless of which view was open** — `gross-pay-advice/holiday-deduction`'s query-string-scoped views (see the Dev Comments section's own "pathname + search" convention) both resolve to the same `gross-pay-advice/holiday-deduction/` folder, so a capture from either view includes both `GrossPayAdvice.jsx`'s list and detail JSX — deliberately not narrowed to "just the currently-open view," since reasoning about one view in isolation would miss how it's reached from or hands off to the other. The output filename still records which view/query was open (`--employee-stephen-nicholls--`) for context.
+
+**No cross-tool exemption marker needed** — unlike `WireframeToggle`, which needed its own `data-wireframeaccess-ui` marker because its gate/modal are portaled to `document.body` (outside `DevToolbar`'s own DOM subtree), `AuditCapture` renders its button and toast as plain in-place children of `<DevToolbar>` with nothing portaled — so the bar's own existing `[data-devtoolbar-ui]` ancestor marker (already in every other tool's capture-phase click-exemption `closest()` check, see the Dev Toolbar section's v12 history) already covers it for free.
+
+**Verified via a headless Playwright script** (no interactive MCP tool available this session, so driven directly against the `playwright` package already present in `node_modules`): the button renders on a mobile (phone-frame) prototype and a query-string multi-view prototype; a click on each produces a real file under `audit-captures/` within ~1s, with the toast reporting the exact relative path; the captured file's DOM snapshot matches what's actually on screen and its source-file list matches the real folder contents (spot-checked on both prototypes); zero console/page errors; a full production build succeeds and contains no trace of the feature. Test capture files and the temporary verification script were deleted after — `audit-captures/` itself is gitignored, so nothing from this round needed to be un-committed.
+
+**Side effect, expected and left as-is**: `AuditIcon` (the new toolbar icon, an inline SVG in `AuditCapture.jsx`) was automatically picked up by `iconLibraryPlugin.js`'s file watcher during verification and added to `public/pass-icon-library.json` / `research/pass-icons/index.html`'s "Inline" group (107 → 108 icons) — this is the icon-library auto-bake feature confirmed working back in Icon Library v3, doing exactly what it's supposed to for a genuinely new icon.
 
 ---
 

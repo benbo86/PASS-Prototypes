@@ -9,6 +9,7 @@ import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 const ChevronLeftIcon = ({ size = 24 }) => (
@@ -47,6 +48,7 @@ export default function App() {
         <DevMode containerRef={phoneFrameRef} />
         <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
+        <AuditCapture containerRef={phoneFrameRef} />
       </DevToolbar>
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
       <PhoneFrame ref={phoneFrameRef}>

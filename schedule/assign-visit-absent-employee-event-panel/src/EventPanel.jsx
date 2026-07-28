@@ -4,7 +4,7 @@ import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
-
+import AuditCapture from '../../../Components/AuditCapture'
 // ── Icons (all 24×24 unless noted) ───────────────────────────────────────────
 
 const CloseIcon = () => (
@@ -371,6 +371,7 @@ export default function EventPanel() {
         <DevMode containerRef={pageRef} />
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
       </DevToolbar>
       <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link ep-back-link">

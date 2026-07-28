@@ -7,6 +7,7 @@ import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { GPA_RECORDS, GPA_EMPLOYEE_NAMES, GPA_L2_VISITS, HOLIDAY_RECORDS_L2, fmtGBP } from './data';
 
@@ -247,6 +248,7 @@ function GPADetail({ record, onBack }) {
         <DevMode containerRef={pageRef} />
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
       </DevToolbar>
       <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
@@ -572,6 +574,7 @@ export default function GrossPayAdvice() {
         <DevMode containerRef={pageRef} />
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
       </DevToolbar>
       <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>

@@ -93,3 +93,31 @@
   cursor: pointer;
 }
 .dev-toolbar-signout:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* Audit (Components/AuditCapture.jsx) — a one-shot capture button, not an
+   ongoing mode, so it needs no .active state of its own; the toast below
+   it communicates the outcome of the click instead. Positioned relative so
+   the toast can anchor to it without being portaled (it stays inside
+   DevToolbar's own DOM subtree, so it's covered by [data-devtoolbar-ui]'s
+   existing cross-tool click exemption for free — see CLAUDE.md). */
+.audit-capture-wrap {
+  position: relative;
+  display: flex;
+}
+
+.audit-toast {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  white-space: nowrap;
+  color: #fff;
+  background: #222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10701;
+}
+.audit-toast--error { background: var(--rag-red-red-overdue, #c0392b); }

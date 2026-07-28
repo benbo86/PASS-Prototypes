@@ -8,7 +8,7 @@ import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
-
+import AuditCapture from '../../../Components/AuditCapture'
 // ─── Icons ────────────────────────────────────────────────────
 
 const ChevronLeftIcon = () => (
@@ -238,6 +238,7 @@ export default function App() {
         <DevMode containerRef={pageRef} />
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
       </DevToolbar>
       <div className="settings-page" ref={pageRef}>
       <a href="../../" className="back-link">

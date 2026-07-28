@@ -7,6 +7,7 @@ import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -634,6 +635,7 @@ export default function App() {
         <DevMode containerRef={phoneFrameRef} />
         <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
+        <AuditCapture containerRef={phoneFrameRef} />
       </DevToolbar>
       <div className="phone-wrap">
       <a href="../../" className="back-link">
