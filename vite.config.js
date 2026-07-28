@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { readdirSync, existsSync } from 'fs'
 import devEditPlugin from './devEditPlugin.js'
 import wireframePlugin from './wireframePlugin.js'
+import iconLibraryPlugin from './iconLibraryPlugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -26,7 +27,7 @@ const prototypeInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/PASS-Prototypes/',
-  plugins: [react(), devEditPlugin(), wireframePlugin()],
+  plugins: [react(), devEditPlugin(), wireframePlugin(), iconLibraryPlugin()],
   build: {
     rollupOptions: {
       input: {

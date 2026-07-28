@@ -194,18 +194,149 @@
   border-radius: 4px;
   border: 1px solid #cac6d7;
 }
-.wf-swatch-dot.wf-swatch-none {
+.wf-swatch-dot.wf-swatch-none,
+.wf-swatch-square.wf-swatch-none {
   background: repeating-linear-gradient(45deg, #ffffff, #ffffff 3px, #e6b3ac 3px, #e6b3ac 4px);
 }
 
-.wf-color-input {
+/* ── Picker tab: large round colour swatch + hex input + a compact None
+   square, replacing the old plain-rectangle native colour input + a
+   full-width "None" row stacked beneath it. ── */
+
+.wf-color-wheel-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+/* A real interactive hue/saturation wheel — not a styled native <input
+   type="color"> (that was v13; this replaces it entirely per Ben's
+   follow-up: "I was more thinking the circle would be the picker, not a
+   preview"). Two stacked CSS gradients do all the rendering, no canvas:
+   a conic-gradient sweeps hue around the full circle, and a radial white-
+   to-transparent gradient painted on top handles saturation (white at the
+   center = s:0 regardless of hue, fully transparent at the edge = s:1,
+   the hue below showing through unmixed). `from 90deg` on the conic-
+   gradient rotates its own 0deg reference from the CSS default (12
+   o'clock/up) to 3 o'clock/right, matching Toolbar.jsx's own hue-from-
+   angle math (atan2(dy,dx), which is already 0deg-at-right/clockwise once
+   dy grows downward on-screen) — verified empirically via Playwright
+   (clicking known points around the wheel and reading back the applied
+   hex) rather than trusted from this derivation alone. */
+.wf-color-wheel {
   box-sizing: border-box;
-  width: 100%;
+  position: relative;
+  width: 136px;
+  height: 136px;
+  border: 1px solid #cac6d7;
+  border-radius: 50%;
+  cursor: crosshair;
+  background-image:
+    radial-gradient(circle at 50% 50%, #fff 0%, rgba(255, 255, 255, 0) 100%),
+    conic-gradient(from 90deg at 50% 50%, red 0deg, #ffff00 60deg, #00ff00 120deg, #00ffff 180deg, #0000ff 240deg, #ff00ff 300deg, red 360deg);
+}
+
+/* Brightness/value darkening — a flat black layer at opacity (1 - v) is
+   mathematically identical to multiplying every channel by v (alpha-
+   blending black at alpha a over color C gives C*(1-a); setting a = 1-v
+   gives exactly C*v), so this stays a plain CSS overlay rather than
+   needing to regenerate the two gradients above per brightness tick. */
+.wf-color-wheel-value-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #000000;
+  pointer-events: none;
+}
+
+.wf-color-wheel-thumb {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.wf-brightness-slider {
+  position: relative;
+  box-sizing: border-box;
+  height: 16px;
+  border-radius: 8px;
+  border: 1px solid #cac6d7;
+  cursor: pointer;
+  margin: 4px 2px 0;
+}
+
+.wf-brightness-thumb {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  background: #9a9a9a;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.wf-hex-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+
+.wf-hex-input {
+  box-sizing: border-box;
+  flex: 1;
   height: 36px;
-  padding: 2px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: 'SF Mono', Menlo, monospace;
+  color: #333333;
   border: 1px solid #cac6d7;
   border-radius: 6px;
+  outline: none;
 }
+.wf-hex-input:focus { border-color: #9a26d6; }
+
+.wf-swatch-square {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #cac6d7;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.wf-swatch-square:hover { border-color: #9a26d6; }
+
+/* Border popup only (not Fill) — sits below the shared ColorPickerPopup,
+   visible regardless of which of its own tabs (Picker/Swatches) is active,
+   since thickness is independent of which colour-selection method is
+   showing. */
+.wf-thickness-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #edecf1;
+}
+.wf-thickness-label { font-size: 12px; font-weight: 600; color: #4d4d4d; }
+.wf-thickness-input {
+  box-sizing: border-box;
+  width: 56px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #333333;
+  border: 1px solid #cac6d7;
+  border-radius: 6px;
+  outline: none;
+}
+.wf-thickness-input:focus { border-color: #9a26d6; }
 
 /* ── Wireframe menu — top-left hamburger + name field, opening a
    slide-out panel (Components/WireframeMenu.jsx). Replaces the old
@@ -326,6 +457,19 @@
   text-align: center;
 }
 
+/* Only rendered at all once there's a genuine "Local" section to
+   distinguish from "Shared" — see WireframeMenu.jsx. */
+.wf-menu-group + .wf-menu-group { margin-top: 8px; }
+
+.wf-menu-group-label {
+  padding: 6px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #968caf;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .wf-menu-list-item {
   box-sizing: border-box;
   display: flex;
@@ -349,7 +493,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.wf-menu-list-item-date { font-size: 11.5px; color: #888888; margin-top: 2px; }
+.wf-menu-list-item-date {
+  font-size: 11.5px;
+  color: #888888;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .wf-menu-list-item-delete {
   box-sizing: border-box;
@@ -516,15 +667,36 @@
    "full width" to stretch to, since it has no fixed width in the first
    place; it just shrinks/grows to fit its own content. */
 .wf-el-text { align-items: flex-start; justify-content: flex-start; }
+
+/* Rect/ellipse/triangle labels get the same "stretch to full width so
+   text-align has room to actually move the text" treatment as bound text
+   above — without this, the label div only ever sizes to its own content,
+   so `justify-content: center` (this file's own .wf-el default) always
+   centers that content-sized box regardless of what textAlign the font
+   panel is set to: left/right visibly did nothing. These three always
+   have a real fixed w/h (never autoSize), so — unlike text — there's no
+   "no width to stretch to" case to exclude. */
 .wf-el-text:not(.wf-el-text-auto) .wf-el-label,
-.wf-el-text:not(.wf-el-text-auto) .wf-label-input { width: 100%; text-align: inherit; }
+.wf-el-text:not(.wf-el-text-auto) .wf-label-input,
+.wf-el-rect .wf-el-label,
+.wf-el-rect .wf-label-input,
+.wf-el-ellipse .wf-el-label,
+.wf-el-ellipse .wf-label-input,
+.wf-el-triangle .wf-el-label,
+.wf-el-triangle .wf-label-input { width: 100%; text-align: inherit; }
 
 /* The text colour set via the font panel is applied inline on the outer
-   .wf-el-text box (ElementRenderer.jsx) — both the display label and the
-   editing input/textarea otherwise have their own fixed default `color`
-   (below), which would block inheriting it. */
+   .wf-el box (ElementRenderer.jsx, every non-frame type) — both the
+   display label and the editing input/textarea otherwise have their own
+   fixed default `color` (below), which would block inheriting it. */
 .wf-el-text .wf-el-label,
-.wf-el-text .wf-label-input { color: inherit; }
+.wf-el-text .wf-label-input,
+.wf-el-rect .wf-el-label,
+.wf-el-rect .wf-label-input,
+.wf-el-ellipse .wf-el-label,
+.wf-el-ellipse .wf-label-input,
+.wf-el-triangle .wf-el-label,
+.wf-el-triangle .wf-label-input { color: inherit; }
 
 /* No fixed width/height at all (ElementRenderer omits both from the
    inline style while autoSize) — content determines size, matching a
@@ -560,6 +732,12 @@
 }
 
 .wf-el-label {
+  /* position:relative (no offset — purely for stacking) lifts this into
+     the same paint layer as a triangle's absolutely-positioned <svg>
+     sibling (ElementRenderer.jsx); a plain non-positioned box always
+     paints BEHIND any positioned sibling regardless of DOM order, which
+     would otherwise leave triangle labels invisible under their own fill. */
+  position: relative;
   font-size: inherit;
   color: #333333;
   text-align: center;
@@ -574,6 +752,9 @@
 }
 
 .wf-label-input {
+  /* Same stacking reason as .wf-el-label above — keeps the editor visible
+     above a triangle's absolutely-positioned <svg> fill/stroke sibling. */
+  position: relative;
   box-sizing: border-box;
   width: 90%;
   font-size: inherit;

@@ -1486,7 +1486,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                           return (
                             <div key={tag.id} className="msg-carer-option" onClick={() => toggleTag(tag)}>
                               <input type="checkbox" className="msg-option-checkbox" checked={isSelected} onChange={() => {}} />
-                              <div className="msg-carer-avatar" style={{ background: '#e8e0f0', color: '#5a3878' }}>
+                              <div className="msg-carer-avatar msg-carer-avatar--group">
                                 <GroupIcon size={16} />
                               </div>
                               <div className="msg-tag-option-body">
@@ -1797,9 +1797,9 @@ export default function App() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="messages-page" ref={pageRef}>
       <a href="../../" className="back-link">

@@ -24,7 +24,7 @@ export default function SlidePanel({ open, onClose, title, children, footer }) {
             <CloseIcon />
           </button>
         </div>
-        <div className="slide-panel-body" style={{ background: 'var(--ui-purple-7-lightest-lavendar)' }}>
+        <div className="slide-panel-body">
           {children}
         </div>
         {footer && (

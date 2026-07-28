@@ -244,9 +244,9 @@ function GPADetail({ record, onBack }) {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
@@ -569,9 +569,9 @@ export default function GrossPayAdvice() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="gpa-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>

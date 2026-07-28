@@ -7,9 +7,18 @@
 
 .side-nav {
   width: 280px;
-  height: 100vh;
+  /* Components/DevToolbar.jsx renders as a real sibling before the page
+     shell now, pushing this down by --dev-toolbar-height — both the fixed
+     100vh height and the sticky top:0 need the same offset subtracted/
+     added, or (a) this box runs exactly --dev-toolbar-height past the
+     bottom of the viewport with overflow:visible (confirmed via Playwright
+     — the sidebar's own footer content silently rendered off-screen,
+     invisible, not just clipped) and (b) once scrolled, this would try to
+     stick flush at the viewport's y:0 same as .top-nav did before its own
+     fix, overlapping the toolbar bar instead of resting below it. */
+  height: calc(100vh - var(--dev-toolbar-height, 0px));
   position: sticky;
-  top: 0;
+  top: var(--dev-toolbar-height, 0px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;

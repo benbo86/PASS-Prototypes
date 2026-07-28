@@ -24,14 +24,15 @@ const ChevronLeftIcon = () => (
 // / fa-regular-400 from pen.passgenius.com, and eltico.woff — see
 // Styles/legacy.css for how they're loaded, and the "PASS legacy icon
 // fonts" specimen artifact for the full glyph list). Not guessed.
-const FaIcon = ({ code, weight = 'solid', color, rotate }) => (
-  <span
-    className={`tl-fa-icon tl-fa-icon-${weight}`}
-    style={{ ...(color ? { color } : null), ...(rotate ? { display: 'inline-block', transform: `rotate(${rotate}deg)` } : null) }}
-  >{code}</span>
+// tone maps to a .tl-fa-icon--{tone}/.tl-eltico-icon--{tone} class in
+// timeline-legacy.css — moved out of an inline colour (and, for the one
+// icon that needed it, an inline rotation transform) so Dev Edit can
+// select/edit each status icon's own styling directly.
+const FaIcon = ({ code, weight = 'solid', tone }) => (
+  <span className={`tl-fa-icon tl-fa-icon-${weight}${tone ? ` tl-fa-icon--${tone}` : ''}`}>{code}</span>
 )
-const EltIcon = ({ code, color }) => (
-  <span className="tl-eltico-icon" style={color ? { color } : undefined}>{code}</span>
+const EltIcon = ({ code, tone }) => (
+  <span className={`tl-eltico-icon${tone ? ` tl-eltico-icon--${tone}` : ''}`}>{code}</span>
 )
 
 const GeneralIcon = () => <FaIcon code={''} weight="solid" /> // fa-check
@@ -45,14 +46,14 @@ const OutcomeIcon = () => <FaIcon code={''} weight="regular" /> // fa-star, "
 // Status icons — eltico glyphs (icon-task-status-*, icon-alert-rag-GREEN).
 // icon-alert-rag-GREEN also backs the default/no-alert state in the
 // export's own CSS, so there's no separate grey "none" glyph.
-const OverdueIcon = () => <EltIcon code={''} color="var(--legacy-status-overdue)" />
-const CompleteIcon = () => <EltIcon code={''} color="var(--legacy-status-complete)" />
-const PartialIcon = () => <EltIcon code={''} color="var(--legacy-status-partial)" />
-const AlertGreenIcon = () => <EltIcon code={''} color="var(--legacy-success)" />
+const OverdueIcon = () => <EltIcon code={''} tone="overdue" />
+const CompleteIcon = () => <EltIcon code={''} tone="complete" />
+const PartialIcon = () => <EltIcon code={''} tone="partial" />
+const AlertGreenIcon = () => <EltIcon code={''} tone="success" />
 // Rotated 90° so the diagonal slash runs bottom-left to top-right,
 // matching MAR Chart's CANCELLED bubble (fa-ban's default slash runs
 // the other way).
-const CancelledIcon = () => <FaIcon code={''} weight="solid" color="var(--legacy-status-cancelled)" rotate={90} /> // fa-ban
+const CancelledIcon = () => <FaIcon code={''} weight="solid" tone="cancelled" /> // fa-ban
 
 // Body icons — Calendar/Info/Cream form/Dosage/Support required/Bodymap/
 // Carer (id-card)/Review note (file) confirmed 2026-07-10 (see header
@@ -81,21 +82,25 @@ const BodymapIcon = () => <FaIcon code={''} weight="solid" /> // fa-male
 // reference screenshots (2026-07-09), stored as shared tokens in
 // Styles/legacy.css since other legacy recreations may need them.
 
+// tone maps to a .tl-item-heading--{tone} class in timeline-legacy.css —
+// moved out of an inline style (the var(--legacy-panel-*) references now
+// live in the CSS rule itself) so Dev Edit can select/edit each type's
+// heading colours directly.
 const TYPE_META = {
-  general:     { icon: GeneralIcon,     bg: 'var(--legacy-panel-task-bg)',             text: 'var(--legacy-panel-task-text)' },
-  observation: { icon: ObservationIcon, bg: 'var(--legacy-panel-observation-bg)',      text: 'var(--legacy-panel-observation-text)' },
-  medication:  { icon: MedicationIcon,  bg: 'var(--legacy-panel-medication-bg)',       text: 'var(--legacy-panel-medication-text)' },
-  visit:       { icon: VisitIcon,       bg: 'var(--legacy-panel-visit-bg)',            text: 'var(--legacy-panel-visit-text)', dark: true },
-  nutrition:   { icon: NutritionIcon,   bg: 'var(--legacy-panel-nutrition-bg)',        text: 'var(--legacy-panel-nutrition-text)' },
-  hydration:   { icon: HydrationIcon,   bg: 'var(--legacy-panel-hydration-bg)',        text: 'var(--legacy-panel-hydration-text)' },
-  outcome:     { icon: OutcomeIcon,     bg: 'var(--legacy-panel-outcome-tracking-bg)', text: 'var(--legacy-panel-outcome-tracking-text)' },
+  general:     { icon: GeneralIcon,     tone: 'general' },
+  observation: { icon: ObservationIcon, tone: 'observation' },
+  medication:  { icon: MedicationIcon,  tone: 'medication' },
+  visit:       { icon: VisitIcon,       tone: 'visit', dark: true },
+  nutrition:   { icon: NutritionIcon,   tone: 'nutrition' },
+  hydration:   { icon: HydrationIcon,   tone: 'hydration' },
+  outcome:     { icon: OutcomeIcon,     tone: 'outcome' },
 }
 
 const STATUS_ICON = { overdue: OverdueIcon, complete: CompleteIcon, partial: PartialIcon, cancelled: CancelledIcon }
 
 // Cancelled items always render flat grey, regardless of their type —
 // matches MAR Chart's CANCELLED bubble colors exactly (AIOP-22638).
-const CANCELLED_META = { bg: 'var(--legacy-panel-cancelled-bg)', text: 'var(--legacy-panel-cancelled-text)' }
+const CANCELLED_META = { tone: 'cancelled' }
 
 // ─── Data ─────────────────────────────────────────────────────
 // Titles/types/notes are pulled from the exported page + Ben's
@@ -420,8 +425,7 @@ function TimelineItem({ item, isOpen, onToggle }) {
   return (
     <div className="tl-item">
       <div
-        className={`tl-item-heading${meta.dark ? ' tl-item-heading-dark' : ''}`}
-        style={{ background: meta.bg, color: meta.text }}
+        className={`tl-item-heading tl-item-heading--${meta.tone}${meta.dark ? ' tl-item-heading-dark' : ''}`}
         onClick={onToggle}
         role="button"
         tabIndex={0}
@@ -532,9 +536,9 @@ export default function App() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>

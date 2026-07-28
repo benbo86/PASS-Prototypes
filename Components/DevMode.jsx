@@ -41,6 +41,19 @@ const SupportIcon = () => (
   </svg>
 )
 
+// Selecting inside an <svg> (one of an icon's own inner <path>/<circle>/etc.)
+// isn't useful to inspect individually — Dev Edit's icon-swap feature
+// already treats a whole <svg> as one indivisible unit (Components/
+// iconSwap.js's own resolveSvgTarget), so hovering/clicking anywhere inside
+// an icon resolves up to its own nearest enclosing <svg> instead, matching
+// that same mental model rather than letting the user drill into internals
+// that can't meaningfully be selected/swapped on their own.
+function resolveHitTarget(el) {
+  if (!el) return el
+  const svg = el.closest && el.closest('svg')
+  return svg || el
+}
+
 function shallowRectEqual(a, b) {
   if (a === b) return true
   if (!a || !b) return false
@@ -173,7 +186,7 @@ export default function DevMode({ containerRef }) {
 
     const handleMove = (e) => {
       if (isDevModeUi(e.target)) return
-      const target = isRecognized(e.target) ? e.target : null
+      const target = isRecognized(e.target) ? resolveHitTarget(e.target) : null
       if (target !== hoveredElRef.current) {
         hoveredElRef.current = target
         setHoveredEl(target)
@@ -194,9 +207,9 @@ export default function DevMode({ containerRef }) {
 
     const handleClick = (e) => {
       if (isDevModeUi(e.target)) return
-      const target = e.target
+      const rawTarget = e.target
 
-      if (!isRecognized(target)) {
+      if (!isRecognized(rawTarget)) {
         // Outside recognized scope entirely (e.g. the back-link) — block
         // real navigation and clear the current selection, mirroring
         // clicking empty canvas to deselect in Figma.
@@ -209,7 +222,12 @@ export default function DevMode({ containerRef }) {
         return
       }
 
-      if (isPassthroughTrigger(target) && !e.shiftKey) return
+      if (isPassthroughTrigger(rawTarget) && !e.shiftKey) return
+
+      // Resolved after the passthrough-trigger check (which cares about the
+      // exact clicked node's own class, not its enclosing svg) — see
+      // resolveHitTarget's own comment above.
+      const target = resolveHitTarget(rawTarget)
 
       e.preventDefault()
       e.stopPropagation()

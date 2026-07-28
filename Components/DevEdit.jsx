@@ -9,6 +9,8 @@ import { getStoredAuthor, storeAuthor } from './authorIdentity'
 import { auth, db, SHARED_EMAIL } from './firebase'
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from './sharedAuthSession'
 import Tooltip from './Tooltip'
+import { resolveSvgTarget, isLikelyIcon, canonicalizeIcon, createIconSwapRuntime, buildDomPath, buildPathHint, resolveTargets } from './iconSwap'
+import IconSwapPanel from './IconSwapPanel'
 
 const PenIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -134,7 +136,7 @@ function setLiveRuleText(selectorText, mediaText, cssText) {
 // save — it's definitionally always the same), just a sentinel id/name so
 // it can flow through the same preview/revert code paths as a real one.
 const ORIGINAL_VERSION_ID = '__original__'
-const ORIGINAL_VERSION = { id: ORIGINAL_VERSION_ID, name: 'Original', authorName: null, createdAt: null, overrides: [] }
+const ORIGINAL_VERSION = { id: ORIGINAL_VERSION_ID, name: 'Original', authorName: null, createdAt: null, overrides: [], iconSwaps: [] }
 
 // Re-resolves a rule within one *specific* stylesheet (by its index in
 // document.styleSheets), rather than the first match anywhere on the page —
@@ -285,10 +287,10 @@ function fmtTime(value) {
   return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-async function upsertActiveVersion(prototypeId, versionId, versionName, overrides) {
+async function upsertActiveVersion(prototypeId, versionId, versionName, overrides, iconSwaps = []) {
   const q = query(collection(db, 'devedit_active'), where('prototypeId', '==', prototypeId))
   const snap = await getDocs(q)
-  const payload = { prototypeId, versionId, versionName, overrides, updatedAt: serverTimestamp() }
+  const payload = { prototypeId, versionId, versionName, overrides, iconSwaps, updatedAt: serverTimestamp() }
   if (snap.empty) {
     await addDoc(collection(db, 'devedit_active'), payload)
   } else {
@@ -302,15 +304,38 @@ async function upsertActiveVersion(prototypeId, versionId, versionName, override
 // idea as Dev Comments' thread panel, adapted for an element's rect
 // instead of a click point.
 const PANEL_WIDTH = 340
+// The SVG tab's Icon Library subview needs more room for a comfortable
+// swatch grid than a CSS declaration textarea does.
+const SVG_PANEL_WIDTH = 400
 const PANEL_MARGIN = 12
 
-function computeEditPanelPosition(rect) {
+// Real bug, reported directly: the panel got cut off at the bottom of the
+// viewport for any element low on the page. The old vertical clamp assumed
+// a fixed ~60px-tall panel (`window.innerHeight - PANEL_MARGIN - 60`) and
+// anchored from `top` regardless — but the panel's real height varies a lot
+// by tab/content (a handful of style rows vs. the full Icon Library grid),
+// so that guess was frequently wrong and the panel ran off the bottom edge
+// with no way to reach its own Apply/Back buttons. Fixed by anchoring from
+// whichever edge leaves more room to grow into: when there's less room
+// below the element than above it, position via `bottom` (growing upward)
+// instead of `top` (growing downward) — combined with the panel's existing
+// `max-height: 80vh` + `overflow-y: auto`, this keeps it fully on-screen
+// regardless of how tall it actually renders, without needing to know that
+// height in advance.
+function computeEditPanelPosition(rect, width = PANEL_WIDTH) {
   let left = rect.right + 16
-  if (left + PANEL_WIDTH + PANEL_MARGIN > window.innerWidth) {
-    left = rect.left - PANEL_WIDTH - 16
+  if (left + width + PANEL_MARGIN > window.innerWidth) {
+    left = rect.left - width - 16
   }
-  left = Math.max(PANEL_MARGIN, Math.min(left, window.innerWidth - PANEL_WIDTH - PANEL_MARGIN))
-  const top = Math.max(PANEL_MARGIN, Math.min(rect.top, window.innerHeight - PANEL_MARGIN - 60))
+  left = Math.max(PANEL_MARGIN, Math.min(left, window.innerWidth - width - PANEL_MARGIN))
+
+  const spaceBelow = window.innerHeight - rect.top
+  const spaceAbove = rect.bottom
+  if (spaceBelow < spaceAbove) {
+    const bottom = Math.max(PANEL_MARGIN, window.innerHeight - rect.bottom)
+    return { left, bottom }
+  }
+  const top = Math.max(PANEL_MARGIN, rect.top)
   return { left, top }
 }
 
@@ -318,11 +343,71 @@ function toBoxStyle(rect) {
   return { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
 }
 
-function classNameOf(el) {
-  // SVG elements expose className as an SVGAnimatedString, not a plain
-  // string — guard rather than assume every element matches HTMLElement's
-  // shape.
-  return typeof el.className === 'string' ? el.className : (el.className?.baseVal || '')
+// Icon edits are keyed by the swapped-in-place shape's TRUE original
+// hash+len (see Components/iconSwap.js's identity scheme) — but a
+// currently-selected element that's already been swapped no longer
+// *hashes* to that original (its content has changed), so it can't be
+// found that way. Its data-passicon marker (set by applySwap) carries the
+// swap's own id instead — this is what makes "pick a different icon for an
+// already-swapped element" replace the swap in place rather than layer a
+// second one on top of the swapped result, and what makes Reset correctly
+// mean "the true original," not "the previous swap."
+//
+// The marker has to be checked against TWO places, not just this session's
+// own iconEdits: an icon can already be swapped from a *previously saved*
+// version, applied by the always-on effect before the user ever opened Dev
+// Edit this session — iconEdits starts empty every session, so a marker
+// left over from that always-on application won't be found there at all.
+// Real bug caught during design, not after shipping: without checking
+// activeSwaps too, selecting an already-actively-swapped icon would fall
+// through to hashing its CURRENT (already-swapped) markup and treat that
+// as "the original" — silently breaking Reset (it would restore to the
+// swapped state, not the true pristine icon) and defeating the whole
+// point of the chained-swap-replaces-in-place rule.
+//
+// Returns { key, seed } — seed is the pre-existing active swap's own data
+// when this element is swapped-but-not-yet-represented-in-session-state,
+// so the caller can seed a session entry for it (mirroring how the CSS
+// side seeds a rule's `original` from whatever's live at selection time,
+// which is *also* already-active-override-aware for the same reason).
+function resolveIconIdentity(el, iconEditsMap, activeSwaps) {
+  if (!el) return { key: null, seed: null }
+  const marker = el.getAttribute('data-passicon')
+  if (marker) {
+    const sessionEntry = Object.entries(iconEditsMap).find(([, e]) => e.id === marker)
+    if (sessionEntry) return { key: sessionEntry[0], seed: null }
+    const activeSwap = (activeSwaps || []).find((s) => s.id === marker)
+    if (activeSwap) return { key: `${activeSwap.originalHash}:${activeSwap.originalLen}`, seed: activeSwap }
+  }
+  const { hash, len } = canonicalizeIcon(el)
+  return { key: `${hash}:${len}`, seed: null }
+}
+
+function makeIconSwapId() {
+  return `iconswap-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+// Merges the shared/persisted active-version icon swaps with this
+// session's own local edits — session edits always win for whatever key
+// they cover, INCLUDING a Reset (an entry with svg: null, kept rather than
+// deleted specifically so it can act as a suppression tombstone here: real
+// bug caught during design — if Reset simply deleted its iconEdits entry,
+// this merge would have nothing left to exclude the active version's own
+// swap with, and the very next reconcile would silently re-apply the old
+// saved swap right back, making Reset a no-op). Anything the session has
+// no opinion about at all falls through to whatever the active/saved
+// version says.
+function mergeIconSwaps(iconEditsMap, activeSwaps) {
+  const result = []
+  const sessionKeys = new Set(Object.keys(iconEditsMap))
+  Object.values(iconEditsMap).forEach((e) => {
+    if (e.svg) result.push({ id: e.id, originalHash: e.originalHash, originalLen: e.originalLen, svg: e.svg, scope: e.scope, domPath: e.domPath })
+  })
+  ;(activeSwaps || []).forEach((s) => {
+    const key = `${s.originalHash}:${s.originalLen}`
+    if (!sessionKeys.has(key)) result.push(s)
+  })
+  return result
 }
 
 // ─── Dev Edit ────────────────────────────────────────────────────────
@@ -397,6 +482,26 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const sessionEditsRef = useRef(sessionEdits)
   sessionEditsRef.current = sessionEdits
 
+  // ── SVG tab / icon swaps ── which of the two tabs is showing (only
+  // relevant once a selection resolves to an <svg> — see selection.svgEl
+  // below), and the session's own icon-swap edits: a flatter two-state
+  // model than sessionEdits' original/committed/draft, since there's no
+  // separate dev-only "apply to file" step here to lose track of — an
+  // entry either represents a swap that's live right now, or (once
+  // Reset/never-applied) it doesn't exist in the map at all. Keyed by
+  // `${originalHash}:${originalLen}` (see resolveIconIdentity above).
+  const [activeTab, setActiveTab] = useState('styles')
+  const [iconEdits, setIconEdits] = useState({})
+  const iconEditsRef = useRef(iconEdits)
+  iconEditsRef.current = iconEdits
+  const [showTabSwitchPrompt, setShowTabSwitchPrompt] = useState(false)
+
+  const iconRuntimeRef = useRef(null)
+  useEffect(() => {
+    iconRuntimeRef.current = createIconSwapRuntime(containerRef.current)
+    return () => iconRuntimeRef.current?.dispose()
+  }, [containerRef])
+
   const selectionRef = useRef(null)
   selectionRef.current = selection
 
@@ -416,9 +521,30 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // ever looked "different" from its own already-updated baseline again.
   const editedEntries = useCallback(() => Object.values(sessionEditsRef.current).filter(e => e.committed !== e.original), [])
 
+  // An icon entry's dirtiness mirrors the CSS side's committed/original
+  // split, just flatter (svg/savedSvg instead of draft/committed/original)
+  // — savedSvg is whatever's currently the active/saved value (or null if
+  // this icon was never swapped before this session), set once at
+  // creation/seeding and only ever updated by a successful Save as
+  // version. Without this comparison, merely *selecting* an
+  // already-actively-swapped icon (which seeds a session entry — see
+  // resolveIconIdentity above) would incorrectly count as a fresh unsaved
+  // edit even though nothing was actually changed. Reads the ref (not
+  // iconEdits directly) for the same reason editedEntries reads
+  // sessionEditsRef — this needs to stay callable from stable useCallback
+  // closures (toggleActive, handleSignOut) without going stale.
+  const iconEditedCount = useCallback(() => Object.values(iconEditsRef.current).filter(e => e.svg !== e.savedSvg).length, [])
+
   const discardSession = useCallback(() => {
     Object.values(sessionEditsRef.current).forEach(entry => { setLiveRuleText(entry.selectorText, entry.mediaText, entry.original) })
     setSessionEdits({})
+    // Icon edits discard the same way — clearing to {} removes this
+    // session's opinion about every icon entirely (including any pending
+    // Reset/suppression — see mergeIconSwaps), so the unified reconcile
+    // effect above falls all the way back to whatever's genuinely saved in
+    // activeOverrides (or the true original, via iconSwap.js's own
+    // registry, for a brand-new swap that was never saved at all).
+    setIconEdits({})
     setSelection(null)
   }, [])
 
@@ -453,6 +579,17 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const closeSelection = useCallback(() => {
     revertDirtyRules(selectionRef.current ? selectionRef.current.keys : [])
+    // A live icon-swap PREVIEW (IconSwapPanel.onPreview) mutates the DOM
+    // directly via the runtime, entirely outside iconEdits/React state —
+    // closing/switching the selection unmounts the panel that was tracking
+    // it, but the mutation itself doesn't clean up on its own the way a
+    // CSS preview does (that's just a CSSOM rule, restored the moment
+    // sessionEdits reverts it above). Re-running the runtime from the
+    // current *committed* iconEdits discards any such uncommitted preview.
+    if (iconRuntimeRef.current) {
+      const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+      iconRuntimeRef.current.setActiveSwaps(swaps)
+    }
     setSelection(null)
   }, [revertDirtyRules])
 
@@ -485,7 +622,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     const unsub = onSnapshot(q, snapshot => {
       setActiveOverrides(snapshot.empty ? null : (() => {
         const data = snapshot.docs[0].data()
-        return { versionId: data.versionId, versionName: data.versionName, overrides: data.overrides || [] }
+        return { versionId: data.versionId, versionName: data.versionName, overrides: data.overrides || [], iconSwaps: data.iconSwaps || [] }
       })())
     }, err => console.error('Dev Edit: active-version subscription failed', err))
     return unsub
@@ -503,6 +640,20 @@ export default function DevEdit({ containerRef, prototypeId }) {
     const exclude = new Set(selectionRef.current ? selectionRef.current.keys : [])
     applyOverrideSet(overrides, pristineRef.current, exclude)
   }, [activeOverrides])
+
+  // Icon-swap analogue of the effect above — reconciles whenever EITHER
+  // side changes: the shared/active version (someone else's save landing
+  // via Firestore), or this session's own local edits (Apply/Reset). One
+  // combined effect rather than two independent ones specifically because
+  // Components/iconSwap.js's setActiveSwaps always restores-then-reapplies
+  // its *entire* given list — two separate effects each calling it with
+  // only their own partial view would fight and silently undo each other.
+  // mergeIconSwaps is what makes a session Reset correctly override (not
+  // just ignore) a still-active saved swap for the same icon.
+  useEffect(() => {
+    if (!iconRuntimeRef.current) return
+    iconRuntimeRef.current.setActiveSwaps(mergeIconSwaps(iconEdits, activeOverrides?.iconSwaps))
+  }, [activeOverrides, iconEdits])
 
   // 'deactivate' | 'signout' | null — which exit path is waiting on the
   // user's save-or-discard decision. A ref, not state, since it needs to
@@ -525,7 +676,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const toggleActive = useCallback(() => {
     if (active) {
-      if (editedEntries().length > 0) { setExitPrompt('deactivate'); return }
+      if (editedEntries().length > 0 || iconEditedCount() > 0) { setExitPrompt('deactivate'); return }
       setActive(false)
       setSelection(null)
       setHoveredEl(null)
@@ -545,7 +696,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     if (!isAuthed) { setGateStep('password'); return }
     if (!authorName.trim()) { setGateStep('name'); return }
     setActive(true)
-  }, [active, authReady, isAuthed, authorName, editedEntries])
+  }, [active, authReady, isAuthed, authorName, editedEntries, iconEditedCount])
 
   const submitPassword = async () => {
     if (!passwordInput || signingIn) return
@@ -577,7 +728,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }
 
   const handleSignOut = async () => {
-    if (editedEntries().length > 0) { setExitPrompt('signout'); return }
+    if (editedEntries().length > 0 || iconEditedCount() > 0) { setExitPrompt('signout'); return }
     await finishExit('signout')
   }
 
@@ -650,7 +801,17 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
     const handleMove = (e) => {
       if (isOtherUi(e.target)) return
-      const target = isRecognized(e.target) ? e.target : null
+      const rawTarget = isRecognized(e.target) ? e.target : null
+      // Same normalization handleClick applies below (and Dev Mode's own
+      // resolveHitTarget) — the hover highlight shows the icon's own box,
+      // not a smaller inner path's, so hovering and the eventual click
+      // agree on what's being pointed at. Only when the raw hover target
+      // actually lands on/inside that svg, though — see handleClick's own
+      // comment on `clickWasOnSvgItself` for why the broader "container
+      // holds exactly one child svg" match must NOT trigger this.
+      const rawSvgEl = rawTarget && resolveSvgTarget(rawTarget)
+      const svgElForHover = rawSvgEl && isLikelyIcon(rawSvgEl) ? rawSvgEl : null
+      const target = (svgElForHover && svgElForHover.contains(rawTarget)) ? svgElForHover : rawTarget
       setHoveredEl(prev => {
         if (target === prev) return prev
         setHoverRect(target ? target.getBoundingClientRect() : null)
@@ -670,15 +831,59 @@ export default function DevEdit({ containerRef, prototypeId }) {
       if (isOtherUi(e.target)) return
       e.preventDefault()
       e.stopPropagation()
-      const target = e.target
+      const rawTarget = e.target
 
-      if (!isRecognized(target)) {
+      if (!isRecognized(rawTarget)) {
         // Clicking outside the recognized page entirely — same as
         // dismissing the panel any other way, so an unconfirmed edit
         // doesn't survive just because the click landed somewhere else.
         closeSelection()
         return
       }
+
+      // Real bug: a click landing on an icon's own inner <path>/<circle>
+      // used to keep THAT raw node as selection.el — but the stale-
+      // selection watchdog a bit below (the `el.isConnected` check) treats
+      // selection.el falling out of the DOM as "the element was removed,
+      // close the panel." applySwap's own el.replaceChildren() on the
+      // <svg> destroys exactly that inner node the instant a preview/apply
+      // runs, so the watchdog immediately (and wrongly) treated a
+      // successful swap as its own selected element having vanished, and
+      // closed the panel out from under the user before Apply could ever
+      // complete — reported as "selecting the icon itself and swapping
+      // doesn't work, only selecting the surrounding box does." Fixed by
+      // normalizing to the enclosing <svg>, whenever the click resolves to
+      // a real icon (isLikelyIcon) — the svg itself is never destroyed by
+      // its own children being replaced, so the watchdog never misfires.
+      //
+      // Real bug #2, reported directly: this normalization was too broad.
+      // resolveSvgTarget also resolves an svg via its OWN separate
+      // "container holds exactly one child svg" fallback — e.g. mobile/
+      // notifications' `.notif-avatar` div, a real styled element (size,
+      // border-radius, its own CSS class) that happens to wrap one
+      // RunIcon/EventIcon. Normalizing selection.el to the icon for THAT
+      // case too meant clicking anywhere in the avatar circle — including
+      // its own background, nowhere near the icon's actual drawn pixels —
+      // silently edited the icon (which has no CSS class of its own)
+      // instead of `.notif-avatar`, hiding every one of that div's real,
+      // genuinely editable rules. The stale-watchdog bug this
+      // normalization exists to fix can only ever happen when
+      // selection.el is a node DESTROYED BY the swapped svg's own
+      // replaceChildren (i.e. the click landed ON or INSIDE the svg) — a
+      // container that merely holds an untouched svg child elsewhere
+      // within it is never itself destroyed by that swap, so it never
+      // needed normalizing in the first place. Fixed by only normalizing
+      // when the raw click target is actually on/inside the resolved svg
+      // (`svgEl.contains(rawTarget)`, true for both "is the svg itself"
+      // and "is a descendant of it"), leaving the container-fallback case
+      // targeting its own real element, exactly as it did before either
+      // fix — svgEl itself (used for the Icon tab) is unaffected either
+      // way, only selection.el/the CSS-matching target changes here.
+      const rawSvgEl = resolveSvgTarget(rawTarget)
+      const svgEl = rawSvgEl && isLikelyIcon(rawSvgEl) ? rawSvgEl : null
+      const clickWasOnSvgItself = svgEl && svgEl.contains(rawTarget)
+      const target = clickWasOnSvgItself ? svgEl : rawTarget
+
       if (selectionRef.current && selectionRef.current.el === target) return // already open on this element
 
       // Switching to a different element — revert whatever was left
@@ -686,6 +891,12 @@ export default function DevEdit({ containerRef, prototypeId }) {
       // Anything already confirmed via Apply is untouched, so it still
       // carries forward as part of the session.
       revertDirtyRules(selectionRef.current ? selectionRef.current.keys : [])
+      // Same reasoning as closeSelection above — discard any uncommitted
+      // icon-swap preview left on the previously-selected element.
+      if (iconRuntimeRef.current) {
+        const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+        iconRuntimeRef.current.setActiveSwaps(swaps)
+      }
 
       const rawMatches = findMatchingRules(target)
       const keys = []
@@ -704,7 +915,24 @@ export default function DevEdit({ containerRef, prototypeId }) {
       if (Object.keys(newEntries).length > 0) {
         setSessionEdits(prev => ({ ...prev, ...newEntries }))
       }
-      setSelection({ el: target, rect: target.getBoundingClientRect(), keys })
+
+      // svgEl was already resolved above (before target was normalized) —
+      // reused here rather than re-resolved.
+      const { key: iconSwapKey, seed } = resolveIconIdentity(svgEl, iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+      if (seed) {
+        // Already actively swapped from a previously-saved version, not
+        // yet represented in this session's own state — seed it now,
+        // svg === savedSvg so it correctly reads as "not dirty" until the
+        // user actually picks something different.
+        setIconEdits(prev => (prev[iconSwapKey] ? prev : {
+          ...prev,
+          [iconSwapKey]: { id: seed.id, originalHash: seed.originalHash, originalLen: seed.originalLen, svg: seed.svg, savedSvg: seed.svg, source: seed.source, authorName: seed.authorName, scope: seed.scope, domPath: seed.domPath, pathHint: seed.pathHint },
+        }))
+      }
+
+      setSelection({ el: target, rect: target.getBoundingClientRect(), keys, svgEl, iconSwapKey })
+      setActiveTab('styles')
+      setShowTabSwitchPrompt(false)
       setError(null)
 
       if (toLookup.length === 0) return
@@ -894,14 +1122,20 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const [saving, setSaving] = useState(false)
 
   const openSaveDialog = () => {
-    if (editedEntries().length === 0) return
+    if (editedEntries().length === 0 && iconEditedCount() === 0) return
     setShowSaveDialog(true)
   }
 
   const submitSaveVersion = async () => {
     const name = versionNameInput.trim()
     const edited = editedEntries()
-    if (!name || saving || edited.length === 0) return
+    // Same "only what's actually dirty this round" rule as the CSS side
+    // above (edited, filtered by committed !== original) — an icon entry
+    // seeded from an already-active swap but never re-picked (svg ===
+    // savedSvg) is deliberately left out, exactly like an unedited CSS
+    // rule would be.
+    const editedIcons = Object.entries(iconEditsRef.current).filter(([, e]) => e.svg !== e.savedSvg)
+    if (!name || saving || (edited.length === 0 && editedIcons.length === 0)) return
     setSaving(true)
     setError(null)
     try {
@@ -910,10 +1144,15 @@ export default function DevEdit({ containerRef, prototypeId }) {
       // panel is deliberately left out, same as it wouldn't survive a
       // click-away either.
       const overrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.committed, filePath: e.filePath || null }))
+      const iconSwaps = editedIcons.map(([, e]) => ({
+        id: e.id, scope: e.scope || 'all', originalHash: e.originalHash, originalLen: e.originalLen,
+        domPath: e.domPath || null, pathHint: e.pathHint || null,
+        svg: e.svg, source: e.source, authorName: e.authorName, createdAt: e.createdAt || new Date().toISOString(),
+      }))
       const versionRef = await addDoc(collection(db, 'devedit_versions'), {
-        prototypeId, name, authorName, createdAt: serverTimestamp(), overrides,
+        prototypeId, name, authorName, createdAt: serverTimestamp(), overrides, iconSwaps,
       })
-      await upsertActiveVersion(prototypeId, versionRef.id, name, overrides)
+      await upsertActiveVersion(prototypeId, versionRef.id, name, overrides, iconSwaps)
       // The session's committed edits are now the saved/active state —
       // reset each edited entry's `original` baseline to its own
       // `committed` value, so further edits diff against this new
@@ -924,6 +1163,15 @@ export default function DevEdit({ containerRef, prototypeId }) {
         edited.forEach(e => {
           const key = ruleKey(e.selectorText, e.mediaText)
           if (next[key]) next[key] = { ...next[key], original: next[key].committed }
+        })
+        return next
+      })
+      // Same reset for icons: savedSvg = svg, so an unchanged swap reads
+      // as clean again until it's actually re-picked.
+      setIconEdits(prev => {
+        const next = { ...prev }
+        editedIcons.forEach(([key]) => {
+          if (next[key]) next[key] = { ...next[key], savedSvg: next[key].svg }
         })
         return next
       })
@@ -961,9 +1209,16 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }, [showHistory, prototypeId])
 
   const previewVersion = (version) => {
-    if (editedEntries().length > 0 && !window.confirm('Discard your unsaved edits to preview a past version?')) return
-    if (editedEntries().length > 0) discardSession()
+    const hasUnsaved = editedEntries().length > 0 || iconEditedCount() > 0
+    if (hasUnsaved && !window.confirm('Discard your unsaved edits to preview a past version?')) return
+    if (hasUnsaved) discardSession()
     if (pristineRef.current) applyOverrideSet(version.overrides, pristineRef.current)
+    // Previewing shows EXACTLY this version's own icon swaps, not merged
+    // with anything else — discardSession() above already cleared this
+    // session's own edits in the common case, but calling setActiveSwaps
+    // directly (bypassing mergeIconSwaps) is what makes this correct
+    // regardless of that effect's own timing.
+    iconRuntimeRef.current?.setActiveSwaps(version.iconSwaps || [])
     setPreviewVersionId(version.id)
   }
 
@@ -971,6 +1226,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     if (pristineRef.current) {
       applyOverrideSet(activeOverridesRef.current ? activeOverridesRef.current.overrides : [], pristineRef.current)
     }
+    iconRuntimeRef.current?.setActiveSwaps(mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps))
     setPreviewVersionId(null)
   }
 
@@ -983,7 +1239,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const revertToVersion = async (version) => {
     setHistoryError(null)
     try {
-      await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides)
+      await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides, version.iconSwaps || [])
       setPreviewVersionId(null)
     } catch (err) {
       console.error('Dev Edit: failed to revert', err)
@@ -1012,7 +1268,138 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const showHoverHighlight = hoverRect && (!selection || hoveredEl !== selection.el)
   const rows = selection ? selection.keys.map(k => sessionEdits[k]).filter(Boolean) : []
-  const dirtyCount = editedEntries().length
+  const dirtyCount = editedEntries().length + iconEditedCount()
+
+  // ── Tab switching (Edit styles <-> SVG) ── switching to the SVG tab
+  // while a CSS edit sits uncommitted (draft !== committed — i.e. typed
+  // but not yet Applied) prompts to apply or discard first, mirroring
+  // ExitPrompt's own two-button + backdrop-cancels convention exactly,
+  // rather than introducing a new three-button pattern for one case.
+  const hasUncommittedCssEdit = rows.some(m => m.draft !== m.committed)
+
+  const requestTab = (tab) => {
+    if (tab === activeTab) return
+    if (tab === 'svg' && hasUncommittedCssEdit) { setShowTabSwitchPrompt(true); return }
+    setActiveTab(tab)
+  }
+
+  const handleTabSwitchDiscard = () => {
+    if (selection) revertDirtyRules(selection.keys)
+    setShowTabSwitchPrompt(false)
+    setActiveTab('svg')
+  }
+
+  // Commits every currently-dirty CSS row's draft as its new committed
+  // value, WITHOUT the per-rule Apply button's other side effects (closing
+  // the whole panel, the dev-only per-rule file write) — this path is
+  // about not losing in-progress work while navigating within Dev Edit's
+  // own UI, not the deliberate single-rule "confirm and write to file"
+  // action, so it deliberately stays a plain in-memory commit.
+  const handleTabSwitchApply = () => {
+    const dirtyKeys = rows.filter(m => m.draft !== m.committed).map(m => ruleKey(m.selectorText, m.mediaText))
+    setSessionEdits(prev => {
+      const next = { ...prev }
+      dirtyKeys.forEach(k => { if (next[k]) next[k] = { ...next[k], committed: next[k].draft } })
+      return next
+    })
+    setShowTabSwitchPrompt(false)
+    setActiveTab('svg')
+  }
+
+  const handleTabSwitchCancel = () => setShowTabSwitchPrompt(false)
+
+  // ── Icon swap handlers (SVG tab) ──
+  // selection.iconSwapKey was already resolved once, at selection time (via
+  // resolveIconIdentity, which is also what seeds a session entry for an
+  // icon that's already actively swapped from a previous save) — reused
+  // here rather than re-resolved, so it can't drift from what selection
+  // was actually seeded with.
+  const currentIconSwap = selection?.iconSwapKey ? iconEdits[selection.iconSwapKey] : null
+
+  // Live-preview a candidate directly on the selected element, without
+  // touching iconEdits/session state at all — Back or deselecting just
+  // re-runs the real reconciliation below, discarding this preview-only
+  // mutation.
+  const handleIconPreview = (svgMarkup, scope = 'all') => {
+    if (!selection?.svgEl || !iconRuntimeRef.current) return
+    if (scope !== 'all' || !selection.iconSwapKey) {
+      iconRuntimeRef.current.applyOne(selection.svgEl, { id: 'preview', svg: svgMarkup })
+      return
+    }
+    // scope 'all' previews on every matching instance too, not just the
+    // selected one — the whole point of previewing before Apply is to see
+    // the real effect, and for an "all instances" swap that effect is
+    // page-wide. originalHash/originalLen come from selection.iconSwapKey
+    // (resolved once, at selection time) rather than re-hashing the live
+    // selection.svgEl, for the same reason handleIconApply's own fallback
+    // branch does — by the time a second/third candidate is previewed,
+    // selection.svgEl may already carry an earlier candidate's swapped-in
+    // content, and re-hashing that would silently stop matching the other
+    // still-original instances.
+    const [hash, lenStr] = selection.iconSwapKey.split(':')
+    const targets = resolveTargets({ originalHash: hash, originalLen: Number(lenStr), scope: 'all' }, containerRef.current)
+    targets.forEach((el) => iconRuntimeRef.current.applyOne(el, { id: 'preview', svg: svgMarkup }))
+  }
+  const handleIconClearPreview = () => {
+    if (!iconRuntimeRef.current) return
+    const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+    iconRuntimeRef.current.setActiveSwaps(swaps)
+  }
+  const handleIconApply = (svgMarkup, source, scope = 'all') => {
+    if (!selection?.svgEl || !selection.iconSwapKey) return
+    const existing = iconEditsRef.current[selection.iconSwapKey]
+    let originalHash, originalLen, id, savedSvg
+    if (existing) {
+      // Replace the swap in place — Reset must still mean "the true
+      // original," not "the previous swap," and re-picking shouldn't
+      // silently chain a second swap on top of an already-swapped result.
+      // savedSvg (whatever's currently the *active/saved* value, or null
+      // if this icon was never swapped before this session) carries
+      // forward unchanged — only Save-as-version updates it, matching the
+      // CSS side's committed/original split.
+      ({ originalHash, originalLen, id, savedSvg } = existing)
+    } else {
+      // Real bug, caught during verification: this used to re-hash the LIVE
+      // selection.svgEl here — but by the time Apply is clicked, that element
+      // has almost always already been mutated by handleIconPreview (picking
+      // a candidate previews it immediately, before Apply). Re-hashing at
+      // this point captures the swapped-in candidate's own shape as if it
+      // were "the original," corrupting originalHash/originalLen for any
+      // icon that had never been swapped before this session — resolveTargets
+      // would then never find the (correctly restored) true-original element
+      // again, silently no-op'ing the swap. selection.iconSwapKey was
+      // resolved once already, at selection time, before any preview
+      // mutation ever ran — parsing it back apart is the correct source,
+      // exactly matching the comment on selection.iconSwapKey's own
+      // declaration above.
+      const [originalHashPart, originalLenPart] = selection.iconSwapKey.split(':')
+      originalHash = originalHashPart
+      originalLen = Number(originalLenPart)
+      id = makeIconSwapId()
+      savedSvg = null
+    }
+    const key = `${originalHash}:${originalLen}`
+    // domPath/pathHint are only computed (and only meaningful) for an
+    // instance-scoped swap — resolveTargets in iconSwap.js falls back to
+    // "all" if this ever fails to resolve to a genuinely matching element
+    // later (page structure changed), so there's no need to guard against
+    // buildDomPath returning null here; it just means that fallback runs.
+    const domPath = scope === 'instance' ? buildDomPath(selection.svgEl, containerRef.current) : null
+    const pathHint = scope === 'instance' ? buildPathHint(selection.svgEl, containerRef.current) : null
+    setIconEdits(prev => ({
+      ...prev,
+      [key]: { id, originalHash, originalLen, svg: svgMarkup, savedSvg, source, authorName, createdAt: new Date().toISOString(), scope, domPath, pathHint },
+    }))
+  }
+  const handleIconReset = () => {
+    if (!selection?.iconSwapKey) return
+    // svg: null, not deleting the entry — this is what makes Reset
+    // correctly SUPPRESS a still-active saved swap for this icon (see
+    // mergeIconSwaps above), rather than just removing this session's own
+    // opinion and letting the old saved swap silently reapply right back
+    // on the very next reconcile.
+    setIconEdits(prev => (prev[selection.iconSwapKey] ? { ...prev, [selection.iconSwapKey]: { ...prev[selection.iconSwapKey], svg: null } } : prev))
+  }
 
   return (
     <>
@@ -1061,7 +1448,22 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 applyingKey={applyingKey}
                 onClose={closeSelection}
                 error={error}
+                activeTab={activeTab}
+                onTabChange={requestTab}
+                containerRef={containerRef}
+                hasIconSwap={!!currentIconSwap?.svg}
+                onIconPreview={handleIconPreview}
+                onIconClearPreview={handleIconClearPreview}
+                onIconApply={handleIconApply}
+                onIconReset={handleIconReset}
               />
+              {showTabSwitchPrompt && (
+                <TabSwitchPrompt
+                  onApply={handleTabSwitchApply}
+                  onDiscard={handleTabSwitchDiscard}
+                  onCancel={handleTabSwitchCancel}
+                />
+              )}
             </>
           )}
 
@@ -1094,7 +1496,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
           {exitPrompt && (
             <ExitPrompt
-              dirtyCount={editedEntries().length}
+              dirtyCount={editedEntries().length + iconEditedCount()}
               onSave={handleExitSaveAsVersion}
               onDiscard={handleExitDiscard}
               onCancel={handleExitCancel}
@@ -1128,7 +1530,7 @@ function AuthGate({ step, password, setPassword, passwordError, signingIn, onSub
       <div className="devedit-gate-box">
         {step === 'password' ? (
           <>
-            <div className="devedit-gate-title">Enter edit password</div>
+            <div className="devedit-gate-title">Enter password to open edit mode</div>
             <input
               className="devedit-gate-input"
               type="password"
@@ -1243,6 +1645,24 @@ function ExitPrompt({ dirtyCount, onSave, onDiscard, onCancel }) {
   )
 }
 
+// Shown when switching from the Edit styles tab to the SVG tab while a CSS
+// edit sits uncommitted (typed but not yet confirmed via Apply) — same
+// two-button + backdrop-cancels convention as ExitPrompt above, just a
+// smaller scope (this one rule block's draft, not the whole session).
+function TabSwitchPrompt({ onApply, onDiscard, onCancel }) {
+  return (
+    <div className="devedit-gate-overlay" data-devedit-ui="true" onClick={(e) => { if (e.target === e.currentTarget) onCancel() }}>
+      <div className="devedit-gate-box">
+        <div className="devedit-gate-title">You have unapplied style edits</div>
+        <div className="devedit-gate-actions">
+          <button className="devedit-btn-secondary" onClick={onDiscard}>Discard changes</button>
+          <button className="devedit-btn-primary" onClick={onApply}>Apply changes</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Version history panel ───────────────────────────────────────────
 
 function VersionHistoryPanel({ versions, activeVersionId, previewVersionId, onPreview, onRevert, onDelete, error, onClose }) {
@@ -1305,61 +1725,128 @@ function VersionRow({ version, isActive, isPreviewing, onPreview, onRevert, onDe
 
 // ─── Edit panel (per selected element) ───────────────────────────────
 
-function EditPanel({ selection, rows, onDraftChange, onApply, onCancelRule, applyingKey, onClose, error }) {
-  const pos = computeEditPanelPosition(selection.rect)
-  const cls = classNameOf(selection.el).trim()
-  const tagLabel = selection.el.tagName.toLowerCase() + (cls ? '.' + cls.split(/\s+/).join('.') : '')
+function EditPanel({
+  selection, rows, onDraftChange, onApply, onCancelRule, applyingKey, onClose, error,
+  activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
+}) {
+  // The Icon tab only ever exists when the selection resolves to one <svg>
+  // AND that svg passes isLikelyIcon (square/small/monochrome) — for every
+  // other element, including a matched-but-not-icon-shaped svg (an
+  // illustration, a logo), this stays byte-for-byte the original plain
+  // "Edit styles" title, no tab strip, no visual noise, and no way to
+  // accidentally swap something that isn't really an icon.
+  const showTabs = !!selection.svgEl
+  const isSvgTab = showTabs && activeTab === 'svg'
+  const panelWidth = isSvgTab ? SVG_PANEL_WIDTH : PANEL_WIDTH
+  const basePos = computeEditPanelPosition(selection.rect, panelWidth)
+
+  // Manual drag override — null until the user actually drags the header,
+  // at which point it takes over from the auto-computed basePos entirely
+  // (always expressed as a plain {left, top}, regardless of whether
+  // basePos itself was top- or bottom-anchored). Resets whenever a
+  // genuinely different element is selected, so a fresh selection always
+  // starts at its own sensible auto-computed position rather than
+  // inheriting wherever the panel was last dragged to.
+  const [dragPos, setDragPos] = useState(null)
+  const dragStateRef = useRef(null)
+  useEffect(() => { setDragPos(null) }, [selection.el])
+
+  const handleHeaderMouseDown = (e) => {
+    if (e.button !== 0 || e.target.closest('button')) return
+    const panelEl = e.currentTarget.closest('.devedit-panel')
+    const startRect = panelEl.getBoundingClientRect()
+    dragStateRef.current = {
+      startX: e.clientX, startY: e.clientY, startLeft: startRect.left, startTop: startRect.top,
+    }
+    const onMove = (ev) => {
+      const d = dragStateRef.current
+      if (!d) return
+      const left = Math.max(-panelWidth + 80, Math.min(d.startLeft + (ev.clientX - d.startX), window.innerWidth - 80))
+      const top = Math.max(0, Math.min(d.startTop + (ev.clientY - d.startY), window.innerHeight - 40))
+      setDragPos({ left, top })
+    }
+    const onUp = () => {
+      dragStateRef.current = null
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
+  const pos = dragPos || basePos
 
   return (
-    <div className="devedit-panel" data-devedit-ui="true" style={{ left: pos.left, top: pos.top }}>
-      <div className="devedit-panel-header">
-        <div className="devedit-panel-title">Edit styles</div>
-        <span className="devedit-panel-tag">{tagLabel}</span>
+    <div className="devedit-panel" data-devedit-ui="true" style={{ left: pos.left, top: pos.top, bottom: pos.bottom, width: panelWidth }}>
+      <div className="devedit-panel-header" onMouseDown={handleHeaderMouseDown}>
+        {showTabs ? (
+          <div className="devedit-tabs">
+            <button className={`devedit-tab${!isSvgTab ? ' active' : ''}`} onClick={() => onTabChange('styles')}>Edit styles</button>
+            <button className={`devedit-tab${isSvgTab ? ' active' : ''}`} onClick={() => onTabChange('svg')}>Icon</button>
+          </div>
+        ) : (
+          <div className="devedit-panel-title">Edit styles</div>
+        )}
         <button className="devedit-panel-close" onClick={onClose} aria-label="Close">×</button>
       </div>
       <div className="devedit-panel-body">
-        {rows.length === 0 && (
-          <div className="devedit-panel-empty">No editable stylesheet rule matches this element.</div>
+        {isSvgTab ? (
+          <IconSwapPanel
+            svgEl={selection.svgEl}
+            iconSwapKey={selection.iconSwapKey}
+            containerRef={containerRef}
+            hasSwap={hasIconSwap}
+            onPreview={onIconPreview}
+            onClearPreview={onIconClearPreview}
+            onApply={onIconApply}
+            onReset={onIconReset}
+          />
+        ) : (
+          <>
+            {rows.length === 0 && (
+              <div className="devedit-panel-empty">No editable stylesheet rule matches this element.</div>
+            )}
+
+            {rows.map((m, i) => {
+              const key = ruleKey(m.selectorText, m.mediaText)
+              return (
+                <div className="devedit-rule-block" key={key}>
+                  <div className="devedit-rule-selector">
+                    {m.selectorText}
+                    {m.mediaText && <span className="devedit-rule-media">@media {m.mediaText}</span>}
+                    {m.loading && <span className="devedit-rule-loading">loading…</span>}
+                  </div>
+                  <textarea
+                    className="devedit-rule-textarea"
+                    value={m.draft}
+                    onChange={e => onDraftChange(key, e.target.value)}
+                    rows={Math.max(3, m.draft.split('\n').length)}
+                    spellCheck={false}
+                    disabled={m.loading}
+                  />
+                  <div className="devedit-rule-actions">
+                    <button
+                      className="devedit-btn-secondary"
+                      onClick={() => onCancelRule(key)}
+                      disabled={m.loading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="devedit-btn-primary"
+                      onClick={() => onApply(key)}
+                      disabled={m.loading || m.draft === m.committed || applyingKey === key}
+                    >
+                      {applyingKey === key ? 'Applying…' : 'Apply'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+
+            {error && <div className="devedit-error">{error}</div>}
+          </>
         )}
-
-        {rows.map((m, i) => {
-          const key = ruleKey(m.selectorText, m.mediaText)
-          return (
-            <div className="devedit-rule-block" key={key}>
-              <div className="devedit-rule-selector">
-                {m.selectorText}
-                {m.mediaText && <span className="devedit-rule-media">@media {m.mediaText}</span>}
-                {m.loading && <span className="devedit-rule-loading">loading…</span>}
-              </div>
-              <textarea
-                className="devedit-rule-textarea"
-                value={m.draft}
-                onChange={e => onDraftChange(key, e.target.value)}
-                rows={Math.max(3, m.draft.split('\n').length)}
-                spellCheck={false}
-                disabled={m.loading}
-              />
-              <div className="devedit-rule-actions">
-                <button
-                  className="devedit-btn-secondary"
-                  onClick={() => onCancelRule(key)}
-                  disabled={m.loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="devedit-btn-primary"
-                  onClick={() => onApply(key)}
-                  disabled={m.loading || m.draft === m.committed || applyingKey === key}
-                >
-                  {applyingKey === key ? 'Applying…' : 'Apply'}
-                </button>
-              </div>
-            </div>
-          )
-        })}
-
-        {error && <div className="devedit-error">{error}</div>}
       </div>
     </div>
   )

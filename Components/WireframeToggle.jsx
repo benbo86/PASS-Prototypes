@@ -135,7 +135,7 @@ export default function WireframeToggle() {
     <>
       <Tooltip text="Wireframe" wrapClassName="wireframeaccess-toggle-wrap" placement="bottom">
         <button
-          className={`dev-toolbar-icon-btn wireframeaccess-toggle${gateOpen ? ' active' : ''}`}
+          className={`dev-toolbar-icon-btn wireframeaccess-toggle${modalOpen ? ' active' : ''}`}
           onClick={handleToggle}
           data-wireframeaccess-ui="true"
           aria-label="Open Wireframe tool"
@@ -151,7 +151,7 @@ export default function WireframeToggle() {
           onClick={(e) => { if (e.target === e.currentTarget) setGateOpen(false) }}
         >
           <div className="devedit-gate-box">
-            <div className="devedit-gate-title">Enter password to open Wireframe</div>
+            <div className="devedit-gate-title">Enter password to open Wireframe mode</div>
             <input
               className="devedit-gate-input"
               type="password"

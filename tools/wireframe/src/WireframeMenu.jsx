@@ -36,12 +36,39 @@ function formatTimestamp(ms) {
   return `${date}, ${time}`
 }
 
+// One row — shared between the grouped and flat rendering below so the
+// two never drift out of sync visually.
+function WireframeMenuRow({ f, currentFileKey, onSelectFile, onDelete }) {
+  const key = `${f.source}:${f.id}`
+  return (
+    <div
+      className={`wf-menu-list-item${key === currentFileKey ? ' wf-menu-list-item-active' : ''}`}
+      onClick={() => onSelectFile(f.source, f.id)}
+    >
+      <div className="wf-menu-list-item-text">
+        <div className="wf-menu-list-item-name">{f.name}</div>
+        <div className="wf-menu-list-item-date">
+          {f.authorName ? `${f.authorName} · ` : ''}{formatTimestamp(f.updatedAtMs)}
+        </div>
+      </div>
+      <button
+        className="wf-menu-list-item-delete"
+        onClick={(e) => { e.stopPropagation(); onDelete(f.source, f.id, f.name) }}
+        aria-label={`Delete ${f.name}`}
+      >
+        <TrashIcon />
+      </button>
+    </div>
+  )
+}
+
 export default function WireframeMenu({
   wireframeName,
   setWireframeName,
   menuOpen,
   setMenuOpen,
-  files,
+  cloudFiles,
+  localFiles,
   currentFileKey,
   onSelectFile,
   onNew,
@@ -92,31 +119,38 @@ export default function WireframeMenu({
           <button className="wf-tool-btn wf-primary" onClick={onNew}>New</button>
         </div>
         <div className="wf-menu-list">
-          {files.length === 0 && (
+          {cloudFiles.length === 0 && localFiles.length === 0 && (
             <div className="wf-menu-list-empty">No saved wireframes yet</div>
           )}
-          {files.map((f) => {
-            const key = `${f.source}:${f.id}`
-            return (
-              <div
-                key={key}
-                className={`wf-menu-list-item${key === currentFileKey ? ' wf-menu-list-item-active' : ''}`}
-                onClick={() => onSelectFile(f.source, f.id)}
-              >
-                <div className="wf-menu-list-item-text">
-                  <div className="wf-menu-list-item-name">{f.name}</div>
-                  <div className="wf-menu-list-item-date">{formatTimestamp(f.updatedAtMs)}</div>
+          {localFiles.length > 0 ? (
+            // Local saves only exist at all when running `vite dev` on this
+            // machine — the deployed site has no local files to list, ever.
+            // So grouping under headings only kicks in once there's
+            // actually a "Local" section to distinguish from "Shared";
+            // otherwise (the normal deployed-site case) it'd just be one
+            // heading over the only list that ever exists there, adding
+            // nothing.
+            <>
+              {cloudFiles.length > 0 && (
+                <div className="wf-menu-group">
+                  <div className="wf-menu-group-label">Shared</div>
+                  {cloudFiles.map((f) => (
+                    <WireframeMenuRow key={`${f.source}:${f.id}`} f={f} currentFileKey={currentFileKey} onSelectFile={onSelectFile} onDelete={onDelete} />
+                  ))}
                 </div>
-                <button
-                  className="wf-menu-list-item-delete"
-                  onClick={(e) => { e.stopPropagation(); onDelete(f.source, f.id, f.name) }}
-                  aria-label={`Delete ${f.name}`}
-                >
-                  <TrashIcon />
-                </button>
+              )}
+              <div className="wf-menu-group">
+                <div className="wf-menu-group-label">Local (this machine)</div>
+                {localFiles.map((f) => (
+                  <WireframeMenuRow key={`${f.source}:${f.id}`} f={f} currentFileKey={currentFileKey} onSelectFile={onSelectFile} onDelete={onDelete} />
+                ))}
               </div>
-            )
-          })}
+            </>
+          ) : (
+            cloudFiles.map((f) => (
+              <WireframeMenuRow key={`${f.source}:${f.id}`} f={f} currentFileKey={currentFileKey} onSelectFile={onSelectFile} onDelete={onDelete} />
+            ))
+          )}
         </div>
       </div>
     </>

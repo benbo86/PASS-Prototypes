@@ -11,6 +11,15 @@
   overflow: hidden;
 }
 
+/* Same reasoning as web/messaging/src/messages.css's identical override:
+   .settings-page's own overflow:hidden makes it (not the viewport)
+   .top-nav's nearest scrolling ancestor for position:sticky purposes.
+   Its box already starts below the toolbar (via the height calc above),
+   so Styles/top-nav.css's shared `top: var(--dev-toolbar-height)` rule
+   double-counts the toolbar's height here — confirmed via Playwright
+   (.top-nav rendered 96px down instead of 48px). Reset back to 0. */
+.top-nav { top: 0; }
+
 /* ─── Layout ─────────────────────────────────────────────────── */
 
 .settings-layout {

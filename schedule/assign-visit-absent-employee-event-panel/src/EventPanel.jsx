@@ -368,9 +368,9 @@ export default function EventPanel() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <div ref={pageRef} style={{ display: 'contents' }}>
       <a href="../../" className="back-link ep-back-link">

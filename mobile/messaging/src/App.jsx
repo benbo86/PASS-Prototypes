@@ -366,7 +366,7 @@ const Attachment = ({ attachment, isMe, onPreview }) => {
   }
   if (attachment.type === 'file') {
     return (
-      <div className={`msg-attachment-file ${isMe ? 'sent' : 'received'}`} onClick={onPreview} style={{ cursor: 'pointer' }}>
+      <div className={`msg-attachment-file ${isMe ? 'sent' : 'received'}`} onClick={onPreview}>
         <FileIcon size={22} />
         <div className="msg-attachment-file-info">
           <span className="msg-attachment-file-name">{attachment.name}</span>
@@ -406,7 +406,7 @@ function VisitNotesDoc() {
         <div className="doc-line long" />
         <div className="doc-line medium" />
       </div>
-      <div className="doc-meta-row" style={{ marginTop: 8 }}><div className="doc-meta-label">Signed</div><div className="doc-meta-value doc-signature">A. Jackson</div></div>
+      <div className="doc-meta-row doc-meta-row--signed"><div className="doc-meta-label">Signed</div><div className="doc-meta-value doc-signature">A. Jackson</div></div>
     </>
   )
 }
@@ -744,7 +744,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
               onClick={e => e.stopPropagation()}
             />
           </div>
-          <button className="send-btn" onClick={handleSend} style={{ visibility: inputText.trim() ? 'visible' : 'hidden' }}>
+          <button className={`send-btn${inputText.trim() ? '' : ' send-btn--hidden'}`} onClick={handleSend}>
             <SendIcon />
           </button>
         </div>
@@ -1124,9 +1124,9 @@ export default function App() {
     <>
       <DevToolbar floating>
         <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={phoneFrameRef} />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="phone-wrap">
       <a href="../../" className="back-link">
@@ -1204,12 +1204,8 @@ export default function App() {
         {actionTarget && (
           <div className="phone-frame-overlay" onClick={handleCloseActions}>
             <div
-              className="actions-menu"
-              style={{
-                position: 'absolute',
-                top: actionMenuY,
-                ...(actionTarget.isMe ? { right: 16 } : { left: 16 }),
-              }}
+              className={`actions-menu ${actionTarget.isMe ? 'actions-menu--mine' : 'actions-menu--theirs'}`}
+              style={{ position: 'absolute', top: actionMenuY }}
               onClick={e => e.stopPropagation()}
             >
               {canReplyInThread && (

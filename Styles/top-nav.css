@@ -15,7 +15,14 @@
   padding: 0 24px;
   flex-shrink: 0;
   position: sticky;
-  top: 0;
+  /* Components/DevToolbar.jsx's own full-width bar sits above this in
+     normal flow, also position:sticky at top:0 — without offsetting this
+     nav's own sticky point by the bar's height, the two would both try to
+     pin at the exact same y:0 once scrolled past, and the bar's much
+     higher z-index (10700 vs this nav's 100) would paint over this nav
+     rather than the two stacking cleanly. Falls back to 0px if
+     dev-toolbar.css somehow isn't loaded, identical to the old behavior. */
+  top: var(--dev-toolbar-height, 0px);
   z-index: 100;
 }
 

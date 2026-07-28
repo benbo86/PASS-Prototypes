@@ -183,9 +183,9 @@ export default function HolidayAbsenceDialog() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <div ref={pageRef} className="modal-page-wrap">
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>

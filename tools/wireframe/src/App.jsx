@@ -10,9 +10,14 @@ import { auth, db, SHARED_EMAIL } from '../../../Components/firebase'
 import { getStoredAuthor, storeAuthor } from '../../../Components/authorIdentity'
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from '../../../Components/sharedAuthSession'
 
-const FILLABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'text'])
+const FILLABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'text'])
+// Types that actually render a stroke/border at all (text never does —
+// created with stroke:null/strokeWidth:0 and ElementRenderer never draws
+// one for it) — Border Fill is scoped to this set, one step broader than
+// FILLABLE_TYPES since arrow has a stroke (its line colour) but no fill.
+const STROKEABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'arrow'])
 const HISTORY_LIMIT = 50
-const DEFAULT_TEXT_STYLE = { fontFamily: 'Barlow', fontWeight: 400, fontSize: 16, textAlign: 'left', textColor: '#333333' }
+const DEFAULT_TEXT_STYLE = { fontFamily: 'Barlow', fontWeight: 400, fontSize: 16, textAlign: 'left', verticalAlign: 'top', textColor: '#333333' }
 // Bare-letter tool shortcuts (no modifier) — Ellipse uses O (circle/oval)
 // rather than its own first letter, since Rect/Frame/Text/Arrow already
 // claim R/F/T/A and "O" reads more intuitively for a circular shape.
@@ -138,13 +143,18 @@ export default function App() {
   const canFill = selectedFillable.length > 0
   const currentFill = selectedFillable[0]?.fill || null
 
+  const selectedStrokeable = elements.filter((el) => selectedIds.includes(el.id) && STROKEABLE_TYPES.has(el.type))
+  const canBorderFill = selectedStrokeable.length > 0
+  const currentStroke = selectedStrokeable[0]?.stroke || null
+  const currentStrokeWidth = selectedStrokeable[0]?.strokeWidth ?? 1
+
   // Font-panel-eligible selection: a text element always qualifies; a
   // rect/ellipse/arrow only once it actually has text (an empty shape
   // stays a plain box with no font controls — matches the Text tool's own
   // "select it to style it" flow, but only once there's something to
   // style). Frame is deliberately excluded — its label is a name badge
   // above the box, not styleable body text.
-  const STYLEABLE_SHAPE_TYPES = new Set(['rect', 'ellipse', 'arrow'])
+  const STYLEABLE_SHAPE_TYPES = new Set(['rect', 'ellipse', 'triangle', 'arrow'])
   const selectedStyleableEl = selectedIds.length === 1
     ? elements.find((el) => el.id === selectedIds[0]
         && (el.type === 'text' || (STYLEABLE_SHAPE_TYPES.has(el.type) && el.label?.trim())))
@@ -156,6 +166,7 @@ export default function App() {
         fontWeight: selectedStyleableEl.fontWeight,
         fontSize: selectedStyleableEl.fontSize,
         textAlign: selectedStyleableEl.textAlign,
+        verticalAlign: selectedStyleableEl.verticalAlign || (selectedStyleableEl.type === 'text' ? 'top' : 'middle'),
         textColor: selectedStyleableEl.textColor,
       }
     : pendingTextStyle
@@ -243,15 +254,31 @@ export default function App() {
   // URL navigation — browsers always show their own generic wording here
   // regardless of any custom string, so this is not the primary UX; the
   // custom Save/Discard prompt on the in-app back-link (below) is.
+  //
+  // Reads elementsRef/savedSnapshotRef directly INSIDE the handler, rather
+  // than closing over the `isDirty` value from whichever render last ran
+  // this effect (previously the dependency here) — a real bug this caused:
+  // saveAndMaybeContinue's save-then-navigate sequence updates
+  // savedSnapshotRef.current (marking clean) and then calls exitTool()'s
+  // `window.location.href = ...` in the very same synchronous/microtask
+  // continuation, with no React render in between. Mutating a ref never
+  // triggers a re-render, so this effect never got a chance to re-run and
+  // re-subscribe with isDirty:false before the navigation fired — the
+  // OLD, still-dirty-closured listener was what the browser actually
+  // consulted, showing its native "changes may not be saved" dialog even
+  // though the save had already genuinely succeeded. Reading both refs
+  // fresh at the moment the event actually fires (rather than a value
+  // captured at some earlier render) needs no re-subscription at all —
+  // registered once, on mount.
   useEffect(() => {
     function handleBeforeUnload(e) {
-      if (!isDirty) return
+      if (elementsRef.current === savedSnapshotRef.current) return
       e.preventDefault()
       e.returnValue = ''
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isDirty])
+  }, [])
 
   // Embedded-in-a-modal only: the parent (Components/WireframeToggle.jsx)
   // owns the modal's visibility, but only this page knows whether it's
@@ -388,6 +415,18 @@ export default function App() {
     setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && FILLABLE_TYPES.has(el.type) ? { ...el, fill: hex } : el)))
   }
 
+  const handleStrokeChange = (hex) => {
+    if (selectedIds.length === 0) return
+    pushHistory()
+    setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && STROKEABLE_TYPES.has(el.type) ? { ...el, stroke: hex } : el)))
+  }
+
+  const handleStrokeWidthChange = (width) => {
+    if (selectedIds.length === 0) return
+    pushHistory()
+    setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && STROKEABLE_TYPES.has(el.type) ? { ...el, strokeWidth: width } : el)))
+  }
+
   const handleDeleteSelection = () => {
     if (selectedIds.length === 0) return
     pushHistory()
@@ -442,7 +481,7 @@ export default function App() {
       setWireframeName(name)
       savedSnapshotRef.current = elements
       const fileName = currentFileName || slugify(name)
-      postJson('/__wireframe/save', { fileName, name, elements })
+      postJson('/__wireframe/save', { fileName, name, elements, authorName: authorName.trim() })
         .then((data) => { if (data?.ok) { setCurrentFileName(fileName); refreshFileList() } })
         .catch(() => { /* dev-only endpoint — silently no-op if unreachable */ })
       return true
@@ -676,23 +715,29 @@ export default function App() {
     requestSave()
   }
 
-  // Merges the two backends into one flat, newest-first list for the menu
-  // panel — the wireframe that drove this design draws a single
-  // undifferentiated list, not grouped sections like the old dropdown's
-  // "Shared"/"Local" optgroups. Firestore's updatedAt is a Timestamp
-  // (.toMillis()); the local plugin's is a plain ISO string (or null for a
-  // file whose own stat() lookup failed) — both normalized to epoch ms so
-  // they sort against each other correctly.
-  const mergedFiles = [
-    ...firestoreFiles.map((f) => ({
-      source: 'cloud', id: f.id, name: f.name || 'Untitled',
+  // Normalizes each backend's own shape into one common shape, sorted
+  // newest-first within itself. Kept as two separate lists (rather than
+  // merging into one flat array here) so WireframeMenu can decide whether
+  // to show them under separate headings — local saves only exist at all
+  // when running `vite dev` locally (the deployed site has no local
+  // endpoints to list), so a "Local" heading only makes sense to show when
+  // there's actually something under it. Firestore's updatedAt is a
+  // Timestamp (.toMillis()); the local plugin's is a plain ISO string (or
+  // null for a file whose own stat() lookup failed) — both normalized to
+  // epoch ms so they still sort correctly against each other if ever
+  // merged into one flat list.
+  const cloudFiles = firestoreFiles
+    .map((f) => ({
+      source: 'cloud', id: f.id, name: f.name || 'Untitled', authorName: f.authorName || null,
       updatedAtMs: f.updatedAt?.toMillis?.() ?? 0,
-    })),
-    ...savedFiles.map((f) => ({
-      source: 'local', id: f.fileName, name: f.name || f.fileName,
+    }))
+    .sort((a, b) => b.updatedAtMs - a.updatedAtMs)
+  const localFiles = savedFiles
+    .map((f) => ({
+      source: 'local', id: f.fileName, name: f.name || f.fileName, authorName: f.authorName || null,
       updatedAtMs: f.updatedAt ? new Date(f.updatedAt).getTime() : 0,
-    })),
-  ].sort((a, b) => b.updatedAtMs - a.updatedAtMs)
+    }))
+    .sort((a, b) => b.updatedAtMs - a.updatedAtMs)
   const currentFileKey = currentFirestoreId ? `cloud:${currentFirestoreId}` : currentFileName ? `local:${currentFileName}` : null
 
   return (
@@ -710,7 +755,8 @@ export default function App() {
         setWireframeName={setWireframeName}
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
-        files={mergedFiles}
+        cloudFiles={cloudFiles}
+        localFiles={localFiles}
         currentFileKey={currentFileKey}
         onSelectFile={requestLoad}
         onNew={requestNew}
@@ -749,6 +795,11 @@ export default function App() {
         canFill={canFill}
         currentFill={currentFill}
         onFillChange={handleFillChange}
+        canBorderFill={canBorderFill}
+        currentStroke={currentStroke}
+        onStrokeChange={handleStrokeChange}
+        currentStrokeWidth={currentStrokeWidth}
+        onStrokeWidthChange={handleStrokeWidthChange}
       />
 
       {showExitPrompt && (

@@ -14,6 +14,18 @@ body { overflow: hidden; }
   overflow: hidden;
 }
 
+/* Because .messages-page sets its own overflow (hidden, not visible), it
+   becomes .top-nav's nearest scrolling ancestor for position:sticky
+   purposes — NOT the document/viewport, unlike the growable min-height
+   SideNav-shell prototypes Styles/top-nav.css's shared `top:
+   var(--dev-toolbar-height)` rule was written for. .messages-page's own
+   box already starts below the toolbar (via the height calc above), so
+   .top-nav sticking at that same offset *again*, relative to a reference
+   frame that's already offset, double-counts the toolbar's height.
+   Confirmed via Playwright: .top-nav rendered 96px down instead of 48px.
+   Reset back to a plain 0 here, same as before the toolbar existed. */
+.top-nav { top: 0; }
+
 .messages-layout {
   display: flex;
   flex: 1;
@@ -1497,6 +1509,14 @@ body { overflow: hidden; }
   font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
+}
+
+/* A group tag's avatar is a fixed colour pair, distinct from a real
+   carer's own palette.bg/palette.fg (per-person, genuinely data-driven —
+   stays inline). */
+.msg-carer-avatar--group {
+  background: #e8e0f0;
+  color: #5a3878;
 }
 
 .msg-carer-option span {

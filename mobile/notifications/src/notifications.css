@@ -183,6 +183,17 @@
 
 }
 
+/* Tone classes, keyed off TYPE_CONFIG's own `tone` field in App.jsx — moved
+   out of an inline style so Dev Edit can select and edit them (and so an
+   edit applies to every notification sharing that tone, not just one). */
+.notif-type-badge--amber  { background: #fef3dc; color: #e09600; }
+.notif-type-badge--blue   { background: #e8f0fe; color: #1a73e8; }
+.notif-type-badge--red    { background: #fdeaea; color: #c0392b; }
+.notif-type-badge--green  { background: #e6f4ec; color: #27ae60; }
+.notif-type-badge--purple { background: #ede7f6; color: #8421b8; }
+.notif-type-badge--grey   { background: #f0f0f0; color: #4d4d4d; }
+.notif-type-badge--shift  { background: #f0ecf5; color: #6d1b98; }
+
 .notif-body {
   flex: 1;
   min-width: 0;
@@ -289,6 +300,19 @@
   color: #fff;
 }
 
+/* Shift/event avatars (RunIcon/EventIcon) share one fixed look, unlike a
+   real customer's photo-less initials avatar (notif.avatarColor, still set
+   inline in App.jsx since that genuinely varies per customer) — moved out
+   of inline styles into a real class so Dev Edit can actually target it.
+   Used by both the list row (.notif-avatar-initials) and the detail view
+   (.booking-detail-avatar) — declared after both, deliberately, since it
+   must win the `color` cascade against each of their own `color: #fff`
+   base rules (same specificity, so source order decides). */
+.notif-avatar-generic {
+  background: #dcd9e4;
+  color: #6d1b98;
+}
+
 .booking-detail-avatar-img {
   width: 72px;
   height: 72px;
@@ -312,6 +336,18 @@
   border-radius: 12px;
   margin-top: 4px;
 }
+
+/* Tone classes, keyed off STATUS_CONFIG's own `tone` field in App.jsx —
+   deliberately a different (darker, text-legible) colour set from
+   .notif-type-badge's own tones above, even though the tone names line up —
+   this badge shows coloured text on a tint, not an icon on a tint. */
+.booking-detail-status-badge--amber  { background: #fef3dc; color: #b37a00; }
+.booking-detail-status-badge--blue   { background: #e8f0fe; color: #1557b0; }
+.booking-detail-status-badge--red    { background: #fdeaea; color: #c0392b; }
+.booking-detail-status-badge--green  { background: #e6f4ec; color: #1e7e45; }
+.booking-detail-status-badge--purple { background: #ede7f6; color: #6d1b98; }
+.booking-detail-status-badge--grey   { background: #f0f0f0; color: #4d4d4d; }
+.booking-detail-status-badge--shift  { background: #f0ecf5; color: #6d1b98; }
 
 .booking-detail-divider {
   height: 1px;
@@ -341,7 +377,19 @@
   justify-content: center;
   padding-top: 2px;
   flex-shrink: 0;
+  color: #726694;
 }
+
+/* Tone classes, keyed off DetailRow's own `tone` prop in App.jsx — moved
+   out of an inline colour so Dev Edit can select/edit them. No default
+   class needed: the base rule above already carries the default colour
+   for a DetailRow with no tone prop passed. */
+.booking-detail-icon-col--muted  { color: #bbb; }
+.booking-detail-icon-col--amber  { color: #e09600; }
+.booking-detail-icon-col--blue   { color: #1a73e8; }
+.booking-detail-icon-col--red    { color: #c0392b; }
+.booking-detail-icon-col--green  { color: #27ae60; }
+.booking-detail-icon-col--purple { color: #8421b8; }
 
 .booking-detail-label {
   font-family: Barlow, sans-serif;

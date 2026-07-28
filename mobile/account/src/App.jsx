@@ -22,9 +22,9 @@ export default function App() {
     <>
       <DevToolbar floating>
         <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={phoneFrameRef} />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
       </DevToolbar>
       <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
       <PhoneFrame ref={phoneFrameRef}>

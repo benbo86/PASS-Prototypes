@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+const VERTICAL_ALIGN_CSS = { top: 'flex-start', middle: 'center', bottom: 'flex-end' }
+
 // Renders one frame/rect/ellipse/text element — these four share one box
 // model (x/y/w/h, optional fill/label) and differ only in a few rendered
 // details, so one component handles all of them rather than duplicating
@@ -71,12 +73,21 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
     setEditing(false)
   }
 
+  // A triangle can't be drawn with a plain CSS border+border-radius the way
+  // rect/ellipse are — clip-path would cut the box down to a triangular
+  // silhouette, but a rectangular border doesn't follow the new diagonal
+  // edges it creates, leaving two sides with no visible stroke at all. Fill
+  // and stroke are rendered via a small inline <svg><polygon> instead (see
+  // below), which draws a real stroke along the diagonal sides for free —
+  // so the div's own background/border stay switched off for this type.
+  const isTriangle = el.type === 'triangle'
+
   const style = {
     left: el.x,
     top: el.y,
     ...(isAutoText ? {} : { width: el.w, height: el.h }),
-    background: el.fill || 'transparent',
-    border: el.stroke ? `${el.strokeWidth}px solid ${el.stroke}` : 'none',
+    background: isTriangle ? 'transparent' : (el.fill || 'transparent'),
+    border: isTriangle ? 'none' : (el.stroke ? `${el.strokeWidth}px solid ${el.stroke}` : 'none'),
     borderRadius: el.type === 'ellipse' ? '50%' : el.type === 'frame' ? 4 : 2,
     fontSize: el.fontSize,
     // Text/rect/ellipse all get full font-panel styling (frame's label is
@@ -92,6 +103,13 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
       fontWeight: el.fontWeight || 400,
       textAlign: el.textAlign || 'center',
       color: el.textColor || '#333333',
+      // Vertical position within the box — set inline (not left to
+      // .wf-el-text's own CSS default) so a per-element choice from the
+      // font panel always wins regardless of specificity. Falls back to
+      // each type's pre-existing hardcoded look for an element saved
+      // before this field existed: text was always top-anchored, rect/
+      // ellipse/arrow labels were always vertically centered.
+      alignItems: VERTICAL_ALIGN_CSS[el.verticalAlign] || (el.type === 'text' ? 'flex-start' : 'center'),
     } : {}),
   }
 
@@ -110,6 +128,30 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
         setEditing(true)
       }}
     >
+      {isTriangle && (
+        // preserveAspectRatio="none" stretches the triangle to exactly fill
+        // a non-equilateral box, matching how border-radius:50% already
+        // turns a non-square rect into an ellipse rather than staying a
+        // fixed circle — the shape always fills its own resized bounds.
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          // width/height:100% is required, not just inset:0 — an <svg> is a
+          // *replaced* element (like <img>), and left with 'auto' width/
+          // height it sizes itself from the viewBox's own intrinsic aspect
+          // ratio instead of actually stretching to fill an absolutely
+          // positioned box, silently ignoring inset:0's bottom/right
+          // constraints. Without this, the polygon renders at a fixed
+          // near-square size regardless of the div's real (possibly very
+          // non-square) box — which looked exactly like "every handle
+          // preserves the aspect ratio" even though the box itself, and the
+          // resize math behind it, were already resizing correctly.
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        >
+          <polygon points="50,0 100,100 0,100" fill={el.fill || 'none'} stroke={el.stroke || 'none'} strokeWidth={el.strokeWidth || 0} />
+        </svg>
+      )}
+
       {el.type === 'frame' && (
         editing ? (
           <input

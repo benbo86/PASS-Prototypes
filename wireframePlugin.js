@@ -14,13 +14,17 @@ export default function wireframePlugin() {
     configureServer(server) {
       server.middlewares.use('/__wireframe/save', (req, res) => {
         handleJsonPost(req, res, async (body) => {
-          const { fileName, name, elements } = JSON.parse(body)
+          const { fileName, name, elements, authorName } = JSON.parse(body)
           const resolvedPath = assertSafePath(fileName)
           await mkdir(WIREFRAMES_DIR, { recursive: true })
           // updatedAt lets the client merge local saves into one
           // chronological list alongside Firestore's own updatedAt —
-          // previously this file had no timestamp of any kind.
-          await writeFile(resolvedPath, JSON.stringify({ version: 1, name, elements, updatedAt: new Date().toISOString() }, null, 2), 'utf-8')
+          // previously this file had no timestamp of any kind. authorName
+          // is best-effort (whatever the client currently has stored via
+          // Components/authorIdentity.js) — local saves aren't gated behind
+          // sign-in the way cloud saves are, so this can be empty if no
+          // name has ever been entered on this machine yet.
+          await writeFile(resolvedPath, JSON.stringify({ version: 1, name, elements, authorName: authorName || null, updatedAt: new Date().toISOString() }, null, 2), 'utf-8')
           return { ok: true, fileName }
         })
       })
@@ -44,9 +48,9 @@ export default function wireframePlugin() {
               // before updatedAt existed — no migration needed, and this
               // is still a genuine "last modified" timestamp either way.
               const updatedAt = data.updatedAt || (await stat(filePath)).mtime.toISOString()
-              return { fileName, name: data.name || fileName, updatedAt }
+              return { fileName, name: data.name || fileName, authorName: data.authorName || null, updatedAt }
             } catch {
-              return { fileName, name: fileName, updatedAt: null }
+              return { fileName, name: fileName, authorName: null, updatedAt: null }
             }
           }))
           return { ok: true, files }

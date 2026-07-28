@@ -592,6 +592,13 @@
   border-bottom: 1px solid #f2f2f2;
 }
 
+/* Extra separation before the signature row specifically — not every
+   .doc-meta-row, so this is its own modifier rather than folded into the
+   base rule above. */
+.doc-meta-row--signed {
+  margin-top: 8px;
+}
+
 .doc-meta-label {
   font-size: 10px;
   font-weight: 600;
@@ -718,6 +725,7 @@
   padding: 9px 11px;
   border-radius: 8px;
   margin-bottom: 6px;
+  cursor: pointer;
 }
 .msg-attachment-file:last-child { margin-bottom: 0; }
 .msg-attachment-file.received { background: var(--ui-purple-6-lavendar-grey); }
@@ -945,6 +953,7 @@
   transition: background 0.15s;
 }
 .send-btn:hover { background: var(--brand-purple-1-purple-0); }
+.send-btn--hidden { visibility: hidden; }
 
 /* ── Message actions overlay ─────────────────────────────────── */
 .phone-frame-overlay {
@@ -981,6 +990,11 @@
 .actions-menu button:last-child { border-bottom: none; }
 .actions-menu button:hover { background: var(--ui-purple-7-lightest-lavendar); }
 .actions-menu button.action-delete { color: var(--rag-red-red-overdue); }
+/* Which side the menu hugs depends on whose message was long-pressed —
+   `top` stays inline (genuinely measured at the press point), just this
+   left/right choice moved into a class. */
+.actions-menu--mine { right: 16px; }
+.actions-menu--theirs { left: 16px; }
 
 /* ── Compose screen (new message) ────────────────────────────── */
 .compose-form {

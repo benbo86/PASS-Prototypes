@@ -54,11 +54,15 @@
   margin: 0 -24px 12px;
   /* Pins to the bottom edge of .context-bar: the sticky .top-nav (44px)
      plus the context bar's live height (--ctx-bar-height, published by
-     CustomerProfileNav — tracks its full/condensed states). Scoped inside
-     its own .tl-day-group, so it naturally hands off to the next day's
-     header once this group's content scrolls past — no JS needed. */
+     CustomerProfileNav — tracks its full/condensed states), plus
+     Components/DevToolbar.jsx's own height (--dev-toolbar-height) since
+     both .top-nav and .context-bar are themselves now pushed down by that
+     same amount (see Styles/top-nav.css / customer-profile-nav.css).
+     Scoped inside its own .tl-day-group, so it naturally hands off to the
+     next day's header once this group's content scrolls past — no JS
+     needed. */
   position: sticky;
-  top: calc(44px + var(--ctx-bar-height, 156px));
+  top: calc(44px + var(--ctx-bar-height, 156px) + var(--dev-toolbar-height, 0px));
   z-index: 10;
 }
 
@@ -91,6 +95,18 @@
   user-select: none;
 }
 
+/* Tone classes, keyed off TYPE_META/CANCELLED_META's own `tone` field in
+   App.jsx — moved out of an inline style so Dev Edit can select/edit each
+   type's own heading colours. */
+.tl-item-heading--general     { background: var(--legacy-panel-task-bg);             color: var(--legacy-panel-task-text); }
+.tl-item-heading--observation { background: var(--legacy-panel-observation-bg);      color: var(--legacy-panel-observation-text); }
+.tl-item-heading--medication  { background: var(--legacy-panel-medication-bg);       color: var(--legacy-panel-medication-text); }
+.tl-item-heading--visit       { background: var(--legacy-panel-visit-bg);            color: var(--legacy-panel-visit-text); }
+.tl-item-heading--nutrition   { background: var(--legacy-panel-nutrition-bg);        color: var(--legacy-panel-nutrition-text); }
+.tl-item-heading--hydration   { background: var(--legacy-panel-hydration-bg);        color: var(--legacy-panel-hydration-text); }
+.tl-item-heading--outcome     { background: var(--legacy-panel-outcome-tracking-bg); color: var(--legacy-panel-outcome-tracking-text); }
+.tl-item-heading--cancelled   { background: var(--legacy-panel-cancelled-bg);        color: var(--legacy-panel-cancelled-text); }
+
 .tl-item-heading-left {
   display: flex;
   align-items: center;
@@ -120,6 +136,12 @@
   font-size: 15px;
   line-height: 1;
 }
+/* Tone classes, keyed off each status icon's own `tone` prop in App.jsx —
+   moved out of an inline colour so Dev Edit can select/edit them. */
+.tl-eltico-icon--overdue  { color: var(--legacy-status-overdue); }
+.tl-eltico-icon--complete { color: var(--legacy-status-complete); }
+.tl-eltico-icon--partial  { color: var(--legacy-status-partial); }
+.tl-eltico-icon--success  { color: var(--legacy-success); }
 
 .tl-fa-icon {
   font-style: normal;
@@ -128,6 +150,11 @@
 }
 .tl-fa-icon-solid { font-family: 'fa-solid'; font-weight: 900; }
 .tl-fa-icon-regular { font-family: 'fa-regular'; font-weight: 400; }
+/* Rotated 90° so the diagonal slash runs bottom-left to top-right,
+   matching MAR Chart's CANCELLED bubble (fa-ban's default slash runs the
+   other way) — colour + rotation both moved out of App.jsx's old inline
+   style, since only CancelledIcon ever used either. */
+.tl-fa-icon--cancelled { color: var(--legacy-status-cancelled); display: inline-block; transform: rotate(90deg); }
 
 .tl-item-title {
   font-weight: 700;

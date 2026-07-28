@@ -118,7 +118,7 @@ export default function MileageScreen({ filter, setFilter, onBack }) {
             <div className="summary-stat-value">{state.miles}</div>
           </div>
           <div className="summary-stat-sep" />
-          <div className="summary-stat" style={{ paddingLeft: 24 }}>
+          <div className="summary-stat summary-stat--pay">
             <div className="summary-stat-label">Total mileage pay</div>
             <div className="summary-stat-value pay">{state.pay}</div>
           </div>

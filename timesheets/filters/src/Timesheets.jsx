@@ -340,9 +340,9 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
@@ -950,9 +950,9 @@ export default function Timesheets() {
     <>
       <DevToolbar>
         <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
-        <WireframeToggle />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <WireframeToggle />
       </DevToolbar>
       <div className="ts-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>

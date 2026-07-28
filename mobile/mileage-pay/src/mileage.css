@@ -94,6 +94,11 @@
 .summary-stat {
   flex: 1;
 }
+/* The pay stat sits right of the separator, so it needs its own left
+   breathing room — not shared by the miles stat before it. */
+.summary-stat--pay {
+  padding-left: 24px;
+}
 
 .summary-stat-sep {
   width: 1px;

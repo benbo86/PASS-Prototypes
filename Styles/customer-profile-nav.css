@@ -4,7 +4,12 @@
   background: #fff;
   border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
   position: sticky;
-  top: 44px;
+  /* 44px is .top-nav's own height — this bar sticks directly below it.
+     Components/DevToolbar.jsx now pushes .top-nav itself down by
+     --dev-toolbar-height (see Styles/top-nav.css), so this needs the same
+     addition or it would stick 48px too high, overlapping .top-nav's own
+     now-correct resting position. */
+  top: calc(44px + var(--dev-toolbar-height, 0px));
   z-index: 90;
 }
 

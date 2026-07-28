@@ -993,6 +993,7 @@ h6 {
   padding: 48px;
   display: flex;
   flex-direction: column;
+  background: var(--ui-purple-7-lightest-lavendar);
 }
 
 .slide-panel-footer {

@@ -21,6 +21,11 @@ const ALIGNMENTS = [
   { value: 'center', label: 'Center' },
   { value: 'right', label: 'Right' },
 ]
+const VERTICAL_ALIGNMENTS = [
+  { value: 'top', label: 'Top' },
+  { value: 'middle', label: 'Middle' },
+  { value: 'bottom', label: 'Bottom' },
+]
 
 export default function FontPanel({ value, onChange, showAlignment = true }) {
   return (
@@ -70,6 +75,23 @@ export default function FontPanel({ value, onChange, showAlignment = true }) {
                   key={a.value}
                   className={`wf-font-panel-align-btn${value.textAlign === a.value ? ' active' : ''}`}
                   onClick={() => onChange({ textAlign: a.value })}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showAlignment && (
+          <div className="wf-font-panel-section">
+            <div className="wf-font-panel-label">Vertical align</div>
+            <div className="wf-font-panel-align-group">
+              {VERTICAL_ALIGNMENTS.map((a) => (
+                <button
+                  key={a.value}
+                  className={`wf-font-panel-align-btn${value.verticalAlign === a.value ? ' active' : ''}`}
+                  onClick={() => onChange({ verticalAlign: a.value })}
                 >
                   {a.label}
                 </button>

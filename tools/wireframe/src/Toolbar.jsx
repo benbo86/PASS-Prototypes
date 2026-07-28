@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FILL_SWATCH_GROUPS, NONE_SWATCH } from './colorTokens'
+import ColorPickerPopup from './ColorPickerPopup'
 
 // Inline SVG icons for this toolbar — dev-tool chrome, not a product
 // prototype icon, so (matching Components/DevEdit.jsx's own PenIcon/
@@ -26,11 +26,23 @@ const FillIcon = () => (
   </svg>
 )
 
+// Distinct from FillIcon (a solid paint-bucket-adjacent diamond) — this is
+// the same diamond outline only, unfilled, with a dashed inner square to
+// read as "the edge/border," not the interior.
+const BorderIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="1.5" strokeDasharray="3.5 3" />
+  </svg>
+)
+
 const RectIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="6" width="18" height="12" rx="1.5" /></svg>
 )
 const EllipseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><ellipse cx="12" cy="12" rx="9" ry="6.5" /></svg>
+)
+const TriangleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M12 3l10 18H2L12 3z" /></svg>
 )
 const ArrowIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -47,14 +59,18 @@ const TextIcon = () => (
 const SHAPE_TOOLS = [
   { key: 'rect', label: 'Rectangle', Icon: RectIcon },
   { key: 'ellipse', label: 'Ellipse', Icon: EllipseIcon },
+  { key: 'triangle', label: 'Triangle', Icon: TriangleIcon },
   { key: 'arrow', label: 'Arrow', Icon: ArrowIcon },
 ]
 
 const SHAPE_TOOL_KEYS = new Set(SHAPE_TOOLS.map((t) => t.key))
 
-export default function Toolbar({ activeTool, setActiveTool, canFill, currentFill, onFillChange }) {
-  const [openPopup, setOpenPopup] = useState(null) // null | 'shapes' | 'fill'
-  const [fillTab, setFillTab] = useState('picker') // 'picker' | 'swatches'
+export default function Toolbar({
+  activeTool, setActiveTool,
+  canFill, currentFill, onFillChange,
+  canBorderFill, currentStroke, onStrokeChange, currentStrokeWidth, onStrokeWidthChange,
+}) {
+  const [openPopup, setOpenPopup] = useState(null) // null | 'shapes' | 'fill' | 'border'
   const toolbarRef = useRef(null)
 
   // Close an open popup on any click outside the toolbar (e.g. clicking
@@ -101,9 +117,9 @@ export default function Toolbar({ activeTool, setActiveTool, canFill, currentFil
     setOpenPopup((p) => (p === 'fill' ? null : 'fill'))
   }
 
-  const applyFill = (hex) => {
-    onFillChange(hex)
-    setOpenPopup(null)
+  const toggleBorderPopup = () => {
+    if (!canBorderFill) return
+    setOpenPopup((p) => (p === 'border' ? null : 'border'))
   }
 
   return (
@@ -158,51 +174,43 @@ export default function Toolbar({ activeTool, setActiveTool, canFill, currentFil
         {!openPopup && <span className="wf-toolbar-tooltip">Colour Fill</span>}
         {openPopup === 'fill' && (
           <div className="wf-popup wf-popup-fill">
-            <div className="wf-popup-tabs">
-              <button className={`wf-popup-tab${fillTab === 'picker' ? ' active' : ''}`} onClick={() => setFillTab('picker')}>Picker</button>
-              <button className={`wf-popup-tab${fillTab === 'swatches' ? ' active' : ''}`} onClick={() => setFillTab('swatches')}>Swatches</button>
+            <ColorPickerPopup
+              value={currentFill}
+              onChange={onFillChange}
+              onApply={(hex) => { onFillChange(hex); setOpenPopup(null) }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="wf-toolbar-item">
+        <button
+          className={`wf-icon-btn${openPopup === 'border' ? ' active' : ''}`}
+          disabled={!canBorderFill}
+          onClick={toggleBorderPopup}
+        >
+          <BorderIcon />
+        </button>
+        {!openPopup && <span className="wf-toolbar-tooltip">Border</span>}
+        {openPopup === 'border' && (
+          <div className="wf-popup wf-popup-fill">
+            <ColorPickerPopup
+              value={currentStroke}
+              onChange={onStrokeChange}
+              onApply={(hex) => { onStrokeChange(hex); setOpenPopup(null) }}
+            />
+            <div className="wf-thickness-row">
+              <label className="wf-thickness-label" htmlFor="wf-thickness-input">Thickness</label>
+              <input
+                id="wf-thickness-input"
+                type="number"
+                className="wf-thickness-input"
+                min={1}
+                max={20}
+                value={currentStrokeWidth}
+                onChange={(e) => onStrokeWidthChange(Math.max(1, Number(e.target.value) || 1))}
+              />
             </div>
-            {fillTab === 'picker' ? (
-              <div className="wf-popup-picker">
-                <input
-                  type="color"
-                  className="wf-color-input"
-                  value={currentFill || '#ffffff'}
-                  onChange={(e) => applyFill(e.target.value)}
-                />
-                <button className="wf-swatch-row wf-swatch-row-none" onClick={() => applyFill(null)}>
-                  <span className="wf-swatch-dot wf-swatch-none" />
-                  <span>None</span>
-                </button>
-              </div>
-            ) : (
-              <div className="wf-popup-swatches">
-                <button key={NONE_SWATCH.label} className="wf-swatch-row" onClick={() => applyFill(NONE_SWATCH.hex)}>
-                  <span className="wf-swatch-dot wf-swatch-none" />
-                  <span>{NONE_SWATCH.label}</span>
-                </button>
-                {FILL_SWATCH_GROUPS.map((group) => (
-                  <div key={group.category} className="wf-swatch-group">
-                    <div className="wf-swatch-group-label">{group.category}</div>
-                    {group.swatches.map((s) => (
-                      <button key={s.label} className="wf-swatch-row" onClick={() => applyFill(s.hex)}>
-                        <span
-                          className={`wf-swatch-dot${s.hex === null ? ' wf-swatch-none' : ''}`}
-                          // Prefer a live var(--token) link (stays accurate
-                          // if the token's value ever changes) but fall
-                          // back to the plain hex for an entry with no
-                          // matching token — without this fallback, a
-                          // hex-only swatch would render with no
-                          // background at all.
-                          style={s.hex === null ? undefined : { background: s.token ? `var(${s.token})` : s.hex }}
-                        />
-                        <span>{s.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>

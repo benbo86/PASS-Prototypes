@@ -25,6 +25,7 @@ export const DEFAULT_SIZE = {
   frame: { w: 320, h: 240 },
   rect: { w: 160, h: 96 },
   ellipse: { w: 160, h: 96 },
+  triangle: { w: 160, h: 96 },
   text: { w: 160, h: 40 },
   arrow: { w: 160, h: 0 },
 }
