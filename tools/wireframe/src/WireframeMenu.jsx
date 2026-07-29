@@ -18,6 +18,12 @@ const MenuIcon = () => (
   </svg>
 )
 
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+)
+
 const TrashIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 7h16" /><path d="M10 11v6" /><path d="M14 11v6" />
@@ -78,6 +84,7 @@ export default function WireframeMenu({
   onDelete,
   onSave,
   saving,
+  justSaved,
   error,
 }) {
   const toggleRef = useRef(null)
@@ -116,8 +123,8 @@ export default function WireframeMenu({
           value={wireframeName}
           onChange={(e) => setWireframeName(e.target.value)}
         />
-        <button className="wf-tool-btn wf-primary" disabled={saving} onClick={onSave}>
-          {saving ? 'Saving…' : 'Save'}
+        <button className={`wf-tool-btn wf-primary${justSaved ? ' wf-tool-btn-saved' : ''}`} disabled={saving} onClick={onSave}>
+          {saving ? 'Saving…' : justSaved ? (<><CheckIcon /> Saved</>) : 'Save'}
         </button>
         {error && <span className="wf-toolbar-error">{error}</span>}
       </div>

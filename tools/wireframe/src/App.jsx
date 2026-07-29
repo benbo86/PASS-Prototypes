@@ -57,6 +57,15 @@ export default function App() {
   const [currentFileName, setCurrentFileName] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  // Brief post-save confirmation on the Save button itself ("Saved", with a
+  // checkmark) — previously a successful save gave no visible feedback at
+  // all beyond the button reverting from "Saving…" back to "Save", which
+  // looked identical to nothing having happened. justSavedTimeoutRef clears
+  // any still-pending revert before starting a new one, so saving twice in
+  // quick succession doesn't cut the confirmation short or leave two
+  // competing timeouts racing to reset it.
+  const [justSaved, setJustSaved] = useState(false)
+  const justSavedTimeoutRef = useRef(null)
   const [showExitPrompt, setShowExitPrompt] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -79,8 +88,19 @@ export default function App() {
 
   // currentFileName (above) tracks the local dev-only file; this is its
   // Firestore counterpart, so a repeated save updates the same doc rather
-  // than creating a duplicate.
+  // than creating a duplicate. Persisted INSIDE the local file itself
+  // (a `firestoreId` field, written by performSave's local mirror, read
+  // back by performLoad's local branch) — without that, reopening a local
+  // file always reset this to null, so the very next save silently created
+  // a brand-new cloud doc under the same name, effectively "undeleting" a
+  // cloud copy that had been deliberately removed on the live site.
   const [currentFirestoreId, setCurrentFirestoreId] = useState(null)
+  // Set once a save discovers its linked cloud doc no longer exists (it was
+  // deleted, e.g. from the live site) — from then on, saves for THIS file
+  // never automatically recreate a cloud copy, even though currentFirestoreId
+  // is null (same null value a file that never had a cloud copy would have).
+  // Also persisted in the local file, for the same reason as firestoreId.
+  const [cloudUnlinked, setCloudUnlinked] = useState(false)
   const [firestoreFiles, setFirestoreFiles] = useState([])
 
   const elementsRef = useRef(elements)
@@ -194,14 +214,36 @@ export default function App() {
   // App.jsx's own instant, non-drag actions (fill/delete/group/ungroup),
   // which push synchronously right before mutating.
   const historyRef = useRef([])
+  // Redo — a mirror-image stack, populated only by undo() itself (each undo
+  // pushes the state it's moving AWAY from, so redo can come back to it).
+  // Any genuinely new action invalidates whatever "future" was there to
+  // redo into, so pushHistory (called only by real user actions, never by
+  // undo/redo themselves) clears it — same convention every other design
+  // tool uses (e.g. Figma: undo, do something new, and the old redo branch
+  // is simply gone).
+  const redoRef = useRef([])
   const pushHistory = useCallback((snapshot) => {
     historyRef.current.push(snapshot || elementsRef.current)
     if (historyRef.current.length > HISTORY_LIMIT) historyRef.current.shift()
+    redoRef.current = []
   }, [])
   const undo = useCallback(() => {
     if (historyRef.current.length === 0) return
+    redoRef.current.push(elementsRef.current)
+    if (redoRef.current.length > HISTORY_LIMIT) redoRef.current.shift()
     const prev = historyRef.current.pop()
     setElements(prev)
+    setSelectedIds([])
+  }, [])
+  const redo = useCallback(() => {
+    if (redoRef.current.length === 0) return
+    // Pushed directly onto historyRef, not via pushHistory — going through
+    // pushHistory would immediately clear the very redoRef entry this call
+    // is in the middle of consuming.
+    historyRef.current.push(elementsRef.current)
+    if (historyRef.current.length > HISTORY_LIMIT) historyRef.current.shift()
+    const next = redoRef.current.pop()
+    setElements(next)
     setSelectedIds([])
   }, [])
 
@@ -350,7 +392,7 @@ export default function App() {
 
       if ((e.metaKey || e.ctrlKey) && !isTyping) {
         const key = e.key.toLowerCase()
-        if (key === 'z') { e.preventDefault(); undo(); return }
+        if (key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return }
         // Zoom shortcuts — preventDefault stops the browser's own native
         // page-zoom, which these keys would otherwise trigger. '=' covers
         // the unshifted key most keyboards report for Cmd/Ctrl+'+'.
@@ -407,7 +449,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [contextMenu, showExitPrompt, menuOpen, pushHistory, undo])
+  }, [contextMenu, showExitPrompt, menuOpen, pushHistory, undo, redo])
 
   const handleFillChange = (hex) => {
     if (selectedIds.length === 0) return
@@ -472,18 +514,47 @@ export default function App() {
     setSaveError(null)
     try {
       const payload = { name, authorName: authorName.trim(), elements, updatedAt: serverTimestamp() }
-      if (currentFirestoreId) {
-        await updateDoc(doc(db, 'wireframe_saves', currentFirestoreId), payload)
+      let firestoreId = currentFirestoreId
+      let unlinked = cloudUnlinked
+      let infoMessage = null
+      if (unlinked) {
+        // This file's cloud copy was previously found to be deleted — never
+        // auto-recreate it from here. Local-only for as long as this stays
+        // true (there's no "re-publish to shared" action yet).
+      } else if (firestoreId) {
+        try {
+          await updateDoc(doc(db, 'wireframe_saves', firestoreId), payload)
+        } catch (err) {
+          if (err.code === 'not-found') {
+            // The linked cloud doc is gone (deleted from the live site,
+            // most likely) — do NOT fall back to creating a fresh one here;
+            // that would silently resurrect something deliberately removed.
+            // Remember this so every future save of this same file also
+            // stays local-only, not just this one.
+            firestoreId = null
+            unlinked = true
+            setCurrentFirestoreId(null)
+            setCloudUnlinked(true)
+            infoMessage = 'Shared copy was deleted — saved locally only.'
+          } else {
+            throw err
+          }
+        }
       } else {
         const ref = await addDoc(collection(db, 'wireframe_saves'), { ...payload, createdAt: serverTimestamp() })
+        firestoreId = ref.id
         setCurrentFirestoreId(ref.id)
       }
       setWireframeName(name)
       savedSnapshotRef.current = elements
       const fileName = currentFileName || slugify(name)
-      postJson('/__wireframe/save', { fileName, name, elements, authorName: authorName.trim() })
+      postJson('/__wireframe/save', { fileName, name, elements, authorName: authorName.trim(), firestoreId, cloudUnlinked: unlinked })
         .then((data) => { if (data?.ok) { setCurrentFileName(fileName); refreshFileList() } })
         .catch(() => { /* dev-only endpoint — silently no-op if unreachable */ })
+      if (infoMessage) setSaveError(infoMessage)
+      clearTimeout(justSavedTimeoutRef.current)
+      setJustSaved(true)
+      justSavedTimeoutRef.current = setTimeout(() => setJustSaved(false), 2000)
       return true
     } catch (err) {
       setSaveError(err.message || 'Failed to save')
@@ -623,9 +694,14 @@ export default function App() {
       setWireframeName(match.name || 'Untitled')
       setCurrentFirestoreId(match.id)
       setCurrentFileName(null)
+      // A cloud-sourced load always corresponds to a real, currently-live
+      // doc (it's in firestoreFiles, the live onSnapshot list) — never
+      // treat it as unlinked just because a previous local session was.
+      setCloudUnlinked(false)
       setSelectedIds([])
       setActiveTool('pointer')
       historyRef.current = []
+      redoRef.current = []
       setMenuOpen(false)
       return
     }
@@ -638,10 +714,15 @@ export default function App() {
       savedSnapshotRef.current = loadedElements
       setWireframeName(data.data.name || id)
       setCurrentFileName(id)
-      setCurrentFirestoreId(null)
+      // Restore whichever cloud link (or deliberate absence of one) this
+      // local file itself remembers, instead of always resetting to null —
+      // see the fields' own declarations above for why this matters.
+      setCurrentFirestoreId(data.data.firestoreId || null)
+      setCloudUnlinked(!!data.data.cloudUnlinked)
       setSelectedIds([])
       setActiveTool('pointer')
       historyRef.current = []
+      redoRef.current = []
       setMenuOpen(false)
     } catch (err) {
       setSaveError(err.message || 'Failed to load')
@@ -657,9 +738,11 @@ export default function App() {
     setWireframeName('')
     setCurrentFileName(null)
     setCurrentFirestoreId(null)
+    setCloudUnlinked(false)
     setActiveTool('pointer')
     setSaveError(null)
     historyRef.current = []
+    redoRef.current = []
     setMenuOpen(false)
   }
   const requestNew = () => requestSwitch({ type: 'new' })
@@ -682,7 +765,14 @@ export default function App() {
     setSaveError(null)
     try {
       await deleteDoc(doc(db, 'wireframe_saves', id))
-      if (currentFirestoreId === id) setCurrentFirestoreId(null)
+      // If this was the currently-open wireframe's own cloud copy, mark it
+      // unlinked too (not just clear the id) — otherwise saving again right
+      // away (no reload in between) would immediately recreate it, same bug
+      // as the stale-reload case performSave's not-found catch handles.
+      if (currentFirestoreId === id) {
+        setCurrentFirestoreId(null)
+        setCloudUnlinked(true)
+      }
     } catch (err) {
       setSaveError(err.message || 'Failed to delete')
     }
@@ -763,6 +853,7 @@ export default function App() {
         onDelete={requestDelete}
         onSave={requestSave}
         saving={saving}
+        justSaved={justSaved}
         error={saveError}
       />
 

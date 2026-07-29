@@ -14,7 +14,7 @@ export default function wireframePlugin() {
     configureServer(server) {
       server.middlewares.use('/__wireframe/save', (req, res) => {
         handleJsonPost(req, res, async (body) => {
-          const { fileName, name, elements, authorName } = JSON.parse(body)
+          const { fileName, name, elements, authorName, firestoreId, cloudUnlinked } = JSON.parse(body)
           const resolvedPath = assertSafePath(fileName)
           await mkdir(WIREFRAMES_DIR, { recursive: true })
           // updatedAt lets the client merge local saves into one
@@ -24,7 +24,17 @@ export default function wireframePlugin() {
           // Components/authorIdentity.js) — local saves aren't gated behind
           // sign-in the way cloud saves are, so this can be empty if no
           // name has ever been entered on this machine yet.
-          await writeFile(resolvedPath, JSON.stringify({ version: 1, name, elements, authorName: authorName || null, updatedAt: new Date().toISOString() }, null, 2), 'utf-8')
+          // firestoreId/cloudUnlinked let a local file remember its own
+          // cloud-save relationship across reloads — without persisting
+          // these, reopening a local file always looked cloud-unlinked
+          // (App.jsx's own client-side state resets on every load), so the
+          // very next save silently created a brand-new cloud doc under the
+          // same name, effectively "undeleting" one the user had removed
+          // from the live site.
+          await writeFile(resolvedPath, JSON.stringify({
+            version: 1, name, elements, authorName: authorName || null, updatedAt: new Date().toISOString(),
+            firestoreId: firestoreId || null, cloudUnlinked: !!cloudUnlinked,
+          }, null, 2), 'utf-8')
           return { ok: true, fileName }
         })
       })

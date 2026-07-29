@@ -375,6 +375,9 @@
 
 .wf-tool-btn {
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 6px 12px;
   font-size: 13px;
   font-family: inherit;
@@ -386,6 +389,10 @@
 .wf-tool-btn.wf-primary { background: #9a26d6; color: #ffffff; border-color: #9a26d6; }
 .wf-tool-btn.wf-danger { color: #c0392b; border-color: #e6b3ac; }
 .wf-tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Brief post-save confirmation (Save button only, ~2s, see App.jsx's
+   justSaved) — a distinct green so it reads as a genuine success signal,
+   not just the button's normal resting purple. */
+.wf-tool-btn-saved.wf-primary { background: #1e8e5a; border-color: #1e8e5a; }
 
 .wf-name-input {
   box-sizing: border-box;
