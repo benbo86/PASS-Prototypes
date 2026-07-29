@@ -5,10 +5,13 @@ import { useEffect, useRef } from 'react'
 // editable name field at the top-left, opening a slide-out panel with New
 // at the top and a single merged, newest-first list of saved wireframes
 // below it — clicking a row loads it directly (no separate Load step), and
-// each row has its own delete action. There's deliberately no Save button
-// anywhere in this component — saving only ever happens via the existing
-// unsaved-changes prompt in App.jsx (on exit, or now also when switching to
-// a different saved wireframe), never a standalone click here.
+// each row has its own delete action. Saving still also happens
+// automatically via the existing unsaved-changes prompt in App.jsx (on
+// exit, or when switching to a different saved wireframe) — the standalone
+// Save button below (added later, see CLAUDE.md's Wireframe tool history)
+// is an explicit, on-demand way to guarantee a save at any moment, since a
+// browser tab/window close can't be intercepted with custom UI the way
+// in-app navigation can.
 const MenuIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <path d="M3 6h18" /><path d="M3 12h18" /><path d="M3 18h18" />
@@ -73,6 +76,8 @@ export default function WireframeMenu({
   onSelectFile,
   onNew,
   onDelete,
+  onSave,
+  saving,
   error,
 }) {
   const toggleRef = useRef(null)
@@ -111,6 +116,9 @@ export default function WireframeMenu({
           value={wireframeName}
           onChange={(e) => setWireframeName(e.target.value)}
         />
+        <button className="wf-tool-btn wf-primary" disabled={saving} onClick={onSave}>
+          {saving ? 'Saving…' : 'Save'}
+        </button>
         {error && <span className="wf-toolbar-error">{error}</span>}
       </div>
 

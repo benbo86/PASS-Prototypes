@@ -33,9 +33,14 @@ export const DEFAULT_SIZE = {
 // A handle's name says which edges move; edges it doesn't name stay fixed.
 // This one formula correctly produces both "resize a single edge" (n/s/e/w)
 // and "resize a corner" (ne/nw/se/sw, which anchors the opposite corner)
-// behavior, including a legitimate flip when a drag pushes one edge past
-// its (fixed) opposite edge — normalizing min/max before snapping is what
-// makes that flip come out correct rather than negative/NaN.
+// behavior. Dragging a moved edge past its (fixed) opposite edge is a real
+// flip, not just a bigger box — flippedX/flippedY (computed from the RAW
+// pre-normalize edges, before the min/max below reorders them into a
+// canonical positive box) tell transformSelection to mirror content rather
+// than merely re-anchoring position. Gated on handle.includes(letter) —
+// only an axis this handle actually controls can flip; the other stays
+// false. w/h themselves still always come out positive here (unchanged) —
+// flip is purely a signal consumed downstream, not a sign on w/h.
 export function resizeBox(startBox, handle, dx, dy) {
   const left0 = startBox.x
   const top0 = startBox.y
@@ -47,12 +52,15 @@ export function resizeBox(startBox, handle, dx, dy) {
   const top = handle.includes('n') ? top0 + dy : top0
   const bottom = handle.includes('s') ? bottom0 + dy : bottom0
 
+  const flippedX = handle.includes('w') ? left > right0 : handle.includes('e') ? right < left0 : false
+  const flippedY = handle.includes('n') ? top > bottom0 : handle.includes('s') ? bottom < top0 : false
+
   const l = snap(Math.min(left, right))
   const r = snap(Math.max(left, right))
   const t = snap(Math.min(top, bottom))
   const b = snap(Math.max(top, bottom))
 
-  return { x: l, y: t, w: Math.max(GRID, r - l), h: Math.max(GRID, b - t) }
+  return { x: l, y: t, w: Math.max(GRID, r - l), h: Math.max(GRID, b - t), flippedX, flippedY }
 }
 
 // Same edge-then-snap logic as resizeBox, but both axes are always free —
@@ -196,6 +204,14 @@ export function resizeBoxAspectLocked(startBox, handle, dx, dy) {
     targetW = targetH * ratio
   }
 
+  // Flip is read from the RAW rawLeft/rawRight/rawTop/rawBottom above, not
+  // the target-size-derived left/right/top/bottom below — those are always
+  // re-derived as an anchor ± a positive magnitude, so they can never
+  // themselves appear to cross. The raw values still carry the user's
+  // actual (unclamped) drag intent.
+  const flippedX = handle.includes('w') ? rawLeft > right0 : handle.includes('e') ? rawRight < left0 : false
+  const flippedY = handle.includes('n') ? rawTop > bottom0 : handle.includes('s') ? rawBottom < top0 : false
+
   // Derive final left/top/right/bottom from the target size, keeping
   // whichever two edges this handle doesn't touch anchored at their
   // original values — same anchoring logic as resizeBox, just fed a
@@ -206,7 +222,44 @@ export function resizeBoxAspectLocked(startBox, handle, dx, dy) {
   const bottom = handle.includes('s') ? top0 + targetH : bottom0
 
   const l = snap(left), r = snap(right), t = snap(top), b = snap(bottom)
-  return { x: l, y: t, w: Math.max(GRID, r - l), h: Math.max(GRID, b - t) }
+  return { x: l, y: t, w: Math.max(GRID, r - l), h: Math.max(GRID, b - t), flippedX, flippedY }
+}
+
+// ─── rotation ──────────────────────────────────────────────────────────
+
+export function normalizeAngle(deg) {
+  const a = deg % 360
+  return a < 0 ? a + 360 : a
+}
+
+// Shift-held rotation snaps to the nearest step — checked live every tick
+// (same "don't capture the modifier at mousedown, read it live" convention
+// already used by aspect-lock resize and shift-drag-to-draw a 1:1 square,
+// since real usage often presses Shift mid-drag, not before).
+export function snapAngle(deg, step = 15) {
+  return Math.round(deg / step) * step
+}
+
+// Angle (degrees) from a center point to a mouse point, both canvas-space.
+// Standard atan2 screen convention: 0°=3 o'clock, increasing clockwise
+// (falls out for free since canvas-space y grows downward) — this already
+// matches CSS transform: rotate()'s own clockwise-positive convention, so
+// no sign flip is ever needed between this math and the rendered CSS.
+export function angleBetween(cx, cy, x, y) {
+  return (Math.atan2(y - cy, x - cx) * 180) / Math.PI
+}
+
+// Rotates a raw (dx, dy) DELTA vector by angleDeg — not an absolute point,
+// no center subtraction needed. Used to convert a resize handle's raw
+// canvas-space mouse delta into a rotated element's own local/unrotated
+// frame (call with -rotation) before feeding resizeBox/
+// resizeBoxAspectLocked, so dragging a corner of a rotated shape resizes
+// along the shape's own visual axes instead of the screen's.
+export function rotateVector(dx, dy, angleDeg) {
+  const rad = (angleDeg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return { dx: dx * cos - dy * sin, dy: dx * sin + dy * cos }
 }
 
 // The one resize/scale transform used for everything from a single
@@ -222,11 +275,27 @@ export function resizeBoxAspectLocked(startBox, handle, dx, dy) {
 // already-updated elements on a later mousemove tick would treat a
 // previous tick's *output* as this tick's input, double-applying the
 // transform relative to groupBox0 (which never itself updates mid-drag).
+// Each startSnapshots entry (non-arrow) also carries its own flipX/flipY
+// at drag-start, for the XOR below.
+//
+// groupBox1.flippedX/flippedY (from resizeBox/resizeBoxAspectLocked) make
+// scaleX/scaleY SIGNED (negative when flipped) instead of always-positive.
+// A negative scale in the plain tx(x) = groupBox1.x + (x-groupBox0.x)*scaleX
+// formula would map the shape OUTSIDE groupBox1 (everything to the right of
+// the mapped left edge moves further left) rather than mirrored WITHIN it —
+// adding groupBox1.w/h when flipped re-anchors the mapped range back to
+// exactly [groupBox1.x, groupBox1.x+groupBox1.w], mirrored. w/h magnitudes
+// always stay positive via Math.abs; only tx/ty and each element's own
+// flipX/flipY (XORed against its frozen start-of-drag state, never
+// accumulated tick-by-tick — same "always fresh from groupBox0" principle
+// as x/y/w/h) carry the actual mirroring.
 export function transformSelection(startSnapshots, groupBox0, groupBox1) {
-  const scaleX = groupBox1.w / groupBox0.w
-  const scaleY = groupBox1.h / groupBox0.h
-  const tx = (x) => groupBox1.x + (x - groupBox0.x) * scaleX
-  const ty = (y) => groupBox1.y + (y - groupBox0.y) * scaleY
+  const flipX = !!groupBox1.flippedX
+  const flipY = !!groupBox1.flippedY
+  const scaleX = (flipX ? -1 : 1) * (groupBox1.w / groupBox0.w)
+  const scaleY = (flipY ? -1 : 1) * (groupBox1.h / groupBox0.h)
+  const tx = (x) => groupBox1.x + (flipX ? groupBox1.w : 0) + (x - groupBox0.x) * scaleX
+  const ty = (y) => groupBox1.y + (flipY ? groupBox1.h : 0) + (y - groupBox0.y) * scaleY
 
   const patches = {}
   startSnapshots.forEach((el) => {
@@ -236,12 +305,16 @@ export function transformSelection(startSnapshots, groupBox0, groupBox1) {
         x2: snap(tx(el.x2)), y2: snap(ty(el.y2)),
       }
     } else {
-      const x = snap(tx(el.x))
-      const y = snap(ty(el.y))
+      const w = Math.max(GRID, snap(Math.abs(el.w * scaleX)))
+      const h = Math.max(GRID, snap(Math.abs(el.h * scaleY)))
+      // tx(el.x)/ty(el.y) map the element's own start TOP-LEFT corner —
+      // when this axis is flipped, that mapped point is now the box's
+      // OPPOSITE corner, so the true new top-left needs the box's own
+      // (just-computed) width/height subtracted back out.
+      const x = snap(flipX ? tx(el.x) - w : tx(el.x))
+      const y = snap(flipY ? ty(el.y) - h : ty(el.y))
       patches[el.id] = {
-        x, y,
-        w: Math.max(GRID, snap(el.w * scaleX)),
-        h: Math.max(GRID, snap(el.h * scaleY)),
+        x, y, w, h,
         // Explicitly resizing a text element (whether it was already a
         // bound box or still autoSize) always graduates it to a fixed-size
         // bound box from here on — matching the same "manually resizing
@@ -249,6 +322,8 @@ export function transformSelection(startSnapshots, groupBox0, groupBox1) {
         // tools use, and consistent with the fact that it now has an
         // explicit w/h a user chose on purpose.
         ...(el.type === 'text' ? { autoSize: false } : {}),
+        flipX: flipX ? !el.flipX : !!el.flipX,
+        flipY: flipY ? !el.flipY : !!el.flipY,
       }
     }
   })

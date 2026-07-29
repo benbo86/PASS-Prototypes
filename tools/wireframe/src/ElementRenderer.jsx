@@ -61,8 +61,17 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
   const isBoundText = el.type === 'text' && !el.autoSize
   const commit = () => {
     if (isAutoText && boxRef.current) {
-      const rect = boxRef.current.getBoundingClientRect()
-      onLabelChange(el.id, draft, { w: Math.max(8, Math.ceil(rect.width)), h: Math.max(8, Math.ceil(rect.height)) })
+      // offsetWidth/offsetHeight, not getBoundingClientRect() — the latter
+      // reflects the element's POST-transform visual box (affected by the
+      // canvas's own zoom scale, and now also by this element's own
+      // rotate/flip transform below), while offset*/* always reflects the
+      // untransformed layout box regardless of either. Rotating an
+      // autoSize text element and re-committing its label would otherwise
+      // measure the rotated bounding box (generally larger) instead of the
+      // text's own true size.
+      const w = boxRef.current.offsetWidth
+      const h = boxRef.current.offsetHeight
+      onLabelChange(el.id, draft, { w: Math.max(8, w), h: Math.max(8, h) })
     } else {
       onLabelChange(el.id, draft)
     }
@@ -110,6 +119,16 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
       // before this field existed: text was always top-anchored, rect/
       // ellipse/arrow labels were always vertically centered.
       alignItems: VERTICAL_ALIGN_CSS[el.verticalAlign] || (el.type === 'text' ? 'flex-start' : 'center'),
+    } : {}),
+    // Rotate + flip combined into one transform (uniform across every
+    // box-shaped type, including a rotated/mirrored label along with its
+    // shape — normal design-tool behavior, not something to special-case
+    // away). Omitted entirely rather than left as a harmless no-op string
+    // when both are inert, so an element untouched by either feature keeps
+    // byte-for-byte the same style object as before this existed.
+    ...((el.rotation || el.flipX || el.flipY) ? {
+      transform: `rotate(${el.rotation || 0}deg) scale(${el.flipX ? -1 : 1}, ${el.flipY ? -1 : 1})`,
+      transformOrigin: 'center',
     } : {}),
   }
 

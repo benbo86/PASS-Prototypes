@@ -3,6 +3,7 @@ import {
   boxFromDrag, boxFromDragAspectLocked, moveArrow, moveArrowPoint, moveBox, resizeBox, resizeBoxAspectLocked,
   snap, distance, CLICK_THRESHOLD, DEFAULT_SIZE, makeId,
   groupMembersOf, computeBoundingBox, transformSelection, getElementBox, rectsIntersect, cloneElements,
+  angleBetween, normalizeAngle, snapAngle, rotateVector,
 } from './geometry'
 
 // The whole interaction state machine for the canvas: tool-select → draw a
@@ -120,6 +121,9 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
           textAlign: textDefaults.textAlign,
           textColor: textDefaults.textColor,
           groupId: null,
+          rotation: 0,
+          flipX: false,
+          flipY: false,
         }
       : {
           id,
@@ -142,6 +146,9 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
           // this field existed.
           ...(activeTool !== 'frame' ? { fontFamily: 'Barlow', fontWeight: 400, textAlign: 'center', textColor: '#333333' } : {}),
           groupId: null,
+          rotation: 0,
+          flipX: false,
+          flipY: false,
         }
 
     setElements((prev) => [...prev, newEl])
@@ -224,9 +231,16 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
       .filter((el) => ids.includes(el.id))
       .map((el) => (el.type === 'arrow'
         ? { id: el.id, type: 'arrow', x1: el.x1, y1: el.y1, x2: el.x2, y2: el.y2 }
-        : { id: el.id, type: el.type, x: el.x, y: el.y, w: el.w, h: el.h }))
+        : { id: el.id, type: el.type, x: el.x, y: el.y, w: el.w, h: el.h, flipX: !!el.flipX, flipY: !!el.flipY }))
     const isCorner = handle === 'nw' || handle === 'ne' || handle === 'se' || handle === 'sw'
     const pt = getCanvasPoint(e)
+    // Only ever nonzero for a SOLE selected non-arrow element (multi-select
+    // or an arrow always get 0 here) — this is what makes the rotation-aware
+    // dx/dy inversion in handleMouseMove below engage only for that one
+    // case, leaving every other (far more common) resize path byte-for-byte
+    // unchanged.
+    const soleSelected = ids.length === 1 ? elementsRef.current.find((el) => el.id === ids[0]) : null
+    const rotationForResize = soleSelected && soleSelected.type !== 'arrow' ? (soleSelected.rotation || 0) : 0
     dragRef.current = {
       kind: 'resizeGroup',
       handle,
@@ -240,6 +254,35 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
       startMouse: pt,
       groupBox0,
       startSnapshots,
+      preDragSnapshot,
+      rotation: rotationForResize,
+    }
+  }, [getCanvasPoint])
+
+  // ── Rotate handle (4, corner-adjacent) — only rendered/usable when
+  // exactly one non-arrow element is selected alone (see Canvas.jsx's
+  // isSoleRotatableSelected / SelectionOverlay.jsx). ──
+  const onRotateHandleMouseDown = useCallback((e) => {
+    e.stopPropagation()
+    const ids = selectedIdsRef.current
+    if (ids.length !== 1) return
+    const el = elementsRef.current.find((elx) => elx.id === ids[0])
+    if (!el || el.type === 'arrow') return
+    const preDragSnapshot = elementsRef.current
+    const box = getElementBox(el)
+    const center = { x: box.x + box.w / 2, y: box.y + box.h / 2 }
+    const pt = getCanvasPoint(e)
+    dragRef.current = {
+      kind: 'rotate',
+      id: el.id,
+      // Every drag kind needs startMouse — handleMouseMove/handleMouseUp
+      // both compute a shared dx/dy from it unconditionally, before
+      // branching on kind, even though the rotate branch itself uses
+      // angleBetween instead of dx/dy directly.
+      startMouse: pt,
+      center,
+      startMouseAngle: angleBetween(center.x, center.y, pt.x, pt.y),
+      startRotation: el.rotation || 0,
       preDragSnapshot,
     }
   }, [getCanvasPoint])
@@ -297,10 +340,29 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         updateElements(patches)
       } else if (drag.kind === 'resizeGroup') {
         const lockAspect = e.shiftKey && drag.isCorner
+        // Only ever a no-op identity when drag.rotation is 0 (multi-select,
+        // or a sole element with no rotation) — resizeVector(dx,dy,0) would
+        // return dx,dy unchanged anyway, but skipping the call entirely
+        // when there's nothing to correct keeps the common path visibly
+        // untouched. A rotated sole element's corner/edge handles need the
+        // raw screen-space delta converted into the shape's own local
+        // frame first, so the resize follows its visual axes, not the
+        // screen's.
+        let localDx = dx, localDy = dy
+        if (drag.rotation) {
+          const rotated = rotateVector(dx, dy, -drag.rotation)
+          localDx = rotated.dx
+          localDy = rotated.dy
+        }
         const groupBox1 = lockAspect
-          ? resizeBoxAspectLocked(drag.groupBox0, drag.handle, dx, dy)
-          : resizeBox(drag.groupBox0, drag.handle, dx, dy)
+          ? resizeBoxAspectLocked(drag.groupBox0, drag.handle, localDx, localDy)
+          : resizeBox(drag.groupBox0, drag.handle, localDx, localDy)
         updateElements(transformSelection(drag.startSnapshots, drag.groupBox0, groupBox1))
+      } else if (drag.kind === 'rotate') {
+        const currentAngle = angleBetween(drag.center.x, drag.center.y, pt.x, pt.y)
+        let newRotation = drag.startRotation + (currentAngle - drag.startMouseAngle)
+        if (e.shiftKey) newRotation = snapAngle(newRotation, 15)
+        updateElement(drag.id, { rotation: normalizeAngle(newRotation) })
       } else if (drag.kind === 'arrowEndpoint') {
         const p = moveArrowPoint(drag.startPoint.x, drag.startPoint.y, dx, dy)
         updateElement(drag.id, drag.endpoint === 'p1' ? { x1: p.x, y1: p.y } : { x2: p.x, y2: p.y })
@@ -362,6 +424,15 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         // even if the user alt-clicks without ever dragging (a valid way
         // to duplicate in place).
         if (drag.isDuplicate || dx !== 0 || dy !== 0) onDragStart(drag.preDragSnapshot)
+      } else if (drag.kind === 'rotate') {
+        // Can't reuse the dx!==0||dy!==0 mouse-delta check above — a tiny
+        // mouse move near the center can swing the angle hugely, and a big
+        // move far from the center can barely change it. Compare the
+        // actual resulting rotation instead.
+        const el = elementsRef.current.find((elx) => elx.id === drag.id)
+        if (el && normalizeAngle(el.rotation || 0) !== normalizeAngle(drag.startRotation)) {
+          onDragStart(drag.preDragSnapshot)
+        }
       } else if (drag.kind === 'marquee') {
         const pt = getCanvasPoint(e)
         const dragDistance = distance(drag.startMouse.x, drag.startMouse.y, pt.x, pt.y)
@@ -400,6 +471,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
     onCanvasMouseDown,
     onElementMouseDown,
     onSelectionHandleMouseDown,
+    onRotateHandleMouseDown,
     onArrowEndpointMouseDown,
     marqueeRect,
   }

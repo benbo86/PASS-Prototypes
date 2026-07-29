@@ -45,6 +45,7 @@ export default function Canvas({
     onCanvasMouseDown,
     onElementMouseDown,
     onSelectionHandleMouseDown,
+    onRotateHandleMouseDown,
     onArrowEndpointMouseDown,
     marqueeRect,
   } = useCanvasInteraction({
@@ -152,6 +153,12 @@ export default function Canvas({
   const selectionBox = selectedIds.length > 0 && !isLoneArrowSelected && !isLoneEmptyTextSelected
     ? computeBoundingBox(elements, selectedIds)
     : null
+  // Rotation (and its 4 corner-adjacent handles) is scoped to exactly one
+  // selected non-arrow element — arrows already achieve any orientation via
+  // their two independent endpoints, and rotating a whole multi-select's
+  // bounding box isn't supported (would need to rotate each member about
+  // the group's own center, real added complexity with no stated need yet).
+  const isSoleRotatableSelected = !!soleSelectedEl && soleSelectedEl.type !== 'arrow' && !isLoneEmptyTextSelected
 
   return (
     <div className="wf-canvas-scroll" ref={scrollRef}>
@@ -206,6 +213,9 @@ export default function Canvas({
           box={selectionBox}
           onHandleMouseDown={onSelectionHandleMouseDown}
           onContextMenu={handleOverlayContextMenu}
+          rotation={isSoleRotatableSelected ? (soleSelectedEl.rotation || 0) : 0}
+          showRotateHandles={isSoleRotatableSelected}
+          onRotateHandleMouseDown={onRotateHandleMouseDown}
         />
       )}
 

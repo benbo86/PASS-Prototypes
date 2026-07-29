@@ -871,7 +871,7 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
   const [careReceivers, setCareReceivers] = useState([])
   const [message, setMessage] = useState('')
   const [showCarePicker, setShowCarePicker] = useState(false)
-  const canSend = title.trim() && message.trim()
+  const canSend = message.trim()
 
   const toggleCare = (customer) => setCareReceivers(prev =>
     prev.some(r => r.id === customer.id) ? prev.filter(r => r.id !== customer.id) : [...prev, customer]
@@ -900,9 +900,13 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
 
         <div className="compose-divider" />
 
-        {/* Title */}
+        {/* Title — optional, matching web's own Employee-mode compose (an
+            empty subject there falls back to the recipient's name; mobile
+            has no equivalent distinct recipient to fall back to, since it's
+            always "Office", so handleNewMessage below falls back to a
+            preview of the message body instead). */}
         <div className="compose-field-group">
-          <label className="compose-field-label">Title <span className="required">*</span></label>
+          <label className="compose-field-label">Title <span className="optional-label">Optional</span></label>
           <input
             className="form-input-mobile"
             placeholder="What's this message about?"
@@ -931,9 +935,9 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
           )}
         </div>
 
-        {/* Message */}
+        {/* Message — mandatory (canSend depends only on this now) */}
         <div className="compose-field-group">
-          <label className="compose-field-label">Message (optional)</label>
+          <label className="compose-field-label">Message <span className="required">*</span></label>
           <textarea
             className="message-textarea"
             placeholder="Write your message..."
@@ -1083,9 +1087,15 @@ export default function App() {
 
   const handleNewMessage = ({ title, careReceivers, message }) => {
     const newId = threads.reduce((max, t) => Math.max(max, t.id), 0) + 1
+    // An empty title falls back to a preview of the message body — the
+    // mobile equivalent of web's own "empty subject falls back to the
+    // recipient's name" convention. Mobile has no distinct recipient name
+    // to fall back to (every thread is "Office"), so the message itself is
+    // the next most useful thing to show as the thread's title.
+    const fallbackTitle = message.trim().length > 40 ? `${message.trim().slice(0, 40)}…` : message.trim()
     const newThread = {
       id: newId,
-      title,
+      title: title.trim() || fallbackTitle,
       careReceiver: careReceivers.length > 0 ? careReceivers.map(r => r.name).join(', ') : null,
       participants: 'Office',
       lastSender: 'You',

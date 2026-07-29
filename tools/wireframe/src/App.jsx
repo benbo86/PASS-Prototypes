@@ -761,6 +761,8 @@ export default function App() {
         onSelectFile={requestLoad}
         onNew={requestNew}
         onDelete={requestDelete}
+        onSave={requestSave}
+        saving={saving}
         error={saveError}
       />
 

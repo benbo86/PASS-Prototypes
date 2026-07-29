@@ -839,6 +839,28 @@ textarea.wf-label-input {
 .wf-handle-sw { bottom: -5px; left: -5px; }
 .wf-handle-w  { top: 50%; left: -5px; transform: translateY(-50%); }
 
+/* ── Rotate handles (4, corner-adjacent) ──
+   Same size/border colour as .wf-handle above, but round (vs the resize
+   handles' 2px-radius square) for unambiguous visual distinction, and
+   positioned an additional ~11px further out (-16px vs -5px) so the two
+   handle types never visually touch or overlap. Only rendered for a sole
+   selected non-arrow element (SelectionOverlay.jsx). */
+.wf-rotate-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border: 1.5px solid #9a26d6;
+  border-radius: 50%;
+  z-index: 5;
+  pointer-events: auto;
+  cursor: grab;
+}
+.wf-rotate-handle-nw { top: -16px; left: -16px; }
+.wf-rotate-handle-ne { top: -16px; right: -16px; }
+.wf-rotate-handle-se { bottom: -16px; right: -16px; }
+.wf-rotate-handle-sw { bottom: -16px; left: -16px; }
+
 /* ── Arrows (SVG overlay) ── */
 
 .wf-arrow-layer {
