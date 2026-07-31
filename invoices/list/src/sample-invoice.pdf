@@ -1,0 +1,82 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 5 0 R >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1077 >>
+stream
+BT
+/F1 24 Tf
+/F1 24 Tf
+1 0 0 1 72 720 Tm
+(SAMPLE INVOICE) Tj
+/F1 14 Tf
+1 0 0 1 72 690 Tm
+(This is a placeholder document.) Tj
+/F1 14 Tf
+1 0 0 1 72 675 Tm
+(Replace src/sample-invoice.pdf with a real example to update every preview/download.) Tj
+/F1 12 Tf
+1 0 0 1 72 640 Tm
+(Invoice no:       INV-100234) Tj
+/F1 12 Tf
+1 0 0 1 72 622 Tm
+(Invoice date:     04/07/2026) Tj
+/F1 12 Tf
+1 0 0 1 72 604 Tm
+(Funder:           Local Authority - Riverside) Tj
+/F1 12 Tf
+1 0 0 1 72 586 Tm
+(Customer:         Margaret Wilson) Tj
+/F1 12 Tf
+1 0 0 1 72 568 Tm
+(Service period:   01/07/2026 - 31/07/2026) Tj
+/F1 12 Tf
+1 0 0 1 72 550 Tm
+(Payment method:   Direct Debit) Tj
+/F1 12 Tf
+1 0 0 1 72 532 Tm
+(Delivery method:  Email) Tj
+/F1 12 Tf
+1 0 0 1 72 496 Tm
+(Expected charge:  GBP 842.50) Tj
+/F1 12 Tf
+1 0 0 1 72 478 Tm
+(Charge:           GBP 842.50) Tj
+/F1 12 Tf
+1 0 0 1 72 460 Tm
+(Expenses:         GBP 18.20) Tj
+/F1 12 Tf
+1 0 0 1 72 442 Tm
+(Total charge:     GBP 860.70) Tj
+/F1 12 Tf
+1 0 0 1 72 406 Tm
+(Status:           Approved) Tj
+/F1 12 Tf
+1 0 0 1 72 388 Tm
+(Paid:             Unpaid) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001370 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1440
+%%EOF

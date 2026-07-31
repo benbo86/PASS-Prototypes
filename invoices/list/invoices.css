@@ -1,0 +1,142 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* ── Page layout ─────────────────────────────────────────────── */
+.inv-page { min-height: 100vh; display: flex; flex-direction: column; margin-top: 96px; }
+.inv-body { flex: 1; margin: 0 40px; }
+
+/* ── Page header (L1) ────────────────────────────────────────── */
+.inv-page-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px; position: relative;
+}
+.inv-page-header h1 { margin-bottom: 0; white-space: nowrap; }
+.inv-header-controls { display: flex; gap: 10px; margin-left: auto; }
+
+/* ── Date navigation ─────────────────────────────────────────── */
+.inv-date-nav {
+  display: flex; align-items: center; gap: 12px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.inv-date-nav .react-datepicker-wrapper { width: auto; }
+#inv-datepicker-portal .react-datepicker-popper { z-index: 9999; }
+
+.inv-nav-arrow {
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s; padding: 0;
+}
+.inv-nav-arrow:hover:not(:disabled) { color: var(--ui-purple-2-dark-grape-grey); }
+.inv-nav-arrow:disabled { color: var(--ui-purple-5-languid-lavendar); cursor: default; }
+
+/* ── Sub-row (L1 showing / pagination) ──────────────────────── */
+.inv-sub-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 16px; padding: 10px 0; margin-bottom: 2px;
+}
+
+/* Sits on the far left of .inv-sub-row (margin-right:auto), separate from
+   the filter/pagination cluster on the right — only rendered while the
+   current column widths differ from the shared saved value, or briefly
+   after a successful save (see justSavedWidths in Invoices.jsx). */
+.inv-widths-save { display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.inv-widths-save-btn {
+  padding: 6px 12px; border-radius: 999px; border: none; background: none;
+  color: var(--brand-purple-5-purple-3); font-size: 16px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+}
+.inv-widths-save-btn:hover:not(:disabled) { color: var(--brand-purple-6-purple-4); }
+.inv-widths-save-btn:disabled { color: var(--greyscale-6-grey-50); cursor: default; }
+.inv-widths-save-error { font-size: 13px; color: var(--rag-red-red-overdue-dark); }
+
+/* ── Table column widths & resizing ──────────────────────────────
+   table-layout:fixed + an explicit <colgroup> whose widths are PERCENTAGES
+   (see colWidths/COL_WIDTHS in Invoices.jsx) — the table itself is
+   width:100% of .table-wrap (Styles/main.css), so the columns always sum
+   to exactly the container's width. Nothing to overflow, so
+   .table-wrap's own overflow-x:auto never actually triggers a scrollbar.
+   Dragging a resize handle trades percentage-points between just the two
+   neighbouring columns, so the total never drifts from 100%. */
+.inv-table { table-layout: fixed; }
+
+/* Every cell truncates rather than wrapping or overflowing once its column
+   is narrowed — the full value is still available via the td's own title
+   attribute on hover. Numeric/pill/icon columns are unaffected in practice
+   (their content is always short), so this is safe to apply table-wide
+   rather than special-casing only the columns most likely to overflow. */
+.inv-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Column-resize handles — a thin invisible strip straddling each column's
+   right border (already drawn by .data-table th's own border-right), with
+   a purple highlight on hover/drag for affordance. .data-table th is
+   already position:relative (Styles/main.css), so this positions correctly
+   without any change needed there. */
+.inv-col-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+}
+.inv-col-resize-handle:hover,
+.inv-col-resize-handle:active {
+  background: var(--brand-purple-6-purple-4);
+  opacity: 0.5;
+}
+
+/* ── Status / Paid pills (table) ─────────────────────────────── */
+.inv-status-to-approve { background: var(--rag-amber-amber-lightest);  color: var(--greyscale-2-grey-20); }
+.inv-status-approved   { background: var(--rag-green-green-lightest);  color: var(--rag-green-green-3-aa); }
+.inv-status-sent       { background: var(--ui-blue-lightest);          color: var(--ui-blue-edited-text); }
+
+.inv-paid-yes { background: var(--rag-green-green-lightest); color: var(--rag-green-green-3-aa); }
+.inv-paid-no  { background: var(--greyscale-13-grey-90);     color: var(--greyscale-4-grey-40); }
+
+/* ── PDF preview overlay ──────────────────────────────────────── */
+.inv-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--web-skrim);
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.inv-preview-panel {
+  background: #fff;
+  border-radius: 8px;
+  width: 800px;
+  max-width: 100%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.inv-preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+}
+.inv-preview-header h2 { font-size: 18px; }
+.inv-preview-close {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  display: flex; color: var(--buttons-lozenge-1-primary-1-default);
+}
+.inv-preview-close:hover { opacity: 0.7; }
+.inv-preview-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+/* Back-link sits above the preview overlay's own scrim (z-index 160) so it
+   stays clickable/visible while the overlay is open — the same convention
+   established for every other prototype that opens a full-page overlay. */
+.inv-back-link--elevated { z-index: 170; }

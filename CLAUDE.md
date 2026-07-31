@@ -366,7 +366,7 @@ When implementing from Figma:
 
 **Delete is a real, user-facing action** (bin icon in the thread panel header, with a `window.confirm()` guard) — removes the whole comment doc, replies included. This changes the security-rules shape needed once test mode expires (see below): rules must allow `delete`, not just `create`/`update`.
 
-**✅ Security rules status:** the shape below (covering `devmode_comments`, Dev Edit's two collections, and `wireframe_saves`) is published and confirmed enforcing. The `devedit_versions`/`devedit_active`/`devmode_comments` portion was confirmed as of 2026-07-22; `wireframe_saves`'s read/create/update portion was published and confirmed on 2026-07-23 via a direct, no-UI Firestore check — unauthenticated read succeeded (open read), unauthenticated write rejected with `permission-denied`, no test doc persisted. Still outstanding: an *authenticated* create/update on `wireframe_saves` hasn't been exercised yet (needs the real shared password, which isn't stored anywhere in this repo/session). **⚠️ `wireframe_saves`'s `allow delete` line changed from `if false` to `if request.auth != null` on 2026-07-24 (Wireframe tool v12, per-row delete in the new menu panel) — this specific line has NOT yet been published to the live rules**, so a real delete attempt against Firestore will fail with `permission-denied` until Ben publishes this exact updated rule set in the Firebase console.
+**✅ Security rules status:** the shape below (covering `devmode_comments`, Dev Edit's two collections, and `wireframe_saves`) is published and confirmed enforcing. The `devedit_versions`/`devedit_active`/`devmode_comments` portion was confirmed as of 2026-07-22; `wireframe_saves`'s read/create/update portion was published and confirmed on 2026-07-23 via a direct, no-UI Firestore check — unauthenticated read succeeded (open read), unauthenticated write rejected with `permission-denied`, no test doc persisted. Still outstanding: an *authenticated* create/update on `wireframe_saves` hasn't been exercised yet (needs the real shared password, which isn't stored anywhere in this repo/session). **⚠️ `wireframe_saves`'s `allow delete` line changed from `if false` to `if request.auth != null` on 2026-07-24 (Wireframe tool v12, per-row delete in the new menu panel) — this specific line has NOT yet been published to the live rules**, so a real delete attempt against Firestore will fail with `permission-denied` until Ben publishes this exact updated rule set in the Firebase console. **✅ `invoices_column_widths` (Invoices prototype's shared column-width save) published and confirmed on 2026-07-31** via a direct, no-UI Firestore check — unauthenticated read succeeded (0 docs, open read), unauthenticated write rejected with `permission-denied`, no test doc persisted. Still outstanding: an *authenticated* create/update hasn't been exercised yet (needs the real shared password, same recurring limitation as every other password-gated check in this file's history).
 ```
 rules_version = '2';
 service cloud.firestore {
@@ -398,6 +398,11 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if request.auth != null;
       allow delete: if request.auth != null;
+    }
+    match /invoices_column_widths/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if false;
     }
   }
 }
