@@ -11,16 +11,16 @@ body {
 
 /* ── Page header (L1) ────────────────────────────────────────── */
 .gpa-page-header {
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items:center;
+  justify-content:space-between; gap: 16px;
   margin-bottom: 24px; position: relative;
 }
 .gpa-page-header h1 { margin-bottom: 0; white-space: nowrap; }
-.gpa-header-controls { display: flex; gap: 10px; margin-left: auto; }
+.gpa-header-controls { display: flex; gap: 10px; justify-content: flex-end; }
 
 /* ── Date navigation ─────────────────────────────────────────── */
 .gpa-date-nav {
   display: flex; align-items: center; gap: 12px;
-  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .gpa-date-nav .react-datepicker-wrapper { width: auto; }
 #gpa-datepicker-portal .react-datepicker-popper { z-index: 9999; }

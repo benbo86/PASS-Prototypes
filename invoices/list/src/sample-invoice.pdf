@@ -6,77 +6,551 @@ endobj
 << /Type /Pages /Kids [3 0 R] /Count 1 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 5 0 R >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 1077 >>
+<< /Length 5299 >>
 stream
 BT
-/F1 24 Tf
-/F1 24 Tf
-1 0 0 1 72 720 Tm
-(SAMPLE INVOICE) Tj
-/F1 14 Tf
-1 0 0 1 72 690 Tm
-(This is a placeholder document.) Tj
-/F1 14 Tf
-1 0 0 1 72 675 Tm
-(Replace src/sample-invoice.pdf with a real example to update every preview/download.) Tj
-/F1 12 Tf
-1 0 0 1 72 640 Tm
-(Invoice no:       INV-100234) Tj
-/F1 12 Tf
-1 0 0 1 72 622 Tm
-(Invoice date:     04/07/2026) Tj
-/F1 12 Tf
-1 0 0 1 72 604 Tm
-(Funder:           Local Authority - Riverside) Tj
-/F1 12 Tf
-1 0 0 1 72 586 Tm
-(Customer:         Margaret Wilson) Tj
-/F1 12 Tf
-1 0 0 1 72 568 Tm
-(Service period:   01/07/2026 - 31/07/2026) Tj
-/F1 12 Tf
-1 0 0 1 72 550 Tm
-(Payment method:   Direct Debit) Tj
-/F1 12 Tf
-1 0 0 1 72 532 Tm
-(Delivery method:  Email) Tj
-/F1 12 Tf
-1 0 0 1 72 496 Tm
-(Expected charge:  GBP 842.50) Tj
-/F1 12 Tf
-1 0 0 1 72 478 Tm
-(Charge:           GBP 842.50) Tj
-/F1 12 Tf
-1 0 0 1 72 460 Tm
-(Expenses:         GBP 18.20) Tj
-/F1 12 Tf
-1 0 0 1 72 442 Tm
-(Total charge:     GBP 860.70) Tj
-/F1 12 Tf
-1 0 0 1 72 406 Tm
-(Status:           Approved) Tj
-/F1 12 Tf
-1 0 0 1 72 388 Tm
-(Paid:             Unpaid) Tj
+/F2 22 Tf
+1 0 0 1 50 740 Tm
+(Invoice) Tj
+ET
+BT
+/F2 11 Tf
+1 0 0 1 350 745 Tm
+(Sample Care Provider) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 732 Tm
+(123 Example Street) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 719 Tm
+(Sampletown) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 706 Tm
+(AB1 2CD) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 693 Tm
+(United Kingdom) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 680 Tm
+(0000 000 0000) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 350 667 Tm
+(invoices@example-care.co.uk) Tj
+ET
+BT
+/F2 11 Tf
+1 0 0 1 50 700 Tm
+(James Anderson) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 50 687 Tm
+(1 Example Road) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 50 674 Tm
+(Sampleford) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 50 661 Tm
+(Greater London) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 50 648 Tm
+(AB2 3CD) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 50 635 Tm
+(United Kingdom) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 350 640 Tm
+(Invoice Ref) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 480 640 Tm
+(INV-100201) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 350 625 Tm
+(Date) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 480 625 Tm
+(09/07/2026) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 350 610 Tm
+(Payment Due) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 480 610 Tm
+(16/07/2026) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 350 595 Tm
+(Payment Method) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 480 595 Tm
+(Standing Order) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 350 580 Tm
+(Delivery Method) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 480 580 Tm
+(Post) Tj
+ET
+0.75 w
+350 571 m 562 571 l S
+BT
+/F2 12 Tf
+1 0 0 1 350 553 Tm
+(Total Payable) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 480 553 Tm
+(£182.00) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 50 500 Tm
+(Customer) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 108 500 Tm
+(James Anderson) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 230 500 Tm
+(Period) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 268 500 Tm
+(02/07/2026 - 08/07/2026) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 400 500 Tm
+(Funder) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 438 500 Tm
+(Local Authority - Northgate) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 50 485 Tm
+(Status) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 108 485 Tm
+(To approve) Tj
+ET
+BT
+/F2 10 Tf
+1 0 0 1 230 485 Tm
+(Paid) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 268 485 Tm
+(Unpaid) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 50 460 Tm
+(Date) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 105 460 Tm
+(Type) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 225 460 Tm
+(Carer) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 305 460 Tm
+(Start) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 340 460 Tm
+(Duration) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 395 460 Tm
+(Status) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 440 460 Tm
+(Charge) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 485 460 Tm
+(Expenses) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 545 460 Tm
+(Total Charge) Tj
+ET
+0.75 w
+50 454 m 610 454 l S
+BT
+/F1 9 Tf
+1 0 0 1 50 440 Tm
+(02/07/2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 105 440 Tm
+(Home Care) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 225 440 Tm
+(Sarah Whitfield) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 305 440 Tm
+(09:00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 340 440 Tm
+(1hr 0m) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 395 440 Tm
+(Complete) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 440 440 Tm
+(£28.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 485 440 Tm
+(N/A) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 545 440 Tm
+(£28.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 426 Tm
+(03/07/2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 105 426 Tm
+(Home Care) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 225 426 Tm
+(Sarah Whitfield) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 305 426 Tm
+(09:00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 340 426 Tm
+(1hr 0m) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 395 426 Tm
+(Complete) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 440 426 Tm
+(£28.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 485 426 Tm
+(N/A) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 545 426 Tm
+(£28.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 412 Tm
+(04/07/2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 105 412 Tm
+(Home Care) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 225 412 Tm
+(Michael Osei) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 305 412 Tm
+(14:30) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 340 412 Tm
+(2hrs 0m) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 395 412 Tm
+(Complete) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 440 412 Tm
+(£56.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 485 412 Tm
+(N/A) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 545 412 Tm
+(£56.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 398 Tm
+(06/07/2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 105 398 Tm
+(Domestic Support) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 225 398 Tm
+(Michael Osei) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 305 398 Tm
+(10:00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 340 398 Tm
+(1hr 30m) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 395 398 Tm
+(Complete) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 440 398 Tm
+(£42.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 485 398 Tm
+(N/A) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 545 398 Tm
+(£42.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 384 Tm
+(08/07/2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 105 384 Tm
+(Home Care) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 225 384 Tm
+(Sarah Whitfield) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 305 384 Tm
+(09:00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 340 384 Tm
+(1hr 0m) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 395 384 Tm
+(Complete) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 440 384 Tm
+(£28.00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 485 384 Tm
+(N/A) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 545 384 Tm
+(£28.00) Tj
+ET
+0.75 w
+440 376 m 610 376 l S
+BT
+/F2 9 Tf
+1 0 0 1 440 358 Tm
+(£182.00) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 485 358 Tm
+(£0.00) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 545 358 Tm
+(£182.00) Tj
+ET
+BT
+/F2 9 Tf
+1 0 0 1 50 190 Tm
+(Payment Details:) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 178 Tm
+(Sample Care Provider) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 166 Tm
+(Account Number: 00000000) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 154 Tm
+(Sort Code: 00-00-00) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 130 Tm
+(Or call 0000 000 0000) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 106 Tm
+(Payment Terms: 7 Days) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 94 Tm
+(If payment method is via Standing Order, payment will be collected) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 82 Tm
+(10 days from the date of the invoice.) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 50 58 Tm
+(Thank you) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 500 40 Tm
+(Page 1 of 1) Tj
 ET
 endstream
 endobj
 5 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 xref
-0 6
+0 7
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
 0000000115 00000 n 
-0000000241 00000 n 
-0000001370 00000 n 
+0000000251 00000 n 
+0000005602 00000 n 
+0000005699 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 7 /Root 1 0 R >>
 startxref
-1440
+5801
 %%EOF

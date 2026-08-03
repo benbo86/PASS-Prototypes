@@ -10,17 +10,27 @@ body {
 .inv-body { flex: 1; margin: 0 40px; }
 
 /* ── Page header (L1) ────────────────────────────────────────── */
+/* 3-column grid (title / date-nav / buttons), not flex+absolute-center —
+   the two outer 1fr tracks are always exactly equal width, so the middle
+   (auto-sized) date-nav column sits truly centered *between* the title and
+   the buttons at any viewport width, rather than centered to the whole
+   header container regardless of how wide the title/buttons themselves are.
+   That mismatch was the actual bug: centering to the container let the
+   date-nav overlap the button cluster once the container got narrow enough
+   that the container's true center no longer left room for both. */
 .inv-page-header {
-  display: flex; align-items: center; gap: 16px;
-  margin-bottom: 24px; position: relative;
+  display: flex;
+  align-items:center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-direction: row;
 }
 .inv-page-header h1 { margin-bottom: 0; white-space: nowrap; }
-.inv-header-controls { display: flex; gap: 10px; margin-left: auto; }
+.inv-header-controls { display: flex; gap: 10px; justify-content: flex-end; }
 
 /* ── Date navigation ─────────────────────────────────────────── */
 .inv-date-nav {
   display: flex; align-items: center; gap: 12px;
-  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .inv-date-nav .react-datepicker-wrapper { width: auto; }
 #inv-datepicker-portal .react-datepicker-popper { z-index: 9999; }
