@@ -94,7 +94,7 @@ export default function HolidayReconciliation() {
             <span className="hr-stat-label">Remaining</span>
             <span className="hr-stat-value">{fmtDays(remaining)} Days</span>
             {reconciled && (
-              <span className="hr-stat-note">Reconciliation: {fmtDays(daysPaidInLieu)} Days paid in lieu</span>
+              <span className="hr-stat-note">Reconciliation: {fmtDays(daysPaidInLieu)}</span>
             )}
           </div>
         </div>
