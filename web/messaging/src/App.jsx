@@ -227,7 +227,7 @@ const THREADS = [
     lastSender: 'Office',
     lastMessage: "Just a reminder the weekly handover meeting is Thursday at 4pm.",
     time: '10:42 AM',
-    unread: 0,
+    unread: false,
     archivedByOffice: false,
   },
   {
@@ -241,7 +241,7 @@ const THREADS = [
     lastSender: 'Office',
     lastMessage: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.",
     time: '9:15 AM',
-    unread: 0,
+    unread: false,
     archivedByOffice: false,
   },
   {
@@ -254,7 +254,7 @@ const THREADS = [
     lastSender: 'Office',
     lastMessage: "Good news — the A57 road closures near Hillsborough have now been resolved and roads have reopened.",
     time: 'Today',
-    unread: 0,
+    unread: false,
     archivedByOffice: false,
   },
   {
@@ -268,7 +268,7 @@ const THREADS = [
     lastSender: 'Tom Harris',
     lastMessage: "Just confirming I'm all set for the Friday cover visit at 6pm.",
     time: 'Tue',
-    unread: 1,
+    unread: true,
     archivedByOffice: false,
   },
   {
@@ -282,7 +282,7 @@ const THREADS = [
     lastSender: 'Office',
     lastMessage: "Thanks for flagging this — the care plan has been updated to reflect the new mobility support.",
     time: 'Mon',
-    unread: 0,
+    unread: false,
     archivedByOffice: false,
   },
   {
@@ -295,7 +295,7 @@ const THREADS = [
     lastSender: 'Office',
     lastMessage: "Thanks everyone — Saturday's cover is now sorted between the five of you.",
     time: 'Wed',
-    unread: 0,
+    unread: false,
     archivedByOffice: false,
   },
   // Replies to the "Weekend Rota" broadcast fork into their own private 1:1
@@ -312,7 +312,7 @@ const THREADS = [
     lastSender: 'Tom Harris',
     lastMessage: "I can cover the 8am–12pm slot.",
     time: 'Wed',
-    unread: 1,
+    unread: true,
     archivedByOffice: false,
   },
   {
@@ -326,7 +326,7 @@ const THREADS = [
     lastSender: 'Olivia Brooks',
     lastMessage: "Happy to take the afternoon if needed.",
     time: 'Wed',
-    unread: 1,
+    unread: true,
     archivedByOffice: false,
   },
 ]
@@ -501,7 +501,7 @@ function AreaTags({ tags, showCount = false }) {
 // ─── Thread Row ────────────────────────────────────────────────
 
 function ThreadRow({ thread, isActive, onClick }) {
-  const isUnread = thread.unread > 0
+  const isUnread = thread.unread
   const firstName = thread.participantList[0] || ''
   const palette = !thread.isBroadcast && firstName ? nameToColor(firstName) : null
   const extraCount = !thread.isBroadcast && thread.participantList.length > 1
@@ -558,7 +558,7 @@ function ThreadRow({ thread, isActive, onClick }) {
             {thread.lastMessage}
           </span>
           {isUnread
-            ? <span className="msg-unread-badge">{thread.unread}</span>
+            ? <span className="msg-unread-badge" aria-label="Unread" />
             : null
           }
         </div>
@@ -1658,7 +1658,7 @@ export default function App() {
   }
 
   const [messageBadge, setMessageBadge] = useState(() =>
-    THREADS.reduce((sum, t) => sum + t.unread, 0)
+    THREADS.filter(t => t.unread).length
   )
 
   useEffect(() => {
@@ -1671,7 +1671,7 @@ export default function App() {
   const handleSelectThread = (id) => {
     setActiveThreadId(id)
     setRightPanel('thread')
-    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 0 } : t))
+    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: false } : t))
   }
 
   const handleSend = (text, attachments) => {
@@ -1683,7 +1683,7 @@ export default function App() {
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: 0, ...(wasArchived ? { archivedByOffice: false } : {}) },
+        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: false, ...(wasArchived ? { archivedByOffice: false } : {}) },
         ...rest,
       ]
     })
@@ -1714,7 +1714,7 @@ export default function App() {
 
   const handleMarkUnread = () => {
     setThreads(prev => prev.map(t =>
-      t.id === activeThreadId ? { ...t, unread: 1 } : t
+      t.id === activeThreadId ? { ...t, unread: true } : t
     ))
   }
 
@@ -1747,7 +1747,7 @@ export default function App() {
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
-        unread: 0,
+        unread: false,
         archivedByOffice: false,
       }
       setThreads(prev => [newThread, ...prev])
@@ -1780,7 +1780,7 @@ export default function App() {
         lastSender: 'Office',
         lastMessage: message,
         time: 'Just now',
-        unread: 0,
+        unread: false,
         archivedByOffice: false,
       }
       setThreads(prev => [newThread, ...prev])

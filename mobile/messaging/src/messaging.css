@@ -250,18 +250,16 @@
   align-items: center;
 }
 
+/* A plain flag/dot, not a count — mirrors web/messaging's own
+   .msg-unread-badge model: once a thread is marked unread (whether it has
+   1 or 20 new messages), there's nothing to display back as a count, so
+   this shows presence only. */
 .unread-badge {
-  width: 20px;
-  height: 20px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--brand-purple-3-purple-2);
-  color: #fff;
-  font-family: Barlow, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0;
 }
 
 .receipt-icon { display: block; }

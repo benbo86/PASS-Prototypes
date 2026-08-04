@@ -942,6 +942,50 @@ h6 {
   font-weight: 600;
 }
 
+/* ─── Schedule tab bar (Components/ScheduleNav.jsx) ─────────────
+   Visually identical to .office-tab-bar/.office-tabs above — duplicated
+   rather than generalized/renamed, a deliberately low-risk choice over
+   touching OfficeNav.jsx (an existing, already-working file) for no
+   functional gain. */
+
+.schedule-tab-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+}
+
+.schedule-tabs {
+  list-style: none;
+  display: flex;
+  padding: 0 24px;
+  gap: 0;
+  margin: 0;
+}
+
+.schedule-tabs li button {
+  display: block;
+  padding: 14px 16px 12px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--greyscale-5-grey-35);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.schedule-tabs li button:not([style*="cursor: default"]):hover { color: #000; }
+
+.schedule-tabs li.active button {
+  color: var(--brand-purple-6-purple-4);
+  border-bottom-color: var(--brand-purple-6-purple-4);
+  font-weight: 600;
+}
+
 /* ─── Slide Panel ────────────────────────────────────────────── */
 
 .slide-panel-overlay {
@@ -1042,3 +1086,56 @@ h6 {
 }
 .actions-menu-item:hover:not(:disabled) { background: var(--ui-purple-7-lightest-lavendar); }
 .actions-menu-item:disabled { color: var(--greyscale-11-grey-80); cursor: default; }
+
+/* ── Resizable columns (Components/useSharedColumnWidths.js) ─────
+   Opt-in via an extra `resizable-table` class alongside `.data-table` —
+   table-layout:fixed + percentage <col> widths (set inline per-table via
+   the hook's colWidths) so the table always renders at exactly its
+   container's width, never wider — .table-wrap's own overflow-x:auto above
+   never actually triggers a scrollbar. The `.data-table.resizable-table`
+   compound selector out-specificities any single-class `min-width` rule a
+   given prototype's own CSS might already have on plain `.data-table`
+   (e.g. timesheets.css's 1200px floor, needed for that table's *other*,
+   non-resizable view) so opting a table into this doesn't require touching
+   that prototype's existing rule. */
+.data-table.resizable-table { table-layout: fixed; min-width: 0; }
+
+/* Every cell truncates rather than wrapping or overflowing once its column
+   is narrowed — the full value is still available via the td's own title
+   attribute on hover, where the consuming prototype sets one. Numeric/pill/
+   icon columns are unaffected in practice (their content is always short),
+   so this is safe to apply table-wide rather than special-casing only the
+   columns most likely to overflow. */
+.resizable-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* A thin invisible strip straddling each column's right border (already
+   drawn by .data-table th's own border-right), with a purple highlight on
+   hover/drag for affordance. .data-table th is already position:relative,
+   so this positions correctly with no other change needed. */
+.col-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 5;
+}
+.col-resize-handle:hover,
+.col-resize-handle:active {
+  background: var(--brand-purple-6-purple-4);
+  opacity: 0.5;
+}
+
+/* "Save column widths" control — sits wherever a table's own filter/sub-row
+   places it; only rendered while the current widths differ from the last
+   shared-saved value for that table, or briefly after a successful save. */
+.col-widths-save { display: flex; align-items: center; gap: 8px; }
+.col-widths-save-btn {
+  padding: 6px 12px; border-radius: 999px; border: none; background: none;
+  color: var(--brand-purple-5-purple-3); font-size: 16px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+}
+.col-widths-save-btn:hover:not(:disabled) { color: var(--brand-purple-6-purple-4); }
+.col-widths-save-btn:disabled { color: var(--greyscale-6-grey-50); cursor: default; }
+.col-widths-save-error { font-size: 13px; color: var(--rag-red-red-overdue-dark); }

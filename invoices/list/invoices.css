@@ -49,56 +49,11 @@ body {
   gap: 16px; padding: 10px 0; margin-bottom: 2px;
 }
 
-/* Sits on the far left of .inv-sub-row (margin-right:auto), separate from
-   the filter/pagination cluster on the right — only rendered while the
-   current column widths differ from the shared saved value, or briefly
-   after a successful save (see justSavedWidths in Invoices.jsx). */
-.inv-widths-save { display: flex; align-items: center; gap: 8px; margin-right: auto; }
-.inv-widths-save-btn {
-  padding: 6px 12px; border-radius: 999px; border: none; background: none;
-  color: var(--brand-purple-5-purple-3); font-size: 16px; font-weight: 500;
-  font-family: inherit; cursor: pointer;
-}
-.inv-widths-save-btn:hover:not(:disabled) { color: var(--brand-purple-6-purple-4); }
-.inv-widths-save-btn:disabled { color: var(--greyscale-6-grey-50); cursor: default; }
-.inv-widths-save-error { font-size: 13px; color: var(--rag-red-red-overdue-dark); }
-
-/* ── Table column widths & resizing ──────────────────────────────
-   table-layout:fixed + an explicit <colgroup> whose widths are PERCENTAGES
-   (see colWidths/COL_WIDTHS in Invoices.jsx) — the table itself is
-   width:100% of .table-wrap (Styles/main.css), so the columns always sum
-   to exactly the container's width. Nothing to overflow, so
-   .table-wrap's own overflow-x:auto never actually triggers a scrollbar.
-   Dragging a resize handle trades percentage-points between just the two
-   neighbouring columns, so the total never drifts from 100%. */
-.inv-table { table-layout: fixed; }
-
-/* Every cell truncates rather than wrapping or overflowing once its column
-   is narrowed — the full value is still available via the td's own title
-   attribute on hover. Numeric/pill/icon columns are unaffected in practice
-   (their content is always short), so this is safe to apply table-wide
-   rather than special-casing only the columns most likely to overflow. */
-.inv-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Column-resize handles — a thin invisible strip straddling each column's
-   right border (already drawn by .data-table th's own border-right), with
-   a purple highlight on hover/drag for affordance. .data-table th is
-   already position:relative (Styles/main.css), so this positions correctly
-   without any change needed there. */
-.inv-col-resize-handle {
-  position: absolute;
-  top: 0;
-  right: -4px;
-  width: 8px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 5;
-}
-.inv-col-resize-handle:hover,
-.inv-col-resize-handle:active {
-  background: var(--brand-purple-6-purple-4);
-  opacity: 0.5;
-}
+/* Positions the shared .col-widths-save control (Styles/main.css) on the
+   far left of .inv-sub-row, separate from the filter/pagination cluster on
+   the right — an Invoices-specific layout choice, not something the shared
+   class should assume for every table that uses it. */
+.inv-sub-row .col-widths-save { margin-right: auto; }
 
 /* ── Status / Paid pills (table) ─────────────────────────────── */
 .inv-status-to-approve { background: var(--rag-amber-amber-lightest);  color: var(--greyscale-2-grey-20); }

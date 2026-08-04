@@ -1,11 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import AddHolidayOrAbsencePage from './AddHolidayOrAbsencePage'
-import '../../../Styles/main.css'
+import HolidayReconciliation from './HolidayReconciliation'
 import '../../../Styles/colors.css'
-import '../../../Styles/modal.css'
-import '../holiday-absence-dialog.css'
-import 'react-datepicker/dist/react-datepicker.css'
+import '../../../Styles/main.css'
+import '../holiday-reconciliation.css'
 import '../../../Styles/dev-toolbar.css'
 import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
@@ -14,6 +12,6 @@ import '../../../Styles/wireframe-access.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AddHolidayOrAbsencePage />
+    <HolidayReconciliation />
   </React.StrictMode>
 )

@@ -1,11 +1,12 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { doc, addDoc, updateDoc, onSnapshot, query, collection, where, serverTimestamp } from 'firebase/firestore';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import ActionsMenu from '../../../Components/ActionsMenu';
 import Pagination from '../../../Components/Pagination';
 import AuthGate from '../../../Components/AuthGate';
+import ColLabel from '../../../Components/ColLabel';
+import ColResizeHandle from '../../../Components/ColResizeHandle';
+import useSharedColumnWidths from '../../../Components/useSharedColumnWidths';
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
@@ -13,9 +14,6 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { db, auth, SHARED_EMAIL } from '../../../Components/firebase';
-import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from '../../../Components/sharedAuthSession';
-import { getStoredAuthor, storeAuthor } from '../../../Components/authorIdentity';
 import { INVOICE_RECORDS, FUNDER_NAMES, CUSTOMER_NAMES, PAYMENT_METHODS, DELIVERY_METHODS, STATUSES, PAID_STATES, fmtGBP } from './data';
 import samplePdfUrl from './sample-invoice.pdf';
 
@@ -84,85 +82,13 @@ const toDateSortKey = (ddmmyyyy) => {
 const statusClass = s => s === 'Approved' ? 'inv-status-approved' : s === 'Sent' ? 'inv-status-sent' : 'inv-status-to-approve';
 const paidClass = p => p === 'Paid' ? 'inv-paid-yes' : 'inv-paid-no';
 
-// Two-word column headings drop their second word onto its own line, so a
-// narrower column doesn't need to widen just to fit its own label.
-const ColLabel = ({ children }) => {
-  const parts = String(children).split(' ');
-  return parts.length === 2 ? <span>{parts[0]}<br />{parts[1]}</span> : <span>{children}</span>;
-};
-
-// Starting proportions only — converted to percentages (see
-// initialColWidths below) so the table always renders at exactly the
+// Starting proportions only — converted to percentages inside
+// useSharedColumnWidths so the table always renders at exactly the
 // container's own width (table-layout:fixed + .data-table's existing
 // width:100%), never wider. Dragging a resize handle then trades
 // percentage-points between two neighbouring columns, so the total stays
 // at 100% no matter how the user resizes things.
 const RAW_COL_WIDTHS = [100, 90, 230, 140, 90, 90, 130, 110, 120, 110, 110, 110, 110, 90, 48, 60];
-const MIN_COL_PX = 48;
-
-function defaultColWidths() {
-  const total = RAW_COL_WIDTHS.reduce((a, b) => a + b, 0);
-  return RAW_COL_WIDTHS.map(w => (w / total) * 100);
-}
-
-// localStorage is now just a fast-paint cache (avoids a flash of default
-// widths before the shared Firestore value below has loaded) — the
-// Firestore doc is the real, shared source of truth once it arrives.
-// Validated on read: a shape mismatch (e.g. an older save from before a
-// column was added/removed) silently falls back to the defaults rather
-// than applying stale widths to the wrong columns.
-const COL_WIDTHS_STORAGE_KEY = 'invoices-list-col-widths';
-
-function loadColWidths() {
-  try {
-    const raw = localStorage.getItem(COL_WIDTHS_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length === RAW_COL_WIDTHS.length && parsed.every(n => typeof n === 'number' && n > 0)) {
-      return parsed;
-    }
-  } catch { /* ignore malformed/unavailable storage */ }
-  return null;
-}
-
-function widthsEqual(a, b) {
-  if (!a || !b || a.length !== b.length) return false;
-  return a.every((w, i) => Math.abs(w - b[i]) < 0.01);
-}
-
-// A thin draggable strip on a column's right edge. Trades width with its
-// immediate right-hand neighbour only (not a global reflow) — the simplest
-// model that keeps the table's total width constant while resizing.
-function ColResizeHandle({ onDrag }) {
-  const lastXRef = useRef(0);
-
-  const onMouseDown = e => {
-    e.preventDefault();
-    e.stopPropagation();
-    lastXRef.current = e.clientX;
-
-    const onMouseMove = e2 => {
-      const dx = e2.clientX - lastXRef.current;
-      lastXRef.current = e2.clientX;
-      onDrag(dx);
-    };
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  };
-
-  return (
-    <span
-      className="inv-col-resize-handle"
-      data-devmode-passthrough="true"
-      onMouseDown={onMouseDown}
-      onClick={e => e.stopPropagation()}
-    />
-  );
-}
 
 function downloadFile(url, filename) {
   const a = document.createElement('a');
@@ -209,166 +135,16 @@ export default function Invoices() {
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [previewRow, setPreviewRow] = useState(null);
 
-  const tableRef = useRef(null);
-  const [colWidths, setColWidths] = useState(() => loadColWidths() || defaultColWidths());
-
-  useEffect(() => {
-    try { localStorage.setItem(COL_WIDTHS_STORAGE_KEY, JSON.stringify(colWidths)); } catch { /* ignore unavailable storage */ }
-  }, [colWidths]);
-
-  // Set true the moment the user drags any handle this session — once true,
-  // incoming shared updates (below) stop auto-applying, so an in-progress
-  // local resize is never silently overwritten by someone else's save.
-  const hasUserResizedRef = useRef(false);
-
-  const resizeColumn = (index, dxPx) => {
-    hasUserResizedRef.current = true;
-    const tableWidth = tableRef.current?.getBoundingClientRect().width;
-    if (!tableWidth) return;
-    const deltaPct = (dxPx / tableWidth) * 100;
-    const minPct = (MIN_COL_PX / tableWidth) * 100;
-    setColWidths(prev => {
-      const next = [...prev];
-      let a = next[index] + deltaPct;
-      let b = next[index + 1] - deltaPct;
-      if (a < minPct) { b -= (minPct - a); a = minPct; }
-      if (b < minPct) { a -= (minPct - b); b = minPct; }
-      next[index] = Math.max(minPct, a);
-      next[index + 1] = Math.max(minPct, b);
-      return next;
-    });
-  };
-
-  // ── Shared column widths (live for every visitor, password-gated to save) ──
-  // Reads are open to everyone; a doc only exists once someone has actually
-  // saved. Scoped by prototypeId (not a fixed doc id) to match the existing
-  // Dev Comments/Dev Edit convention, in case a second resizable table ever
-  // reuses this same collection.
-  const [activeColWidths, setActiveColWidths] = useState(null);
-  const activeDocIdRef = useRef(null);
-
-  const [authUser, setAuthUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [authorName, setAuthorName] = useState(() => getStoredAuthor());
-  const isAuthed = !!authUser;
-
-  const [gateStep, setGateStep] = useState(null); // null | 'password' | 'name'
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState(null);
-  const [signingIn, setSigningIn] = useState(false);
-  const [nameInput, setNameInput] = useState('');
-
-  const [savingWidths, setSavingWidths] = useState(false);
-  const [saveWidthsError, setSaveWidthsError] = useState(null);
-  const [justSavedWidths, setJustSavedWidths] = useState(false);
-  const justSavedTimeoutRef = useRef(null);
-
-  // Gated on hasUserResizedRef, not merely "no shared value exists yet" —
-  // otherwise a brand-new visitor who hasn't touched a handle would see a
-  // "Save column widths" prompt the instant the page loads, just because
-  // nobody's ever saved a shared default. Matches Dev Edit's own dirty
-  // tracking: only what *this session* actually changed counts.
-  const widthsDirty = hasUserResizedRef.current && (!activeColWidths || !widthsEqual(colWidths, activeColWidths));
-
-  useEffect(() => {
-    return onAuthStateChanged(auth, user => {
-      if (user) {
-        if (isSessionExpired()) { clearSignInAt(); signOut(auth); return; }
-        if (getSignInAt() === null) setSignInAt(Date.now());
-      } else {
-        clearSignInAt();
-      }
-      setAuthUser(user);
-      setAuthReady(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, 'invoices_column_widths'), where('prototypeId', '==', window.location.pathname));
-    return onSnapshot(q, snapshot => {
-      const d = snapshot.docs[0];
-      if (!d) return;
-      const data = d.data();
-      activeDocIdRef.current = d.id;
-      if (Array.isArray(data.widths) && data.widths.length === RAW_COL_WIDTHS.length) {
-        setActiveColWidths(data.widths);
-      }
-    }, err => console.error('Invoices: shared column-width subscription failed', err));
-  }, []);
-
-  // The actual "live for everyone" behaviour: whenever a new shared value
-  // arrives and the user hasn't touched a resize handle this session, adopt
-  // it immediately — including the very first load, which is what makes a
-  // fresh visit show whatever was last saved rather than the hardcoded
-  // defaults.
-  useEffect(() => {
-    if (activeColWidths && !hasUserResizedRef.current) {
-      setColWidths(activeColWidths);
-    }
-  }, [activeColWidths]);
-
-  const performSaveWidths = async () => {
-    setSavingWidths(true);
-    setSaveWidthsError(null);
-    try {
-      const payload = { prototypeId: window.location.pathname, widths: colWidths, authorName: authorName.trim(), updatedAt: serverTimestamp() };
-      if (activeDocIdRef.current) {
-        await updateDoc(doc(db, 'invoices_column_widths', activeDocIdRef.current), payload);
-      } else {
-        const ref = await addDoc(collection(db, 'invoices_column_widths'), payload);
-        activeDocIdRef.current = ref.id;
-      }
-      hasUserResizedRef.current = false;
-      clearTimeout(justSavedTimeoutRef.current);
-      setJustSavedWidths(true);
-      justSavedTimeoutRef.current = setTimeout(() => setJustSavedWidths(false), 2000);
-      return true;
-    } catch (err) {
-      setSaveWidthsError(err.message || 'Failed to save');
-      return false;
-    } finally {
-      setSavingWidths(false);
-    }
-  };
-
-  // Mirrors Components/DevEdit.jsx's/the Wireframe tool's own
-  // toggleActive/requestSave gate logic exactly: save immediately if
-  // already signed in with a name on file, otherwise open the password/name
-  // gate, which resumes the save itself once satisfied.
-  const requestSaveWidths = () => {
-    if (!authReady) return;
-    if (isAuthed && isSessionExpired()) { clearSignInAt(); signOut(auth); setGateStep('password'); return; }
-    if (!isAuthed) { setGateStep('password'); return; }
-    if (!authorName.trim()) { setGateStep('name'); return; }
-    performSaveWidths();
-  };
-
-  const submitPassword = async () => {
-    if (!passwordInput || signingIn) return;
-    setSigningIn(true);
-    setPasswordError(null);
-    try {
-      await signInWithEmailAndPassword(auth, SHARED_EMAIL, passwordInput);
-      setPasswordInput('');
-      if (authorName.trim()) { setGateStep(null); performSaveWidths(); }
-      else setGateStep('name');
-    } catch {
-      setPasswordError('Incorrect password');
-    } finally {
-      setSigningIn(false);
-    }
-  };
-
-  const submitName = () => {
-    const trimmed = nameInput.trim();
-    if (!trimmed) return;
-    storeAuthor(trimmed);
-    setAuthorName(trimmed);
-    setGateStep(null);
-    performSaveWidths();
-  };
-
-  const closeGate = () => setGateStep(null);
+  const {
+    tableRef, colWidths, resizeColumn,
+    widthsDirty, savingWidths, justSavedWidths, saveWidthsError, requestSaveWidths,
+    gateStep, passwordInput, setPasswordInput, passwordError, signingIn,
+    nameInput, setNameInput, submitPassword, submitName, closeGate,
+  } = useSharedColumnWidths({
+    rawWidths: RAW_COL_WIDTHS,
+    storageKey: 'invoices-list-col-widths',
+    prototypeId: window.location.pathname,
+  });
 
   const [startDate, endDate] = dateRange;
 
@@ -562,11 +338,11 @@ export default function Invoices() {
 
         <div className="inv-sub-row">
           {(widthsDirty || justSavedWidths) && (
-            <div className="inv-widths-save">
-              <button className="inv-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
+            <div className="col-widths-save">
+              <button className="col-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
                 {savingWidths ? 'Saving…' : (justSavedWidths && !widthsDirty) ? 'Saved ✓' : 'Save column widths'}
               </button>
-              {saveWidthsError && <span className="inv-widths-save-error">{saveWidthsError}</span>}
+              {saveWidthsError && <span className="col-widths-save-error">{saveWidthsError}</span>}
             </div>
           )}
           {anyFilter && <button className="clear-btn" onClick={clearAllFilters}><CloseIcon /> Clear</button>}
@@ -576,7 +352,7 @@ export default function Invoices() {
         </div>
 
         <div className="table-wrap">
-          <table className="data-table inv-table" ref={tableRef}>
+          <table className="data-table resizable-table" ref={tableRef}>
             <colgroup>
               {colWidths.map((w, i) => <col key={i} style={{ width: `${w}%` }} />)}
             </colgroup>

@@ -2,6 +2,10 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from './FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import AuthGate from '../../../Components/AuthGate';
+import ColLabel from '../../../Components/ColLabel';
+import ColResizeHandle from '../../../Components/ColResizeHandle';
+import useSharedColumnWidths from '../../../Components/useSharedColumnWidths';
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
@@ -100,6 +104,11 @@ const COL_LABELS = {
   visits: 'Visits', runs: 'Runs', travelMins: 'Travel time',
   waitMins: 'Wait time', mileage: 'Mileage', expenses: 'Expenses', holiday: 'Holidays',
 };
+
+// Employee, Contract, 7×SORTABLE_COLS, Pay verified, Invoice verified, Pay
+// checkbox, Invoice checkbox — 13 columns, matching the header <th> order
+// below exactly. Starting proportions only (see Components/useSharedColumnWidths.js).
+const RAW_COL_WIDTHS = [150, 120, 100, 100, 100, 100, 110, 120, 105, 120, 130, 60, 70];
 
 // ─── Holiday Panel ───────────────────────────────────────────────────────────
 
@@ -743,6 +752,17 @@ export default function Timesheets() {
   const pageRef = useRef(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+  const {
+    tableRef, colWidths, resizeColumn,
+    widthsDirty, savingWidths, justSavedWidths, saveWidthsError, requestSaveWidths,
+    gateStep, passwordInput, setPasswordInput, passwordError, signingIn,
+    nameInput, setNameInput, submitPassword, submitName, closeGate,
+  } = useSharedColumnWidths({
+    rawWidths: RAW_COL_WIDTHS,
+    storageKey: 'timesheets-filters-col-widths',
+    prototypeId: window.location.pathname,
+  });
+
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('employee');
     if (slug) {
@@ -1089,6 +1109,14 @@ export default function Timesheets() {
                 <CloseIcon /> Clear
               </button>
             )}
+            {(widthsDirty || justSavedWidths) && (
+              <div className="col-widths-save">
+                <button className="col-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
+                  {savingWidths ? 'Saving…' : (justSavedWidths && !widthsDirty) ? 'Saved ✓' : 'Save column widths'}
+                </button>
+                {saveWidthsError && <span className="col-widths-save-error">{saveWidthsError}</span>}
+              </div>
+            )}
           </div>
 
           <div className="filter-bar-right">
@@ -1107,12 +1135,15 @@ export default function Timesheets() {
 
         {/* Table */}
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table resizable-table" ref={tableRef}>
+            <colgroup>
+              {colWidths.map((w, i) => <col key={i} style={{ width: `${w}%` }} />)}
+            </colgroup>
             <thead>
               <tr>
                 {/* Employee — filterable */}
                 <th className="th-name">
-                  <span>Employee</span>
+                  <ColLabel>Employee</ColLabel>
                   <button
                     ref={el => anchorRefs.current['emp'] = el}
                     data-devmode-passthrough="true"
@@ -1131,11 +1162,12 @@ export default function Timesheets() {
                     onClose={closeDropdown}
                     anchorEl={anchorRefs.current['emp']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(0, dx)} />
                 </th>
 
                 {/* Contract — filterable */}
                 <th>
-                  <span>Contract</span>
+                  <ColLabel>Contract</ColLabel>
                   <button
                     ref={el => anchorRefs.current['contract'] = el}
                     data-devmode-passthrough="true"
@@ -1153,21 +1185,23 @@ export default function Timesheets() {
                     onClose={closeDropdown}
                     anchorEl={anchorRefs.current['contract']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(1, dx)} />
                 </th>
 
                 {/* Sortable numeric columns */}
-                {SORTABLE_COLS.map(col => (
+                {SORTABLE_COLS.map((col, i) => (
                   <th key={col} className={`th-num ${sort.col === col ? 'sorted' : ''}`}>
-                    <span>{COL_LABELS[col]}</span>
+                    <ColLabel>{COL_LABELS[col]}</ColLabel>
                     <button className="col-icon-btn" onClick={() => toggleSort(col)}>
                       <SortIcon dir={sort.col === col ? sort.dir : null} />
                     </button>
+                    <ColResizeHandle onDrag={dx => resizeColumn(2 + i, dx)} />
                   </th>
                 ))}
 
                 {/* Pay verified — filterable */}
                 <th>
-                  <span>Pay verified</span>
+                  <ColLabel>Pay verified</ColLabel>
                   <button
                     ref={el => anchorRefs.current['payVer'] = el}
                     data-devmode-passthrough="true"
@@ -1186,11 +1220,12 @@ export default function Timesheets() {
                     onClose={closeDropdown}
                     anchorEl={anchorRefs.current['payVer']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(9, dx)} />
                 </th>
 
                 {/* Invoice verified — filterable */}
                 <th>
-                  <span>Invoice verified</span>
+                  <ColLabel>Invoice verified</ColLabel>
                   <button
                     ref={el => anchorRefs.current['invVer'] = el}
                     data-devmode-passthrough="true"
@@ -1209,6 +1244,7 @@ export default function Timesheets() {
                     onClose={closeDropdown}
                     anchorEl={anchorRefs.current['invVer']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(10, dx)} />
                 </th>
 
                 {/* Pay checkbox */}
@@ -1220,6 +1256,7 @@ export default function Timesheets() {
                     </label>
                     <span>Pay</span>
                   </div>
+                  <ColResizeHandle onDrag={dx => resizeColumn(11, dx)} />
                 </th>
 
                 {/* Invoice checkbox */}
@@ -1288,6 +1325,19 @@ export default function Timesheets() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
+
+      {gateStep && (
+        <AuthGate
+          step={gateStep}
+          passwordTitle="Enter password to save column widths"
+          password={passwordInput} setPassword={setPasswordInput}
+          passwordError={passwordError} signingIn={signingIn}
+          onSubmitPassword={submitPassword}
+          name={nameInput} setName={setNameInput}
+          onSubmitName={submitName}
+          onClose={closeGate}
+        />
+      )}
       </div>
     </>
   );

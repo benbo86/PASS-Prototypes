@@ -1,19 +1,19 @@
-import { useState, useRef, forwardRef } from 'react'
+import { useState, forwardRef } from 'react'
 import Select, { components } from 'react-select'
 import DatePicker from 'react-datepicker'
-import DevToolbar from '../../../Components/DevToolbar'
-import DevMode from '../../../Components/DevMode'
-import DevComments from '../../../Components/DevComments'
-import DevEdit from '../../../Components/DevEdit'
-import WireframeToggle from '../../../Components/WireframeToggle'
-import AuditCapture from '../../../Components/AuditCapture'
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
-const ChevronLeftIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <polygon fill="currentColor" points="15.4 7.4 14 6 8 12 14 18 15.4 16.6 10.8 12" />
-  </svg>
-)
+// Extracted from holiday-absences/assign-visits-on-holiday/src/HolidayAbsenceDialog.jsx
+// (now that prototype's src/AddHolidayOrAbsencePage.jsx) so it can be reused
+// and pre-populated from other flows (e.g. schedule/leave-requests' Approve
+// action) — the original was a standalone demo with zero props and no real
+// close/confirm callbacks. All props default to that original's own
+// hardcoded values, so a caller that renders this with no props at all gets
+// byte-for-byte the same look/behaviour as before this extraction.
+//
+// Renders only the modal box itself (`.modal.modal-add-absence`) — no
+// scrim/overlay/page chrome — so callers decide how to frame it: a full-page
+// `.modal-page-wrap` for a bare demo page, or a `.modal-overlay` scrim over
+// real page content elsewhere.
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -79,8 +79,6 @@ const WarningIcon = () => (
   </svg>
 )
 
-// ── react-select: custom chevron matching the existing design ─────────────────
-
 const DropdownIndicator = (props) => (
   <components.DropdownIndicator {...props}>
     <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -88,8 +86,6 @@ const DropdownIndicator = (props) => (
     </svg>
   </components.DropdownIndicator>
 )
-
-// ── DatePicker: custom inputs preserving input-wrap / input-icon markup ────────
 
 const DateInput = forwardRef(({ value, onClick }, ref) => (
   <div className="input-wrap">
@@ -106,8 +102,6 @@ const TimeInput = forwardRef(({ value, onClick }, ref) => (
   </div>
 ))
 TimeInput.displayName = 'TimeInput'
-
-// ── react-select styles matching existing input design ────────────────────────
 
 const SELECT_STYLES = {
   control: (base, { isFocused }) => ({
@@ -152,46 +146,40 @@ const SELECT_STYLES = {
   }),
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-
-const EMPLOYEES = [
+export const EMPLOYEES = [
   { value: 'amirah', label: 'Amirah Marsden' },
   { value: 'sarah',  label: 'Sarah Mitchell' },
   { value: 'james',  label: 'James Okafor' },
 ]
 
-const ABSENCE_TYPES = [
+export const ABSENCE_TYPES = [
   { value: 'holiday',   label: 'Holiday' },
   { value: 'sickness',  label: 'Sickness' },
   { value: 'other',     label: 'Other' },
 ]
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
-export default function HolidayAbsenceDialog() {
-  const pageRef = useRef(null)
+export default function HolidayAbsenceDialog({
+  employee: employeeProp,
+  absenceType: absenceTypeProp,
+  startDate: startDateProp,
+  endDate: endDateProp,
+  startTime: startTimeProp,
+  endTime: endTimeProp,
+  onClose,
+  onConfirm,
+}) {
   const [step,        setStep]        = useState(1)
-  const [employee,    setEmployee]    = useState(EMPLOYEES[0])
-  const [absenceType, setAbsenceType] = useState(ABSENCE_TYPES[0])
-  const [startDate,   setStartDate]   = useState(new Date(2026, 3, 30))
-  const [endDate,     setEndDate]     = useState(new Date(2026, 4, 1))
-  const [startTime,   setStartTime]   = useState(new Date(2026, 0, 1, 0, 0))
-  const [endTime,     setEndTime]     = useState(new Date(2026, 0, 1, 0, 0))
+  const [employee,    setEmployee]    = useState(employeeProp || EMPLOYEES[0])
+  const [absenceType, setAbsenceType] = useState(absenceTypeProp || ABSENCE_TYPES[0])
+  const [startDate,   setStartDate]   = useState(startDateProp || new Date(2026, 3, 30))
+  const [endDate,     setEndDate]     = useState(endDateProp || new Date(2026, 4, 1))
+  const [startTime,   setStartTime]   = useState(startTimeProp || new Date(2026, 0, 1, 0, 0))
+  const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState('keep')
 
   return (
-    <>
-      <DevToolbar>
-        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <DevMode containerRef={pageRef} />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <AuditCapture containerRef={pageRef} />
-      </DevToolbar>
-      <div ref={pageRef} className="modal-page-wrap">
-      <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
-      <div className="modal modal-add-absence">
-      <button className="modal-close-btn" aria-label="Close"><CloseIcon /></button>
+    <div className="modal modal-add-absence">
+      <button className="modal-close-btn" aria-label="Close" onClick={onClose}><CloseIcon /></button>
 
       {step === 1 && (
         <div>
@@ -332,15 +320,13 @@ export default function HolidayAbsenceDialog() {
             <button className="round-btn secondary-btn" onClick={() => setStep(1)}>Back</button>
             <button
               className="round-btn primary-btn"
-              onClick={() => alert(`Holiday booked. Visits: ${option === 'keep' ? 'Keep assigned' : 'Move to unassigned'}`)}
+              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option })}
             >
               Confirm
             </button>
           </div>
         </div>
       )}
-      </div>
-      </div>
-    </>
+    </div>
   )
 }

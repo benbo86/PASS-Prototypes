@@ -238,7 +238,7 @@ const THREAD_MESSAGES = {
 // ─── Inbox Screen ────────────────────────────────────────────
 
 function ThreadRow({ thread, onClick, showArchivedTag }) {
-  const isUnread = thread.unread > 0
+  const isUnread = thread.unread
   return (
     <div className="thread-row-outer" onClick={onClick}>
       <div className="thread-row">
@@ -260,7 +260,7 @@ function ThreadRow({ thread, onClick, showArchivedTag }) {
             </div>
             <div className="thread-right-meta">
               {isUnread
-                ? <span className="unread-badge">{thread.unread}</span>
+                ? <span className="unread-badge" aria-label="Unread" />
                 : thread.sentByMe && (
                     thread.deliveredNotRead
                       ? <CheckSentIcon />
@@ -1009,7 +1009,7 @@ export default function App() {
   const threadScreenRef = useRef(null)
 
   const [messageBadge, setMessageBadge] = useState(() =>
-    THREADS.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
+    THREADS.filter(t => !t.archivedByCarer && t.unread).length
   )
 
   useEffect(() => {
@@ -1017,7 +1017,7 @@ export default function App() {
     markMessagesRead()
   }, [])
 
-  const totalUnread = threads.filter(t => !t.archivedByCarer).reduce((sum, t) => sum + t.unread, 0)
+  const totalUnread = threads.filter(t => !t.archivedByCarer && t.unread).length
 
   const handleOpenActions = (msg, rect) => {
     if (actionTarget?.id === msg.id) { setActionTarget(null); return }
@@ -1037,7 +1037,7 @@ export default function App() {
   }
 
   const handleMarkUnread = (id) => {
-    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 1 } : t))
+    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: true } : t))
   }
 
   const openCompose = () => {
@@ -1054,7 +1054,7 @@ export default function App() {
 
   const openThread = (id) => {
     setActiveThreadId(id)
-    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: 0 } : t))
+    setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: false } : t))
     setView('thread')
   }
 
@@ -1066,7 +1066,7 @@ export default function App() {
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: 0, ...(wasArchived ? { archivedByCarer: false } : {}) },
+        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: false, ...(wasArchived ? { archivedByCarer: false } : {}) },
         ...rest,
       ]
     })
@@ -1101,7 +1101,7 @@ export default function App() {
       lastSender: 'You',
       lastMessage: message,
       time: 'Just now',
-      unread: 0,
+      unread: false,
       sentByMe: true,
       deliveredNotRead: true,
     }

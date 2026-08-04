@@ -475,18 +475,16 @@ body { overflow: hidden; }
   margin-top: 4px;
 }
 
+/* A plain unread indicator, not a count — this thread is either unread or
+   it isn't (no per-message read tracking backs a real number), matching
+   the read/unread-flag model most messaging apps use for a manually
+   "marked unread" item (iMessage/WhatsApp/Outlook) rather than a
+   last-read-marker count (Slack/Gmail-style). */
 .msg-unread-badge {
-  width: 18px;
-  height: 18px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--brand-purple-6-purple-4);
-  color: #fff;
-  font-family: Barlow, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
 

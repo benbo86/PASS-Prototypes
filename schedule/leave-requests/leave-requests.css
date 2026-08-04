@@ -1,0 +1,89 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { background: #fff; min-height: 100vh; }
+
+/* ── Page shell (SideNav + TopNav + ScheduleNav) ─────────────────
+   Same shape as office/details/details.css's .office-page/.office-content
+   — a flex-row root with SideNav as the first child, everything else
+   inside .page-body (Styles/main.css). */
+.schedule-page { display: flex; flex-direction: row; min-height: 100vh; }
+
+.lr-content {
+  flex: 1;
+  padding: 40px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+/* ── Page header ──────────────────────────────────────────────── */
+.lr-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px;
+}
+.lr-page-header h1 { margin-bottom: 0; white-space: nowrap; }
+
+.lr-date-nav { display: flex; align-items: center; gap: 12px; }
+.lr-date-nav .react-datepicker-wrapper { width: auto; }
+#lr-datepicker-portal .react-datepicker-popper { z-index: 9999; }
+
+.lr-nav-arrow {
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s; padding: 0;
+}
+.lr-nav-arrow:hover:not(:disabled) { color: var(--ui-purple-2-glossy-grape); }
+.lr-nav-arrow:disabled { color: var(--ui-purple-5-languid-lavendar); cursor: default; }
+
+/* ── Sub-row (showing / pagination) ──────────────────────────── */
+.lr-sub-row {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 16px; padding: 10px 0; margin-bottom: 2px;
+}
+.lr-sub-row .col-widths-save { margin-right: auto; }
+
+/* ── Status pills ────────────────────────────────────────────── */
+.lr-status-pending   { background: var(--ui-purple-6-lavendar-grey);   color: var(--greyscale-2-grey-20); }
+.lr-status-approved  { background: var(--rag-green-green-lightest);   color: var(--rag-green-green-3-aa); }
+.lr-status-awaiting  { background: var(--rag-amber-amber-lightest);   color: var(--greyscale-2-grey-20); }
+.lr-status-cancelled { background: var(--greyscale-13-grey-90);        color: var(--greyscale-4-grey-40); }
+
+/* ── Actions column ───────────────────────────────────────────── */
+.lr-actions { display: flex; gap: 12px; }
+.lr-action-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--brand-purple-5-purple-3); font-size: 14px; font-weight: 500; font-family: inherit;
+}
+.lr-action-btn:hover { color: var(--brand-purple-6-purple-4); text-decoration: underline; }
+
+.lr-cancelled-note {
+  display: inline-block; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--greyscale-6-grey-50); font-size: 14px;
+  vertical-align: middle;
+}
+
+/* ── Cancel dialog ────────────────────────────────────────────── */
+.lr-cancel-summary {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-radius: 8px; padding: 16px 20px; margin-bottom: 20px;
+}
+.lr-cancel-summary > div { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+.lr-cancel-label { color: var(--greyscale-6-grey-50); }
+
+/* modal.css styles select/input[type="text"] but not textarea */
+textarea {
+  width: 100%;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  color: var(--greyscale-2-grey-20);
+  background: #fff;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.15s;
+  outline: none;
+}
+textarea:focus { border-color: var(--brand-purple-6-purple-4); }

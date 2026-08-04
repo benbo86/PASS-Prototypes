@@ -2,6 +2,10 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
+import AuthGate from '../../../Components/AuthGate';
+import ColLabel from '../../../Components/ColLabel';
+import ColResizeHandle from '../../../Components/ColResizeHandle';
+import useSharedColumnWidths from '../../../Components/useSharedColumnWidths';
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode';
 import DevComments from '../../../Components/DevComments';
@@ -467,8 +471,24 @@ function GPADetail({ record, onBack }) {
 const L1_SORTABLE_COLS = ['cycleFrom', 'cycleTo', 'visitShiftPay', 'holidayPay', 'mileagePay', 'total'];
 const DATE_COLS = ['cycleFrom', 'cycleTo'];
 
+// GPA Reference, Employee, 6×L1_SORTABLE_COLS, Status — 9 columns, matching
+// the header <th> order below exactly. Starting proportions only (see
+// Components/useSharedColumnWidths.js).
+const RAW_COL_WIDTHS = [110, 150, 100, 100, 140, 110, 100, 100, 100];
+
 export default function GrossPayAdvice() {
   const [selectedRecord, setSelectedRecord] = useState(null);
+
+  const {
+    tableRef, colWidths, resizeColumn,
+    widthsDirty, savingWidths, justSavedWidths, saveWidthsError, requestSaveWidths,
+    gateStep, passwordInput, setPasswordInput, passwordError, signingIn,
+    nameInput, setNameInput, submitPassword, submitName, closeGate,
+  } = useSharedColumnWidths({
+    rawWidths: RAW_COL_WIDTHS,
+    storageKey: 'gpa-holiday-deduction-col-widths',
+    prototypeId: window.location.pathname,
+  });
 
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('employee');
@@ -609,6 +629,14 @@ export default function GrossPayAdvice() {
         </div>
 
         <div className="gpa-sub-row">
+          {(widthsDirty || justSavedWidths) && (
+            <div className="col-widths-save">
+              <button className="col-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
+                {savingWidths ? 'Saving…' : (justSavedWidths && !widthsDirty) ? 'Saved ✓' : 'Save column widths'}
+              </button>
+              {saveWidthsError && <span className="col-widths-save-error">{saveWidthsError}</span>}
+            </div>
+          )}
           {anyFilter && <button className="clear-btn" onClick={clearAllFilters}><CloseIcon /> Clear</button>}
           <span className="count-label">Showing: {showStart} – {showEnd} of {totalRows}</span>
           <button className="gpa-nav-arrow pag-inline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}><ChevronLeft /></button>
@@ -616,11 +644,14 @@ export default function GrossPayAdvice() {
         </div>
 
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table resizable-table" ref={tableRef}>
+            <colgroup>
+              {colWidths.map((w, i) => <col key={i} style={{ width: `${w}%` }} />)}
+            </colgroup>
             <thead>
               <tr>
                 <th>
-                  <span>GPA Reference</span>
+                  <ColLabel>GPA Reference</ColLabel>
                   <button ref={el => anchorRefs.current['gpaRef'] = el}
                     className={`col-icon-btn ${gpaRefFilter.search ? 'col-icon-btn--active' : ''}`}
                     data-devmode-passthrough="true"
@@ -633,9 +664,10 @@ export default function GrossPayAdvice() {
                     searchOnly hasSort={false}
                     isOpen={openDD === 'gpaRef'} onClose={closeDropdown} anchorEl={anchorRefs.current['gpaRef']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(0, dx)} />
                 </th>
                 <th>
-                  <span>Employee</span>
+                  <ColLabel>Employee</ColLabel>
                   <button ref={el => anchorRefs.current['emp'] = el}
                     className={`col-icon-btn ${empFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     data-devmode-passthrough="true"
@@ -648,13 +680,15 @@ export default function GrossPayAdvice() {
                     hasNameSort
                     isOpen={openDD === 'emp'} onClose={closeDropdown} anchorEl={anchorRefs.current['emp']}
                   />
+                  <ColResizeHandle onDrag={dx => resizeColumn(1, dx)} />
                 </th>
-                {[['cycleFrom','Cycle from'],['cycleTo','Cycle to'],['visitShiftPay','Visit / Shift pay'],['holidayPay','Holiday pay'],['mileagePay','Mileage'],['total','Total']].map(([col, label]) => (
+                {[['cycleFrom','Cycle from'],['cycleTo','Cycle to'],['visitShiftPay','Visit / Shift pay'],['holidayPay','Holiday pay'],['mileagePay','Mileage'],['total','Total']].map(([col, label], i) => (
                   <th key={col} className={`${['visitShiftPay','holidayPay','mileagePay','total'].includes(col) ? 'th-num ' : ''}${sort.col === col ? 'sorted' : ''}`}>
-                    <span>{label}</span>
+                    <ColLabel>{label}</ColLabel>
                     <button className="col-icon-btn" onClick={() => toggleSort(col)}>
                       <SortIcon dir={sort.col === col ? sort.dir : null} />
                     </button>
+                    <ColResizeHandle onDrag={dx => resizeColumn(2 + i, dx)} />
                   </th>
                 ))}
                 <th><span>Status</span></th>
@@ -690,6 +724,19 @@ export default function GrossPayAdvice() {
           onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1); }}
         />
       </div>
+
+      {gateStep && (
+        <AuthGate
+          step={gateStep}
+          passwordTitle="Enter password to save column widths"
+          password={passwordInput} setPassword={setPasswordInput}
+          passwordError={passwordError} signingIn={signingIn}
+          onSubmitPassword={submitPassword}
+          name={nameInput} setName={setNameInput}
+          onSubmitName={submitName}
+          onClose={closeGate}
+        />
+      )}
       </div>
     </>
   );

@@ -1,0 +1,63 @@
+/* ── Page layout ─────────────────────────────────────────────────────────────── */
+.hr-page {
+  max-width: 940px;
+  margin: 48px auto;
+  padding: 0 24px 80px;
+}
+
+.hr-section { margin-top: 32px; }
+.hr-section h1 { margin-bottom: 16px; }
+
+/* ── Simulate toggle ─────────────────────────────────────────────────────────── */
+.hr-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--greyscale-2-grey-20);
+  cursor: pointer;
+}
+.hr-toggle input { cursor: pointer; }
+
+/* ── Summary stat cards ──────────────────────────────────────────────────────── */
+.hr-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.hr-stat-card {
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  padding: 16px 24px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.hr-stat-label {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+  line-height: 1.4;
+}
+.hr-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.3;
+}
+
+/* Reconciliation note — sits under the Remaining figure specifically, so the
+   number that doesn't match the other three boxes' arithmetic explains
+   itself without needing the warning banner below to be read first. Shown
+   as days paid out, not a minus figure — unused days on a leaver's contract
+   get paid in lieu, they aren't forfeited. */
+.hr-stat-note {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ui-purple-2-glossy-grape);
+  line-height: 1.3;
+}
