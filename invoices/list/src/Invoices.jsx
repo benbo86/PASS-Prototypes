@@ -596,7 +596,12 @@ export default function Invoices() {
                 <CloseIcon />
               </button>
             </div>
-            <iframe className="inv-preview-iframe" src={samplePdfUrl} title={`Invoice ${previewRow.invoiceNo} preview`} />
+            {/* #toolbar=0&navpanes=0&scrollbar=0 is a browser-native-PDF-viewer
+                convention (Chrome/Firefox both honour it) — a best-effort hint
+                via the URL, not something the page can enforce; it hides the
+                built-in toolbar/sidebar/scrollbar chrome so only the document
+                itself shows inside the panel. */}
+            <iframe className="inv-preview-iframe" src={`${samplePdfUrl}#toolbar=0&navpanes=0&scrollbar=0`} title={`Invoice ${previewRow.invoiceNo} preview`} />
           </div>
         </div>
       )}
