@@ -16,12 +16,18 @@ body { background: #fff; min-height: 100vh; }
 
 /* ── Page header ──────────────────────────────────────────────── */
 .lr-page-header {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 24px;
+  display: flex; align-items: center;
+  gap: 16px; margin-bottom: 24px; position: relative;
 }
 .lr-page-header h1 { margin-bottom: 0; white-space: nowrap; }
 
-.lr-date-nav { display: flex; align-items: center; gap: 12px; }
+/* Truly centered in the header regardless of the title's width (there's no
+   right-hand button cluster here to balance a flex space-between against,
+   unlike Invoices/GPA/Timesheets' 3-column headers). */
+.lr-date-nav {
+  display: flex; align-items: center; gap: 12px;
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+}
 .lr-date-nav .react-datepicker-wrapper { width: auto; }
 #lr-datepicker-portal .react-datepicker-popper { z-index: 9999; }
 
@@ -53,6 +59,22 @@ body { background: #fff; min-height: 100vh; }
   color: var(--brand-purple-5-purple-3); font-size: 14px; font-weight: 500; font-family: inherit;
 }
 .lr-action-btn:hover { color: var(--brand-purple-6-purple-4); text-decoration: underline; }
+
+/* Tooltip.jsx's .tooltip-wrap is display:inline-flex, and this note is its
+   flex-item child — flex items default to min-width:auto, which blocks
+   them from ever shrinking below their own text's full natural width.
+   That silently defeated max-width/overflow/ellipsis below (the wrap just
+   grew to fit the untruncated text, then the <td> hard-clipped the whole
+   oversized box with no "…", since a nested flex box breaks the browser's
+   own text-overflow ellipsis handling). Compound selector — .tooltip-wrap
+   is only ever present on the wrap div, never the portaled tooltip content
+   that also carries this same wrapClassName, so this can't leak into the
+   tooltip popup's own styling. */
+.tooltip-wrap.lr-cancelled-tooltip-wrap {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+}
 
 .lr-cancelled-note {
   display: inline-block; max-width: 100%;

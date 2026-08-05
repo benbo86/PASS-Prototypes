@@ -3,6 +3,8 @@ import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import Modal from '../../../Components/Modal';
+import Tooltip from '../../../Components/Tooltip';
+import AuthGate from '../../../Components/AuthGate';
 import ColLabel from '../../../Components/ColLabel';
 import ColResizeHandle from '../../../Components/ColResizeHandle';
 import useSharedColumnWidths from '../../../Components/useSharedColumnWidths';
@@ -108,6 +110,8 @@ export default function LeaveRequests() {
   const {
     tableRef, colWidths, resizeColumn,
     widthsDirty, savingWidths, justSavedWidths, saveWidthsError, requestSaveWidths,
+    gateStep, passwordInput, setPasswordInput, passwordError, signingIn,
+    nameInput, setNameInput, submitPassword, submitName, closeGate,
   } = useSharedColumnWidths({
     rawWidths: RAW_COL_WIDTHS,
     storageKey: 'schedule-leave-requests-col-widths',
@@ -377,9 +381,11 @@ export default function LeaveRequests() {
                       </span>
                     )}
                     {row.status === 'Cancelled' && (
-                      <span className="lr-cancelled-note" title={row.cancellationReason}>
-                        Cancelled — {row.cancellationReason}
-                      </span>
+                      <Tooltip text={row.cancellationReason} wrapClassName="lr-cancelled-tooltip-wrap">
+                        <span className="lr-cancelled-note">
+                          Cancelled — {row.cancellationReason}
+                        </span>
+                      </Tooltip>
                     )}
                   </td>
                 </tr>
@@ -402,12 +408,13 @@ export default function LeaveRequests() {
       </div>
 
       {approveRow && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproveRow(null) }}>
           <HolidayAbsenceDialog
             employee={{ value: approveRow.employee, label: approveRow.employee }}
             absenceType={{ value: 'holiday', label: 'Holiday' }}
             startDate={approveRow.fromDate}
             endDate={approveRow.toDate}
+            showVisitsStep={false}
             onClose={() => setApproveRow(null)}
             onConfirm={handleApproveConfirm}
           />
@@ -439,6 +446,19 @@ export default function LeaveRequests() {
             </button>
           </div>
         </Modal>
+      )}
+
+      {gateStep && (
+        <AuthGate
+          step={gateStep}
+          passwordTitle="Enter password to save column widths"
+          password={passwordInput} setPassword={setPasswordInput}
+          passwordError={passwordError} signingIn={signingIn}
+          onSubmitPassword={submitPassword}
+          name={nameInput} setName={setNameInput}
+          onSubmitName={submitName}
+          onClose={closeGate}
+        />
       )}
     </>
   );

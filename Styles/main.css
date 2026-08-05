@@ -551,13 +551,25 @@ h6 {
   align-items: center;
   color: var(--ui-purple-3-grape-grey);
   cursor: help;
-  line-height: 0;
+  /* No line-height override here — a zeroed value used to live on this
+     rule (fine for an icon-only trigger, but it inherits onto a text
+     trigger's own content and collapses its line box to zero height,
+     making it invisible/unhoverable). Hit twice now (employee-restricted-
+     hours' hours line, schedule/leave-requests' cancelled-reason note) —
+     removed at the root instead of leaving every future text-trigger
+     caller to remember its own workaround. align-items:center already
+     centers an icon-only child correctly with no line-height help needed. */
 }
+/* Portaled to document.body (Components/Tooltip.jsx) — position:fixed with
+   top/left set inline from the trigger's own getBoundingClientRect, not
+   position:absolute relative to .tooltip-wrap. Any ancestor with overflow
+   other than visible (a truncating table cell, a scrollable panel) would
+   otherwise silently clip this popup — portaling escapes that entirely,
+   matching FilterDropdown/DevComments/Modal/AuthGate's own established
+   pattern for the same problem. */
 .tooltip {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  transform: translate(-50%, -100%);
   background: #fff;
   color: var(--greyscale-2-grey-20);
   border: 1px solid var(--ui-purple-5-languid-lavendar);
@@ -573,8 +585,14 @@ h6 {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s;
-  z-index: 1000;
+  z-index: 20000;
 }
+.tooltip.tooltip-visible { opacity: 1; }
+/* Arrow always sits at the box's own bottom-center — even when the box has
+   been shifted off-center from its trigger by the viewport-edge clamp in
+   Tooltip.jsx's updatePosition, a plain centered tail reads as intentional,
+   where a tail dragged toward one corner to stay "accurate" reads as
+   broken. */
 .tooltip::before {
   content: '';
   position: absolute;
@@ -600,18 +618,19 @@ h6 {
    "appears above" placement would render partly above the viewport,
    invisible). Flips both the box position and the arrow, which otherwise
    would still point the wrong way (down, as if the trigger were above it,
-   when the trigger is now above the box instead). */
-.tooltip-wrap.tooltip-below .tooltip {
-  bottom: auto;
-  top: calc(100% + 10px);
+   when the trigger is now above the box instead). Applied directly on
+   .tooltip itself (not via a .tooltip-wrap ancestor combinator) since the
+   portaled tooltip is no longer a DOM descendant of its trigger's wrap. */
+.tooltip.tooltip-below {
+  transform: translate(-50%, 0);
 }
-.tooltip-wrap.tooltip-below .tooltip::before {
+.tooltip.tooltip-below::before {
   top: auto;
   bottom: 100%;
   border-top-color: transparent;
   border-bottom-color: var(--ui-purple-5-languid-lavendar);
 }
-.tooltip-wrap.tooltip-below .tooltip::after {
+.tooltip.tooltip-below::after {
   top: auto;
   bottom: 100%;
   margin-top: 0;
@@ -619,7 +638,6 @@ h6 {
   border-top-color: transparent;
   border-bottom-color: #fff;
 }
-.tooltip-wrap:hover .tooltip { opacity: 1; }
 
 /* ── Shared L2 header patterns ───────────────────────────────── */
 .ts-l2-header { margin-bottom: 16px; }

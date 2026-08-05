@@ -1,0 +1,61 @@
+/* Styles for Components/HolidayAbsenceDialog.jsx — moved here from
+   holiday-absences/assign-visits-on-holiday's own prototype-local CSS once
+   the dialog itself became a shared component, so every consumer (that
+   prototype's own demo page, and schedule/leave-requests' Approve flow)
+   renders it identically. schedule/leave-requests previously had no import
+   for this at all, which is why its date/time fields stacked vertically
+   instead of laying out in rows like the original demo. */
+
+.modal-add-absence h1 {
+  color: var(--greyscale-3-grey-30);
+}
+
+.modal-add-absence h2 {
+  margin-bottom: 12px;
+}
+
+.entitlement {
+  margin-bottom: 20px;
+}
+
+.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+
+.option-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option-card:hover { background: #fafafa; }
+.option-card.selected { border-color: var(--brand-purple-6-purple-4); }
+
+.radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #d1d5db;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+.radio.checked { border-color: #7c3aed; }
+.radio.checked::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-purple-6-purple-4);
+  display: block;
+}
+
+.opt-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px; }
+.opt-desc { color: var(--greyscale-3-grey-30); margin: 0; }

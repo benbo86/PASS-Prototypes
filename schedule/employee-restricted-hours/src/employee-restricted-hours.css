@@ -97,21 +97,24 @@
 
 .erh-hours-tooltip-wrap {
   display: inline-flex;
-  /* Overrides the shared .tooltip-wrap's own line-height:0 (main.css) — that
-     rule assumes an icon-sized trigger, and collapses the line box around
-     a text trigger like this one. No visual underline/border marks the
-     hover target anymore (removed per Ben — unclear what it was meant to
-     indicate); .tooltip-wrap's own cursor:help is the only affordance now,
-     same as every other Tooltip usage in this repo. */
-  line-height: normal;
+  /* No visual underline/border marks the hover target (removed per Ben —
+     unclear what it was meant to indicate); .tooltip-wrap's own cursor:help
+     is the only affordance now, same as every other Tooltip usage in this
+     repo. (The line-height:0 override this rule used to need is gone —
+     fixed at the root in Styles/main.css's own .tooltip-wrap instead.) */
 }
 
 /* This tooltip's text ("Scheduled / Weekly Contracted / Maximum term time")
    wraps to 2 lines at the shared component's default 260px max-width, which
    is tall enough to overlap the swim lane row below in this tightly packed
    (88px, no gap) list regardless of top/bottom placement. Widened just for
-   this instance so it renders on one line instead. */
-.erh-hours-tooltip-wrap .tooltip {
+   this instance so it renders on one line instead.
+   Compound selector, not a descendant combinator — Components/Tooltip.jsx
+   now portals the tooltip to document.body (see main.css's own comment on
+   .tooltip), so it's a sibling of .erh-hours-tooltip-wrap, not nested
+   inside it; wrapClassName is applied to both elements for exactly this
+   reason. */
+.tooltip.erh-hours-tooltip-wrap {
   max-width: 340px;
   white-space: nowrap;
 }

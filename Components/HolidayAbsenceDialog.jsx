@@ -165,6 +165,7 @@ export default function HolidayAbsenceDialog({
   endDate: endDateProp,
   startTime: startTimeProp,
   endTime: endTimeProp,
+  showVisitsStep = true,
   onClose,
   onConfirm,
 }) {
@@ -176,6 +177,17 @@ export default function HolidayAbsenceDialog({
   const [startTime,   setStartTime]   = useState(startTimeProp || new Date(2026, 0, 1, 0, 0))
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState('keep')
+
+  // Skips straight to confirming when the visits-affected warning/choice
+  // (step 2) doesn't apply to the calling flow — e.g. a leave request being
+  // approved has no "visits already assigned" context to weigh in on.
+  const handlePrimary = () => {
+    if (showVisitsStep) {
+      setStep(2)
+    } else {
+      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null })
+    }
+  }
 
   return (
     <div className="modal modal-add-absence">
@@ -275,12 +287,12 @@ export default function HolidayAbsenceDialog({
           </div>
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={() => setStep(2)}>Add absence</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary}>Add absence</button>
           </div>
         </div>
       )}
 
-      {step === 2 && (
+      {step === 2 && showVisitsStep && (
         <div>
           <h2>Add a Holiday or Absence</h2>
 
