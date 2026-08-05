@@ -8,15 +8,22 @@ const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 const between = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
 const r2 = (n) => Math.round(n * 100) / 100;
 
+// "Private" isn't a real funder — it's a funder *type*. A private-payer
+// customer's own funder is themselves (they pay directly, not via an LA/
+// NHS/council body), so Patricia Moore and Susan Roberts are each their own
+// named funder below rather than being lumped into one generic "Private"
+// bucket (AIOP-23432 — Ben: "this would be a funder type not an individual
+// funder... show some examples of private funders (who are often the
+// customers themselves)").
 export const CUSTOMERS = [
   { id: 1,  name: 'Margaret Wilson',  funder: 'NHS South East' },
   { id: 2,  name: 'Robert Taylor',    funder: 'Southwark Council' },
   { id: 3,  name: 'Dorothy Hughes',   funder: 'NHS South East' },
-  { id: 4,  name: 'Patricia Moore',   funder: 'Private' },
+  { id: 4,  name: 'Patricia Moore',   funder: 'Patricia Moore' },
   { id: 5,  name: 'James Anderson',   funder: 'Southwark Council' },
   { id: 6,  name: 'Helen Davies',     funder: 'NHS South East' },
   { id: 7,  name: 'Thomas Clarke',    funder: 'Southwark Council' },
-  { id: 8,  name: 'Susan Roberts',    funder: 'Private' },
+  { id: 8,  name: 'Susan Roberts',    funder: 'Susan Roberts' },
   { id: 9,  name: 'Frank Harrison',   funder: 'NHS South East' },
   { id: 10, name: 'Jean Campbell',    funder: 'Southwark Council' },
 ];
@@ -135,4 +142,24 @@ export function fmtMins(mins) {
 // Helper: format currency
 export function fmtGBP(n) {
   return `£${n.toFixed(2)}`;
+}
+
+// Groups the given visits by funder (AIOP-23432 — Funders timesheet view).
+// Each visit already carries a denormalized `funder` field from its
+// customer, so this is a plain groupBy — no new relationship needed.
+export function summarizeFunders(visits) {
+  const byFunder = new Map();
+  for (const v of visits) {
+    if (!byFunder.has(v.funder)) byFunder.set(v.funder, []);
+    byFunder.get(v.funder).push(v);
+  }
+  return FUNDERS.map(funder => {
+    const funderVisits = byFunder.get(funder) || [];
+    return {
+      funder,
+      visits: funderVisits.length,
+      expenses: funderVisits.reduce((sum, v) => sum + v.expenses, 0),
+      invVerCount: funderVisits.filter(v => v.invVerified).length,
+    };
+  });
 }

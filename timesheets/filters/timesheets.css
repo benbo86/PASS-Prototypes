@@ -6,11 +6,47 @@ body {
 }
 
 /* ── Page layout ─────────────────────────────────────────────── */
-.ts-page { min-height: 100vh; display: flex; flex-direction: column; margin-top:96px; }
+/* .ts-shell is the real outer root now (SideNav + .page-body), matching
+   schedule/leave-requests' own SideNav+TopNav convention — .ts-page no
+   longer needs the fixed margin-top it used as placeholder spacing before
+   a real TopNav existed. */
+.ts-shell { display: flex; flex-direction: row; min-height: 100vh; }
+.ts-page { min-height: 100vh; display: flex; flex-direction: column; margin-top:40px; }
 .ts-body {
   flex: 1;
   margin: 0 40px;
 }
+
+/* ── Employees / Customers / Funders toggle (AIOP-23432) ───────
+   Page-internal state, not navigation — a real segmented/pill toggle
+   (filled active pill), not underline tabs. Tabs read as "different
+   pages"; a toggle reads as "same underlying data, different grouping,"
+   which is what switching Employees/Customers/Funders actually is here.
+   Shown only at Level 1 of either view. */
+.ts-view-toggle {
+  display: inline-flex; gap: 4px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-radius: 24px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+.ts-view-toggle-btn {
+  background: none; border: none; border-radius: 20px;
+  padding: 8px 20px;
+  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
+  color: var(--greyscale-5-grey-35); cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ts-view-toggle-btn:not([style*="cursor: default"]):hover { color: #000; }
+.ts-view-toggle-btn.active {
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  font-weight: 600;
+}
+/* Now lives inside .ts-page-header itself (far left, same row as the date
+   picker/action buttons), not as its own block above it — the standalone
+   margin-bottom would otherwise nudge it out of vertical center with them. */
+.ts-page-header-left .ts-view-toggle { margin-bottom: 0; }
 
 /* ── Page header (Level 1) ───────────────────────────────────── */
 .ts-page-header {
@@ -50,4 +86,16 @@ body {
 .checkbox-disabled { cursor: not-allowed; }
 .checkbox-disabled input { pointer-events: none; }
 .checkbox-disabled .checkbox-box { opacity: 0.35; }
+
+/* ── Verified invoice checkbox (AIOP-23432, Funders) ───────────
+   A checked+green box means "genuinely verified" (real invVerified state,
+   not just "currently selected for the next bulk action" — the shared
+   .checkbox-box's own checked state is plain purple for that). Still
+   clickable/selectable while green — its own checkbox toggles the row's
+   ordinary selection flag either way, so a verified row can be selected
+   again and sent through Actions > Unverify to revert it. */
+.checkbox-verified input:checked + .checkbox-box {
+  background: var(--rag-green-green-5);
+  border-color: var(--rag-green-green-5);
+}
 

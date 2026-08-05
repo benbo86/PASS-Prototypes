@@ -12,7 +12,13 @@ import DevComments from '../../../Components/DevComments';
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import SideNav from '../../../Components/SideNav';
+import TopNav from '../../../Components/TopNav';
+import ScheduleNav from '../../../Components/ScheduleNav';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
+import ViewToggle from './ViewToggle';
+import FunderList from './FunderList';
+import FunderDetail from './FunderDetail';
 import {
   EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
   HOLIDAY_RECORDS, fmtMins, fmtGBP,
@@ -355,8 +361,13 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
-      <div className="ts-page" ref={pageRef}>
+      <div className="ts-shell" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
+      <SideNav activeItem="finance" />
+      <div className="page-body">
+      <TopNav />
+      <ScheduleNav active="timesheets" />
+      <div className="ts-page">
       <div className="ts-body">
         <div className="ts-l2-header">
 
@@ -742,6 +753,8 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
         <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
       )}
       </div>
+      </div>
+      </div>
     </>
   );
 }
@@ -751,6 +764,51 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
 export default function Timesheets() {
   const pageRef = useRef(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // AIOP-23432 — Funders timesheet view. Kept as a separate local copy of
+  // VISITS (not threading a shared mutable source through the existing,
+  // already-working Employee flow above) so Verify/Unverify here can
+  // genuinely mutate invVerified with zero regression risk to Employees.
+  const [viewMode, setViewMode] = useState('employees');
+  const [selectedFunder, setSelectedFunder] = useState(null);
+  const [funderVisits, setFunderVisits] = useState(VISITS);
+
+  const verifyVisitIds = (visitIds) => {
+    const idSet = new Set(visitIds);
+    setFunderVisits(prev => prev.map(v => idSet.has(v.id) ? { ...v, invVerified: true } : v));
+  };
+  const unverifyVisitIds = (visitIds) => {
+    const idSet = new Set(visitIds);
+    setFunderVisits(prev => prev.map(v => idSet.has(v.id) ? { ...v, invVerified: false } : v));
+  };
+  const verifyFunders = (funderNames) => {
+    setFunderVisits(prev => prev.map(v => funderNames.includes(v.funder) ? { ...v, invVerified: true } : v));
+  };
+  const unverifyFunders = (funderNames) => {
+    setFunderVisits(prev => prev.map(v => funderNames.includes(v.funder) ? { ...v, invVerified: false } : v));
+  };
+
+  const goToEmployees = () => {
+    history.pushState(null, '', window.location.pathname);
+    setViewMode('employees');
+    setSelectedFunder(null);
+  };
+
+  const goToFunders = () => {
+    history.pushState(null, '', '?view=funders');
+    setViewMode('funders');
+    setSelectedFunder(null);
+  };
+
+  const navigateToFunder = (funder) => {
+    history.pushState(null, '', `?view=funders&funder=${encodeURIComponent(funder)}`);
+    setSelectedFunder(funder);
+  };
+
+  const navigateBackToFunders = () => {
+    history.pushState(null, '', '?view=funders');
+    setSelectedFunder(null);
+  };
 
   const {
     tableRef, colWidths, resizeColumn,
@@ -764,10 +822,17 @@ export default function Timesheets() {
   });
 
   useEffect(() => {
-    const slug = new URLSearchParams(window.location.search).get('employee');
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('employee');
     if (slug) {
       const emp = EMPLOYEES.find(e => e.name.toLowerCase().replace(/\s+/g, '-') === slug);
       if (emp) setSelectedEmployee(emp);
+      return;
+    }
+    if (params.get('view') === 'funders') {
+      setViewMode('funders');
+      const funder = params.get('funder');
+      if (funder && FUNDERS.includes(funder)) setSelectedFunder(funder);
     }
   }, []);
 
@@ -957,6 +1022,38 @@ export default function Timesheets() {
 
   const selectedCount = Object.values(payRows).filter(Boolean).length + (payAll ? pageRows.length : 0);
 
+  if (viewMode === 'funders' && selectedFunder) {
+    return (
+      <FunderDetail
+        funder={selectedFunder}
+        visits={funderVisits}
+        onVerify={verifyVisitIds}
+        onUnverify={unverifyVisitIds}
+        onBack={navigateBackToFunders}
+        period={rangeLabel}
+      />
+    );
+  }
+
+  if (viewMode === 'funders') {
+    return (
+      <FunderList
+        visits={funderVisits}
+        onVerify={verifyFunders}
+        onUnverify={unverifyFunders}
+        onSelectFunder={navigateToFunder}
+        onSelectEmployees={goToEmployees}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        hoverDate={hoverDate}
+        setHoverDate={setHoverDate}
+        rangeLabel={rangeLabel}
+        navigateRange={navigateRange}
+        backwardHighlight={backwardHighlight}
+      />
+    );
+  }
+
   if (selectedEmployee) {
     return (
       <VisitDetail
@@ -977,12 +1074,21 @@ export default function Timesheets() {
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
-      <div className="ts-page" ref={pageRef}>
+      <div className="ts-shell" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
+      <SideNav activeItem="finance" />
+      <div className="page-body">
+      <TopNav />
+      <ScheduleNav active="timesheets" />
+      <div className="ts-page">
 
       <div className="ts-body">
         {/* Page header */}
         <div className="ts-page-header">
+          <div className="ts-page-header-left">
+            <ViewToggle active="employees" onSelectEmployees={() => {}} onSelectFunders={goToFunders} />
+          </div>
+
           <div className="ts-date-nav">
             <button className="ts-nav-arrow" onClick={() => navigateRange(-1)}><ChevronLeft /></button>
             <DatePicker
@@ -1338,6 +1444,8 @@ export default function Timesheets() {
           onClose={closeGate}
         />
       )}
+      </div>
+      </div>
       </div>
     </>
   );
