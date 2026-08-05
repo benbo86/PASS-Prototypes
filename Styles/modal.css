@@ -112,7 +112,14 @@ select:focus, input[type="text"]:focus { border-color: var(--brand-purple-6-purp
 .step { display: none; }
 .step.active { display: block; }
 
-ul {
+/* Scoped to .warning-banner — its own two real consumers (AssignVisitWarning.jsx,
+   Components/HolidayAbsenceDialog.jsx) both render a bulleted list inside a
+   warning banner. Previously a bare `ul`/`li` tag selector, which leaked
+   this margin onto any other <ul> on a page importing modal.css — caught
+   when it pushed Components/ScheduleNav.jsx's own tab-bar <ul> taller than
+   its buttons, leaving a visible gap below the tabs instead of them
+   touching the tab bar's bottom edge. */
+.warning-banner ul {
   margin-top:12px;
 
   li {
