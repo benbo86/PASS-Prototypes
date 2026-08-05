@@ -165,6 +165,7 @@ export default function HolidayAbsenceDialog({
   endDate: endDateProp,
   startTime: startTimeProp,
   endTime: endTimeProp,
+  daysDeducted = 1,
   showVisitsStep = true,
   onClose,
   onConfirm,
@@ -282,7 +283,7 @@ export default function HolidayAbsenceDialog({
             </div>
             <div>
               <label htmlFor="days-deducted">Days deducted</label>
-              <input type="text" id="days-deducted" value="1" readOnly />
+              <input type="text" id="days-deducted" value={daysDeducted} readOnly />
             </div>
           </div>
 

@@ -414,6 +414,7 @@ export default function LeaveRequests() {
             absenceType={{ value: 'holiday', label: 'Holiday' }}
             startDate={approveRow.fromDate}
             endDate={approveRow.toDate}
+            daysDeducted={approveRow.daysRequested}
             showVisitsStep={false}
             onClose={() => setApproveRow(null)}
             onConfirm={handleApproveConfirm}
