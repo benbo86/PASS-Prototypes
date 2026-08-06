@@ -97,6 +97,7 @@ export const VISITS = EMPLOYEES.flatMap(emp => {
     return {
       id: _vid++,
       employeeId:   emp.id,
+      employeeName: emp.name,
       customerId:   customer.id,
       customerName: customer.name,
       funder:       customer.funder,

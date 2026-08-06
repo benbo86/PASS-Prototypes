@@ -88,6 +88,7 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
   const pageRef = useRef(null);
   const [sort, setSort] = useState({ col: null, dir: 'asc' });
   const [customerFilter, setCustomerFilter] = useState({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
+  const [employeeFilter, setEmployeeFilter] = useState({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
   const [typeFilter, setTypeFilter] = useState({ selected: new Set() });
   const [statusFilter, setStatusFilter] = useState({ selected: new Set() });
   const [page, setPage] = useState(1);
@@ -103,26 +104,29 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
 
   const baseVisits = useMemo(() => visits.filter(v => v.funder === funder), [visits, funder]);
   const allCustomers = useMemo(() => [...new Set(baseVisits.map(v => v.customerName))].sort(), [baseVisits]);
+  const allEmployees = useMemo(() => [...new Set(baseVisits.map(v => v.employeeName))].sort(), [baseVisits]);
   const invVerCount = useMemo(() => baseVisits.filter(v => v.invVerified).length, [baseVisits]);
 
   const filteredVisits = useMemo(() => {
     let r = baseVisits;
     if (customerFilter.selected.size) r = r.filter(v => customerFilter.selected.has(v.customerName));
+    if (employeeFilter.selected.size) r = r.filter(v => employeeFilter.selected.has(v.employeeName));
     if (typeFilter.selected.size)     r = r.filter(v => typeFilter.selected.has(v.visitType));
     if (statusFilter.selected.size)   r = r.filter(v => statusFilter.selected.has(v.status));
     return r;
-  }, [baseVisits, customerFilter, typeFilter, statusFilter]);
+  }, [baseVisits, customerFilter, employeeFilter, typeFilter, statusFilter]);
 
   const sortedVisits = useMemo(() => {
     const r = [...filteredVisits];
-    if (sort.col === 'customerName') {
+    if (sort.col === 'customerName' || sort.col === 'employeeName') {
+      const nameField = sort.col === 'employeeName' ? employeeFilter.nameField : customerFilter.nameField;
       const key = name => {
         const parts = name.trim().split(/\s+/);
-        return customerFilter.nameField === 'last' ? parts[parts.length - 1] : parts[0];
+        return nameField === 'last' ? parts[parts.length - 1] : parts[0];
       };
       return r.sort((a, b) => sort.dir === 'asc'
-        ? key(a.customerName).localeCompare(key(b.customerName))
-        : key(b.customerName).localeCompare(key(a.customerName)));
+        ? key(a[sort.col]).localeCompare(key(b[sort.col]))
+        : key(b[sort.col]).localeCompare(key(a[sort.col])));
     }
     if (sort.col) {
       return r.sort((a, b) => {
@@ -132,7 +136,7 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
       });
     }
     return r.sort((a, b) => a.date.localeCompare(b.date) || a.plannedStart.localeCompare(b.plannedStart));
-  }, [filteredVisits, sort, customerFilter.nameField]);
+  }, [filteredVisits, sort, customerFilter.nameField, employeeFilter.nameField]);
 
   const totalRows  = sortedVisits.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
@@ -140,12 +144,13 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
   const pageRows   = sortedVisits.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
   const showStart  = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
   const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
-  const anyFilter  = !!(customerFilter.selected.size || typeFilter.selected.size || statusFilter.selected.size);
+  const anyFilter  = !!(customerFilter.selected.size || employeeFilter.selected.size || typeFilter.selected.size || statusFilter.selected.size);
   const selectedIds = pageRows.filter(v => selectAll || selected[v.id]).map(v => v.id);
   const selectedCount = Object.values(selected).filter(Boolean).length + (selectAll ? pageRows.length : 0);
 
   const clearAllFilters = () => {
     setCustomerFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
+    setEmployeeFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
     setTypeFilter({ selected: new Set() });
     setStatusFilter({ selected: new Set() });
     setSort({ col: null, dir: 'asc' });
@@ -285,6 +290,29 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
                 />
               </th>
 
+              <th>
+                <span>Employee</span>
+                <button ref={el => anchorRefs.current['employee'] = el}
+                  data-devmode-passthrough="true"
+                  className={`col-icon-btn ${employeeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
+                  onClick={() => openDropdown('employee')}>
+                  <FilterIcon active={employeeFilter.selected.size > 0} />
+                </button>
+                <FilterDropdown
+                  items={allEmployees}
+                  selected={employeeFilter.selected}
+                  onApply={(sel, sortDir, nameField) => {
+                    setEmployeeFilter({ selected: sel, sortDir, nameField });
+                    setSort({ col: 'employeeName', dir: sortDir });
+                  }}
+                  onClear={() => { setEmployeeFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' }); setSort({ col: null, dir: 'asc' }); }}
+                  hasNameSort
+                  isOpen={openDD === 'employee'}
+                  onClose={closeDropdown}
+                  anchorEl={anchorRefs.current['employee']}
+                />
+              </th>
+
               <th className={sort.col === 'visitName' ? 'sorted' : ''}>
                 <span>Visit / Shift</span>
                 <button className="col-icon-btn" onClick={() => toggleSort('visitName')}>
@@ -383,6 +411,7 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
               return (
               <tr key={row.id}>
                 <td>{row.customerName}</td>
+                <td>{row.employeeName}</td>
                 <td>{row.visitName}</td>
                 <td>{row.visitType}</td>
                 <td className="nowrap">{row.date}</td>
@@ -402,7 +431,7 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
               );
             })}
             {totalRows === 0 && (
-              <tr><td colSpan={10} className="table-empty">No visits match the current filters</td></tr>
+              <tr><td colSpan={11} className="table-empty">No visits match the current filters</td></tr>
             )}
           </tbody>
         </table>

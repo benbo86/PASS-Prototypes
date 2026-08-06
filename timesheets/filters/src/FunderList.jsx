@@ -17,6 +17,7 @@ import SideNav from '../../../Components/SideNav';
 import TopNav from '../../../Components/TopNav';
 import ScheduleNav from '../../../Components/ScheduleNav';
 import ViewToggle from './ViewToggle';
+import PublishToggle from './PublishToggle';
 import { DateRangeInput } from '../../../Components/DateRangePicker';
 import { FUNDERS, fmtGBP, summarizeFunders } from './data';
 
@@ -210,6 +211,7 @@ export default function FunderList({
       <div className="ts-body">
         <div className="ts-page-header">
           <div className="ts-page-header-left">
+            <PublishToggle />
             <ViewToggle active="funders" onSelectEmployees={onSelectEmployees} onSelectFunders={() => {}} />
           </div>
 

@@ -17,10 +17,11 @@ import TopNav from '../../../Components/TopNav';
 import ScheduleNav from '../../../Components/ScheduleNav';
 import { CalendarIcon, fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import ViewToggle from './ViewToggle';
+import PublishToggle from './PublishToggle';
 import FunderList from './FunderList';
 import FunderDetail from './FunderDetail';
 import {
-  EMPLOYEES, VISITS, FUNDERS, CUSTOMERS, VISIT_STATUSES, VISIT_TYPES,
+  EMPLOYEES, VISITS, FUNDERS, VISIT_STATUSES, VISIT_TYPES,
   HOLIDAY_RECORDS, fmtMins, fmtGBP,
 } from './data';
 
@@ -881,11 +882,6 @@ export default function Timesheets() {
     setDateRange([new Date(startDate.getTime() + dir * ms), new Date(endDate.getTime() + dir * ms)]);
   };
 
-  // Above-table filters (filter the underlying visits, changing totals)
-  const [funderFilter,   setFunderFilter]   = useState(new Set());
-  const [customerFilter, setCustomerFilter] = useState(new Set());
-  const [statusFilter,   setStatusFilter]   = useState(new Set());
-
   // Column header filters (filter employee rows)
   const [empColFilter,     setEmpColFilter]     = useState({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
   const [contractFilter,   setContractFilter]   = useState({ selected: new Set() });
@@ -919,28 +915,16 @@ export default function Timesheets() {
   const openDropdown = useCallback((id) => setOpenDD(prev => prev === id ? null : id), []);
   const closeDropdown = useCallback(() => setOpenDD(null), []);
 
-  // Step 1: filter visits by above-table filters
-  const filteredVisits = useMemo(() => {
-    const hasAbove = funderFilter.size || customerFilter.size || statusFilter.size;
-    if (!hasAbove) return VISITS;
-    return VISITS.filter(v => {
-      if (funderFilter.size   && !funderFilter.has(v.funder))       return false;
-      if (customerFilter.size && !customerFilter.has(v.customerName)) return false;
-      if (statusFilter.size   && !statusFilter.has(v.status))       return false;
-      return true;
-    });
-  }, [funderFilter, customerFilter, statusFilter]);
-
-  // Step 2: aggregate filtered visits per employee
+  // Aggregate all visits per employee — no above-table filters anymore
+  // (superseded by the dedicated Customer/Funder-oriented timesheet views).
   const employeeRows = useMemo(() => {
-    const hasAbove = funderFilter.size || customerFilter.size || statusFilter.size;
     const byEmp = new Map(EMPLOYEES.map(e => [e.id, {
       ...e,
       visits: 0, travelMins: 0, waitMins: 0,
       mileage: 0, expenses: 0,
       payVerCount: 0, invVerCount: 0,
     }]));
-    filteredVisits.forEach(v => {
+    VISITS.forEach(v => {
       const row = byEmp.get(v.employeeId);
       if (!row) return;
       row.visits++;
@@ -951,8 +935,8 @@ export default function Timesheets() {
       if (v.payVerified) row.payVerCount++;
       if (v.invVerified) row.invVerCount++;
     });
-    return [...byEmp.values()].filter(r => !hasAbove || r.visits > 0);
-  }, [filteredVisits, funderFilter.size, customerFilter.size, statusFilter.size]);
+    return [...byEmp.values()];
+  }, []);
 
   // Step 3: apply column filters
   const colFiltered = useMemo(() => {
@@ -998,21 +982,13 @@ export default function Timesheets() {
   const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
 
   // Dropdown item lists (derived from actual data)
-  const allFunders    = FUNDERS;
-  const allCustomers  = [...new Set(CUSTOMERS.map(c => c.name))].sort();
-  const allStatuses   = VISIT_STATUSES;
   const allContracts  = [...new Set(EMPLOYEES.map(e => e.contract))].sort();
   const allEmpNames   = EMPLOYEES.map(e => e.name);
   const verStatuses   = ['Verified', 'Partially verified', 'Unverified'];
 
-  const anyAboveFilter  = funderFilter.size || customerFilter.size || statusFilter.size;
-  const anyColFilter    = empColFilter.selected.size || contractFilter.selected.size || payVerFilter.selected.size || invVerFilter.selected.size;
-  const anyActiveFilter = !!(anyAboveFilter || anyColFilter);
+  const anyActiveFilter = !!(empColFilter.selected.size || contractFilter.selected.size || payVerFilter.selected.size || invVerFilter.selected.size);
 
   const clearAll = () => {
-    setFunderFilter(new Set());
-    setCustomerFilter(new Set());
-    setStatusFilter(new Set());
     setEmpColFilter({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
     setContractFilter({ selected: new Set() });
     setPayVerFilter({ selected: new Set() });
@@ -1058,7 +1034,7 @@ export default function Timesheets() {
     return (
       <VisitDetail
         employee={selectedEmployee}
-        visits={filteredVisits}
+        visits={VISITS}
         onBack={navigateBack}
         period={rangeLabel}
       />
@@ -1086,6 +1062,7 @@ export default function Timesheets() {
         {/* Page header */}
         <div className="ts-page-header">
           <div className="ts-page-header-left">
+            <PublishToggle />
             <ViewToggle active="employees" onSelectEmployees={() => {}} onSelectFunders={goToFunders} />
           </div>
 
@@ -1132,83 +1109,6 @@ export default function Timesheets() {
               <span className="checkbox-box" />
               <span>Copies</span>
             </label>
-            <span className="filter-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path d="M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z" fill="currentColor"/>
-              </svg>
-            </span>
-
-            {/* Funder filter */}
-            <div className="filter-pill-wrap">
-              <button
-                ref={el => anchorRefs.current['funder'] = el}
-                data-devmode-passthrough="true"
-                className={`filter-pill ${funderFilter.size ? 'active' : ''}`}
-                onClick={() => openDropdown('funder')}
-              >
-                <span>Funder</span>
-                {funderFilter.size > 0 && <span className="filter-count">{funderFilter.size}</span>}
-                <ChevronDown size={20} />
-              </button>
-              <FilterDropdown
-                items={allFunders}
-                selected={funderFilter}
-                onApply={(sel) => { setFunderFilter(sel); setPage(1); }}
-                onClear={() => { setFunderFilter(new Set()); setPage(1); }}
-                hasSort={false} /* hasNameSort */
-                isOpen={openDD === 'funder'}
-                onClose={closeDropdown}
-                anchorEl={anchorRefs.current['funder']}
-              />
-            </div>
-
-            {/* Customer filter */}
-            <div className="filter-pill-wrap">
-              <button
-                ref={el => anchorRefs.current['customer'] = el}
-                data-devmode-passthrough="true"
-                className={`filter-pill ${customerFilter.size ? 'active' : ''}`}
-                onClick={() => openDropdown('customer')}
-              >
-                <span>Customer</span>
-                {customerFilter.size > 0 && <span className="filter-count">{customerFilter.size}</span>}
-                <ChevronDown size={20} />
-              </button>
-              <FilterDropdown
-                items={allCustomers}
-                selected={customerFilter}
-                onApply={(sel) => { setCustomerFilter(sel); setPage(1); }}
-                onClear={() => { setCustomerFilter(new Set()); setPage(1); }}
-                hasSort={false} /* hasNameSort */
-                isOpen={openDD === 'customer'}
-                onClose={closeDropdown}
-                anchorEl={anchorRefs.current['customer']}
-              />
-            </div>
-
-            {/* Visit status filter */}
-            <div className="filter-pill-wrap">
-              <button
-                ref={el => anchorRefs.current['status'] = el}
-                data-devmode-passthrough="true"
-                className={`filter-pill ${statusFilter.size ? 'active' : ''}`}
-                onClick={() => openDropdown('status')}
-              >
-                <span>Visit status</span>
-                {statusFilter.size > 0 && <span className="filter-count">{statusFilter.size}</span>}
-                <ChevronDown size={20} />
-              </button>
-              <FilterDropdown
-                items={allStatuses}
-                selected={statusFilter}
-                onApply={(sel) => { setStatusFilter(sel); setPage(1); }}
-                onClear={() => { setStatusFilter(new Set()); setPage(1); }}
-                hasSort={false}
-                isOpen={openDD === 'status'}
-                onClose={closeDropdown}
-                anchorEl={anchorRefs.current['status']}
-              />
-            </div>
 
             {anyActiveFilter && (
               <button className="clear-btn" onClick={clearAll}>
