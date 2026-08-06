@@ -107,10 +107,19 @@ function VisitCard({ visit, index, onEdit }) {
         <Row label="Charge rate sheet" value={visit.chargeRateSheet} />
         <Row label="Deposit status" value={visit.depositPaid ? 'Paid' : '—'} />
         <Row label="Pay rate sheet" value={visit.payRateSheet || '—'} />
-        <Row
-          label="Recurring expense"
-          value={visit.recurringExpense ? `${visit.recurringExpense.title} · ${fmtGBP(visit.recurringExpense.amount)}` : '—'}
-        />
+
+        <div className="sa-row">
+          <span className="sa-row-label">Recurring expenses</span>
+          <span className="sa-row-value">
+            {visit.recurringExpenses.length === 0 ? '—' : (
+              <div className="sa-expense-list">
+                {visit.recurringExpenses.map((exp, i) => (
+                  <div key={i}>{exp.title} · {fmtGBP(exp.amount)}</div>
+                ))}
+              </div>
+            )}
+          </span>
+        </div>
       </div>
     </section>
   )

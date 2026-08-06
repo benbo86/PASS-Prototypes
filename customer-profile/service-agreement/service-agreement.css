@@ -64,6 +64,7 @@ body { background: #f5f5f6; min-height: 100vh; }
 .sa-row-label { width: 220px; flex-shrink: 0; font-size: 14px; font-weight: 600; color: #000; }
 .sa-row-value { font-size: 14px; color: var(--greyscale-2-grey-20); }
 .sa-cadence-value { display: flex; flex-direction: column; gap: 8px; }
+.sa-expense-list { display: flex; flex-direction: column; gap: 4px; }
 
 .sa-day-badges { display: flex; gap: 6px; }
 .sa-day-badge {
@@ -97,6 +98,11 @@ body { background: #f5f5f6; min-height: 100vh; }
 .sa-field-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
 .sa-field-label { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .sa-required { color: var(--rag-red-red-7, #c0392b); }
+
+/* .sa-field-group's own align-items default (stretch) would otherwise
+   force this button to the column's full width — .round-btn is normally
+   inline-flex and hugs its own content everywhere else in this repo. */
+.sa-add-expense-btn { align-self: flex-start; }
 
 .sa-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 

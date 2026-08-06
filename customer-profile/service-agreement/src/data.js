@@ -88,7 +88,7 @@ export const INITIAL_VISITS = [
     depositPaid: false,
     payRateSheet: null,
     status: 'active',
-    recurringExpense: null,
+    recurringExpenses: [],
   },
   {
     id: _vid++,
@@ -108,7 +108,7 @@ export const INITIAL_VISITS = [
     depositPaid: false,
     payRateSheet: null,
     status: 'active',
-    recurringExpense: null,
+    recurringExpenses: [],
   },
 ]
 
