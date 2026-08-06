@@ -655,7 +655,7 @@ h6 {
 }
 
 /* ── Rostering sub-nav (Components/RosteringNav.jsx) ──────────── */
-.rn-nav { width: 260px; flex-shrink: 0; }
+.rn-nav { width:20%; min-width: 270px; flex-shrink: 0; }
 .rn-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .rn-item {
   width: 100%; display: flex; align-items: center; gap: 12px;
