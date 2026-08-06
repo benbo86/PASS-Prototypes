@@ -24,24 +24,26 @@ body {
    which is what switching Employees/Customers/Funders actually is here.
    Shown only at Level 1 of either view. */
 .ts-view-toggle {
-  display: inline-flex; gap: 4px;
-  background: var(--ui-purple-7-lightest-lavendar);
-  border-radius: 24px;
-  padding: 4px;
-  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background-color: var(--ui-purple-6-lavendar-grey);
+  border-radius: 8px;
 }
 .ts-view-toggle-btn {
-  background: none; border: none; border-radius: 20px;
-  padding: 8px 20px;
+  background: none; border: none; border-radius: 6px;
+  padding: 3px 15px;
   font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
-  color: var(--greyscale-5-grey-35); cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  line-height: 20px;
+  color: var(--greyscale-4-grey-40); cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
-.ts-view-toggle-btn:not([style*="cursor: default"]):hover { color: #000; }
+.ts-view-toggle-btn:not([style*="cursor: default"]):hover {
+    color:#000; }
 .ts-view-toggle-btn.active {
-  background: var(--brand-purple-6-purple-4);
-  color: #fff;
-  font-weight: 600;
+  color: #000;
+  background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 4px 0px;
 }
 /* Now lives inside .ts-page-header itself (far left, same row as the date
    picker/action buttons), not as its own block above it — the standalone
@@ -93,9 +95,18 @@ body {
    .checkbox-box's own checked state is plain purple for that). Still
    clickable/selectable while green — its own checkbox toggles the row's
    ordinary selection flag either way, so a verified row can be selected
-   again and sent through Actions > Unverify to revert it. */
-.checkbox-verified input:checked + .checkbox-box {
+   again and sent through Actions > Unverify to revert it.
+   Selector includes .checkbox-wrap (already present on the same element in
+   every consumer) specifically to outrank main.css's own plain
+   ".checkbox-wrap input:checked + .checkbox-box" rule, which is otherwise
+   the exact same specificity (0,3,1) — a tie that dev happens to resolve in
+   this rule's favour (main.css loads first there) but the production build
+   does not: Vite splits shared stylesheets into separate chunks and links
+   main-*.css AFTER this prototype's own CSS in the built HTML, so on the
+   live site the tie flipped and every verified row silently stayed purple
+   instead of green. Confirmed directly by reading dist/timesheets/filters/
+   index.html's <link> order, not assumed. */
+.checkbox-wrap.checkbox-verified input:checked + .checkbox-box {
   background: var(--rag-green-green-5);
   border-color: var(--rag-green-green-5);
 }
-
