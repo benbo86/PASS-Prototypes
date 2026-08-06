@@ -17,43 +17,19 @@ body {
   margin: 0 40px;
 }
 
-/* ── Employees / Customers / Funders toggle (AIOP-23432) ───────
-   Page-internal state, not navigation — a real segmented/pill toggle
-   (filled active pill), not underline tabs. Tabs read as "different
-   pages"; a toggle reads as "same underlying data, different grouping,"
-   which is what switching Employees/Customers/Funders actually is here.
-   Shown only at Level 1 of either view. */
-.ts-view-toggle {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px;
-  background-color: var(--ui-purple-6-lavendar-grey);
-  border-radius: 8px;
-}
-.ts-view-toggle-btn {
-  background: none; border: none; border-radius: 6px;
-  padding: 3px 15px;
-  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
-  line-height: 20px;
-  color: var(--greyscale-4-grey-40); cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-}
-.ts-view-toggle-btn:not([style*="cursor: default"]):hover {
-    color:#000; }
-.ts-view-toggle-btn.active {
-  color: #000;
-  background-color: #fff;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 4px 0px;
-}
 /* Now lives inside .ts-page-header itself (far left, same row as the date
    picker/action buttons), not as its own block above it — the standalone
-   margin-bottom would otherwise nudge it out of vertical center with them. */
-.ts-page-header-left .ts-view-toggle { margin-bottom: 0; }
+   margin-bottom would otherwise nudge it out of vertical center with them.
+   (Targets the shared Components/SegmentedToggle.jsx's own .seg-toggle —
+   PublishToggle's original inline .ts-view-toggle* classes were promoted
+   to that shared component/CSS once Service Agreement needed the same
+   pill look for its own status toggle.) */
+.ts-page-header-left .seg-toggle { margin-bottom: 0; }
 
 /* Employees/Customers/Funders <select> (ViewToggle, Round 11) — shares
    Styles/main.css's .rows-select base (background arrow, border, colours)
    but sized down to match the Timesheets/Unpublished pill sitting right next
-   to it (PublishToggle's .ts-view-toggle-btn: font-size 14px, line-height
+   to it (PublishToggle's .seg-toggle-item: font-size 14px, line-height
    20px, ~36px tall) — .rows-select's own defaults (16px font, 10px padding)
    read visibly larger/heavier once the two sit side by side. Selector is
    ".rows-select.ts-view-select", not a bare class, specifically to outrank

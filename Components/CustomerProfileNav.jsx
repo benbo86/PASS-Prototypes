@@ -23,7 +23,7 @@ const PRIMARY_TABS = [
   { label: 'About Me', href: null },
   { label: 'Details', href: null },
   { label: 'Checklists', href: null },
-  { label: 'Rostering', href: null },
+  { label: 'Rostering', href: '../service-agreement/' },
   { label: 'Communications', href: null },
   { label: 'Medical History', href: null },
   { label: 'Customer File', href: null },

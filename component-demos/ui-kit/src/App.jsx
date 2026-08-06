@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react'
 import Select, { components } from 'react-select'
 import FilterDropdown from '../../../Components/FilterDropdown'
+import NumberStepper from '../../../Components/NumberStepper'
+import SearchMultiSelect from '../../../Components/SearchMultiSelect'
+import SegmentedToggle from '../../../Components/SegmentedToggle'
 
 // ─── Icons (copied verbatim from Icons/, fill set to currentColor) ──────
 
@@ -113,6 +116,13 @@ function Section({ title, description, children }) {
 
 const CUSTOMERS = ['Margaret Thompson', 'George Evans', 'Dorothy Williams', 'Harold Clarke', 'Edith Morrison']
 
+const CARE_WORKERS_DEMO = [
+  { id: 1, name: 'Amirah Marsden' },
+  { id: 2, name: 'Sarah Mitchell' },
+  { id: 3, name: 'James Okafor' },
+  { id: 4, name: 'David Chen' },
+]
+
 export default function App() {
   const [filterSelected, setFilterSelected] = useState(new Set())
   const [filterOpen, setFilterOpen] = useState(false)
@@ -125,6 +135,9 @@ export default function App() {
   const [rows, setRows] = useState(10)
   const [activeTab, setActiveTab] = useState('Details')
   const [absenceType, setAbsenceType] = useState(ABSENCE_TYPES[0])
+  const [stepperValue, setStepperValue] = useState(1)
+  const [multiSelected, setMultiSelected] = useState([1])
+  const [careType, setCareType] = useState('Home Care')
 
   return (
     <div className="uk-page">
@@ -157,7 +170,7 @@ export default function App() {
         </div>
       </Section>
 
-      <Section title="Field inputs" description="Text, number and dropdown fields all share the same height via .form-input and react-select's SELECT_STYLES. Time (and date) fields use the same styling but swap the input for a readonly .input-wrap with a trailing icon — copied from the holiday-absences dialog.">
+      <Section title="Field inputs" description="Text, number and dropdown fields all share the same height via .form-input/.select-input and react-select's SELECT_STYLES. Time (and date) fields use the same styling but swap the input for a readonly .input-wrap with a trailing icon — copied from the holiday-absences dialog.">
         <div className="uk-field-row">
           <div className="uk-field">
             <label className="uk-field-label" htmlFor="uk-text-demo">Text</label>
@@ -177,6 +190,14 @@ export default function App() {
               styles={SELECT_STYLES}
               components={{ DropdownIndicator }}
             />
+          </div>
+          <div className="uk-field">
+            <label className="uk-field-label" htmlFor="uk-select-input-demo">Care type (.select-input)</label>
+            <select id="uk-select-input-demo" className="select-input" value={careType} onChange={e => setCareType(e.target.value)}>
+              {['Home Care', 'Personal Care', 'Complex Care', 'Live-in Care', 'Respite Care'].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
           <div className="uk-field uk-field--narrow">
             <label className="uk-field-label" htmlFor="uk-time-demo">Start time</label>
@@ -221,6 +242,25 @@ export default function App() {
         </div>
       </Section>
 
+      <Section title="Number stepper" description="Components/NumberStepper.jsx — a .form-input flanked by round +/- buttons. First built for customer-profile/service-agreement/'s 'Care workers' field; no equivalent existed anywhere in this repo before.">
+        <div className="uk-row">
+          <NumberStepper value={stepperValue} onChange={setStepperValue} min={1} max={6} />
+        </div>
+      </Section>
+
+      <Section title="Search multi-select" description="Components/SearchMultiSelect.jsx — type to filter a list, click a result to add it, added items render as removable rows. Mirrors roster/contactable-staff's own search-to-add UX rather than react-select's chip-multiselect. First built for 'Preferred care workers'.">
+        <div className="uk-row" style={{ alignItems: 'flex-start' }}>
+          <div style={{ width: 320 }}>
+            <SearchMultiSelect
+              items={CARE_WORKERS_DEMO}
+              selected={multiSelected}
+              onChange={setMultiSelected}
+              placeholder="Search care workers..."
+            />
+          </div>
+        </div>
+      </Section>
+
       <Section title="Radio buttons" description=".form-radio — a custom circular radio, typically wrapped in .fd-radio-row for label spacing.">
         <div className="uk-row">
           <label className="fd-radio-row">
@@ -252,6 +292,23 @@ export default function App() {
           <div className={`tog${toggleOn ? ' tog-on' : ''}`} onClick={() => setToggleOn(o => !o)} role="switch" aria-checked={toggleOn} tabIndex={0}>
             <div className="tog-thumb" />
           </div>
+        </div>
+      </Section>
+
+      <Section title="Segmented toggle" description="Components/SegmentedToggle.jsx — a display-only pill group (.seg-toggle/.seg-toggle-item), no click handling. Originally built inline for timesheets/filters' Timesheets/Unpublished pill; promoted to a shared component once customer-profile/service-agreement/ needed the same look for its visit status, with the active option's tone recoloured via the optional `tone` field.">
+        <span className="uk-caption">Default (white active pill)</span>
+        <div className="uk-row">
+          <SegmentedToggle
+            options={[{ value: 'timesheets', label: 'Timesheets' }, { value: 'unpublished', label: 'Unpublished' }]}
+            value="timesheets"
+          />
+        </div>
+        <span className="uk-caption">With a coloured tone on the active option</span>
+        <div className="uk-row">
+          <SegmentedToggle
+            options={[{ value: 'inactive', label: 'Inactive' }, { value: 'active', label: 'Active', tone: 'green' }]}
+            value="active"
+          />
         </div>
       </Section>
 

@@ -15,7 +15,7 @@ h1 {
     font-weight: 500;
     line-height: 1.3;
     color: #000;
-    margin-bottom:16px;
+    margin-bottom: 12px;
 }
 
 h2 {
@@ -509,6 +509,39 @@ h6 {
 }
 .rows-select:focus { border-color: var(--brand-purple-6-purple-4); }
 
+/* Full-height, full-width select — matches .form-input's own box model
+   exactly (same border/radius/padding-vertical/line-height) so a <select>
+   sitting in a form alongside text/date/number inputs is the same height,
+   not .rows-select's own deliberately-shorter Pagination/toggle-dropdown
+   size. Self-contained (doesn't layer on .rows-select) so there's no
+   specificity/cascade-order risk between the two.
+   Named .select-input, not .form-select — a differently-styled .form-select
+   already exists (office/customer-assessments' own simpler select, no
+   custom arrow/appearance:none), and reusing that name here would have
+   silently collided with it via the exact same cascade-order tie already
+   documented elsewhere in this file for the verified-checkbox rule. */
+.select-input {
+  box-sizing: border-box;
+  appearance: none; -webkit-appearance: none;
+  width: 100%;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px;
+  /* An explicit height, not just matching .form-input's padding — a
+     <select>'s content-box height doesn't scale linearly with padding the
+     way an <input>'s does (confirmed empirically: 12px→44px, 13px→50px,
+     14px→52px measured, not the +2px/+4px steps plain padding math would
+     predict), so hitting .form-input's real ~48px height needed a fixed
+     value rather than more padding-tuning guesswork. */
+  height: 48px;
+  padding: 10px 38px 10px 14px;
+  font-size: 16px; font-weight: 500; line-height: 1.38; font-family: inherit;
+  color: var(--greyscale-2-grey-20);
+  background: #fff url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23968caf' points='16.6 8.6 12 13.2 7.4 8.6 6 10 12 16 18 10'/%3E%3C/svg%3E") no-repeat right 8px center;
+  outline: none; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.select-input:focus { border-color: var(--brand-purple-6-purple-4); }
+
 /* ── Input ───────────────────────────────────────────────────── */
 .form-input {
   box-sizing: border-box;
@@ -521,6 +554,119 @@ h6 {
 }
 .form-input:focus { border-color: var(--brand-purple-6-purple-4); }
 .form-input::placeholder { color: var(--greyscale-8-grey-65); }
+
+/* ── Number stepper (Components/NumberStepper.jsx) ────────────── */
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+.stepper-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  background: #fff; color: var(--ui-purple-3-grape-grey);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; padding: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+.stepper-btn:hover:not(:disabled) { border-color: var(--brand-purple-6-purple-4); color: var(--brand-purple-6-purple-4); }
+.stepper-btn:disabled { opacity: 0.4; cursor: default; }
+.stepper-input {
+  box-sizing: border-box;
+  width: 56px; text-align: center;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px; padding: 12px 4px;
+  font-size: 16px; font-weight: 500; line-height: 1.38; font-family: inherit;
+  color: var(--greyscale-2-grey-20);
+  outline: none; transition: border-color 0.15s;
+  /* Native spinner arrows are redundant with the +/- buttons either side. */
+  appearance: textfield; -moz-appearance: textfield;
+}
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper-input:focus { border-color: var(--brand-purple-6-purple-4); }
+
+/* ── Search multi-select (Components/SearchMultiSelect.jsx) ──── */
+.sms-wrap { display: flex; flex-direction: column; gap: 8px; }
+.sms-search-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px;
+  background: #fff; color: var(--ui-purple-3-grape-grey);
+}
+.sms-search-bar input {
+  flex: 1; border: none; outline: none;
+  font-family: inherit; font-size: 16px; font-weight: 500;
+  padding: 12px 0; color: var(--greyscale-2-grey-20); background: transparent;
+}
+.sms-search-bar input::placeholder { color: var(--greyscale-8-grey-65); }
+.sms-search-results {
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px; overflow: hidden;
+}
+.sms-search-result {
+  padding: 10px 14px; cursor: pointer; font-size: 14px; font-weight: 500;
+  color: var(--greyscale-2-grey-20);
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  transition: background 0.1s;
+}
+.sms-search-result:last-child { border-bottom: none; }
+.sms-search-result:hover { background: var(--ui-purple-7-lightest-lavendar); }
+.sms-no-results { font-size: 14px; color: var(--greyscale-8-grey-65); font-style: italic; padding: 4px 2px; }
+.sms-selected-list { display: flex; flex-direction: column; gap: 4px; }
+.sms-selected-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-radius: 8px;
+  font-size: 14px; font-weight: 500; color: var(--greyscale-2-grey-20);
+}
+.sms-remove-btn {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: var(--ui-purple-3-grape-grey); display: flex; flex-shrink: 0;
+  transition: color 0.12s;
+}
+.sms-remove-btn:hover { color: var(--rag-red-red-7, #c0392b); }
+
+/* ── Segmented toggle (Components/SegmentedToggle.jsx) ────────
+   Display-only — no hover/cursor styling, since no consumer of this
+   component is ever clickable. Originally built inline for timesheets/
+   filters' Timesheets/Unpublished pill; promoted here once Service
+   Agreement needed the identical look for its visit status pill. */
+.seg-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background-color: var(--ui-purple-6-lavendar-grey);
+  border-radius: 8px;
+}
+.seg-toggle-item {
+  border-radius: 6px;
+  padding: 3px 15px;
+  font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
+  line-height: 20px;
+  color: var(--greyscale-4-grey-40);
+}
+.seg-toggle-item.active {
+  color: #000;
+  background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 4px 0px;
+}
+.seg-toggle-item.active.seg-toggle-item--green {
+  color: #fff;
+  background-color: var(--rag-green-green-5);
+}
+
+/* ── Rostering sub-nav (Components/RosteringNav.jsx) ──────────── */
+.rn-nav { width: 260px; flex-shrink: 0; }
+.rn-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rn-item {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border: none; background: none; border-radius: 8px;
+  font-family: inherit; font-size: 16px; font-weight: 500;
+  color: var(--greyscale-6-grey-50); text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+.rn-item:hover { background: var(--ui-purple-7-lightest-lavendar); }
+.rn-item.active { background: var(--ui-purple-6-lavendar-grey); color: #000; }
+.rn-item-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: inherit; }
 
 /* ── Textarea ────────────────────────────────────────────────── */
 .form-textarea {

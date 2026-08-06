@@ -1,13 +1,20 @@
+import SegmentedToggle from '../../../Components/SegmentedToggle'
+
 // Timesheets / Unpublished toggle — sits immediately to the left of the
-// Employees/Customers/Funders ViewToggle, same .ts-view-toggle* styling.
-// Purely decorative for now: no props, no state, no onClick — "Timesheets"
-// always renders as the active segment. Wire this up for real once there's
-// an actual published/unpublished distinction to switch between.
+// Employees/Customers/Funders ViewToggle. Purely decorative for now —
+// "Timesheets" always renders as the active segment. Wire this up for real
+// once there's an actual published/unpublished distinction to switch
+// between. Uses the shared Components/SegmentedToggle.jsx (this toggle was
+// the original inline implementation the shared component was extracted
+// from, once customer-profile/service-agreement/ needed the same look).
 export default function PublishToggle() {
   return (
-    <div className="ts-view-toggle">
-      <button className="ts-view-toggle-btn active">Timesheets</button>
-      <button className="ts-view-toggle-btn">Unpublished</button>
-    </div>
-  );
+    <SegmentedToggle
+      options={[
+        { value: 'timesheets', label: 'Timesheets' },
+        { value: 'unpublished', label: 'Unpublished' },
+      ]}
+      value="timesheets"
+    />
+  )
 }
