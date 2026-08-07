@@ -57,7 +57,7 @@ tbody tr:last-child td {padding-bottom:8px;}
 /* Value + smaller grey note stacked underneath — the one real addition over
    the original document — shows which recurring expense type produced the
    Expenses amount without a new column or row. */
-.inv-doc-cell-note { font-size: 11px; color: #888; }
+.inv-doc-cell-note { font-size: 11px; color: #000; }
 
 .inv-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
 
