@@ -5,14 +5,26 @@ import { fmtGBP } from './data'
 // and a leaner Customer/Customer ID/Period row. The one real addition to
 // the original document's own logic is the small grey recurring-expense-
 // type note under an Expenses value, so a visit line item never needs a new
-// column or row to show it.
+// column or row to show it — a visit can carry more than one recurring
+// expense (e.g. Mileage and a Parking Fee on the same trip), so each one
+// stacks as its own value+note pair within the same cell, and a summary
+// below the table totals each expense type across the whole invoice.
 export default function InvoiceDocument({ invoice }) {
   const items = invoice.lineItems
   const totals = items.reduce((acc, item) => ({
     charge: acc.charge + item.charge,
-    expenses: acc.expenses + item.expenseAmount,
+    expenses: acc.expenses + item.expenseTotal,
     totalCharge: acc.totalCharge + item.totalCharge,
   }), { charge: 0, expenses: 0, totalCharge: 0 })
+
+  const expenseTotalsByType = []
+  items.forEach(item => {
+    item.expenses.forEach(exp => {
+      const existing = expenseTotalsByType.find(e => e.type === exp.type)
+      if (existing) existing.amount += exp.amount
+      else expenseTotalsByType.push({ type: exp.type, amount: exp.amount })
+    })
+  })
 
   return (
     <div className="inv-doc">
@@ -91,12 +103,12 @@ export default function InvoiceDocument({ invoice }) {
               <td>{fmtGBP(item.rate)}/hr</td>
               <td>{fmtGBP(item.charge)}</td>
               <td>
-                {item.expenseType ? (
-                  <>
-                    <div>{fmtGBP(item.expenseAmount)}</div>
-                    <div className="inv-doc-cell-note">{item.expenseType}</div>
-                  </>
-                ) : 'N/A'}
+                {item.expenses.length > 0 ? item.expenses.map((exp, j) => (
+                  <div key={j} className={j > 0 ? 'inv-doc-cell-extra' : undefined}>
+                    <div>{fmtGBP(exp.amount)}</div>
+                    <div className="inv-doc-cell-note">{exp.type}</div>
+                  </div>
+                )) : 'N/A'}
               </td>
               <td>{fmtGBP(item.totalCharge)}</td>
             </tr>
@@ -111,6 +123,15 @@ export default function InvoiceDocument({ invoice }) {
           </tr>
         </tfoot>
       </table>
+
+      {expenseTotalsByType.length > 0 && (
+        <div className="inv-doc-expense-summary">
+          <div className="inv-doc-footer-title">Recurring Expenses</div>
+          {expenseTotalsByType.map(e => (
+            <div key={e.type}><span>{e.type}</span><span>{fmtGBP(e.amount)}</span></div>
+          ))}
+        </div>
+      )}
 
       <div className="inv-doc-footer">
         <div className="inv-doc-footer-title">Payment Details:</div>

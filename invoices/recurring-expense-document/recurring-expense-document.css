@@ -59,7 +59,17 @@ tbody tr:last-child td {padding-bottom:8px;}
    Expenses amount without a new column or row. */
 .inv-doc-cell-note { font-size: 11px; color: #000; }
 
+/* Spacing between a second (or third) expense on the same visit — each one
+   is its own value+note pair, stacked in the same Expenses cell. */
+.inv-doc-cell-extra { margin-top: 8px; }
+
 .inv-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
+
+/* Per-type totals across the whole invoice — e.g. "Mileage £45.60" — for
+   when more than one visit carries a recurring expense of that type. */
+.inv-doc-expense-summary { margin-top: 24px; }
+.inv-doc-expense-summary > div { display: flex; gap: 16px; }
+.inv-doc-expense-summary > div > span:first-child { min-width: 130px; }
 
 .inv-doc-footer { margin-top: 32px; }
 .inv-doc-footer-title { font-weight: bold; margin-bottom: 2px; }

@@ -34,9 +34,11 @@ const RATE = 28; // £/hr
 
 // Line items for the example invoice, dated within its start/end period —
 // same shape as the original sample-invoice.pdf's table (Date/Type/Carer/
-// Start/Duration/Status/Charge/Expenses/Total Charge), plus Rate. The
-// second row always carries a recurring expense so the feature this
-// prototype demonstrates is visible without hunting for it.
+// Start/Duration/Status/Charge/Expenses/Total Charge), plus Rate. `expenses`
+// is an array (0, 1, or more per visit) rather than a single optional
+// value — a visit can carry more than one recurring expense (e.g. Mileage
+// AND a Parking Fee on the same trip). Row 1 always carries two, of
+// different types, so that scenario is visible without hunting for it.
 function buildLineItems(startDate, endDate) {
   const count = 5;
   const spanDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000));
@@ -48,9 +50,16 @@ function buildLineItems(startDate, endDate) {
     const durationMin = pick(DURATIONS_MIN);
     const charge = r2(RATE * (durationMin / 60));
 
-    const hasExpense = i === 1 ? true : rnd() < 0.3;
-    const expenseType = hasExpense ? pick(EXPENSE_TYPES) : null;
-    const expenseAmount = hasExpense ? r2(btw(30, 250) / 10) : 0;
+    const expenseCount = i === 1 ? 2 : (rnd() < 0.3 ? 1 : 0);
+    const usedTypes = [];
+    const expenses = [];
+    for (let e = 0; e < expenseCount; e++) {
+      let type = pick(EXPENSE_TYPES);
+      while (usedTypes.includes(type) && usedTypes.length < EXPENSE_TYPES.length) type = pick(EXPENSE_TYPES);
+      usedTypes.push(type);
+      expenses.push({ type, amount: r2(btw(30, 250) / 10) });
+    }
+    const expenseTotal = r2(expenses.reduce((sum, exp) => sum + exp.amount, 0));
 
     items.push({
       date: fmtD(date.getDate(), date.getMonth() + 1, date.getFullYear()),
@@ -62,9 +71,9 @@ function buildLineItems(startDate, endDate) {
       status: 'Complete',
       rate: RATE,
       charge,
-      expenseType,
-      expenseAmount,
-      totalCharge: r2(charge + expenseAmount),
+      expenses,
+      expenseTotal,
+      totalCharge: r2(charge + expenseTotal),
     });
   }
   return items.sort((a, b) => a.sortKey - b.sortKey);
