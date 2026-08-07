@@ -113,9 +113,15 @@ function VisitCard({ visit, index, onEdit }) {
           <span className="sa-row-value">
             {visit.recurringExpenses.length === 0 ? '—' : (
               <div className="sa-expense-list">
-                {visit.recurringExpenses.map((exp, i) => (
-                  <div key={i}>{exp.title} · {fmtGBP(exp.amount)}</div>
-                ))}
+                {visit.recurringExpenses.map((exp, i) => {
+                  const flags = [exp.payEmployee && 'Pay employee', exp.chargeFunder && 'Charge funder']
+                    .filter(Boolean).join(', ')
+                  return (
+                    <div key={i}>
+                      {exp.title} · {fmtGBP(exp.amount)}{flags ? ` · ${flags}` : ''}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </span>
