@@ -1205,14 +1205,14 @@ export default function App() {
             messagesUnread={messageBadge}
             links={{ notifications: '../notifications/' }}
           />
-        ) : (
+        ) : view !== 'thread' ? (
           <AppNav
             activeTab={null}
             messagesUnread={messageBadge}
             notifCount={UNREAD_NOTIFICATIONS_COUNT}
             links={{ notifications: '../notifications/', account: '../account/' }}
           />
-        )}
+        ) : null}
         {actionTarget && (
           <div className="phone-frame-overlay" onClick={handleCloseActions}>
             <div
