@@ -90,6 +90,17 @@
   color: #8e8e93;
 }
 
+.devedit-add-rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.devedit-add-rule-hint {
+  margin-top: 6px;
+}
+
 .devedit-rule-block {
   display: flex;
   flex-direction: column;

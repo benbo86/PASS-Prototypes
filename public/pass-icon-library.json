@@ -1612,6 +1612,30 @@
       "usageCount": 4
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
+          "name": "BackIcon"
+        }
+      ],
+      "usageCount": 3
+    },
+    {
       "hash": "a812efbb",
       "name": "Chevron Left",
       "group": "Inline",
@@ -1707,25 +1731,6 @@
           "kind": "inline",
           "ref": "web/employees/src/App.jsx#StarIcon",
           "name": "StarIcon"
-        }
-      ],
-      "usageCount": 2
-    },
-    {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
-          "name": "BackIcon"
         }
       ],
       "usageCount": 2
@@ -3268,5 +3273,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-06T15:53:45.093Z"
+  "generatedAt": "2026-08-07T09:47:06.967Z"
 }

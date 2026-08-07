@@ -122,12 +122,61 @@ function applyOverridesLive(overrides) {
   })
 }
 
+// A dedicated <style> tag for rules Dev Edit creates from scratch — for an
+// element with no existing stylesheet rule of its own to edit ("No editable
+// stylesheet rule matches this element"). Nothing else ever writes to this
+// sheet, so it's safe to fully manage (including pruning stale rules from
+// it, see pruneInjectedSheet below) without risking a real, hand-authored
+// rule living anywhere else on the page.
+const INJECTED_STYLE_ID = 'devedit-injected-rules'
+function getInjectedSheet() {
+  let styleEl = document.getElementById(INJECTED_STYLE_ID)
+  if (!styleEl) {
+    styleEl = document.createElement('style')
+    styleEl.id = INJECTED_STYLE_ID
+    document.head.appendChild(styleEl)
+  }
+  return styleEl.sheet
+}
+
+// Removes any rule from the injected sheet whose key isn't in `keepKeys` —
+// run on every reconcile so a brand-new rule that's no longer part of the
+// active override set (e.g. reverted to a version/Original that doesn't
+// include it) actually stops applying. A synthesized rule never appears in
+// pristineMap (it didn't exist at mount), so applyOverrideSet's own
+// pristine-restore loop below has nothing to restore it FROM — pruning the
+// injected sheet directly is the only way to un-apply it.
+function pruneInjectedSheet(keepKeys) {
+  const sheet = getInjectedSheet()
+  for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+    const rule = sheet.cssRules[i]
+    if (rule.type === CSSRule.STYLE_RULE && keepKeys.has(ruleKey(rule.selectorText, null))) continue
+    sheet.deleteRule(i)
+  }
+}
+
 // Always re-resolves the live rule(s) for a selector fresh, rather than
 // mutating a previously-captured CSSStyleRule reference directly — see the
 // comment on buildPristineSnapshot below for why holding onto an old
-// reference is actually broken, not just extra-cautious.
+// reference is actually broken, not just extra-cautious. Falls back to
+// inserting a brand-new rule into the injected sheet when nothing matches
+// this selector anywhere yet — this is what makes it possible to create a
+// rule for an element that had none to begin with, not just edit one that
+// already existed. (Only ever exercised for a plain, non-@media selector —
+// a synthesized rule is always created without a mediaText, so the @media
+// case stays exclusively the "found an existing rule" branch above.)
 function setLiveRuleText(selectorText, mediaText, cssText) {
-  findRulesForSelector(selectorText, mediaText).forEach(rule => { rule.style.cssText = cssText })
+  const existing = findRulesForSelector(selectorText, mediaText)
+  if (existing.length > 0) {
+    existing.forEach(rule => { rule.style.cssText = cssText })
+    return
+  }
+  try {
+    const sheet = getInjectedSheet()
+    sheet.insertRule(`${selectorText} { ${cssText} }`, sheet.cssRules.length)
+  } catch (err) {
+    console.error('Dev Edit: failed to create new rule', err)
+  }
 }
 
 // A pinned pseudo-version, always present in history, representing "no
@@ -253,6 +302,7 @@ function buildPristineSnapshot() {
 // selectors like `:root`.
 function applyOverrideSet(overrides, pristineMap, excludeKeys) {
   const newSelKeys = new Set(overrides.map(o => ruleKey(o.selector, o.mediaText)))
+  pruneInjectedSheet(new Set([...newSelKeys, ...(excludeKeys || [])]))
   pristineMap.forEach((entry) => {
     const selKey = ruleKey(entry.selectorText, entry.mediaText)
     if (newSelKeys.has(selKey) || (excludeKeys && excludeKeys.has(selKey))) return
@@ -555,10 +605,26 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // explicit Apply: clicking away, clicking a different element, Escape,
   // or the panel's own close button — an edit you never confirmed
   // shouldn't silently persist just because you clicked elsewhere.
+  //
+  // Real, severe bug found: this can fire *while a different rule's Apply
+  // is still awaiting its file-write* (see handleApply below) — switching
+  // to a new element right after clicking Apply calls this with the
+  // *previous* selection's keys, and at that moment `committed` for the
+  // just-applied rule hasn't been updated yet (that only happens once the
+  // async request resolves). This reverted the still-in-flight rule's
+  // draft/live style back to its pre-edit value moments before the apply
+  // actually completed — reported as "apply an edit, go to another
+  // element, edit it without saving, and the previous edit disappears."
+  // Skipping any key with a genuinely in-flight Apply (applyingKeyRef,
+  // already tracked for the Apply button's own disabled/label state) stops
+  // this specific revert from ever running out from under it; handleApply's
+  // own finishApply is *also* hardened independently (closure-captured
+  // draft value, forced live re-apply) as a second line of defense.
   const revertDirtyRules = useCallback((keys) => {
     if (!keys || keys.length === 0) return
     let changed = false
     keys.forEach(key => {
+      if (key === applyingKeyRef.current) return
       const entry = sessionEditsRef.current[key]
       if (entry && entry.draft !== entry.committed) {
         setLiveRuleText(entry.selectorText, entry.mediaText, entry.committed)
@@ -569,6 +635,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setSessionEdits(prev => {
       const next = { ...prev }
       keys.forEach(key => {
+        if (key === applyingKeyRef.current) return
         if (next[key] && next[key].draft !== next[key].committed) {
           next[key] = { ...next[key], draft: next[key].committed }
         }
@@ -1054,16 +1121,35 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // committed value, same as any other way of leaving the panel without
   // an explicit Apply (click-away, Escape, ×). ──
   const [applyingKey, setApplyingKey] = useState(null)
+  const applyingKeyRef = useRef(null)
+  applyingKeyRef.current = applyingKey
   const handleApply = async (key) => {
     const entry = sessionEditsRef.current[key]
     if (!entry) return
     const sel = selectionRef.current
     const canWriteToFile = import.meta.env.DEV && entry.filePath
 
+    // `entry.draft` is captured once, above, at the moment Apply was
+    // clicked — used here (not a fresh `prev[key].draft` read) so the value
+    // actually written to disk during the awaited fetch below is exactly
+    // what ends up committed, regardless of anything that happens to
+    // sessionEdits' live `draft` field while this request is in flight
+    // (revertDirtyRules now skips an in-flight key for the same reason —
+    // see its own comment — but re-asserting the live rule text here too,
+    // rather than trusting whatever the CSSOM currently shows, is a second,
+    // independent line of defense against the same race).
     const finishApply = () => {
-      setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], committed: prev[key].draft } }))
-      if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
-      setSelection(null)
+      setLiveRuleText(entry.selectorText, entry.mediaText, entry.draft)
+      setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], committed: entry.draft } }))
+      // Only close/tidy up the panel this Apply actually belongs to — if
+      // the user has since selected something else (exactly the scenario
+      // that motivated this fix), `selectionRef.current` is no longer
+      // `sel`, and blindly closing/reverting here would yank a completely
+      // unrelated, currently-open panel out from under them.
+      if (selectionRef.current === sel) {
+        if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
+        setSelection(null)
+      }
     }
 
     if (!canWriteToFile) {
@@ -1114,6 +1200,24 @@ export default function DevEdit({ containerRef, prototypeId }) {
     }))
     if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
     setSelection(null)
+  }
+
+  // ── Add rule: for an element with no existing stylesheet rule at all
+  // ("No editable stylesheet rule matches this element") — creates a
+  // brand-new sessionEdits entry for one of the element's own classes, with
+  // empty original/committed/draft. Everything downstream (Apply, Cancel,
+  // Discard, Save as version) already treats a rule generically via that
+  // same three-state shape, so a rule that started out empty needs no
+  // special-casing anywhere else — only the live CSSOM insert
+  // (setLiveRuleText's injected-sheet fallback) and the reconcile-time
+  // prune (applyOverrideSet) above needed to change to make this possible.
+  const handleAddRule = (selector) => {
+    const key = ruleKey(selector, null)
+    setSessionEdits(prev => (prev[key] ? prev : {
+      ...prev,
+      [key]: { selectorText: selector, mediaText: null, filePath: null, original: '', committed: '', draft: '', loading: false },
+    }))
+    setSelection(sel => (sel && !sel.keys.includes(key) ? { ...sel, keys: [...sel.keys, key] } : sel))
   }
 
   // ── Save as version ──
@@ -1445,6 +1549,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 onDraftChange={updateDraft}
                 onApply={handleApply}
                 onCancelRule={handleCancelRule}
+                onAddRule={handleAddRule}
                 applyingKey={applyingKey}
                 onClose={closeSelection}
                 error={error}
@@ -1726,9 +1831,13 @@ function VersionRow({ version, isActive, isPreviewing, onPreview, onRevert, onDe
 // ─── Edit panel (per selected element) ───────────────────────────────
 
 function EditPanel({
-  selection, rows, onDraftChange, onApply, onCancelRule, applyingKey, onClose, error,
+  selection, rows, onDraftChange, onApply, onCancelRule, onAddRule, applyingKey, onClose, error,
   activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
 }) {
+  // Only read when rows.length === 0 below ("no rule matches this element")
+  // — offers one of the element's own classes as a selector to create a
+  // brand-new rule under.
+  const addableClasses = selection.el.classList ? Array.from(selection.el.classList) : []
   // The Icon tab only ever exists when the selection resolves to one <svg>
   // AND that svg passes isLikelyIcon (square/small/monochrome) — for every
   // other element, including a matched-but-not-icon-shaped svg (an
@@ -1804,7 +1913,20 @@ function EditPanel({
         ) : (
           <>
             {rows.length === 0 && (
-              <div className="devedit-panel-empty">No editable stylesheet rule matches this element.</div>
+              <div className="devedit-panel-empty">
+                No editable stylesheet rule matches this element.
+                {addableClasses.length > 0 ? (
+                  <div className="devedit-add-rule-list">
+                    {addableClasses.map(cls => (
+                      <button key={cls} className="devedit-btn-secondary" onClick={() => onAddRule(`.${cls}`)}>
+                        + Add rule for .{cls}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="devedit-add-rule-hint">This element has no class name to attach a new rule to.</div>
+                )}
+              </div>
             )}
 
             {rows.map((m, i) => {

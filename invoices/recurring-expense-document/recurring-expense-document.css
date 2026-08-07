@@ -1,0 +1,68 @@
+.red-page {
+  min-height: 100vh;
+  background: var(--ui-purple-7-lightest-lavendar);
+  padding: 40px;
+}
+
+.red-doc-wrap {
+  background: #fff;
+  max-width: 900px;
+  height:1217px;
+  margin: 0 auto;
+  padding: 48px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* ── Invoice document — recreates invoices/list/src/sample-invoice.pdf's own
+   layout/copy as closely as possible (plain black-on-white, no colour).
+   Not part of the Barlow-based design system, so it uses
+   --legacy-font-family (Styles/legacy.css), matching the technique
+   customer-profile/mar-chart's own legacy recreation already uses. */
+.inv-doc {
+  font-family: var(--legacy-font-family);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000;
+}
+
+.inv-doc-header { display: flex; justify-content: space-between; gap: 32px; margin-bottom: 32px; }
+.inv-doc-header-col {
+    display:flex;
+    flex-direction:column; }
+.inv-doc-title { font-size: 28px; font-weight: bold; margin-top:0px; margin-bottom:130px; }
+.inv-doc-address { margin: 0 0 48px 48px; line-height: 22px; }
+.inv-doc-header .inv-doc-address:first-child {margin: 0px 0px 24px 0px; }
+.inv-doc-address-name { font-weight: bold; }
+.inv-doc-summary { line-height:22px; margin-bottom: 12px; }
+.inv-doc-summary > div { display: flex; gap: 16px; }
+.inv-doc-summary > div > span:first-child { font-weight: bold; min-width: 130px; }
+.inv-doc-total-payable {
+  display: flex; gap: 16px;
+  padding: 4px 0px; border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  font-weight: bold; font-size: 13px;
+}
+.inv-doc-total-payable span:first-child { min-width: 130px; }
+
+.inv-doc-meta { display: flex; gap: 16px; margin: 16px 0; }
+.inv-doc-meta-col > div { display: flex; gap: 8px; }
+.inv-doc-meta-col span:first-child { font-weight: bold; min-width: 60px; }
+
+.inv-doc-table { width: 100%; border-collapse: collapse; text-align: left; }
+.inv-doc-table thead tr th { padding-bottom:24px; }
+.inv-doc-table th { font-weight: bold; padding: 4px 12px 4px 0; }
+.inv-doc-table td { padding: 4px 12px 4px 0; vertical-align: top; }
+.inv-doc-table td { padding: 4px 12px 4px 0; vertical-align: top; }
+tbody tr:last-child td {padding-bottom:8px;}
+/* Value + smaller grey note stacked underneath — the one real addition over
+   the original document — shows which recurring expense type produced the
+   Expenses amount without a new column or row. */
+.inv-doc-cell-note { font-size: 11px; color: #888; }
+
+.inv-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
+
+.inv-doc-footer { margin-top: 32px; }
+.inv-doc-footer-title { font-weight: bold; margin-bottom: 2px; }
+.inv-doc-footer-gap { margin-top: 12px; }
+
+.inv-doc-page { text-align: right; font-size: 11px; color: #888; margin-top: 24px; }
