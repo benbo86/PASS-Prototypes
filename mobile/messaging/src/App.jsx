@@ -235,6 +235,17 @@ const THREAD_MESSAGES = {
   ],
 }
 
+// ─── Thread URLs ─────────────────────────────────────────────
+// Each thread gets its own shareable/reloadable URL (?thread=<slug-of-title>)
+// rather than only living in component state — matches the pathname+search
+// convention already established for Timesheets/GPA's own drill-down views.
+
+const slugifyThreadTitle = (title) =>
+  title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+
+const findThreadBySlug = (slug) =>
+  (slug && THREADS.find(t => slugifyThreadTitle(t.title) === slug)) || null
+
 // ─── Inbox Screen ────────────────────────────────────────────
 
 function ThreadRow({ thread, onClick, showArchivedTag }) {
@@ -988,18 +999,29 @@ export default function App() {
   // Defaults to Account (the real entry point), but skips straight to the
   // inbox when arriving via ?screen=inbox — e.g. a "Messages" tap from
   // mobile/account, which already showed Account once.
-  const [outerView, setOuterView] = useState(() =>
-    new URLSearchParams(window.location.search).get('screen') === 'inbox' ? 'messaging' : 'account'
-  )
+  const [outerView, setOuterView] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('screen') === 'inbox' || params.get('thread') ? 'messaging' : 'account'
+  })
   // mobile/account and mobile/messaging are separate pages, so the "Messages"
   // tap has no shared DOM to slide within — this plays a matching entrance
   // once, only for that specific arrival (never a direct visit or bottom-nav switch).
   const [entering] = useState(() =>
     new URLSearchParams(window.location.search).get('transition') === '1'
   )
-  const [view, setView] = useState('inbox')
-  const [activeThreadId, setActiveThreadId] = useState(null)
-  const [threads, setThreads] = useState(THREADS)
+  // A direct/reloaded ?thread=<slug> link opens straight into that thread,
+  // already in its final ScreenSlider position — set via lazy initial state
+  // (not a post-mount useEffect) so there's no inbox flash before it slides in.
+  const [view, setView] = useState(() =>
+    findThreadBySlug(new URLSearchParams(window.location.search).get('thread')) ? 'thread' : 'inbox'
+  )
+  const [activeThreadId, setActiveThreadId] = useState(() =>
+    findThreadBySlug(new URLSearchParams(window.location.search).get('thread'))?.id ?? null
+  )
+  const [threads, setThreads] = useState(() => {
+    const initial = findThreadBySlug(new URLSearchParams(window.location.search).get('thread'))
+    return initial ? THREADS.map(t => t.id === initial.id ? { ...t, unread: false } : t) : THREADS
+  })
   const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
   const [composeVisible, setComposeVisible] = useState(false)
   const [composeExiting, setComposeExiting] = useState(false)
@@ -1053,9 +1075,21 @@ export default function App() {
   }
 
   const openThread = (id) => {
+    const thread = threads.find(t => t.id === id)
+    if (thread) history.pushState(null, '', `?thread=${slugifyThreadTitle(thread.title)}`)
     setActiveThreadId(id)
     setThreads(prev => prev.map(t => t.id === id ? { ...t, unread: false } : t))
     setView('thread')
+  }
+
+  const closeThread = () => {
+    history.pushState(null, '', '?screen=inbox')
+    setView('inbox')
+  }
+
+  const goToAccount = () => {
+    history.pushState(null, '', window.location.pathname)
+    setOuterView('account')
   }
 
   const handleReply = (text) => {
@@ -1080,6 +1114,7 @@ export default function App() {
   }
 
   const handleToggleArchive = (id) => {
+    history.pushState(null, '', '?screen=inbox')
     setThreads(prev => prev.map(t => t.id === id ? { ...t, archivedByCarer: !t.archivedByCarer } : t))
     setActiveThreadId(null)
     setView('inbox')
@@ -1093,9 +1128,10 @@ export default function App() {
     // to fall back to (every thread is "Office"), so the message itself is
     // the next most useful thing to show as the thread's title.
     const fallbackTitle = message.trim().length > 40 ? `${message.trim().slice(0, 40)}…` : message.trim()
+    const newThreadTitle = title.trim() || fallbackTitle
     const newThread = {
       id: newId,
-      title: title.trim() || fallbackTitle,
+      title: newThreadTitle,
       careReceiver: careReceivers.length > 0 ? careReceivers.map(r => r.name).join(', ') : null,
       participants: 'Office',
       lastSender: 'You',
@@ -1110,6 +1146,7 @@ export default function App() {
       ...prev,
       [newId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', receipt: 'delivered' }],
     }))
+    history.pushState(null, '', `?thread=${slugifyThreadTitle(newThreadTitle)}`)
     setActiveThreadId(newId)
     setComposeVisible(false)
     setView('thread')
@@ -1134,9 +1171,9 @@ export default function App() {
   return (
     <>
       <DevToolbar floating>
-        <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <DevEdit containerRef={phoneFrameRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={phoneFrameRef} />
-        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname} />
+        <DevComments containerRef={phoneFrameRef} prototypeId={window.location.pathname + window.location.search} />
         <WireframeToggle />
         <AuditCapture containerRef={phoneFrameRef} />
       </DevToolbar>
@@ -1165,7 +1202,7 @@ export default function App() {
                       threads={threads}
                       onOpenThread={openThread}
                       onCompose={openCompose}
-                      onBack={() => setOuterView('account')}
+                      onBack={goToAccount}
                       totalUnread={totalUnread}
                     />
                   }
@@ -1174,7 +1211,7 @@ export default function App() {
                       ref={threadScreenRef}
                       thread={activeThread}
                       messages={activeThreadId ? (threadMessages[activeThreadId] || []) : []}
-                      onBack={() => setView('inbox')}
+                      onBack={closeThread}
                       onMessageSent={handleReply}
                       onMarkUnread={handleMarkUnread}
                       onToggleArchive={handleToggleArchive}
