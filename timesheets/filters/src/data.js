@@ -6,7 +6,7 @@ function rand() {
 }
 const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 const between = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
-const r2 = (n) => Math.round(n * 100) / 100;
+export const r2 = (n) => Math.round(n * 100) / 100;
 
 // "Private" isn't a real funder — it's a funder *type*. A private-payer
 // customer's own funder is themselves (they pay directly, not via an LA/
@@ -33,6 +33,16 @@ export const FUNDERS = [...new Set(CUSTOMERS.map(c => c.funder))].sort();
 
 export const VISIT_TYPES = ['Personal care', 'Medication', 'Domestic', 'Social support', 'Complex care'];
 export const VISIT_STATUSES = ['Completed', 'Missed', 'Cancelled'];
+
+// Matches customer-profile/service-agreement/src/data.js's own recurring
+// expense taxonomy — declared locally rather than imported, per this repo's
+// convention that each prototype owns its own data.js.
+export const EXPENSE_TYPES = ['Customer Shopping', 'Mileage', 'Parking Fee'];
+
+let _expenseId = 1;
+export function makeExpense({ type, amount, payEmployee = false, chargeFunder = false, note = '' }) {
+  return { id: _expenseId++, type, amount: r2(amount), payEmployee, chargeFunder, note, addedBy: 'admin' };
+}
 
 // customerIds: the subset of customers each employee visits
 // visitRange: [min, max] visits for the period
@@ -117,8 +127,33 @@ export const VISITS = EMPLOYEES.flatMap(emp => {
       invVerified,
       payRef:  payVerified ? `PAY-${10000 + between(0, 89999)}` : '',
       invRef:  invVerified ? `INV-${10000 + between(0, 89999)}` : '',
+      // Ad-hoc/recurring expenses (Timesheets' own Expenses tab, distinct
+      // from the flat `expenses` total above) — always start empty; a
+      // recurring one only ever arrives via a visit's Service Agreement
+      // config (customer-profile/service-agreement/src/VisitPanel.jsx),
+      // never generated here.
+      recurringExpenses: [],
+      adhocExpenses: [],
     };
   });
+});
+
+// Demonstrates a recurring expense configured via Service Agreement landing
+// here in Timesheets, unprompted — a recurring expense is configured once
+// against the visit itself, so every occurrence of it carries the same one,
+// not just a single hand-picked visit (which a reviewer could easily miss
+// if they happened to open a different row first). Applied to every one of
+// Stephen Nicholls' (employeeId 1) visits; each gets its own expense object
+// (a fresh makeExpense() call) so they don't share one mutable instance.
+VISITS.filter(v => v.employeeId === 1).forEach(v => {
+  v.recurringExpenses = [
+    makeExpense({ type: 'Mileage', amount: 4.50, payEmployee: true, chargeFunder: true, note: 'Weekly round trip mileage' }),
+  ];
+  // Keep the flat `expenses` column (what the table itself shows) in sync
+  // with the recurring total from the start — otherwise it'd still be
+  // showing its own unrelated random value, making the panel's "Save
+  // changes" look dirty the instant it's opened, before any real edit.
+  v.expenses = r2(v.recurringExpenses.reduce((sum, e) => sum + e.amount, 0));
 });
 
 // Holiday records — one per day for multi-day holidays

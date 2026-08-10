@@ -168,6 +168,28 @@ h6 {
 .warning-banner.green p,
 .warning-banner.green li { color: var(--greyscale-2-grey-20); font-size: 15px; line-height: 1.5; }
 
+/* ── Toast banner — a floating, fully-bordered, dismissible confirmation
+   (distinct from .warning-banner above, which sits inline in a page's own
+   flow with a left accent border) — see component-demos/ui-kit's own
+   "Toasters" section for the reference look. Positioning (fixed/floating
+   placement) is left to each consumer, since where a toast should anchor
+   depends on the specific page layout it's used in — timesheets/filters'
+   own Expenses feature is the first real usage, see its .ve-toast. */
+.toast-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 8px;
+  padding: 14px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  background: var(--rag-green-green-lightest);
+  border: 1px solid var(--rag-green-green-3-aa);
+}
+.toast-banner-content { display: flex; align-items: center; gap: 12px; color: var(--rag-green-green-3-aa); }
+.toast-banner-content span { font-size: 15px; font-weight: 500; }
+.toast-banner-close { background: none; border: none; cursor: pointer; padding: 0; display: flex; color: var(--rag-green-green-3-aa); }
+
 /* react-datepicker overrides */
 .react-datepicker-wrapper { width: 100%; }
 .react-datepicker-popper { z-index: 100; }

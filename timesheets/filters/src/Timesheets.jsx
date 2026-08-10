@@ -20,9 +20,10 @@ import ViewToggle from './ViewToggle';
 import PublishToggle from './PublishToggle';
 import FunderList from './FunderList';
 import FunderDetail from './FunderDetail';
+import ExpensesTab from './ExpensesTab';
 import {
   EMPLOYEES, VISITS, FUNDERS, VISIT_STATUSES, VISIT_TYPES,
-  HOLIDAY_RECORDS, fmtMins, fmtGBP,
+  HOLIDAY_RECORDS, fmtMins, fmtGBP, r2,
 } from './data';
 
 // ─── SVG icons ─────────────────────────────────────────────────────────────
@@ -84,6 +85,23 @@ const BackIcon = () => (
   </svg>
 );
 
+// Matches Styles/main.css's .warning-banner convention exactly (see
+// component-demos/ui-kit and employee-contract/holiday-pay-deduction for
+// the same two icons) — reused here for the Expenses tab's unsaved-changes
+// warning and save-confirmation banner, both of which occupy the panel's
+// own footer rather than floating as a page-level toast.
+const WarningIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" className="warning-icon">
+    <path fill="currentColor" fillRule="evenodd" d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z" />
+  </svg>
+);
+
+const TickIcon = ({ className }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" className={className}>
+    <polygon stroke="currentColor" fill="currentColor" strokeLinejoin="round" points="9.29090299 15.7925373 5.47272117 12.0313433 4.1999939 13.2850746 9.29090299 18.3 20.1999939 7.55373134 18.9272666 6.3" />
+  </svg>
+);
+
 const SettingsIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M13.5759 2.85953C14.1433 1.88245 15.341 1.47271 16.3181 1.88245C17.1375 2.22915 17.894 2.67041 18.6189 3.20623C19.4699 3.8366 19.7221 5.06583 19.1547 6.04291C18.8395 6.61024 18.8395 7.30365 19.1547 7.87099C19.4699 8.43832 20.0688 8.78503 20.7307 8.78503C21.8653 8.78503 22.8109 9.63603 22.937 10.7392C23 11.1489 23 11.5902 23 11.9999C23 12.4097 23 12.8509 22.937 13.2607C22.8109 14.3638 21.8653 15.2148 20.7307 15.2148C20.1003 15.2148 19.4699 15.5615 19.1547 16.1289C18.8395 16.6962 18.8395 17.3896 19.1547 17.9569C19.7221 18.934 19.4699 20.1317 18.6189 20.7936C17.894 21.3294 17.1375 21.7707 16.3181 22.1174C16.0344 22.212 15.7822 22.275 15.4986 22.275C14.7421 22.275 13.9857 21.8653 13.5759 21.1403C13.2607 20.573 12.6304 20.2263 12 20.2263C11.3696 20.2263 10.7393 20.573 10.4241 21.1403C9.85673 22.1174 8.65903 22.5271 7.68195 22.1174C6.86246 21.7707 6.10602 21.3294 5.38109 20.7936C4.53009 20.1633 4.27794 18.934 4.84527 17.9569C5.16046 17.3896 5.16046 16.6962 4.84527 16.1289C4.53009 15.5615 3.93123 15.2148 3.26934 15.2148C2.13467 15.2148 1.18911 14.3638 1.06304 13.2607C1.03152 12.8509 1 12.4097 1 11.9999C1 11.5902 1 11.1489 1.06304 10.7392C1.18911 9.63603 2.13467 8.78503 3.26934 8.78503C3.89971 8.78503 4.53009 8.43832 4.84527 7.87099C5.16046 7.30365 5.16046 6.61024 4.84527 6.04291C4.27794 5.06583 4.53009 3.86812 5.38109 3.20623C6.10602 2.67041 6.86246 2.22915 7.68195 1.88245C8.69054 1.47271 9.85673 1.88245 10.4241 2.85953C10.7393 3.42686 11.3696 3.77357 12 3.77357C12.6304 3.77357 13.2607 3.42686 13.5759 2.85953ZM15.6246 3.58445C15.4355 3.4899 15.2779 3.61597 15.1834 3.77357C14.5215 4.90824 13.3238 5.60165 12 5.60165C10.6762 5.60165 9.47851 4.90824 8.81662 3.77357C8.72206 3.64749 8.53295 3.52142 8.37536 3.58445C7.68195 3.86812 7.05158 4.24635 6.45272 4.68761C6.32665 4.78216 6.32665 5.00279 6.4212 5.16039C7.08309 6.29506 7.08309 7.68188 6.4212 8.81655C5.79083 9.9197 4.5616 10.6446 3.26934 10.6446C3.08023 10.6446 2.92264 10.7707 2.89112 10.9598C2.8596 11.3065 2.82808 11.6532 2.82808 11.9999C2.82808 12.3466 2.8596 12.6933 2.89112 13.04C2.89112 13.2292 3.04871 13.3552 3.26934 13.3552C4.5616 13.3552 5.75931 14.0486 6.4212 15.1833C7.05158 16.318 7.08309 17.7048 6.4212 18.8395C6.32665 18.9971 6.29513 19.2177 6.45272 19.3122C7.05158 19.7535 7.68195 20.1317 8.37536 20.4154C8.56447 20.51 8.72206 20.3839 8.81662 20.2263C9.47851 19.0916 10.6762 18.3982 12 18.3982C13.3238 18.3982 14.5215 19.0916 15.1834 20.2263C15.2779 20.3524 15.467 20.4784 15.6246 20.4154C16.3181 20.1317 16.9484 19.7535 17.5473 19.3122C17.6734 19.2177 17.6734 18.9971 17.5788 18.8395C16.9169 17.7048 16.9169 16.318 17.5788 15.1833C18.2092 14.0802 19.4384 13.3552 20.7307 13.3552C20.9198 13.3552 21.0774 13.2292 21.1089 13.04C21.1719 12.6933 21.1719 12.3466 21.1719 11.9999C21.1719 11.6532 21.1404 11.3065 21.1089 10.9598C21.1089 10.7707 20.9513 10.6446 20.7307 10.6446C19.4384 10.6446 18.2407 9.95122 17.5788 8.81655C16.9484 7.68188 16.9169 6.29506 17.5788 5.16039C17.6734 5.00279 17.7049 4.78216 17.5473 4.68761C16.9484 4.24635 16.2865 3.86812 15.6246 3.58445ZM12 8.34377C14.0172 8.34377 15.6562 9.98274 15.6562 11.9999C15.6562 14.0171 14.0172 15.6561 12 15.6561C9.98281 15.6561 8.34384 14.0171 8.34384 11.9999C8.34384 9.98274 9.98281 8.34377 12 8.34377ZM12 10.1718C10.9914 10.1718 10.1719 10.9913 10.1719 11.9999C10.1719 13.0085 10.9914 13.828 12 13.828C13.0086 13.828 13.8281 13.0085 13.8281 11.9999C13.8281 10.9913 13.0086 10.1718 12 10.1718Z"/>
@@ -117,17 +135,86 @@ const COL_LABELS = {
 // below exactly. Starting proportions only (see Components/useSharedColumnWidths.js).
 const RAW_COL_WIDTHS = [150, 120, 100, 100, 100, 100, 110, 120, 105, 120, 130, 60, 70];
 
-// ─── Holiday Panel ───────────────────────────────────────────────────────────
+// ─── Record Panel (holiday deduction, or a visit's own detail/expenses) ──────
 
-const TABS = ['Details', 'Finance', 'Notes'];
+const TABS_HOLIDAY = ['Details', 'Finance', 'Notes'];
+const TABS_VISIT = ['Details', 'Expenses', 'Finance', 'Notes'];
 
-function HolidayPanel({ record, onClose }) {
-  const [activeTab, setActiveTab] = useState('finance');
-  const [deduction, setDeduction] = useState(record.deduction.toFixed(2));
-  const [savedDeduction, setSavedDeduction] = useState(record.deduction);
+// Expenses don't apply to a holiday (or holiday-reconciliation/deduction)
+// record — `record._isHoliday` (already the merge-time flag every other
+// piece of this file uses to distinguish the two row kinds, see allRows
+// below) decides both the tab set and what Finance/Details actually show:
+// deduction editing for a holiday record (unchanged from this panel's
+// original, holiday-only build), a read-only summary + the new Expenses
+// tab for a visit.
+function RecordPanel({ record, onClose, onUpdateVisit, onSaveExpenses }) {
+  const isHoliday = !!record._isHoliday;
+  const tabs = isHoliday ? TABS_HOLIDAY : TABS_VISIT;
+  const [activeTab, setActiveTab] = useState(isHoliday ? 'finance' : 'details');
+  const [deduction, setDeduction] = useState(isHoliday ? record.deduction.toFixed(2) : '0');
+  const [savedDeduction, setSavedDeduction] = useState(isHoliday ? record.deduction : 0);
   const [editHistory, setEditHistory] = useState([]);
 
-  const isDirty = parseFloat(deduction) !== savedDeduction;
+  const isDirty = isHoliday && parseFloat(deduction) !== savedDeduction;
+
+  // The table's own "Expenses" column (a flat number, `record.expenses`)
+  // only updates when the user explicitly saves the panel — individual
+  // ad-hoc/recurring entries commit immediately within the Expenses tab
+  // itself (their own Confirm button), but that's panel-local until this
+  // syncs the total out to the row the user actually sees in the table.
+  const expensesTotal = !isHoliday
+    ? r2([...record.adhocExpenses, ...record.recurringExpenses].reduce((sum, e) => sum + e.amount, 0))
+    : 0;
+  const expensesDirty = !isHoliday && expensesTotal !== record.expenses;
+
+  // Snapshot of the last-saved (or opening) ad-hoc/recurring arrays — what
+  // "Discard the changes" reverts to. Only meaningful for a visit; a
+  // holiday record's own isDirty/Save flow is unrelated and untouched.
+  const [savedSnapshot, setSavedSnapshot] = useState(() => !isHoliday
+    ? { adhocExpenses: record.adhocExpenses, recurringExpenses: record.recurringExpenses }
+    : null);
+  // Set instead of switching tabs/closing immediately whenever that would
+  // silently leave expensesDirty behind — { type: 'tab', target } | { type: 'close' } | null.
+  const [pendingAction, setPendingAction] = useState(null);
+
+  // The save-confirmation itself is a floating toast owned by VisitDetail
+  // (see onSaveExpenses there) — it survives the panel closing right after
+  // a save, so there's nothing further to show/wait for here.
+  const performSaveExpenses = () => {
+    onSaveExpenses(record, expensesTotal);
+    setSavedSnapshot({ adhocExpenses: record.adhocExpenses, recurringExpenses: record.recurringExpenses });
+  };
+
+  const resolvePendingAction = (action) => {
+    if (!action) return;
+    if (action.type === 'tab') setActiveTab(action.target);
+    else if (action.type === 'close') onClose();
+  };
+
+  const handleDiscardPending = () => {
+    const action = pendingAction;
+    setPendingAction(null);
+    onUpdateVisit({ ...record, adhocExpenses: savedSnapshot.adhocExpenses, recurringExpenses: savedSnapshot.recurringExpenses });
+    resolvePendingAction(action);
+  };
+
+  const handleSavePending = () => {
+    const action = pendingAction;
+    setPendingAction(null);
+    performSaveExpenses();
+    resolvePendingAction(action);
+  };
+
+  const requestTabChange = (tab) => {
+    if (tab === activeTab) return;
+    if (expensesDirty) { setPendingAction({ type: 'tab', target: tab }); return; }
+    setActiveTab(tab);
+  };
+
+  const requestClose = () => {
+    if (expensesDirty) { setPendingAction({ type: 'close' }); return; }
+    onClose();
+  };
 
   const handleSave = () => {
     const newVal = parseFloat(deduction);
@@ -142,25 +229,27 @@ function HolidayPanel({ record, onClose }) {
     setSavedDeduction(newVal);
   };
 
-  const rateLabel = record.dailyRate
+  const rateLabel = isHoliday && (record.dailyRate
     ? `${record.durationLabel} × £${record.dailyRate.toFixed(2)} daily rate`
-    : `${record.durationLabel} × £${record.hourlyRate.toFixed(2)}/hr rate`;
+    : `${record.durationLabel} × £${record.hourlyRate.toFixed(2)}/hr rate`);
+
+  const title = isHoliday ? `Holiday — ${record.date}` : `${record.visitName} — ${record.date}`;
 
   return (
     <>
-      <div className="hp-scrim" onClick={onClose} />
+      <div className="hp-scrim" onClick={requestClose} />
       <div className="hp-panel">
 
         {/* Header */}
         <div className="hp-header">
-          <button className="hp-close" onClick={onClose}><CloseIcon /></button>
-          <h2>Holiday — {record.date}</h2>
+          <button className="hp-close" onClick={requestClose}><CloseIcon /></button>
+          <h2>{title}</h2>
           <div className="hp-tabs">
-            {TABS.map(t => (
+            {tabs.map(t => (
               <button
                 key={t}
                 className={`hp-tab ${activeTab === t.toLowerCase() ? 'active' : ''}`}
-                onClick={() => setActiveTab(t.toLowerCase())}
+                onClick={() => requestTabChange(t.toLowerCase())}
               >{t}</button>
             ))}
           </div>
@@ -168,59 +257,104 @@ function HolidayPanel({ record, onClose }) {
 
         {/* Body */}
         <div className="hp-body">
-          {activeTab === 'finance' && (
-            <div className="hp-finance">
-
-              <div className="hp-field">
-                <label className="hp-label">Holiday deduction (£)</label>
-                <input
-                  className="hp-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={deduction}
-                  onKeyDown={e => (e.key === '-' || e.key === 'e') && e.preventDefault()}
-                  onChange={e => { const v = e.target.value; if (v === '' || parseFloat(v) >= 0) setDeduction(v); }}
-                />
-                {editHistory.length > 0 && (
-                  <span className="hp-last-edit">
-                    Last edited by {editHistory[0].user} at {editHistory[0].time}, {editHistory[0].date}
-                  </span>
-                )}
+          {activeTab === 'details' && (
+            isHoliday ? (
+              <p className="hp-placeholder">No content for this tab in the prototype.</p>
+            ) : (
+              <div className="ve-details-list">
+                <div><span>Customer</span>{record.customerName}</div>
+                <div><span>Visit type</span>{record.visitType}</div>
+                <div><span>Date</span>{record.date}</div>
+                <div><span>Planned time</span>{record.plannedStart}–{record.plannedEnd}</div>
+                <div><span>Actual time</span>{record.actualStart}–{record.actualEnd}</div>
+                <div><span>Status</span>{record.status}</div>
               </div>
-
-              <div className="hp-field">
-                <label className="hp-label">Duration deducted</label>
-                <div className="hp-read-only">{record.durationLabel}</div>
-              </div>
-
-              <div className="hp-calc-card">
-                <span className={`hp-calc-label${savedDeduction !== record.deduction ? ' hp-calc-struck' : ''}`}>{rateLabel}</span>
-                <span className={`hp-calc-total${savedDeduction !== record.deduction ? ' hp-calc-struck' : ''}`}>
-                  = £{record.deduction.toFixed(2)} deduction
-                </span>
-                {savedDeduction !== record.deduction && (
-                  <span className="hp-edited-note">Amount manually edited</span>
-                )}
-                <a
-                  href="#"
-                  className="hp-contract-link"
-                  onClick={e => e.preventDefault()}
-                >View contract →</a>
-              </div>
-
-            </div>
+            )
           )}
-          {activeTab !== 'finance' && (
+
+          {activeTab === 'expenses' && !isHoliday && (
+            <ExpensesTab visit={record} onChange={onUpdateVisit} />
+          )}
+
+          {activeTab === 'finance' && (
+            isHoliday ? (
+              <div className="hp-finance">
+
+                <div className="hp-field">
+                  <label className="hp-label">Holiday deduction (£)</label>
+                  <input
+                    className="hp-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={deduction}
+                    onKeyDown={e => (e.key === '-' || e.key === 'e') && e.preventDefault()}
+                    onChange={e => { const v = e.target.value; if (v === '' || parseFloat(v) >= 0) setDeduction(v); }}
+                  />
+                  {editHistory.length > 0 && (
+                    <span className="hp-last-edit">
+                      Last edited by {editHistory[0].user} at {editHistory[0].time}, {editHistory[0].date}
+                    </span>
+                  )}
+                </div>
+
+                <div className="hp-field">
+                  <label className="hp-label">Duration deducted</label>
+                  <div className="hp-read-only">{record.durationLabel}</div>
+                </div>
+
+                <div className="hp-calc-card">
+                  <span className={`hp-calc-label${savedDeduction !== record.deduction ? ' hp-calc-struck' : ''}`}>{rateLabel}</span>
+                  <span className={`hp-calc-total${savedDeduction !== record.deduction ? ' hp-calc-struck' : ''}`}>
+                    = £{record.deduction.toFixed(2)} deduction
+                  </span>
+                  {savedDeduction !== record.deduction && (
+                    <span className="hp-edited-note">Amount manually edited</span>
+                  )}
+                  <a
+                    href="#"
+                    className="hp-contract-link"
+                    onClick={e => e.preventDefault()}
+                  >View contract →</a>
+                </div>
+
+              </div>
+            ) : (
+              <p className="hp-placeholder">No content for this tab in the prototype.</p>
+            )
+          )}
+
+          {activeTab === 'notes' && (
             <p className="hp-placeholder">No content for this tab in the prototype.</p>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="hp-footer">
-          <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
-          <button className="round-btn primary-btn" disabled={!isDirty} onClick={handleSave}>Save changes</button>
-        </div>
+        {/* Footer — either the normal Cancel/Save changes controls, or (for
+            a dirty visit) an unsaved-changes warning replacing it in place
+            when a tab switch/close is attempted (requestTabChange/
+            requestClose above). The save-confirmation itself is a separate
+            floating toast (VisitDetail), not shown here. */}
+        {pendingAction ? (
+          <div className="hp-footer ve-unsaved-warning">
+            <div className="ve-unsaved-warning-text">
+              <WarningIcon />
+              <span>Do you want to save your changes?</span>
+            </div>
+            <div className="ve-unsaved-warning-actions">
+              <button className="round-btn secondary-btn" onClick={handleDiscardPending}>Discard the changes</button>
+              <button className="round-btn primary-btn" onClick={handleSavePending}>Save the changes</button>
+            </div>
+          </div>
+        ) : (
+          <div className="hp-footer">
+            <button className="round-btn tertiary-btn" onClick={requestClose}>Cancel</button>
+            {isHoliday ? (
+              <button className="round-btn primary-btn" disabled={!isDirty} onClick={handleSave}>Save changes</button>
+            ) : (
+              <button className="round-btn primary-btn" disabled={!expensesDirty} onClick={() => performSaveExpenses()}>Save changes</button>
+            )}
+          </div>
+        )}
 
       </div>
     </>
@@ -229,14 +363,46 @@ function HolidayPanel({ record, onClose }) {
 
 // ─── Level 2 – Visit Detail ─────────────────────────────────────────────────
 
-function VisitDetail({ employee, visits, onBack, period = '' }) {
+function VisitDetail({ employee, visits, onUpdateVisits, onBack, period = '' }) {
   const pageRef = useRef(null);
   const [payAll,  setPayAll]  = useState(false);
   const [invAll,  setInvAll]  = useState(false);
   const [payRows, setPayRows] = useState({});
   const [invRows, setInvRows] = useState({});
-  const [selectedHoliday, setSelectedHoliday] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const [copies, setCopies] = useState(false);
+
+  // Save-confirmation toast — a floating notification independent of the
+  // panel (lives here, not inside RecordPanel), so it survives the panel
+  // closing right after a save rather than unmounting with it.
+  const [toast, setToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
+  const showToast = (message) => {
+    clearTimeout(toastTimeoutRef.current);
+    setToast(message);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
+  // `visits` is owned by the parent Timesheets component (shared with its
+  // own L1 employee summary, so a visit's expenses edited/saved here are
+  // reflected in that aggregate too) — mutate it via onUpdateVisits rather
+  // than a local copy of its own.
+  const handleUpdateVisit = (updated) => {
+    onUpdateVisits(prev => prev.map(v => v.id === updated.id ? updated : v));
+    setSelectedRecord(updated);
+  };
+
+  // Syncs the Expenses tab's current ad-hoc+recurring total out to the
+  // table's own flat "Expenses" column — kept as a separate, explicit step
+  // (the panel's own "Save changes") rather than happening automatically on
+  // every add/edit/delete, so the table only ever reflects a deliberately
+  // confirmed state.
+  const handleSaveExpenses = (visit, total) => {
+    const updated = { ...visit, expenses: total };
+    onUpdateVisits(prev => prev.map(v => v.id === updated.id ? updated : v));
+    setSelectedRecord(updated);
+    showToast('Expense changes saved');
+  };
 
   // Filter + sort state
   const [sort,            setSort]            = useState({ col: null, dir: 'asc' });
@@ -666,7 +832,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
             </thead>
             <tbody>
               {pageRows.map(row => row._isHoliday ? (
-                <tr key={row.id} className="holiday-row" onClick={() => setSelectedHoliday(row)}>
+                <tr key={row.id} className="holiday-row" onClick={() => setSelectedRecord(row)}>
                   <td className="td-dash">—</td>
                   <td className="td-dash">—</td>
                   <td>Holiday deduction</td>
@@ -698,7 +864,7 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   </td>
                 </tr>
               ) : (
-                <tr key={row.id}>
+                <tr key={row.id} className="data-row" onClick={() => setSelectedRecord(row)}>
                   <td>{row.customerName}</td>
                   <td>{row.visitName}</td>
                   <td>{row.visitType}</td>
@@ -712,14 +878,14 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
                   <td>{fmtGBP(row.expenses)}</td>
                   <td className="td-ref">{row.payRef || '—'}</td>
                   <td className="td-ref">{row.invRef || '—'}</td>
-                  <td className="check-col">
+                  <td className="check-col" onClick={e => e.stopPropagation()}>
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={payAll || !!payRows[row.id]}
                         onChange={e => setPayRows(p => ({ ...p, [row.id]: e.target.checked }))} />
                       <span className="checkbox-box" />
                     </label>
                   </td>
-                  <td className="check-col">
+                  <td className="check-col" onClick={e => e.stopPropagation()}>
                     <label className="checkbox-wrap">
                       <input type="checkbox" checked={invAll || !!invRows[row.id]}
                         onChange={e => setInvRows(p => ({ ...p, [row.id]: e.target.checked }))} />
@@ -750,8 +916,24 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
         />
       </div>
 
-      {selectedHoliday && (
-        <HolidayPanel record={selectedHoliday} onClose={() => setSelectedHoliday(null)} />
+      {selectedRecord && (
+        <RecordPanel record={selectedRecord} onClose={() => setSelectedRecord(null)} onUpdateVisit={handleUpdateVisit} onSaveExpenses={handleSaveExpenses} />
+      )}
+
+      {/* Outside the panel conditional above so it survives the panel
+          closing right after a save. .ve-toast positions it relative to
+          the slide-out panel's own fixed geometry (937px, right-anchored),
+          not centered on the whole screen; .toast-banner (Styles/main.css)
+          is the shared visual style — see component-demos/ui-kit's own
+          "Toasters" section. */}
+      {toast && (
+        <div className="ve-toast toast-banner">
+          <div className="toast-banner-content">
+            <TickIcon />
+            <span>{toast}</span>
+          </div>
+          <button className="toast-banner-close" onClick={() => setToast(null)} aria-label="Dismiss"><CloseIcon /></button>
+        </div>
       )}
       </div>
       </div>
@@ -765,6 +947,15 @@ function VisitDetail({ employee, visits, onBack, period = '' }) {
 export default function Timesheets() {
   const pageRef = useRef(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Shared between the Employees L1 summary (employeeRows below) and the L2
+  // VisitDetail drill-down — a visit's expenses edited/saved in the detail
+  // panel need to be reflected back in the L1 row's own aggregate Expenses
+  // total, which a plain read of the frozen VISITS import could never pick
+  // up. Deliberately its own state, separate from funderVisits below (see
+  // that comment) — Employees and Funders still don't share one mutable
+  // source, only L1 and L2 *within* Employees do now.
+  const [visits, setVisits] = useState(VISITS);
 
   // AIOP-23432 — Funders timesheet view. Kept as a separate local copy of
   // VISITS (not threading a shared mutable source through the existing,
@@ -924,7 +1115,7 @@ export default function Timesheets() {
       mileage: 0, expenses: 0,
       payVerCount: 0, invVerCount: 0,
     }]));
-    VISITS.forEach(v => {
+    visits.forEach(v => {
       const row = byEmp.get(v.employeeId);
       if (!row) return;
       row.visits++;
@@ -936,7 +1127,7 @@ export default function Timesheets() {
       if (v.invVerified) row.invVerCount++;
     });
     return [...byEmp.values()];
-  }, []);
+  }, [visits]);
 
   // Step 3: apply column filters
   const colFiltered = useMemo(() => {
@@ -1034,7 +1225,8 @@ export default function Timesheets() {
     return (
       <VisitDetail
         employee={selectedEmployee}
-        visits={VISITS}
+        visits={visits}
+        onUpdateVisits={setVisits}
         onBack={navigateBack}
         period={rangeLabel}
       />

@@ -103,3 +103,96 @@ body {
   background: var(--rag-green-green-5);
   border-color: var(--rag-green-green-5);
 }
+
+/* ── Record panel — Details tab (read-only visit summary) ─────────────── */
+.ve-details-list { display: flex; flex-direction: column; gap: 16px; }
+.ve-details-list > div { display: flex; gap: 16px; }
+.ve-details-list > div > span:first-child { font-weight: 500; min-width: 140px; color: var(--greyscale-6-grey-50); }
+
+/* ── Record panel — Expenses tab ────────────────────────────────────────── */
+.ve-tab { display: flex; flex-direction: column; gap: 40px; }
+.ve-section { display: flex; flex-direction: column; gap: 16px; }
+.ve-section-title { font-size: 18px; font-weight: 500; margin: 0; }
+
+/* .ve-section's own flex-column default (align-items: stretch) would
+   otherwise stretch this button to the section's full width, same as its
+   sibling cards/forms — those should stay full width, this shouldn't. */
+.ve-add-btn { align-self: flex-start; }
+
+.ve-card {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  padding: 20px 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ve-card-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
+.ve-icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: var(--ui-purple-7-lightest-lavendar);
+  color: var(--ui-purple-3-grape-grey);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.ve-icon-btn:hover { background: var(--ui-purple-6-lavendar-grey); }
+
+.ve-card-row { display: flex; gap: 16px; }
+.ve-card-row > span:first-child { font-weight: 500; min-width: 140px; }
+.ve-card-author {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 4px; color: var(--greyscale-6-grey-50); font-size: 13px;
+}
+
+/* ── Record panel — add/edit expense form ───────────────────────────────── */
+.ve-form {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ve-form-row { display: flex; gap: 24px; align-items: flex-start; }
+.ve-field { display: flex; flex-direction: column; gap: 8px; width: 220px; }
+.ve-field-note { flex: 1; width: auto; }
+.ve-label { font-size: 14px; }
+.ve-note-input { height: 128px; resize: none; }
+
+.ve-attachment-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  align-self: flex-start;
+  background: none; border: none; cursor: pointer; padding: 0;
+  color: var(--brand-purple-6-purple-4); font-size: 15px; font-weight: 500;
+}
+
+.ve-form-actions { display: flex; justify-content: flex-end; gap: 12px; }
+
+/* ── Unsaved-changes warning — replaces .hp-footer in place (same size and
+   position), rather than a floating toast, when a tab switch or panel
+   close is attempted while a visit's expense edits haven't been saved. ── */
+.ve-unsaved-warning {
+  background: var(--rag-amber-amber-lightest);
+  border-top: 3px solid var(--rag-amber-amber-7);
+}
+.ve-unsaved-warning-text { display: flex; align-items: center; gap: 12px; }
+.ve-unsaved-warning-text span { font-size: 16px; font-weight: 500; color: #7b3306; }
+.ve-unsaved-warning-actions { display: flex; gap: 12px; }
+
+/* ── Save-confirmation toast positioning — the visual style itself is the
+   shared .toast-banner (Styles/main.css); this is just where it floats for
+   this specific panel: centered under the slide-out's own 937px-wide,
+   right-anchored footprint (VisitDetail's toast is rendered regardless of
+   whether the panel is still open, so this is computed from the panel's
+   fixed geometry, not its live position) rather than centered on the
+   whole screen. */
+.ve-toast {
+  position: fixed;
+  bottom: 32px;
+  right: calc((937px - 500px) / 2);
+  width: 500px;
+  z-index: 150;
+}

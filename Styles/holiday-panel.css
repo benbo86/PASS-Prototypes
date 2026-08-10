@@ -10,7 +10,14 @@
 
 .hp-panel {
   position: fixed;
-  top: 0;
+  /* Accounts for the dev toolbar (Components/DevToolbar.jsx, z-index 10700 —
+     well above this panel's own 101) sitting on top of a plain `top: 0`
+     panel and covering its close button, unclickable, exactly the same
+     class of bug already fixed for schedule/assign-visit-absent-employee-
+     event-panel's own all-position:fixed .ep-panel (see CLAUDE.md's Dev
+     Toolbar v12 history) — this panel has the identical "no in-flow page
+     wrapper, everything is position: fixed" shape. */
+  top: var(--dev-toolbar-height, 0px);
   right: 0;
   bottom: 0;
   width: 937px;

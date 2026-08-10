@@ -1315,6 +1315,50 @@
       "usageCount": 22
     },
     {
+      "hash": "edf28168",
+      "name": "Close",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon fill=\"currentColor\" stroke=\"currentColor\" stroke-linejoin=\"round\"\n      points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "component-demos/ui-kit/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/holiday-deduction/src/GrossPayAdvice.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/list/src/Invoices.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/leave-requests/src/LeaveRequests.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/FunderDetail.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/FunderList.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/Timesheets.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 7
+    },
+    {
       "hash": "426924f7",
       "name": "Chevron Right",
       "group": "Inline",
@@ -1476,45 +1520,6 @@
       "usageCount": 6
     },
     {
-      "hash": "edf28168",
-      "name": "Close",
-      "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon fill=\"currentColor\" stroke=\"currentColor\" stroke-linejoin=\"round\"\n      points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/holiday-deduction/src/GrossPayAdvice.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "invoices/list/src/Invoices.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/leave-requests/src/LeaveRequests.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/FunderDetail.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/FunderList.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/Timesheets.jsx#CloseIcon",
-          "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 6
-    },
-    {
       "hash": "102b1d3f",
       "name": "Close",
       "group": "Inline",
@@ -1636,6 +1641,30 @@
       "usageCount": 3
     },
     {
+      "hash": "e4e62cd8",
+      "name": "Warning",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#WarningIcon",
+          "name": "WarningIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "employee-contract/holiday-reconciliation/src/HolidayReconciliation.jsx#WarningIcon",
+          "name": "WarningIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/Timesheets.jsx#WarningIcon",
+          "name": "WarningIcon"
+        }
+      ],
+      "usageCount": 3
+    },
+    {
       "hash": "a812efbb",
       "name": "Chevron Left",
       "group": "Inline",
@@ -1736,6 +1765,25 @@
       "usageCount": 2
     },
     {
+      "hash": "96c904e8",
+      "name": "Trash",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M3 6h18\" /><path d=\"M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2\" />\n    <path d=\"M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6\" />\n    <line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\" /><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/VisitPanel.jsx#TrashIcon",
+          "name": "TrashIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/ExpensesTab.jsx#TrashIcon",
+          "name": "TrashIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
       "hash": "3eb9d40a",
       "name": "Chevron Left",
       "group": "Inline",
@@ -1755,20 +1803,20 @@
       "usageCount": 2
     },
     {
-      "hash": "e4e62cd8",
-      "name": "Warning",
+      "hash": "74038b31",
+      "name": "Tick",
       "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z\" />\n  </svg>",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <polygon stroke=\"currentColor\" fill=\"currentColor\" stroke-linejoin=\"round\" points=\"9.29090299 15.7925373 5.47272117 12.0313433 4.1999939 13.2850746 9.29090299 18.3 20.1999939 7.55373134 18.9272666 6.3\" />\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#WarningIcon",
-          "name": "WarningIcon"
+          "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#TickIcon",
+          "name": "TickIcon"
         },
         {
           "kind": "inline",
-          "ref": "employee-contract/holiday-reconciliation/src/HolidayReconciliation.jsx#WarningIcon",
-          "name": "WarningIcon"
+          "ref": "timesheets/filters/src/Timesheets.jsx#TickIcon",
+          "name": "TickIcon"
         }
       ],
       "usageCount": 2
@@ -2545,20 +2593,6 @@
       "usageCount": 1
     },
     {
-      "hash": "96c904e8",
-      "name": "Trash",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M3 6h18\" /><path d=\"M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2\" />\n    <path d=\"M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6\" />\n    <line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\" /><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/VisitPanel.jsx#TrashIcon",
-          "name": "TrashIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "5fb85b66",
       "name": "Plus",
       "group": "Inline",
@@ -2610,20 +2644,6 @@
           "kind": "inline",
           "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#InfoIcon",
           "name": "InfoIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "74038b31",
-      "name": "Tick",
-      "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <polygon stroke=\"currentColor\" fill=\"currentColor\" stroke-linejoin=\"round\" points=\"9.29090299 15.7925373 5.47272117 12.0313433 4.1999939 13.2850746 9.29090299 18.3 20.1999939 7.55373134 18.9272666 6.3\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#TickIcon",
-          "name": "TickIcon"
         }
       ],
       "usageCount": 1
@@ -3049,6 +3069,48 @@
       "usageCount": 1
     },
     {
+      "hash": "b3a72a23",
+      "name": "Pen",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/ExpensesTab.jsx#PenIcon",
+          "name": "PenIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "7e4c6da0",
+      "name": "Plus",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/ExpensesTab.jsx#PlusIcon",
+          "name": "PlusIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "fbeaef22",
+      "name": "User",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/ExpensesTab.jsx#UserIcon",
+          "name": "UserIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "c2fcd0e8",
       "name": "Search",
       "group": "Inline",
@@ -3273,5 +3335,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-07T09:47:06.967Z"
+  "generatedAt": "2026-08-10T09:49:00.993Z"
 }

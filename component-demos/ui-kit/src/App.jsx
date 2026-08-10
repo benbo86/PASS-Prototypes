@@ -43,6 +43,13 @@ const TickIcon = ({ className }) => (
   </svg>
 )
 
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
+      points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12"/>
+  </svg>
+)
+
 const ClockIcon = () => (
   <svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <g transform="translate(0.0374, 0.7143)" fillRule="nonzero">
@@ -342,7 +349,7 @@ export default function App() {
         </div>
       </Section>
 
-      <Section title="Warnings" description=".warning-banner + a colour modifier (orange / red / green). Orange is the default even without the modifier class, but always add it explicitly.">
+      <Section title="Inline toasters">
         <div className="uk-stack">
           <div className="warning-banner orange">
             <WarningIcon />
@@ -364,6 +371,18 @@ export default function App() {
               <h4>Holiday pay deduction added</h4>
               <p>£42.50 deduction record created. <a href="#" onClick={e => e.preventDefault()}>View in timesheets</a></p>
             </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Toasters" description=".toast-banner — a floating, fully-bordered, dismissible confirmation (unlike the inline toasters above, this is meant to be positioned fixed by its own consumer — see timesheets/filters' Expenses feature).">
+        <div className="uk-stack">
+          <div className="toast-banner" style={{ width: 500 }}>
+            <div className="toast-banner-content">
+              <TickIcon />
+              <span>This is an success alert</span>
+            </div>
+            <button className="toast-banner-close" onClick={e => e.preventDefault()} aria-label="Dismiss"><CloseIcon /></button>
           </div>
         </div>
       </Section>
