@@ -1,194 +1,40 @@
-/* ── PASS top navigation ──────────────────────────────────────────
-   Built from a Chrome screenshot (no Figma frame existed for this),
-   so exact colors/spacing are a best-effort read of the screenshot.
-   Houses the utility actions that don't have a home in the left
-   SideNav (journal, PASSgenius, messages, help, profile/log out). */
+/* top-nav.css 
+   Extracted from https://pass-design-prototypes-ac.vercel.app/components/new-nav
+   Source: assets/main-CyA-m16i.css (source CSS rules, not computed styles)
+*/
 
-.top-nav {
-  height: 44px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 0 24px;
-  flex-shrink: 0;
-  position: sticky;
-  /* Components/DevToolbar.jsx's own full-width bar sits above this in
-     normal flow, also position:sticky at top:0 — without offsetting this
-     nav's own sticky point by the bar's height, the two would both try to
-     pin at the exact same y:0 once scrolled past, and the bar's much
-     higher z-index (10700 vs this nav's 100) would paint over this nav
-     rather than the two stacking cleanly. Falls back to 0px if
-     dev-toolbar.css somehow isn't loaded, identical to the old behavior. */
-  top: var(--dev-toolbar-height, 0px);
-  z-index: 100;
-}
+.top-nav { height: 44px; background: rgb(255, 255, 255); border-bottom: 1px solid rgb(229, 231, 235); display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0px 24px; flex-shrink: 0; position: sticky; top: 0px; z-index: 100; }
 
-/* Left-aligned office title — same treatment as the side nav's app title.
-   margin-right: auto pushes the icon actions to the right. */
-.top-nav-title {
-  margin-right: auto;
-  font-family: Barlow, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.top-nav-title { margin-right: auto; font-family: Barlow, sans-serif; font-size: 16px; font-weight: 600; color: rgb(30, 41, 59); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.top-nav-icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: none;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.12s;
-  position: relative;
-}
+.top-nav-icon-btn { width: 36px; height: 36px; border-radius: 50%; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; background: none; color: rgb(92, 107, 128); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.12s; position: relative; }
+
 .top-nav-icon-btn svg { width: 20px; height: 20px; }
-.top-nav-icon-btn:hover,
-.top-nav-icon-btn.active { background: #f3f4f6; }
 
-/* PASSgenius animated logo — embedded via <object> so its own script and
-   CSS animations run. Sized to sit inside the bar; pointer-events stay on
-   so the SVG's internal hover animation fires. */
-.top-nav-genius {
-  width: 22px;
-  height: 22px;
-  display: block;
-  border: none;
-}
-/* The logo has no line-icon stroke to tint on hover, so drop the grey
-   circle — the gradient animation is the hover affordance. */
-.top-nav-genius-btn:hover,
-.top-nav-genius-btn.active { background: none; }
+.top-nav-icon-btn:hover, .top-nav-icon-btn.active { background: rgb(243, 244, 246); }
 
-/* Icon tooltip — fixed-positioned (via portal) and centered under the
-   icon, arrow pointing up. Matches the shared/side-nav tooltip look. */
-.top-nav-tooltip {
-  position: fixed;
-  z-index: 1100;
-  transform: translateX(-50%);
-  background: #fff;
-  color: var(--greyscale-2-grey-20, #333);
-  border: 1px solid var(--ui-purple-5-languid-lavendar, #dcd9e4);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-family: Barlow, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: top-nav-tooltip-in 0.1s ease;
-}
-@keyframes top-nav-tooltip-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.top-nav-tooltip::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-bottom-color: var(--ui-purple-5-languid-lavendar, #dcd9e4);
-}
-.top-nav-tooltip::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: -1px;
-  border: 5px solid transparent;
-  border-bottom-color: #fff;
-}
+.top-nav-genius { width: 22px; height: 22px; display: block; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; }
 
-/* Profile avatar — initials fallback follows the employees card
-   convention, sized down to 32px to sit inside the 44px top bar. */
-.top-nav-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--availability-4-blue-tint, #e3edf7);
-  color: #333;
-  font-family: Barlow, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  user-select: none;
-}
-/* The avatar carries its own fill, so skip the grey circle hover and
-   show a subtle ring on the avatar itself instead. */
-.top-nav-profile-btn:hover,
-.top-nav-profile-btn.active { background: none; }
-.top-nav-profile-btn:hover .top-nav-avatar,
-.top-nav-profile-btn.active .top-nav-avatar { box-shadow: 0 0 0 2px #e5e7eb; }
+.top-nav-genius-btn:hover, .top-nav-genius-btn.active { background: none; }
 
-.top-nav-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 15px;
-  height: 15px;
-  padding: 0 3px;
-  background: var(--rag-red-red-overdue);
-  color: #fff;
-  border-radius: 8px;
-  font-family: Barlow, sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #fff;
-  line-height: 1;
-}
+.top-nav-tooltip { position: fixed; z-index: 1100; transform: translate(-50%); background: rgb(255, 255, 255); color: var(--greyscale-2-grey-20, #333); border: 1px solid var(--ui-purple-5-languid-lavendar, #dcd9e4); box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px; border-radius: 6px; padding: 6px 10px; font-family: Barlow, sans-serif; font-size: 13px; font-weight: 500; line-height: 1; white-space: nowrap; pointer-events: none; animation: 0.1s ease 0s 1 normal none running top-nav-tooltip-in; }
+
+.top-nav-tooltip::before { content: ""; position: absolute; bottom: 100%; left: 50%; transform: translate(-50%); border-width: 6px; border-style: solid; border-top-color: transparent; border-right-color: transparent; border-left-color: transparent; border-image: none; border-bottom-color: var(--ui-purple-5-languid-lavendar, #dcd9e4); }
+
+.top-nav-tooltip::after { content: ""; position: absolute; bottom: 100%; left: 50%; transform: translate(-50%); margin-bottom: -1px; border-width: 5px; border-style: solid; border-color: transparent transparent rgb(255, 255, 255); border-image: none; }
+
+.top-nav-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--availability-4-blue-tint, #e3edf7); color: rgb(51, 51, 51); font-family: Barlow, sans-serif; font-size: 12px; font-weight: 600; text-transform: uppercase; user-select: none; }
+
+.top-nav-profile-btn:hover, .top-nav-profile-btn.active { background: none; }
+
+.top-nav-profile-btn:hover .top-nav-avatar, .top-nav-profile-btn.active .top-nav-avatar { box-shadow: rgb(229, 231, 235) 0px 0px 0px 2px; }
+
+.top-nav-badge { position: absolute; top: 2px; right: 2px; min-width: 15px; height: 15px; padding: 0px 3px; background: var(--rag-red-red-overdue); color: rgb(255, 255, 255); border-radius: 8px; font-family: Barlow, sans-serif; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid rgb(255, 255, 255); line-height: 1; }
 
 .top-nav-profile { position: relative; }
 
-.top-nav-profile-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-  min-width: 140px;
-  z-index: 300;
-  overflow: hidden;
-}
+.top-nav-profile-menu { position: absolute; top: calc(100% + 8px); right: 0px; background: rgb(255, 255, 255); border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 8px; box-shadow: rgba(0, 0, 0, 0.15) 0px 4px 16px; min-width: 140px; z-index: 300; overflow: hidden; }
 
-.top-nav-profile-item {
-  display: flex;
-  align-items: center;
-  padding: 11px 16px;
-  font-family: Barlow, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  background: none;
-  border: none;
-  width: 100%;
-  cursor: pointer;
-  text-align: left;
-  line-height: 1;
-}
+.top-nav-profile-item { display: flex; align-items: center; padding: 11px 16px; font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500; color: rgb(26, 26, 26); background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; width: 100%; cursor: pointer; text-align: left; line-height: 1; }
+
 .top-nav-profile-item:hover { background: var(--ui-purple-7-lightest-lavendar); }
