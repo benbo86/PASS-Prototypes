@@ -751,7 +751,7 @@
   </section>
 
   <section data-section-slug="customer-documents">
-    <div class="section-head"><h2>Customer Documents</h2><span class="count">14 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Customer Documents')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Customer Documents</h2><span class="count">15 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Customer Documents')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronRightIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -826,6 +826,21 @@
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="InfoIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download InfoIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
+  </svg></span>
+        <span class="label">InfoIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path fill-rule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/&gt;
   &lt;/svg&gt;</template>
       </div>
 
@@ -1162,7 +1177,7 @@
   </section>
 
   <section data-section-slug="staff-messaging">
-    <div class="section-head"><h2>Staff Messaging</h2><span class="count">23 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Staff Messaging')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Staff Messaging</h2><span class="count">22 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Staff Messaging')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="CheckSentIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -1389,21 +1404,6 @@
         <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/&gt;
     &lt;circle cx="19" cy="5" r="3.5"/&gt;
-  &lt;/svg&gt;</template>
-      </div>
-
-      <div class="card" tabindex="0" role="button" data-name="InfoIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download InfoIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
-    <path fill-rule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
-  </svg></span>
-        <span class="label">InfoIcon</span>
-        <span class="native-size">24×24</span>
-        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
-    &lt;path fill-rule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/&gt;
   &lt;/svg&gt;</template>
       </div>
 

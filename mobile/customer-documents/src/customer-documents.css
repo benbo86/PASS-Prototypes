@@ -496,6 +496,8 @@
   letter-spacing: 0.3px;
   margin: 0 0 12px;
 }
+.docs-filter-section-title { display: flex; align-items: center; gap: 6px; }
+.docs-filter-info-icon { display: flex; color: var(--greyscale-8-grey-65); cursor: help; }
 .docs-filter-row {
   display: flex;
   align-items: center;
@@ -505,6 +507,12 @@
   font-size: 15px;
   color: #000;
   cursor: pointer;
+}
+.docs-filter-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 .docs-filter-row input[type="checkbox"],
 .docs-filter-row input[type="radio"] {

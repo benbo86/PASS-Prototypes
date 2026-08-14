@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import ScreenSlider from '../../../Components/ScreenSlider'
+import Tooltip from '../../../Components/Tooltip'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -95,6 +96,12 @@ const FilterActiveIcon = ({ size = 20 }) => (
     <path d="M10.5,15.7658125 L10.5,12 L10.5,12 L6.75103413,7.83448237 C6.56630462,7.62922736 6.58294383,7.31308244 6.78819884,7.12835293 C6.88001119,7.04572181 6.99916031,7 7.1226812,7 L16.8773188,7 C17.1534612,7 17.3773188,7.22385763 17.3773188,7.5 C17.3773188,7.62352089 17.331597,7.74267001 17.2489659,7.83448237 L13.5,12 L13.5,12 L13.5,17.4324792 C13.5,17.7086216 13.2761424,17.9324792 13,17.9324792 C12.8830317,17.9324792 12.7697653,17.8914711 12.6799078,17.8165898 L10.6799078,16.1499232 C10.5659115,16.0549263 10.5,15.9142024 10.5,15.7658125 Z" fill="currentColor"/>
   </svg>
 )
+// Copied verbatim from mobile/messaging's own InfoIcon.
+const InfoIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path fillRule="evenodd" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
+  </svg>
+)
 
 // Uploaded via the Mobile Icons library's "Upload icon" feature (Icons/
 // Mobile Uploads/Used across multiple mobile screens/), copied in verbatim
@@ -150,10 +157,13 @@ const DATE_RANGES = [
   { key: '1y',  label: 'Last year',     days: 365 },
 ]
 
+// dotColor matches the exact status-icon colours (StatusIcon/DocumentComplete
+// etc.) so the filter list visually reinforces which colour each label maps
+// to, not just the word.
 const STATUS_FILTER_OPTIONS = [
-  { key: 'complete',   label: 'Complete' },
-  { key: 'partial',    label: 'Partially complete' },
-  { key: 'notStarted', label: 'Outstanding' },
+  { key: 'complete',   label: 'Complete',           dotColor: '#21A621' },
+  { key: 'partial',    label: 'Partially complete', dotColor: '#E09600' },
+  { key: 'notStarted', label: 'Outstanding',        dotColor: '#E61C1C' },
 ]
 
 function parseDMY(str) {
@@ -257,6 +267,19 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
   const [pending, setPending] = useState(initialFilters)
   const [typeSearch, setTypeSearch] = useState('')
   const [typeListOpen, setTypeListOpen] = useState(false)
+  const typeSearchRef = useRef(null)
+  const typeListRef = useRef(null)
+
+  useEffect(() => {
+    if (!typeListOpen) return
+    const handleOutside = (e) => {
+      const inSearch = typeSearchRef.current?.contains(e.target)
+      const inList = typeListRef.current?.contains(e.target)
+      if (!inSearch && !inList) setTypeListOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [typeListOpen])
 
   const toggleStatus = (key) => setPending(p => ({
     ...p,
@@ -266,19 +289,12 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
     ...p,
     types: p.types.includes(name) ? p.types.filter(t => t !== name) : [...p.types, name],
   }))
-  // Picking a result turns it into a chip and closes the list back down —
-  // the chip itself is the "selected" representation from then on, rather
-  // than leaving the full results list open underneath it.
-  const selectType = (name) => {
-    toggleType(name)
-    setTypeSearch('')
-    setTypeListOpen(false)
-  }
 
-  // Already-selected types move out into their own chip row, so the
-  // browsable list only ever shows things you haven't picked yet.
+  // The list always shows every type (search text just narrows which are
+  // visible) — a selected one stays put and shows checked, rather than
+  // disappearing into the chip row, so it can be unchecked from the same
+  // place it was checked.
   const visibleTypeOptions = typeOptions
-    .filter(t => !pending.types.includes(t))
     .filter(t => !typeSearch.trim() || t.toLowerCase().includes(typeSearch.trim().toLowerCase()))
 
   return (
@@ -291,7 +307,12 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
         </div>
         <div className="docs-filter-body">
           <div className="docs-filter-section">
-            <h3>Status</h3>
+            <h3 className="docs-filter-section-title">
+              Status
+              <Tooltip text="Based on required document fields being populated.">
+                <span className="docs-filter-info-icon"><InfoIcon size={18} /></span>
+              </Tooltip>
+            </h3>
             {statusOptions.map(opt => (
               <label key={opt.key} className="docs-filter-row">
                 <input
@@ -299,6 +320,7 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
                   checked={pending.statuses.includes(opt.key)}
                   onChange={() => toggleStatus(opt.key)}
                 />
+                <span className="docs-filter-status-dot" style={{ background: opt.dotColor }} />
                 <span>{opt.label} ({opt.count})</span>
               </label>
             ))}
@@ -306,7 +328,7 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
 
           <div className="docs-filter-section">
             <h3>Document type</h3>
-            <div className="docs-filter-type-search">
+            <div className="docs-filter-type-search" ref={typeSearchRef}>
               <SearchIcon size={16} />
               <input
                 type="text"
@@ -316,7 +338,22 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
                 onChange={e => setTypeSearch(e.target.value)}
               />
             </div>
-            {pending.types.length > 0 && (
+            {typeListOpen ? (
+              <div className="docs-filter-type-list" ref={typeListRef}>
+                {visibleTypeOptions.length === 0 ? (
+                  <p className="docs-checklist-empty">No matching types.</p>
+                ) : visibleTypeOptions.map(name => (
+                  <label key={name} className="docs-filter-row">
+                    <input
+                      type="checkbox"
+                      checked={pending.types.includes(name)}
+                      onChange={() => toggleType(name)}
+                    />
+                    <span>{name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : pending.types.length > 0 && (
               <div className="docs-filter-chip-row">
                 {pending.types.map(name => (
                   <span key={name} className="docs-filter-chip">
@@ -325,22 +362,6 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
                       <CloseIcon size={12} />
                     </button>
                   </span>
-                ))}
-              </div>
-            )}
-            {typeListOpen && (
-              <div className="docs-filter-type-list">
-                {visibleTypeOptions.length === 0 ? (
-                  <p className="docs-checklist-empty">No matching types.</p>
-                ) : visibleTypeOptions.map(name => (
-                  <label key={name} className="docs-filter-row">
-                    <input
-                      type="checkbox"
-                      checked={false}
-                      onChange={() => selectType(name)}
-                    />
-                    <span>{name}</span>
-                  </label>
                 ))}
               </div>
             )}
