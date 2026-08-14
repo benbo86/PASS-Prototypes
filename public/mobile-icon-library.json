@@ -2,6 +2,104 @@
   "version": 1,
   "icons": [
     {
+      "hash": "e7477d95",
+      "name": "Close",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_1_154)\">\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M16.9497 7.05027C17.3403 7.4408 17.3403 8.07396 16.9497 8.46449L13.4142 12L16.9497 15.5356C17.3403 15.9261 17.3403 16.5592 16.9497 16.9498C16.5592 17.3403 15.9261 17.3403 15.5355 16.9498L12 13.4142L8.46447 16.9498C8.07394 17.3403 7.44078 17.3403 7.05025 16.9498C6.65973 16.5592 6.65973 15.9261 7.05025 15.5356L10.5858 12L7.05025 8.46449C6.65973 8.07396 6.65973 7.4408 7.05025 7.05027C7.44078 6.65975 8.07394 6.65975 8.46447 7.05027L12 10.5858L15.5355 7.05027C15.9261 6.65975 16.5592 6.65975 16.9497 7.05027Z\" fill=\"#333333\"/>\n</g>\n<defs>\n<clipPath id=\"clip0_1_154\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/Close.svg",
+          "name": "Close"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "cd796ab5",
+      "name": "Document",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_436_5585)\">\n<path d=\"M15.6178 2C17.4461 2 18.9282 3.48212 18.9282 5.31042V18.6896C18.9282 20.5179 17.4461 22 15.6178 22H6.30787C4.48057 21.9986 3 20.5169 3 18.6896V7.14388C3 7.09341 3.00524 7.04309 3.01528 6.99363C3.02202 6.96429 3.03052 6.93538 3.04074 6.90705C3.05857 6.88668 3.05857 6.86886 3.05857 6.85103C3.0726 6.81941 3.08877 6.78879 3.10695 6.75936C3.11459 6.74663 3.12987 6.73135 3.12987 6.71861C3.15681 6.67845 3.18751 6.64093 3.22154 6.60657L7.61166 2.22154L7.6631 2.17454L7.71861 2.13242L7.7619 2.1095C7.79051 2.09141 7.82028 2.07525 7.85103 2.06112L7.90451 2.04329C7.9336 2.03211 7.96337 2.02275 7.99363 2.01528C8.04309 2.00524 8.09341 2 8.14388 2H15.6178ZM15.6178 3.52788H8.90782V6.12783C8.90782 7.1123 8.10975 7.91036 7.12529 7.91036H4.52534V18.6896C4.52534 19.674 5.3234 20.4721 6.30787 20.4721H15.6178C16.6022 20.4721 17.4003 19.674 17.4003 18.6896V5.31042C17.4003 4.32595 16.6022 3.52788 15.6178 3.52788ZM15.3453 16.4818C15.7672 16.4818 16.1092 16.8238 16.1092 17.2457C16.1092 17.6676 15.7672 18.0097 15.3453 18.0097H6.58034C6.15843 18.0097 5.8164 17.6676 5.8164 17.2457C5.8164 16.8238 6.15843 16.4818 6.58034 16.4818H15.3453ZM15.3453 13.3496C15.7672 13.3496 16.1092 13.6917 16.1092 14.1136C16.1092 14.5355 15.7672 14.8775 15.3453 14.8775H6.58034C6.15843 14.8775 5.8164 14.5355 5.8164 14.1136C5.8164 13.6917 6.15843 13.3496 6.58034 13.3496H15.3453ZM10.9628 10.2175C11.3847 10.2175 11.7268 10.5595 11.7268 10.9814C11.7268 11.4033 11.3847 11.7454 10.9628 11.7454H6.58034C6.15843 11.7454 5.8164 11.4033 5.8164 10.9814C5.8164 10.5595 6.15843 10.2175 6.58034 10.2175H10.9628Z\" fill=\"black\"/>\n</g>\n<defs>\n<clipPath id=\"clip0_436_5585\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/Document.svg",
+          "name": "Document"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "b9f1bad8",
+      "name": "DocumentComplete",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#21A621\" stroke=\"#21A621\" stroke-width=\"2\"/>\n<path d=\"M8 12.1732L10.6095 15L16 9\" stroke=\"white\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/DocumentComplete.svg",
+          "name": "DocumentComplete"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "5b5a2c27",
+      "name": "DocumentIncomplete",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#E09600\" stroke=\"#E09600\" stroke-width=\"2\"/>\n<path d=\"M16.2129 7.7866C16.5871 8.16077 16.5877 8.76785 16.2136 9.14212L13.3555 12.0002L16.2129 14.8577C16.5871 15.2318 16.5877 15.8389 16.2136 16.2132C15.8394 16.5874 15.2317 16.5874 14.8574 16.2132L12 13.3558L9.14257 16.2132C8.76832 16.5874 8.16061 16.5874 7.78636 16.2132C7.41234 15.8389 7.41288 15.2318 7.78705 14.8577L10.6445 12.0002L7.78636 9.14212C7.41234 8.76785 7.41288 8.16077 7.78705 7.7866C8.16125 7.41265 8.76769 7.41265 9.14188 7.7866L12 10.6447L14.8581 7.7866C15.2323 7.41265 15.8388 7.41265 16.2129 7.7866Z\" fill=\"white\" stroke=\"white\" stroke-width=\"0.25\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/DocumentIncomplete.svg",
+          "name": "DocumentIncomplete"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "b65e5f2c",
+      "name": "DocumentList",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_429_5049)\">\n<path d=\"M5.49209 16H12.506C13.8834 16 15 14.8884 15 13.5172V3.48281C15 2.11159 13.8834 1 12.506 1H6.8753C6.83728 1 6.79937 1.00393 6.76211 1.01146C6.73931 1.01706 6.71688 1.02408 6.69496 1.03247L6.65468 1.04584C6.63151 1.05644 6.60908 1.06856 6.58753 1.08212L6.55492 1.09931C6.52607 1.11911 6.4991 1.14148 6.47434 1.16616L3.16691 4.45493C3.14126 4.4807 3.11814 4.50884 3.09784 4.53896C3.09784 4.54851 3.08633 4.55997 3.08058 4.56952C3.06688 4.59159 3.0547 4.61456 3.04412 4.63827C3.04412 4.65164 3.04412 4.66501 3.0307 4.68029C3.02299 4.70153 3.01659 4.72322 3.01151 4.74523C3.00394 4.78232 3 4.82006 3 4.85791V13.5172C3 14.8877 4.11543 15.9989 5.49209 16ZM4.14916 5.43277H6.10791C6.84959 5.43277 7.45084 4.83422 7.45084 4.09587V2.14591H12.506C13.2477 2.14591 13.8489 2.74446 13.8489 3.48281V13.5172C13.8489 14.2555 13.2477 14.8541 12.506 14.8541H5.49209C4.75041 14.8541 4.14916 14.2555 4.14916 13.5172V5.43277Z\" fill=\"black\"/>\n<mask id=\"mask0_429_5049\" style=\"mask-type:luminance\" maskUnits=\"userSpaceOnUse\" x=\"2\" y=\"1\" width=\"18\" height=\"20\">\n<path d=\"M2 20.0001H20V1.6256H15.9818V17.0001H2V20.0001Z\" fill=\"white\"/>\n</mask>\n<g mask=\"url(#mask0_429_5049)\">\n<path d=\"M14.45 4.55002H9.55005C7.89319 4.55002 6.55005 5.89316 6.55005 7.55002V15.45C6.55005 17.1069 7.89319 18.45 9.55005 18.45H14.45C16.1069 18.45 17.45 17.1069 17.45 15.45V7.55002C17.45 5.89316 16.1069 4.55002 14.45 4.55002Z\" stroke=\"black\" stroke-width=\"1.1\"/>\n</g>\n<mask id=\"mask1_429_5049\" style=\"mask-type:luminance\" maskUnits=\"userSpaceOnUse\" x=\"5\" y=\"4\" width=\"18\" height=\"20\">\n<path d=\"M5 23.0001H23V4.6256H18.9818V20.0001H5V23.0001Z\" fill=\"white\"/>\n</mask>\n<g mask=\"url(#mask1_429_5049)\">\n<path d=\"M17.45 7.55002H12.55C10.8932 7.55002 9.55005 8.89316 9.55005 10.55V18.45C9.55005 20.1069 10.8932 21.45 12.55 21.45H17.45C19.1069 21.45 20.45 20.1069 20.45 18.45V10.55C20.45 8.89316 19.1069 7.55002 17.45 7.55002Z\" stroke=\"black\" stroke-width=\"1.1\"/>\n</g>\n</g>\n<defs>\n<clipPath id=\"clip0_429_5049\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/DocumentList.svg",
+          "name": "DocumentList"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "9116aa32",
+      "name": "DocumentNotStarted",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#E61C1C\" stroke=\"#E61C1C\" stroke-width=\"2\"/>\n<path d=\"M16.2129 7.78617C16.5871 8.16035 16.5877 8.76742 16.2136 9.14169L13.3555 11.9998L16.2129 14.8572C16.5871 15.2314 16.5877 15.8385 16.2136 16.2128C15.8394 16.587 15.2317 16.587 14.8574 16.2128L12 13.3553L9.14257 16.2128C8.76832 16.587 8.16061 16.587 7.78636 16.2128C7.41234 15.8385 7.41288 15.2314 7.78705 14.8572L10.6445 11.9998L7.78636 9.14169C7.41234 8.76742 7.41288 8.16035 7.78705 7.78617C8.16125 7.41223 8.76769 7.41223 9.14188 7.78617L12 10.6443L14.8581 7.78617C15.2323 7.41223 15.8388 7.41223 16.2129 7.78617Z\" fill=\"white\" stroke=\"white\" stroke-width=\"0.25\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/DocumentNotStarted.svg",
+          "name": "DocumentNotStarted"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "404f2693",
+      "name": "Tick",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M6 12.2599L9.91432 16.5L18 7.5\" stroke=\"#333333\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Mobile Uploads/Used across multiple mobile screens/Tick.svg",
+          "name": "Tick"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "977df25d",
       "name": "Chevron Left",
       "group": "Used across multiple mobile screens",
@@ -10,6 +108,11 @@
         {
           "kind": "inline",
           "ref": "mobile/account/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
         {
@@ -28,13 +131,174 @@
           "name": "ChevronLeftIcon"
         }
       ],
-      "usageCount": 4,
+      "usageCount": 5,
       "sharedAcross": [
         "mobile/account/src/App.jsx",
         "mobile/messaging/src/App.jsx",
         "mobile/mileage-pay/src/App.jsx",
         "mobile/notifications/src/App.jsx"
       ]
+    },
+    {
+      "hash": "d74b6ffa",
+      "name": "Arrow Left",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M4.71969 12.6255L4.73999 12.6499C4.74414 12.6548 4.74834 12.6596 4.75259 12.6644L9.75259 18.2894C10.1195 18.7022 10.7516 18.7393 11.1644 18.3724C11.5771 18.0055 11.6143 17.3734 11.2474 16.9606L7.727 13L18.5 13C19.0523 13 19.5 12.5523 19.5 12C19.5 11.4477 19.0523 11 18.5 11L7.727 11L11.2474 7.03937C11.5861 6.65834 11.5805 6.09046 11.2529 5.71676L11.1644 5.6276C10.7516 5.26068 10.1195 5.29786 9.75259 5.71065L4.75259 11.3356L4.7402 11.3498C4.73323 11.358 4.72639 11.3662 4.71969 11.3746L4.75259 11.3356C4.72265 11.3693 4.69538 11.4045 4.67076 11.441C4.65284 11.4675 4.63629 11.4947 4.62104 11.5227C4.60922 11.5452 4.59534 11.5722 4.5711 11.629C4.56169 11.6537 4.52179 11.7614 4.5 12C4.5 12.1218 4.52179 12.2386 4.56167 12.3465C4.5711 12.3998 4.59534 12.4278 4.62098 12.4771C4.63629 12.5053 4.65284 12.5325 4.67061 12.5589L4.71969 12.6255Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#ArrowLeftIcon",
+          "name": "ArrowLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#ArrowLeftIcon",
+          "name": "ArrowLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/notifications/src/App.jsx#ArrowLeftIcon",
+          "name": "ArrowLeftIcon"
+        }
+      ],
+      "usageCount": 3,
+      "sharedAcross": [
+        "mobile/messaging/src/App.jsx",
+        "mobile/notifications/src/App.jsx"
+      ]
+    },
+    {
+      "hash": "6f642ef5",
+      "name": "Document",
+      "group": "Account",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"-5.07 -3 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AccountScreen.jsx#DocumentIcon",
+          "name": "DocumentIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#DocumentIcon",
+          "name": "DocumentIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "b8845ffa",
+      "name": "Menu",
+      "group": "Account",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M4 8H8V4H4V8ZM10 20H14V16H10V20ZM4 20H8V16H4V20ZM4 14H8V10H4V14ZM10 14H14V10H10V14ZM16 4V8H20V4H16ZM10 8H14V4H10V8ZM16 14H20V10H16V14ZM16 20H20V16H16V20Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AccountScreen.jsx#MenuIcon",
+          "name": "MenuIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#GridMenuIcon",
+          "name": "GridMenuIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "ab6cfad7",
+      "name": "Chevron Right",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#ChevronRightIcon",
+          "name": "ChevronRightIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#ChevronRightIcon",
+          "name": "ChevronRightIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "d9048ac6",
+      "name": "Close",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "585b2ccf",
+      "name": "Plus",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#PlusIcon",
+          "name": "PlusIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#PlusIcon",
+          "name": "PlusIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "80aa3919",
+      "name": "Edit Action",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#EditActionIcon",
+          "name": "EditActionIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#EditActionIcon",
+          "name": "EditActionIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "a57c6e0b",
+      "name": "Delete Action",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#DeleteActionIcon",
+          "name": "DeleteActionIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#DeleteActionIcon",
+          "name": "DeleteActionIcon"
+        }
+      ],
+      "usageCount": 2
     },
     {
       "hash": "a5beeb02",
@@ -51,29 +315,6 @@
           "kind": "inline",
           "ref": "mobile/notifications/src/App.jsx#PersonDetailIcon",
           "name": "PersonDetailIcon"
-        }
-      ],
-      "usageCount": 2,
-      "sharedAcross": [
-        "mobile/messaging/src/App.jsx",
-        "mobile/notifications/src/App.jsx"
-      ]
-    },
-    {
-      "hash": "d74b6ffa",
-      "name": "Arrow Left",
-      "group": "Used across multiple mobile screens",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M4.71969 12.6255L4.73999 12.6499C4.74414 12.6548 4.74834 12.6596 4.75259 12.6644L9.75259 18.2894C10.1195 18.7022 10.7516 18.7393 11.1644 18.3724C11.5771 18.0055 11.6143 17.3734 11.2474 16.9606L7.727 13L18.5 13C19.0523 13 19.5 12.5523 19.5 12C19.5 11.4477 19.0523 11 18.5 11L7.727 11L11.2474 7.03937C11.5861 6.65834 11.5805 6.09046 11.2529 5.71676L11.1644 5.6276C10.7516 5.26068 10.1195 5.29786 9.75259 5.71065L4.75259 11.3356L4.7402 11.3498C4.73323 11.358 4.72639 11.3662 4.71969 11.3746L4.75259 11.3356C4.72265 11.3693 4.69538 11.4045 4.67076 11.441C4.65284 11.4675 4.63629 11.4947 4.62104 11.5227C4.60922 11.5452 4.59534 11.5722 4.5711 11.629C4.56169 11.6537 4.52179 11.7614 4.5 12C4.5 12.1218 4.52179 12.2386 4.56167 12.3465C4.5711 12.3998 4.59534 12.4278 4.62098 12.4771C4.63629 12.5053 4.65284 12.5325 4.67061 12.5589L4.71969 12.6255Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#ArrowLeftIcon",
-          "name": "ArrowLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "mobile/notifications/src/App.jsx#ArrowLeftIcon",
-          "name": "ArrowLeftIcon"
         }
       ],
       "usageCount": 2,
@@ -187,20 +428,6 @@
       "usageCount": 1
     },
     {
-      "hash": "6f642ef5",
-      "name": "Document",
-      "group": "Account",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"-5.07 -3 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AccountScreen.jsx#DocumentIcon",
-          "name": "DocumentIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "2071cb53",
       "name": "Calendar Menu",
       "group": "Account",
@@ -252,20 +479,6 @@
           "kind": "inline",
           "ref": "Components/AccountScreen.jsx#FaceIdIcon",
           "name": "FaceIdIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "b8845ffa",
-      "name": "Menu",
-      "group": "Account",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M4 8H8V4H4V8ZM10 20H14V16H10V20ZM4 20H8V16H4V20ZM4 14H8V10H4V14ZM10 14H14V10H10V14ZM16 4V8H20V4H16ZM10 8H14V4H10V8ZM16 14H20V10H16V14ZM16 20H20V16H16V20Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AccountScreen.jsx#MenuIcon",
-          "name": "MenuIcon"
         }
       ],
       "usageCount": 1
@@ -439,29 +652,127 @@
       "usageCount": 1
     },
     {
-      "hash": "ab6cfad7",
-      "name": "Chevron Right",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z\"/>\n  </svg>",
+      "hash": "e17de180",
+      "name": "Folder",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z\"/>\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#ChevronRightIcon",
-          "name": "ChevronRightIcon"
+          "ref": "mobile/customer-documents/src/App.jsx#FolderIcon",
+          "name": "FolderIcon"
         }
       ],
       "usageCount": 1
     },
     {
-      "hash": "d9048ac6",
-      "name": "Close",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/>\n  </svg>",
+      "hash": "0aafa76d",
+      "name": "Folder Minus",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 40 40\" fill=\"none\">\n    <path d=\"M14.9999 23.3333H24.9999M36.6666 31.6667C36.6666 32.5507 36.3154 33.3986 35.6903 34.0237C35.0652 34.6488 34.2173 35 33.3333 35H6.66659C5.78253 35 4.93468 34.6488 4.30956 34.0237C3.68444 33.3986 3.33325 32.5507 3.33325 31.6667V8.33333C3.33325 7.44928 3.68444 6.60143 4.30956 5.97631C4.93468 5.35119 5.78253 5 6.66659 5H14.9999L18.3333 10H33.3333C34.2173 10 35.0652 10.3512 35.6903 10.9763C36.3154 11.6014 36.6666 12.4493 36.6666 13.3333V31.6667Z\" stroke=\"currentColor\" stroke-width=\"3.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#CloseIcon",
-          "name": "CloseIcon"
+          "ref": "mobile/customer-documents/src/App.jsx#FolderMinusIcon",
+          "name": "FolderMinusIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "149f7043",
+      "name": "Key",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#KeyIcon",
+          "name": "KeyIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "08660f9e",
+      "name": "Search",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M10.8488372,18.6872093 C12.627907,18.6872093 14.2813953,18.0802326 15.6,17.0755814 L19.2209302,20.6965116 C19.4302326,20.905814 19.7023256,21.0104651 19.9534884,21.0104651 C20.2046512,21.0104651 20.4976744,20.905814 20.6860465,20.6965116 C21.1046512,20.277907 21.1046512,19.6290698 20.6860465,19.2104651 L17.0860465,15.5895349 C18.0906977,14.2709302 18.6976744,12.6174419 18.6976744,10.8383721 C18.6976744,6.50581395 15.1813953,2.98953488 10.8488372,2.98953488 C6.51627907,2.98953488 3,6.50581395 3,10.8383721 C3,15.1709302 6.51627907,18.6872093 10.8488372,18.6872093 Z M10.8488372,5.08255814 C14.0093023,5.08255814 16.6046512,7.65697674 16.6046512,10.8383721 C16.6046512,14.0197674 14.0093023,16.594186 10.8488372,16.594186 C7.68837209,16.594186 5.09302326,13.9988372 5.09302326,10.8383721 C5.09302326,7.67790698 7.66744186,5.08255814 10.8488372,5.08255814 Z\" fill=\"currentColor\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#SearchIcon",
+          "name": "SearchIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "a0c19299",
+      "name": "Filters",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M15,17 C15,16.4477153 14.5522847,16 14,16 L10,16 C9.44771525,16 9,16.4477153 9,17 C9,17.5522847 9.44771525,18 10,18 L14,18 C14.5522847,18 15,17.5522847 15,17 Z M18,12 C18,11.4477153 17.5522847,11 17,11 L7,11 C6.44771525,11 6,11.4477153 6,12 C6,12.5522847 6.44771525,13 7,13 L17,13 C17.5522847,13 18,12.5522847 18,12 Z M4,8 L20,8 C20.5522847,8 21,7.55228475 21,7 C21,6.44771525 20.5522847,6 20,6 L4,6 C3.44771525,6 3,6.44771525 3,7 C3,7.55228475 3.44771525,8 4,8 Z\" fill=\"currentColor\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#FiltersIcon",
+          "name": "FiltersIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "09e64591",
+      "name": "Filter Active",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M10.5,15.7658125 L10.5,12 L10.5,12 L6.75103413,7.83448237 C6.56630462,7.62922736 6.58294383,7.31308244 6.78819884,7.12835293 C6.88001119,7.04572181 6.99916031,7 7.1226812,7 L16.8773188,7 C17.1534612,7 17.3773188,7.22385763 17.3773188,7.5 C17.3773188,7.62352089 17.331597,7.74267001 17.2489659,7.83448237 L13.5,12 L13.5,12 L13.5,17.4324792 C13.5,17.7086216 13.2761424,17.9324792 13,17.9324792 C12.8830317,17.9324792 12.7697653,17.8914711 12.6799078,17.8165898 L10.6799078,16.1499232 C10.5659115,16.0549263 10.5,15.9142024 10.5,15.7658125 Z\" fill=\"currentColor\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#FilterActiveIcon",
+          "name": "FilterActiveIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "f53d76b8",
+      "name": "Document Complete",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#21A621\" stroke=\"#21A621\" stroke-width=\"2\" />\n    <path d=\"M8 12.1732L10.6095 15L16 9\" stroke=\"white\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#DocumentCompleteIcon",
+          "name": "DocumentCompleteIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "30fa7511",
+      "name": "Document Incomplete",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#E09600\" stroke=\"#E09600\" stroke-width=\"2\" />\n    <path d=\"M16.2129 7.7866C16.5871 8.16077 16.5877 8.76785 16.2136 9.14212L13.3555 12.0002L16.2129 14.8577C16.5871 15.2318 16.5877 15.8389 16.2136 16.2132C15.8394 16.5874 15.2317 16.5874 14.8574 16.2132L12 13.3558L9.14257 16.2132C8.76832 16.5874 8.16061 16.5874 7.78636 16.2132C7.41234 15.8389 7.41288 15.2318 7.78705 14.8577L10.6445 12.0002L7.78636 9.14212C7.41234 8.76785 7.41288 8.16077 7.78705 7.7866C8.16125 7.41265 8.76769 7.41265 9.14188 7.7866L12 10.6447L14.8581 7.7866C15.2323 7.41265 15.8388 7.41265 16.2129 7.7866Z\" fill=\"white\" stroke=\"white\" stroke-width=\"0.25\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#DocumentIncompleteIcon",
+          "name": "DocumentIncompleteIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "6bc49006",
+      "name": "Document Not Started",
+      "group": "Customer Documents",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#E61C1C\" stroke=\"#E61C1C\" stroke-width=\"2\" />\n    <path d=\"M16.2129 7.78617C16.5871 8.16035 16.5877 8.76742 16.2136 9.14169L13.3555 11.9998L16.2129 14.8572C16.5871 15.2314 16.5877 15.8385 16.2136 16.2128C15.8394 16.587 15.2317 16.587 14.8574 16.2128L12 13.3553L9.14257 16.2128C8.76832 16.587 8.16061 16.587 7.78636 16.2128C7.41234 15.8385 7.41288 15.2314 7.78705 14.8572L10.6445 11.9998L7.78636 9.14169C7.41234 8.76742 7.41288 8.16035 7.78705 7.78617C8.16125 7.41223 8.76769 7.41223 9.14188 7.78617L12 10.6443L14.8581 7.78617C15.2323 7.41223 15.8388 7.41223 16.2129 7.78617Z\" fill=\"white\" stroke=\"white\" stroke-width=\"0.25\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/customer-documents/src/App.jsx#DocumentNotStartedIcon",
+          "name": "DocumentNotStartedIcon"
         }
       ],
       "usageCount": 1
@@ -621,34 +932,6 @@
       "usageCount": 1
     },
     {
-      "hash": "80aa3919",
-      "name": "Edit Action",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#EditActionIcon",
-          "name": "EditActionIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "a57c6e0b",
-      "name": "Delete Action",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#DeleteActionIcon",
-          "name": "DeleteActionIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "236a0c55",
       "name": "Reply",
       "group": "Staff Messaging",
@@ -714,20 +997,6 @@
           "kind": "inline",
           "ref": "mobile/messaging/src/App.jsx#AddIcon",
           "name": "AddIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "585b2ccf",
-      "name": "Plus",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#PlusIcon",
-          "name": "PlusIcon"
         }
       ],
       "usageCount": 1
@@ -929,5 +1198,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-07-27T23:06:36.301Z"
+  "generatedAt": "2026-08-14T11:00:48.148Z"
 }

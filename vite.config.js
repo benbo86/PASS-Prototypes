@@ -6,6 +6,7 @@ import { readdirSync, existsSync } from 'fs'
 import devEditPlugin from './devEditPlugin.js'
 import wireframePlugin from './wireframePlugin.js'
 import iconLibraryPlugin from './iconLibraryPlugin.js'
+import iconUploadPlugin from './iconUploadPlugin.js'
 import auditPlugin from './auditPlugin.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -28,7 +29,7 @@ const prototypeInputs = Object.fromEntries(
 
 export default defineConfig({
   base: '/PASS-Prototypes/',
-  plugins: [react(), devEditPlugin(), wireframePlugin(), iconLibraryPlugin(), auditPlugin()],
+  plugins: [react(), devEditPlugin(), wireframePlugin(), iconLibraryPlugin(), iconUploadPlugin(), auditPlugin()],
   build: {
     rollupOptions: {
       input: {

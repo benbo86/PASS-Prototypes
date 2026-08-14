@@ -155,7 +155,7 @@ export default function App() {
         <p>The shared CSS-only building blocks used across prototypes — buttons, inputs, dropdowns, radios, checkboxes, toggles, badges, tabs and warnings. All classes live in <code>Styles/main.css</code> unless noted otherwise. The Dropdowns section below shows FilterDropdown in context, but for its full behaviour (and the other shared React components with real state — Pagination, Modal, Tooltip, Date Range Picker), see their own dedicated demos on the <a href="../../">prototypes page</a>.</p>
       </div>
 
-      <Section title="Buttons" description="Always composed as .round-btn plus a variant class. .btn-icon-left / .btn-icon-right just adjust padding on whichever side has an icon.">
+      <Section title="Buttons" description="Composed as a base shape class (.round-btn) plus a primary/secondary/tertiary variant class. .btn-icon-left / .btn-icon-right just adjust padding on whichever side has an icon. Mobile prototypes have a second base shape, .fab-square, for a square-cornered look — same variant classes, different corners.">
         <span className="uk-caption">Primary / Secondary / Tertiary</span>
         <div className="uk-row">
           <button className="round-btn primary-btn">Primary</button>
@@ -174,6 +174,13 @@ export default function App() {
           <button className="round-btn primary-btn btn-icon-left"><PlusIcon /> Add employee</button>
           <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDownIcon /></button>
           <button className="round-btn tertiary-btn btn-icon-left btn-icon-right"><SettingsIcon /> Actions <ChevronDownIcon /></button>
+        </div>
+
+        <span className="uk-caption">Mobile — .fab-square (10px radius, Styles/mobile.css). Same primary/secondary/tertiary modifiers, square corners instead of .round-btn's pill shape.</span>
+        <div className="uk-row">
+          <button className="fab-square primary-btn">Primary</button>
+          <button className="fab-square secondary-btn">Secondary</button>
+          <button className="fab-square tertiary-btn">Tertiary</button>
         </div>
       </Section>
 

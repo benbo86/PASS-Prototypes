@@ -1,3 +1,13 @@
+/* Styles/mobile.css (imported for .fab-square) sets html,body {
+   overflow:hidden } for phone-frame prototypes that manage their own
+   internal scroll area — this page isn't one, so restore normal document
+   scrolling. Loaded after mobile.css, so this wins on source order at
+   equal specificity. */
+html, body {
+  height: auto;
+  overflow: visible;
+}
+
 .uk-page {
   max-width: 760px;
   margin: 0 auto;

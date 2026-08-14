@@ -43,15 +43,23 @@ function renderCard(icon) {
       </div>`
 }
 
-function renderSection(group, index) {
+function renderSection(group, index, enableUpload) {
   const slug = group.slug || `section-${index}`
   const cardsHtml = group.icons.map(renderCard).join('\n')
   const count = `${group.icons.length} icon${group.icons.length === 1 ? '' : 's'}`
   const subtitle = group.subtitle ? ` &middot; ${escapeHtml(group.subtitle)}` : ''
   const description = group.description ? `\n    <p class="section-desc">${escapeHtml(group.description)}</p>` : ''
+  // The title goes inside both an HTML attribute (onclick="...") AND, once
+  // the browser decodes that attribute's entities, a single-quoted JS
+  // string literal — escapeAttr handles the former, the \' replace handles
+  // the latter (JS-string-escape a literal quote, not an HTML entity for
+  // it, since entity decoding happens BEFORE the JS parser ever sees this).
+  const uploadBtn = enableUpload
+    ? `<button class="section-upload-btn" onclick="openUploadPanel('${escapeAttr(group.title).replace(/'/g, "\\'")}')">Upload icon</button>`
+    : ''
   return `
   <section data-section-slug="${escapeAttr(slug)}">
-    <div class="section-head"><h2>${escapeHtml(group.title)}</h2><span class="count">${count}${subtitle}</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>${description}
+    <div class="section-head"><h2>${escapeHtml(group.title)}</h2><span class="count">${count}${subtitle}</span>${uploadBtn}<button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>${description}
     <div class="grid">
 ${cardsHtml}
     </div>
@@ -112,6 +120,43 @@ const PAGE_STYLE = `
     background: var(--accent-soft); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;
   }
   .section-dl-btn:hover { filter: brightness(0.96); }
+  .section-upload-btn {
+    font-family: inherit; font-size: 12px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;
+  }
+  .section-upload-btn:hover { filter: brightness(0.96); }
+  .new-section-upload-btn {
+    font-family: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--card);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; cursor: pointer; margin-left: 10px;
+  }
+  .new-section-upload-btn:hover { background: var(--accent-soft); }
+
+  .upload-overlay {
+    position: fixed; inset: 0; background: rgba(20,15,30,0.45); z-index: 400;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+  }
+  .upload-overlay.show { opacity: 1; pointer-events: auto; }
+  .upload-panel {
+    background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: 12px; padding: 24px; width: 340px; max-width: 90vw;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .upload-panel h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .upload-field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+  .upload-field input {
+    font-family: inherit; font-size: 13.5px; color: var(--text); background: var(--bg-inset);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+  }
+  .upload-field input:disabled { opacity: 0.65; }
+  .upload-error { font-size: 12.5px; color: #c0392b; min-height: 1em; }
+  .upload-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .upload-actions button { font-family: inherit; font-size: 13px; font-weight: 600; border: none; border-radius: 7px; padding: 8px 14px; cursor: pointer; }
+  .upload-cancel-btn { background: transparent; color: var(--text-muted); }
+  .upload-cancel-btn:hover { color: var(--text); }
+  .upload-submit-btn { background: var(--accent); color: #fff; }
+  .upload-submit-btn:hover { filter: brightness(1.08); }
+  .upload-submit-btn:disabled { opacity: 0.6; cursor: default; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; }
 
@@ -378,13 +423,105 @@ function pageScript(zipPrefix) {
     document.querySelectorAll('.card input[type=checkbox]:checked').forEach(cb => cb.checked = false);
     updateSelectionBar();
   }
+
+  // ── Upload (only wired up when enableUpload rendered the panel/buttons —
+  // harmless if never called on a page without them) ─────────────────
+  function openUploadPanel(sectionTitle) {
+    const overlay = document.getElementById('upload-overlay');
+    const sectionInput = document.getElementById('upload-section-input');
+    const titleEl = document.getElementById('upload-panel-title');
+    document.getElementById('upload-error').textContent = '';
+    document.getElementById('upload-name-input').value = '';
+    document.getElementById('upload-file-input').value = '';
+    if (sectionTitle) {
+      sectionInput.value = sectionTitle;
+      sectionInput.disabled = true;
+      titleEl.textContent = 'Upload icon to "' + sectionTitle + '"';
+    } else {
+      sectionInput.value = '';
+      sectionInput.disabled = false;
+      titleEl.textContent = 'Upload icon to a new section';
+    }
+    overlay.classList.add('show');
+  }
+
+  function closeUploadPanel() {
+    document.getElementById('upload-overlay').classList.remove('show');
+  }
+
+  async function submitUpload() {
+    const section = document.getElementById('upload-section-input').value.trim();
+    const name = document.getElementById('upload-name-input').value.trim();
+    const fileInput = document.getElementById('upload-file-input');
+    const errorEl = document.getElementById('upload-error');
+    const submitBtn = document.getElementById('upload-submit-btn');
+    errorEl.textContent = '';
+    if (!section) { errorEl.textContent = 'Section name is required.'; return; }
+    if (!name) { errorEl.textContent = 'Icon name is required.'; return; }
+    const file = fileInput.files[0];
+    if (!file) { errorEl.textContent = 'Choose an .svg file.'; return; }
+    const text = await file.text();
+    if (text.toLowerCase().indexOf('<svg') === -1) { errorEl.textContent = 'That doesn’t look like a valid SVG file.'; return; }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading…';
+    try {
+      const res = await fetch('/__icon-library/upload', {
+        method: 'POST',
+        body: JSON.stringify({ section: section, name: name, svg: text }),
+      });
+      let data;
+      try { data = await res.json(); } catch (parseErr) { throw new Error('local-only'); }
+      if (!data.ok) throw new Error(data.error || 'Upload failed.');
+      showToast('Uploaded ' + name + ' — reloading…');
+      setTimeout(function () { location.reload(); }, 600);
+    } catch (err) {
+      // A real {ok:false, error} response (bad name, duplicate, etc.) shows
+      // that message directly. Anything else (network failure, or a 404's
+      // own HTML page instead of JSON — e.g. this static page viewed on a
+      // deployed site with no dev server behind it) gets the generic hint.
+      errorEl.textContent = err.message === 'local-only'
+        ? 'Upload failed — this only works while running npm run dev locally.'
+        : err.message;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Upload';
+    }
+  }
 `
 }
 
 // groups: [{ title, subtitle?, description?, slug?, icons: [{name, svg, note?}] }]
-export function renderSpecimenPage({ title, eyebrow, heading, descriptionHtml, zipPrefix, groups }) {
+// enableUpload: only true for the mobile page (iconLibraryPlugin.js's
+// generateMobileHtml) — the PASS page's own call site omits it, so its
+// output stays byte-for-byte what it was before this option existed.
+export function renderSpecimenPage({ title, eyebrow, heading, descriptionHtml, zipPrefix, groups, enableUpload = false }) {
   const totalCount = groups.reduce((n, g) => n + g.icons.length, 0)
-  const sectionsHtml = groups.map(renderSection).join('\n')
+  const sectionsHtml = groups.map((g, i) => renderSection(g, i, enableUpload)).join('\n')
+  const newSectionUploadBtn = enableUpload
+    ? `<button class="new-section-upload-btn" onclick="openUploadPanel(null)">Upload icon to a new section</button>`
+    : ''
+  const uploadPanelHtml = enableUpload ? `
+<div class="upload-overlay" id="upload-overlay" onclick="if (event.target === this) closeUploadPanel()">
+  <div class="upload-panel">
+    <h3 id="upload-panel-title">Upload icon</h3>
+    <label class="upload-field">
+      <span>Section</span>
+      <input type="text" id="upload-section-input" placeholder="e.g. Staff Messaging">
+    </label>
+    <label class="upload-field">
+      <span>Icon name</span>
+      <input type="text" id="upload-name-input" placeholder="e.g. pin">
+    </label>
+    <label class="upload-field">
+      <span>SVG file</span>
+      <input type="file" id="upload-file-input" accept=".svg,image/svg+xml">
+    </label>
+    <div class="upload-error" id="upload-error"></div>
+    <div class="upload-actions">
+      <button class="upload-cancel-btn" onclick="closeUploadPanel()">Cancel</button>
+      <button class="upload-submit-btn" id="upload-submit-btn" onclick="submitUpload()">Upload</button>
+    </div>
+  </div>
+</div>` : ''
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,6 +544,7 @@ export function renderSpecimenPage({ title, eyebrow, heading, descriptionHtml, z
 
   <div class="top-actions">
     <button class="download-all-btn" onclick="downloadAll()">Download all ${totalCount} icons (.zip)</button>
+    ${newSectionUploadBtn}
   </div>
 ${sectionsHtml}
 </div>
@@ -418,6 +556,7 @@ ${sectionsHtml}
   <button class="dl-btn" onclick="downloadSelected()">Download (.zip)</button>
   <button class="clear-btn" onclick="clearSelection()">Clear</button>
 </div>
+${uploadPanelHtml}
 
 <script>${pageScript(zipPrefix)}</script>
 </body>

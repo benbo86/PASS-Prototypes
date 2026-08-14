@@ -3,10 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/main.css'
-import '../../../Styles/filter-dropdown.css'
-import '../../../Styles/mobile-account.css'
 import '../../../Styles/mobile.css'
-import './demo.css'
+import '../../../Styles/dev-toolbar.css'
+import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
+import '../../../Styles/dev-edit.css'
+import '../../../Styles/wireframe-access.css'
+import './customer-documents.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

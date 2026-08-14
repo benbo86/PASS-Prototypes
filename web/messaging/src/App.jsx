@@ -3,12 +3,10 @@ import { createPortal } from 'react-dom'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import Tooltip from '../../../Components/Tooltip'
-import DevToolbar from '../../../Components/DevToolbar'
-import DevMode from '../../../Components/DevMode'
-import DevComments from '../../../Components/DevComments'
-import DevEdit from '../../../Components/DevEdit'
-import WireframeToggle from '../../../Components/WireframeToggle'
-import AuditCapture from '../../../Components/AuditCapture'
+// Dev toolbar (Dev Mode/Edit/Comments/Wireframe/Audit) temporarily removed
+// from this prototype only — Ben reported an issue with it on the live
+// deployed site (not reproducible locally) on 2026-08-14; re-add once
+// diagnosed.
 // ─── Icons ────────────────────────────────────────────────────
 
 const SearchIcon = () => (
@@ -1795,13 +1793,6 @@ export default function App() {
 
   return (
     <>
-      <DevToolbar>
-        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
-        <DevMode containerRef={pageRef} />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
-        <WireframeToggle />
-        <AuditCapture containerRef={pageRef} />
-      </DevToolbar>
       <div className="messages-page" ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes

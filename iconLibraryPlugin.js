@@ -34,6 +34,14 @@ import { renderSpecimenPage } from './iconSpecimenTemplate.js'
 // file-watch events during `vite dev`, only rewriting a given output file
 // when its actual content differs (ignoring generatedAt) so a dev session
 // doesn't dirty git on every restart.
+//
+// A third mobile source, alongside the folder scan and the inline-def scan
+// below: `Icons/Mobile Uploads/<Section>/*.svg`, written by the separate
+// iconUploadPlugin.js's dev-only upload endpoint. These are real files
+// under Icons/ (scanIconsFolder already walks them) — only the
+// mobile-vs-pass classification differs by subfolder; `bakeIfChanged` is
+// exported so that plugin can trigger a synchronous rebake right after
+// writing a new file, rather than waiting on the debounced file-watcher.
 
 const ROOT = resolve(process.cwd())
 const ICONS_DIR = resolve(ROOT, 'Icons')
@@ -148,10 +156,15 @@ async function scanIconsFolder() {
           // one was requested. Strip it (and any XML comment before the
           // root tag) before ever embedding the markup inline.
           const cleaned = raw.replace(/^﻿/, '').replace(/^\s*<\?xml[^>]*\?>\s*/i, '').replace(/^\s*<!--[\s\S]*?-->\s*/, '')
+          // Icons/Mobile Uploads/<Section>/*.svg — uploaded via
+          // iconUploadPlugin.js's endpoint, classified as Mobile (by the
+          // subfolder name, which IS the section) instead of PASS. Every
+          // other Icons/*.svg file stays PASS, grouped by its own relDir.
+          const uploadMatch = relDir.match(/^Mobile Uploads\/?(.*)$/)
           results.push({
             name,
-            group: relDir || 'Icons',
-            isMobile: false,
+            group: uploadMatch ? (uploadMatch[1] || 'Uncategorized') : (relDir || 'Icons'),
+            isMobile: !!uploadMatch,
             source: { kind: 'repo-file', ref: `Icons/${relDir ? relDir + '/' : ''}${entry.name}`, name },
             svg: cleaned.trim(),
           })
@@ -282,8 +295,13 @@ function regroupSharedMobileIcons(icons) {
 
 async function buildLibraries() {
   const [fromFiles, fromInline] = await Promise.all([scanIconsFolder(), scanInlineIcons()])
-  const mobileCandidates = fromInline.filter((c) => c.isMobile)
-  const passCandidates = [...fromFiles, ...fromInline.filter((c) => !c.isMobile)]
+  // Every candidate (file-scanned or inline-scanned) already carries its
+  // own isMobile flag — scanIconsFolder sets it per-entry now too (true
+  // only for Icons/Mobile Uploads/**), so both sources are split the same
+  // way rather than assuming "file-scanned == always PASS."
+  const allCandidates = [...fromFiles, ...fromInline]
+  const mobileCandidates = allCandidates.filter((c) => c.isMobile)
+  const passCandidates = allCandidates.filter((c) => !c.isMobile)
   const mobileIcons = regroupSharedMobileIcons(dedupe(mobileCandidates))
   const passIcons = dedupe(passCandidates)
   return {
@@ -338,6 +356,7 @@ async function generateMobileHtml(mobileIcons) {
     descriptionHtml: 'Every distinct inline SVG icon defined across the mobile app prototypes and the shared mobile shell components (<code>AppNav</code>, <code>AppHeader</code>, <code>StatusBar</code>, <code>AccountScreen</code>). Each preview renders inside a fixed 24&times;24 box regardless of the icon\'s native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.',
     zipPrefix: 'pass-mobile-icons',
     groups,
+    enableUpload: true,
   })
   await mkdir(resolve(MOBILE_HTML_PATH, '..'), { recursive: true })
   const existing = await readFile(MOBILE_HTML_PATH, 'utf-8').catch(() => null)
@@ -363,7 +382,7 @@ async function generatePassHtml(passIcons) {
   return true
 }
 
-async function bakeIfChanged() {
+export async function bakeIfChanged() {
   const { mobile, pass } = await buildLibraries()
   await Promise.all([
     writeIfChanged(MOBILE_JSON_PATH, mobile),

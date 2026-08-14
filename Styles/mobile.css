@@ -262,3 +262,32 @@ html, body {
   align-items: center;
   justify-content: center;
 }
+
+/* ── .fab-square: 10px-radius button variant, mobile-only ────────────
+   A square-cornered counterpart to the shared .round-btn (Styles/main.css)
+   — added alongside it rather than changing its pill shape, which is used
+   everywhere else in the repo. Combine with the same existing
+   .primary-btn/.secondary-btn/.tertiary-btn colour modifiers exactly like
+   .round-btn does — those only set colour/border, never shape, so they
+   apply the same way regardless of which base class they're paired with. */
+.fab-square {
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Removes the browser default button border for primary/tertiary (mirroring
+   .round-btn's own unconditional border:none) via a 2-class selector, so it
+   always wins on specificity over .secondary-btn's single-class border —
+   safe regardless of which stylesheet (main.css vs this file) loads first. */
+.fab-square.primary-btn,
+.fab-square.tertiary-btn {
+  border: none;
+}

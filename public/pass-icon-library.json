@@ -328,6 +328,20 @@
       "usageCount": 1
     },
     {
+      "hash": "1360261d",
+      "name": "Cloud Offline",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z\" fill=\"#000000\"/>\n<line x1=\"2\" y1=\"3\" x2=\"22\" y2=\"21\" stroke=\"#000000\" stroke-width=\"2\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Cloud Offline.svg",
+          "name": "Cloud Offline"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "c5822ecb",
       "name": "Data",
       "group": "Icons",
@@ -510,6 +524,34 @@
       "usageCount": 1
     },
     {
+      "hash": "0aafa76d",
+      "name": "Folder Minus",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M14.9999 23.3333H24.9999M36.6666 31.6667C36.6666 32.5507 36.3154 33.3986 35.6903 34.0237C35.0652 34.6488 34.2173 35 33.3333 35H6.66659C5.78253 35 4.93468 34.6488 4.30956 34.0237C3.68444 33.3986 3.33325 32.5507 3.33325 31.6667V8.33333C3.33325 7.44928 3.68444 6.60143 4.30956 5.97631C4.93468 5.35119 5.78253 5 6.66659 5H14.9999L18.3333 10H33.3333C34.2173 10 35.0652 10.3512 35.6903 10.9763C36.3154 11.6014 36.6666 12.4493 36.6666 13.3333V31.6667Z\" stroke=\"#000000\" stroke-width=\"3.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Folder Minus.svg",
+          "name": "Folder Minus"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "234c0595",
+      "name": "Folder",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z\" fill=\"#000000\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Folder.svg",
+          "name": "Folder"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "0c819af2",
       "name": "Funder Allocation",
       "group": "Icons",
@@ -547,6 +589,20 @@
           "kind": "repo-file",
           "ref": "Icons/Info.svg",
           "name": "Info"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ff4a2e98",
+      "name": "Key",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z\" fill=\"#000000\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Key.svg",
+          "name": "Key"
         }
       ],
       "usageCount": 1
@@ -3335,5 +3391,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-10T09:49:00.993Z"
+  "generatedAt": "2026-08-13T13:09:03.326Z"
 }

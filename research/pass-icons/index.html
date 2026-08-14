@@ -58,6 +58,43 @@
     background: var(--accent-soft); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;
   }
   .section-dl-btn:hover { filter: brightness(0.96); }
+  .section-upload-btn {
+    font-family: inherit; font-size: 12px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;
+  }
+  .section-upload-btn:hover { filter: brightness(0.96); }
+  .new-section-upload-btn {
+    font-family: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--card);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; cursor: pointer; margin-left: 10px;
+  }
+  .new-section-upload-btn:hover { background: var(--accent-soft); }
+
+  .upload-overlay {
+    position: fixed; inset: 0; background: rgba(20,15,30,0.45); z-index: 400;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.15s ease;
+  }
+  .upload-overlay.show { opacity: 1; pointer-events: auto; }
+  .upload-panel {
+    background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: 12px; padding: 24px; width: 340px; max-width: 90vw;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .upload-panel h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .upload-field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+  .upload-field input {
+    font-family: inherit; font-size: 13.5px; color: var(--text); background: var(--bg-inset);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+  }
+  .upload-field input:disabled { opacity: 0.65; }
+  .upload-error { font-size: 12.5px; color: #c0392b; min-height: 1em; }
+  .upload-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .upload-actions button { font-family: inherit; font-size: 13px; font-weight: 600; border: none; border-radius: 7px; padding: 8px 14px; cursor: pointer; }
+  .upload-cancel-btn { background: transparent; color: var(--text-muted); }
+  .upload-cancel-btn:hover { color: var(--text); }
+  .upload-submit-btn { background: var(--accent); color: #fff; }
+  .upload-submit-btn:hover { filter: brightness(1.08); }
+  .upload-submit-btn:disabled { opacity: 0.6; cursor: default; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; }
 
@@ -163,7 +200,8 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 207 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 211 icons (.zip)</button>
+    
   </div>
 
   <section data-section-slug="buttons-round-tertiary">
@@ -212,7 +250,7 @@
   </section>
 
   <section data-section-slug="icons">
-    <div class="section-head"><h2>Icons</h2><span class="count">53 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Icons</h2><span class="count">57 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="Medication" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -579,6 +617,23 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Cloud Offline" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Cloud Offline.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#000000"/>
+<line x1="2" y1="3" x2="22" y2="21" stroke="#000000" stroke-width="2"/>
+</svg></span>
+        <span class="label">Cloud Offline</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#000000"/&gt;
+&lt;line x1="2" y1="3" x2="22" y2="21" stroke="#000000" stroke-width="2"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Data" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -880,6 +935,36 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Folder Minus" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Folder Minus.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M14.9999 23.3333H24.9999M36.6666 31.6667C36.6666 32.5507 36.3154 33.3986 35.6903 34.0237C35.0652 34.6488 34.2173 35 33.3333 35H6.66659C5.78253 35 4.93468 34.6488 4.30956 34.0237C3.68444 33.3986 3.33325 32.5507 3.33325 31.6667V8.33333C3.33325 7.44928 3.68444 6.60143 4.30956 5.97631C4.93468 5.35119 5.78253 5 6.66659 5H14.9999L18.3333 10H33.3333C34.2173 10 35.0652 10.3512 35.6903 10.9763C36.3154 11.6014 36.6666 12.4493 36.6666 13.3333V31.6667Z" stroke="#000000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
+        <span class="label">Folder Minus</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;path d="M14.9999 23.3333H24.9999M36.6666 31.6667C36.6666 32.5507 36.3154 33.3986 35.6903 34.0237C35.0652 34.6488 34.2173 35 33.3333 35H6.66659C5.78253 35 4.93468 34.6488 4.30956 34.0237C3.68444 33.3986 3.33325 32.5507 3.33325 31.6667V8.33333C3.33325 7.44928 3.68444 6.60143 4.30956 5.97631C4.93468 5.35119 5.78253 5 6.66659 5H14.9999L18.3333 10H33.3333C34.2173 10 35.0652 10.3512 35.6903 10.9763C36.3154 11.6014 36.6666 12.4493 36.6666 13.3333V31.6667Z" stroke="#000000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Folder" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Folder.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" fill="#000000"/>
+</svg></span>
+        <span class="label">Folder</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" fill="#000000"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Funder Allocation" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -966,6 +1051,21 @@
             &lt;path d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z" id="Shape" fill="#000000"&gt;&lt;/path&gt;
         &lt;/g&gt;
     &lt;/g&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Key" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Key.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#000000"/>
+</svg></span>
+        <span class="label">Key</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#000000"/&gt;
 &lt;/svg&gt;</template>
       </div>
 
@@ -3916,6 +4016,7 @@
   <button class="clear-btn" onclick="clearSelection()">Clear</button>
 </div>
 
+
 <script>
   function copySvg(card) {
     const tmpl = card.querySelector('.svg-src');
@@ -4084,6 +4185,69 @@
   function clearSelection() {
     document.querySelectorAll('.card input[type=checkbox]:checked').forEach(cb => cb.checked = false);
     updateSelectionBar();
+  }
+
+  // ── Upload (only wired up when enableUpload rendered the panel/buttons —
+  // harmless if never called on a page without them) ─────────────────
+  function openUploadPanel(sectionTitle) {
+    const overlay = document.getElementById('upload-overlay');
+    const sectionInput = document.getElementById('upload-section-input');
+    const titleEl = document.getElementById('upload-panel-title');
+    document.getElementById('upload-error').textContent = '';
+    document.getElementById('upload-name-input').value = '';
+    document.getElementById('upload-file-input').value = '';
+    if (sectionTitle) {
+      sectionInput.value = sectionTitle;
+      sectionInput.disabled = true;
+      titleEl.textContent = 'Upload icon to "' + sectionTitle + '"';
+    } else {
+      sectionInput.value = '';
+      sectionInput.disabled = false;
+      titleEl.textContent = 'Upload icon to a new section';
+    }
+    overlay.classList.add('show');
+  }
+
+  function closeUploadPanel() {
+    document.getElementById('upload-overlay').classList.remove('show');
+  }
+
+  async function submitUpload() {
+    const section = document.getElementById('upload-section-input').value.trim();
+    const name = document.getElementById('upload-name-input').value.trim();
+    const fileInput = document.getElementById('upload-file-input');
+    const errorEl = document.getElementById('upload-error');
+    const submitBtn = document.getElementById('upload-submit-btn');
+    errorEl.textContent = '';
+    if (!section) { errorEl.textContent = 'Section name is required.'; return; }
+    if (!name) { errorEl.textContent = 'Icon name is required.'; return; }
+    const file = fileInput.files[0];
+    if (!file) { errorEl.textContent = 'Choose an .svg file.'; return; }
+    const text = await file.text();
+    if (text.toLowerCase().indexOf('<svg') === -1) { errorEl.textContent = 'That doesn’t look like a valid SVG file.'; return; }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading…';
+    try {
+      const res = await fetch('/__icon-library/upload', {
+        method: 'POST',
+        body: JSON.stringify({ section: section, name: name, svg: text }),
+      });
+      let data;
+      try { data = await res.json(); } catch (parseErr) { throw new Error('local-only'); }
+      if (!data.ok) throw new Error(data.error || 'Upload failed.');
+      showToast('Uploaded ' + name + ' — reloading…');
+      setTimeout(function () { location.reload(); }, 600);
+    } catch (err) {
+      // A real {ok:false, error} response (bad name, duplicate, etc.) shows
+      // that message directly. Anything else (network failure, or a 404's
+      // own HTML page instead of JSON — e.g. this static page viewed on a
+      // deployed site with no dev server behind it) gets the generic hint.
+      errorEl.textContent = err.message === 'local-only'
+        ? 'Upload failed — this only works while running npm run dev locally.'
+        : err.message;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Upload';
+    }
   }
 </script>
 </body>
