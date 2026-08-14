@@ -144,6 +144,7 @@
   color: #000;
 }
 .docs-section-row-chevron { color: var(--greyscale-6-grey-50); flex-shrink: 0; }
+.docs-section-row--disabled { cursor: default; }
 
 /* ── Level 1 -> Level 2 modal sheet transition ────────────────────
    Assessments/Other Documents/Incidents close via an X (not a back-
@@ -577,3 +578,67 @@
 }
 .docs-filter-type-search input::placeholder { color: var(--greyscale-6-grey-50); }
 .docs-filter-type-list { max-height: 200px; overflow-y: auto; }
+
+/* ── AlertPrompt — mimics the native iOS text-input alert ─────────────
+   Recolored to this app's brand purple rather than iOS system blue. */
+.docs-alert-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.docs-alert-box {
+  width: 270px;
+  background: #f2f2f2;
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: center;
+}
+.docs-alert-title {
+  padding: 20px 16px 12px;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+}
+.docs-alert-input {
+  width: calc(100% - 32px);
+  margin: 0 16px 16px;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  font-family: Barlow, sans-serif;
+  font-size: 15px;
+  box-sizing: border-box;
+  outline: none;
+}
+.docs-alert-actions {
+  display: flex;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
+.docs-alert-btn {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: none;
+  font-family: Barlow, sans-serif;
+  font-size: 16px;
+  color: var(--brand-purple-6-purple-4);
+  cursor: pointer;
+}
+.docs-alert-btn:first-child { border-right: 1px solid rgba(0, 0, 0, 0.15); }
+.docs-alert-btn:disabled { color: var(--greyscale-11-grey-80); cursor: default; }
+
+/* ── Document preview/save screen — placeholder body ─────────────── */
+.docs-template-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--greyscale-6-grey-50);
+  font-family: Barlow, sans-serif;
+  font-size: 15px;
+}

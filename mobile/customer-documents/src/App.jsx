@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import Tooltip from '../../../Components/Tooltip'
@@ -10,7 +10,7 @@ import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import {
   CUSTOMER, ASSESSMENTS, ASSESSMENT_FOLDERS, OPTIONAL_ASSESSMENT_TEMPLATES,
-  OTHER_DOCUMENTS, OTHER_DOCUMENT_FOLDERS,
+  OTHER_DOCUMENTS, OTHER_DOCUMENT_FOLDERS, DOCUMENT_TEMPLATES,
   nextAssessmentId, nextOtherDocId, nextFolderId,
 } from './customerDocumentsData'
 
@@ -66,6 +66,39 @@ const DocumentIcon = ({ size = 24 }) => (
     <path fillRule="evenodd" d="M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z"/>
   </svg>
 )
+// Already-uploaded icon (Icons/Mobile Uploads/Used across multiple mobile
+// screens/DocumentList.svg), copied verbatim per icon-copy-fidelity — fill/
+// stroke literals swapped for currentColor. mask/clipPath ids are suffixed
+// with useId() since this renders once per template row (many simultaneous
+// instances on the template-picker screen) — reusing the source file's
+// literal ids as-is would collide across instances.
+const DocumentListIcon = ({ size = 24 }) => {
+  const uid = useId()
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <g clipPath={`url(#dl-clip-${uid})`}>
+        <path d="M5.49209 16H12.506C13.8834 16 15 14.8884 15 13.5172V3.48281C15 2.11159 13.8834 1 12.506 1H6.8753C6.83728 1 6.79937 1.00393 6.76211 1.01146C6.73931 1.01706 6.71688 1.02408 6.69496 1.03247L6.65468 1.04584C6.63151 1.05644 6.60908 1.06856 6.58753 1.08212L6.55492 1.09931C6.52607 1.11911 6.4991 1.14148 6.47434 1.16616L3.16691 4.45493C3.14126 4.4807 3.11814 4.50884 3.09784 4.53896C3.09784 4.54851 3.08633 4.55997 3.08058 4.56952C3.06688 4.59159 3.0547 4.61456 3.04412 4.63827C3.04412 4.65164 3.04412 4.66501 3.0307 4.68029C3.02299 4.70153 3.01659 4.72322 3.01151 4.74523C3.00394 4.78232 3 4.82006 3 4.85791V13.5172C3 14.8877 4.11543 15.9989 5.49209 16ZM4.14916 5.43277H6.10791C6.84959 5.43277 7.45084 4.83422 7.45084 4.09587V2.14591H12.506C13.2477 2.14591 13.8489 2.74446 13.8489 3.48281V13.5172C13.8489 14.2555 13.2477 14.8541 12.506 14.8541H5.49209C4.75041 14.8541 4.14916 14.2555 4.14916 13.5172V5.43277Z" fill="currentColor"/>
+        <mask id={`dl-mask0-${uid}`} style={{ maskType: 'luminance' }} maskUnits="userSpaceOnUse" x="2" y="1" width="18" height="20">
+          <path d="M2 20.0001H20V1.6256H15.9818V17.0001H2V20.0001Z" fill="white"/>
+        </mask>
+        <g mask={`url(#dl-mask0-${uid})`}>
+          <path d="M14.45 4.55002H9.55005C7.89319 4.55002 6.55005 5.89316 6.55005 7.55002V15.45C6.55005 17.1069 7.89319 18.45 9.55005 18.45H14.45C16.1069 18.45 17.45 17.1069 17.45 15.45V7.55002C17.45 5.89316 16.1069 4.55002 14.45 4.55002Z" stroke="currentColor" strokeWidth="1.1"/>
+        </g>
+        <mask id={`dl-mask1-${uid}`} style={{ maskType: 'luminance' }} maskUnits="userSpaceOnUse" x="5" y="4" width="18" height="20">
+          <path d="M5 23.0001H23V4.6256H18.9818V20.0001H5V23.0001Z" fill="white"/>
+        </mask>
+        <g mask={`url(#dl-mask1-${uid})`}>
+          <path d="M17.45 7.55002H12.55C10.8932 7.55002 9.55005 8.89316 9.55005 10.55V18.45C9.55005 20.1069 10.8932 21.45 12.55 21.45H17.45C19.1069 21.45 20.45 20.1069 20.45 18.45V10.55C20.45 8.89316 19.1069 7.55002 17.45 7.55002Z" stroke="currentColor" strokeWidth="1.1"/>
+        </g>
+      </g>
+      <defs>
+        <clipPath id={`dl-clip-${uid}`}>
+          <rect width="24" height="24" fill="white"/>
+        </clipPath>
+      </defs>
+    </svg>
+  )
+}
 const KeyIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
@@ -413,6 +446,29 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
   )
 }
 
+// ─── Shared: useSlideUpScreen ────────────────────────────────
+// Backs any full-screen "slides up over whatever's currently showing"
+// overlay (see docs-modal-slide) — Add assessment, the document template
+// picker, the document preview/save screen. `mounted` stays true a moment
+// past `active` turning off so the screen's own content is still visible
+// sliding away, not blank, matching the same close animation used
+// throughout this prototype.
+function useSlideUpScreen() {
+  const [active, setActive] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const timeoutRef = useRef(null)
+  const open = () => {
+    clearTimeout(timeoutRef.current)
+    setMounted(true)
+    setActive(true)
+  }
+  const close = () => {
+    setActive(false)
+    timeoutRef.current = setTimeout(() => setMounted(false), 300)
+  }
+  return { active, mounted, open, close }
+}
+
 // ─── Shared: useFolderSelection ──────────────────────────────
 // Backs the header "Select" mode on both a section root (moving loose
 // documents INTO a folder) and a folder detail screen (moving that
@@ -647,6 +703,39 @@ function ConfirmSheet({ title, message, confirmLabel, onConfirm, onClose }) {
   )
 }
 
+// ─── Shared: AlertPrompt ─────────────────────────────────────────────
+// Mimics the native iOS text-input alert (title, single field, Cancel/OK
+// split by a vertical divider) rather than using the real window.prompt() —
+// a real one can't be styled to match this app at all (it'd show the
+// browser's own unstyled dialog), so a look-alike is the only way to get
+// the requested visual. Recolored to this app's own brand purple rather
+// than iOS system blue, matching the reference screenshot.
+
+function AlertPrompt({ title, placeholder, submitLabel = 'OK', onSubmit, onCancel }) {
+  const [value, setValue] = useState('')
+  const canSubmit = value.trim().length > 0
+  return (
+    <div className="docs-alert-overlay">
+      <div className="docs-alert-box">
+        <div className="docs-alert-title">{title}</div>
+        <input
+          className="docs-alert-input"
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && canSubmit) onSubmit(value.trim()) }}
+          autoFocus
+        />
+        <div className="docs-alert-actions">
+          <button className="docs-alert-btn" onClick={onCancel}>Cancel</button>
+          <button className="docs-alert-btn" disabled={!canSubmit} onClick={() => onSubmit(value.trim())}>{submitLabel}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Shared: AddAssessmentScreen ─────────────────────────────────────
 // A full screen (slides up over Assessments, see docs-modal-slide) rather
 // than a bottom sheet — same row style as the Assessments list itself
@@ -784,21 +873,26 @@ function DocumentsRootScreen({ onOpenSection }) {
       </div>
 
       <div className="docs-section-list">
-        <button className="docs-section-row" onClick={() => onOpenSection('assessments')}>
+        {/* Both blocked for now, not a current requirement — non-interactive,
+            but deliberately NOT muted/labelled as "coming soon" since these
+            areas already exist (unlike a genuinely not-yet-built feature).
+            Each screen itself (folders, search/filter, etc.) is untouched,
+            just unreachable from here. */}
+        <div className="docs-section-row docs-section-row--disabled">
           <span className="docs-section-row-icon"><DocumentIcon /></span>
           <span className="docs-section-row-body"><span className="docs-section-row-title">Assessments</span></span>
           <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
-        </button>
+        </div>
         <button className="docs-section-row" onClick={() => onOpenSection('other-documents')}>
           <span className="docs-section-row-icon"><DocumentIcon /></span>
           <span className="docs-section-row-body"><span className="docs-section-row-title">Other Documents</span></span>
           <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
         </button>
-        <button className="docs-section-row" onClick={() => onOpenSection('incidents')}>
+        <div className="docs-section-row docs-section-row--disabled">
           <span className="docs-section-row-icon"><DocumentIcon /></span>
           <span className="docs-section-row-body"><span className="docs-section-row-title">Incidents</span></span>
           <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
-        </button>
+        </div>
       </div>
     </div>
   )
@@ -849,20 +943,8 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
 
   // "Add assessment" is its own full screen (slides up over Assessments,
   // same mechanic as Assessments sliding up over Level 1) rather than a
-  // bottom sheet — kept mounted a moment past `addAssessmentActive` turning
-  // off so its content is still visible sliding away, not blank.
-  const [addAssessmentActive, setAddAssessmentActive] = useState(false)
-  const [addAssessmentMounted, setAddAssessmentMounted] = useState(false)
-  const addAssessmentTimeoutRef = useRef(null)
-  const openAddAssessment = () => {
-    clearTimeout(addAssessmentTimeoutRef.current)
-    setAddAssessmentMounted(true)
-    setAddAssessmentActive(true)
-  }
-  const closeAddAssessment = () => {
-    setAddAssessmentActive(false)
-    addAssessmentTimeoutRef.current = setTimeout(() => setAddAssessmentMounted(false), 300)
-  }
+  // bottom sheet.
+  const addAssessment = useSlideUpScreen()
 
   const openFolder = (id) => {
     history.pushState(null, '', `?section=assessments&folder=${id}`)
@@ -895,14 +977,14 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
       .filter(t => selectedIds.has(t.id))
       .map(t => ({ id: nextAssessmentId(), name: t.name, group: 'optional', status: 'notStarted', date: todayDMY(), folderId }))
     setAssessments(prev => [...prev, ...newItems])
-    closeAddAssessment()
+    addAssessment.close()
   }
 
   const availableTemplates = OPTIONAL_ASSESSMENT_TEMPLATES.filter(t => !assessments.some(a => a.name === t.name))
   const looseAssessments = assessments.filter(a => !a.folderId)
 
   const fabMenuItems = [
-    { label: 'Add assessment', icon: <PlusIcon size={16} />, onClick: openAddAssessment },
+    { label: 'Add assessment', icon: <PlusIcon size={16} />, onClick: addAssessment.open },
     { label: 'New folder', icon: <FolderIcon size={16} />, onClick: () => setSheet({ type: 'create' }) },
   ]
 
@@ -1007,18 +1089,18 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
             onBack={closeFolder}
             onToggleSelecting={sel.toggleSelecting}
             onMoveSelected={() => sel.setPickerOpen(true)}
-            onAdd={openAddAssessment}
+            onAdd={addAssessment.open}
             addLabel="Add assessment"
           />
         }
       />
 
-      <div className={`docs-modal-slide${addAssessmentActive ? ' docs-modal-active' : ''}`}>
-        {addAssessmentMounted && (
+      <div className={`docs-modal-slide${addAssessment.active ? ' docs-modal-active' : ''}`}>
+        {addAssessment.mounted && (
           <AddAssessmentScreen
             templates={availableTemplates}
             onAdd={handleAddAssessments}
-            onClose={closeAddAssessment}
+            onClose={addAssessment.close}
           />
         )}
       </div>
@@ -1097,6 +1179,59 @@ function OtherDocumentRow({ item, selecting, selected, onToggle, folderName }) {
   )
 }
 
+// ─── Shared: DocumentTemplatePicker + DocumentPreviewScreen ─────────
+// "Add document" is a 3-step flow rather than a single name-entry sheet:
+// pick a template here (single-select, no checkboxes — tapping a row
+// commits immediately, matching the reference screenshot's plain chevron
+// rows) → AlertPrompt asks for a name → DocumentPreviewScreen (a stand-in
+// for the real template content, out of scope for this prototype) is
+// where Save actually creates the document.
+
+function DocumentTemplatePicker({ templates, onPick, onClose }) {
+  return (
+    <div className="screen">
+      <StatusBar />
+      <div className="docs-screen">
+        <div className="app-header">
+          <button className="app-header-back" onClick={onClose}><CloseIcon /></button>
+          <span className="app-header-title">Choose New Document Template</span>
+          <div style={{ width: 36 }} />
+        </div>
+        <div className="docs-screen-body">
+          {templates.map(t => (
+            <button key={t.id} className="docs-section-row" onClick={() => onPick(t)}>
+              <span className="docs-section-row-icon"><DocumentListIcon /></span>
+              <span className="docs-section-row-body"><span className="docs-section-row-title">{t.name}</span></span>
+              <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DocumentPreviewScreen({ templateName, onSave, onClose }) {
+  return (
+    <div className="screen">
+      <StatusBar />
+      <div className="docs-screen">
+        <div className="app-header">
+          <button className="app-header-back" onClick={onClose}><CloseIcon /></button>
+          <span className="app-header-title">{templateName}</span>
+          <div style={{ width: 36 }} />
+        </div>
+        <div className="docs-template-placeholder">
+          <p>Document template</p>
+        </div>
+        <div className="docs-fab-wrap">
+          <button className="docs-fab" onClick={onSave}><span>Save</span></button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, onClose }) {
   const [folderId, setFolderId] = useState(() => {
     const p = new URLSearchParams(window.location.search)
@@ -1131,15 +1266,54 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
     setFolders(prev => prev.filter(f => f.id !== folder.id))
     setSheet(null)
   }
-  const handleAddDocument = (name) => {
-    setDocuments(prev => [...prev, { id: nextOtherDocId(), title: name, code: 'Added via ADD DOCUMENT', status: 'notStarted', date: todayDMY(), folderId }])
-    setSheet(null)
+  // "Add document" is a 3-step flow (see DocumentTemplatePicker/
+  // DocumentPreviewScreen above): pick a template, name it via the native-
+  // style AlertPrompt, then Save on the placeholder preview screen actually
+  // creates it — using whichever folder is currently open, same as "Add
+  // assessment".
+  const templatePicker = useSlideUpScreen()
+  const docPreview = useSlideUpScreen()
+  const [namePromptOpen, setNamePromptOpen] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [pendingDocName, setPendingDocName] = useState('')
+
+  const handlePickTemplate = (template) => {
+    setSelectedTemplate(template)
+    setNamePromptOpen(true)
+  }
+  const handleCancelDocName = () => {
+    setNamePromptOpen(false)
+    setSelectedTemplate(null)
+  }
+  const handleConfirmDocName = (name) => {
+    setPendingDocName(name)
+    setNamePromptOpen(false)
+    templatePicker.close()
+    docPreview.open()
+  }
+  const handleCancelDocPreview = () => {
+    docPreview.close()
+    setSelectedTemplate(null)
+    setPendingDocName('')
+  }
+  const handleSaveNewDocument = () => {
+    setDocuments(prev => [...prev, {
+      id: nextOtherDocId(),
+      title: pendingDocName,
+      code: selectedTemplate.name,
+      status: 'notStarted',
+      date: todayDMY(),
+      folderId,
+    }])
+    docPreview.close()
+    setSelectedTemplate(null)
+    setPendingDocName('')
   }
 
   const looseDocuments = documents.filter(d => !d.folderId)
 
   const fabMenuItems = [
-    { label: 'Add document', icon: <DocumentIcon size={16} />, onClick: () => setSheet('add-document') },
+    { label: 'Add document', icon: <DocumentIcon size={16} />, onClick: templatePicker.open },
     { label: 'New folder', icon: <FolderIcon size={16} />, onClick: () => setSheet({ type: 'create' }) },
   ]
 
@@ -1244,20 +1418,35 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
             onBack={closeFolder}
             onToggleSelecting={sel.toggleSelecting}
             onMoveSelected={() => sel.setPickerOpen(true)}
-            onAdd={() => setSheet('add-document')}
+            onAdd={templatePicker.open}
             addLabel="Add document"
           />
         }
       />
 
-      {sheet === 'add-document' && (
-        <NameEntrySheet
-          title="Add document"
-          label="Document name"
-          placeholder="e.g. GP Letter"
-          submitLabel="Add"
-          onSubmit={handleAddDocument}
-          onClose={() => setSheet(null)}
+      <div className={`docs-modal-slide${templatePicker.active ? ' docs-modal-active' : ''}`}>
+        {templatePicker.mounted && (
+          <DocumentTemplatePicker
+            templates={DOCUMENT_TEMPLATES}
+            onPick={handlePickTemplate}
+            onClose={templatePicker.close}
+          />
+        )}
+      </div>
+      <div className={`docs-modal-slide${docPreview.active ? ' docs-modal-active' : ''}`}>
+        {docPreview.mounted && (
+          <DocumentPreviewScreen
+            templateName={selectedTemplate?.name}
+            onSave={handleSaveNewDocument}
+            onClose={handleCancelDocPreview}
+          />
+        )}
+      </div>
+      {namePromptOpen && (
+        <AlertPrompt
+          title="Please enter your new document name"
+          onSubmit={handleConfirmDocName}
+          onCancel={handleCancelDocName}
         />
       )}
       {sheet && sheet.type === 'create' && (

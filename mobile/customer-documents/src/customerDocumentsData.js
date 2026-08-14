@@ -90,6 +90,25 @@ export const OTHER_DOCUMENT_FOLDERS = [
   { id: 'g1', name: 'Best Interest Decisions' },
 ]
 
+// Offered on "Add document" — the user picks one of these first, then names
+// the new document; the template's own name becomes the new document's
+// `code` (matching the existing OTHER_DOCUMENTS shape above, e.g. "BBC
+// SD09(2) Best Interest Decision Making Framework").
+export const DOCUMENT_TEMPLATES = [
+  { id: 'accident', name: 'Accident' },
+  { id: 'falls-register', name: 'BBC SD15(7) Falls Register' },
+  { id: 'complaint', name: 'Complaint' },
+  { id: 'covid-screening', name: 'COVID-19 Screening - DO NOT EDIT' },
+  { id: 'info-governance', name: 'Information Governance Incident' },
+  { id: 'medication-incident', name: 'Medication Incident' },
+  { id: 'safeguarding-incident', name: 'Safeguarding Incident' },
+  { id: 'financial-transaction', name: 'SD16(1) Financial Transaction Sheet and Audit' },
+  { id: 'medication-disposal', name: 'SD18(5) Medication Disposal Form' },
+  { id: 'repositioning-chart', name: 'SD20(2) Customer Repositioning Chart' },
+  { id: 'fluid-balance-chart', name: 'SD21(6) Fluid Balance Chart' },
+  { id: 'food-chart', name: 'SD21(7) Food chart' },
+]
+
 let _nextAssessmentId = ASSESSMENTS.length + 1
 export function nextAssessmentId() { return _nextAssessmentId++ }
 
