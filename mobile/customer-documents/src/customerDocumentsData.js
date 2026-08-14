@@ -27,29 +27,32 @@ export const CUSTOMER = {
 // folderId is the foreign key onto ASSESSMENT_FOLDERS — null/undefined
 // means "loose", not yet in a folder.
 
-// Dates are DD/MM/YYYY, deliberately spread across the search/filter
-// feature's date-range buckets (7 days/30 days/3 months/6 months/1 year)
-// relative to a real "today" — see REFERENCE_TODAY note near the bottom.
+// date is when the item was CREATED, not completed — every item has one,
+// regardless of status, so the date filter applies uniformly instead of
+// only ever matching "All time" for anything not yet complete. DD/MM/YYYY,
+// deliberately spread across the search/filter feature's date-range
+// buckets (7 days/30 days/3 months/6 months/1 year) relative to a real
+// "today" (the filter compares against the actual system clock).
 export const ASSESSMENTS = [
   { id: 1, name: 'Consent to Care',                     group: 'mandatory', status: 'complete',   date: '08/08/2026', folderId: null },
-  { id: 2, name: 'Essential Documents 2024',            group: 'mandatory', status: 'partial',    date: null,         folderId: null },
+  { id: 2, name: 'Essential Documents 2024',            group: 'mandatory', status: 'partial',    date: '12/08/2026', folderId: null },
   { id: 3, name: 'Important Contacts',                  group: 'mandatory', status: 'complete',   date: '20/07/2026', folderId: null, reviewDue: 'in 5 months' },
   { id: 4, name: 'My Important Contacts',                group: 'mandatory', status: 'complete',   date: '15/07/2026', folderId: null },
-  { id: 5, name: 'Risk Assessment',                      group: 'mandatory', status: 'partial',    date: null,         folderId: 'f1' },
-  { id: 6, name: 'Moving and Handling Assessment',       group: 'mandatory', status: 'notStarted', date: null,         folderId: null },
+  { id: 5, name: 'Risk Assessment',                      group: 'mandatory', status: 'partial',    date: '25/07/2026', folderId: 'f1' },
+  { id: 6, name: 'Moving and Handling Assessment',       group: 'mandatory', status: 'notStarted', date: '08/07/2026', folderId: null },
   { id: 7, name: 'Care and Support Plan',                group: 'mandatory', status: 'complete',   date: '01/06/2026', folderId: null },
-  { id: 8, name: 'Next of Kin Details',                  group: 'mandatory', status: 'notStarted', date: null,         folderId: null },
-  { id: 9, name: 'Future-state assessment',              group: 'optional',  status: 'notStarted', date: null,         folderId: null },
-  { id: 10, name: 'Opportunity Assessment',              group: 'optional',  status: 'notStarted', date: null,         folderId: null },
+  { id: 8, name: 'Next of Kin Details',                  group: 'mandatory', status: 'notStarted', date: '15/06/2026', folderId: null },
+  { id: 9, name: 'Future-state assessment',              group: 'optional',  status: 'notStarted', date: '20/05/2026', folderId: null },
+  { id: 10, name: 'Opportunity Assessment',              group: 'optional',  status: 'notStarted', date: '01/05/2026', folderId: null },
   // Deliberately mixed with Risk Assessment (mandatory) in the same folder
   // (f1) — folders have no classification of their own, so a folder can
   // freely hold both mandatory and optional documents together.
   { id: 11, name: 'Personal History',                    group: 'optional',  status: 'complete',   date: '10/05/2026', folderId: 'f1' },
-  { id: 12, name: 'Life Story',                          group: 'optional',  status: 'partial',    date: null,         folderId: null },
-  { id: 13, name: 'Continence Assessment',               group: 'optional',  status: 'partial',    date: null,         folderId: null },
+  { id: 12, name: 'Life Story',                          group: 'optional',  status: 'partial',    date: '10/04/2026', folderId: null },
+  { id: 13, name: 'Continence Assessment',               group: 'optional',  status: 'partial',    date: '01/03/2026', folderId: null },
   { id: 14, name: 'Pain Assessment',                     group: 'optional',  status: 'complete',   date: '10/11/2025', folderId: null },
-  { id: 15, name: 'Medication Management Assessment',    group: 'optional',  status: 'notStarted', date: null,         folderId: null },
-  { id: 16, name: 'Communication Needs Assessment',      group: 'optional',  status: 'partial',    date: null,         folderId: null },
+  { id: 15, name: 'Medication Management Assessment',    group: 'optional',  status: 'notStarted', date: '15/01/2026', folderId: null },
+  { id: 16, name: 'Communication Needs Assessment',      group: 'optional',  status: 'partial',    date: '20/10/2025', folderId: null },
 ]
 
 // Not-yet-added optional assessment templates — offered by "Add assessment"

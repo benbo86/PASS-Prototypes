@@ -143,11 +143,12 @@ function StatusIcon({ status, size = 24 }) {
 const initials = (name) => name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
 // ─── Shared: search & filter (Assessments / Other Documents) ────────
-// Date ranges are cumulative windows counted back from today (real
-// wall-clock date) — "Last 30 days" includes anything within the last 7
-// too. An item with no date (not yet completed) only ever matches "All
-// time", never a specific range — there's no completion date to compare it
-// against.
+// `date` on an assessment/document is when it was CREATED, not completed —
+// every item has one regardless of status, so date filtering applies
+// uniformly rather than leaving anything incomplete permanently invisible
+// to every range but "All time". Date ranges themselves are cumulative
+// windows counted back from today (real wall-clock date) — "Last 30 days"
+// includes anything within the last 7 too.
 const DATE_RANGES = [
   { key: 'all', label: 'All time' },
   { key: '7d',  label: 'Last 7 days',   days: 7 },
@@ -172,6 +173,26 @@ function parseDMY(str) {
   return new Date(y, m - 1, d)
 }
 
+// Matches the DD/MM/YYYY convention every seeded date already uses —
+// stamped onto anything created through the UI (Add assessment/document),
+// since `date` means "created", not "completed", so every item gets one.
+function todayDMY() {
+  const d = new Date()
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+}
+
+// Midnight today — parseDMY's own dates are always midnight too, so
+// comparing against this (rather than a raw `new Date()`, which carries
+// the current time-of-day) keeps day-counts as clean calendar-day
+// differences. Without this, something created exactly 30 calendar days
+// ago reads as slightly *more* than 30 days elapsed once today's clock
+// time is factored in, and silently drops out of "Last 30 days".
+function todayMidnight() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
 function isWithinDays(date, days, now) {
   if (!date) return false
   const diffDays = (now - date) / (1000 * 60 * 60 * 24)
@@ -183,7 +204,7 @@ function isWithinDays(date, days, now) {
 // fixed total per range, not a live "of your current results" count that
 // would shift confusingly as other filters change.
 function computeDateRangeCounts(items, getDate) {
-  const now = new Date()
+  const now = todayMidnight()
   return DATE_RANGES.map(range => ({
     ...range,
     count: range.days == null ? items.length : items.filter(i => isWithinDays(getDate(i), range.days, now)).length,
@@ -221,6 +242,7 @@ function useDocumentSearchFilter() {
     setDrawerOpen(false)
   }
   const clearFilters = () => {
+    setSearchText('')
     setStatuses([])
     setTypes([])
     setDateRange('all')
@@ -399,7 +421,7 @@ function FilterDrawer({ statusOptions, typeOptions, dateOptions, initialFilters,
 // when at the section root) is all that changes which move targets make
 // sense.
 
-function useFolderSelection({ setItems, folders, folderId }) {
+function useFolderSelection({ items, setItems, folders }) {
   const [selecting, setSelecting] = useState(false)
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -423,12 +445,22 @@ function useFolderSelection({ setItems, folders, folderId }) {
     })
   }
 
-  // At a folder's own detail view: offer every other folder, plus "Remove
-  // from folder". At the section root (folderId null): only real folders
-  // make sense as a target, since everything there is already loose.
-  const folderPickerOptions = folderId
-    ? [{ id: null, label: 'Remove from folder' }, ...folders.filter(f => f.id !== folderId).map(f => ({ id: f.id, label: f.name }))]
-    : folders.map(f => ({ id: f.id, label: f.name }))
+  // Derived from the actual selected items' current folderId, not just
+  // "which screen level you're viewing" — this is what makes it correct
+  // for a flattened cross-folder search/filter result too, not only a real
+  // open folder. "Remove from folder" only shows when at least one
+  // selected item is actually in one; a folder every selected item is
+  // already in isn't offered as a "move to" target (that'd be a no-op) —
+  // a mixed selection spanning several folders leaves all folders offered,
+  // since no single exclusion would be correct for every item in it.
+  const selectedItems = items.filter(i => selectedIds.has(i.id))
+  const selectedFolderIds = new Set(selectedItems.map(i => i.folderId ?? null))
+  const commonFolderId = selectedFolderIds.size === 1 ? [...selectedFolderIds][0] : undefined
+  const anyFoldered = selectedItems.some(i => i.folderId)
+  const folderPickerOptions = [
+    ...(anyFoldered ? [{ id: null, label: 'Remove from folder' }] : []),
+    ...folders.filter(f => f.id !== commonFolderId).map(f => ({ id: f.id, label: f.name })),
+  ]
 
   const handleMoveSelected = (targetFolderId) => {
     setItems(prev => prev.map(item => selectedIds.has(item.id) ? { ...item, folderId: targetFolderId } : item))
@@ -676,7 +708,7 @@ function AddAssessmentScreen({ templates, onAdd, onClose }) {
 
 // ─── Shared: FolderDetailScreen (Level 3) ───────────────────────────
 
-function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount, onBack, onToggleSelecting, onMoveSelected }) {
+function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount, onBack, onToggleSelecting, onMoveSelected, onAdd, addLabel }) {
   if (!folder) return <div className="screen" />
   return (
     <div className="screen">
@@ -685,14 +717,26 @@ function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount
         <div className="app-header">
           <button className="app-header-back" onClick={onBack}><ChevronLeftIcon /></button>
           <span className="app-header-title">{selecting ? `${selectedCount} selected` : folder.name}</span>
-          <button className="app-header-action-text" onClick={onToggleSelecting}>{selecting ? 'Cancel' : 'Select'}</button>
+          {selecting || items.length > 0 ? (
+            <button className="app-header-action-text" onClick={onToggleSelecting}>{selecting ? 'Cancel' : 'Select'}</button>
+          ) : (
+            <div style={{ width: 36 }} />
+          )}
         </div>
         <div className="docs-screen-body">
           {items.length === 0 ? (
             <div className="docs-empty-state">This folder is empty.</div>
           ) : items.map(renderRow)}
         </div>
-        {selecting && <SelectionBar count={selectedCount} onMove={onMoveSelected} />}
+        {selecting ? (
+          <SelectionBar count={selectedCount} onMove={onMoveSelected} />
+        ) : (
+          <div className="docs-fab-wrap">
+            <button className="docs-fab" onClick={onAdd}>
+              <PlusIcon size={18} /><span>{addLabel}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -801,7 +845,7 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
     return p.get('section') === 'assessments' ? p.get('folder') : null
   })
   const [sheet, setSheet] = useState(null)
-  const sel = useFolderSelection({ setItems: setAssessments, folders, folderId })
+  const sel = useFolderSelection({ items: assessments, setItems: setAssessments, folders })
 
   // "Add assessment" is its own full screen (slides up over Assessments,
   // same mechanic as Assessments sliding up over Level 1) rather than a
@@ -849,7 +893,7 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
   const handleAddAssessments = (selectedIds) => {
     const newItems = OPTIONAL_ASSESSMENT_TEMPLATES
       .filter(t => selectedIds.has(t.id))
-      .map(t => ({ id: nextAssessmentId(), name: t.name, group: 'optional', status: 'notStarted', date: null, folderId: null }))
+      .map(t => ({ id: nextAssessmentId(), name: t.name, group: 'optional', status: 'notStarted', date: todayDMY(), folderId }))
     setAssessments(prev => [...prev, ...newItems])
     closeAddAssessment()
   }
@@ -875,7 +919,7 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
       if (sf.types.length && !sf.types.includes(item.name)) return false
       if (sf.dateRange !== 'all') {
         const range = DATE_RANGES.find(r => r.key === sf.dateRange)
-        if (!isWithinDays(parseDMY(item.date), range.days, new Date())) return false
+        if (!isWithinDays(parseDMY(item.date), range.days, todayMidnight())) return false
       }
       return true
     })
@@ -963,6 +1007,8 @@ function AssessmentsScreen({ assessments, setAssessments, folders, setFolders, o
             onBack={closeFolder}
             onToggleSelecting={sel.toggleSelecting}
             onMoveSelected={() => sel.setPickerOpen(true)}
+            onAdd={openAddAssessment}
+            addLabel="Add assessment"
           />
         }
       />
@@ -1057,7 +1103,7 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
     return p.get('section') === 'other-documents' ? p.get('folder') : null
   })
   const [sheet, setSheet] = useState(null)
-  const sel = useFolderSelection({ setItems: setDocuments, folders, folderId })
+  const sel = useFolderSelection({ items: documents, setItems: setDocuments, folders })
 
   const openFolder = (id) => {
     history.pushState(null, '', `?section=other-documents&folder=${id}`)
@@ -1086,7 +1132,7 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
     setSheet(null)
   }
   const handleAddDocument = (name) => {
-    setDocuments(prev => [...prev, { id: nextOtherDocId(), title: name, code: 'Added via ADD DOCUMENT', status: 'complete', folderId: null }])
+    setDocuments(prev => [...prev, { id: nextOtherDocId(), title: name, code: 'Added via ADD DOCUMENT', status: 'notStarted', date: todayDMY(), folderId }])
     setSheet(null)
   }
 
@@ -1110,7 +1156,7 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
       if (sf.types.length && !sf.types.includes(item.title)) return false
       if (sf.dateRange !== 'all') {
         const range = DATE_RANGES.find(r => r.key === sf.dateRange)
-        if (!isWithinDays(parseDMY(item.date), range.days, new Date())) return false
+        if (!isWithinDays(parseDMY(item.date), range.days, todayMidnight())) return false
       }
       return true
     })
@@ -1198,6 +1244,8 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
             onBack={closeFolder}
             onToggleSelecting={sel.toggleSelecting}
             onMoveSelected={() => sel.setPickerOpen(true)}
+            onAdd={() => setSheet('add-document')}
+            addLabel="Add document"
           />
         }
       />
