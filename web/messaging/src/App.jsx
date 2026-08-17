@@ -3,10 +3,12 @@ import { createPortal } from 'react-dom'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import Tooltip from '../../../Components/Tooltip'
-// Dev toolbar (Dev Mode/Edit/Comments/Wireframe/Audit) temporarily removed
-// from this prototype only — Ben reported an issue with it on the live
-// deployed site (not reproducible locally) on 2026-08-14; re-add once
-// diagnosed.
+import DevToolbar from '../../../Components/DevToolbar'
+import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 // ─── Icons ────────────────────────────────────────────────────
 
 const SearchIcon = () => (
@@ -1793,7 +1795,23 @@ export default function App() {
 
   return (
     <>
-      <div className="messages-page" ref={pageRef}>
+      {/* Dev toolbar restored locally, but deliberately kept off the live
+          deployed build for this one prototype — Ben reported an issue
+          with it on live that isn't reproducible in dev (2026-08-14),
+          still undiagnosed. import.meta.env.DEV is statically replaced by
+          Vite, so this (and the height adjustment below) tree-shakes out
+          of the production bundle entirely, same as AuditCapture's own
+          dev-only gating. */}
+      {import.meta.env.DEV && (
+        <DevToolbar>
+          <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+          <DevMode containerRef={pageRef} />
+          <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+          <WireframeToggle />
+          <AuditCapture containerRef={pageRef} />
+        </DevToolbar>
+      )}
+      <div className={`messages-page${import.meta.env.DEV ? ' messages-page--dev-toolbar' : ''}`} ref={pageRef}>
       <a href="../../" className="back-link">
         <ChevronLeftIcon /> Prototypes
       </a>

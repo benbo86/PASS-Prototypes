@@ -388,7 +388,7 @@
   flex-shrink: 0;
 }
 .docs-sheet-header {
-  padding: 16px 20px 12px;
+  padding: 0px 24px 12px;
   border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
   flex-shrink: 0;
   display: flex;
@@ -405,11 +405,11 @@
   padding: 0;
 }
 
-.docs-sheet-field { display: flex; flex-direction: column; gap: 6px; padding: 16px 20px; }
+.docs-sheet-field { display: flex; flex-direction: column; gap: 6px; padding: 16px 24px; }
 .docs-sheet-field label { font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500; color: var(--greyscale-6-grey-50); }
 .docs-sheet-error { color: var(--rag-red-red-overdue); font-size: 13px; margin-top: 2px; }
-.docs-sheet-message { padding: 4px 20px 16px; font-family: Barlow, sans-serif; font-size: 15px; color: var(--greyscale-2-grey-20); line-height: 1.4; margin: 0; }
-.docs-sheet-footer { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; border-top: 1px solid var(--ui-purple-6-lavendar-grey); }
+.docs-sheet-message { padding: 16px 24px; font-family: Barlow, sans-serif; font-size: 15px; color: var(--greyscale-2-grey-20); line-height: 1.4; margin: 0; }
+.docs-sheet-footer { display: flex; flex-direction: column; gap: 12px; padding: 16px 24px 24px; border-top: 1px solid var(--ui-purple-6-lavendar-grey); }
 .docs-sheet-footer .fab-square { width: 100%; justify-content: center; }
 
 /* Scrollable checklist-style wrapper — now only the folder-picker sheet's

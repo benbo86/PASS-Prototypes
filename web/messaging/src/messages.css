@@ -6,16 +6,18 @@ body { overflow: hidden; }
 .messages-page {
   display: flex;
   flex-direction: row;
-  /* Normally Components/DevToolbar.jsx renders as a real sibling before
-     this element, pushing it down by --dev-toolbar-height — subtracted
-     here so the fixed-height, overflow:hidden three-pane layout doesn't
-     get its own bottom edge clipped past the viewport. DevToolbar is
-     temporarily removed from this one prototype (see App.jsx), so back to
-     plain 100vh for now — leaving the subtraction in would leave a blank
-     gap at the top where the toolbar used to sit. Restore the calc()
-     alongside re-adding DevToolbar. */
+  /* Full 100vh by default — matches production, where DevToolbar is
+     deliberately never rendered for this one prototype (see App.jsx). */
   height: 100vh;
   overflow: hidden;
+}
+/* Applied only in dev (see App.jsx's import.meta.env.DEV check), where
+   Components/DevToolbar.jsx renders as a real sibling before this element,
+   pushing it down by --dev-toolbar-height — subtracted here so the
+   fixed-height, overflow:hidden three-pane layout doesn't get its own
+   bottom edge clipped past the viewport. */
+.messages-page--dev-toolbar {
+  height: calc(100vh - var(--dev-toolbar-height, 0px));
 }
 
 /* Because .messages-page sets its own overflow (hidden, not visible), it

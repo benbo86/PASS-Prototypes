@@ -821,6 +821,11 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const handleExitSaveAsVersion = () => {
     pendingExitRef.current = exitPrompt
     setExitPrompt(null)
+    // Same pre-filled-timestamp default as the toolbar's own "Save as
+    // version" button (openSaveDialog) — this path bypasses that function
+    // entirely (it needs to clear exitPrompt first), so the default has to
+    // be set here too.
+    setVersionNameInput(fmtTime(new Date()))
     setShowSaveDialog(true)
   }
 
@@ -1227,6 +1232,10 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const openSaveDialog = () => {
     if (editedEntries().length === 0 && iconEditedCount() === 0) return
+    // Pre-filled with a timestamp so Save works immediately for a small
+    // edit with no typing required — still a plain editable text field, so
+    // a real name can replace it for anything worth naming properly.
+    setVersionNameInput(fmtTime(new Date()))
     setShowSaveDialog(true)
   }
 
@@ -1247,12 +1256,36 @@ export default function DevEdit({ containerRef, prototypeId }) {
       // not `draft`. A rule sitting mid-edit in a still-open, unconfirmed
       // panel is deliberately left out, same as it wouldn't survive a
       // click-away either.
-      const overrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.committed, filePath: e.filePath || null }))
-      const iconSwaps = editedIcons.map(([, e]) => ({
+      const newOverrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.committed, filePath: e.filePath || null }))
+      const newIconSwaps = editedIcons.map(([, e]) => ({
         id: e.id, scope: e.scope || 'all', originalHash: e.originalHash, originalLen: e.originalLen,
         domPath: e.domPath || null, pathHint: e.pathHint || null,
         svg: e.svg, source: e.source, authorName: e.authorName, createdAt: e.createdAt || new Date().toISOString(),
       }))
+      // Real bug, reported live: saving used to write ONLY this round's
+      // dirty edits as the version's entire override set, silently dropping
+      // every override from a PREVIOUS save that isn't also being re-edited
+      // right now — e.g. save a padding change on rule A, then separately
+      // save a padding change on rule B, and B's save would wipe A's out of
+      // the resulting version (and the live active styling) entirely, even
+      // though A was never touched or reverted. A new version needs to
+      // represent the FULL current styling state, not just this session's
+      // delta — so merge this round's edits with whatever's already active,
+      // same "session wins for its own key, otherwise carry the existing
+      // entry forward unchanged" rule mergeIconSwaps already established for
+      // the live-reconcile path (not reused directly here since it drops
+      // fields — source/authorName/createdAt/pathHint — this save path
+      // needs to preserve on carried-over entries).
+      const newOverrideKeys = new Set(newOverrides.map(o => ruleKey(o.selector, o.mediaText)))
+      const carriedOverrides = (activeOverridesRef.current?.overrides || [])
+        .filter(o => !newOverrideKeys.has(ruleKey(o.selector, o.mediaText)))
+      const overrides = [...carriedOverrides, ...newOverrides]
+
+      const newIconKeys = new Set(newIconSwaps.map(s => `${s.originalHash}:${s.originalLen}`))
+      const carriedIconSwaps = (activeOverridesRef.current?.iconSwaps || [])
+        .filter(s => !newIconKeys.has(`${s.originalHash}:${s.originalLen}`))
+      const iconSwaps = [...carriedIconSwaps, ...newIconSwaps]
+
       const versionRef = await addDoc(collection(db, 'devedit_versions'), {
         prototypeId, name, authorName, createdAt: serverTimestamp(), overrides, iconSwaps,
       })
@@ -1716,6 +1749,7 @@ function SaveVersionDialog({ name, setName, onSubmit, onCancel, saving }) {
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') onSubmit() }}
+          onFocus={e => e.target.select()}
           autoFocus
         />
         <div className="devedit-gate-actions">
