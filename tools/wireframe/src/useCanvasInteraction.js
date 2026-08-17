@@ -163,8 +163,28 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
     if (activeTool !== 'pointer') return
     e.stopPropagation()
 
-    const group = groupMembersOf(el, elementsRef.current)
     const current = selectedIdsRef.current
+    // Once an element is isolated as the sole selection — via Cmd/Ctrl
+    // below, or via a double-click that (for a real group member) now
+    // selects without opening editing, see ElementRenderer's own
+    // onDoubleClick — that isolation persists through the *next* plain
+    // interaction on the same element, rather than a plain click
+    // immediately re-expanding it back to the whole group. Without this, a
+    // double-click-to-isolate followed by a plain click/drag to actually
+    // move or edit it would silently snap back to whole-group behavior,
+    // defeating the isolation the moment you tried to use it.
+    const alreadyIsolatedHere = current.length === 1 && current[0] === el.id
+    // Cmd/Ctrl "drills into" a persistent group to act on just the clicked
+    // element alone — move it by itself, or (combined with Option below)
+    // duplicate just it — without breaking the group's own membership for
+    // everything else. A plain click always expands to the whole group
+    // (matching Figma's own "click selects the group, something else gets
+    // you an individual member" convention) with no way to isolate a
+    // single grouped element otherwise: Option+drag on a not-yet-selected
+    // grouped element used to always duplicate the *whole* group too, with
+    // no way to copy out just the one element you actually grabbed.
+    const bypassGroup = e.metaKey || e.ctrlKey || alreadyIsolatedHere
+    const group = bypassGroup ? [el.id] : groupMembersOf(el, elementsRef.current)
     const fullyContained = group.every((id) => current.includes(id))
 
     if (e.shiftKey) {
@@ -175,8 +195,18 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
     // Clicking something already part of a larger selection keeps that
     // whole selection intact and moves all of it together — only clicking
     // something *not* already selected replaces the selection with just
-    // its group.
-    const nextSelection = fullyContained ? current : group
+    // its group. Real bug, reported directly: under bypassGroup this
+    // "already contained, so keep the bigger current selection" shortcut
+    // defeats the whole point of the modifier — a single-element `group`
+    // is trivially "fully contained" in any selection that already
+    // includes it, which is exactly the common case right after ⌘G groups
+    // 2 elements and leaves them both selected. Cmd-clicking one of them
+    // right then would silently keep dragging/copying the *whole* group
+    // (the state from before you tried to narrow it) instead of just the
+    // one clicked — so bypassGroup skips this shortcut entirely and always
+    // narrows to `group` (== [el.id]), regardless of what's already
+    // selected.
+    const nextSelection = (!bypassGroup && fullyContained) ? current : group
     const pt = getCanvasPoint(e)
 
     // Option+drag duplicates the whole selection about to be moved,
@@ -202,7 +232,10 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
       return
     }
 
-    if (!fullyContained) setSelectedIds(nextSelection)
+    // Same reasoning as nextSelection above — under bypassGroup the
+    // selection must actually be written even when the old fullyContained
+    // check alone would have skipped it as "already correct."
+    if (bypassGroup || !fullyContained) setSelectedIds(nextSelection)
 
     const preDragSnapshot = elementsRef.current
     const startBoxes = {}
@@ -212,7 +245,20 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         ? { x1: elx.x1, y1: elx.y1, x2: elx.x2, y2: elx.y2 }
         : { x: elx.x, y: elx.y, w: elx.w, h: elx.h }
     })
-    dragRef.current = { kind: 'moveGroup', ids: nextSelection, startMouse: pt, startBoxes, preDragSnapshot }
+    // A plain click (not drag) on an element that was ALREADY isolated as
+    // the sole selection, and is a genuine group member, opens its text
+    // editing on mouseup below — completing the "double-click to select
+    // without editing, click again to edit" flow (see ElementRenderer's
+    // own onDoubleClick). Checked against `alreadyIsolatedHere` (the
+    // state as it stood BEFORE this mousedown), not the modifier keys on
+    // *this* click, so a plain Cmd-click that's doing the initial
+    // isolating doesn't also open editing in the same click — only a
+    // later, truly separate plain click does.
+    const clickToEditId = (alreadyIsolatedHere && !e.metaKey && !e.ctrlKey
+      && groupMembersOf(el, elementsRef.current).length > 1)
+      ? el.id
+      : null
+    dragRef.current = { kind: 'moveGroup', ids: nextSelection, startMouse: pt, startBoxes, preDragSnapshot, clickToEditId }
   }, [activeTool, getCanvasPoint, setSelectedIds, setElements])
 
   // ── One resize handle on the shared SelectionOverlay, operating on the
@@ -424,6 +470,11 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         // even if the user alt-clicks without ever dragging (a valid way
         // to duplicate in place).
         if (drag.isDuplicate || dx !== 0 || dy !== 0) onDragStart(drag.preDragSnapshot)
+        // A plain click (no movement) on an already-isolated group member
+        // opens its text editing — see the clickToEditId comment at
+        // mousedown above. A real drag (dx/dy !== 0) never reaches this;
+        // the move itself already applied to just this one element.
+        if (dx === 0 && dy === 0 && drag.clickToEditId) onTextPlaced(drag.clickToEditId)
       } else if (drag.kind === 'rotate') {
         // Can't reuse the dx!==0||dy!==0 mouse-delta check above — a tiny
         // mouse move near the center can swing the angle hugely, and a big

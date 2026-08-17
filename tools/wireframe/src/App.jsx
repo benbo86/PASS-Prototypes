@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Toolbar from './Toolbar'
 import WireframeMenu from './WireframeMenu'
-import FontPanel from './FontPanel'
+import FontToolbar from './FontToolbar'
 import Canvas from './Canvas'
-import { cloneElements, clampZoom, ZOOM_STEP } from './geometry'
+import { cloneElements, clampZoom, ZOOM_STEP, computeBoundingBox } from './geometry'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { auth, db, SHARED_EMAIL } from '../../../Components/firebase'
@@ -46,6 +46,12 @@ export default function App() {
   const [activeTool, setActiveTool] = useState('pointer')
   const [contextMenu, setContextMenu] = useState(null) // {x, y} | null
   const [autoEditId, setAutoEditId] = useState(null)
+  // { id, char } | null — set by the keydown handler below when a single
+  // styleable element is selected and the user just starts typing, without
+  // double-clicking first. Consumed the same way autoEditId is (the target
+  // element opens editing and seeds its draft with `char`), just triggered
+  // by a keystroke instead of the drop/placement moment.
+  const [typeEditTarget, setTypeEditTarget] = useState(null)
   const [pendingTextStyle, setPendingTextStyle] = useState(DEFAULT_TEXT_STYLE)
   // View state only — not part of a saved wireframe's JSON, resets to 100%
   // on reload. Lives here (not Canvas.jsx) so this file's own keydown
@@ -113,6 +119,12 @@ export default function App() {
   // Plain ref, not state — clipboard contents don't need to trigger a
   // render, only to be read back on the next ⌘V.
   const clipboardRef = useRef(null)
+  // How many times ⌘V has been pressed since the last ⌘C — every paste
+  // used to clone at the exact same fixed +16/+16 offset from the
+  // clipboard's original position, so a 2nd/3rd paste landed exactly on
+  // top of the 1st and looked like nothing had happened. Reset on every
+  // fresh ⌘C so a new copy always starts its own cascade from scratch.
+  const pasteCountRef = useRef(0)
 
   // What to do once the dirty-check (showExitPrompt) resolves — set by
   // requestSwitch() before showing the prompt, read by handleExitDiscard/
@@ -168,19 +180,26 @@ export default function App() {
   const currentStroke = selectedStrokeable[0]?.stroke || null
   const currentStrokeWidth = selectedStrokeable[0]?.strokeWidth ?? 1
 
-  // Font-panel-eligible selection: a text element always qualifies; a
-  // rect/ellipse/arrow only once it actually has text (an empty shape
-  // stays a plain box with no font controls — matches the Text tool's own
-  // "select it to style it" flow, but only once there's something to
-  // style). Frame is deliberately excluded — its label is a name badge
-  // above the box, not styleable body text.
+  // Font-toolbar-eligible selection: any single text/rect/ellipse/
+  // triangle/arrow, regardless of whether it has text yet — shown as soon
+  // as the element exists (on drop) or is simply selected (a click), not
+  // gated on already having a label. Lets the toolbar double as a way to
+  // preset style *before* typing (double-click still opens the actual text
+  // edit), rather than requiring text to exist first. Frame stays excluded
+  // — its label is a name badge above the box, not styleable body text.
   const STYLEABLE_SHAPE_TYPES = new Set(['rect', 'ellipse', 'triangle', 'arrow'])
   const selectedStyleableEl = selectedIds.length === 1
     ? elements.find((el) => el.id === selectedIds[0]
-        && (el.type === 'text' || (STYLEABLE_SHAPE_TYPES.has(el.type) && el.label?.trim())))
+        && (el.type === 'text' || STYLEABLE_SHAPE_TYPES.has(el.type)))
     : null
-  const showFontPanel = activeTool === 'text' || !!selectedStyleableEl
-  const fontPanelValue = selectedStyleableEl
+  // The toolbar floats above a real element box, so — unlike the old docked
+  // panel — it has nothing to anchor to before something is actually
+  // selected. Dropped the old "customize defaults for the next placed text"
+  // case (armed Text tool, nothing selected yet): a freshly placed element
+  // auto-selects immediately, so this only costs one beat, not a real
+  // capability, and pendingTextStyle still supplies its fixed defaults.
+  const fontToolbarBox = selectedStyleableEl ? computeBoundingBox(elements, [selectedStyleableEl.id]) : null
+  const fontToolbarValue = selectedStyleableEl
     ? {
         fontFamily: selectedStyleableEl.fontFamily,
         fontWeight: selectedStyleableEl.fontWeight,
@@ -189,19 +208,15 @@ export default function App() {
         verticalAlign: selectedStyleableEl.verticalAlign || (selectedStyleableEl.type === 'text' ? 'top' : 'middle'),
         textColor: selectedStyleableEl.textColor,
       }
-    : pendingTextStyle
+    : null
 
-  // Edits the currently-selected element live if one qualifies (a real,
-  // undoable mutation); otherwise just updates the *pending* defaults used
-  // the next time a text element is placed — the panel is one component,
-  // this decides which of the two it's actually driving.
+  // Only ever called while selectedStyleableEl exists (the toolbar that
+  // calls this doesn't render otherwise) — always a real, undoable mutation
+  // of the selected element.
   const handleFontChange = (patch) => {
-    if (selectedStyleableEl) {
-      pushHistory()
-      setElements((prev) => prev.map((el) => (el.id === selectedStyleableEl.id ? { ...el, ...patch } : el)))
-    } else {
-      setPendingTextStyle((prev) => ({ ...prev, ...patch }))
-    }
+    if (!selectedStyleableEl) return
+    pushHistory()
+    setElements((prev) => prev.map((el) => (el.id === selectedStyleableEl.id ? { ...el, ...patch } : el)))
   }
 
   // ── Undo: snapshot-based. pushHistory captures a pre-mutation elements
@@ -390,6 +405,46 @@ export default function App() {
         return
       }
 
+      // ⌘C/⌘V get a narrower, separate gate from every other Cmd-shortcut
+      // below — real bug, reported directly: double-clicking a shape (this
+      // tool's own, if unintuitive, way to isolate a single member of a
+      // persistent group — see groupMembersOf's own history) immediately
+      // opens that shape's label for editing and focuses its input, which
+      // made `isTyping` true and silently blocked ⌘C from ever running —
+      // "double-click the circle, ⌘C, click away, ⌘V" pasted nothing,
+      // because the shape-level clipboard was never actually populated.
+      // Scoped specifically to `wf-label-input` (the shared class every
+      // element-label editing input carries — rect/ellipse/text/frame/
+      // arrow all use it) rather than lifting the isTyping gate globally,
+      // so unrelated real text fields (the wireframe name field, save/
+      // rename dialogs) keep their normal native copy/paste of typed text,
+      // unaffected.
+      const isEditingElementLabel = active?.classList?.contains('wf-label-input')
+      if ((e.metaKey || e.ctrlKey) && isEditingElementLabel) {
+        const key = e.key.toLowerCase()
+        if (key === 'c') {
+          const ids = selectedIdsRef.current
+          if (ids.length === 0) return
+          e.preventDefault()
+          clipboardRef.current = elementsRef.current.filter((el) => ids.includes(el.id))
+          pasteCountRef.current = 0
+          return
+        }
+        if (key === 'v' && clipboardRef.current && clipboardRef.current.length > 0) {
+          e.preventDefault()
+          pushHistory()
+          pasteCountRef.current += 1
+          const step = pasteCountRef.current * 16
+          const { elements: pasted } = cloneElements(clipboardRef.current, { x: step, y: step })
+          setElements((prev) => [...prev, ...pasted])
+          setSelectedIds(pasted.map((el) => el.id))
+          return
+        }
+        // No matching clipboard content (⌘V with nothing copied) or some
+        // other Cmd-combo while editing a label — fall through to native
+        // input behaviour rather than returning early.
+      }
+
       if ((e.metaKey || e.ctrlKey) && !isTyping) {
         const key = e.key.toLowerCase()
         if (key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return }
@@ -404,13 +459,20 @@ export default function App() {
           if (ids.length === 0) return
           e.preventDefault()
           clipboardRef.current = elementsRef.current.filter((el) => ids.includes(el.id))
+          pasteCountRef.current = 0
           return
         }
         if (key === 'v') {
           if (!clipboardRef.current || clipboardRef.current.length === 0) return
           e.preventDefault()
           pushHistory()
-          const { elements: pasted } = cloneElements(clipboardRef.current, { x: 16, y: 16 })
+          // Cascades further from the clipboard's original position with
+          // each successive paste (16px per step, matching Figma's own
+          // repeated-paste convention) instead of every paste landing at
+          // the same fixed +16/+16 offset and stacking exactly on the last.
+          pasteCountRef.current += 1
+          const step = pasteCountRef.current * 16
+          const { elements: pasted } = cloneElements(clipboardRef.current, { x: step, y: step })
           setElements((prev) => [...prev, ...pasted])
           setSelectedIds(pasted.map((el) => el.id))
           return
@@ -432,6 +494,26 @@ export default function App() {
           }
         }
         return
+      }
+
+      // Typing while a single text/rect/ellipse/triangle/arrow is selected
+      // starts editing it with the typed character, no double-click needed
+      // first — an explicit ask: select, then just type. Checked (and
+      // returns) before the bare-letter tool shortcuts right below, so
+      // e.g. typing "r" onto a selected shape edits its text rather than
+      // arming the Rect tool; with nothing styleable selected, target is
+      // null and the shortcut branch runs exactly as before.
+      if (!isTyping && !e.altKey && !e.metaKey && !e.ctrlKey && e.key.length === 1) {
+        const ids = selectedIdsRef.current
+        const target = ids.length === 1
+          ? elementsRef.current.find((el) => el.id === ids[0]
+              && (el.type === 'text' || STYLEABLE_SHAPE_TYPES.has(el.type)))
+          : null
+        if (target) {
+          e.preventDefault()
+          setTypeEditTarget({ id: target.id, char: e.key })
+          return
+        }
       }
 
       // Bare-letter tool shortcuts — never fire while typing, and the
@@ -857,10 +939,6 @@ export default function App() {
         error={saveError}
       />
 
-      {showFontPanel && (
-        <FontPanel value={fontPanelValue} onChange={handleFontChange} showAlignment={selectedStyleableEl?.type !== 'arrow'} />
-      )}
-
       <Canvas
         elements={elements}
         setElements={setElements}
@@ -878,8 +956,14 @@ export default function App() {
         onTextPlaced={setAutoEditId}
         autoEditId={autoEditId}
         onAutoEditConsumed={() => setAutoEditId(null)}
+        typeEditTarget={typeEditTarget}
+        onTypeEditConsumed={() => setTypeEditTarget(null)}
         zoom={zoom}
         setZoom={setZoom}
+        fontToolbarBox={fontToolbarBox}
+        fontToolbarValue={fontToolbarValue}
+        onFontToolbarChange={handleFontChange}
+        fontToolbarShowAlignment={selectedStyleableEl?.type !== 'arrow'}
       />
 
       <Toolbar

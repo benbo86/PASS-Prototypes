@@ -904,73 +904,71 @@ textarea.wf-label-input {
   outline: none;
 }
 
-/* ── Font panel — deliberately styled to match Components/DevMode.jsx's
-   own dark inspector panel (Styles/dev-mode.css's .devmode-panel), not
-   this tool's own light toolbar/popup look, per the "similar to dev mode"
-   ask. Shown while the Text tool is armed or a text element is selected
-   (see App.jsx). top/bottom offsets clear the top-right FileControls
-   cluster and the bottom-center Toolbar, both fixed elsewhere on the
-   page. ── */
+/* ── Font toolbar — floating contextual toolbar (replaces the old docked
+   right-side panel), horizontally centered directly above the selected
+   element's own box. Positioned in plain canvas-space coordinates (see
+   Canvas.jsx/FontToolbar.jsx) as a child of the already-scaled .wf-canvas,
+   so it inherits zoom automatically like every other overlay — the same
+   dark, Barlow-font styling as before, just laid out as a single row. ── */
 
-.wf-font-panel {
-  position: fixed;
-  top: 80px;
-  right: 0;
-  bottom: 100px;
+.wf-font-toolbar {
+  position: absolute;
   z-index: 15;
-  width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
   background: #1c1c1e;
   color: #f2f2f2;
   font-family: 'Barlow', sans-serif;
-  overflow-y: auto;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  /* Centered horizontally on box.x + box.w/2, sitting just above box.y. */
+  transform: translate(-50%, calc(-100% - 12px));
+  /* Real bug, reported directly: floating above the selected element (not
+     docked to the side like the old panel) means this box can overlap a
+     DIFFERENT, unselected element positioned nearby — very common for
+     grouped elements specifically, since they're typically placed close
+     together on purpose. Without this, clicking that other element's
+     overlapping area hit this toolbar's own opaque background instead,
+     silently swallowing the mousedown and making it look like the element
+     couldn't be moved at all. Same fix already established for
+     SelectionOverlay's own analogous issue: pointer-events:none on the
+     whole box so its dead space (padding/gaps/background) is click-
+     through, with pointer-events:auto opted back in only on the actual
+     interactive controls below. */
+  pointer-events: none;
 }
 
-.wf-font-panel-header {
-  padding: 16px 18px;
-  border-bottom: 1px solid #3a3a3c;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.wf-font-panel-body { padding: 4px 18px 18px; }
-
-.wf-font-panel-section {
-  padding: 14px 0;
-  border-bottom: 1px solid #2e2e30;
-}
-.wf-font-panel-section:last-child { border-bottom: none; }
-
-.wf-font-panel-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #8e8e93;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
-}
-
-.wf-font-panel-select,
-.wf-font-panel-input {
+.wf-font-toolbar-select,
+.wf-font-toolbar-input {
   box-sizing: border-box;
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 13px;
+  padding: 5px 6px;
+  font-size: 12px;
   font-family: inherit;
   color: #f2f2f2;
   background: #2c2c2e;
   border: 1px solid #3a3a3c;
   border-radius: 6px;
+  pointer-events: auto;
 }
 
-.wf-font-panel-align-group { display: flex; gap: 4px; }
-.wf-font-panel-align-btn {
+.wf-font-toolbar-select-family { width: 108px; }
+.wf-font-toolbar-input { width: 52px; }
+
+.wf-font-toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #3a3a3c;
+  flex-shrink: 0;
+}
+
+.wf-font-toolbar-align-group { display: flex; gap: 2px; flex-shrink: 0; }
+.wf-font-toolbar-align-btn {
   box-sizing: border-box;
-  flex: 1;
-  padding: 6px 4px;
+  width: 24px;
+  padding: 5px 0;
   font-size: 12px;
   font-family: inherit;
   color: #f2f2f2;
@@ -978,29 +976,32 @@ textarea.wf-label-input {
   border: 1px solid #3a3a3c;
   border-radius: 6px;
   cursor: pointer;
+  pointer-events: auto;
 }
-.wf-font-panel-align-btn.active { background: #9a26d6; border-color: #9a26d6; }
+.wf-font-toolbar-align-btn.active { background: #9a26d6; border-color: #9a26d6; }
 
-.wf-font-panel-swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.wf-font-panel-swatch {
+.wf-font-toolbar-swatches { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.wf-font-toolbar-swatch {
   box-sizing: border-box;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: 1px solid #3a3a3c;
   border-radius: 5px;
   cursor: pointer;
+  pointer-events: auto;
 }
-.wf-font-panel-swatch.active { outline: 2px solid #9a26d6; outline-offset: 1px; }
+.wf-font-toolbar-swatch.active { outline: 2px solid #9a26d6; outline-offset: 1px; }
 
-.wf-font-panel-color-input {
+.wf-font-toolbar-color-input {
   box-sizing: border-box;
-  width: 28px;
-  height: 22px;
+  width: 24px;
+  height: 20px;
   padding: 0;
   border: 1px solid #3a3a3c;
   border-radius: 5px;
   background: #2c2c2e;
+  pointer-events: auto;
 }
 
 /* ── Exit confirmation — mirrors Components/DevEdit.jsx's own ExitPrompt

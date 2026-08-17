@@ -3,6 +3,7 @@ import ElementRenderer from './ElementRenderer'
 import ArrowLayer from './ArrowLayer'
 import SelectionOverlay from './SelectionOverlay'
 import ContextMenu from './ContextMenu'
+import FontToolbar from './FontToolbar'
 import { useCanvasInteraction } from './useCanvasInteraction'
 import { computeBoundingBox, groupMembersOf, clampZoom, ZOOM_STEP } from './geometry'
 
@@ -30,8 +31,14 @@ export default function Canvas({
   onTextPlaced,
   autoEditId,
   onAutoEditConsumed,
+  typeEditTarget,
+  onTypeEditConsumed,
   zoom,
   setZoom,
+  fontToolbarBox,
+  fontToolbarValue,
+  onFontToolbarChange,
+  fontToolbarShowAlignment,
 }) {
   const canvasRef = useRef(null)
   const scrollRef = useRef(null)
@@ -178,7 +185,24 @@ export default function Canvas({
         <ElementRenderer
           key={el.id}
           el={el}
-          isSelected={selectedIds.includes(el.id)}
+          // .wf-el-selected's own outline is only actually needed to mark
+          // an individual member of a MULTI-select — SelectionOverlay below
+          // already draws its own identical-looking outline around a SOLE
+          // selection's exact box, so showing both there is pure
+          // redundancy. For a fixed-size element (rect/ellipse/frame/
+          // triangle, or bound text) the two boxes are pixel-identical, so
+          // the duplication was invisible; for autoSize text specifically
+          // the stored el.w/h (measured from the editing input's own ch-
+          // based width approximation, not the true rendered content
+          // width — see the "not pixel-perfect" note in FontToolbar/v3.1
+          // history) can differ from the live box by a couple of pixels,
+          // making the redundant second outline visibly offset from the
+          // first — reported as "two bounding boxes."
+          isSelected={selectedIds.length > 1 && selectedIds.includes(el.id)}
+          // Whether this element has real group siblings (not just a
+          // lone/"group of one") — see the onDoubleClick prop below for
+          // why this changes what a double-click does.
+          isGrouped={!!el.groupId && elements.some((other) => other.id !== el.id && other.groupId === el.groupId)}
           activeTool={activeTool}
           onMouseDown={onElementMouseDown}
           onContextMenu={handleContextMenu}
@@ -186,6 +210,8 @@ export default function Canvas({
           onDoubleClick={handleDoubleClick}
           autoEdit={el.id === autoEditId}
           onAutoEditConsumed={onAutoEditConsumed}
+          typeEditChar={el.id === typeEditTarget?.id ? typeEditTarget.char : null}
+          onTypeEditConsumed={onTypeEditConsumed}
         />
       ))}
       {/* Arrows render as one shared SVG overlay on top of every box
@@ -206,6 +232,8 @@ export default function Canvas({
         onDoubleClick={handleDoubleClick}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
+        typeEditTarget={typeEditTarget}
+        onTypeEditConsumed={onTypeEditConsumed}
       />
 
       {selectionBox && (
@@ -216,6 +244,19 @@ export default function Canvas({
           rotation={isSoleRotatableSelected ? (soleSelectedEl.rotation || 0) : 0}
           showRotateHandles={isSoleRotatableSelected}
           onRotateHandleMouseDown={onRotateHandleMouseDown}
+        />
+      )}
+
+      {/* Positioned in the same canvas-space coordinates as SelectionOverlay
+          above, as a plain child of the already-zoom-scaled .wf-canvas — it
+          inherits the current zoom automatically with zero extra math, same
+          reasoning as every other overlay here. */}
+      {fontToolbarBox && (
+        <FontToolbar
+          box={fontToolbarBox}
+          value={fontToolbarValue}
+          onChange={onFontToolbarChange}
+          showAlignment={fontToolbarShowAlignment}
         />
       )}
 

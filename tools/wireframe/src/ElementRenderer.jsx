@@ -9,17 +9,32 @@ const VERTICAL_ALIGN_CSS = { top: 'flex-start', middle: 'center', bottom: 'flex-
 // they moved to the shared SelectionOverlay, which handles 1-or-more
 // selected elements uniformly) — this component only renders the box
 // itself and reports clicks/double-clicks/right-clicks upward.
-export default function ElementRenderer({ el, isSelected, activeTool, onMouseDown, onContextMenu, onLabelChange, onDoubleClick, autoEdit, onAutoEditConsumed }) {
+export default function ElementRenderer({ el, isSelected, isGrouped, activeTool, onMouseDown, onContextMenu, onLabelChange, onDoubleClick, autoEdit, onAutoEditConsumed, typeEditChar, onTypeEditConsumed }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(el.label)
   const inputRef = useRef(null)
   const boxRef = useRef(null)
+  // Set synchronously (ref, not state) by the typeEditChar effect below,
+  // just before it flips editing to true — read once editing actually
+  // becomes true (the effect right here), so a seeded keystroke survives
+  // the same two-render "setEditing now, react to it next render" gap the
+  // pre-existing autoEdit flow below already relies on.
+  const pendingCharRef = useRef(null)
 
   useEffect(() => {
     if (!editing) return
-    setDraft(el.label)
+    const seeded = pendingCharRef.current
+    pendingCharRef.current = null
+    setDraft(seeded != null ? seeded : el.label)
     inputRef.current?.focus()
-    inputRef.current?.select()
+    if (seeded != null) {
+      // Cursor placed right after the just-typed character rather than
+      // selecting it — selecting would mean the *next* keystroke replaces
+      // it instead of continuing on from it.
+      inputRef.current?.setSelectionRange?.(seeded.length, seeded.length)
+    } else {
+      inputRef.current?.select()
+    }
     // Only re-run when editing starts, not on every keystroke of el.label.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing])
@@ -40,6 +55,21 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
       onAutoEditConsumed(el.id)
     }
   }, [autoEdit, el.id, onAutoEditConsumed])
+
+  // Typing while this element is selected (no double-click first) — the
+  // keydown handler in App.jsx seeds this once a printable key is pressed
+  // with a single non-frame element selected. Same two-effect shape as
+  // autoEdit above (this one flips `editing`, the `[editing]` effect above
+  // reacts to it next render), except the ref lets that follow-up effect
+  // seed the draft with the typed character instead of resetting to the
+  // pre-existing (here, still-empty) el.label.
+  useEffect(() => {
+    if (typeEditChar != null) {
+      pendingCharRef.current = typeEditChar
+      setEditing(true)
+      onTypeEditConsumed(el.id)
+    }
+  }, [typeEditChar, el.id, onTypeEditConsumed])
 
   // Commit on both explicit confirm (blur/Enter) AND cancel (Escape) —
   // canceling re-commits the *original* el.label unchanged (a genuine no-op
@@ -144,7 +174,21 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
         if (activeTool !== 'pointer') return
         e.stopPropagation()
         onDoubleClick(el)
-        setEditing(true)
+        // Real bug, reported directly: double-click is this tool's own way
+        // to isolate one member of a persistent group (bypassing the
+        // whole-group expansion a plain click does) — but immediately
+        // opening editing here means the very next mousedown (an attempt
+        // to drag the now-selected element) lands on the editing <input>
+        // instead, whose own stopPropagation blocks the drag from ever
+        // starting. Skipped specifically for grouped elements — selecting
+        // via double-click no longer also opens editing; a subsequent
+        // plain click on that same already-selected element does instead
+        // (see onElementMouseDown's clickToEditId), and a drag now works
+        // immediately. Ungrouped elements keep the original, unchanged
+        // behavior — there's no "already selected, want to drag it"
+        // conflict for them, since a single plain click already selects
+        // them without needing double-click at all.
+        if (!isGrouped) setEditing(true)
       }}
     >
       {isTriangle && (
@@ -193,7 +237,10 @@ export default function ElementRenderer({ el, isSelected, activeTool, onMouseDow
               if (activeTool !== 'pointer') return
               e.stopPropagation()
               onDoubleClick(el)
-              setEditing(true)
+              // Same reasoning as the main box's own onDoubleClick above —
+              // grouped frames get the same "select now, edit on the next
+              // plain click" treatment.
+              if (!isGrouped) setEditing(true)
             }}
           >
             {el.label || 'Frame'}

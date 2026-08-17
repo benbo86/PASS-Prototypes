@@ -11,13 +11,22 @@ import { useEffect, useRef, useState } from 'react'
 // arrow is part of a multi-select/group), the shared SelectionOverlay's 8
 // handles take over instead (see geometry.js's transformSelection, which
 // treats an arrow's two points like any other element's bounding box).
-export default function ArrowLayer({ arrows, selectedIds, activeTool, onMouseDown, onEndpointMouseDown, onContextMenu, onLabelChange, onDoubleClick, width, height }) {
+export default function ArrowLayer({ arrows, selectedIds, activeTool, onMouseDown, onEndpointMouseDown, onContextMenu, onLabelChange, onDoubleClick, width, height, typeEditTarget, onTypeEditConsumed }) {
   const [editingId, setEditingId] = useState(null)
   const [draft, setDraft] = useState('')
   const inputRef = useRef(null)
+  // Set right before startEditing/the typeEditTarget effect below call
+  // setEditingId — read by the focus effect once editingId actually
+  // updates, so a seeded keystroke's cursor lands after itself rather than
+  // at the input's default (start-of-field) position.
+  const pendingCharRef = useRef(null)
 
   useEffect(() => {
-    if (editingId) inputRef.current?.focus()
+    if (!editingId) return
+    inputRef.current?.focus()
+    const seeded = pendingCharRef.current
+    pendingCharRef.current = null
+    if (seeded != null) inputRef.current?.setSelectionRange?.(seeded.length, seeded.length)
   }, [editingId])
 
   const startEditing = (arrow) => {
@@ -25,6 +34,27 @@ export default function ArrowLayer({ arrows, selectedIds, activeTool, onMouseDow
     setDraft(arrow.label || '')
     setEditingId(arrow.id)
   }
+
+  // Typing while this arrow is the sole selection, no double-click first —
+  // mirrors ElementRenderer's own typeEditChar handling, just against this
+  // component's own local editingId/draft state instead of that one's
+  // editing/draft pair.
+  useEffect(() => {
+    if (typeEditTarget == null) return
+    const arrow = arrows.find((a) => a.id === typeEditTarget.id)
+    if (arrow) {
+      onDoubleClick(arrow)
+      pendingCharRef.current = typeEditTarget.char
+      setDraft(typeEditTarget.char)
+      setEditingId(arrow.id)
+    }
+    onTypeEditConsumed(typeEditTarget.id)
+    // arrows/onDoubleClick/onTypeEditConsumed are stable-enough per render
+    // for this purpose; re-running only on a genuinely new target avoids
+    // re-firing every time the arrow list itself changes for unrelated
+    // reasons (e.g. dragging it) while mid-edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeEditTarget])
   const commit = (id) => {
     onLabelChange(id, draft)
     setEditingId(null)
