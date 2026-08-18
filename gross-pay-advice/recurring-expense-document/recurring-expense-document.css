@@ -1,0 +1,79 @@
+.gpa-doc-page-bg {
+  min-height: 100vh;
+  background: var(--ui-purple-7-lightest-lavendar);
+  padding: 40px;
+}
+
+.gpa-doc-wrap {
+  background: #fff;
+  max-width: 900px;
+  height: 1217px;
+  margin: 0 auto;
+  padding: 48px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* ── Gross Pay Advice document — mirrors
+   invoices/recurring-expense-document's own InvoiceDocument layout/styling
+   exactly (same font sizes, padding and margins throughout — plain
+   black-on-white, no colour), adapted for an employee-facing pay advice
+   rather than a customer-facing invoice. Not part of the Barlow-based
+   design system, so it uses --legacy-font-family (Styles/legacy.css),
+   matching the same technique. ── */
+.gpa-doc {
+  font-family: var(--legacy-font-family);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000;
+}
+
+.gpa-doc-header { display: flex; justify-content: space-between; gap: 32px; margin-bottom: 32px; }
+.gpa-doc-header-col { display: flex; flex-direction: column; }
+.gpa-doc-title { font-size: 28px; font-weight: bold; margin-top: 0px; margin-bottom: 130px; }
+.gpa-doc-address { margin: 0 0 48px 48px; line-height: 22px; }
+.gpa-doc-header .gpa-doc-address:first-child { margin: 0px 0px 24px 0px; }
+.gpa-doc-address-name { font-weight: bold; }
+
+/* Two .gpa-doc-summary blocks side by side (visit-count stats, then the
+   pay breakdown) — new wrapper only, not present in the invoice document
+   (which only ever has one summary block); the summary rows themselves
+   keep byte-for-byte the same formatting either way. */
+.gpa-doc-stats-row { display: flex; gap: 32px; }
+
+.gpa-doc-summary { line-height: 22px; margin-bottom: 12px; }
+.gpa-doc-summary > div { display: flex; gap: 16px; }
+.gpa-doc-summary > div > span:first-child { font-weight: bold; min-width: 130px; }
+.gpa-doc-total-payable {
+  display: flex; gap: 16px;
+  padding: 4px 0px; border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  font-weight: bold; font-size: 13px;
+}
+.gpa-doc-total-payable span:first-child { min-width: 130px; }
+
+/* flex-wrap/white-space are layout-only additions, not font-size/padding/
+   margin changes — needed because this document has 5 meta columns where
+   the invoice document only ever had 3; without this, a column with no
+   room left wraps *inside* its own label/value pair (e.g. "Stephen" /
+   "Nicholls" on separate lines) instead of the whole pair moving to a new
+   row together. */
+.gpa-doc-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+.gpa-doc-meta-col > div { display: flex; gap: 8px; white-space: nowrap; }
+.gpa-doc-meta-col span:first-child { font-weight: bold; min-width: 60px; }
+
+.gpa-doc-table { width: 100%; border-collapse: collapse; text-align: left; }
+.gpa-doc-table thead tr th { padding-bottom: 24px; }
+.gpa-doc-table th { font-weight: bold; padding: 4px 12px 4px 0; }
+.gpa-doc-table td { padding: 4px 12px 4px 0; vertical-align: top; }
+.gpa-doc-table tbody tr:last-child td { padding-bottom: 8px; }
+
+/* Value + smaller grey note stacked underneath — same technique as
+   invoices/recurring-expense-document's own Expenses column, so a visit
+   row never needs a new column/row to show which recurring expense
+   type(s) it carries. */
+.gpa-doc-cell-note { font-size: 11px; color: #000; }
+.gpa-doc-cell-extra { margin-top: 8px; }
+
+.gpa-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
+
+.gpa-doc-page { text-align: right; font-size: 11px; color: #888; margin-top: 24px; }
