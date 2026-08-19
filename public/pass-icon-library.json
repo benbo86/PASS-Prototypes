@@ -1610,6 +1610,40 @@
       "usageCount": 5
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
+          "name": "BackIcon"
+        }
+      ],
+      "usageCount": 5
+    },
+    {
       "hash": "355fe673",
       "name": "Chevron Down",
       "group": "Inline",
@@ -1668,35 +1702,6 @@
           "kind": "inline",
           "ref": "web/messaging/src/App.jsx#CloseIcon",
           "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 4
-    },
-    {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
-          "name": "BackIcon"
         }
       ],
       "usageCount": 4
@@ -2598,6 +2603,76 @@
       "usageCount": 1
     },
     {
+      "hash": "9165bbf8",
+      "name": "Search",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#SearchIcon",
+          "name": "SearchIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "025add4d",
+      "name": "Filter",
+      "group": "Inline",
+      "svg": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#FilterIcon",
+          "name": "FilterIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "a51d1b9a",
+      "name": "Send",
+      "group": "Inline",
+      "svg": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M2.01 21L23 12 2.01 3 2 10l15 2-15 2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#SendIcon",
+          "name": "SendIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "5fffaec6",
+      "name": "Notes",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#NotesIcon",
+          "name": "NotesIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "014b203d",
+      "name": "Group",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M6.34529323,13.6992001 C6.98659064,13.9861115 7.69403084,14.1492572 8.44173186,14.1492572 C8.83563565,14.1492572 9.21916363,14.1039779 9.58727007,14.0191771 C8.13951251,14.6947293 7.11265435,16.3547899 7.11265435,17.9622169 L7.11265435,18.6498286 C7.11265435,19.3952357 7.73094558,20 8.49302546,20 L3.38037111,20 C2.61829123,20 2,19.3952357 2,18.6498286 L2,17.9622169 C2,15.8750769 3.73121544,13.6992001 5.86503911,13.6992001 L6.34529323,13.6992001 Z M13.3845982,13.6992001 C14.0316964,13.9861115 14.7455357,14.1492572 15.5,14.1492572 C16.2544643,14.1492572 16.9712054,13.9861115 17.6154018,13.6992001 L18.1,13.6992001 C20.253125,13.6992001 22,15.8750769 22,17.9622169 L22,18.6498286 C22,19.3952357 21.3761161,20 20.6071429,20 L10.3928571,20 C9.62388393,20 9,19.3952357 9,18.6498286 L9,17.9622169 C9,15.8750769 10.746875,13.6992001 12.9,13.6992001 Z M19.6758297,16.8496 L17.2371129,16.8496 C16.9609705,16.8496 16.7371129,17.0734577 16.7371129,17.3496 L16.7371129,18.2311353 C16.7371129,18.5072776 16.9609705,18.7311353 17.2371129,18.7311353 L19.6758297,18.7311353 C19.9519721,18.7311353 20.1758297,18.5072776 20.1758297,18.2311353 L20.1758297,17.3496 C20.1758297,17.0734577 19.9519721,16.8496 19.6758297,16.8496 Z M8.44173186,5 C9.43518456,5 10.3366335,5.384812 10.9988003,6.01037989 C10.3047346,6.66418301 9.87339658,7.5829878 9.87339658,8.60045709 C9.87339658,9.61792638 10.3047346,10.5367312 10.9983346,11.1914945 C10.3366335,11.8161022 9.43518456,12.2009142 8.44173186,12.2009142 C6.40856024,12.2009142 4.76074222,10.5891471 4.76074222,8.60045709 C4.76074222,6.61176712 6.40856024,5 8.44173186,5 Z M15.5,5 C17.5515625,5 19.2142857,6.61176712 19.2142857,8.60045709 C19.2142857,10.5891471 17.5515625,12.2009142 15.5,12.2009142 C13.4484375,12.2009142 11.7857143,10.5891471 11.7857143,8.60045709 C11.7857143,6.61176712 13.4484375,5 15.5,5 Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#GroupIcon",
+          "name": "GroupIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "7011914a",
       "name": "Arrow Left",
       "group": "Inline",
@@ -3396,5 +3471,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-18T10:02:31.661Z"
+  "generatedAt": "2026-08-18T15:54:19.898Z"
 }

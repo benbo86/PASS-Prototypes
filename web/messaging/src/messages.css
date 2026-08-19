@@ -20,6 +20,32 @@ body { overflow: hidden; }
   height: calc(100vh - var(--dev-toolbar-height, 0px));
 }
 
+/* Real bug, reported directly: opening a thread scrolled the top of the
+   page up behind the dev toolbar. Root cause was .side-nav (Styles/
+   side-nav.css) having a hardcoded height:100vh that never accounts for
+   the toolbar at all — harmless on every other SideNav-shell prototype,
+   where the toolbar is unconditional and just pushes the whole page down
+   in normal flow (nothing is height-constrained against 100vh in a way
+   that could overflow). Here it's a real problem: .messages-page is
+   overflow:hidden with its own explicit reduced height specifically so
+   this fixed-height three-pane layout doesn't get clipped — but .side-nav
+   being 48px taller than that reduced height creates genuine (if
+   invisible, no visible scrollbar) scrollable overflow inside it. Clicking
+   into a thread focuses an element that triggers the browser's own
+   "scroll into view" behaviour, scrolling that hidden 48px into view —
+   which shifts everything except the sticky .top-nav up by 48px, since
+   .top-nav (position:sticky) resists the scroll while plain content
+   doesn't. Scoped to dev only (same class this whole fix is gated on) —
+   in production .side-nav's own unmodified 100vh is already correct,
+   since there's no toolbar there to account for. Confirmed via Playwright:
+   .messages-page had scrollTop:48 with scrollHeight 48px taller than
+   clientHeight right after opening a thread; forcing scrollTop back to 0
+   restored .page-body to its correct position, and this fix removes the
+   overflow that made that scroll possible in the first place. */
+.messages-page--dev-toolbar .side-nav {
+  height: calc(100vh - var(--dev-toolbar-height, 0px));
+}
+
 /* Because .messages-page sets its own overflow (hidden, not visible), it
    becomes .top-nav's nearest scrolling ancestor for position:sticky
    purposes — NOT the document/viewport, unlike the growable min-height

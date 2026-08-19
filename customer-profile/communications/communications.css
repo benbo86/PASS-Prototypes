@@ -1,0 +1,251 @@
+.page { display: flex; flex-direction: row; min-height: 100vh; }
+
+/* ── Page shell ──────────────────────────────────────────────────
+   Deliberately a normal growable page (min-height:100vh on .page above),
+   not the fixed-height overflow:hidden app-shell web/messaging uses —
+   that shape needs its own toolbar-height-aware CSS on .side-nav/.top-nav
+   (see Styles/dev-toolbar.css history) to avoid a real bug already found
+   and fixed there. This page sits below CustomerProfileNav's own dynamic-
+   height banner, so a fixed vh-based height would need to account for
+   that too — not worth the fragility for what's being asked here. The
+   messages area gets a generous min-height instead, with its own two
+   panes scrolling internally, close enough to a native chat feel without
+   the overflow-trap risk. ── */
+.cc-page { padding: 24px 32px 40px; }
+
+/* ── Sidebar search + filter ── mirrors web/messaging's .msg-sidebar-search
+   exactly (same padding/border/gap) — lives at the top of the sidebar, above
+   the thread list, not above the whole two-pane layout. */
+.cc-sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey, #edecf1);
+  flex-shrink: 0;
+}
+
+.cc-search-bar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--greyscale-8-grey-65, #8f8f8f);
+}
+.cc-search-bar input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font: 14px Barlow, sans-serif;
+  color: #333;
+}
+
+/* Same button as web/messaging's .msg-filter-icon-btn — deliberately not a
+   bordered/white button like the earlier version of this page had. */
+.cc-filter-wrap { position: relative; flex-shrink: 0; }
+.cc-filter-icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border: none;
+  border-radius: 8px;
+  color: var(--ui-purple-3-grape-grey);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.cc-filter-icon-btn:hover,
+.cc-filter-icon-btn.active {
+  background: var(--ui-purple-6-lavendar-grey);
+  color: #000;
+}
+.cc-filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 180px;
+  background: #fff;
+  border: 1px solid var(--ui-purple-6-lavendar-grey, #edecf1);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 4px 0;
+  z-index: 20;
+}
+/* Item rows reuse the shared fd-item/fd-checkbox/fd-item-label classes
+   (Styles/filter-dropdown.css) — the same checkbox styling web/messaging's
+   own filter submenu reuses for its option rows, rather than a bespoke
+   native <input type="checkbox"> + label pairing. */
+
+/* ── Two-pane layout ── */
+.cc-layout {
+  display: flex;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 640px;
+  background: #fff;
+}
+
+.cc-sidebar {
+  width: 360px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
+  display: flex;
+  flex-direction: column;
+}
+/* No overflow:hidden on .cc-sidebar itself (unlike web/messaging's own
+   .msg-sidebar) — that property there exists only to support its resize
+   handle, a feature this page doesn't have. Leaving this visible is what
+   lets the portal-free filter dropdown below actually show without being
+   clipped by its own scroll container. */
+.cc-thread-list { flex: 1; overflow-y: auto; }
+.cc-empty-list { padding: 24px 16px; color: var(--greyscale-6-grey-50, #757575); font: 14px Barlow, sans-serif; }
+
+.cc-thread-row {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey, #edecf1);
+  cursor: pointer;
+  position: relative;
+}
+.cc-thread-row:hover, .cc-thread-row.active { background: var(--ui-purple-7-lightest-lavendar); }
+.cc-thread-row.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--brand-purple-6-purple-4);
+  border-radius: 0 2px 2px 0;
+}
+.cc-thread-row.unread .cc-thread-name { font-weight: 700; }
+.cc-thread-row.unread .cc-thread-time { color: var(--brand-purple-6-purple-4); font-weight: 600; }
+
+.cc-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: Barlow, sans-serif;
+}
+/* 'employee' threads are visible to a group (Care Managers / All care
+   staff), not one fixed person — a neutral fixed colour (not the per-name
+   hash used elsewhere) makes clear this isn't standing in for a person. */
+.cc-avatar-group { background: var(--ui-purple-6-lavendar-grey, #edecf1); color: var(--ui-purple-3-grape-grey, #968caf); }
+
+.cc-thread-row-body { flex: 1; min-width: 0; }
+.cc-thread-row-top { display: flex; justify-content: space-between; gap: 8px; }
+.cc-thread-name { font: 14px/1.4 Barlow, sans-serif; font-weight: 500; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-thread-time { font: 11px Barlow, sans-serif; color: var(--greyscale-6-grey-50, #757575); white-space: nowrap; }
+.cc-thread-subtitle { font: 12px/1.4 Barlow, sans-serif; font-weight: 500; color: #000; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-thread-preview-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-top: 2px; }
+.cc-thread-preview { font: 13px/1.4 Barlow, sans-serif; color: var(--greyscale-6-grey-50, #757575); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* .cc-thread-sender's own explicit colour (below) always wins over this,
+   since a directly-matching rule beats an ancestor's inherited value — so
+   turning the preview text black on unread leaves the "Sender:" prefix
+   exactly as it was. */
+.cc-thread-row.unread .cc-thread-preview { color: #000; }
+.cc-thread-sender { color: var(--greyscale-6-grey-50, #757575); }
+.cc-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-purple-6-purple-4); flex-shrink: 0; margin-bottom: 4px; }
+
+/* ── Thread detail ── */
+.cc-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.cc-empty-state { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--greyscale-6-grey-50, #757575); font: 14px Barlow, sans-serif; }
+
+.cc-thread-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+.cc-thread-header-info { flex: 1; min-width: 0; }
+/* No font-size/weight override here, deliberately — web/messaging's real
+   thread-header title is a bare <h2> with no class of its own, so it just
+   takes main.css's shared h2 style (20px/500). An earlier version of this
+   page gave it a bespoke 16px/600 override that never matched. */
+.cc-thread-header-title { margin: 0; color: #000; }
+.cc-thread-header-sub { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50, #757575); }
+/* Same sizing as web/messaging's .msg-header-action-btn, on the same
+   shared .round-btn.secondary-btn.btn-icon-left base (Styles/main.css). */
+.cc-header-action-btn { padding: 5px 14px 5px 12px; font-size: 13px; gap: 6px; white-space: nowrap; }
+
+/* Fills the remaining height below the thread header, with the compose
+   bar pinned below it — see .cc-thread-view below for the flex chain that
+   makes this actually reach the bottom of the panel rather than just
+   trailing the last message. */
+.cc-thread-view { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.cc-message-list { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; background: var(--ui-purple-7-lightest-lavendar); }
+.cc-day-sep { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
+.cc-day-sep::before, .cc-day-sep::after { content: ''; flex: 1; height: 1px; background: var(--ui-purple-5-languid-lavendar); }
+.cc-day-sep span { font: 11px Barlow, sans-serif; font-weight: 500; color: var(--greyscale-6-grey-50, #757575); white-space: nowrap; }
+
+.cc-message-group { display: flex; flex-direction: column; max-width: 100%; }
+.cc-message-group.from-me { align-items: flex-end; }
+.cc-message-group.from-them { align-items: flex-start; }
+
+.cc-bubble-sender { font: 12px Barlow, sans-serif; font-weight: 600; color: var(--greyscale-6-grey-50, #757575); margin-bottom: 2px; }
+.cc-bubble { position: relative; max-width: 60%; padding: 10px 14px; border-radius: 12px; font: 14px/1.4 Barlow, sans-serif; }
+.cc-bubble.sent { background: var(--brand-purple-3-purple-2); color: #fff; border-bottom-right-radius: 4px; }
+/* The tail is a real CSS border-triangle (::after), matching
+   web/messaging's .msg-bubble.sent::after exactly, not just the cut
+   bottom-right corner above — that corner alone isn't a "tail" on its own. */
+.cc-bubble.sent::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent transparent var(--brand-purple-3-purple-2) var(--brand-purple-3-purple-2);
+}
+/* No border on the bubble itself (box-shadow only) — matching
+   web/messaging's .msg-bubble.received exactly. A border here would show
+   as a visible seam where the borderless tail triangle meets the bubble. */
+.cc-bubble.received { background: #fff; color: #000; box-shadow: 0 1px 2px rgba(0,0,0,0.08); border-bottom-left-radius: 4px; }
+.cc-bubble.received::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -6px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent #fff #fff transparent;
+}
+.cc-meta { font: 11px Barlow, sans-serif; color: var(--greyscale-6-grey-50, #757575); margin-top: 4px; }
+
+.cc-compose-bar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-top: 1px solid var(--ui-purple-5-languid-lavendar); background: #fff; flex-shrink: 0; }
+.cc-compose-input-wrap { flex: 1; border: 1.5px solid var(--ui-purple-5-languid-lavendar); border-radius: 20px; padding: 8px 16px; }
+.cc-compose-input-wrap:focus-within { border-color: var(--brand-purple-6-purple-4); }
+.cc-compose-input { width: 100%; border: none; outline: none; background: none; font: 14px Barlow, sans-serif; }
+.cc-send-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ui-purple-6-lavendar-grey, #edecf1); color: var(--greyscale-8-grey-65, #8f8f8f);
+  cursor: pointer;
+}
+.cc-send-btn.active { background: var(--brand-purple-6-purple-4); color: #fff; }
+
+/* ── View care notes modal content ── */
+.cc-care-notes-visit { font-weight: 600; color: #333; margin-bottom: 16px; }
+.cc-care-notes-list { display: flex; flex-direction: column; gap: 12px; }
+.cc-care-notes-row { display: flex; gap: 16px; }
+.cc-care-notes-label { width: 100px; flex-shrink: 0; font-weight: 600; color: #333; font-size: 13px; }
+.cc-care-notes-value { font-size: 13px; color: #555; line-height: 1.5; }

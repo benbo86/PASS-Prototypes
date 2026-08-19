@@ -24,7 +24,7 @@ const PRIMARY_TABS = [
   { label: 'Details', href: null },
   { label: 'Checklists', href: null },
   { label: 'Rostering', href: '../service-agreement/' },
-  { label: 'Communications', href: null },
+  { label: 'Communications', href: '../communications/' },
   { label: 'Medical History', href: null },
   { label: 'Customer File', href: null },
   { label: 'openPASS', href: null },
