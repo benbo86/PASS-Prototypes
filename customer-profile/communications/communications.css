@@ -86,28 +86,53 @@
    native <input type="checkbox"> + label pairing. */
 
 /* ── Two-pane layout ── */
+/* A fixed height (not min-height) is what actually pins the compose bar —
+   with only a min-height, a long thread's .cc-message-list simply grew
+   past it (flex:1 has nothing to fill when the parent's own height is
+   content-driven), so the whole panel grew taller than the viewport and
+   the compose bar drifted down the page instead of staying put. Fixed at
+   a plain 640px, not a `calc(100vh - ...)` — this page is deliberately a
+   growable one (see the Page shell comment above), so bounding just this
+   widget to its own constant height avoids re-deriving toolbar/nav
+   offsets the way web/messaging's full-page `100vh` shell has to. */
 .cc-layout {
   display: flex;
   border: 1px solid var(--ui-purple-5-languid-lavendar);
   border-radius: 12px;
   overflow: hidden;
-  min-height: 640px;
+  height: 640px;
   background: #fff;
 }
 
+/* Width is set inline via React state (sidebarWidth), not here — see
+   .cc-sidebar-resize-handle below, mirroring web/messaging's own
+   .msg-sidebar/.msg-sidebar-resize-handle exactly (same 240–480px clamp,
+   same plain document-level drag mechanics, no persistence). */
 .cc-sidebar {
-  width: 360px;
+  position: relative;
   flex-shrink: 0;
   border-right: 1px solid var(--ui-purple-5-languid-lavendar);
   display: flex;
   flex-direction: column;
 }
-/* No overflow:hidden on .cc-sidebar itself (unlike web/messaging's own
-   .msg-sidebar) — that property there exists only to support its resize
-   handle, a feature this page doesn't have. Leaving this visible is what
-   lets the portal-free filter dropdown below actually show without being
-   clipped by its own scroll container. */
+/* Still no overflow:hidden on .cc-sidebar itself, unlike web/messaging's
+   own .msg-sidebar (that property there exists only to clip the resize
+   handle's own slight overflow) — nothing here needs clipping, and adding
+   it would clip the portal-free filter dropdown above instead. */
 .cc-thread-list { flex: 1; overflow-y: auto; }
+.cc-sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 1;
+}
+.cc-sidebar-resize-handle:hover,
+.cc-sidebar-resize-handle:active {
+  background: var(--ui-purple-5-languid-lavendar);
+}
 .cc-empty-list { padding: 24px 16px; color: var(--greyscale-6-grey-50, #757575); font: 14px Barlow, sans-serif; }
 
 .cc-thread-row {
@@ -198,6 +223,18 @@
 .cc-message-group.from-them { align-items: flex-start; }
 
 .cc-bubble-sender { font: 12px Barlow, sans-serif; font-weight: 600; color: var(--greyscale-6-grey-50, #757575); margin-bottom: 2px; }
+/* Only ever shown on an office-sent message (see MessageBubble) — the
+   per-message visibility tag ("To: Care Managers" / "To: All care staff")
+   that matches the live product's own Office messages thread. */
+.cc-audience-tag {
+  font: 11px Barlow, sans-serif;
+  font-weight: 600;
+  color: var(--ui-purple-3-grape-grey, #968caf);
+  background: var(--ui-purple-6-lavendar-grey, #edecf1);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-bottom: 4px;
+}
 .cc-bubble { position: relative; max-width: 60%; padding: 10px 14px; border-radius: 12px; font: 14px/1.4 Barlow, sans-serif; }
 .cc-bubble.sent { background: var(--brand-purple-3-purple-2); color: #fff; border-bottom-right-radius: 4px; }
 /* The tail is a real CSS border-triangle (::after), matching

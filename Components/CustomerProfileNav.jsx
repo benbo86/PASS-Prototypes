@@ -30,7 +30,14 @@ const PRIMARY_TABS = [
   { label: 'openPASS', href: null },
 ]
 
-export default function CustomerProfileNav({ activeTab }) {
+// tabBadges: optional { [tabLabel]: count } map — shows a small count pill
+// next to a tab's label (only when count is truthy/>0). Deliberately
+// opt-in and per-consumer, not wired up for every customer-profile
+// prototype: only the page that actually owns the underlying data (e.g.
+// customer-profile/communications/ knowing its own unread thread count)
+// can compute a real count, so this stays a plain prop rather than this
+// shared component reaching into any one prototype's own data/state.
+export default function CustomerProfileNav({ activeTab, tabBadges = {} }) {
   // Condense the customer info once the page scrolls past the header.
   const [scrolled, setScrolled] = useState(false)
   const barRef = useRef(null)
@@ -95,6 +102,7 @@ export default function CustomerProfileNav({ activeTab }) {
                 style={!href ? { opacity: 0.4, cursor: 'default' } : undefined}
               >
                 {label}
+                {!!tabBadges[label] && <span className="ctx-tab-badge">{tabBadges[label]}</span>}
               </button>
             </li>
           ))}

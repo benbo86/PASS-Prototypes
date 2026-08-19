@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useEffect } from 'react'
+import { useRef, useState, useMemo, useEffect, useLayoutEffect, Fragment } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
@@ -36,9 +36,9 @@ const NotesIcon = () => (
     <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
   </svg>
 )
-// 'employee' threads are visible to a group (Care Managers / All care
-// staff), not one fixed person — this group glyph stands in for that,
-// same shape web/messaging already uses for its own "employees" concept.
+// The 'employee' ("Office messages") thread has no single fixed person —
+// this group glyph stands in for that, same shape web/messaging already
+// uses for its own "employees" concept.
 const GroupIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" d="M6.34529323,13.6992001 C6.98659064,13.9861115 7.69403084,14.1492572 8.44173186,14.1492572 C8.83563565,14.1492572 9.21916363,14.1039779 9.58727007,14.0191771 C8.13951251,14.6947293 7.11265435,16.3547899 7.11265435,17.9622169 L7.11265435,18.6498286 C7.11265435,19.3952357 7.73094558,20 8.49302546,20 L3.38037111,20 C2.61829123,20 2,19.3952357 2,18.6498286 L2,17.9622169 C2,15.8750769 3.73121544,13.6992001 5.86503911,13.6992001 L6.34529323,13.6992001 Z M13.3845982,13.6992001 C14.0316964,13.9861115 14.7455357,14.1492572 15.5,14.1492572 C16.2544643,14.1492572 16.9712054,13.9861115 17.6154018,13.6992001 L18.1,13.6992001 C20.253125,13.6992001 22,15.8750769 22,17.9622169 L22,18.6498286 C22,19.3952357 21.3761161,20 20.6071429,20 L10.3928571,20 C9.62388393,20 9,19.3952357 9,18.6498286 L9,17.9622169 C9,15.8750769 10.746875,13.6992001 12.9,13.6992001 Z M19.6758297,16.8496 L17.2371129,16.8496 C16.9609705,16.8496 16.7371129,17.0734577 16.7371129,17.3496 L16.7371129,18.2311353 C16.7371129,18.5072776 16.9609705,18.7311353 17.2371129,18.7311353 L19.6758297,18.7311353 C19.9519721,18.7311353 20.1758297,18.5072776 20.1758297,18.2311353 L20.1758297,17.3496 C20.1758297,17.0734577 19.9519721,16.8496 19.6758297,16.8496 Z M8.44173186,5 C9.43518456,5 10.3366335,5.384812 10.9988003,6.01037989 C10.3047346,6.66418301 9.87339658,7.5829878 9.87339658,8.60045709 C9.87339658,9.61792638 10.3047346,10.5367312 10.9983346,11.1914945 C10.3366335,11.8161022 9.43518456,12.2009142 8.44173186,12.2009142 C6.40856024,12.2009142 4.76074222,10.5891471 4.76074222,8.60045709 C4.76074222,6.61176712 6.40856024,5 8.44173186,5 Z M15.5,5 C17.5515625,5 19.2142857,6.61176712 19.2142857,8.60045709 C19.2142857,10.5891471 17.5515625,12.2009142 15.5,12.2009142 C13.4484375,12.2009142 11.7857143,10.5891471 11.7857143,8.60045709 C11.7857143,6.61176712 13.4484375,5 15.5,5 Z" />
@@ -64,6 +64,46 @@ function getInitials(name) {
   return name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()
 }
 
+// Day-separator labelling, computed from each message's real `date`
+// (YYYY-MM-DD) rather than a hardcoded literal — this is what actually
+// gives an office user clear visibility into when older messages were
+// sent, for a thread that can genuinely span weeks (e.g. Office messages).
+// Matches web/messaging's own Today/Yesterday/weekday-name scheme for
+// anything in the last week, then adds an absolute date beyond that —
+// a gap neither web/messaging nor an earlier version of this page actually
+// covered (both only ever showed sample data within the current week).
+const WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-GB', { weekday: 'long' })
+const ABSOLUTE_DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+
+function parseLocalDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+function dayLabel(dateStr) {
+  const date = parseLocalDate(dateStr)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const diffDays = Math.round((today - date) / 86400000)
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays > 1 && diffDays < 7) return WEEKDAY_FORMATTER.format(date)
+  return ABSOLUTE_DATE_FORMATTER.format(date)
+}
+
+// Groups consecutive messages sharing the same `date` under one separator
+// — messages already arrive in chronological order, so this never needs
+// to sort, only to notice when the date actually changes.
+function groupMessagesByDay(messages) {
+  const groups = []
+  for (const m of messages) {
+    const last = groups[groups.length - 1]
+    if (last && last.date === m.date) last.messages.push(m)
+    else groups.push({ date: m.date, messages: [m] })
+  }
+  return groups
+}
+
 function Avatar({ name, size = 40 }) {
   const { bg, fg } = nameToColor(name)
   return (
@@ -73,11 +113,11 @@ function Avatar({ name, size = 40 }) {
   )
 }
 
-// 'employee' threads are visible to a group, not one fixed person, so they
-// get a neutral group icon rather than a name-hashed initials avatar — an
-// initials avatar would need to pick one arbitrary person to represent an
-// audience, which is exactly the "who is this thread with" confusion the
-// audience model exists to avoid. See data.js's own comment on 'employee'.
+// 'employee' ("Office messages") has no single fixed person, so it gets a
+// neutral group icon rather than a name-hashed initials avatar — an
+// initials avatar would need to pick one arbitrary person to represent the
+// whole thread, which is exactly the "who is this thread with" confusion
+// this avoids. See data.js's own comment on 'employee'.
 function GroupAvatar({ size = 40 }) {
   return (
     <div className="cc-avatar cc-avatar-group" style={{ width: size, height: size }}>
@@ -92,22 +132,24 @@ function ThreadAvatar({ thread, size }) {
 }
 
 // A thread's displayed name: a person's name for the two openPASS kinds,
-// or the visibility audience label for an 'employee' thread — there's no
-// single fixed person to name there, see data.js's own comment.
+// or the fixed "Office messages" label — matching the live product's own
+// nav label exactly (Communications -> Office messages). Not an audience
+// label — a single Office messages thread mixes messages of different
+// audiences over time, see data.js's own comment on 'employee'.
 function threadTitle(thread) {
-  if (thread.kind === 'employee') return AUDIENCE_LABELS[thread.audience]
+  if (thread.kind === 'employee') return 'Office messages'
   return thread.personName
 }
 
 // The one line shown between the name and the last-message preview — what
-// it shows depends entirely on the thread's kind, not any shared field:
-// a visit label, a subject, or the audience for an employee thread (shown
-// as "Visible to: ..." since the title above it is already the audience
-// name, not a person's — repeating it bare would read as a duplicate).
+// it shows depends entirely on the thread's kind: a visit label or a
+// subject for the two openPASS kinds. 'employee' has none — its messages
+// can carry different audiences over time, so there's no single fixed
+// subtitle to show at the thread level any more (each message shows its
+// own audience tag instead, see MessageBubble).
 function ThreadSubtitle({ thread }) {
   if (thread.kind === 'openpass-visit') return <div className="cc-thread-subtitle">{thread.visitLabel}</div>
   if (thread.kind === 'openpass-general') return <div className="cc-thread-subtitle">{thread.subject}</div>
-  if (thread.kind === 'employee') return <div className="cc-thread-subtitle">Visible to: {AUDIENCE_LABELS[thread.audience]}</div>
   return null
 }
 
@@ -140,7 +182,6 @@ function ThreadHeader({ thread, onViewCareNotes }) {
         <h2 className="cc-thread-header-title">{threadTitle(thread)}</h2>
         {thread.kind === 'openpass-visit' && <span className="cc-thread-header-sub">{thread.visitLabel}</span>}
         {thread.kind === 'openpass-general' && <span className="cc-thread-header-sub">{thread.subject}</span>}
-        {thread.kind === 'employee' && <span className="cc-thread-header-sub">Visible to this group only</span>}
       </div>
       {thread.kind === 'openpass-visit' && (
         <button className="round-btn secondary-btn btn-icon-left cc-header-action-btn" onClick={onViewCareNotes}>
@@ -151,15 +192,22 @@ function ThreadHeader({ thread, onViewCareNotes }) {
   )
 }
 
-// showSender: an 'employee' thread has no single fixed "them" — different
-// people can post into the same audience — so incoming messages there need
-// their own sender label. The other two kinds are always exactly two
-// participants (the named openPASS user and "Office"), already identified
-// by the thread header, so labelling every bubble there would be noise.
+// showSender: the 'employee' ("Office messages") thread has no single
+// fixed "them" — different care workers can reply into it — so incoming
+// messages there need their own sender label. The other two kinds are
+// always exactly two participants (the named openPASS user and "Office"),
+// already identified by the thread header, so labelling every bubble
+// there would be noise.
+//
+// message.audience: only ever set on an office-sent message (never on a
+// care worker's reply — a reply doesn't re-declare who can see it, see
+// data.js's own comment) — shown as a small "To: ..." tag above the
+// bubble, matching the live product's own per-message visibility label.
 function MessageBubble({ message, showSender }) {
   return (
     <div className={`cc-message-group ${message.isMe ? 'from-me' : 'from-them'}`}>
       {showSender && !message.isMe && <div className="cc-bubble-sender">{message.sender}</div>}
+      {message.audience && <div className="cc-audience-tag">To: {AUDIENCE_LABELS[message.audience]}</div>}
       <div className={`cc-bubble ${message.isMe ? 'sent' : 'received'}`}>
         <span className="cc-bubble-text">{message.text}</span>
       </div>
@@ -170,13 +218,33 @@ function MessageBubble({ message, showSender }) {
 
 function ThreadView({ thread, messages, onViewCareNotes }) {
   const [replyText, setReplyText] = useState('')
+  const dayGroups = useMemo(() => groupMessagesByDay(messages), [messages])
+  const messageListRef = useRef(null)
+
+  // Jump straight to the latest message on open — the message list now has
+  // a genuinely bounded, scrollable height (see .cc-layout's fixed 640px),
+  // so without this it defaults to scrollTop 0 and a thread with real
+  // history (e.g. Office messages) opens showing its oldest message
+  // instead of the latest. useLayoutEffect (not useEffect) so the jump
+  // happens before paint — no visible flash of the top of the thread.
+  // ThreadView is remounted per thread (parent keys it by thread id), so a
+  // mount-only effect is enough; it doesn't need to re-fire on every
+  // render of the same open thread.
+  useLayoutEffect(() => {
+    const el = messageListRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
 
   return (
     <div className="cc-thread-view">
       <ThreadHeader thread={thread} onViewCareNotes={onViewCareNotes} />
-      <div className="cc-message-list">
-        <div className="cc-day-sep"><span>Today</span></div>
-        {messages.map((m) => <MessageBubble key={m.id} message={m} showSender={thread.kind === 'employee'} />)}
+      <div className="cc-message-list" ref={messageListRef}>
+        {dayGroups.map((group) => (
+          <Fragment key={group.date}>
+            <div className="cc-day-sep"><span>{dayLabel(group.date)}</span></div>
+            {group.messages.map((m) => <MessageBubble key={m.id} message={m} showSender={thread.kind === 'employee'} />)}
+          </Fragment>
+        ))}
       </div>
       <div className="cc-compose-bar">
         <div className="cc-compose-input-wrap">
@@ -203,7 +271,7 @@ export default function App() {
   const pageRef = useRef(null)
   const [search, setSearch] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
-  const [filters, setFilters] = useState({ openpass: false, office: false })
+  const [filters, setFilters] = useState({ openpass: false, office: false, unread: false })
   const [activeThreadId, setActiveThreadId] = useState(THREADS[0].id)
   const [careNotesVisit, setCareNotesVisit] = useState(null)
   // Local, mutable copy of THREADS so opening a thread can clear its own
@@ -211,6 +279,32 @@ export default function App() {
   // static seed data, never mutated directly.
   const [threads, setThreads] = useState(THREADS)
   const filterWrapRef = useRef(null)
+
+  // Resizable sidebar — same drag mechanics and 240–480px clamp as
+  // web/messaging's own .msg-sidebar-resize-handle (plain document-level
+  // mousemove/mouseup listeners added on mousedown, removed on mouseup;
+  // no persistence, matching that reference implementation exactly).
+  const [sidebarWidth, setSidebarWidth] = useState(360)
+
+  function handleSidebarResizeStart(e) {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    function handleMouseMove(moveEvent) {
+      const newWidth = startWidth + (moveEvent.clientX - startX)
+      setSidebarWidth(Math.min(480, Math.max(240, newWidth)))
+    }
+    function handleMouseUp() {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
 
   function openThread(id) {
     setActiveThreadId(id)
@@ -226,25 +320,51 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [filterOpen])
 
-  const anyFilterActive = filters.openpass || filters.office
+  // OpenPASS/Office narrow by thread *kind* (OR'd together); Unread is a
+  // separate dimension (thread *status*) applied on top, not folded into
+  // the same kind-matching branch below — a thread can be both "Office"
+  // and "unread" at once, so these two checks need to compose, not compete.
+  const anyKindFilterActive = filters.openpass || filters.office
+  const anyFilterActive = anyKindFilterActive || filters.unread
+  const unreadCount = threads.filter((t) => t.unread).length
+
+  // Most-recent-activity first — not unread-first. Matches how mainstream
+  // messaging apps (e.g. WhatsApp) actually order a chat list: sorted by
+  // recency, with unread shown only as a status (bold name + dot), never
+  // as something that reorders the list out from under you the moment you
+  // open and read it. Sorted by each thread's true last message (date +
+  // time combined — a bare time-of-day string alone would wrongly rank an
+  // old thread's late-evening message above a newer thread's early-morning
+  // one), not the thread's own display `time`/`lastMessage` fields, which
+  // are just a cached copy of that same last message for the row preview.
+  function lastMessageKey(threadId) {
+    const last = (THREAD_MESSAGES[threadId] || []).at(-1)
+    return last ? `${last.date}T${last.time}` : ''
+  }
 
   const visibleThreads = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return threads.filter((t) => {
-      if (anyFilterActive) {
-        const isOpenPass = t.kind === 'openpass-visit' || t.kind === 'openpass-general'
-        if (isOpenPass && !filters.openpass) return false
-        if (!isOpenPass && !filters.office) return false
-      }
-      if (!q) return true
-      const haystacks = [
-        t.personName, t.visitLabel, t.subject, t.lastMessage,
-        t.kind === 'employee' ? AUDIENCE_LABELS[t.audience] : null,
-        ...(THREAD_MESSAGES[t.id] || []).map((m) => m.text),
-      ].filter(Boolean).map((s) => s.toLowerCase())
-      return haystacks.some((s) => s.includes(q))
-    })
-  }, [search, filters, anyFilterActive, threads])
+    return threads
+      .filter((t) => {
+        if (anyKindFilterActive) {
+          const isOpenPass = t.kind === 'openpass-visit' || t.kind === 'openpass-general'
+          if (isOpenPass && !filters.openpass) return false
+          if (!isOpenPass && !filters.office) return false
+        }
+        if (filters.unread && !t.unread) return false
+        if (!q) return true
+        const haystacks = [
+          t.personName, t.visitLabel, t.subject, t.lastMessage,
+          // Audience now lives per-message, not on the thread itself — flatten
+          // every message's own audience label in too, so e.g. searching "care
+          // managers" still finds the Office messages thread via whichever of
+          // its messages actually carries that audience.
+          ...(THREAD_MESSAGES[t.id] || []).flatMap((m) => [m.text, m.audience ? AUDIENCE_LABELS[m.audience] : null]),
+        ].filter(Boolean).map((s) => s.toLowerCase())
+        return haystacks.some((s) => s.includes(q))
+      })
+      .sort((a, b) => lastMessageKey(b.id).localeCompare(lastMessageKey(a.id)))
+  }, [search, filters, anyKindFilterActive, threads])
 
   const activeThread = threads.find((t) => t.id === activeThreadId)
   const activeMessages = THREAD_MESSAGES[activeThreadId] || []
@@ -263,16 +383,16 @@ export default function App() {
         <SideNav activeItem="customers" />
         <div className="page-body">
           <TopNav />
-          <CustomerProfileNav activeTab="Communications" />
+          <CustomerProfileNav activeTab="Communications" tabBadges={{ Communications: unreadCount }} />
 
           <div className="cc-page">
             <div className="cc-layout">
-              <div className="cc-sidebar">
+              <div className="cc-sidebar" style={{ width: sidebarWidth }}>
                 <div className="cc-sidebar-search">
                   <div className="cc-search-bar">
                     <SearchIcon />
                     <input
-                      placeholder="Search by title, visit, user, or message..."
+                      placeholder="Search"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
@@ -314,6 +434,19 @@ export default function App() {
                             </span>
                             <span className="fd-item-label">Office</span>
                           </div>
+                          <div
+                            className="fd-item"
+                            onClick={() => setFilters((f) => ({ ...f, unread: !f.unread }))}
+                          >
+                            <span className={`fd-checkbox${filters.unread ? ' checked' : ''}`}>
+                              {filters.unread && (
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                                  <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </span>
+                            <span className="fd-item-label">Unread</span>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -330,6 +463,7 @@ export default function App() {
                     />
                   ))}
                 </div>
+                <div className="cc-sidebar-resize-handle" onMouseDown={handleSidebarResizeStart} />
               </div>
               <div className="cc-main">
                 {activeThread ? (
