@@ -68,6 +68,25 @@
   background: var(--ui-purple-6-lavendar-grey);
   color: #000;
 }
+/* Matches web/messaging's own .msg-filter-badge exactly — count of
+   currently-active filters, shown only while at least one is active. */
+.cc-filter-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
 .cc-filter-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -84,6 +103,25 @@
    (Styles/filter-dropdown.css) — the same checkbox styling web/messaging's
    own filter submenu reuses for its option rows, rather than a bespoke
    native <input type="checkbox"> + label pairing. */
+/* Matches web/messaging's own .msg-filter-menu-clear — shown only while
+   at least one filter is active. */
+.cc-filter-menu-clear {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 9px 10px;
+  border: none;
+  border-top: 1px solid var(--greyscale-13-grey-90, #e6e6e6);
+  border-radius: 0 0 6px 6px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brand-purple-6-purple-4);
+  text-align: left;
+  cursor: pointer;
+}
+.cc-filter-menu-clear:hover { background: var(--ui-purple-7-lightest-lavendar); }
 
 /* ── Two-pane layout ── */
 /* A fixed height (not min-height) is what actually pins the compose bar —
@@ -268,7 +306,29 @@
 }
 .cc-meta { font: 11px Barlow, sans-serif; color: var(--greyscale-6-grey-50, #757575); margin-top: 4px; }
 
-.cc-compose-bar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-top: 1px solid var(--ui-purple-5-languid-lavendar); background: #fff; flex-shrink: 0; }
+/* flex-direction: column so the audience picker (Office messages thread
+   only, see ThreadView) can sit as its own row above the input row,
+   rather than fighting it for horizontal space. */
+.cc-compose-bar { display: flex; flex-direction: column; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--ui-purple-5-languid-lavendar); background: #fff; flex-shrink: 0; }
+.cc-compose-row { display: flex; align-items: center; gap: 12px; }
+/* Only ever shown for the 'employee' (Office messages) thread — every
+   office-sent message there needs a declared audience, matching the
+   per-message "To: ..." tag already shown on past messages (see
+   MessageBubble/.cc-audience-tag) rather than introducing a different
+   visual language for the same concept. */
+.cc-audience-picker { display: flex; align-items: center; gap: 8px; }
+.cc-audience-picker-label { font: 12px Barlow, sans-serif; font-weight: 500; color: var(--greyscale-6-grey-50, #757575); }
+.cc-audience-option {
+  font: 12px Barlow, sans-serif;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+  color: var(--ui-purple-3-grape-grey);
+  cursor: pointer;
+}
+.cc-audience-option.active { background: var(--brand-purple-6-purple-4); border-color: var(--brand-purple-6-purple-4); color: #fff; }
 .cc-compose-input-wrap { flex: 1; border: 1.5px solid var(--ui-purple-5-languid-lavendar); border-radius: 20px; padding: 8px 16px; }
 .cc-compose-input-wrap:focus-within { border-color: var(--brand-purple-6-purple-4); }
 .cc-compose-input { width: 100%; border: none; outline: none; background: none; font: 14px Barlow, sans-serif; }

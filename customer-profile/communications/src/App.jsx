@@ -216,10 +216,22 @@ function MessageBubble({ message, showSender }) {
   )
 }
 
-function ThreadView({ thread, messages, onViewCareNotes }) {
+function ThreadView({ thread, messages, onViewCareNotes, onSend }) {
   const [replyText, setReplyText] = useState('')
+  // Only meaningful for the 'employee' (Office messages) thread — every
+  // office-sent message there needs a declared audience (see data.js's own
+  // comment on why this isn't 1:1 or per-thread). Defaults to the broader
+  // option; resets automatically on every thread switch since ThreadView
+  // is remounted per thread (parent keys it by thread id).
+  const [audience, setAudience] = useState('all-care-staff')
   const dayGroups = useMemo(() => groupMessagesByDay(messages), [messages])
   const messageListRef = useRef(null)
+
+  function handleSend() {
+    if (!replyText.trim()) return
+    onSend(thread.id, replyText, thread.kind === 'employee' ? audience : undefined)
+    setReplyText('')
+  }
 
   // Jump straight to the latest message on open — the message list now has
   // a genuinely bounded, scrollable height (see .cc-layout's fixed 640px),
@@ -227,13 +239,18 @@ function ThreadView({ thread, messages, onViewCareNotes }) {
   // history (e.g. Office messages) opens showing its oldest message
   // instead of the latest. useLayoutEffect (not useEffect) so the jump
   // happens before paint — no visible flash of the top of the thread.
-  // ThreadView is remounted per thread (parent keys it by thread id), so a
-  // mount-only effect is enough; it doesn't need to re-fire on every
-  // render of the same open thread.
+  //
+  // Keyed on `messages`, not mount-only — sending a reply appends to this
+  // same open thread without remounting ThreadView (only a thread *switch*
+  // remounts it), so a mount-only effect never re-fired for a message sent
+  // into the thread already open, leaving the new bubble sitting below the
+  // fold, visually hidden behind the compose bar. `messages` only changes
+  // reference when this thread's own messages actually change (see
+  // activeMessages in App), so this doesn't re-fire on unrelated renders.
   useLayoutEffect(() => {
     const el = messageListRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [])
+  }, [messages])
 
   return (
     <div className="cc-thread-view">
@@ -247,17 +264,39 @@ function ThreadView({ thread, messages, onViewCareNotes }) {
         ))}
       </div>
       <div className="cc-compose-bar">
-        <div className="cc-compose-input-wrap">
-          <input
-            className="cc-compose-input"
-            placeholder="Reply to this thread..."
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-          />
+        {thread.kind === 'employee' && (
+          <div className="cc-audience-picker">
+            <span className="cc-audience-picker-label">Visible to:</span>
+            <button
+              type="button"
+              className={`cc-audience-option${audience === 'all-care-staff' ? ' active' : ''}`}
+              onClick={() => setAudience('all-care-staff')}
+            >
+              All care staff
+            </button>
+            <button
+              type="button"
+              className={`cc-audience-option${audience === 'care-managers' ? ' active' : ''}`}
+              onClick={() => setAudience('care-managers')}
+            >
+              Care Managers
+            </button>
+          </div>
+        )}
+        <div className="cc-compose-row">
+          <div className="cc-compose-input-wrap">
+            <input
+              className="cc-compose-input"
+              placeholder="Reply to this thread..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
+            />
+          </div>
+          <button className={`cc-send-btn${replyText.trim() ? ' active' : ''}`} onClick={handleSend}>
+            <SendIcon />
+          </button>
         </div>
-        <button className={`cc-send-btn${replyText.trim() ? ' active' : ''}`}>
-          <SendIcon />
-        </button>
       </div>
     </div>
   )
@@ -272,13 +311,73 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
   const [filters, setFilters] = useState({ openpass: false, office: false, unread: false })
-  const [activeThreadId, setActiveThreadId] = useState(THREADS[0].id)
   const [careNotesVisit, setCareNotesVisit] = useState(null)
   // Local, mutable copy of THREADS so opening a thread can clear its own
   // unread flag (bold name + purple dot) — THREADS itself is just the
   // static seed data, never mutated directly.
   const [threads, setThreads] = useState(THREADS)
+  // Local, mutable copy of THREAD_MESSAGES so a sent reply actually lands
+  // in the thread (see sendMessage below) instead of just sitting in the
+  // compose input — same reasoning as lifting THREADS into state above.
+  const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
   const filterWrapRef = useRef(null)
+
+  // Most-recent-activity first — not unread-first. Matches how mainstream
+  // messaging apps (e.g. WhatsApp) actually order a chat list: sorted by
+  // recency, with unread shown only as a status (bold name + dot), never
+  // as something that reorders the list out from under you the moment you
+  // open and read it. Sorted by each thread's true last message (date +
+  // time combined — a bare time-of-day string alone would wrongly rank an
+  // old thread's late-evening message above a newer thread's early-morning
+  // one), not the thread's own display `time`/`lastMessage` fields, which
+  // are just a cached copy of that same last message for the row preview.
+  function lastMessageKey(threadId) {
+    const last = (threadMessages[threadId] || []).at(-1)
+    return last ? `${last.date}T${last.time}` : ''
+  }
+
+  // Lands on whichever thread actually has the most recent activity
+  // (Office messages, at the time this was built) rather than a hardcoded
+  // thread — a lazy initializer so this is only ever computed once, off
+  // the real seed data, matching the same recency ordering used for the
+  // sidebar list below.
+  const [activeThreadId, setActiveThreadId] = useState(() => {
+    const sorted = [...THREADS].sort((a, b) => lastMessageKey(b.id).localeCompare(lastMessageKey(a.id)))
+    return sorted[0]?.id ?? THREADS[0].id
+  })
+
+  // Appends a real message to the thread (isMe: true, sender 'Office' —
+  // this whole page is the office's own view) and refreshes that thread's
+  // sidebar preview to match, exactly like every other last-message field
+  // in this file is kept in sync with the true last message. `audience`
+  // is only ever passed for the 'employee' thread (see ThreadView) — every
+  // other kind sends a plain, untagged reply.
+  function sendMessage(threadId, text, audience) {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    const existing = threadMessages[threadId] || []
+    const last = existing.at(-1)
+    const now = new Date()
+    let time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    // This prototype's own seed data uses fixed "later today" demo
+    // timestamps (e.g. 19:47) so the day-separator/recency-sort features
+    // have something to show — those can easily be ahead of whichever
+    // real wall-clock time this actually runs at. A message genuinely
+    // being sent right now must still land as the newest thing in its own
+    // thread, so nudge forward a minute past the last message rather than
+    // let a real "now" that's earlier than the demo data quietly sort
+    // behind it.
+    if (last && last.date === date && time <= last.time) {
+      const [h, m] = last.time.split(':').map(Number)
+      const bumped = new Date(2000, 0, 1, h, m + 1)
+      time = `${String(bumped.getHours()).padStart(2, '0')}:${String(bumped.getMinutes()).padStart(2, '0')}`
+    }
+    const nextId = (last?.id ?? 0) + 1
+    const newMessage = { id: nextId, isMe: true, sender: 'Office', text: trimmed, time, date, ...(audience ? { audience } : {}) }
+    setThreadMessages((prev) => ({ ...prev, [threadId]: [...(prev[threadId] || []), newMessage] }))
+    setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, lastSender: 'Office', lastMessage: trimmed, time } : t)))
+  }
 
   // Resizable sidebar — same drag mechanics and 240–480px clamp as
   // web/messaging's own .msg-sidebar-resize-handle (plain document-level
@@ -327,20 +426,7 @@ export default function App() {
   const anyKindFilterActive = filters.openpass || filters.office
   const anyFilterActive = anyKindFilterActive || filters.unread
   const unreadCount = threads.filter((t) => t.unread).length
-
-  // Most-recent-activity first — not unread-first. Matches how mainstream
-  // messaging apps (e.g. WhatsApp) actually order a chat list: sorted by
-  // recency, with unread shown only as a status (bold name + dot), never
-  // as something that reorders the list out from under you the moment you
-  // open and read it. Sorted by each thread's true last message (date +
-  // time combined — a bare time-of-day string alone would wrongly rank an
-  // old thread's late-evening message above a newer thread's early-morning
-  // one), not the thread's own display `time`/`lastMessage` fields, which
-  // are just a cached copy of that same last message for the row preview.
-  function lastMessageKey(threadId) {
-    const last = (THREAD_MESSAGES[threadId] || []).at(-1)
-    return last ? `${last.date}T${last.time}` : ''
-  }
+  const activeFilterCount = [filters.openpass, filters.office, filters.unread].filter(Boolean).length
 
   const visibleThreads = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -359,15 +445,15 @@ export default function App() {
           // every message's own audience label in too, so e.g. searching "care
           // managers" still finds the Office messages thread via whichever of
           // its messages actually carries that audience.
-          ...(THREAD_MESSAGES[t.id] || []).flatMap((m) => [m.text, m.audience ? AUDIENCE_LABELS[m.audience] : null]),
+          ...(threadMessages[t.id] || []).flatMap((m) => [m.text, m.audience ? AUDIENCE_LABELS[m.audience] : null]),
         ].filter(Boolean).map((s) => s.toLowerCase())
         return haystacks.some((s) => s.includes(q))
       })
       .sort((a, b) => lastMessageKey(b.id).localeCompare(lastMessageKey(a.id)))
-  }, [search, filters, anyKindFilterActive, threads])
+  }, [search, filters, anyKindFilterActive, threads, threadMessages])
 
   const activeThread = threads.find((t) => t.id === activeThreadId)
-  const activeMessages = THREAD_MESSAGES[activeThreadId] || []
+  const activeMessages = threadMessages[activeThreadId] || []
 
   return (
     <>
@@ -404,6 +490,7 @@ export default function App() {
                       onClick={() => setFilterOpen((v) => !v)}
                     >
                       <FilterIcon />
+                      {activeFilterCount > 0 && <span className="cc-filter-badge">{activeFilterCount}</span>}
                     </button>
                     {filterOpen && (
                       <div className="cc-filter-menu">
@@ -448,6 +535,14 @@ export default function App() {
                             <span className="fd-item-label">Unread</span>
                           </div>
                         </div>
+                        {activeFilterCount > 0 && (
+                          <button
+                            className="cc-filter-menu-clear"
+                            onClick={() => { setFilters({ openpass: false, office: false, unread: false }); setFilterOpen(false) }}
+                          >
+                            Clear filters
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -472,6 +567,7 @@ export default function App() {
                     thread={activeThread}
                     messages={activeMessages}
                     onViewCareNotes={() => setCareNotesVisit(activeThread.visitLabel)}
+                    onSend={sendMessage}
                   />
                 ) : <EmptyState />}
               </div>
