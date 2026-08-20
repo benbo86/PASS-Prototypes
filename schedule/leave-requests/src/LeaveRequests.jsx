@@ -86,6 +86,18 @@ export default function LeaveRequests() {
   const pageRef = useRef(null);
   const [rows, setRows] = useState(LEAVE_REQUESTS);
 
+  // Leave Requests tab badge — a live queue-depth count, not a "new since
+  // last visit" notification (an earlier version tracked that via
+  // localStorage; see [[project_leave_requests_prototype]] memory for why
+  // that was the wrong model). A leave request doesn't become less urgent
+  // just because someone opened the tab without deciding on it, so this
+  // counts everything still awaiting a decision — Pending *and* Awaiting
+  // Cancellation, both of which need someone to actually act — and reads
+  // off the live `rows` state (not the static LEAVE_REQUESTS import) so
+  // it decrements the moment a request is approved/cancelled, the same
+  // way a real approvals-queue badge would.
+  const actionRequiredCount = rows.filter((r) => r.status === 'Pending' || r.status === 'Awaiting Cancellation').length;
+
   // Decorative date-range header — same non-filtering convention already
   // established for Invoices/Timesheets/GPA (doesn't actually filter the
   // table below).
@@ -221,7 +233,7 @@ export default function LeaveRequests() {
       <SideNav activeItem="schedule" />
       <div className="page-body">
       <TopNav />
-      <ScheduleNav active="leave-requests" />
+      <ScheduleNav active="leave-requests" tabBadges={{ 'leave-requests': actionRequiredCount }} />
       <main className="lr-content">
 
         <div className="lr-page-header">

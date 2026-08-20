@@ -15,7 +15,15 @@ const TABS = [
   { key: 'timesheets',            label: 'Timesheets',            href: '../../timesheets/filters/' },
 ]
 
-export default function ScheduleNav({ active }) {
+// tabBadges: optional { [tabKey]: count } map — same opt-in-per-consumer
+// pattern as Components/CustomerProfileNav.jsx's own tabBadges prop (see
+// its comment for the reasoning: only the page that actually owns the
+// underlying data can compute a real count, so every other prototype
+// sharing this nav — currently 3 Timesheets pages alongside Leave
+// Requests — is unaffected unless it passes its own). Keyed by `key`
+// here, not `label` like CustomerProfileNav — ScheduleNav's own TABS
+// array already has a stable `key` field CustomerProfileNav's doesn't.
+export default function ScheduleNav({ active, tabBadges = {} }) {
   return (
     <div className="schedule-tab-bar">
       <ul className="schedule-tabs">
@@ -26,6 +34,7 @@ export default function ScheduleNav({ active }) {
               style={!href ? { opacity: 0.4, cursor: 'default' } : undefined}
             >
               {label}
+              {!!tabBadges[key] && <span className="schedule-tab-badge">{tabBadges[key]}</span>}
             </button>
           </li>
         ))}
