@@ -76,11 +76,19 @@ const emptyCheckboxFilter = () => ({ selected: new Set(), sortDir: 'asc', nameFi
 
 const STRING_SORT_COLS = ['leaveType', 'status'];
 const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
-const NUM_SORT_COLS = ['daysRequested'];
+const NUM_SORT_COLS = ['amount'];
 
-// 8 columns: Employee, Leave Type, From Date, To Date, Days Requested,
+// 8 columns: Employee, Leave Type, From Date, To Date, Amount Requested,
 // Status, Submitted, Actions.
 const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
+
+// Amount is in days for most employees, but hours for an employee on an
+// hourly/zero-hours contract (see data.js's own EMPLOYEE_CONTRACTS) —
+// each request already carries its own `unit`, so formatting is a plain
+// per-row lookup, no separate employee/contract check needed here.
+function fmtAmount(row) {
+  return row.unit === 'hours' ? `${row.amount} hrs` : `${row.amount} ${row.amount === 1 ? 'day' : 'days'}`;
+}
 
 export default function LeaveRequests() {
   const pageRef = useRef(null);
@@ -333,10 +341,12 @@ export default function LeaveRequests() {
                   <ColResizeHandle onDrag={dx => resizeColumn(3, dx)} />
                 </th>
 
-                {/* Days Requested — sort only, numeric */}
-                <th className={`th-num ${sort.col === 'daysRequested' ? 'sorted' : ''}`}>
-                  <ColLabel>Days Requested</ColLabel>
-                  <button className="col-icon-btn" onClick={() => toggleSort('daysRequested')}><SortIcon dir={sort.col === 'daysRequested' ? sort.dir : null} /></button>
+                {/* Amount Requested — sort only, numeric. Mixed units (days vs
+                    hours, see fmtAmount) sort on the raw number regardless —
+                    same as any table sorting mixed units, not a bug to fix. */}
+                <th className={`th-num ${sort.col === 'amount' ? 'sorted' : ''}`}>
+                  <ColLabel>Amount Requested</ColLabel>
+                  <button className="col-icon-btn" onClick={() => toggleSort('amount')}><SortIcon dir={sort.col === 'amount' ? sort.dir : null} /></button>
                   <ColResizeHandle onDrag={dx => resizeColumn(4, dx)} />
                 </th>
 
@@ -377,7 +387,7 @@ export default function LeaveRequests() {
                   <td>{row.leaveType}</td>
                   <td className="nowrap">{fmtD(row.fromDate)}</td>
                   <td className="nowrap">{fmtD(row.toDate)}</td>
-                  <td className="td-num">{row.daysRequested}</td>
+                  <td className="td-num">{fmtAmount(row)}</td>
                   <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
                   <td className="nowrap">{fmtD(row.submitted)}</td>
                   <td>
@@ -426,7 +436,8 @@ export default function LeaveRequests() {
             absenceType={{ value: 'holiday', label: 'Holiday' }}
             startDate={approveRow.fromDate}
             endDate={approveRow.toDate}
-            daysDeducted={approveRow.daysRequested}
+            daysDeducted={approveRow.amount}
+            deductedLabel={approveRow.unit === 'hours' ? 'Hours deducted' : 'Days deducted'}
             showVisitsStep={false}
             onClose={() => setApproveRow(null)}
             onConfirm={handleApproveConfirm}
@@ -440,7 +451,7 @@ export default function LeaveRequests() {
             <div><span className="lr-cancel-label">Leave type</span><span>{cancelRow.leaveType}</span></div>
             <div><span className="lr-cancel-label">Date from</span><span>{fmtD(cancelRow.fromDate)}</span></div>
             <div><span className="lr-cancel-label">Date to</span><span>{fmtD(cancelRow.toDate)}</span></div>
-            <div><span className="lr-cancel-label">Days requested</span><span>{cancelRow.daysRequested}</span></div>
+            <div><span className="lr-cancel-label">{cancelRow.unit === 'hours' ? 'Hours requested' : 'Days requested'}</span><span>{cancelRow.amount}</span></div>
           </div>
           <div className="field">
             <label htmlFor="cancel-reason">Cancellation reason</label>
