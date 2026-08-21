@@ -122,15 +122,40 @@ export const THREAD_MESSAGES = {
   ],
 }
 
-// Dummy content for the "View care notes" inline modal — visit-linked
+// Dummy content for the "View care notes" side panel — visit-linked
 // threads only. Care Notes itself has no real prototype yet (unbuilt tab in
 // Components/CustomerProfileNav.jsx), so this is illustrative content, not
 // a link into a built feature.
+//
+// Keyed by the visit thread's own stable `id` (from THREADS above), not
+// its display label — an earlier version keyed this by the literal
+// visitLabel string ('Evening Visit 17:30, 18/08/26'), which silently
+// breaks the moment two visit threads ever produce the same label, or the
+// label's own format changes for display reasons (a copy tweak,
+// localisation) without this key being updated to match — the lookup
+// would just return an empty list, no error, no visible sign anything's
+// wrong. A thread's own `id` can't collide or drift the way a formatted
+// string can.
+//
+// Each entry is a real task performed (or not) during the visit, shown as
+// a coloured chip/pill (see App.jsx's TaskChip) — replacing the earlier
+// fixed Mood/Meals/Medication/Mobility label-value rows, per the live
+// product's own equivalent screen. `type` picks the chip's icon, reusing
+// customer-profile/timeline's own icon-font mapping where a real one
+// exists ('medication', 'nutrition'); 'general' is that prototype's own
+// catch-all for anything without a dedicated icon — used here for
+// mobility/wellbeing tasks, since timeline has no icon of its own for
+// either concept (confirmed by checking, not assumed — see
+// [[project_client_oriented_messaging]] memory for the honest gap this
+// leaves). `status` drives the chip's fill colour: complete (green),
+// partial (orange), cancelled (grey) — any other/unrecognised value falls
+// back to a neutral grey (see communications.css's own fallback comment)
+// rather than rendering invisibly.
 export const CARE_NOTES_BY_VISIT = {
-  'Evening Visit 17:30, 18/08/26': [
-    { label: 'Mood', value: 'Settled and talkative throughout the visit.' },
-    { label: 'Meals', value: 'Ate full dinner, no concerns.' },
-    { label: 'Medication', value: 'Evening medication administered on time.' },
-    { label: 'Mobility', value: 'Used walking frame as usual, no falls or near-misses.' },
+  1: [
+    { task: 'Serve dinner that Pat has left out', type: 'nutrition', status: 'complete' },
+    { task: 'Administer evening medication', type: 'medication', status: 'complete' },
+    { task: 'Assist with mobility and safe transfer', type: 'general', status: 'partial' },
+    { task: 'Companionship and check on wellbeing', type: 'general', status: 'cancelled' },
   ],
 }

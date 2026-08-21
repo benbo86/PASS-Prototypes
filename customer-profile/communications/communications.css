@@ -251,6 +251,12 @@
    makes this actually reach the bottom of the panel rather than just
    trailing the last message. */
 .cc-thread-view { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+/* Matches web/messaging's own .msg-thread-content-row/.msg-thread-main-col
+   exactly — splits the area below the header into the message thread
+   (main-col) and an optional third column (.cc-care-notes-panel below),
+   never a modal/overlay. */
+.cc-thread-content-row { flex: 1; display: flex; overflow: hidden; }
+.cc-thread-main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
 .cc-message-list { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; background: var(--ui-purple-7-lightest-lavendar); }
 .cc-day-sep { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; }
 .cc-day-sep::before, .cc-day-sep::after { content: ''; flex: 1; height: 1px; background: var(--ui-purple-5-languid-lavendar); }
@@ -340,9 +346,86 @@
 }
 .cc-send-btn.active { background: var(--brand-purple-6-purple-4); color: #fff; }
 
-/* ── View care notes modal content ── */
-.cc-care-notes-visit { font-weight: 600; color: #333; margin-bottom: 16px; }
-.cc-care-notes-list { display: flex; flex-direction: column; gap: 12px; }
-.cc-care-notes-row { display: flex; gap: 16px; }
-.cc-care-notes-label { width: 100px; flex-shrink: 0; font-weight: 600; color: #333; font-size: 13px; }
-.cc-care-notes-value { font-size: 13px; color: #555; line-height: 1.5; }
+/* ── Care notes panel — a static third column within the thread view,
+   matching web/messaging's own .msg-read-status-panel exactly (same
+   width/border/background, no overlay/scrim/animation), not the generic
+   SlidePanel component used elsewhere for full editor-style forms. ── */
+.cc-care-notes-panel {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+}
+.cc-care-notes-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+}
+.cc-care-notes-panel-titles { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cc-care-notes-panel-header h3 { font-size: 15px; font-weight: 600; color: var(--greyscale-2-grey-20, #333); margin-bottom: 0px; }
+.cc-care-notes-panel-subtitle {
+  font-size: 12px;
+  color: var(--greyscale-6-grey-50, #757575);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-care-notes-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--greyscale-6-grey-50, #757575);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cc-care-notes-close:hover { background: var(--ui-purple-6-lavendar-grey, #edecf1); }
+.cc-care-notes-panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+.cc-care-notes-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Icon-font base, reusing customer-profile/timeline's own mechanism —
+   Styles/legacy.css (imported in main.jsx) provides the @font-face rules
+   this depends on; only the class names are duplicated here (this
+   prototype doesn't otherwise import timeline's own local CSS file, per
+   the repo's established "each prototype owns its copy" convention). */
+.cc-fa-icon { font-style: normal; font-size: 14px; line-height: 1; }
+.cc-fa-icon-solid { font-family: 'fa-solid'; font-weight: 900; }
+.cc-fa-icon-regular { font-family: 'fa-regular'; font-weight: 400; }
+
+/* Solid-fill status colour (not a light tint) — matches the live
+   product's own task-chip screenshot: a solid coloured pill with a white
+   icon+text. complete/partial reuse the exact same hex Ben gave, which
+   also happen to match timeline's own --legacy-status-complete/-partial
+   tokens; cancelled uses Ben's own #999 (timeline's own cancelled token
+   is a slightly different #757575 — this is his explicit spec, not a
+   mismatch to reconcile). */
+/* .cc-task-chip's own background below is a fallback only — every real
+   status further down overrides it (same specificity, declared later, so
+   the cascade already favours them). Without it, a status value with no
+   matching --{status} modifier (a typo, or a new status added later
+   without a matching class) would render white text on no background at
+   all: invisible, not just unstyled. */
+.cc-task-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px 3px 6px;
+  border-radius: .25em;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--greyscale-6-grey-50, #757575);
+}
+.cc-task-chip .cc-fa-icon { color: #fff; }
+.cc-task-chip--complete { background: var(--legacy-status-complete, #21a621); }
+.cc-task-chip--partial { background: var(--legacy-status-partial, #e09600); }
+.cc-task-chip--cancelled { background: #999; }

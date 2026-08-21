@@ -2,7 +2,6 @@ import { useRef, useState, useMemo, useEffect, useLayoutEffect, Fragment } from 
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import CustomerProfileNav from '../../../Components/CustomerProfileNav'
-import Modal from '../../../Components/Modal'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -31,6 +30,13 @@ const SendIcon = () => (
     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
   </svg>
 )
+// Matches web/messaging's own CloseIcon exactly (used on its read-status
+// panel's close button, which this Care notes panel mirrors).
+const CloseIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+  </svg>
+)
 const NotesIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
@@ -44,6 +50,41 @@ const GroupIcon = ({ size = 18 }) => (
     <path fillRule="evenodd" d="M6.34529323,13.6992001 C6.98659064,13.9861115 7.69403084,14.1492572 8.44173186,14.1492572 C8.83563565,14.1492572 9.21916363,14.1039779 9.58727007,14.0191771 C8.13951251,14.6947293 7.11265435,16.3547899 7.11265435,17.9622169 L7.11265435,18.6498286 C7.11265435,19.3952357 7.73094558,20 8.49302546,20 L3.38037111,20 C2.61829123,20 2,19.3952357 2,18.6498286 L2,17.9622169 C2,15.8750769 3.73121544,13.6992001 5.86503911,13.6992001 L6.34529323,13.6992001 Z M13.3845982,13.6992001 C14.0316964,13.9861115 14.7455357,14.1492572 15.5,14.1492572 C16.2544643,14.1492572 16.9712054,13.9861115 17.6154018,13.6992001 L18.1,13.6992001 C20.253125,13.6992001 22,15.8750769 22,17.9622169 L22,18.6498286 C22,19.3952357 21.3761161,20 20.6071429,20 L10.3928571,20 C9.62388393,20 9,19.3952357 9,18.6498286 L9,17.9622169 C9,15.8750769 10.746875,13.6992001 12.9,13.6992001 Z M19.6758297,16.8496 L17.2371129,16.8496 C16.9609705,16.8496 16.7371129,17.0734577 16.7371129,17.3496 L16.7371129,18.2311353 C16.7371129,18.5072776 16.9609705,18.7311353 17.2371129,18.7311353 L19.6758297,18.7311353 C19.9519721,18.7311353 20.1758297,18.5072776 20.1758297,18.2311353 L20.1758297,17.3496 C20.1758297,17.0734577 19.9519721,16.8496 19.6758297,16.8496 Z M8.44173186,5 C9.43518456,5 10.3366335,5.384812 10.9988003,6.01037989 C10.3047346,6.66418301 9.87339658,7.5829878 9.87339658,8.60045709 C9.87339658,9.61792638 10.3047346,10.5367312 10.9983346,11.1914945 C10.3366335,11.8161022 9.43518456,12.2009142 8.44173186,12.2009142 C6.40856024,12.2009142 4.76074222,10.5891471 4.76074222,8.60045709 C4.76074222,6.61176712 6.40856024,5 8.44173186,5 Z M15.5,5 C17.5515625,5 19.2142857,6.61176712 19.2142857,8.60045709 C19.2142857,10.5891471 17.5515625,12.2009142 15.5,12.2009142 C13.4484375,12.2009142 11.7857143,10.5891471 11.7857143,8.60045709 C11.7857143,6.61176712 13.4484375,5 15.5,5 Z" />
   </svg>
 )
+
+// Task-chip icons — reusing customer-profile/timeline's own icon-font
+// mechanism exactly (same @font-face/class names, from Styles/legacy.css
+// + this component's own .cc-fa-icon/.cc-eltico-icon rules in
+// communications.css), not a copy of Timeline's inline SVGs, since these
+// aren't SVGs at all — each is a single codepoint rendered in an icon
+// font. Only 'medication' and 'nutrition' have a real dedicated icon in
+// Timeline; 'general' is that prototype's own catch-all, reused here for
+// mobility/wellbeing tasks since Timeline has no icon of its own for
+// either (confirmed, not assumed — see data.js's own comment on
+// CARE_NOTES_BY_VISIT).
+const FaIcon = ({ code, weight = 'solid' }) => <span className={`cc-fa-icon cc-fa-icon-${weight}`}>{code}</span>
+const TASK_TYPE_ICON = {
+  medication: () => <FaIcon code={''} weight="regular" />, // fa-plus, matches timeline's MedicationIcon
+  nutrition: () => <FaIcon code={''} />, // fa-utensils, matches timeline's NutritionIcon
+  general: () => <FaIcon code={''} />, // fa-check, matches timeline's GeneralIcon
+}
+
+// Solid-fill status colour, not timeline's own light-tint style — matches
+// the live product's own task-chip screenshot (Ben supplied it): a solid
+// coloured pill with a white icon+text, not a tinted background with
+// coloured text. 'complete'/'partial' happen to already match timeline's
+// own --legacy-status-complete/--legacy-status-partial tokens exactly;
+// 'cancelled' uses Ben's own explicit #999 rather than timeline's
+// slightly different --legacy-status-cancelled (#757575) — his spec, not
+// a mismatch to fix.
+function TaskChip({ note }) {
+  const Icon = TASK_TYPE_ICON[note.type] || TASK_TYPE_ICON.general
+  return (
+    <span className={`cc-task-chip cc-task-chip--${note.status}`}>
+      <Icon />
+      {note.task}
+    </span>
+  )
+}
 
 // Colour palette + hash, mirroring web/messaging's own nameToColor — a
 // deterministic name -> {bg, fg} pair so the same person always gets the
@@ -216,8 +257,13 @@ function MessageBubble({ message, showSender }) {
   )
 }
 
-function ThreadView({ thread, messages, onViewCareNotes, onSend }) {
+function ThreadView({ thread, messages, onSend }) {
   const [replyText, setReplyText] = useState('')
+  // Whether the Care notes panel is open — local to this thread's own
+  // ThreadView instance (remounted per thread switch, see the parent's
+  // key={activeThread.id}), so it naturally resets rather than needing to
+  // be lifted/reset from App.
+  const [showCareNotes, setShowCareNotes] = useState(false)
   // Only meaningful for the 'employee' (Office messages) thread — every
   // office-sent message there needs a declared audience (see data.js's own
   // comment on why this isn't 1:1 or per-thread). Defaults to the broader
@@ -254,49 +300,78 @@ function ThreadView({ thread, messages, onViewCareNotes, onSend }) {
 
   return (
     <div className="cc-thread-view">
-      <ThreadHeader thread={thread} onViewCareNotes={onViewCareNotes} />
-      <div className="cc-message-list" ref={messageListRef}>
-        {dayGroups.map((group) => (
-          <Fragment key={group.date}>
-            <div className="cc-day-sep"><span>{dayLabel(group.date)}</span></div>
-            {group.messages.map((m) => <MessageBubble key={m.id} message={m} showSender={thread.kind === 'employee'} />)}
-          </Fragment>
-        ))}
-      </div>
-      <div className="cc-compose-bar">
-        {thread.kind === 'employee' && (
-          <div className="cc-audience-picker">
-            <span className="cc-audience-picker-label">Visible to:</span>
-            <button
-              type="button"
-              className={`cc-audience-option${audience === 'all-care-staff' ? ' active' : ''}`}
-              onClick={() => setAudience('all-care-staff')}
-            >
-              All care staff
-            </button>
-            <button
-              type="button"
-              className={`cc-audience-option${audience === 'care-managers' ? ' active' : ''}`}
-              onClick={() => setAudience('care-managers')}
-            >
-              Care Managers
-            </button>
+      <ThreadHeader thread={thread} onViewCareNotes={() => setShowCareNotes(true)} />
+      {/* Mirrors web/messaging's own .msg-thread-content-row/.msg-thread-main-col
+          nesting exactly — Care notes is a static third column here (see
+          .cc-care-notes-panel below), never a modal/overlay, matching that
+          prototype's real read-status panel rather than the generic
+          SlidePanel component used for editor-style forms elsewhere. */}
+      <div className="cc-thread-content-row">
+        <div className="cc-thread-main-col">
+          <div className="cc-message-list" ref={messageListRef}>
+            {dayGroups.map((group) => (
+              <Fragment key={group.date}>
+                <div className="cc-day-sep"><span>{dayLabel(group.date)}</span></div>
+                {group.messages.map((m) => <MessageBubble key={m.id} message={m} showSender={thread.kind === 'employee'} />)}
+              </Fragment>
+            ))}
+          </div>
+          <div className="cc-compose-bar">
+            {thread.kind === 'employee' && (
+              <div className="cc-audience-picker">
+                <span className="cc-audience-picker-label">Visible to:</span>
+                <button
+                  type="button"
+                  className={`cc-audience-option${audience === 'all-care-staff' ? ' active' : ''}`}
+                  onClick={() => setAudience('all-care-staff')}
+                >
+                  All care staff
+                </button>
+                <button
+                  type="button"
+                  className={`cc-audience-option${audience === 'care-managers' ? ' active' : ''}`}
+                  onClick={() => setAudience('care-managers')}
+                >
+                  Care Managers
+                </button>
+              </div>
+            )}
+            <div className="cc-compose-row">
+              <div className="cc-compose-input-wrap">
+                <input
+                  className="cc-compose-input"
+                  placeholder="Reply to this thread..."
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
+                />
+              </div>
+              <button className={`cc-send-btn${replyText.trim() ? ' active' : ''}`} onClick={handleSend}>
+                <SendIcon />
+              </button>
+            </div>
+          </div>
+        </div>
+        {showCareNotes && (
+          <div className="cc-care-notes-panel">
+            <div className="cc-care-notes-panel-header">
+              <div className="cc-care-notes-panel-titles">
+                <h3>Care notes</h3>
+                <span className="cc-care-notes-panel-subtitle">{thread.visitLabel}</span>
+              </div>
+              <button className="cc-care-notes-close" onClick={() => setShowCareNotes(false)} aria-label="Close">
+                <CloseIcon size={20} />
+              </button>
+            </div>
+            <div className="cc-care-notes-panel-body">
+              <div className="cc-care-notes-list">
+                {(CARE_NOTES_BY_VISIT[thread.id] || []).map((note, i) => (
+                  <TaskChip key={i} note={note} />
+                ))}
+              </div>
+            </div>
           </div>
         )}
-        <div className="cc-compose-row">
-          <div className="cc-compose-input-wrap">
-            <input
-              className="cc-compose-input"
-              placeholder="Reply to this thread..."
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
-            />
-          </div>
-          <button className={`cc-send-btn${replyText.trim() ? ' active' : ''}`} onClick={handleSend}>
-            <SendIcon />
-          </button>
-        </div>
       </div>
     </div>
   )
@@ -311,7 +386,6 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
   const [filters, setFilters] = useState({ openpass: false, office: false, unread: false })
-  const [careNotesVisit, setCareNotesVisit] = useState(null)
   // Local, mutable copy of THREADS so opening a thread can clear its own
   // unread flag (bold name + purple dot) — THREADS itself is just the
   // static seed data, never mutated directly.
@@ -566,7 +640,6 @@ export default function App() {
                     key={activeThread.id}
                     thread={activeThread}
                     messages={activeMessages}
-                    onViewCareNotes={() => setCareNotesVisit(activeThread.visitLabel)}
                     onSend={sendMessage}
                   />
                 ) : <EmptyState />}
@@ -575,20 +648,6 @@ export default function App() {
           </div>
         </div>
       </div>
-
-      {careNotesVisit && (
-        <Modal title="Care notes" onClose={() => setCareNotesVisit(null)}>
-          <p className="cc-care-notes-visit">{careNotesVisit}</p>
-          <div className="cc-care-notes-list">
-            {(CARE_NOTES_BY_VISIT[careNotesVisit] || []).map((note) => (
-              <div className="cc-care-notes-row" key={note.label}>
-                <div className="cc-care-notes-label">{note.label}</div>
-                <div className="cc-care-notes-value">{note.value}</div>
-              </div>
-            ))}
-          </div>
-        </Modal>
-      )}
     </>
   )
 }

@@ -891,7 +891,10 @@ h6 {
   position: fixed;
   inset: 0;
   background: var(--web-skrim);
-  z-index: 200;
+  /* Same fix, same reason as .slide-panel-overlay above — must exceed the
+     dev toolbar's z-index (10700) or the always-on-top toolbar swallows
+     clicks on this modal's own controls whenever they share screen space. */
+  z-index: 10800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1205,7 +1208,12 @@ h6 {
   position: fixed;
   inset: 0;
   background: var(--web-skrim);
-  z-index: 200;
+  /* Must exceed the dev toolbar's own z-index (10700, Styles/dev-toolbar.css)
+     — a real bug, caught by testing: at 200 the sticky, always-on-top
+     toolbar sat above this overlay whenever the two occupied the same
+     screen area, silently swallowing clicks on the panel's own header
+     controls (e.g. its close button) rather than passing them through. */
+  z-index: 10800;
   display: flex;
   justify-content: flex-end;
 }

@@ -3,6 +3,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import '../../../Styles/main.css'
 import '../../../Styles/colors.css'
+// @font-face for the task-chip icon font (eltico/fa-solid/fa-regular) —
+// reusing customer-profile/timeline's own icon mechanism, see App.jsx's
+// TASK_TYPE_ICON comment. Safe to load alongside colors.css's own :root
+// block — the Dev Edit `:root`-corruption bug this could once have
+// triggered (see CLAUDE.md's Dev Edit history) was already fixed at its
+// root (keyed by stylesheet index, not just selector).
+import '../../../Styles/legacy.css'
 import '../../../Styles/top-nav.css'
 import '../../../Styles/side-nav.css'
 import '../../../Styles/customer-profile-nav.css'
