@@ -162,13 +162,14 @@ export default function DevMode({ containerRef }) {
     const isDevModeUi = (target) => target.closest && target.closest('[data-devmode-ui], [data-devcomments-ui], [data-devedit-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
 
     // "Recognized" = containerRef's own subtree, OR content react-datepicker/
-    // FilterDropdown have portaled to document.body — both are conceptually
-    // part of this prototype, just rendered elsewhere for stacking/position
-    // reasons. Anything NOT recognized (the back-link, other page chrome)
-    // gets the simple "block real navigation, clear selection" treatment.
+    // FilterDropdown/RowActionsMenu have portaled to document.body — all
+    // conceptually part of this prototype, just rendered elsewhere for
+    // stacking/position reasons. Anything NOT recognized (the back-link,
+    // other page chrome) gets the simple "block real navigation, clear
+    // selection" treatment.
     const isRecognized = (target) =>
       container.contains(target) ||
-      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap'))
+      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap, .row-actions-panel'))
 
     // A trigger that opens a portaled popup (react-datepicker's own
     // `.react-datepicker-wrapper` around its customInput — a stable,

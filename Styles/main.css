@@ -1308,6 +1308,47 @@ h6 {
 .actions-menu-item:hover:not(:disabled) { background: var(--ui-purple-7-lightest-lavendar); }
 .actions-menu-item:disabled { color: var(--greyscale-11-grey-80); cursor: default; }
 
+/* ── Components/RowActionsMenu.jsx — portaled "⋮" row-actions dropdown ───
+   Same panel/item look as .actions-menu-panel/.actions-menu-item above,
+   just its own classes since the panel is portaled to document.body (needed
+   to escape a table's own scroll/overflow clipping) rather than living
+   inside a position:relative wrapper the way .actions-menu-wrap does. ── */
+.row-actions-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border: none; background: none; cursor: pointer;
+  border-radius: 4px; padding: 0; vertical-align: middle;
+  color: var(--greyscale-6-grey-50);
+  transition: background 0.12s, color 0.12s;
+}
+.row-actions-btn:hover { background: var(--ui-purple-7-lightest-lavendar); color: #000; }
+
+.row-actions-panel {
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.row-actions-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #000;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.row-actions-item:hover:not(:disabled) { background: var(--ui-purple-7-lightest-lavendar); }
+.row-actions-item:disabled { color: var(--greyscale-11-grey-80); cursor: default; }
+
 /* ── Resizable columns (Components/useSharedColumnWidths.js) ─────
    Opt-in via an extra `resizable-table` class alongside `.data-table` —
    table-layout:fixed + percentage <col> widths (set inline per-table via

@@ -49,6 +49,7 @@ body { background: #fff; min-height: 100vh; }
 /* ── Status pills ────────────────────────────────────────────── */
 .lr-status-pending   { background: var(--ui-purple-6-lavendar-grey);   color: var(--greyscale-2-grey-20); }
 .lr-status-approved  { background: var(--rag-green-green-lightest);   color: var(--rag-green-green-3-aa); }
+.lr-status-declined  { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue-text); }
 .lr-status-awaiting  { background: var(--rag-amber-amber-lightest);   color: var(--greyscale-2-grey-20); }
 .lr-status-cancelled { background: var(--greyscale-13-grey-90);        color: var(--greyscale-4-grey-40); }
 
@@ -76,6 +77,9 @@ body { background: #fff; min-height: 100vh; }
   overflow: hidden;
 }
 
+/* Shared by both terminal-with-a-reason statuses (Declined, Cancelled) —
+   same truncate-with-tooltip treatment either way, just a different
+   leading word (see LeaveRequests.jsx). */
 .lr-cancelled-note {
   display: inline-block; max-width: 100%;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import Select, { components } from 'react-select'
 import FilterDropdown from '../../../Components/FilterDropdown'
+import RowActionsMenu from '../../../Components/RowActionsMenu'
 import NumberStepper from '../../../Components/NumberStepper'
 import SearchMultiSelect from '../../../Components/SearchMultiSelect'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
@@ -259,6 +260,17 @@ export default function App() {
           <select className="rows-select" value={rows} onChange={e => setRows(Number(e.target.value))}>
             {[10, 12, 25, 50].map(n => <option key={n} value={n}>{n} rows</option>)}
           </select>
+        </div>
+      </Section>
+
+      <Section title="Row actions menu" description="Components/RowActionsMenu.jsx — a small ⋮ trigger that opens a portaled dropdown of secondary row actions, anchored via the same portal technique FilterDropdown uses to escape a table's own scroll/overflow clipping (Components/ActionsMenu.jsx's own dropdown is deliberately non-portaled, meant for a page-header trigger instead). First built for schedule/leave-requests/'s Pending row, once a 3rd/4th text-link action next to Approve got cramped — keeps one primary action visible inline, tucks rarer ones behind the kebab.">
+        <div className="uk-row">
+          <RowActionsMenu
+            items={[
+              { label: 'Edit', onClick: () => {} },
+              { label: 'Delete', onClick: () => {} },
+            ]}
+          />
         </div>
       </Section>
 

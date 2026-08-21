@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import FilterDropdown from '../../../Components/FilterDropdown';
 import Pagination from '../../../Components/Pagination';
 import Modal from '../../../Components/Modal';
+import RowActionsMenu from '../../../Components/RowActionsMenu';
 import Tooltip from '../../../Components/Tooltip';
 import AuthGate from '../../../Components/AuthGate';
 import ColLabel from '../../../Components/ColLabel';
@@ -19,7 +20,7 @@ import DevEdit from '../../../Components/DevEdit';
 import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD } from './data';
+import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, leaveTypeTimes } from './data';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ const CloseIcon = () => (
 
 const statusClass = s => {
   if (s === 'Approved') return 'lr-status-approved';
+  if (s === 'Declined') return 'lr-status-declined';
   if (s === 'Awaiting Cancellation') return 'lr-status-awaiting';
   if (s === 'Cancelled') return 'lr-status-cancelled';
   return 'lr-status-pending';
@@ -124,8 +126,15 @@ export default function LeaveRequests() {
   const [rowsPerPage, setRowsPerPage] = useState(12);
 
   const [approveRow, setApproveRow] = useState(null);
-  const [cancelRow, setCancelRow] = useState(null);
-  const [cancelReason, setCancelReason] = useState('');
+  // Decline (Pending -> Declined, an initial office decision) and Cancel
+  // (Approved/Awaiting Cancellation -> Cancelled, calling off something
+  // already agreed) share one dialog — same reason-required shape, just a
+  // different resulting status/copy — rather than duplicating the whole
+  // block. See STATUSES' own comment in data.js for why these are two
+  // distinct terminal states, not one.
+  const [actionRow, setActionRow] = useState(null);
+  const [actionMode, setActionMode] = useState('cancel'); // 'decline' | 'cancel'
+  const [actionReason, setActionReason] = useState('');
 
   const {
     tableRef, colWidths, resizeColumn,
@@ -214,17 +223,19 @@ export default function LeaveRequests() {
     setApproveRow(null);
   };
 
-  // ── Cancel flow ────────────────────────────────────────────────────────────
-  // Same single dialog for all three cancellable statuses (Pending,
-  // Approved, Awaiting Cancellation) — confirming always finalizes straight
-  // to Cancelled with the required reason attached.
-  const openCancelDialog = row => { setCancelRow(row); setCancelReason(''); };
-  const closeCancelDialog = () => { setCancelRow(null); setCancelReason(''); };
-  const handleCancelConfirm = () => {
-    const reason = cancelReason.trim();
+  // ── Decline / Cancel flow ───────────────────────────────────────────────────
+  // Decline is the office's own initial rejection of a still-Pending
+  // request; Cancel calls off something already Approved (reached via
+  // Awaiting Cancellation, the care-worker-initiated withdrawal of an
+  // already-approved holiday). Both require a reason.
+  const openActionDialog = (row, mode) => { setActionRow(row); setActionMode(mode); setActionReason(''); };
+  const closeActionDialog = () => { setActionRow(null); setActionReason(''); };
+  const handleActionConfirm = () => {
+    const reason = actionReason.trim();
     if (!reason) return;
-    setRows(prev => prev.map(r => r.id === cancelRow.id ? { ...r, status: 'Cancelled', cancellationReason: reason } : r));
-    closeCancelDialog();
+    const nextStatus = actionMode === 'decline' ? 'Declined' : 'Cancelled';
+    setRows(prev => prev.map(r => r.id === actionRow.id ? { ...r, status: nextStatus, reason } : r));
+    closeActionDialog();
   };
 
   return (
@@ -393,19 +404,29 @@ export default function LeaveRequests() {
                   <td>
                     {row.status === 'Pending' && (
                       <span className="lr-actions">
-                        <button className="lr-action-btn" onClick={() => setApproveRow(row)}>Approve</button>
-                        <button className="lr-action-btn" onClick={() => openCancelDialog(row)}>Cancel</button>
+                        {/* All three Pending outcomes live in one kebab menu —
+                            a lone visible "Approve" text link next to the "⋮"
+                            read oddly as two different action styles sitting
+                            side by side, so it moved in alongside Decline/
+                            Cancel rather than staying split out. */}
+                        <RowActionsMenu
+                          items={[
+                            { label: 'Approve', onClick: () => setApproveRow(row) },
+                            { label: 'Decline', onClick: () => openActionDialog(row, 'decline') },
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel') },
+                          ]}
+                        />
                       </span>
                     )}
                     {(row.status === 'Approved' || row.status === 'Awaiting Cancellation') && (
                       <span className="lr-actions">
-                        <button className="lr-action-btn" onClick={() => openCancelDialog(row)}>Cancel</button>
+                        <button className="lr-action-btn" onClick={() => openActionDialog(row, 'cancel')}>Cancel</button>
                       </span>
                     )}
-                    {row.status === 'Cancelled' && (
-                      <Tooltip text={row.cancellationReason} wrapClassName="lr-cancelled-tooltip-wrap">
+                    {(row.status === 'Declined' || row.status === 'Cancelled') && (
+                      <Tooltip text={row.reason} wrapClassName="lr-cancelled-tooltip-wrap">
                         <span className="lr-cancelled-note">
-                          Cancelled — {row.cancellationReason}
+                          {row.status} — {row.reason}
                         </span>
                       </Tooltip>
                     )}
@@ -429,44 +450,48 @@ export default function LeaveRequests() {
       </div>
       </div>
 
-      {approveRow && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproveRow(null) }}>
-          <HolidayAbsenceDialog
-            employee={{ value: approveRow.employee, label: approveRow.employee }}
-            absenceType={{ value: 'holiday', label: 'Holiday' }}
-            startDate={approveRow.fromDate}
-            endDate={approveRow.toDate}
-            daysDeducted={approveRow.amount}
-            deductedLabel={approveRow.unit === 'hours' ? 'Hours deducted' : 'Days deducted'}
-            showVisitsStep={false}
-            onClose={() => setApproveRow(null)}
-            onConfirm={handleApproveConfirm}
-          />
-        </div>
-      )}
+      {approveRow && (() => {
+        const [startTime, endTime] = leaveTypeTimes(approveRow.leaveType);
+        return (
+          <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproveRow(null) }}>
+            <HolidayAbsenceDialog
+              employee={{ value: approveRow.employee, label: approveRow.employee }}
+              absenceType={{ value: 'holiday', label: 'Holiday' }}
+              startDate={approveRow.fromDate}
+              endDate={approveRow.toDate}
+              startTime={startTime}
+              endTime={endTime}
+              daysDeducted={approveRow.amount}
+              deductedLabel={approveRow.unit === 'hours' ? 'Hours deducted' : 'Days deducted'}
+              onClose={() => setApproveRow(null)}
+              onConfirm={handleApproveConfirm}
+            />
+          </div>
+        );
+      })()}
 
-      {cancelRow && (
-        <Modal title="Cancel leave request" onClose={closeCancelDialog}>
+      {actionRow && (
+        <Modal title={actionMode === 'decline' ? 'Decline leave request' : 'Cancel leave request'} onClose={closeActionDialog}>
           <div className="lr-cancel-summary">
-            <div><span className="lr-cancel-label">Leave type</span><span>{cancelRow.leaveType}</span></div>
-            <div><span className="lr-cancel-label">Date from</span><span>{fmtD(cancelRow.fromDate)}</span></div>
-            <div><span className="lr-cancel-label">Date to</span><span>{fmtD(cancelRow.toDate)}</span></div>
-            <div><span className="lr-cancel-label">{cancelRow.unit === 'hours' ? 'Hours requested' : 'Days requested'}</span><span>{cancelRow.amount}</span></div>
+            <div><span className="lr-cancel-label">Leave type</span><span>{actionRow.leaveType}</span></div>
+            <div><span className="lr-cancel-label">Date from</span><span>{fmtD(actionRow.fromDate)}</span></div>
+            <div><span className="lr-cancel-label">Date to</span><span>{fmtD(actionRow.toDate)}</span></div>
+            <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours requested' : 'Days requested'}</span><span>{actionRow.amount}</span></div>
           </div>
           <div className="field">
-            <label htmlFor="cancel-reason">Cancellation reason</label>
+            <label htmlFor="action-reason">{actionMode === 'decline' ? 'Decline reason' : 'Cancellation reason'}</label>
             <textarea
-              id="cancel-reason"
-              value={cancelReason}
-              onChange={e => setCancelReason(e.target.value)}
+              id="action-reason"
+              value={actionReason}
+              onChange={e => setActionReason(e.target.value)}
               rows={3}
-              placeholder="Explain why this leave request is being cancelled"
+              placeholder={actionMode === 'decline' ? 'Explain why this leave request is being declined' : 'Explain why this leave request is being cancelled'}
             />
           </div>
           <div className="btn-row">
-            <button className="round-btn tertiary-btn" onClick={closeCancelDialog}>Cancel</button>
-            <button className="round-btn primary-btn" disabled={!cancelReason.trim()} onClick={handleCancelConfirm}>
-              Confirm cancellation
+            <button className="round-btn tertiary-btn" onClick={closeActionDialog}>Cancel</button>
+            <button className="round-btn primary-btn" disabled={!actionReason.trim()} onClick={handleActionConfirm}>
+              {actionMode === 'decline' ? 'Confirm decline' : 'Confirm cancellation'}
             </button>
           </div>
         </Modal>
