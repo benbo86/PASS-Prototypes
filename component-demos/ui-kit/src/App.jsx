@@ -109,6 +109,12 @@ const FilterIcon = ({ active }) => (
   </svg>
 )
 
+// Task-chip icon — a single codepoint in the fa-solid/fa-regular icon
+// font (Styles/legacy.css, imported in main.jsx specifically for this
+// section), not an SVG. Copied verbatim from customer-profile/
+// communications/src/App.jsx's own FaIcon.
+const FaIcon = ({ code, weight = 'solid' }) => <span className={`cc-fa-icon cc-fa-icon-${weight}`}>{code}</span>
+
 // ─── Layout helper ───────────────────────────────────────────────
 
 function Section({ title, description, children }) {
@@ -337,6 +343,20 @@ export default function App() {
         <span className="uk-caption">Count badge</span>
         <div className="uk-row">
           <span className="menu-row-badge">3</span>
+        </div>
+      </Section>
+
+      <Section title="Task chips" description=".cc-task-chip / .cc-task-chip--{status} — solid-fill status pills used on customer-profile/communications/'s Care notes panel, one per care task performed during a visit. A local pattern (copied here from communications.css), not yet promoted to Styles/main.css. Icon glyphs come from the fa-solid/fa-regular icon font (Styles/legacy.css), the same mechanism customer-profile/timeline uses for its own status icons — not SVGs.">
+        <span className="uk-caption">Status variants</span>
+        <div className="uk-row">
+          <span className="cc-task-chip cc-task-chip--complete"><FaIcon code={''} />Serve dinner</span>
+          <span className="cc-task-chip cc-task-chip--partial"><FaIcon code={''} weight="regular" />Administer medication</span>
+          <span className="cc-task-chip cc-task-chip--cancelled"><FaIcon code={''} />Companionship visit</span>
+        </div>
+
+        <span className="uk-caption">Unrecognised status (falls back to grey, never invisible)</span>
+        <div className="uk-row">
+          <span className="cc-task-chip cc-task-chip--pending"><FaIcon code={''} />Assist with mobility</span>
         </div>
       </Section>
 

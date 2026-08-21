@@ -157,3 +157,28 @@ html, body {
   height: 3px;
   background: var(--brand-purple-4-purple-2-tint);
 }
+
+/* ── Task chips (.cc-task-chip) — copied from
+   customer-profile/communications/communications.css, a local pattern not
+   yet promoted to Styles/main.css (same "copy, don't centralize" convention
+   as .ep-tabs/.ep-tab above). .cc-task-chip's own background is a fallback
+   only — every real status further down overrides it — so an unrecognised
+   status still renders a visible grey chip instead of white-on-nothing. ── */
+.cc-fa-icon { font-style: normal; font-size: 14px; line-height: 1; }
+.cc-fa-icon-solid { font-family: 'fa-solid'; font-weight: 900; }
+.cc-fa-icon-regular { font-family: 'fa-regular'; font-weight: 400; }
+.cc-task-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px 3px 6px;
+  border-radius: .25em;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--greyscale-6-grey-50, #757575);
+}
+.cc-task-chip .cc-fa-icon { color: #fff; }
+.cc-task-chip--complete { background: var(--legacy-status-complete, #21a621); }
+.cc-task-chip--partial { background: var(--legacy-status-partial, #e09600); }
+.cc-task-chip--cancelled { background: #999; }
