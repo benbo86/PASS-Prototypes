@@ -20,7 +20,14 @@ import DevEdit from '../../../Components/DevEdit';
 import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, leaveTypeTimes } from './data';
+import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, leaveTypeTimes } from './data';
+
+// The signed-in office user — matches Components/TopNav.jsx's own default
+// `userName` ("Alex Morgan"), declared explicitly here (rather than left
+// implicit) and passed into <TopNav> below, so the nav's own identity and
+// every audit-trail attribution this page records can never drift apart —
+// same reasoning/pattern as web/messaging's own CURRENT_OFFICE_USER.
+const CURRENT_OFFICE_USER = 'Alex Morgan';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 
@@ -219,7 +226,9 @@ export default function LeaveRequests() {
   // Approved once the office user actually completes that dialog's own
   // step-2 Confirm; closing/backing out leaves the request Pending.
   const handleApproveConfirm = () => {
-    setRows(prev => prev.map(r => r.id === approveRow.id ? { ...r, status: 'Approved' } : r));
+    setRows(prev => prev.map(r => r.id === approveRow.id
+      ? { ...r, status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() }
+      : r));
     setApproveRow(null);
   };
 
@@ -234,7 +243,9 @@ export default function LeaveRequests() {
     const reason = actionReason.trim();
     if (!reason) return;
     const nextStatus = actionMode === 'decline' ? 'Declined' : 'Cancelled';
-    setRows(prev => prev.map(r => r.id === actionRow.id ? { ...r, status: nextStatus, reason } : r));
+    setRows(prev => prev.map(r => r.id === actionRow.id
+      ? { ...r, status: nextStatus, reason, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() }
+      : r));
     closeActionDialog();
   };
 
@@ -251,7 +262,7 @@ export default function LeaveRequests() {
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
       <SideNav activeItem="schedule" />
       <div className="page-body">
-      <TopNav />
+      <TopNav userName={CURRENT_OFFICE_USER} />
       <ScheduleNav active="leave-requests" tabBadges={{ 'leave-requests': actionRequiredCount }} />
       <main className="lr-content">
 
@@ -424,7 +435,15 @@ export default function LeaveRequests() {
                       </span>
                     )}
                     {(row.status === 'Declined' || row.status === 'Cancelled') && (
-                      <Tooltip text={row.reason} wrapClassName="lr-cancelled-tooltip-wrap">
+                      <Tooltip
+                        wrapClassName="lr-cancelled-tooltip-wrap lr-audit-popover"
+                        text={
+                          <>
+                            <div className="lr-popover-reason">{row.reason}</div>
+                            <div className="lr-popover-meta">{row.status} by {row.actionedBy} on {fmtDT(row.actionedAt)}</div>
+                          </>
+                        }
+                      >
                         <span className="lr-cancelled-note">
                           {row.status} — {row.reason}
                         </span>

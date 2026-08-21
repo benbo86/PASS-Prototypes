@@ -87,6 +87,30 @@ body { background: #fff; min-height: 100vh; }
   vertical-align: middle;
 }
 
+/* "Popover" variant of the shared Tooltip — this one now carries two
+   distinct pieces of info (the reason, and who/when actioned it), not just
+   a single line, so it reads better as a small structured card than the
+   default single-line tooltip: wider, no pointer arrow, the audit line
+   visually separated from the reason. Compound selector on `.tooltip`
+   itself (never present on the wrap div, see the comment above) so this
+   can't leak onto anything else using the shared component. */
+.tooltip.lr-audit-popover {
+  max-width: 280px;
+  padding: 12px 14px;
+}
+.tooltip.lr-audit-popover::before,
+.tooltip.lr-audit-popover::after {
+  display: none;
+}
+.lr-popover-reason { color: var(--greyscale-2-grey-20); }
+.lr-popover-meta {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  color: var(--greyscale-6-grey-50);
+  font-size: 12px;
+}
+
 /* ── Cancel dialog ────────────────────────────────────────────── */
 .lr-cancel-summary {
   display: flex; flex-direction: column; gap: 8px;

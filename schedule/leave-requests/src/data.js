@@ -11,6 +11,16 @@ export const EMPLOYEE_NAMES = [
   'John Smith',
 ];
 
+// Office users, not care workers — who a decision on a request is
+// attributed to (the audit trail). 'Alex Morgan' matches
+// Components/TopNav.jsx's own default `userName`, and LeaveRequests.jsx
+// declares the same name as its own CURRENT_OFFICE_USER constant, so a
+// live Approve/Decline/Cancel always attributes to whoever the nav shows as
+// signed in — the rest of the pool is only ever used to seed plausible
+// *historical* attributions on rows that already started in a decided
+// state.
+const OFFICE_USERS = ['Alex Morgan', 'Priya Shah', 'Grace Okafor'];
+
 export const LEAVE_TYPES = ['Full Day', 'Half Day (AM)', 'Half Day (PM)'];
 // 'Declined' and 'Cancelled' are deliberately distinct terminal states, not
 // one status doing double duty — see AIOP-21555/21563 comparison, 2026-08-21
@@ -60,6 +70,12 @@ const pad = n => String(n).padStart(2, '0');
 // from every other prototype's DD/MM/YYYY.
 export function fmtD(date) {
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
+}
+
+// Audit-trail stamp — date + time, for the "who actioned this and when"
+// tooltip on the status pill (LeaveRequests.jsx).
+export function fmtDT(date) {
+  return `${fmtD(date)} at ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 const CANCELLATION_REASONS = [
@@ -149,6 +165,19 @@ function buildRequests() {
     if (status === 'Declined') reason = pick(DECLINE_REASONS);
     else if (status === 'Cancelled') reason = pick(CANCELLATION_REASONS);
 
+    // Audit trail — who actioned this request, and when. Pending has no
+    // entry (never decided on yet). 'Awaiting Cancellation' keeps the
+    // original *approval's* stamp — nobody has actually decided on the
+    // cancellation itself yet, so there's nothing newer to attribute; the
+    // tooltip in LeaveRequests.jsx reads this as "Approved by ... on ..."
+    // for that status specifically, not "Awaiting Cancellation by ...".
+    let actionedBy = null, actionedAt = null;
+    if (status !== 'Pending') {
+      actionedBy = pick(OFFICE_USERS);
+      actionedAt = new Date(submitted.getTime() + btw(1, 4) * 86400000);
+      actionedAt.setHours(btw(8, 17), pick([0, 15, 30, 45]), 0, 0);
+    }
+
     requests.push({
       id: i + 1,
       employee,
@@ -160,6 +189,8 @@ function buildRequests() {
       status,
       submitted,
       reason,
+      actionedBy,
+      actionedAt,
     });
   }
   return requests;
