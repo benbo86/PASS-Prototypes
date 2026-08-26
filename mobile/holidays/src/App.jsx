@@ -490,7 +490,7 @@ export default function App() {
         <div className="hol-demo-stack">
           {outerView === 'holidays' && (
             <div className="hol-demo-toggle-wrap">
-              <span className="hol-demo-toggle-label">Demo: employee contract type</span>
+              <span className="hol-demo-toggle-label">Employee holiday scheme</span>
               <SegmentedToggle options={CONTRACT_TOGGLE_OPTIONS} value={contractType} onChange={setContractType} />
             </div>
           )}
