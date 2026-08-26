@@ -1279,7 +1279,7 @@
         },
         {
           "kind": "inline",
-          "ref": "component-demos/mobile-shell/src/App.jsx#ChevronLeftIcon",
+          "ref": "component-demos/mobile-components/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
         {
@@ -2006,6 +2006,48 @@
       "usageCount": 1
     },
     {
+      "hash": "32c40cd7",
+      "name": "Chevron Right",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M9 6l6 6-6 6\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/IOSCalendarPopover.jsx#ChevronRightIcon",
+          "name": "ChevronRightIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ba9d18e2",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M15 6l-6 6 6 6\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/IOSCalendarPopover.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "f650717c",
+      "name": "Backspace",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M9 6h11a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-6-6 6-6z\" />\n    <path d=\"M13 10l4 4M17 10l-4 4\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/IOSTimeKeypadPopover.jsx#BackspaceIcon",
+          "name": "BackspaceIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "bc31c177",
       "name": "Minus",
       "group": "Inline",
@@ -2491,6 +2533,34 @@
           "kind": "inline",
           "ref": "Components/WebNav.jsx#MoreIcon",
           "name": "MoreIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ca4514ed",
+      "name": "Calendar",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "component-demos/mobile-components/src/App.jsx#CalendarIcon",
+          "name": "CalendarIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "c2f7e5cb",
+      "name": "Clock",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "component-demos/mobile-components/src/App.jsx#ClockIcon",
+          "name": "ClockIcon"
         }
       ],
       "usageCount": 1
@@ -3490,5 +3560,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-21T13:57:03.184Z"
+  "generatedAt": "2026-08-25T08:14:06.758Z"
 }

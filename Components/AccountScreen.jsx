@@ -129,7 +129,7 @@ function Toggle({ on }) {
   )
 }
 
-export default function AccountScreen({ onGoToMessages, onGoToMileage, messagesUnread, hideNav = false }) {
+export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHolidays, messagesUnread, hideNav = false }) {
   return (
     <>
       <StatusBar />
@@ -158,7 +158,7 @@ export default function AccountScreen({ onGoToMessages, onGoToMileage, messagesU
             }
           />
           <MenuRow icon={<DocumentIcon />}     label="My Documents" />
-          <MenuRow icon={<CalendarMenuIcon />} label="Holidays" />
+          <MenuRow icon={<CalendarMenuIcon />} label="Holidays" onClick={onGoToHolidays} />
           <MenuRow icon={<CarMenuIcon />}      label="Mileage Pay" onClick={onGoToMileage} />
         </div>
 

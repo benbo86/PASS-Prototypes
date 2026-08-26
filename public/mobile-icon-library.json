@@ -797,6 +797,76 @@
       "usageCount": 1
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ca4514ed",
+      "name": "Calendar",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#CalendarIcon",
+          "name": "CalendarIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "c2f7e5cb",
+      "name": "Clock",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#ClockIcon",
+          "name": "ClockIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "2913b726",
+      "name": "Plus",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#PlusIcon",
+          "name": "PlusIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "6724b5af",
+      "name": "Delete Outline",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M17.3321482,7.55624688 L17.3321482,18.222321 C17.3321482,19.1545359 16.6150014,19.9198978 15.7004386,19.9941034 L15.5544692,20 L8.44464196,20 C7.51158269,20 6.74617855,19.2812488 6.67197078,18.3680498 L6.66607411,18.222321 L6.66607411,7.55624688 L17.3321482,7.55624688 Z M15.332,9.556 L8.666,9.556 L8.666,18 L15.332,18 L15.332,9.556 Z M14.2212099,4 L15.1109383,4.88972835 L17.3321482,4.88972835 C17.7858666,4.88972835 18.1600628,5.22902311 18.2149467,5.66642439 L18.2218766,5.77767902 L18.2218766,6.66740737 L5.77812344,6.66740737 L5.77812344,5.77767902 C5.77812344,5.32560157 6.1174182,4.95153162 6.55481948,4.89665741 L6.66607411,4.88972835 L8.88906172,4.88972835 L9.77701239,4 L14.2212099,4 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#DeleteOutlineIcon",
+          "name": "DeleteOutlineIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "b66f6e6b",
       "name": "Archive",
       "group": "Staff Messaging",
@@ -1203,5 +1273,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-14T12:31:23.176Z"
+  "generatedAt": "2026-08-26T16:20:36.553Z"
 }

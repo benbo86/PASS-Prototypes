@@ -49,6 +49,14 @@ export const THREADS = [
     kind: 'openpass-visit',
     personName: 'Mark Allin',
     visitLabel: 'Evening Visit 17:30, 18/08/26',
+    // The care worker who actually carried out the visit — distinct from
+    // personName above (Mark, the openPASS/family member this thread is
+    // with). Shown in the Care notes panel as "Completed by ...", under the
+    // visit name/time. Priya Shah is already this customer's own care
+    // worker elsewhere in this data (see the 'employee' thread below —
+    // "I've got Pat tomorrow morning"), so reusing her here keeps the cast
+    // consistent rather than naming an unrelated one-off employee.
+    employeeName: 'Priya Shah',
     lastSender: 'Mark Allin',
     lastMessage: "I'm glad she was in a good mood today, thank you for letting me know.",
     time: '19:15',

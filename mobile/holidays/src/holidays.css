@@ -1,0 +1,368 @@
+/* ── Screen ──────────────────────────────────────────────────── */
+/* The actual root cause of the "can't scroll" bug, found after the stale
+   Dev Edit override below turned out not to be the whole story: every
+   other mobile prototype (mobile/account, mobile/messaging,
+   mobile/notifications) defines its own local `.screen` rule
+   (position:absolute; inset:0; display:flex; flex-direction:column;
+   overflow:hidden) — this file never had one at all. Without `.screen`
+   being a flex container, `.hol-list-scroll`'s own `flex:1` below was
+   inert from the very start (flex properties only do anything on a flex
+   container's direct children) — `.screen` just grew to fit whatever
+   content was inside it, with nothing to properly cap it or hand off
+   overflow to its own scrollable child. Confirmed directly: no CSS rule
+   for `.screen` existed anywhere in this file, and the live page's own
+   computed `display` for it was `block`, not `flex`. */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── List / entitlement screen ──────────────────────────────────── */
+/* Renamed from `.hol-body` (2026-08-26) — not a style change, a rename.
+   A `height:100%` rule had been applied to `.hol-body` at some point via
+   Dev Edit and saved as this prototype's active version — Dev Edit's own
+   always-on reconciliation effect re-applies whatever's saved for a given
+   selector on every single page load, live, straight onto the CSSOM,
+   completely independent of what this source file says. Editing the
+   source (removing height:100%, even trying overflow:scroll instead) had
+   no effect on the live page at all, because that effect kept re-writing
+   `.hol-body`'s own rule back to the stale saved value on every load —
+   confirmed directly: a fresh, uncached fetch of the raw served CSS file
+   showed the correct rule with no height:100%, while the same page's own
+   live CSSOM still showed height:100% applied moments later. Fixing the
+   Firestore-side "active version" properly needs the shared Dev Edit
+   password (not available in this session) to sign in and re-save it —
+   see this prototype's own memory for that follow-up. In the meantime,
+   renaming the selector is a full, immediate, no-password fix: Dev Edit
+   matches and re-applies overrides purely by selector text, so a stale
+   override for a selector that no longer exists anywhere on the page
+   simply has nothing to attach to and does nothing — every *other* live
+   override for this prototype (status colours etc., matched by their own,
+   different selectors) is completely unaffected by this rename.
+
+   No explicit height on this rule, deliberately — it's a `flex:1` child of
+   `.screen` (itself a plain, unsized block inside the ScreenSlider's
+   clipped `.screen-slide`), so `flex:1` alone is what correctly caps it to
+   the real available space and lets `overflow-y:auto` scroll its own
+   overflow internally. */
+.hol-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--ui-purple-6-lavendar-grey, #edecf1);
+  padding-bottom: 24px;
+}
+
+/* Demo-only control switching between the Days-scheme and Hours-scheme
+   experiences — deliberately rendered outside .phone-frame entirely (see
+   App.jsx's own root component) so it reads as a prototype control, not
+   part of the app's own UI. Sits to the left of the phone mockup,
+   vertically centered against it (Ben: the previous above-the-phone
+   placement was "easy to miss"), rather than stacked above it.
+
+   .hol-demo-toggle-wrap is taken out of flow (position:absolute) rather
+   than laid out as a plain flex sibling of .phone-frame — Ben's own
+   follow-up: the phone mockup itself must stay exactly centered on the
+   page, same as before this round. A plain flex row centers the *pair* as
+   one combined block, visibly shifting the phone off-centre to make room
+   for the toggle; absolute positioning keeps .hol-demo-stack sized to
+   (and therefore .phone-wrap centering on) the phone frame alone, with
+   the toggle floating beside it without consuming any layout space. */
+.hol-demo-stack {
+  position: relative;
+}
+.hol-demo-toggle-wrap {
+  position: absolute;
+  right: calc(100% + 24px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* Real bug: with only `right` set (no `left`), an absolutely positioned
+     box's auto width falls back to a shrink-to-fit calculation that
+     doesn't reliably size to its own widest child the way normal-flow
+     content would — it came out narrower than the pill row's real
+     content width, squeezing "Days scheme"/"Hours scheme" onto two lines
+     inside each pill. max-content sizes the box to its content's actual
+     natural width instead, bypassing that calculation entirely. */
+  width: max-content;
+}
+.hol-demo-toggle-label {
+  font: 12px Barlow, sans-serif;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  /* Narrower than the pill row's own natural width so the label wraps to
+     2-3 short lines instead of stretching wide and unbalancing the
+     now-compact side-by-side layout. */
+  max-width: 120px;
+}
+
+.hol-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  padding: 16px 16px 0;
+}
+.hol-stat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+}
+.hol-stat-label {
+  font: 13px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+  margin-bottom: 4px;
+}
+.hol-stat-value {
+  font: 20px/1.2 Barlow, sans-serif;
+  font-weight: 600;
+  color: #333;
+}
+
+.hol-request-btn {
+  margin: 16px;
+  width: calc(100% - 32px);
+  justify-content: center;
+}
+
+.hol-section-label {
+  padding: 0 16px;
+  font: 14px Barlow, sans-serif;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.hol-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.hol-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  font: 14px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+}
+
+.hol-request-card {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+}
+/* Awaiting cancellation gets a distinct tinted card background (matches
+   the Figma design), not just its own status pill — a request in this
+   state is already leaving the active list, worth reading as visually
+   receding. */
+.hol-request-card--awaiting-cancellation {
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.hol-request-status {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font: 12px Barlow, sans-serif;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+.hol-request-status--awaiting-approval { background: var(--rag-amber-amber-7); color: #FFF; }
+.hol-request-status--awaiting-cancellation { background: var(--ui-purple-5-languid-lavendar); color: var(--ui-purple-1-cyber-grape); }
+.hol-request-status--approved { background: var(--rag-green-green-5); color: #FFF; }
+.hol-request-status--declined { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue-text); }
+
+.hol-request-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 16px Barlow, sans-serif;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+.hol-request-date svg { color: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
+.hol-request-duration { font: 14px Barlow, sans-serif; color: #333; margin-bottom: 4px; }
+.hol-request-meta { font: 12px Barlow, sans-serif; color: var(--greyscale-6-grey-50); }
+
+.hol-request-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.04);
+  color: var(--rag-red-red-overdue, #e31c4a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ── Request leave form ─────────────────────────────────────────── */
+.hol-form-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color:var(--ui-purple-7-lightest-lavendar);
+  height:100vh;
+}
+
+.hol-form-label {
+  font: 14px Barlow, sans-serif;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.hol-pill-row {
+  display: flex;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+.hol-pill {
+  flex: 1;
+  padding: 15px 4px;
+  text-align: center;
+  border-radius: 10px;
+  border: 2px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+  font: 14px Barlow, sans-serif;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  font-family: inherit;
+}
+.hol-pill.active {
+  background-color: #EBE1EE;
+  border-color: var(--brand-purple-7-purple-5);
+  color: var(--brand-purple-3-purple-2);
+}
+
+.hol-field-group {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.hol-field {
+  position: relative;
+}
+.hol-field + .hol-field {
+  margin-top: 16px;
+}
+/* Label/input/icon below are copied verbatim (same values, not just the
+   same look) from Components/HolidayAbsenceDialog.jsx's own DateInput/
+   TimeInput + Styles/modal.css's plain `label`/`input[type="text"]`/
+   `.input-wrap`/`.input-icon` rules — the "Add a Holiday or Absence" modal
+   this prototype's own web/office side already uses. The field itself is a
+   plain readOnly text input (not `type="date"`/`type="time"` — those only
+   actually render as an iOS-native picker on a real iPhone; everywhere
+   else, including this prototype's own desktop demo context, they'd show
+   that platform's own native control instead). Tapping it opens
+   Components/IOSCalendarPopover.jsx (date fields) or
+   Components/IOSTimeKeypadPopover.jsx (time fields) — both from-scratch,
+   built from real reference images (Styles/ios-picker.css) — so the
+   picker itself looks the same regardless of what's actually viewing this
+   prototype. */
+.hol-field-label {
+  display: block;
+  font-size: 14px;
+  font-family: Barlow, sans-serif;
+  color: #333;
+  margin-bottom: 6px;
+}
+.hol-field-input-wrap { position: relative; }
+.hol-field-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--ui-purple-4-lavendar, #cac6d7);
+  border-radius: 8px;
+  padding: 12px 40px 12px 14px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  font-family: Barlow, sans-serif;
+  color: var(--greyscale-2-grey-20, #333);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.hol-field-input:disabled { cursor: default; }
+.hol-field-input:focus { border-color: var(--brand-purple-6-purple-4); }
+.hol-field-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: var(--ui-purple-3-grape-grey, #968caf);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.hol-summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var( --ui-purple-6-lavendar-grey);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+.hol-summary-label { font: 16px Barlow, sans-serif; color: #333; }
+.hol-summary-value { font: 18px Barlow, sans-serif; font-weight: 700; color: #333; }
+.hol-remaining-text {
+  text-align: right;
+  font: 12px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+  margin-bottom: 24px;
+}
+
+.hol-submit-btn { width: 100%; justify-content: center; }
+
+/* ── Delete/cancel confirmation bottom sheet ────────────────────────
+   Same overlay+sheet technique as mobile/customer-documents' own
+   .docs-sheet-overlay/.docs-sheet-panel (and mobile/messaging's
+   .picker-overlay/.picker-sheet) — not shared across prototypes, each
+   copies its own per this repo's established convention. Two distinct
+   copy variants render through the same sheet (Approved vs Awaiting
+   approval — see HolidayApp.jsx), matching the Figma's own two bottom
+   sheets exactly. */
+.hol-sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--web-skrim, rgba(60,57,72,0.7));
+  display: flex;
+  align-items: flex-end;
+  z-index: 50;
+}
+.hol-sheet-panel {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 16px 32px;
+}
+.hol-sheet-body {
+  font: 14px/1.5 Barlow, sans-serif;
+  color: #333;
+  margin-bottom: 20px;
+}
+.hol-sheet-title { font: 16px Barlow, sans-serif; font-weight: 600; color: #333; margin-bottom: 4px; }
+.hol-sheet-subtitle { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50); margin-bottom: 20px; }
+.hol-sheet-btn { width: 100%; justify-content: center; }
+.hol-sheet-btn + .hol-sheet-btn { margin-top: 12px; }

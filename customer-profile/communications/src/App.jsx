@@ -358,6 +358,7 @@ function ThreadView({ thread, messages, onSend }) {
               <div className="cc-care-notes-panel-titles">
                 <h3>Care notes</h3>
                 <span className="cc-care-notes-panel-subtitle">{thread.visitLabel}</span>
+                <span className="cc-care-notes-panel-subtitle">Completed by {thread.employeeName}</span>
               </div>
               <button className="cc-care-notes-close" onClick={() => setShowCareNotes(false)} aria-label="Close">
                 <CloseIcon size={20} />

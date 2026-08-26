@@ -1,0 +1,94 @@
+.mobile-shell-demo {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.mobile-shell-demo-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+}
+.mobile-shell-demo-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.mobile-shell-demo-content p {
+  color: var(--greyscale-4-grey-40);
+  max-width: 60ch;
+  margin-bottom: 20px;
+}
+
+/* Real screens always paint an opaque background on their body content,
+   which is what keeps the outgoing slide fully hidden behind the
+   incoming one. This minimal demo's body has no real content to do
+   that, so paint the whole slide white directly. */
+.mobile-shell-demo .screen-slide {
+  background: #fff;
+}
+
+.shell-demo-body {
+  padding: 24px 24px 95px;
+}
+.shell-demo-body p {
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* AppNav sits outside the ScreenSlider entirely (a sibling of .screen, not
+   inside either slide), pinned to the bottom of the phone frame so it
+   never moves during the primary/secondary transition. */
+.mobile-shell-demo .phone-frame > .app-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* ── Pickers story's own field chrome — same values (not approximated)
+   as mobile/holidays/src/holidays.css's own .hol-field-* rules, which
+   themselves were copied verbatim from Styles/modal.css's plain
+   label/input/.input-icon rules. Kept local to this demo rather than
+   importing holidays.css directly, matching this repo's convention of
+   each prototype owning its own local CSS rather than reaching into
+   another prototype's. */
+.demo-field {
+  margin-bottom: 16px;
+}
+.demo-field-label {
+  display: block;
+  font-size: 14px;
+  font-family: Barlow, sans-serif;
+  color: #333;
+  margin-bottom: 6px;
+}
+.demo-field-input-wrap {
+  position: relative;
+  border: 1.5px solid var(--ui-purple-4-lavendar, #cac6d7);
+  border-radius: 8px;
+  padding: 12px 40px 12px 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.demo-field-value {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.38;
+  font-family: Barlow, sans-serif;
+  color: var(--greyscale-2-grey-20, #333);
+}
+.demo-field-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  color: var(--ui-purple-3-grape-grey, #968caf);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}

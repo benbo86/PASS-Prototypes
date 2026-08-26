@@ -38,6 +38,7 @@ export default function App() {
             // this page is never itself a transition destination.
             onGoToMessages={() => { window.location.href = '../messaging/?screen=inbox&transition=1' }}
             onGoToMileage={() => { window.location.href = '../mileage-pay/?screen=mileage&transition=1' }}
+            onGoToHolidays={() => { window.location.href = '../holidays/?screen=holidays&transition=1' }}
             messagesUnread={messagesUnread}
           />
         </div>

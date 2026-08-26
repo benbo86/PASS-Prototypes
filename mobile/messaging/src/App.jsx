@@ -1189,7 +1189,8 @@ export default function App() {
               <AccountScreen
                 hideNav
                 onGoToMessages={() => setOuterView('messaging')}
-                onGoToMileage={() => { window.location.href = '../mileage-pay/' }}
+                onGoToMileage={() => { window.location.href = '../mileage-pay/?screen=mileage&transition=1' }}
+                onGoToHolidays={() => { window.location.href = '../holidays/?screen=holidays&transition=1' }}
                 messagesUnread={messageBadge}
               />
             }
@@ -1242,7 +1243,7 @@ export default function App() {
             messagesUnread={messageBadge}
             links={{ notifications: '../notifications/' }}
           />
-        ) : view !== 'thread' ? (
+        ) : view === 'inbox' ? (
           <AppNav
             activeTab={null}
             messagesUnread={messageBadge}

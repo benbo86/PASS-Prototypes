@@ -671,6 +671,12 @@ h6 {
   font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
   line-height: 20px;
   color: var(--greyscale-4-grey-40);
+  /* Harmless on the original <span> (which has no default browser chrome
+     to begin with) — needed once Components/SegmentedToggle.jsx renders
+     this as a real <button> for its optional interactive (onChange) mode. */
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 .seg-toggle-item.active {
   color: #000;

@@ -1,0 +1,200 @@
+/* ── Components/IOSCalendarPopover.jsx — the date-mode picker ──────
+   A calendar grid, not a wheel (see the component's own header comment
+   for why date and time use two different iOS-native conventions). Built
+   directly from a visual reference, not approximated from docs. Docked
+   under whichever field opened it — portaled to document.body and
+   positioned via inline top/left/width computed from that field's own
+   getBoundingClientRect() (see the component's own header comment for why:
+   position:absolute inside the field's own ancestry gets clipped by
+   .hol-form-body's overflow-y:auto and .phone-frame/.screen-area's
+   overflow:hidden). No scrim/dimming and no Cancel/Done — .ios-cal-backdrop
+   is a transparent full-page click-catcher only, matching the reference's
+   own plain, undimmed background; tapping a day both selects and closes.
+   Uses the real iOS system blue (#007aff) directly rather than this repo's
+   own brand purple — the whole point here is matching Apple's actual look,
+   not this design system's usual accent colour. */
+.ios-cal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10800;
+}
+.ios-cal-popover {
+  position: fixed;
+  z-index: 10801;
+  background: #f2f2f7;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  padding: 16px;
+  box-sizing: border-box;
+  /* Safety net alongside the component's own top-vs-bottom anchoring —
+     keeps it fully on-screen even if the estimated height is ever off. */
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+}
+
+.ios-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.ios-cal-month-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 17px Barlow, sans-serif;
+  font-weight: 700;
+  color: #1c1c1e;
+}
+.ios-cal-nav {
+  display: flex;
+  gap: 20px;
+}
+.ios-cal-nav-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #007aff;
+  display: flex;
+  cursor: pointer;
+}
+
+.ios-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+.ios-cal-weekdays span {
+  text-align: center;
+  font: 11px Barlow, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #8e8e93;
+}
+
+.ios-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 4px;
+}
+.ios-cal-cell {
+  border: none;
+  background: none;
+  padding: 0;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 16px Barlow, sans-serif;
+  color: #1c1c1e;
+  cursor: pointer;
+}
+.ios-cal-cell--empty { cursor: default; }
+.ios-cal-cell.disabled {
+  color: #c7c7cc;
+  cursor: default;
+}
+.ios-cal-cell.today {
+  color: #007aff;
+  font-weight: 600;
+}
+.ios-cal-cell.selected {
+  position: relative;
+  color: #007aff;
+  font-weight: 600;
+}
+.ios-cal-cell.selected::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: rgba(0, 122, 255, 0.15);
+  z-index: -1;
+}
+
+/* ── Components/IOSTimeKeypadPopover.jsx — the time-mode picker ────
+   A numeric keypad, not a wheel — see the component's own header comment
+   for the digit-entry model and why AM/PM was dropped. Positioned like a
+   real system keyboard: full-width, flush against the bottom edge of the
+   phone mockup (Ben: "the numeric keyboard should be the native iOS one,
+   where its displayed at the bottom of the device") — rounded top corners
+   only, no bottom radius, matching a keyboard sitting flush against the
+   device's own bottom edge (border-radius:20px would look wrong here,
+   unlike .ios-cal-popover's own fully-rounded floating card). Reuses
+   .ios-cal-backdrop (defined above) for its own outside-click-to-close
+   catcher — both pickers share the identical "no scrim, tap outside
+   closes" convention, so there's nothing picker-specific to style there.
+   `overflow:hidden` (rather than the auto/hidden split .ios-cal-popover
+   uses) is what actually clips the toolbar's own square top corners into
+   the container's rounded shape — the safety-net scrolling if content
+   ever exceeds max-height happens on .ios-time-keypad itself instead, so
+   the toolbar stays pinned above the scrollable region rather than
+   scrolling away with it. */
+.ios-time-popover {
+  position: fixed;
+  z-index: 10801;
+  background: #f2f2f7;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  overflow: hidden;
+  max-height: calc(100vh - 16px);
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-time-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f9f9f9;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+.ios-time-toolbar-btn {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  font: 16px Barlow, sans-serif;
+  font-weight: 600;
+  color: #007aff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ios-time-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 8px;
+  overflow-y: auto;
+}
+.ios-time-key {
+  border: none;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ios-time-key-digit {
+  font: 28px Barlow, sans-serif;
+  font-weight: 400;
+  color: #1c1c1e;
+  line-height: 1;
+}
+.ios-time-key-letters {
+  font: 10px Barlow, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #8e8e93;
+  margin-top: 2px;
+}
+.ios-time-key--backspace {
+  color: #1c1c1e;
+}

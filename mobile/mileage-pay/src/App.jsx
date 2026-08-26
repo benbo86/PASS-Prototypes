@@ -60,6 +60,7 @@ export default function App() {
                 hideNav
                 onGoToMessages={() => { window.location.href = '../messaging/?screen=inbox&transition=1' }}
                 onGoToMileage={() => setOuterView('mileage')}
+                onGoToHolidays={() => { window.location.href = '../holidays/?screen=holidays&transition=1' }}
                 messagesUnread={messagesUnread}
               />
             }
