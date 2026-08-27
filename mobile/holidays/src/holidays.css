@@ -180,6 +180,10 @@
 .hol-request-status--awaiting-cancellation { background: var(--ui-purple-5-languid-lavendar); color: var(--ui-purple-1-cyber-grape); }
 .hol-request-status--approved { background: var(--rag-green-green-5); color: #FFF; }
 .hol-request-status--declined { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue-text); }
+/* Same tone as Awaiting cancellation, deliberately — Cancelled is that
+   status's own resolved terminal state, not a rejection, so it doesn't
+   borrow Declined's red. */
+.hol-request-status--cancelled { background: var(--ui-purple-5-languid-lavendar); color: var(--ui-purple-1-cyber-grape); }
 
 .hol-request-date {
   display: flex;
@@ -192,6 +196,11 @@
 }
 .hol-request-date svg { color: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
 .hol-request-duration { font: 14px Barlow, sans-serif; color: #333; margin-bottom: 4px; }
+/* Only ever rendered on a Declined card — reuses the same red text colour
+   as .hol-request-status--declined's own pill for a consistent "this is
+   the negative-outcome detail" read, rather than the neutral grey used by
+   .hol-request-meta below it. */
+.hol-request-declined-reason { font: 13px Barlow, sans-serif; color: var(--rag-red-red-overdue-text); margin-bottom: 4px; }
 .hol-request-meta { font: 12px Barlow, sans-serif; color: var(--greyscale-6-grey-50); }
 
 .hol-request-delete {

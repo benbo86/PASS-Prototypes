@@ -44,7 +44,8 @@ export const DAYS_INITIAL_REQUESTS = [
   { id: 1, status: 'Awaiting approval', fromDate: '2026-02-02', toDate: '2026-02-02', amount: 1, requestedOn: '2025-12-18' },
   { id: 2, status: 'Awaiting cancellation', fromDate: '2026-01-15', toDate: '2026-01-15', amount: 0.5, requestedOn: '2025-12-01' },
   { id: 3, status: 'Approved', fromDate: '2025-12-23', toDate: '2025-12-27', amount: 5, requestedOn: '2025-12-15' },
-  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 1, requestedOn: '2025-12-10' },
+  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 1, requestedOn: '2025-12-10', declinedReason: 'Insufficient staff cover for the requested date' },
+  { id: 5, status: 'Cancelled', fromDate: '2025-12-30', toDate: '2025-12-30', amount: 1, requestedOn: '2025-11-28' },
 ]
 
 export function fmtDays(n) {
@@ -61,7 +62,8 @@ export const HOURS_INITIAL_REQUESTS = [
   { id: 1, status: 'Awaiting approval', fromDate: '2026-02-02', toDate: '2026-02-02', amount: 4, requestedOn: '2025-12-18' },
   { id: 2, status: 'Awaiting cancellation', fromDate: '2026-01-15', toDate: '2026-01-15', amount: 4, requestedOn: '2025-12-01' },
   { id: 3, status: 'Approved', fromDate: '2025-12-23', toDate: '2025-12-27', amount: 40, requestedOn: '2025-12-15' },
-  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 8, requestedOn: '2025-12-10' },
+  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 8, requestedOn: '2025-12-10', declinedReason: 'Insufficient staff cover for the requested date' },
+  { id: 5, status: 'Cancelled', fromDate: '2025-12-30', toDate: '2025-12-30', amount: 8, requestedOn: '2025-11-28' },
 ]
 
 export function hoursBetween(start, end) {

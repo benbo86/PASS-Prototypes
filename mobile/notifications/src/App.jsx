@@ -147,10 +147,18 @@ const TYPE_CONFIG = {
   event_date_changed:     { label: 'Event date changed',         tone: 'blue', Icon: CalendarIcon },
   event_time_changed:     { label: 'Event time changed',         tone: 'amber', Icon: ClockIcon },
   event_duration_changed: { label: 'Event duration changed',     tone: 'amber', Icon: TimeGlassIcon },
+  holiday_approved:       { label: 'Holiday request approved',   tone: 'green', Icon: CalendarIcon },
+  holiday_declined:       { label: 'Holiday request declined',   tone: 'red', Icon: CalendarIcon },
+  holiday_cancelled:      { label: 'Holiday request cancelled',  tone: 'grey', Icon: CalendarIcon },
 }
 
 const SHIFT_TYPES = ['shift_visit_changed', 'shift_duration_changed', 'shift_summary', 'shift_new']
 const EVENT_TYPES = ['event_date_changed', 'event_time_changed', 'event_duration_changed']
+// Unlike every other type, tapping one of these navigates to a different
+// prototype (mobile/holidays/) entirely rather than opening this
+// prototype's own in-app booking/shift/event detail screen — see the root
+// App()'s own viewBooking for where that's intercepted.
+const HOLIDAY_TYPES = ['holiday_approved', 'holiday_declined', 'holiday_cancelled']
 
 const renderDetail = (notif) => {
   switch (notif.type) {
@@ -189,6 +197,12 @@ const renderDetail = (notif) => {
       return <><s>{notif.originalTime}</s>{` ${notif.newTime}, ${notif.eventDate}`}</>
     case 'event_duration_changed':
       return <><s>{notif.originalDuration}</s>{` ${notif.newDuration}, ${notif.eventDate}, ${notif.eventTime}`}</>
+    case 'holiday_approved':
+      return notif.amount
+    case 'holiday_declined':
+      return `${notif.amount} — ${notif.declinedReason}`
+    case 'holiday_cancelled':
+      return notif.amount
     default:
       return ''
   }
@@ -199,7 +213,7 @@ const renderDetail = (notif) => {
 function NotifRow({ notif }) {
   const config = TYPE_CONFIG[notif.type]
   const { Icon } = config
-  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : (notif.shiftName || notif.eventName || notif.customer)
+  const displayName = notif.type === 'shift_visit_changed' ? notif.customer : notif.isHoliday ? notif.dateRange : (notif.shiftName || notif.eventName || notif.customer)
 
   return (
     <div className={`notif-row${notif.read ? '' : ' unread'}`}>
@@ -207,14 +221,15 @@ function NotifRow({ notif }) {
         {notif.photo
           ? <img src={notif.photo} className="notif-avatar" alt={notif.customer} />
           : <div
-              className={`notif-avatar notif-avatar-initials${(notif.shiftInitials || notif.isEvent) ? ' notif-avatar-generic' : ''}`}
-              // Shift/event backgrounds are a fixed value now covered by
-              // .notif-avatar-generic (see notifications.css) — only a real
-              // customer's photo-less avatar colour still needs an inline
-              // style, since that genuinely varies per customer.
-              style={(notif.shiftInitials || notif.isEvent) ? undefined : { background: notif.avatarColor, color: '#fff' }}
+              className={`notif-avatar notif-avatar-initials${(notif.shiftInitials || notif.isEvent || notif.isHoliday) ? ' notif-avatar-generic' : ''}`}
+              // Shift/event/holiday backgrounds are a fixed value now
+              // covered by .notif-avatar-generic (see notifications.css) —
+              // only a real customer's photo-less avatar colour still
+              // needs an inline style, since that genuinely varies per
+              // customer.
+              style={(notif.shiftInitials || notif.isEvent || notif.isHoliday) ? undefined : { background: notif.avatarColor, color: '#fff' }}
             >
-              {notif.shiftInitials ? <RunIcon size={22} /> : notif.isEvent ? <EventIcon size={22} /> : notif.initials}
+              {notif.shiftInitials ? <RunIcon size={22} /> : notif.isEvent ? <EventIcon size={22} /> : notif.isHoliday ? <CalendarIcon size={22} /> : notif.initials}
             </div>
         }
         {notif.type !== 'shift_summary' && (
@@ -617,6 +632,14 @@ export default function App() {
   }
 
   const viewBooking = (notif) => {
+    // Holiday request responses have nowhere to open *within* this
+    // prototype — they navigate straight to mobile/holidays/ instead,
+    // matching the same ?screen=holidays&transition=1 convention every
+    // other cross-prototype "go to Holidays" link already uses.
+    if (HOLIDAY_TYPES.includes(notif.type)) {
+      window.location.href = '../holidays/?screen=holidays&transition=1'
+      return
+    }
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))
     setSelectedNotif(notif)
     setView('detail')

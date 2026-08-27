@@ -59,13 +59,18 @@ const STATUS_CLASS = {
   'Awaiting cancellation': 'hol-request-status--awaiting-cancellation',
   'Approved': 'hol-request-status--approved',
   'Declined': 'hol-request-status--declined',
+  // The resolved terminal state of 'Awaiting cancellation', once the office
+  // confirms it — reuses that same status's own purple/lavender tone
+  // (rather than Declined's red) since this is a care worker-initiated,
+  // neutral outcome, not a rejection.
+  'Cancelled': 'hol-request-status--cancelled',
 }
 
 // Delete/cancel icon only appears where the care worker can actually still
 // act on the request — Approved (asks the office to cancel it) or Awaiting
 // approval (withdraws it outright, no office involvement) — matching
-// AIOP-21563's own field list. Declined/Awaiting cancellation are already
-// terminal-or-in-progress from the care worker's side.
+// AIOP-21563's own field list. Declined/Awaiting cancellation/Cancelled are
+// already terminal-or-in-progress from the care worker's side.
 const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
 
 const CONTRACT_TOGGLE_OPTIONS = [
@@ -129,6 +134,9 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
                 {r.fromDate === r.toDate ? fmtDate(r.fromDate) : `${fmtDate(r.fromDate)} – ${fmtDate(r.toDate)}`}
               </div>
               <div className="hol-request-duration">{fmtAmount(r.amount)}</div>
+              {r.status === 'Declined' && r.declinedReason && (
+                <div className="hol-request-declined-reason">Reason: {r.declinedReason}</div>
+              )}
               <div className="hol-request-meta">Requested on {fmtDate(r.requestedOn)}</div>
             </div>
           ))}

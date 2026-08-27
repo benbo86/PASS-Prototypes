@@ -10,7 +10,28 @@ import harryImg    from '../Images/Customer=Harinder Kulkarni.png'
 import samImg      from '../Images/Customer=Sam Malone.png'
 
 export const NOTIFICATIONS = [
-  // Non-contact event — Today (most recent)
+  // Holiday request response — Today (most recent). Unlike every other
+  // type here, tapping this one navigates to a different prototype
+  // (mobile/holidays/) entirely rather than opening an in-app detail
+  // screen — see mobile/notifications/src/App.jsx's own HOLIDAY_TYPES
+  // handling for why.
+  {
+    id: 19, type: 'holiday_cancelled', read: false, receivedAt: '1 min ago', section: 'Today',
+    isHoliday: true,
+    dateRange: '30 Dec 2025', amount: '1 day',
+  },
+  {
+    id: 18, type: 'holiday_declined', read: false, receivedAt: '2 mins ago', section: 'Today',
+    isHoliday: true,
+    dateRange: '5 Jan 2026', amount: '1 day',
+    declinedReason: 'Insufficient staff cover for the requested date',
+  },
+  {
+    id: 17, type: 'holiday_approved', read: false, receivedAt: '10 mins ago', section: 'Today',
+    isHoliday: true,
+    dateRange: '23 Dec 2025 – 27 Dec 2025', amount: '5 days',
+  },
+  // Non-contact event — Today
   {
     id: 14, type: 'event_time_changed', read: false, receivedAt: '5 mins ago', section: 'Today',
     eventName: 'Staff Meeting', isEvent: true,
