@@ -1,12 +1,14 @@
 import { useState } from 'react'
 
 // Search-to-add, pick-many input — type to filter `items`, click a result to
-// add it, added items render as removable rows below. Mirrors
-// roster/contactable-staff's own search-to-add employee UX (row-based, not
-// react-select's chip-multiselect) since that's this repo's established
-// precedent for "search and add people." No equivalent shared component
-// existed before this — first consumer: customer-profile/service-agreement/'s
-// "Preferred care workers" field. Demoed in component-demos/ui-kit.
+// add it, added items render as removable rows below. Mirrors the
+// search-to-add employee UX originally built for roster/communications'
+// (then roster/contactable-staff's) own Contactable employees feature —
+// since removed from that prototype, but this remains the established
+// precedent for "search and add people" (row-based, not react-select's
+// chip-multiselect). No equivalent shared component existed before this —
+// first consumer: customer-profile/service-agreement/'s "Preferred care
+// workers" field. Demoed in component-demos/ui-kit.
 
 const SearchIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

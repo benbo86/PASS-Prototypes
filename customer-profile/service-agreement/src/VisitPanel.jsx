@@ -79,8 +79,9 @@ export default function VisitPanel({ open, visit, onClose, onSave }) {
 
   // VisitPanel never unmounts (SlidePanel just returns null while closed),
   // so the pending copy has to be (re)seeded here rather than at mount —
-  // same reasoning as roster/contactable-staff's own openPanel(), just as
-  // an effect since open/visit are controlled by the parent.
+  // same reasoning as roster/communications' own openCommsPanel()/
+  // openHolidayPanel(), just as an effect since open/visit are controlled
+  // by the parent.
   useEffect(() => {
     if (open) {
       setPending(visit ? { ...visit } : emptyVisit())

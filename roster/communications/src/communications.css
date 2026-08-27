@@ -1,0 +1,537 @@
+/* ─── Page ───────────────────────────────────────────────────── */
+
+.settings-page {
+  display: flex;
+  flex-direction: row;
+  /* Components/DevToolbar.jsx renders as a real sibling before this
+     element now, pushing it down by --dev-toolbar-height — subtracted
+     here so the fixed-height, overflow:hidden layout doesn't get its own
+     bottom edge clipped past the viewport. */
+  height: calc(100vh - var(--dev-toolbar-height, 0px));
+  overflow: hidden;
+}
+
+/* Same reasoning as web/messaging/src/messages.css's identical override:
+   .settings-page's own overflow:hidden makes it (not the viewport)
+   .top-nav's nearest scrolling ancestor for position:sticky purposes.
+   Its box already starts below the toolbar (via the height calc above),
+   so Styles/top-nav.css's shared `top: var(--dev-toolbar-height)` rule
+   double-counts the toolbar's height here — confirmed via Playwright
+   (.top-nav rendered 96px down instead of 48px). Reset back to 0. */
+.top-nav { top: 0; }
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+
+.settings-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+
+.settings-sidebar {
+  width: 232px;
+  background: #fff;
+  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.settings-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 13px;
+  font-size: 14px;
+  color: #444;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.1s, color 0.1s;
+  line-height: 1.3;
+}
+
+.settings-nav-item:hover {
+  background: var(--ui-purple-7-lightest-lavendar);
+  color: #1a1a1a;
+}
+
+.settings-nav-item.active {
+  color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-left-color: var(--brand-purple-6-purple-4);
+  font-weight: 500;
+}
+
+.settings-nav-item svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.settings-nav-item.active svg {
+  opacity: 1;
+}
+
+/* ─── Content ────────────────────────────────────────────────── */
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 40px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+/* ─── Section ────────────────────────────────────────────────── */
+
+.settings-section {
+  background: #fff;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.settings-section-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.settings-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+}
+
+.settings-edit-btn:hover {
+  color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+/* ─── Subsection ─────────────────────────────────────────────── */
+
+.settings-subsection {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.settings-subsection:last-child {
+  border-bottom: none;
+}
+
+/* Each subsection edits independently (its own pencil), not the whole
+   .settings-section at once — Communications currently has 4 real,
+   separately-editable blocks (Invoicing, Credit notes, Draw pay advice,
+   Schedule), so a single section-level edit button doesn't match how this
+   is actually implemented. */
+.settings-subsection-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-subsection-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.settings-subsection-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.settings-subsection-header .settings-edit-btn {
+  flex-shrink: 0;
+}
+
+/* ─── Communications: read-only block summary ───────────────────── */
+
+.comms-summary-row {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.comms-summary-label {
+  color: #777;
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.comms-summary-value {
+  color: #1a1a1a;
+}
+
+.comms-configured {
+  color: var(--rag-green-green-3-aa);
+  font-weight: 500;
+}
+
+/* ─── Communications: edit panel ─────────────────────────────────── */
+
+.comms-panel-block {
+  margin-bottom: 28px;
+}
+
+.comms-panel-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.comms-panel-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.comms-radio-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.comms-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.comms-radio-option input[type="radio"] {
+  accent-color: var(--brand-purple-6-purple-4);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.comms-from-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comms-from-input-row .form-input {
+  /* Never grows past 350px, but can still shrink on a narrow panel —
+     matches the 350px cap applied to every other single-line field in
+     these panels (.comms-field-narrow), just expressed via flex-basis
+     since this input shares its row with a button. */
+  flex: 0 1 350px;
+}
+
+.comms-from-input-row .round-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Applied directly to standalone single-line fields (not sharing a row
+   with a button) that would otherwise stretch to their container's full
+   width via .form-input's own 100% default — email/subject-style fields
+   should never be this wide. */
+.comms-field-narrow {
+  max-width: 350px;
+}
+
+.comms-input-invalid {
+  border-color: var(--rag-red-red-overdue) !important;
+}
+
+.comms-field-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--rag-red-red-overdue-text);
+}
+
+.comms-verified-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comms-verified-address {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.comms-verified-status {
+  font-size: 14px;
+  color: var(--rag-green-green-3-aa);
+}
+
+.comms-verified-status strong {
+  font-weight: 600;
+}
+
+.comms-link-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 2px;
+  color: var(--brand-purple-6-purple-4);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.comms-link-btn:hover {
+  text-decoration: underline;
+}
+
+.comms-preview-toggle {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.comms-tags-box {
+  background: var(--ui-purple-6-lavendar-grey);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.comms-tags-box p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+.comms-tags-list {
+  font-size: 14px;
+  color: #444;
+  font-weight: 500;
+}
+
+.comms-textarea {
+  resize: vertical;
+  min-height: 160px;
+  line-height: 1.5;
+}
+
+/* ─── Communications: fixed-content preview + org note (Holiday requests) ─
+   Holiday requests' subject/body are fixed, not editable — shown here as a
+   read-only preview instead of the input fields the other 4 blocks use. */
+
+.comms-preview-box {
+  background: var(--ui-purple-6-lavendar-grey);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.comms-preview-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #777;
+  margin: 0 0 4px;
+}
+
+.comms-preview-subject {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.comms-preview-body {
+  font-size: 14px;
+  color: #333;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.comms-optional {
+  font-weight: 400;
+  color: #999;
+}
+
+.comms-note-textarea {
+  min-height: 90px;
+}
+
+/* ─── Communications: recipients (Holiday requests) ─────────────── */
+
+/* Half the slide panel's own width, not the full content area — a narrower
+   row is what actually closes up the gap between the address, Verify, and
+   remove button; the add-recipient input above shrinks to match so the
+   whole section reads as one consistent-width block. */
+.comms-recipients-list {
+  max-width: 50%;
+}
+
+.comms-recipients-empty {
+  margin: 4px 0 16px;
+}
+
+/* Table-like grid, not flex — every row shares the same 3 column tracks
+   (email+status, verify action, remove), so the Verify button sits at the
+   exact same X position on every row regardless of how long any one email
+   is, and the remove button sits immediately after it rather than being
+   pushed out to the panel's own far-right edge. */
+.comms-recipient-row {
+  display: grid;
+  /* Column 2 is sized for its own longest possible label ("Verifying…",
+     ~97px), not the shorter resting "Verify" (~69px) — right-aligning the
+     button within it (.comms-recipient-action) is what closes up the
+     resulting slack against the remove button, rather than shrinking the
+     column itself and risking the longer label wrapping. */
+  grid-template-columns: 1fr 100px 32px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.comms-recipient-row:last-child {
+  border-bottom: none;
+}
+
+.comms-recipient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.comms-recipient-email {
+  font-size: 15px;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comms-recipient-status {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.comms-recipient-status--verified {
+  color: var(--rag-green-green-3-aa);
+}
+
+.comms-recipient-status--unverified {
+  color: var(--rag-amber-amber-6);
+}
+
+.comms-recipient-action {
+  display: flex;
+  justify-content: center;
+}
+
+.comms-verify-btn {
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  white-space: nowrap;
+}
+
+.settings-value-empty {
+  font-style: italic;
+  color: #aaa;
+}
+
+/* ─── Table ──────────────────────────────────────────────────── */
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.settings-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  padding: 8px 16px;
+  background: var(--ui-purple-6-lavendar-grey);
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+
+.settings-table th:first-child { border-radius: 4px 0 0 4px; }
+.settings-table th:last-child  { border-radius: 0 4px 4px 0; }
+
+.settings-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  color: #333;
+}
+
+.settings-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Shared edit-panel field primitives ─────────────────────────
+   Named "cs-" from this file's original Contactable Staff feature (now
+   removed) — kept and reused by the Communications/Holiday requests panels
+   below rather than renamed, since renaming a purely-cosmetic class prefix
+   isn't worth the churn once it's already this small. */
+
+.cs-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.cs-field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cs-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: color 0.12s;
+}
+
+.cs-remove-btn:hover {
+  color: var(--rag-red-red-7, #c0392b);
+}

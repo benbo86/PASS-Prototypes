@@ -280,7 +280,7 @@ export default function App() {
         </div>
       </Section>
 
-      <Section title="Search multi-select" description="Components/SearchMultiSelect.jsx — type to filter a list, click a result to add it, added items render as removable rows. Mirrors roster/contactable-staff's own search-to-add UX rather than react-select's chip-multiselect. First built for 'Preferred care workers'.">
+      <Section title="Search multi-select" description="Components/SearchMultiSelect.jsx — type to filter a list, click a result to add it, added items render as removable rows. Mirrors the search-to-add UX originally built for roster/communications' own (since-removed) Contactable employees feature, rather than react-select's chip-multiselect. First built for 'Preferred care workers'.">
         <div className="uk-row" style={{ alignItems: 'flex-start' }}>
           <div style={{ width: 320 }}>
             <SearchMultiSelect

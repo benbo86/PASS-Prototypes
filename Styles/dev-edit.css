@@ -14,7 +14,11 @@
 
 .devedit-highlight {
   position: fixed;
-  z-index: 10500;
+  /* Above Styles/main.css's .slide-panel-overlay (10800) — Dev Edit needs
+     to stay usable, including highlighting elements inside an open
+     SlidePanel, regardless of whether one happens to be open. Every other
+     Dev Edit fixed-position element below shares this same reasoning. */
+  z-index: 10900;
   pointer-events: none;
   box-sizing: border-box;
   border-radius: 2px;
@@ -34,7 +38,7 @@
 
 .devedit-panel {
   position: fixed;
-  z-index: 10700;
+  z-index: 10900;
   width: 340px;
   max-height: 80vh;
   overflow-y: auto;
@@ -367,7 +371,7 @@
 .devedit-gate-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10800;
+  z-index: 10900;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -422,7 +426,7 @@
 
 .devedit-session-bar {
   position: fixed;
-  z-index: 10700;
+  z-index: 10900;
   bottom: 20px;
   right: 20px;
   display: flex;
@@ -468,7 +472,7 @@
 
 .devedit-history-panel {
   position: fixed;
-  z-index: 10700;
+  z-index: 10900;
   bottom: 76px;
   right: 20px;
   width: 320px;

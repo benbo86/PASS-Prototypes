@@ -1212,7 +1212,18 @@ h6 {
 
 .slide-panel-overlay {
   position: fixed;
-  inset: 0;
+  /* top offset (not inset:0) so the overlay never covers the dev toolbar's
+     own real estate — the toolbar previously sat underneath this overlay
+     (fully hidden, unclickable) whenever a panel was open, since both are
+     fixed-position and the toolbar's own right-aligned buttons happen to
+     occupy the same top-right corner as this panel's own close button.
+     Leaving the toolbar's own strip uncovered avoids that clash entirely,
+     same pattern already used for EventPanel's own fixed elements — see
+     CLAUDE.md's Dev Toolbar section, "Per-file layout fixes". */
+  top: var(--dev-toolbar-height, 0px);
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--web-skrim);
   /* Must exceed the dev toolbar's own z-index (10700, Styles/dev-toolbar.css)
      — a real bug, caught by testing: at 200 the sticky, always-on-top
