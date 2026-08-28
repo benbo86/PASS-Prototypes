@@ -1,5 +1,14 @@
 /* ─── Page ───────────────────────────────────────────────────── */
 
+/* Matches customer-profile/service-agreement's own local `body` override
+   (service-agreement.css) — one uniform page background behind everything
+   (nav included), rather than leaving `body` at its own default and only
+   painting .settings-content's own region, which left the sidebar showing
+   through to a mismatched white. */
+body {
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
 .settings-page {
   display: flex;
   flex-direction: row;
@@ -22,70 +31,30 @@
 
 /* ─── Layout ─────────────────────────────────────────────────── */
 
+/* Padding lives here now (not on .settings-content alone) — matches
+   customer-profile/service-agreement's own .sa-page, which pads the whole
+   nav+content row as one unit rather than padding just the content side.
+   That's what gave the real page its breathing room from the global PASS
+   sidebar on the left; this page's nav used to sit flush against it. */
 .settings-layout {
   display: flex;
   flex: 1;
   overflow: hidden;
+  padding: 32px 40px 48px;
+  gap: 40px;
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
-
-.settings-sidebar {
-  width: 232px;
-  background: #fff;
-  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding: 8px 0;
-}
-
-.settings-nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.settings-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px 10px 13px;
-  font-size: 14px;
-  color: #444;
-  text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: background 0.1s, color 0.1s;
-  line-height: 1.3;
-}
-
-.settings-nav-item:hover {
-  background: var(--ui-purple-7-lightest-lavendar);
-  color: #1a1a1a;
-}
-
-.settings-nav-item.active {
-  color: var(--brand-purple-6-purple-4);
-  background: var(--ui-purple-7-lightest-lavendar);
-  border-left-color: var(--brand-purple-6-purple-4);
-  font-weight: 500;
-}
-
-.settings-nav-item svg {
-  flex-shrink: 0;
-  opacity: 0.75;
-}
-
-.settings-nav-item.active svg {
-  opacity: 1;
-}
+/* Uses the shared .rn-nav/.rn-list/.rn-item styling from Styles/main.css
+   (Components/RosteringNav.jsx's own left sub-nav, first built for
+   customer-profile/service-agreement/) — this page's own bordered white-
+   card sidebar look was replaced with it, per Ben's own ask to match. */
 
 /* ─── Content ────────────────────────────────────────────────── */
 
 .settings-content {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 40px;
-  background: var(--ui-purple-7-lightest-lavendar);
 }
 
 /* ─── Section ────────────────────────────────────────────────── */
@@ -101,8 +70,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  padding: 25px 24px 26px 24px;
+  margin-bottom: 0px;
 }
 
 .settings-section-icon-title {
@@ -138,8 +107,7 @@
 /* ─── Subsection ─────────────────────────────────────────────── */
 
 .settings-subsection {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  padding: 0px 24px 32px;
 }
 
 .settings-subsection:last-child {
@@ -160,15 +128,15 @@
 
 .settings-subsection-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 4px;
 }
 
 .settings-subsection-desc {
   font-size: 14px;
-  color: #666;
-  margin: 0 0 16px;
+  color: #000;
+  margin: 0 0 24px;
 }
 
 .settings-subsection-header .settings-edit-btn {
@@ -185,7 +153,8 @@
 }
 
 .comms-summary-label {
-  color: #777;
+  color: #000;
+  font-weight: 500;
   width: 180px;
   flex-shrink: 0;
 }
@@ -195,8 +164,6 @@
 }
 
 .comms-configured {
-  color: var(--rag-green-green-3-aa);
-  font-weight: 500;
 }
 
 /* ─── Communications: edit panel ─────────────────────────────────── */

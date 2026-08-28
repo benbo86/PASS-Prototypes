@@ -603,23 +603,24 @@ export default function App() {
 
       <div className="settings-layout">
 
-        {/* Settings sidebar */}
-        <aside className="settings-sidebar">
-          <ul className="settings-nav-list">
+        {/* Settings sidebar — same rn-nav/rn-list/rn-item styling as
+            Components/RosteringNav.jsx (customer-profile/service-agreement's
+            own left sub-nav), not this page's own bordered-white-card look */}
+        <nav className="rn-nav">
+          <ul className="rn-list">
             {NAV_ITEMS.map(({ key, label, Icon }) => (
               <li key={key}>
-                <a
-                  href="#"
-                  className={`settings-nav-item${key === 'communications' ? ' active' : ''}`}
-                  onClick={e => e.preventDefault()}
+                <button
+                  className={`rn-item${key === 'communications' ? ' active' : ''}`}
+                  style={{ cursor: 'default' }}
                 >
-                  <Icon />
+                  <span className="rn-item-icon"><Icon /></span>
                   <span>{label}</span>
-                </a>
+                </button>
               </li>
             ))}
           </ul>
-        </aside>
+        </nav>
 
         {/* Main content */}
         <main className="settings-content">

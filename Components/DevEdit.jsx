@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { createPortal } from 'react-dom'
 import {
   collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs, serverTimestamp,
@@ -11,6 +11,10 @@ import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from './sha
 import Tooltip from './Tooltip'
 import { resolveSvgTarget, isLikelyIcon, canonicalizeIcon, createIconSwapRuntime, buildDomPath, buildPathHint, resolveTargets } from './iconSwap'
 import IconSwapPanel from './IconSwapPanel'
+import { canonicalizeElement, createElementEditRuntime, isEligibleForTagChange, isLeafTextElement, resolveElementTarget } from './elementEdit'
+import ElementEditPanel from './ElementEditPanel'
+import { getSuggestions, getCaretCoordinates } from './cssAutocomplete'
+import CssAutocompletePopup from './CssAutocompletePopup'
 
 const PenIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -337,10 +341,10 @@ function fmtTime(value) {
   return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-async function upsertActiveVersion(prototypeId, versionId, versionName, overrides, iconSwaps = []) {
+async function upsertActiveVersion(prototypeId, versionId, versionName, overrides, iconSwaps = [], elementEdits = []) {
   const q = query(collection(db, 'devedit_active'), where('prototypeId', '==', prototypeId))
   const snap = await getDocs(q)
-  const payload = { prototypeId, versionId, versionName, overrides, iconSwaps, updatedAt: serverTimestamp() }
+  const payload = { prototypeId, versionId, versionName, overrides, iconSwaps, elementEdits, updatedAt: serverTimestamp() }
   if (snap.empty) {
     await addDoc(collection(db, 'devedit_active'), payload)
   } else {
@@ -460,6 +464,58 @@ function mergeIconSwaps(iconEditsMap, activeSwaps) {
   return result
 }
 
+// ─── Element edits (text / tag / class / id) ───────────────────────────
+// Same shape of problem resolveIconIdentity/mergeIconSwaps already solve —
+// a marker attribute (data-passelement here) checked against BOTH this
+// session's own edits and the currently-active saved version, so re-
+// selecting an already-actively-edited element seeds from its real current
+// state rather than hashing its already-edited content and treating that as
+// "the original." Keyed by dom path (not content hash) as the PRIMARY key,
+// the inverse of icon identity's own emphasis — see elementEdit.js's own
+// module comment for why: this is instance-scoped by construction, and a
+// path is what actually distinguishes "this specific element" from another
+// one that merely looks the same.
+function resolveElementEditIdentity(el, container, elementEditsMap, activeEdits) {
+  if (!el) return { key: null, seed: null }
+  const marker = el.getAttribute('data-passelement')
+  if (marker) {
+    const sessionEntry = Object.entries(elementEditsMap).find(([, e]) => e.id === marker)
+    if (sessionEntry) return { key: sessionEntry[0], seed: null }
+    const activeEdit = (activeEdits || []).find((e) => e.id === marker)
+    if (activeEdit) return { key: activeEdit.domPath.join('.'), seed: activeEdit }
+  }
+  const domPath = buildDomPath(el, container)
+  if (!domPath) return { key: null, seed: null }
+  return { key: domPath.join('.'), seed: null }
+}
+
+function makeElementEditId() {
+  return `elementedit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+// Same merge rule as mergeIconSwaps: session edits always win for whatever
+// key they cover (including an explicit Reset, kept as a tombstone rather
+// than deleted so it can suppress a still-active saved edit — see that
+// function's own comment for the exact bug this prevents), anything the
+// session has no opinion about falls through to the active/saved version.
+function mergeElementEdits(elementEditsMap, activeEdits) {
+  const result = []
+  const sessionKeys = new Set(Object.keys(elementEditsMap))
+  Object.values(elementEditsMap).forEach((e) => {
+    if (e.committed) {
+      result.push({
+        id: e.id, domPath: e.domPath, originalHash: e.originalHash, originalLen: e.originalLen,
+        tag: e.committed.tag, text: e.committed.text, className: e.committed.className, elementId: e.committed.elementId,
+      })
+    }
+  })
+  ;(activeEdits || []).forEach((e) => {
+    const key = e.domPath.join('.')
+    if (!sessionKeys.has(key)) result.push(e)
+  })
+  return result
+}
+
 // ─── Dev Edit ────────────────────────────────────────────────────────
 // Toggleable live style editor. Two independent capabilities layered on
 // the same select-an-element-and-edit-its-CSS mechanic:
@@ -544,12 +600,28 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const [iconEdits, setIconEdits] = useState({})
   const iconEditsRef = useRef(iconEdits)
   iconEditsRef.current = iconEdits
+
+  // ── Element tab / text-tag-class-id edits ── keyed by dom-path string
+  // (see resolveElementEditIdentity above for why this, unlike icons, keys
+  // primarily by structural position rather than content). Same three-state
+  // shape as sessionEdits (original/committed/draft), just holding all four
+  // fields together per entry instead of one CSS declaration string, since
+  // Apply/Reset/dirty-checking all need to treat the four as one edit unit.
+  const [elementEdits, setElementEdits] = useState({})
+  const elementEditsRef = useRef(elementEdits)
+  elementEditsRef.current = elementEdits
   const [showTabSwitchPrompt, setShowTabSwitchPrompt] = useState(false)
 
   const iconRuntimeRef = useRef(null)
   useEffect(() => {
     iconRuntimeRef.current = createIconSwapRuntime(containerRef.current)
     return () => iconRuntimeRef.current?.dispose()
+  }, [containerRef])
+
+  const elementRuntimeRef = useRef(null)
+  useEffect(() => {
+    elementRuntimeRef.current = createElementEditRuntime(containerRef.current)
+    return () => elementRuntimeRef.current?.dispose()
   }, [containerRef])
 
   const selectionRef = useRef(null)
@@ -585,6 +657,16 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // closures (toggleActive, handleSignOut) without going stale.
   const iconEditedCount = useCallback(() => Object.values(iconEditsRef.current).filter(e => e.svg !== e.savedSvg).length, [])
 
+  // Same dirtiness rule as the icon side (committed vs saved, not some
+  // deeper "true original" — see the seeding comment in handleClick below
+  // for why), just comparing the whole {tag,text,className,elementId}
+  // object at once. There's no live-draft state to worry about here at all
+  // (see ElementEditPanel's own comment on why), so committed is genuinely
+  // the only thing that can differ from saved.
+  const elementEditedCount = useCallback(() => Object.values(elementEditsRef.current).filter(
+    (e) => JSON.stringify(e.committed) !== JSON.stringify(e.saved)
+  ).length, [])
+
   const discardSession = useCallback(() => {
     Object.values(sessionEditsRef.current).forEach(entry => { setLiveRuleText(entry.selectorText, entry.mediaText, entry.original) })
     setSessionEdits({})
@@ -595,6 +677,10 @@ export default function DevEdit({ containerRef, prototypeId }) {
     // activeOverrides (or the true original, via iconSwap.js's own
     // registry, for a brand-new swap that was never saved at all).
     setIconEdits({})
+    // Same reasoning as icon edits above — the combined reconcile effect
+    // below falls back to whatever's genuinely saved/active, or the true
+    // original for anything never saved.
+    setElementEdits({})
     setSelection(null)
   }, [])
 
@@ -606,25 +692,29 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // or the panel's own close button — an edit you never confirmed
   // shouldn't silently persist just because you clicked elsewhere.
   //
-  // Real, severe bug found: this can fire *while a different rule's Apply
-  // is still awaiting its file-write* (see handleApply below) — switching
-  // to a new element right after clicking Apply calls this with the
-  // *previous* selection's keys, and at that moment `committed` for the
-  // just-applied rule hasn't been updated yet (that only happens once the
-  // async request resolves). This reverted the still-in-flight rule's
-  // draft/live style back to its pre-edit value moments before the apply
-  // actually completed — reported as "apply an edit, go to another
-  // element, edit it without saving, and the previous edit disappears."
-  // Skipping any key with a genuinely in-flight Apply (applyingKeyRef,
-  // already tracked for the Apply button's own disabled/label state) stops
-  // this specific revert from ever running out from under it; handleApply's
-  // own finishApply is *also* hardened independently (closure-captured
-  // draft value, forced live re-apply) as a second line of defense.
+  // Real, severe bug found: this can fire *while the unified Apply's own
+  // batch file-write is still awaiting its response* (see handlePanelApply
+  // below) — switching to a new element right after clicking Apply calls
+  // this with the *previous* selection's keys, and at that moment
+  // `committed` for the just-applied rules hasn't been updated yet (that
+  // only happens once the async request resolves). This reverted the
+  // still-in-flight rules' draft/live style back to their pre-edit values
+  // moments before the apply actually completed — reported as "apply an
+  // edit, go to another element, edit it without saving, and the previous
+  // edit disappears." Skipping every key while a batch Apply is in flight
+  // (applyingAllRef, already tracked for the unified Apply button's own
+  // disabled/label state) stops this specific revert from ever running out
+  // from under it; handlePanelApply's own commit step is *also* hardened
+  // independently (closure-captured draft values, forced live re-apply) as
+  // a second line of defense.
+  const [applyingAll, setApplyingAll] = useState(false)
+  const applyingAllRef = useRef(false)
+  applyingAllRef.current = applyingAll
+
   const revertDirtyRules = useCallback((keys) => {
-    if (!keys || keys.length === 0) return
+    if (!keys || keys.length === 0 || applyingAllRef.current) return
     let changed = false
     keys.forEach(key => {
-      if (key === applyingKeyRef.current) return
       const entry = sessionEditsRef.current[key]
       if (entry && entry.draft !== entry.committed) {
         setLiveRuleText(entry.selectorText, entry.mediaText, entry.committed)
@@ -635,7 +725,6 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setSessionEdits(prev => {
       const next = { ...prev }
       keys.forEach(key => {
-        if (key === applyingKeyRef.current) return
         if (next[key] && next[key].draft !== next[key].committed) {
           next[key] = { ...next[key], draft: next[key].committed }
         }
@@ -689,7 +778,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     const unsub = onSnapshot(q, snapshot => {
       setActiveOverrides(snapshot.empty ? null : (() => {
         const data = snapshot.docs[0].data()
-        return { versionId: data.versionId, versionName: data.versionName, overrides: data.overrides || [], iconSwaps: data.iconSwaps || [] }
+        return { versionId: data.versionId, versionName: data.versionName, overrides: data.overrides || [], iconSwaps: data.iconSwaps || [], elementEdits: data.elementEdits || [] }
       })())
     }, err => console.error('Dev Edit: active-version subscription failed', err))
     return unsub
@@ -722,6 +811,14 @@ export default function DevEdit({ containerRef, prototypeId }) {
     iconRuntimeRef.current.setActiveSwaps(mergeIconSwaps(iconEdits, activeOverrides?.iconSwaps))
   }, [activeOverrides, iconEdits])
 
+  // Element-edit analogue of the effect above — same combined-effect
+  // reasoning (createElementEditRuntime's own setActiveEdits also always
+  // restores-then-reapplies its entire given list).
+  useEffect(() => {
+    if (!elementRuntimeRef.current) return
+    elementRuntimeRef.current.setActiveEdits(mergeElementEdits(elementEdits, activeOverrides?.elementEdits))
+  }, [activeOverrides, elementEdits])
+
   // 'deactivate' | 'signout' | null — which exit path is waiting on the
   // user's save-or-discard decision. A ref, not state, since it needs to
   // survive across the Save Version dialog's own lifecycle (opened from
@@ -743,7 +840,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const toggleActive = useCallback(() => {
     if (active) {
-      if (editedEntries().length > 0 || iconEditedCount() > 0) { setExitPrompt('deactivate'); return }
+      if (editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('deactivate'); return }
       setActive(false)
       setSelection(null)
       setHoveredEl(null)
@@ -763,7 +860,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     if (!isAuthed) { setGateStep('password'); return }
     if (!authorName.trim()) { setGateStep('name'); return }
     setActive(true)
-  }, [active, authReady, isAuthed, authorName, editedEntries, iconEditedCount])
+  }, [active, authReady, isAuthed, authorName, editedEntries, iconEditedCount, elementEditedCount])
 
   const submitPassword = async () => {
     if (!passwordInput || signingIn) return
@@ -795,7 +892,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }
 
   const handleSignOut = async () => {
-    if (editedEntries().length > 0 || iconEditedCount() > 0) { setExitPrompt('signout'); return }
+    if (editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('signout'); return }
     await finishExit('signout')
   }
 
@@ -1002,7 +1099,32 @@ export default function DevEdit({ containerRef, prototypeId }) {
         }))
       }
 
-      setSelection({ el: target, rect: target.getBoundingClientRect(), keys, svgEl, iconSwapKey })
+      // Same seeding idea as the icon block above, adapted for dom-path-
+      // primary identity (see resolveElementEditIdentity's own comment).
+      const { key: elementEditKey, seed: elementSeed } = resolveElementEditIdentity(
+        target, containerRef.current, elementEditsRef.current, activeOverridesRef.current?.elementEdits
+      )
+      if (elementSeed) {
+        // Already actively edited from a previously-saved version, not yet
+        // represented in this session's own state — seed it now, saved ===
+        // committed so it correctly reads as "not dirty" until the user
+        // actually changes something. (Recovering the *true* pristine
+        // original, if this is ever Reset, is the runtime's own registry's
+        // job — same division of responsibility as icon swaps: this field
+        // only ever needs to know "what's currently active," not the
+        // deeper history behind it.)
+        const seedValues = { tag: elementSeed.tag, text: elementSeed.text, className: elementSeed.className, elementId: elementSeed.elementId }
+        setElementEdits(prev => (prev[elementEditKey] ? prev : {
+          ...prev,
+          [elementEditKey]: {
+            id: elementSeed.id, domPath: elementSeed.domPath, pathHint: elementSeed.pathHint,
+            originalHash: elementSeed.originalHash, originalLen: elementSeed.originalLen,
+            saved: seedValues, committed: seedValues,
+          },
+        }))
+      }
+
+      setSelection({ el: target, rect: target.getBoundingClientRect(), keys, svgEl, iconSwapKey, elementEditKey })
       setActiveTab('styles')
       setShowTabSwitchPrompt(false)
       setError(null)
@@ -1097,7 +1219,27 @@ export default function DevEdit({ containerRef, prototypeId }) {
     let rafId
     const tick = () => {
       const el = selectionRef.current?.el
-      if (!el || !el.isConnected) { closeSelection(); return }
+      if (!el || !el.isConnected) {
+        // Might not be a genuine removal — an Element-tab tag change
+        // replaces this exact node (you can't rename a DOM node's tag in
+        // place, only recreate and swap it in), which looks identical to a
+        // removal from here. Same failure mode already fixed once for icon
+        // swaps (see handleClick's own history on this) — try to re-resolve
+        // the new live node via this edit's own domPath before concluding
+        // the element is actually gone.
+        const key = selectionRef.current?.elementEditKey
+        const entry = key ? elementEditsRef.current[key] : null
+        const resolved = entry && containerRef.current
+          ? resolveElementTarget({ domPath: entry.domPath, id: entry.id, originalHash: entry.originalHash, originalLen: entry.originalLen }, containerRef.current)
+          : null
+        if (resolved) {
+          setSelection(sel => (sel ? { ...sel, el: resolved, rect: resolved.getBoundingClientRect() } : sel))
+          rafId = requestAnimationFrame(tick)
+          return
+        }
+        closeSelection()
+        return
+      }
       setSelection(sel => (sel ? { ...sel, rect: el.getBoundingClientRect() } : sel))
       rafId = requestAnimationFrame(tick)
     }
@@ -1116,94 +1258,124 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], draft: value } }))
   }
 
-  // ── Apply: confirms this one rule's edit (committed = draft) and closes
-  // the panel — when running locally with a resolvable source file, it
-  // *also* writes straight into that file via devEditPlugin.js (unchanged
-  // behavior from the original build, just no longer the only thing this
-  // button does; in production, no file to write to, it's just the
-  // confirm step, no network call). Any *other* rule block still open in
-  // this same panel that hasn't been confirmed reverts to its own last-
-  // committed value, same as any other way of leaving the panel without
-  // an explicit Apply (click-away, Escape, ×). ──
-  const [applyingKey, setApplyingKey] = useState(null)
-  const applyingKeyRef = useRef(null)
-  applyingKeyRef.current = applyingKey
-  const handleApply = async (key) => {
-    const entry = sessionEditsRef.current[key]
-    if (!entry) return
+  // ── Unified Apply / Cancel / Reset — one action row shared by the "Edit
+  // styles" and "Element" tabs (Ben: "have one apply button across both...
+  // a cancel and reset button"). Previously each CSS rule had its OWN
+  // Apply/Cancel pair, and clicking either one closed the WHOLE panel and
+  // silently reverted every OTHER still-open rule's unconfirmed draft — so
+  // editing two rules (or a rule plus the element's text/tag) meant
+  // applying them one at a time, each click discarding whatever hadn't
+  // been applied yet elsewhere in the same panel. Batching into one action
+  // removes that trap. The Icon tab is untouched — it keeps its own
+  // self-contained Apply/Reset, since "styles and/or elements" doesn't
+  // cover it.
+  const elementPanelRef = useRef(null)
+  const [elementDraftDirty, setElementDraftDirty] = useState(false)
+  const [elementResetNonce, setElementResetNonce] = useState(0)
+
+  // Apply: validates the Element tab first (if it's part of this
+  // selection) — an invalid element edit blocks the WHOLE apply, since
+  // there's only one Apply action now, not two independent ones. Then
+  // commits every dirty CSS row in one batched request (devEditPlugin.js's
+  // /apply endpoint already loops over an `edits` array — it just never
+  // received more than one at a time before this), and finally the element
+  // edit, before closing. `entry.draft`/`elementResult.value` are captured
+  // once, at the moment Apply was clicked, for the same reason the old
+  // per-rule Apply captured `entry.draft` once — so what's actually
+  // written/committed can't drift from what the request is in flight for.
+  const handlePanelApply = async () => {
     const sel = selectionRef.current
-    const canWriteToFile = import.meta.env.DEV && entry.filePath
+    if (!sel || applyingAllRef.current) return
 
-    // `entry.draft` is captured once, above, at the moment Apply was
-    // clicked — used here (not a fresh `prev[key].draft` read) so the value
-    // actually written to disk during the awaited fetch below is exactly
-    // what ends up committed, regardless of anything that happens to
-    // sessionEdits' live `draft` field while this request is in flight
-    // (revertDirtyRules now skips an in-flight key for the same reason —
-    // see its own comment — but re-asserting the live rule text here too,
-    // rather than trusting whatever the CSSOM currently shows, is a second,
-    // independent line of defense against the same race).
-    const finishApply = () => {
-      setLiveRuleText(entry.selectorText, entry.mediaText, entry.draft)
-      setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], committed: entry.draft } }))
-      // Only close/tidy up the panel this Apply actually belongs to — if
-      // the user has since selected something else (exactly the scenario
-      // that motivated this fix), `selectionRef.current` is no longer
-      // `sel`, and blindly closing/reverting here would yank a completely
-      // unrelated, currently-open panel out from under them.
-      if (selectionRef.current === sel) {
-        if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
-        setSelection(null)
+    let elementResult = null
+    if (elementPanelRef.current) {
+      elementResult = elementPanelRef.current.commit()
+      if (!elementResult.ok) return // its own inline error is already shown; nothing here is applied
+    }
+
+    const dirtyKeys = sel.keys.filter(k => {
+      const e = sessionEditsRef.current[k]
+      return e && e.draft !== e.committed
+    })
+    const fileEdits = dirtyKeys
+      .map(k => sessionEditsRef.current[k])
+      .filter(e => import.meta.env.DEV && e.filePath)
+      .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.draft }))
+
+    if (fileEdits.length > 0) {
+      setApplyingAll(true)
+      setError(null)
+      try {
+        const res = await fetch('/__dev-edit/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ edits: fileEdits }),
+        })
+        const data = await res.json()
+        if (!data.ok) throw new Error(data.error || 'Failed to apply')
+      } catch (err) {
+        setError(err.message)
+        // Leave the panel open on failure, so the error is visible and the
+        // edit can be retried, rather than closing on top of a failed write.
+        setApplyingAll(false)
+        return
       }
+      setApplyingAll(false)
     }
 
-    if (!canWriteToFile) {
-      finishApply()
-      return
-    }
-    setApplyingKey(key)
-    setError(null)
-    try {
-      const res = await fetch('/__dev-edit/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ edits: [{ filePath: entry.filePath, selector: entry.selectorText, mediaText: entry.mediaText, declarations: entry.draft }] }),
+    dirtyKeys.forEach(k => {
+      const e = sessionEditsRef.current[k]
+      setLiveRuleText(e.selectorText, e.mediaText, e.draft)
+    })
+    if (dirtyKeys.length > 0) {
+      setSessionEdits(prev => {
+        const next = { ...prev }
+        dirtyKeys.forEach(k => { if (next[k]) next[k] = { ...next[k], committed: next[k].draft } })
+        return next
       })
-      const data = await res.json()
-      if (!data.ok) throw new Error(data.error || 'Failed to apply')
-      finishApply()
-    } catch (err) {
-      setError(err.message)
-      // Leave the panel open on failure, so the error is visible and the
-      // edit can be retried, rather than closing on top of a failed write.
-    } finally {
-      setApplyingKey(null)
     }
+
+    if (elementResult?.ok && elementResult.value) handleElementApply(elementResult.value)
+
+    if (iconRuntimeRef.current) {
+      const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+      iconRuntimeRef.current.setActiveSwaps(swaps)
+    }
+    setSelection(null)
   }
 
-  // ── Cancel: reverts this one rule all the way back to its true
-  // original (not just its last-committed value — Cancel means "I don't
-  // want this edit at all," a stronger action than just leaving the panel
-  // without confirming) and closes the panel. Any *other* rule block still
-  // open in this same panel that hasn't been confirmed reverts to its own
-  // last-committed value, same as Apply above. Always enabled (once the
-  // rule has finished loading) regardless of whether anything's actually
-  // been edited — Cancel doubles as a plain "close the panel" action, so a
-  // user who opened the panel and changed their mind needs a way to back
-  // out via this exact button, not just the panel's own × / Escape /
-  // click-away. When nothing has changed this is a harmless no-op revert
-  // that still closes the panel. ──
-  const handleCancelRule = (key) => {
-    const sel = selectionRef.current
-    const entry = sessionEditsRef.current[key]
-    if (!entry) return
+  // Cancel: discards only unconfirmed drafts (CSS keystrokes not yet
+  // Applied; the Element tab's own in-progress typing, which was never
+  // live-applied and simply unmounts with the panel) and closes — exactly
+  // what closing the panel any other way (×, Escape, clicking elsewhere)
+  // already does. An explicit button just makes it a deliberate action
+  // instead of only an implicit side effect of leaving.
+  const handlePanelCancel = closeSelection
 
-    setLiveRuleText(entry.selectorText, entry.mediaText, entry.original)
-    setSessionEdits(prev => ({
-      ...prev,
-      [key]: { ...prev[key], committed: prev[key].original, draft: prev[key].original },
-    }))
-    if (sel) revertDirtyRules(sel.keys.filter(k => k !== key))
+  // Reset: every CSS rule in this selection goes all the way back to its
+  // true original (not just its last-committed value — a stronger action
+  // than Cancel, since it discards even an already-applied edit), and any
+  // existing element edit resets the same way, then closes.
+  const handlePanelReset = () => {
+    const sel = selectionRef.current
+    if (!sel || applyingAllRef.current) return
+    sel.keys.forEach(key => {
+      const entry = sessionEditsRef.current[key]
+      if (entry) setLiveRuleText(entry.selectorText, entry.mediaText, entry.original)
+    })
+    setSessionEdits(prev => {
+      const next = { ...prev }
+      sel.keys.forEach(key => {
+        if (next[key]) next[key] = { ...next[key], committed: next[key].original, draft: next[key].original }
+      })
+      return next
+    })
+    handleElementReset()
+    setElementResetNonce(n => n + 1)
+    if (iconRuntimeRef.current) {
+      const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
+      iconRuntimeRef.current.setActiveSwaps(swaps)
+    }
     setSelection(null)
   }
 
@@ -1231,7 +1403,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const [saving, setSaving] = useState(false)
 
   const openSaveDialog = () => {
-    if (editedEntries().length === 0 && iconEditedCount() === 0) return
+    if (editedEntries().length === 0 && iconEditedCount() === 0 && elementEditedCount() === 0) return
     // Pre-filled with a timestamp so Save works immediately for a small
     // edit with no typing required — still a plain editable text field, so
     // a real name can replace it for anything worth naming properly.
@@ -1248,7 +1420,12 @@ export default function DevEdit({ containerRef, prototypeId }) {
     // savedSvg) is deliberately left out, exactly like an unedited CSS
     // rule would be.
     const editedIcons = Object.entries(iconEditsRef.current).filter(([, e]) => e.svg !== e.savedSvg)
-    if (!name || saving || (edited.length === 0 && editedIcons.length === 0)) return
+    // Same "only what's genuinely dirty this round" rule as CSS/icons above
+    // — committed vs saved, exactly what elementEditedCount() itself checks.
+    const editedElements = Object.entries(elementEditsRef.current).filter(
+      ([, e]) => JSON.stringify(e.committed) !== JSON.stringify(e.saved)
+    )
+    if (!name || saving || (edited.length === 0 && editedIcons.length === 0 && editedElements.length === 0)) return
     setSaving(true)
     setError(null)
     try {
@@ -1262,6 +1439,18 @@ export default function DevEdit({ containerRef, prototypeId }) {
         domPath: e.domPath || null, pathHint: e.pathHint || null,
         svg: e.svg, source: e.source, authorName: e.authorName, createdAt: e.createdAt || new Date().toISOString(),
       }))
+      // committed: null is a pending Reset (a tombstone suppressing a still-
+      // active saved edit, see handleElementReset) — "no edit" is expressed
+      // by absence from the persisted array, not a null entry, same as
+      // icons exclude svg: null from what actually gets saved.
+      const newElementEdits = editedElements
+        .filter(([, e]) => e.committed !== null)
+        .map(([, e]) => ({
+          id: e.id, domPath: e.domPath, pathHint: e.pathHint || null,
+          originalHash: e.originalHash, originalLen: e.originalLen,
+          tag: e.committed.tag, text: e.committed.text, className: e.committed.className, elementId: e.committed.elementId,
+          authorName, createdAt: e.createdAt || new Date().toISOString(),
+        }))
       // Real bug, reported live: saving used to write ONLY this round's
       // dirty edits as the version's entire override set, silently dropping
       // every override from a PREVIOUS save that isn't also being re-edited
@@ -1286,10 +1475,24 @@ export default function DevEdit({ containerRef, prototypeId }) {
         .filter(s => !newIconKeys.has(`${s.originalHash}:${s.originalLen}`))
       const iconSwaps = [...carriedIconSwaps, ...newIconSwaps]
 
+      const newElementKeys = new Set(newElementEdits.map(e => e.domPath.join('.')))
+      // A pending Reset (committed: null) also needs to suppress its
+      // carried-over counterpart here, or the save would silently resurrect
+      // the very edit Reset was meant to remove — same reasoning newIconSwaps
+      // doesn't need (icons have no separate tombstone-vs-persisted split at
+      // this layer since svg:null is already excluded above, but the KEY
+      // still needs excluding from the carry-forward so it doesn't survive).
+      const resetElementKeys = new Set(
+        editedElements.filter(([, e]) => e.committed === null).map(([, e]) => e.domPath.join('.'))
+      )
+      const carriedElementEdits = (activeOverridesRef.current?.elementEdits || [])
+        .filter(e => !newElementKeys.has(e.domPath.join('.')) && !resetElementKeys.has(e.domPath.join('.')))
+      const elementEdits = [...carriedElementEdits, ...newElementEdits]
+
       const versionRef = await addDoc(collection(db, 'devedit_versions'), {
-        prototypeId, name, authorName, createdAt: serverTimestamp(), overrides, iconSwaps,
+        prototypeId, name, authorName, createdAt: serverTimestamp(), overrides, iconSwaps, elementEdits,
       })
-      await upsertActiveVersion(prototypeId, versionRef.id, name, overrides, iconSwaps)
+      await upsertActiveVersion(prototypeId, versionRef.id, name, overrides, iconSwaps, elementEdits)
       // The session's committed edits are now the saved/active state —
       // reset each edited entry's `original` baseline to its own
       // `committed` value, so further edits diff against this new
@@ -1309,6 +1512,17 @@ export default function DevEdit({ containerRef, prototypeId }) {
         const next = { ...prev }
         editedIcons.forEach(([key]) => {
           if (next[key]) next[key] = { ...next[key], savedSvg: next[key].svg }
+        })
+        return next
+      })
+      // Same reset for elements: saved = committed, so an unchanged edit
+      // reads as clean again until it's actually re-edited. A pending
+      // Reset (committed: null) resets to null too — it's genuinely
+      // "no edit" now, matching the just-persisted absence of that key.
+      setElementEdits(prev => {
+        const next = { ...prev }
+        editedElements.forEach(([key]) => {
+          if (next[key]) next[key] = { ...next[key], saved: next[key].committed }
         })
         return next
       })
@@ -1346,7 +1560,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }, [showHistory, prototypeId])
 
   const previewVersion = (version) => {
-    const hasUnsaved = editedEntries().length > 0 || iconEditedCount() > 0
+    const hasUnsaved = editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0
     if (hasUnsaved && !window.confirm('Discard your unsaved edits to preview a past version?')) return
     if (hasUnsaved) discardSession()
     if (pristineRef.current) applyOverrideSet(version.overrides, pristineRef.current)
@@ -1356,6 +1570,9 @@ export default function DevEdit({ containerRef, prototypeId }) {
     // directly (bypassing mergeIconSwaps) is what makes this correct
     // regardless of that effect's own timing.
     iconRuntimeRef.current?.setActiveSwaps(version.iconSwaps || [])
+    // Same reasoning as icons directly above: show exactly this version's
+    // own element edits, not merged with the current session's.
+    elementRuntimeRef.current?.setActiveEdits(version.elementEdits || [])
     setPreviewVersionId(version.id)
   }
 
@@ -1364,6 +1581,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
       applyOverrideSet(activeOverridesRef.current ? activeOverridesRef.current.overrides : [], pristineRef.current)
     }
     iconRuntimeRef.current?.setActiveSwaps(mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps))
+    elementRuntimeRef.current?.setActiveEdits(mergeElementEdits(elementEditsRef.current, activeOverridesRef.current?.elementEdits))
     setPreviewVersionId(null)
   }
 
@@ -1376,7 +1594,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const revertToVersion = async (version) => {
     setHistoryError(null)
     try {
-      await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides, version.iconSwaps || [])
+      await upsertActiveVersion(prototypeId, version.id, version.name, version.overrides, version.iconSwaps || [], version.elementEdits || [])
       setPreviewVersionId(null)
     } catch (err) {
       console.error('Dev Edit: failed to revert', err)
@@ -1405,45 +1623,68 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const showHoverHighlight = hoverRect && (!selection || hoveredEl !== selection.el)
   const rows = selection ? selection.keys.map(k => sessionEdits[k]).filter(Boolean) : []
-  const dirtyCount = editedEntries().length + iconEditedCount()
+  const dirtyCount = editedEntries().length + iconEditedCount() + elementEditedCount()
 
-  // ── Tab switching (Edit styles <-> SVG) ── switching to the SVG tab
-  // while a CSS edit sits uncommitted (draft !== committed — i.e. typed
-  // but not yet Applied) prompts to apply or discard first, mirroring
-  // ExitPrompt's own two-button + backdrop-cancels convention exactly,
-  // rather than introducing a new three-button pattern for one case.
+  // ── Tab switching (Edit styles <-> Element/Icon) ── switching away from
+  // a tab that has something uncommitted prompts to apply or discard
+  // first, mirroring ExitPrompt's own two-button + backdrop-cancels
+  // convention exactly, rather than introducing a new three-button pattern
+  // for one case. Generalized from "always goes to svg" to a remembered
+  // pendingTab once the Element tab existed as a second possible
+  // destination, and again to check *whichever* tab is actually being
+  // left (not just Edit styles) once the Element tab could itself hold an
+  // uncommitted draft — leaving Element for Edit styles/Icon used to
+  // silently drop an in-progress (never-applied) text/tag/class/id edit,
+  // since unmounting ElementEditPanel just discards its own local state.
   const hasUncommittedCssEdit = rows.some(m => m.draft !== m.committed)
+  const [pendingTab, setPendingTab] = useState(null)
 
   const requestTab = (tab) => {
     if (tab === activeTab) return
-    if (tab === 'svg' && hasUncommittedCssEdit) { setShowTabSwitchPrompt(true); return }
+    if (activeTab === 'styles' && hasUncommittedCssEdit) { setPendingTab(tab); setShowTabSwitchPrompt(true); return }
+    if (activeTab === 'element' && elementDraftDirty) { setPendingTab(tab); setShowTabSwitchPrompt(true); return }
     setActiveTab(tab)
   }
 
   const handleTabSwitchDiscard = () => {
-    if (selection) revertDirtyRules(selection.keys)
+    // Element's own in-progress draft needs no action here — it's local
+    // state inside ElementEditPanel, which is about to unmount as soon as
+    // the tab switches, discarding it for free.
+    if (activeTab === 'styles' && selection) revertDirtyRules(selection.keys)
     setShowTabSwitchPrompt(false)
-    setActiveTab('svg')
+    setActiveTab(pendingTab)
+    setPendingTab(null)
   }
 
-  // Commits every currently-dirty CSS row's draft as its new committed
-  // value, WITHOUT the per-rule Apply button's other side effects (closing
-  // the whole panel, the dev-only per-rule file write) — this path is
-  // about not losing in-progress work while navigating within Dev Edit's
-  // own UI, not the deliberate single-rule "confirm and write to file"
-  // action, so it deliberately stays a plain in-memory commit.
+  // Commits whichever tab is being left. For CSS: every currently-dirty
+  // row's draft becomes its new committed value, WITHOUT the unified
+  // Apply's other side effects (closing the whole panel, the dev-only
+  // batched file write) — this path is about not losing in-progress work
+  // while navigating within Dev Edit's own UI, not the deliberate "confirm
+  // and write to file" action, so it deliberately stays a plain in-memory
+  // commit. For Element: validates via the same ref-exposed `commit()`
+  // the unified Apply uses — an invalid draft cancels the whole tab
+  // switch (its own inline error is already visible, so staying put on
+  // the Element tab is the only way to actually show it).
   const handleTabSwitchApply = () => {
-    const dirtyKeys = rows.filter(m => m.draft !== m.committed).map(m => ruleKey(m.selectorText, m.mediaText))
-    setSessionEdits(prev => {
-      const next = { ...prev }
-      dirtyKeys.forEach(k => { if (next[k]) next[k] = { ...next[k], committed: next[k].draft } })
-      return next
-    })
+    if (activeTab === 'styles') {
+      const dirtyKeys = rows.filter(m => m.draft !== m.committed).map(m => ruleKey(m.selectorText, m.mediaText))
+      setSessionEdits(prev => {
+        const next = { ...prev }
+        dirtyKeys.forEach(k => { if (next[k]) next[k] = { ...next[k], committed: next[k].draft } })
+        return next
+      })
+    } else if (activeTab === 'element' && elementPanelRef.current) {
+      const result = elementPanelRef.current.commit()
+      if (!result.ok) { setShowTabSwitchPrompt(false); setPendingTab(null); return }
+      handleElementApply(result.value)
+    }
     setShowTabSwitchPrompt(false)
-    setActiveTab('svg')
+    setActiveTab(pendingTab)
+    setPendingTab(null)
   }
 
-  const handleTabSwitchCancel = () => setShowTabSwitchPrompt(false)
+  const handleTabSwitchCancel = () => { setShowTabSwitchPrompt(false); setPendingTab(null) }
 
   // ── Icon swap handlers (SVG tab) ──
   // selection.iconSwapKey was already resolved once, at selection time (via
@@ -1452,6 +1693,26 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // here rather than re-resolved, so it can't drift from what selection
   // was actually seeded with.
   const currentIconSwap = selection?.iconSwapKey ? iconEdits[selection.iconSwapKey] : null
+
+  // Element tab — hasElementEditToReset feeds the unified Reset button's
+  // own enabled state below: true whenever there's a currently-active
+  // committed edit at all (session-applied, or seeded from an active
+  // saved version), regardless of whether it happens to already match
+  // `saved` — Reset means "back to the TRUE original," a stronger target
+  // than merely undoing this session's own changes.
+  const currentElementEdit = selection?.elementEditKey ? elementEdits[selection.elementEditKey] : null
+  const hasElementEditToReset = !!currentElementEdit?.committed
+  // The panel's own starting draft — always read straight off the live
+  // element (selection.el), which already reflects whatever's currently
+  // applied (a fresh original, a seeded active edit, or this session's own
+  // prior Apply) — there's no separate "what should the fields show"
+  // bookkeeping to keep in sync with that.
+  const elementEditInitial = selection ? {
+    tag: selection.el.tagName.toLowerCase(),
+    text: selection.el.children.length === 0 ? selection.el.textContent : '',
+    className: selection.el.className || '',
+    elementId: selection.el.id || '',
+  } : null
 
   // Live-preview a candidate directly on the selected element, without
   // touching iconEdits/session state at all — Back or deselecting just
@@ -1538,6 +1799,52 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setIconEdits(prev => (prev[selection.iconSwapKey] ? { ...prev, [selection.iconSwapKey]: { ...prev[selection.iconSwapKey], svg: null } } : prev))
   }
 
+  // ── Element edit handlers (Element tab) ── ElementEditPanel has already
+  // validated `draftValues` before ever calling this — this only ever
+  // updates state, never the DOM directly; the combined reconcile effect
+  // above is what actually applies it, exactly the same division as the
+  // icon-swap handlers above.
+  const handleElementApply = (draftValues) => {
+    if (!selection?.el) return
+    const target = selection.el
+    const existing = selection.elementEditKey ? elementEditsRef.current[selection.elementEditKey] : null
+    let entry
+    if (existing) {
+      // Same "carry saved forward unchanged, only committed moves" split
+      // the icon side uses for savedSvg — only Save-as-version updates
+      // `saved`.
+      entry = { ...existing, committed: draftValues }
+    } else {
+      const { hash, len } = canonicalizeElement(target)
+      const domPath = buildDomPath(target, containerRef.current)
+      const pathHint = buildPathHint(target, containerRef.current)
+      const savedValues = {
+        tag: target.tagName.toLowerCase(), text: target.textContent, className: target.className, elementId: target.id,
+      }
+      entry = {
+        id: makeElementEditId(), domPath, pathHint, originalHash: hash, originalLen: len,
+        saved: savedValues, committed: draftValues,
+      }
+    }
+    const key = selection.elementEditKey || entry.domPath.join('.')
+    setElementEdits(prev => ({ ...prev, [key]: entry }))
+    // selection.el itself doesn't need updating here even if the tag just
+    // changed — the per-frame watchdog below re-resolves it via domPath the
+    // moment it notices the old node disconnected, the same way it already
+    // recovers from any other DOM replacement.
+    if (!selection.elementEditKey) setSelection(sel => (sel ? { ...sel, elementEditKey: key } : sel))
+  }
+
+  const handleElementReset = () => {
+    if (!selection?.elementEditKey) return
+    // committed: null, not deleting the entry — same reasoning as
+    // handleIconReset: this is what makes Reset correctly SUPPRESS a still-
+    // active saved edit for this element, rather than just removing this
+    // session's own opinion and letting the old saved edit silently
+    // reapply right back on the very next reconcile.
+    setElementEdits(prev => (prev[selection.elementEditKey] ? { ...prev, [selection.elementEditKey]: { ...prev[selection.elementEditKey], committed: null } } : prev))
+  }
+
   return (
     <>
       <Tooltip text="Edit" wrapClassName="devedit-toggle-wrap" placement="bottom">
@@ -1580,10 +1887,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 selection={selection}
                 rows={rows}
                 onDraftChange={updateDraft}
-                onApply={handleApply}
-                onCancelRule={handleCancelRule}
                 onAddRule={handleAddRule}
-                applyingKey={applyingKey}
                 onClose={closeSelection}
                 error={error}
                 activeTab={activeTab}
@@ -1594,6 +1898,16 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 onIconClearPreview={handleIconClearPreview}
                 onIconApply={handleIconApply}
                 onIconReset={handleIconReset}
+                elementEditInitial={elementEditInitial}
+                elementPanelRef={elementPanelRef}
+                elementDraftDirty={elementDraftDirty}
+                onElementDirtyChange={setElementDraftDirty}
+                elementResetNonce={elementResetNonce}
+                hasElementEditToReset={hasElementEditToReset}
+                applyingAll={applyingAll}
+                onPanelApply={handlePanelApply}
+                onPanelCancel={handlePanelCancel}
+                onPanelReset={handlePanelReset}
               />
               {showTabSwitchPrompt && (
                 <TabSwitchPrompt
@@ -1634,7 +1948,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
           {exitPrompt && (
             <ExitPrompt
-              dirtyCount={editedEntries().length + iconEditedCount()}
+              dirtyCount={editedEntries().length + iconEditedCount() + elementEditedCount()}
               onSave={handleExitSaveAsVersion}
               onDiscard={handleExitDiscard}
               onCancel={handleExitCancel}
@@ -1862,11 +2176,121 @@ function VersionRow({ version, isActive, isPreviewing, onPreview, onRevert, onDe
   )
 }
 
+// ─── Rule textarea with Chrome-Styles-pane-style autocomplete ─────────
+// Ben: "can we have it so it presents you the options when you're adding a
+// style, similar to how it does in chrome." Wraps the plain declarations
+// textarea with a property/value suggestion dropdown (Components/
+// cssAutocomplete.js does the actual matching) — a purely local UI concern,
+// so its suggestion/caret state lives here rather than in DevEdit.jsx's own
+// (already large) state, matching how ElementEditPanel keeps its own draft
+// local too.
+function RuleTextarea({ value, onChange, disabled, rows }) {
+  const textareaRef = useRef(null)
+  const pendingCaretRef = useRef(null)
+  const [suggestion, setSuggestion] = useState(null) // { kind, options, activeIndex, replaceStart, replaceEnd, position } | null
+
+  // Moves the real caret to wherever a just-applied suggestion should leave
+  // it — has to happen after the controlled value actually lands in the
+  // DOM (a plain assignment during the event handler would be clobbered by
+  // React's own re-render), so this runs as a layout effect keyed on value.
+  useLayoutEffect(() => {
+    if (pendingCaretRef.current != null && textareaRef.current) {
+      textareaRef.current.setSelectionRange(pendingCaretRef.current, pendingCaretRef.current)
+      pendingCaretRef.current = null
+    }
+  }, [value])
+
+  const refreshSuggestions = (text, caretIndex) => {
+    if (disabled || !textareaRef.current) { setSuggestion(null); return }
+    const result = getSuggestions(text, caretIndex)
+    if (!result) { setSuggestion(null); return }
+    const position = getCaretCoordinates(textareaRef.current, caretIndex, text)
+    setSuggestion({ ...result, activeIndex: 0, position })
+  }
+
+  const applySuggestion = (option) => {
+    if (!suggestion) return
+    const { replaceStart, replaceEnd, kind } = suggestion
+    // Selecting a property is only ever half the job — auto-append ": "
+    // and immediately re-open suggestions for the (empty) value, mirroring
+    // how Chrome jumps straight into the value field once a property's
+    // picked. Value/variable picks insert verbatim: a value can be one
+    // token of a longer one (`1px solid <here>`), so there's nothing safe
+    // to auto-append there the way there is for a property name.
+    const insertText = kind === 'property' ? `${option}: ` : option
+    const newText = value.slice(0, replaceStart) + insertText + value.slice(replaceEnd)
+    const newCaret = replaceStart + insertText.length
+    pendingCaretRef.current = newCaret
+    onChange(newText)
+    if (kind === 'property') refreshSuggestions(newText, newCaret)
+    else setSuggestion(null)
+  }
+
+  const handleChange = (e) => {
+    onChange(e.target.value)
+    refreshSuggestions(e.target.value, e.target.selectionStart)
+  }
+
+  const handleKeyDown = (e) => {
+    if (!suggestion) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSuggestion(s => s && { ...s, activeIndex: (s.activeIndex + 1) % s.options.length })
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSuggestion(s => s && { ...s, activeIndex: (s.activeIndex - 1 + s.options.length) % s.options.length })
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      applySuggestion(suggestion.options[suggestion.activeIndex])
+    } else if (e.key === 'Escape') {
+      // Swallow here (not the panel/selection-closing Escape below) — only
+      // dismiss the dropdown, matching Chrome's own suggestion-box Escape.
+      e.preventDefault()
+      e.stopPropagation()
+      setSuggestion(null)
+    }
+  }
+
+  const handleKeyUp = (e) => {
+    if (['ArrowDown', 'ArrowUp', 'Enter', 'Tab', 'Escape'].includes(e.key)) return
+    refreshSuggestions(e.target.value, e.target.selectionStart)
+  }
+
+  return (
+    <div className="devedit-autocomplete-wrap">
+      <textarea
+        ref={textareaRef}
+        className="devedit-rule-textarea"
+        value={value}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        onClick={(e) => refreshSuggestions(e.target.value, e.target.selectionStart)}
+        onBlur={() => setSuggestion(null)}
+        rows={rows}
+        spellCheck={false}
+        disabled={disabled}
+      />
+      {suggestion && (
+        <CssAutocompletePopup
+          options={suggestion.options}
+          activeIndex={suggestion.activeIndex}
+          position={suggestion.position}
+          onSelect={applySuggestion}
+          onHover={(i) => setSuggestion(s => s && { ...s, activeIndex: i })}
+        />
+      )}
+    </div>
+  )
+}
+
 // ─── Edit panel (per selected element) ───────────────────────────────
 
 function EditPanel({
-  selection, rows, onDraftChange, onApply, onCancelRule, onAddRule, applyingKey, onClose, error,
+  selection, rows, onDraftChange, onAddRule, onClose, error,
   activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
+  elementEditInitial, elementPanelRef, elementDraftDirty, onElementDirtyChange, elementResetNonce, hasElementEditToReset,
+  applyingAll, onPanelApply, onPanelCancel, onPanelReset,
 }) {
   // Only read when rows.length === 0 below ("no rule matches this element")
   // — offers one of the element's own classes as a selector to create a
@@ -1875,11 +2299,14 @@ function EditPanel({
   // The Icon tab only ever exists when the selection resolves to one <svg>
   // AND that svg passes isLikelyIcon (square/small/monochrome) — for every
   // other element, including a matched-but-not-icon-shaped svg (an
-  // illustration, a logo), this stays byte-for-byte the original plain
-  // "Edit styles" title, no tab strip, no visual noise, and no way to
-  // accidentally swap something that isn't really an icon.
-  const showTabs = !!selection.svgEl
-  const isSvgTab = showTabs && activeTab === 'svg'
+  // illustration, a logo), that tab is simply absent. The Element tab, by
+  // contrast, is offered for every selection — Ben's own ask for this was
+  // general-purpose, not conditional the way icon-swapping is — so the tab
+  // strip itself is now always shown (a plain "Edit styles" title with no
+  // strip at all was the pre-Element-tab behaviour).
+  const showIconTab = !!selection.svgEl
+  const isSvgTab = activeTab === 'svg' && showIconTab
+  const isElementTab = activeTab === 'element'
   const panelWidth = isSvgTab ? SVG_PANEL_WIDTH : PANEL_WIDTH
   const basePos = computeEditPanelPosition(selection.rect, panelWidth)
 
@@ -1919,17 +2346,25 @@ function EditPanel({
 
   const pos = dragPos || basePos
 
+  // Unified Apply/Reset enabled state — the union of both tabs' own
+  // dirtiness, not just whichever one happens to be showing right now,
+  // since Apply/Cancel/Reset now act across both at once regardless of
+  // which tab is active.
+  const hasDirtyCss = rows.some(m => m.draft !== m.committed)
+  const hasEditedCss = rows.some(m => m.committed !== m.original)
+  const canApply = hasDirtyCss || elementDraftDirty
+  const canReset = hasDirtyCss || hasEditedCss || elementDraftDirty || hasElementEditToReset
+
   return (
     <div className="devedit-panel" data-devedit-ui="true" style={{ left: pos.left, top: pos.top, bottom: pos.bottom, width: panelWidth }}>
       <div className="devedit-panel-header" onMouseDown={handleHeaderMouseDown}>
-        {showTabs ? (
-          <div className="devedit-tabs">
-            <button className={`devedit-tab${!isSvgTab ? ' active' : ''}`} onClick={() => onTabChange('styles')}>Edit styles</button>
+        <div className="devedit-tabs">
+          <button className={`devedit-tab${!isSvgTab && !isElementTab ? ' active' : ''}`} onClick={() => onTabChange('styles')}>Edit styles</button>
+          <button className={`devedit-tab${isElementTab ? ' active' : ''}`} onClick={() => onTabChange('element')}>Element</button>
+          {showIconTab && (
             <button className={`devedit-tab${isSvgTab ? ' active' : ''}`} onClick={() => onTabChange('svg')}>Icon</button>
-          </div>
-        ) : (
-          <div className="devedit-panel-title">Edit styles</div>
-        )}
+          )}
+        </div>
         <button className="devedit-panel-close" onClick={onClose} aria-label="Close">×</button>
       </div>
       <div className="devedit-panel-body">
@@ -1943,6 +2378,15 @@ function EditPanel({
             onClearPreview={onIconClearPreview}
             onApply={onIconApply}
             onReset={onIconReset}
+          />
+        ) : isElementTab ? (
+          <ElementEditPanel
+            ref={elementPanelRef}
+            el={selection.el}
+            elKey={selection.elementEditKey || selection.el}
+            initial={elementEditInitial}
+            onDirtyChange={onElementDirtyChange}
+            resetNonce={elementResetNonce}
           />
         ) : (
           <>
@@ -1972,38 +2416,34 @@ function EditPanel({
                     {m.mediaText && <span className="devedit-rule-media">@media {m.mediaText}</span>}
                     {m.loading && <span className="devedit-rule-loading">loading…</span>}
                   </div>
-                  <textarea
-                    className="devedit-rule-textarea"
+                  <RuleTextarea
                     value={m.draft}
-                    onChange={e => onDraftChange(key, e.target.value)}
+                    onChange={(text) => onDraftChange(key, text)}
                     rows={Math.max(3, m.draft.split('\n').length)}
-                    spellCheck={false}
-                    disabled={m.loading}
+                    disabled={m.loading || applyingAll}
                   />
-                  <div className="devedit-rule-actions">
-                    <button
-                      className="devedit-btn-secondary"
-                      onClick={() => onCancelRule(key)}
-                      disabled={m.loading}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="devedit-btn-primary"
-                      onClick={() => onApply(key)}
-                      disabled={m.loading || m.draft === m.committed || applyingKey === key}
-                    >
-                      {applyingKey === key ? 'Applying…' : 'Apply'}
-                    </button>
-                  </div>
                 </div>
               )
             })}
-
-            {error && <div className="devedit-error">{error}</div>}
           </>
         )}
       </div>
+      {!isSvgTab && (
+        <div className="devedit-panel-footer">
+          {error && <div className="devedit-error">{error}</div>}
+          <div className="devedit-rule-actions">
+            <button className="devedit-btn-secondary" onClick={onPanelCancel} disabled={applyingAll}>
+              Cancel
+            </button>
+            <button className="devedit-btn-secondary" onClick={onPanelReset} disabled={applyingAll || !canReset}>
+              Reset
+            </button>
+            <button className="devedit-btn-primary" onClick={onPanelApply} disabled={applyingAll || !canApply}>
+              {applyingAll ? 'Applying…' : 'Apply'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -94,6 +94,23 @@
   color: #8e8e93;
 }
 
+/* Unified Apply/Cancel/Reset row, shared by the "Edit styles" and
+   "Element" tabs (Components/DevEdit.jsx's EditPanel) — sticky to the
+   bottom of .devedit-panel's own scroll box (the panel itself scrolls as
+   one unit, not just its body), so the actions stay reachable while
+   scrolling through several CSS rules. */
+.devedit-panel-footer {
+  position: sticky;
+  bottom: 0;
+  background: #1c1c1e;
+  border-top: 1px solid #3a3a3c;
+  padding: 12px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .devedit-add-rule-list {
   display: flex;
   flex-direction: column;
@@ -156,6 +173,50 @@
 
 .devedit-rule-textarea:disabled {
   opacity: 0.5;
+}
+
+/* ── Chrome-Styles-pane-style autocomplete (Components/RuleTextarea, part
+   of DevEdit.jsx) ── .devedit-autocomplete-wrap is `display: contents` so
+   it's invisible to .devedit-rule-block's own flex layout — purely a hook
+   for the popup to render as a sibling of the textarea it belongs to. */
+
+.devedit-autocomplete-wrap {
+  display: contents;
+}
+
+.devedit-autocomplete-popup {
+  position: fixed;
+  z-index: 10900;
+  display: flex;
+  flex-direction: column;
+  background: #1c1c1e;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 140px;
+}
+
+.devedit-autocomplete-item {
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11.5px;
+  color: #d8d8dc;
+  cursor: pointer;
+}
+
+.devedit-autocomplete-item:hover,
+.devedit-autocomplete-item.active {
+  background: #3b82f6;
+  color: #fff;
 }
 
 .devedit-rule-actions {
@@ -250,6 +311,40 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* ── Element tab (text / tag / class / id) ────────────────────────
+   Third tab in EditPanel's header, shown for any selected element
+   (Components/ElementEditPanel.jsx). Reuses .devedit-rule-block/
+   -textarea/-error/-actions/-btn-* wholesale — only the label and hint
+   styles are new. */
+
+.devedit-element-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.devedit-element-label {
+  font-family: Barlow, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.devedit-element-input {
+  min-height: unset;
+  resize: none;
+}
+
+.devedit-element-hint {
+  font-family: Barlow, sans-serif;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #8e8e93;
+  font-style: italic;
 }
 
 .devedit-svg-occurrences {
