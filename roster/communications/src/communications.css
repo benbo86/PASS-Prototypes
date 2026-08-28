@@ -41,7 +41,7 @@ body {
   flex: 1;
   overflow: hidden;
   padding: 32px 40px 48px;
-  gap: 40px;
+  justify-content:space-between;
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
@@ -53,15 +53,14 @@ body {
 /* ─── Content ────────────────────────────────────────────────── */
 
 .settings-content {
-  flex: 1;
   overflow-y: auto;
+  width:70%;
 }
 
 /* ─── Section ────────────────────────────────────────────────── */
 
 .settings-section {
   background: #fff;
-  border: 1px solid var(--ui-purple-5-languid-lavendar);
   border-radius: 6px;
   margin-bottom: 24px;
 }
