@@ -1252,6 +1252,34 @@
       "usageCount": 1
     },
     {
+      "hash": "78a274fc",
+      "name": "openpass-app-icon",
+      "group": "Icons",
+      "svg": "<svg width=\"38\" height=\"38\" viewBox=\"0 0 38 38\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_5391_19429)\">\n<rect width=\"38\" height=\"38\" rx=\"10\" fill=\"#9A26D6\"/>\n<g clip-path=\"url(#clip1_5391_19429)\">\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z\" fill=\"#5D91C9\"/>\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z\" fill=\"white\"/>\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z\" fill=\"#5D91C9\"/>\n</g>\n</g>\n<defs>\n<clipPath id=\"clip0_5391_19429\">\n<rect width=\"38\" height=\"38\" rx=\"10\" fill=\"white\"/>\n</clipPath>\n<clipPath id=\"clip1_5391_19429\">\n<rect width=\"38\" height=\"38\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/openpass-app-icon.svg",
+          "name": "openpass-app-icon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "383e0bc2",
+      "name": "openpass-emblem",
+      "group": "Icons",
+      "svg": "<svg width=\"38\" height=\"38\" viewBox=\"0 0 38 38\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<rect width=\"38\" height=\"38\" rx=\"19\" fill=\"#688FC4\"/>\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z\" fill=\"white\"/>\n<circle cx=\"19\" cy=\"19\" r=\"15.5\" stroke=\"white\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/openpass-emblem.svg",
+          "name": "openpass-emblem"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "977df25d",
       "name": "Chevron Left",
       "group": "Inline",
@@ -1498,6 +1526,45 @@
       "usageCount": 6
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
+          "name": "BackIcon"
+        }
+      ],
+      "usageCount": 6
+    },
+    {
       "hash": "9af5394b",
       "name": "Chevron Left",
       "group": "Inline",
@@ -1605,40 +1672,6 @@
           "kind": "inline",
           "ref": "schedule/assign-visit-absent-employee-event-panel/src/EventPanel.jsx#CloseIcon",
           "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 5
-    },
-    {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/communications/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
-          "name": "BackIcon"
         }
       ],
       "usageCount": 5
@@ -3019,6 +3052,160 @@
       "usageCount": 1
     },
     {
+      "hash": "b0f23f68",
+      "name": "Open Pass Emblem",
+      "group": "Inline",
+      "svg": "<svg viewBox=\"0 0 38 38\" fill=\"none\">\n    <rect width=\"38\" height=\"38\" rx=\"19\" fill=\"#688FC4\" />\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z\" fill=\"white\" />\n    <circle cx=\"19\" cy=\"19\" r=\"15.5\" stroke=\"white\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#OpenPassEmblemIcon",
+          "name": "OpenPassEmblemIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "2215f1c1",
+      "name": "Restart",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M3 12a9 9 0 1 1 2.64 6.36\" />\n    <path d=\"M3 21v-6h6\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#RestartIcon",
+          "name": "RestartIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ca7615ce",
+      "name": "Hamburger",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"14\" viewBox=\"0 0 20 14\" fill=\"none\">\n    <rect width=\"20\" height=\"2\" rx=\"1\" fill=\"currentColor\" />\n    <rect y=\"6\" width=\"20\" height=\"2\" rx=\"1\" fill=\"currentColor\" />\n    <rect y=\"12\" width=\"20\" height=\"2\" rx=\"1\" fill=\"currentColor\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#HamburgerIcon",
+          "name": "HamburgerIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "5649fae0",
+      "name": "Open Pass App",
+      "group": "Inline",
+      "svg": "<svg viewBox=\"0 0 38 38\" fill=\"none\">\n    <g clip-path=\"url(#opn-app-icon-clip0)\">\n      <rect width=\"38\" height=\"38\" rx=\"10\" fill=\"#9A26D6\" />\n      <g clip-path=\"url(#opn-app-icon-clip1)\">\n        <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z\" fill=\"#5D91C9\" />\n        <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z\" fill=\"white\" />\n        <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z\" fill=\"#5D91C9\" />\n      </g>\n    </g>\n    <defs>\n      <clipPath id=\"opn-app-icon-clip0\"><rect width=\"38\" height=\"38\" rx=\"10\" fill=\"white\" /></clipPath>\n      <clipPath id=\"opn-app-icon-clip1\"><rect width=\"38\" height=\"38\" fill=\"white\" /></clipPath>\n    </defs>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#OpenPassAppIcon",
+          "name": "OpenPassAppIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "195034a2",
+      "name": "Camera",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M9 3l-1.83 2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#CameraIcon",
+          "name": "CameraIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "21972a76",
+      "name": "Flashlight",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M7 2h10v5l-2 3v10a2 2 0 01-2 2h-2a2 2 0 01-2-2V10L7 7V2zm2 2v2.4l2 3V20h2v-10.6l2-3V4H9z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#FlashlightIcon",
+          "name": "FlashlightIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "bc1c2445",
+      "name": "Note",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M4 3h13l3 3v15H4z\" />\n    <path d=\"M8 9h9M8 13h9M8 17h6\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#NoteIcon",
+          "name": "NoteIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "264cc26a",
+      "name": "Speech",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M21 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h13a2 2 0 012 2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#SpeechIcon",
+          "name": "SpeechIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "21ce3fc4",
+      "name": "Calendar Grid",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\" />\n    <path d=\"M3 10h18M8 3v4M16 3v4\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#CalendarGridIcon",
+          "name": "CalendarGridIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "5225a90c",
+      "name": "Clipboard",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <rect x=\"5\" y=\"4\" width=\"14\" height=\"17\" rx=\"2\" />\n    <path d=\"M9 3h6v3H9zM8.5 12.5l2 2 4.5-4.5\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#ClipboardIcon",
+          "name": "ClipboardIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "eaf95d51",
+      "name": "Question",
+      "group": "Inline",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <circle cx=\"12\" cy=\"12\" r=\"9\" />\n    <path d=\"M9.5 9.5a2.5 2.5 0 114 2c-.7.6-1.5 1-1.5 2.2\" />\n    <circle cx=\"12\" cy=\"17.2\" r=\"0.15\" fill=\"currentColor\" stroke=\"none\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#QuestionIcon",
+          "name": "QuestionIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "e197d34f",
       "name": "Visit Types",
       "group": "Inline",
@@ -3551,5 +3738,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-27T13:14:14.498Z"
+  "generatedAt": "2026-09-01T14:30:12.608Z"
 }

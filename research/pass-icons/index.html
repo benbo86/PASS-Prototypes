@@ -200,7 +200,7 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 221 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 234 icons (.zip)</button>
     
   </div>
 
@@ -250,7 +250,7 @@
   </section>
 
   <section data-section-slug="icons">
-    <div class="section-head"><h2>Icons</h2><span class="count">57 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Icons</h2><span class="count">59 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="Medication" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -1561,11 +1561,75 @@
     &lt;/g&gt;
 &lt;/svg&gt;</template>
       </div>
+
+      <div class="card" tabindex="0" role="button" data-name="openpass-app-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download openpass-app-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5391_19429)">
+<rect width="38" height="38" rx="10" fill="#9A26D6"/>
+<g clip-path="url(#clip1_5391_19429)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z" fill="#5D91C9"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z" fill="#5D91C9"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_5391_19429">
+<rect width="38" height="38" rx="10" fill="white"/>
+</clipPath>
+<clipPath id="clip1_5391_19429">
+<rect width="38" height="38" fill="white"/>
+</clipPath>
+</defs>
+</svg></span>
+        <span class="label">openpass-app-icon</span>
+        <span class="native-size">38×38</span>
+        <template class="svg-src">&lt;svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;g clip-path="url(#clip0_5391_19429)"&gt;
+&lt;rect width="38" height="38" rx="10" fill="#9A26D6"/&gt;
+&lt;g clip-path="url(#clip1_5391_19429)"&gt;
+&lt;path fill-rule="evenodd" clip-rule="evenodd" d="M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z" fill="#5D91C9"/&gt;
+&lt;path fill-rule="evenodd" clip-rule="evenodd" d="M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z" fill="white"/&gt;
+&lt;path fill-rule="evenodd" clip-rule="evenodd" d="M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z" fill="#5D91C9"/&gt;
+&lt;/g&gt;
+&lt;/g&gt;
+&lt;defs&gt;
+&lt;clipPath id="clip0_5391_19429"&gt;
+&lt;rect width="38" height="38" rx="10" fill="white"/&gt;
+&lt;/clipPath&gt;
+&lt;clipPath id="clip1_5391_19429"&gt;
+&lt;rect width="38" height="38" fill="white"/&gt;
+&lt;/clipPath&gt;
+&lt;/defs&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="openpass-emblem" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download openpass-emblem.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="38" height="38" rx="19" fill="#688FC4"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z" fill="white"/>
+<circle cx="19" cy="19" r="15.5" stroke="white"/>
+</svg></span>
+        <span class="label">openpass-emblem</span>
+        <span class="native-size">38×38</span>
+        <template class="svg-src">&lt;svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;rect width="38" height="38" rx="19" fill="#688FC4"/&gt;
+&lt;path fill-rule="evenodd" clip-rule="evenodd" d="M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z" fill="white"/&gt;
+&lt;circle cx="19" cy="19" r="15.5" stroke="white"/&gt;
+&lt;/svg&gt;</template>
+      </div>
     </div>
   </section>
 
   <section data-section-slug="inline">
-    <div class="section-head"><h2>Inline</h2><span class="count">136 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Inline</h2><span class="count">147 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -1630,6 +1694,21 @@
   &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download ChevronLeftIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+  </svg></span>
+        <span class="label">ChevronLeftIcon</span>
+        <span class="native-size">16×16</span>
+        <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="ChevronLeft" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -1674,21 +1753,6 @@
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"&gt;
     &lt;polygon fill="currentColor" stroke="currentColor" stroke-linejoin="round"
       points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" /&gt;
-  &lt;/svg&gt;</template>
-      </div>
-
-      <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download ChevronLeftIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-  </svg></span>
-        <span class="label">ChevronLeftIcon</span>
-        <span class="native-size">16×16</span>
-        <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"&gt;
-    &lt;path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /&gt;
   &lt;/svg&gt;</template>
       </div>
 
@@ -3177,6 +3241,213 @@
         <span class="native-size">16×16</span>
         <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="OpenPassEmblemIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download OpenPassEmblemIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 38 38" fill="none">
+    <rect width="38" height="38" rx="19" fill="#688FC4" />
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z" fill="white" />
+    <circle cx="19" cy="19" r="15.5" stroke="white" />
+  </svg></span>
+        <span class="label">OpenPassEmblemIcon</span>
+        <span class="native-size">38×38</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 38 38" fill="none"&gt;
+    &lt;rect width="38" height="38" rx="19" fill="#688FC4" /&gt;
+    &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M27.5782 12.4177C25.6831 10.5274 22.6106 10.5274 20.7155 12.4177L18.9997 14.1288L17.2845 12.4177C15.3894 10.5274 12.3162 10.5274 10.4218 12.4177C8.52606 14.308 8.52606 17.3716 10.4218 19.2619L18.9997 27.8179L27.5782 19.2619C29.4739 17.3716 29.4739 14.308 27.5782 12.4177Z" fill="white" /&gt;
+    &lt;circle cx="19" cy="19" r="15.5" stroke="white" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="RestartIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download RestartIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 12a9 9 0 1 1 2.64 6.36" />
+    <path d="M3 21v-6h6" />
+  </svg></span>
+        <span class="label">RestartIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;path d="M3 12a9 9 0 1 1 2.64 6.36" /&gt;
+    &lt;path d="M3 21v-6h6" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="HamburgerIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download HamburgerIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+    <rect width="20" height="2" rx="1" fill="currentColor" />
+    <rect y="6" width="20" height="2" rx="1" fill="currentColor" />
+    <rect y="12" width="20" height="2" rx="1" fill="currentColor" />
+  </svg></span>
+        <span class="label">HamburgerIcon</span>
+        <span class="native-size">20×14</span>
+        <template class="svg-src">&lt;svg width="20" height="14" viewBox="0 0 20 14" fill="none"&gt;
+    &lt;rect width="20" height="2" rx="1" fill="currentColor" /&gt;
+    &lt;rect y="6" width="20" height="2" rx="1" fill="currentColor" /&gt;
+    &lt;rect y="12" width="20" height="2" rx="1" fill="currentColor" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="OpenPassAppIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download OpenPassAppIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 38 38" fill="none">
+    <g clip-path="url(#opn-app-icon-clip0)">
+      <rect width="38" height="38" rx="10" fill="#9A26D6" />
+      <g clip-path="url(#opn-app-icon-clip1)">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z" fill="#5D91C9" />
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z" fill="white" />
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z" fill="#5D91C9" />
+      </g>
+    </g>
+    <defs>
+      <clipPath id="opn-app-icon-clip0"><rect width="38" height="38" rx="10" fill="white" /></clipPath>
+      <clipPath id="opn-app-icon-clip1"><rect width="38" height="38" fill="white" /></clipPath>
+    </defs>
+  </svg></span>
+        <span class="label">OpenPassAppIcon</span>
+        <span class="native-size">38×38</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 38 38" fill="none"&gt;
+    &lt;g clip-path="url(#opn-app-icon-clip0)"&gt;
+      &lt;rect width="38" height="38" rx="10" fill="#9A26D6" /&gt;
+      &lt;g clip-path="url(#opn-app-icon-clip1)"&gt;
+        &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M6.24693 0C2.79639 0 0 2.75229 0 6.14786V31.8528C0 35.2484 2.79639 38 6.24693 38H31.7524C35.2029 38 38 35.2484 38 31.8528V6.14786C38 2.75229 35.2029 0 31.7524 0H6.24693Z" fill="#5D91C9" /&gt;
+        &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M19 4.75146C11.1299 4.75146 4.75 11.1307 4.75 19.0015C4.75 26.8715 11.1299 33.2515 19 33.2515C26.8707 33.2515 33.25 26.8715 33.25 19.0015C33.25 11.1307 26.8707 4.75146 19 4.75146Z" fill="white" /&gt;
+        &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M15.7705 27.0727L28.6844 14.1588L25.455 10.9302L15.7705 20.6154L12.5418 17.3875L9.3125 20.6154L15.7705 27.0727Z" fill="#5D91C9" /&gt;
+      &lt;/g&gt;
+    &lt;/g&gt;
+    &lt;defs&gt;
+      &lt;clipPath id="opn-app-icon-clip0"&gt;&lt;rect width="38" height="38" rx="10" fill="white" /&gt;&lt;/clipPath&gt;
+      &lt;clipPath id="opn-app-icon-clip1"&gt;&lt;rect width="38" height="38" fill="white" /&gt;&lt;/clipPath&gt;
+    &lt;/defs&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="CameraIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download CameraIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M9 3l-1.83 2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z" />
+  </svg></span>
+        <span class="label">CameraIcon</span>
+        <span class="native-size">20×20</span>
+        <template class="svg-src">&lt;svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path d="M9 3l-1.83 2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="FlashlightIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download FlashlightIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7 2h10v5l-2 3v10a2 2 0 01-2 2h-2a2 2 0 01-2-2V10L7 7V2zm2 2v2.4l2 3V20h2v-10.6l2-3V4H9z" />
+  </svg></span>
+        <span class="label">FlashlightIcon</span>
+        <span class="native-size">20×20</span>
+        <template class="svg-src">&lt;svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path d="M7 2h10v5l-2 3v10a2 2 0 01-2 2h-2a2 2 0 01-2-2V10L7 7V2zm2 2v2.4l2 3V20h2v-10.6l2-3V4H9z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="NoteIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download NoteIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 3h13l3 3v15H4z" />
+    <path d="M8 9h9M8 13h9M8 17h6" />
+  </svg></span>
+        <span class="label">NoteIcon</span>
+        <span class="native-size">22×22</span>
+        <template class="svg-src">&lt;svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;path d="M4 3h13l3 3v15H4z" /&gt;
+    &lt;path d="M8 9h9M8 13h9M8 17h6" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="SpeechIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download SpeechIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h13a2 2 0 012 2z" />
+  </svg></span>
+        <span class="label">SpeechIcon</span>
+        <span class="native-size">22×22</span>
+        <template class="svg-src">&lt;svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;path d="M21 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h13a2 2 0 012 2z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="CalendarGridIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download CalendarGridIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="5" width="18" height="16" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg></span>
+        <span class="label">CalendarGridIcon</span>
+        <span class="native-size">22×22</span>
+        <template class="svg-src">&lt;svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;rect x="3" y="5" width="18" height="16" rx="2" /&gt;
+    &lt;path d="M3 10h18M8 3v4M16 3v4" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="ClipboardIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download ClipboardIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 3h6v3H9zM8.5 12.5l2 2 4.5-4.5" />
+  </svg></span>
+        <span class="label">ClipboardIcon</span>
+        <span class="native-size">22×22</span>
+        <template class="svg-src">&lt;svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;rect x="5" y="4" width="14" height="17" rx="2" /&gt;
+    &lt;path d="M9 3h6v3H9zM8.5 12.5l2 2 4.5-4.5" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="QuestionIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download QuestionIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 114 2c-.7.6-1.5 1-1.5 2.2" />
+    <circle cx="12" cy="17.2" r="0.15" fill="currentColor" stroke="none" />
+  </svg></span>
+        <span class="label">QuestionIcon</span>
+        <span class="native-size">22×22</span>
+        <template class="svg-src">&lt;svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;circle cx="12" cy="12" r="9" /&gt;
+    &lt;path d="M9.5 9.5a2.5 2.5 0 114 2c-.7.6-1.5 1-1.5 2.2" /&gt;
+    &lt;circle cx="12" cy="17.2" r="0.15" fill="currentColor" stroke="none" /&gt;
   &lt;/svg&gt;</template>
       </div>
 
