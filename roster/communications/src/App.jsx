@@ -209,17 +209,10 @@ const HOLIDAY_FIXED_SUBJECT = 'Holiday request — [employee-name]'
 // No "Dear Coordinator" greeting either — a recipient isn't necessarily a
 // coordinator by role, just whoever's been added to the recipients list.
 //
-// Two body variants, not one body trying to cover both — a days-scheme
-// request has a real Full day/Half day AM/Half day PM distinction but no
-// genuinely captured clock times; an hours-scheme request has real
-// start/end times but no such distinction at all. This mirrors how
-// mobile/holidays itself already treats these as two genuinely different
-// request experiences (DaysRequestLeaveScreen/HoursRequestLeaveScreen),
-// not one form/template that adapts a few fields — a single [start-time]/
-// [end-time] pair shown unconditionally would have nothing real to
-// substitute for a days-scheme request. [amount-requested] doesn't need
-// the same split — it's already unit-aware elsewhere in the app ("1 day"
-// vs "8 hrs"), so one tag covers both here too.
+// Days scheme only — a care office uses either a days or an hours holiday
+// scheme organisation-wide, never both, so previewing an hours variant
+// alongside this one was confusing rather than useful (Ben: "let's not
+// show them both days and hours schemes... this will confuse them").
 //
 // [day-type], not "leave type" — this repo's own Roster Settings already
 // has a real "Absence types" concept (Holiday/Sick day/Appointment/etc.),
@@ -228,7 +221,6 @@ const HOLIDAY_FIXED_SUBJECT = 'Holiday request — [employee-name]'
 // fires for Holiday requests specifically anyway, never other absence
 // types, so there's nothing to disambiguate on that front.
 const HOLIDAY_FIXED_BODY_DAYS = '[employee-name] has a holiday request that requires your review.\n\nStatus: [request-status]\nDates: [start-date] – [end-date]\nDay type: [day-type]\nAmount: [amount-requested]'
-const HOLIDAY_FIXED_BODY_HOURS = '[employee-name] has a holiday request that requires your review.\n\nStatus: [request-status]\nDates: [start-date] – [end-date]\nTimes: [start-time] – [end-time]\nAmount: [amount-requested]'
 
 const INITIAL_COMMS_CONFIGS = {
   invoicing: {
@@ -372,10 +364,6 @@ function HolidayRequestsPanelBody({ draft, onPatch, recipientInput, setRecipient
   // Hidden by default — nothing here is editable, so it's a check-if-you-
   // want-to reference rather than something that needs to stay in view.
   const [previewOpen, setPreviewOpen] = useState(false)
-  // Which of the two body variants the preview is currently showing — the
-  // real email sent depends on the requesting employee's own scheme, not
-  // on anything configured here, so the preview lets you check either.
-  const [previewScheme, setPreviewScheme] = useState('days')
 
   const handleAdd = () => {
     if (!isValidEmail(recipientInput)) { setRecipientTouched(true); return }
@@ -458,20 +446,12 @@ function HolidayRequestsPanelBody({ draft, onPatch, recipientInput, setRecipient
               {previewOpen ? 'Hide preview' : 'Preview email content'}
             </button>
             {previewOpen && (
-              <>
-                <p className="comms-panel-desc">The wording below adapts to the requesting employee's own holiday scheme — preview either.</p>
-                <SegmentedToggle
-                  options={[{ value: 'days', label: 'Days scheme' }, { value: 'hours', label: 'Hours scheme' }]}
-                  value={previewScheme}
-                  onChange={setPreviewScheme}
-                />
-                <div className="comms-preview-box">
-                  <div className="comms-preview-label">Subject</div>
-                  <div className="comms-preview-subject">{HOLIDAY_FIXED_SUBJECT}</div>
-                  <div className="comms-preview-label">Message</div>
-                  <div className="comms-preview-body">{previewScheme === 'days' ? HOLIDAY_FIXED_BODY_DAYS : HOLIDAY_FIXED_BODY_HOURS}</div>
-                </div>
-              </>
+              <div className="comms-preview-box">
+                <div className="comms-preview-label">Subject</div>
+                <div className="comms-preview-subject">{HOLIDAY_FIXED_SUBJECT}</div>
+                <div className="comms-preview-label">Message</div>
+                <div className="comms-preview-body">{HOLIDAY_FIXED_BODY_DAYS}</div>
+              </div>
             )}
 
             <div className="cs-field-group">

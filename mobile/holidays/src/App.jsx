@@ -54,6 +54,17 @@ const DeleteOutlineIcon = ({ size = 18 }) => (
   </svg>
 )
 
+// Copied verbatim from Icons/Close.svg (fill swapped to currentColor for
+// theming) — used for the Approved-request "request cancellation" action
+// in place of the bin icon above, so the row-level trigger doesn't read as
+// destructive for something that isn't a deletion at all (see the
+// CAN_DELETE_STATUSES comment below for why the two cases differ).
+const CloseIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" />
+  </svg>
+)
+
 const STATUS_CLASS = {
   'Awaiting approval': 'hol-request-status--awaiting-approval',
   'Awaiting cancellation': 'hol-request-status--awaiting-cancellation',
@@ -125,8 +136,12 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
             >
               <span className={`hol-request-status ${STATUS_CLASS[r.status]}`}>{r.status}</span>
               {CAN_DELETE_STATUSES.includes(r.status) && (
-                <button className="hol-request-delete" onClick={() => onDeleteTap(r)} aria-label="Delete request">
-                  <DeleteOutlineIcon size={20} />
+                <button
+                  className={`hol-request-delete${r.status === 'Approved' ? ' hol-request-delete--cancel' : ''}`}
+                  onClick={() => onDeleteTap(r)}
+                  aria-label={r.status === 'Approved' ? 'Request cancellation' : 'Delete request'}
+                >
+                  {r.status === 'Approved' ? <CloseIcon size={20} /> : <DeleteOutlineIcon size={20} />}
                 </button>
               )}
               <div className="hol-request-date">

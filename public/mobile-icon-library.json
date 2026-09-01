@@ -867,6 +867,20 @@
       "usageCount": 1
     },
     {
+      "hash": "5f728a1e",
+      "name": "Close",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\" fill=\"currentColor\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "b66f6e6b",
       "name": "Archive",
       "group": "Staff Messaging",
@@ -1273,5 +1287,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-08-26T16:20:36.553Z"
+  "generatedAt": "2026-09-01T09:14:03.723Z"
 }

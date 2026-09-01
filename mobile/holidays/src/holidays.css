@@ -219,6 +219,15 @@
   cursor: pointer;
 }
 
+/* Requesting a cancellation on an already-Approved request isn't a
+   deletion — it goes through the office before anything actually changes
+   — so it shouldn't carry the same alarming red as the true-delete case
+   above. Neutral icon tone, matching main.css's own convention for
+   inactive/secondary icons. */
+.hol-request-delete--cancel {
+  color: var(--ui-purple-3-grape-grey, #968caf);
+}
+
 /* ── Request leave form ─────────────────────────────────────────── */
 .hol-form-body {
   flex: 1;
