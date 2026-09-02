@@ -10,6 +10,11 @@ import '../../../Styles/mobile.css'
 // fa-regular @font-face rules its icons render through (same mechanism
 // customer-profile/communications and customer-profile/timeline use).
 import '../../../Styles/legacy.css'
+import '../../../Styles/dev-toolbar.css'
+import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
+import '../../../Styles/dev-edit.css'
+import '../../../Styles/wireframe-access.css'
 import './demo.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

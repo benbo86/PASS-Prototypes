@@ -7,6 +7,12 @@ import ScreenSlider from '../../../Components/ScreenSlider'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import IOSCalendarPopover from '../../../Components/IOSCalendarPopover'
 import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
+import DevToolbar from '../../../Components/DevToolbar'
+import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -150,8 +156,18 @@ export default function App() {
   const [story, setStory] = useState('shell')
   const current = STORIES.find(s => s.key === story)
 
+  const pageRef = useRef(null)
+
   return (
-    <div className="mobile-shell-demo">
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
+      </DevToolbar>
+      <div className="mobile-shell-demo" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="mobile-shell-demo-content">
         <h1>Mobile Components</h1>
@@ -167,5 +183,6 @@ export default function App() {
         {story === 'pickers' && <PickersStory />}
       </PhoneFrame>
     </div>
+    </>
   )
 }

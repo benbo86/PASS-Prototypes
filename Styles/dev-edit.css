@@ -542,6 +542,17 @@
   white-space: nowrap;
 }
 
+/* Transient post-Save confirmation — same green as .devedit-banner-success
+   (Icon Swap's "Icon applied" state) for visual consistency, but a plain
+   inline label rather than a boxed banner since it lives in the always-on
+   session bar alongside plain text, not a standalone panel row. */
+.devedit-session-confirmation {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #34c759;
+  white-space: nowrap;
+}
+
 .devedit-session-previewing {
   font-size: 12.5px;
   color: #3b82f6;

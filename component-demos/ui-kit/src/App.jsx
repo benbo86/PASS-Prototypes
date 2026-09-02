@@ -5,6 +5,12 @@ import RowActionsMenu from '../../../Components/RowActionsMenu'
 import NumberStepper from '../../../Components/NumberStepper'
 import SearchMultiSelect from '../../../Components/SearchMultiSelect'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
+import DevToolbar from '../../../Components/DevToolbar'
+import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 
 // ─── Icons (copied verbatim from Icons/, fill set to currentColor) ──────
 
@@ -153,8 +159,18 @@ export default function App() {
   const [multiSelected, setMultiSelected] = useState([1])
   const [careType, setCareType] = useState('Home Care')
 
+  const pageRef = useRef(null)
+
   return (
-    <div className="uk-page">
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
+      </DevToolbar>
+      <div className="uk-page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
 
       <div className="uk-header">
@@ -426,5 +442,6 @@ export default function App() {
         </div>
       </Section>
     </div>
+    </>
   )
 }

@@ -1,5 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import SlidePanel from '../../../Components/SlidePanel'
+import DevToolbar from '../../../Components/DevToolbar'
+import DevMode from '../../../Components/DevMode'
+import DevComments from '../../../Components/DevComments'
+import DevEdit from '../../../Components/DevEdit'
+import WireframeToggle from '../../../Components/WireframeToggle'
+import AuditCapture from '../../../Components/AuditCapture'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -10,8 +16,18 @@ const ChevronLeftIcon = () => (
 export default function App() {
   const [open, setOpen] = useState(false)
 
+  const pageRef = useRef(null)
+
   return (
-    <div className="demo-page">
+    <>
+      <DevToolbar>
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevMode containerRef={pageRef} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <WireframeToggle />
+        <AuditCapture containerRef={pageRef} />
+      </DevToolbar>
+      <div className="demo-page" ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <div className="demo-content">
         <h1>Slide Panel</h1>
@@ -33,5 +49,6 @@ export default function App() {
         <p>Panel body content — the consuming prototype controls spacing here.</p>
       </SlidePanel>
     </div>
+    </>
   )
 }

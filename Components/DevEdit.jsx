@@ -262,6 +262,32 @@ function setLiveRuleTextInSheet(sheetIndex, selectorText, mediaText, cssText) {
 // for an instant on refresh, before this effect ran and clobbered it).
 // Including sheetIndex keeps same-selector rules from different files as
 // distinct snapshot/restore targets instead of conflating them.
+// Reverts any of `entries`' real source-file writes back to their true
+// original declarations — the counterpart to handleApply's own file write.
+// Discard/Reset used to only ever revert the LIVE CSSOM (setLiveRuleText),
+// never the file Apply had already written to disk — reported directly:
+// "if I make a change then click discard the change remains until I
+// refresh the page... Discard should be exactly that, undo those style
+// changes." Fixed by reusing the exact same /__dev-edit/apply endpoint
+// Apply itself calls, just with `original` as the declarations instead of
+// `draft`/`committed` — its own job is already "write these declarations
+// for this selector," which is exactly what undoing an edit needs too.
+// Fire-and-forget (best effort) — the caller is always about to revert the
+// live DOM/close the panel regardless of whether this particular network
+// request succeeds.
+function revertFileWrites(entries) {
+  if (!import.meta.env.DEV) return
+  const edits = entries
+    .filter(e => e && e.filePath && e.committed !== e.original)
+    .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.original }))
+  if (edits.length === 0) return
+  fetch('/__dev-edit/apply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ edits }),
+  }).catch(err => console.error('Dev Edit: failed to revert file write(s)', err))
+}
+
 function buildPristineSnapshot() {
   const snapshot = new Map()
   Array.from(document.styleSheets).forEach((sheet, sheetIndex) => {
@@ -643,6 +669,25 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // ever looked "different" from its own already-updated baseline again.
   const editedEntries = useCallback(() => Object.values(sessionEditsRef.current).filter(e => e.committed !== e.original), [])
 
+  // A narrower view of the above, used only to decide whether *leaving*
+  // needs a decision at all. A CSS entry with a resolvable file path,
+  // applied while running locally, is already durably saved the moment
+  // Apply wrote it to the real source file — it's in exactly the same
+  // state as any other already-committed line in that file, no different
+  // from an edit made by hand. Prompting "discard or save as version" for
+  // it is actively misleading: Discard would wrongly undo something
+  // already safely on disk, and Save as version is redundant (every
+  // prototype sharing that file already gets the change for free) — this
+  // is the exact confusion reported directly after the file-write-aware
+  // Discard fix above shipped. Only a CSS entry with nowhere durable to
+  // live (no resolvable file, or not running locally at all, where the
+  // file-write endpoint doesn't even exist) is genuinely at risk of being
+  // silently lost on exit, so only *those* still force the choice.
+  const editedEntriesNeedingDecision = useCallback(
+    () => editedEntries().filter(e => !(import.meta.env.DEV && e.filePath)),
+    [editedEntries]
+  )
+
   // An icon entry's dirtiness mirrors the CSS side's committed/original
   // split, just flatter (svg/savedSvg instead of draft/committed/original)
   // — savedSvg is whatever's currently the active/saved value (or null if
@@ -667,22 +712,53 @@ export default function DevEdit({ containerRef, prototypeId }) {
     (e) => JSON.stringify(e.committed) !== JSON.stringify(e.saved)
   ).length, [])
 
-  const discardSession = useCallback(() => {
-    Object.values(sessionEditsRef.current).forEach(entry => { setLiveRuleText(entry.selectorText, entry.mediaText, entry.original) })
+  // Renamed from "discardSession" and deliberately narrowed to only revert
+  // whatever's still genuinely at risk — the exact same set
+  // editedEntriesNeedingDecision() already identifies (icon/element edits
+  // always qualify, since neither ever has a file-write path; a CSS edit
+  // only qualifies when it's NOT already durably saved to a file). A CSS
+  // edit that WAS saved to a file — its own real file content included —
+  // is left completely untouched. Reported directly: "The Discard button
+  // should be Close as currently you could Save then Discard which
+  // doesn't make sense" — a single button that could also silently erase
+  // an explicit, already-permanent Save read as contradictory once v14
+  // started labelling that state "saved to file" right next to it.
+  const closeSession = useCallback(() => {
+    // Only the at-risk entries' *live style* gets reverted — a file-saved
+    // entry's live CSSOM already correctly reflects its saved value (Apply
+    // set it there directly) and the real file already has it, so there's
+    // nothing to revert for those.
+    const atRisk = editedEntriesNeedingDecision()
+    atRisk.forEach(entry => setLiveRuleText(entry.selectorText, entry.mediaText, entry.original))
+    // But the whole map still needs to be *cleared*, not just patched for
+    // the at-risk keys — a first version left every already-file-saved
+    // entry sitting in sessionEdits with committed !== original, which
+    // kept dirtyCount above 0 forever and left the session bar's badge/
+    // buttons stuck showing exactly what they'd shown before the click —
+    // reported directly as "the Close button doesn't do anything." Once a
+    // rule's live style is correct (reverted for at-risk, already-saved
+    // for the rest), this session's own bookkeeping about it has nothing
+    // left to say — a fresh selection later re-establishes `original` from
+    // whatever's actually live/on-disk at that point anyway, which is
+    // exactly right for an edit that's now the new permanent baseline.
+    // Confirmed safe against the always-on reconcile effect above: that
+    // effect's own dependency array is [activeOverrides] and its exclude
+    // set reads `selectionRef.current` — neither reads sessionEdits at
+    // all, so clearing it here can never trigger that effect to stomp a
+    // just-applied live style.
     setSessionEdits({})
-    // Icon edits discard the same way — clearing to {} removes this
-    // session's opinion about every icon entirely (including any pending
-    // Reset/suppression — see mergeIconSwaps), so the unified reconcile
-    // effect above falls all the way back to whatever's genuinely saved in
-    // activeOverrides (or the true original, via iconSwap.js's own
-    // registry, for a brand-new swap that was never saved at all).
+    // Icon/element edits are unconditionally cleared — both are always
+    // "at risk" (neither has any file-write path at all), same reasoning
+    // as editedEntriesNeedingDecision's own CSS-only filter. Clearing to
+    // {} removes this session's opinion about every icon/element entirely
+    // (including any pending Reset/suppression — see mergeIconSwaps), so
+    // the unified reconcile effect above falls all the way back to
+    // whatever's genuinely saved/active, or the true original for anything
+    // never saved.
     setIconEdits({})
-    // Same reasoning as icon edits above — the combined reconcile effect
-    // below falls back to whatever's genuinely saved/active, or the true
-    // original for anything never saved.
     setElementEdits({})
     setSelection(null)
-  }, [])
+  }, [editedEntriesNeedingDecision])
 
   // Reverts only the *unconfirmed* rules among `keys` (draft !== committed)
   // back to their last committed value — leaves anything already confirmed
@@ -710,6 +786,25 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const [applyingAll, setApplyingAll] = useState(false)
   const applyingAllRef = useRef(false)
   applyingAllRef.current = applyingAll
+
+  // A brief, explicit confirmation shown after a successful Save — the
+  // panel itself closes immediately on Save (established v12 behaviour,
+  // unchanged), which on its own gives no visible proof the edit actually
+  // stuck. Reported directly: "its not obvious to the user that after
+  // apply they need to refresh to notice its a permanent change." Message
+  // differs by what genuinely happened — a real file write (dev-only,
+  // resolvable path) vs. a session/live-only commit — so this never claims
+  // more permanence than actually occurred. Auto-clears via a ref-tracked
+  // timeout (same pattern as the Wireframe tool's own Save-confirmation
+  // button state) so two Saves in quick succession restart the window
+  // rather than the first timeout cutting the second confirmation short.
+  const [saveConfirmation, setSaveConfirmation] = useState(null)
+  const saveConfirmationTimeoutRef = useRef(null)
+  const showSaveConfirmation = (toFile) => {
+    if (saveConfirmationTimeoutRef.current) clearTimeout(saveConfirmationTimeoutRef.current)
+    setSaveConfirmation(toFile ? 'file' : 'session')
+    saveConfirmationTimeoutRef.current = setTimeout(() => setSaveConfirmation(null), 2500)
+  }
 
   const revertDirtyRules = useCallback((keys) => {
     if (!keys || keys.length === 0 || applyingAllRef.current) return
@@ -840,7 +935,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const toggleActive = useCallback(() => {
     if (active) {
-      if (editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('deactivate'); return }
+      if (editedEntriesNeedingDecision().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('deactivate'); return }
       setActive(false)
       setSelection(null)
       setHoveredEl(null)
@@ -860,7 +955,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     if (!isAuthed) { setGateStep('password'); return }
     if (!authorName.trim()) { setGateStep('name'); return }
     setActive(true)
-  }, [active, authReady, isAuthed, authorName, editedEntries, iconEditedCount, elementEditedCount])
+  }, [active, authReady, isAuthed, authorName, editedEntriesNeedingDecision, iconEditedCount, elementEditedCount])
 
   const submitPassword = async () => {
     if (!passwordInput || signingIn) return
@@ -892,7 +987,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }
 
   const handleSignOut = async () => {
-    if (editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('signout'); return }
+    if (editedEntriesNeedingDecision().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0) { setExitPrompt('signout'); return }
     await finishExit('signout')
   }
 
@@ -910,7 +1005,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // leaving them applied-but-unmanaged or silently discarding them)
   const handleExitDiscard = () => {
     const intent = exitPrompt
-    discardSession()
+    closeSession()
     setExitPrompt(null)
     finishExit(intent)
   }
@@ -1341,6 +1436,10 @@ export default function DevEdit({ containerRef, prototypeId }) {
       const swaps = mergeIconSwaps(iconEditsRef.current, activeOverridesRef.current?.iconSwaps)
       iconRuntimeRef.current.setActiveSwaps(swaps)
     }
+    // Only a real CSS commit (fileEdits, computed above) or an element edit
+    // reaches this line at all (canApply gates the button itself), so this
+    // always reflects a genuine save — never shown for a no-op click.
+    showSaveConfirmation(fileEdits.length > 0)
     setSelection(null)
   }
 
@@ -1359,6 +1458,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const handlePanelReset = () => {
     const sel = selectionRef.current
     if (!sel || applyingAllRef.current) return
+    revertFileWrites(sel.keys.map(key => sessionEditsRef.current[key]))
     sel.keys.forEach(key => {
       const entry = sessionEditsRef.current[key]
       if (entry) setLiveRuleText(entry.selectorText, entry.mediaText, entry.original)
@@ -1560,12 +1660,16 @@ export default function DevEdit({ containerRef, prototypeId }) {
   }, [showHistory, prototypeId])
 
   const previewVersion = (version) => {
-    const hasUnsaved = editedEntries().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0
+    // Matches closeSession's own narrower scope — a CSS edit already
+    // durably saved to a file isn't at risk of being lost by previewing,
+    // and closeSession itself now leaves it untouched, so warning about it
+    // here would be inaccurate (nothing would actually be discarded).
+    const hasUnsaved = editedEntriesNeedingDecision().length > 0 || iconEditedCount() > 0 || elementEditedCount() > 0
     if (hasUnsaved && !window.confirm('Discard your unsaved edits to preview a past version?')) return
-    if (hasUnsaved) discardSession()
+    if (hasUnsaved) closeSession()
     if (pristineRef.current) applyOverrideSet(version.overrides, pristineRef.current)
     // Previewing shows EXACTLY this version's own icon swaps, not merged
-    // with anything else — discardSession() above already cleared this
+    // with anything else — closeSession() above already cleared this
     // session's own edits in the common case, but calling setActiveSwaps
     // directly (bypassing mergeIconSwaps) is what makes this correct
     // regardless of that effect's own timing.
@@ -1624,6 +1728,15 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const showHoverHighlight = hoverRect && (!selection || hoveredEl !== selection.el)
   const rows = selection ? selection.keys.map(k => sessionEdits[k]).filter(Boolean) : []
   const dirtyCount = editedEntries().length + iconEditedCount() + elementEditedCount()
+  // Splits dirtyCount into the same two buckets editedEntriesNeedingDecision
+  // draws — how many are already durably saved to a real file (safe, not at
+  // risk of loss) vs. everything else (still only session/live-only, or an
+  // icon/element edit, which never has a file-write path at all). Purely
+  // for the session bar's own wording below: dirtyCount itself stays the
+  // raw total, since Discard/Save-as-version legitimately still act on
+  // every dirty entry regardless of which bucket it's in.
+  const fileSavedCount = editedEntries().length - editedEntriesNeedingDecision().length
+  const atRiskCount = dirtyCount - fileSavedCount
 
   // ── Tab switching (Edit styles <-> Element/Icon) ── switching away from
   // a tab that has something uncommitted prompts to apply or discard
@@ -1921,8 +2034,11 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
           <SessionBar
             dirtyCount={dirtyCount}
+            atRiskCount={atRiskCount}
+            fileSavedCount={fileSavedCount}
+            saveConfirmation={saveConfirmation}
             onSave={openSaveDialog}
-            onDiscard={discardSession}
+            onClose={closeSession}
             onToggleHistory={() => { setShowHistory(h => !h); setHistoryError(null) }}
             historyOpen={showHistory}
             authorName={authorName}
@@ -2027,17 +2143,37 @@ function AuthGate({ step, password, setPassword, passwordError, signingIn, onSub
 // discard the current session and reach version history, independent of
 // whether any element is currently selected.
 
-function SessionBar({ dirtyCount, onSave, onDiscard, onToggleHistory, historyOpen, authorName, previewing, onStopPreview }) {
+function SessionBar({ dirtyCount, atRiskCount, fileSavedCount, saveConfirmation, onSave, onClose, onToggleHistory, historyOpen, authorName, previewing, onStopPreview }) {
+  // Wording split so a CSS edit already durably written to a real file is
+  // never described as "unsaved" — that word was the actual source of "not
+  // obvious ... after apply they need to refresh to notice its a permanent
+  // change": the badge kept saying "unsaved" forever after a genuinely
+  // permanent Save. atRiskCount/fileSavedCount are the same two buckets
+  // editedEntriesNeedingDecision draws elsewhere; dirtyCount itself is left
+  // untouched for Discard/Save-as-version, which legitimately still act on
+  // every dirty entry regardless of which bucket it's in.
+  const countLabel = atRiskCount > 0 && fileSavedCount > 0
+    ? `${atRiskCount} unsaved, ${fileSavedCount} saved to file`
+    : atRiskCount > 0
+      ? `${atRiskCount} unsaved edit${atRiskCount === 1 ? '' : 's'}`
+      : fileSavedCount > 0
+        ? `${fileSavedCount} saved to file`
+        : null
   return (
     <div className="devedit-session-bar" data-devedit-ui="true">
+      {saveConfirmation && (
+        <span className="devedit-session-confirmation">
+          ✓ {saveConfirmation === 'file' ? 'Saved to file' : 'Saved'}
+        </span>
+      )}
       {previewing && (
         <span className="devedit-session-previewing">
           Previewing a past version
           <button className="devedit-link-btn" onClick={onStopPreview}>Stop</button>
         </span>
       )}
-      {dirtyCount > 0 && <span className="devedit-session-count">{dirtyCount} unsaved edit{dirtyCount === 1 ? '' : 's'}</span>}
-      {dirtyCount > 0 && <button className="devedit-btn-secondary" onClick={onDiscard}>Discard</button>}
+      {countLabel && <span className="devedit-session-count">{countLabel}</span>}
+      {dirtyCount > 0 && <button className="devedit-btn-secondary" onClick={onClose}>Close</button>}
       {dirtyCount > 0 && <button className="devedit-btn-primary" onClick={onSave}>Save as version</button>}
       <button className={`devedit-btn-secondary${historyOpen ? ' active' : ''}`} onClick={onToggleHistory}>
         <HistoryIcon /> History
@@ -2438,8 +2574,13 @@ function EditPanel({
             <button className="devedit-btn-secondary" onClick={onPanelReset} disabled={applyingAll || !canReset}>
               Reset
             </button>
+            {/* "Save as version" deliberately lives only in the session bar
+                (bottom of screen), not here too — it's a "now that I've
+                finished all my edits" decision, not something to reach for
+                mid-edit on one element. Reported directly after v14 first
+                added it here. */}
             <button className="devedit-btn-primary" onClick={onPanelApply} disabled={applyingAll || !canApply}>
-              {applyingAll ? 'Applying…' : 'Apply'}
+              {applyingAll ? 'Saving…' : 'Save'}
             </button>
           </div>
         </div>
