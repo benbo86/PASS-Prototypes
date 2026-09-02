@@ -267,8 +267,11 @@ function BookingsScreen() {
 
         {BOOKINGS.map(b => (
           <div className="opn-booking-card" key={b.time}>
-            <div className="opn-booking-time">{b.time} - {b.duration}</div>
-            <div className="opn-booking-carer">{b.carer}</div>
+            <span className="opn-booking-accent" />
+            <div className="opn-booking-card-text">
+              <div className="opn-booking-time">{b.time} - {b.duration}</div>
+              <div className="opn-booking-carer">{b.carer}</div>
+            </div>
           </div>
         ))}
       </div>

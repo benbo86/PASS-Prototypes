@@ -319,10 +319,33 @@
 }
 
 .opn-booking-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: #fff;
   border-radius: 12px;
   padding: 16px;
-  border-left: 4px solid var(--rag-amber-amber-7, #f0a205);
+}
+
+/* A real element, not a border — same reasoning as .opn-details-accent:
+   the Figma design's accent bar has fully rounded (pill) ends, which a
+   CSS border can't produce without also rounding the card's own outer
+   corners. Matches the source frame's own "Rectangle 108" for this card
+   (9x30px) and its "openPASS Orange" colour — a different token from
+   .opn-details-accent's openPASS Green, and also different from this
+   repo's own --rag-amber-amber-7 used for the calendar dots elsewhere on
+   this screen; confirmed directly against the design, not assumed. */
+.opn-booking-accent {
+  flex-shrink: 0;
+  width: 9px;
+  height: 30px;
+  border-radius: 4.5px;
+  background: #e49c43;
+}
+
+.opn-booking-card-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .opn-booking-time {
