@@ -5,6 +5,7 @@ import RowActionsMenu from '../../../Components/RowActionsMenu'
 import NumberStepper from '../../../Components/NumberStepper'
 import SearchMultiSelect from '../../../Components/SearchMultiSelect'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
+import { HeartbeatIcon } from '../../../Components/CustomerProfileNav'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -360,7 +361,7 @@ export default function App() {
         </div>
       </Section>
 
-      <Section title="Badges / status pills" description="Status pills (.status-pill + a colour modifier) and count badges (.menu-row-badge) share the same red/green/grey tokens used throughout the RAG colour system.">
+      <Section title="Badges / status pills" description="Status pills (.status-pill + a colour modifier), count badges (.menu-row-badge), and flag badges (.ctx-badge + a colour modifier) share the same red/green/grey tokens used throughout the RAG colour system.">
         <span className="uk-caption">Status pills</span>
         <div className="uk-row">
           <span className="status-pill status-completed">Completed</span>
@@ -371,6 +372,15 @@ export default function App() {
         <span className="uk-caption">Count badge</span>
         <div className="uk-row">
           <span className="menu-row-badge">3</span>
+        </div>
+
+        <span className="uk-caption">Flag badges — small uppercase status flag next to a name (originally the customer context bar's DNACPR/HIGH RISK/ACTIVE, promoted here so it's reusable anywhere a similar flag is needed)</span>
+        <div className="uk-row">
+          <div className="ctx-badge-group">
+            <span className="ctx-badge ctx-badge--dnacpr"><HeartbeatIcon /> DNACPR</span>
+            <span className="ctx-badge ctx-badge--danger-soft">HIGH RISK</span>
+            <span className="ctx-badge ctx-badge--success">ACTIVE</span>
+          </div>
         </div>
       </Section>
 

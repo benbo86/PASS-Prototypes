@@ -493,11 +493,43 @@ h6 {
 .status-pill {
   display: inline-flex; align-items: center;
   padding: 6px 12px; border-radius: 4px;
-  font-size: 14px; font-weight: 500; white-space: nowrap;
+  font-size: 14px; font-weight: 400; white-space: nowrap;
 }
-.status-completed { background: var(--rag-green-green-lightest);     color: var(--rag-green-green-3-aa); }
-.status-missed    { background: var(--rag-red-action-med-pastel);    color: var(--rag-red-red-overdue-dark); }
+.status-completed { background: var(--rag-green-green-lightest); }
+.status-missed    { background: var(--rag-red-action-med-pastel); }
 .status-cancelled { background: var(--greyscale-13-grey-90);         color: var(--greyscale-4-grey-40); }
+
+/* Small uppercase status flag, sat next to a name (e.g. customer-profile's
+   context bar: DNACPR/HIGH RISK/ACTIVE) — moved here from
+   customer-profile-nav.css so it's a shared component, not a page-local
+   one, for reuse anywhere a similar "flag next to a name" is needed. */
+.ctx-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: .2em .6em .3em; border-radius: .25em;
+  font-family: Barlow, sans-serif; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+  line-height:1;
+}
+/* DNACPR gets its own fully self-contained class (colour AND its own
+   larger pill border-radius) rather than a shared --danger modifier — the
+   base .ctx-badge's radius stays 4px for every other badge, DNACPR is the
+   one exception, not the new default. */
+.ctx-badge--dnacpr      { background: #e61c1c; color: #FFF; border-radius: 11px; padding: 3px 7px; }
+/* Distinct from --dnacpr on purpose (e.g. HIGH RISK vs. DNACPR — both are
+   red-toned flags but not meant to read with the same visual weight). */
+.ctx-badge--danger-soft { background: #e61c1c; color: #FFF; }
+.ctx-badge--success     { background: #21a621; color: #FFF; }
+
+/* Groups a set of .ctx-badge flags together (e.g. DNACPR/HIGH RISK/ACTIVE)
+   so they can sit as one unit next to a name, separate from the name
+   itself — same gap as .context-name-row's own flex gap, so wrapping the
+   badges in this div doesn't change their spacing. */
+.ctx-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
 
 /* ── Pagination ──────────────────────────────────────────────── */
 .pagination {

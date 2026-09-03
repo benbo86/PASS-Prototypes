@@ -16,8 +16,8 @@
 .context-top {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px 12px;
+  gap: 14px;
+  padding: 4px 8px;
 }
 
 .context-avatar {
@@ -40,57 +40,39 @@
 .context-name-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 15px;
   margin-bottom: 6px;
   flex-wrap: wrap;
 }
 
 .context-name {
   font-family: Barlow, sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1;
   color: #000;
   margin: 0;
 }
 
-.ctx-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: Barlow, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  white-space: nowrap;
-}
-
-.ctx-badge--danger {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.ctx-badge--success {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
+/* .ctx-badge / .ctx-badge--dnacpr / .ctx-badge--danger-soft /
+   .ctx-badge--success moved to the shared "── Badges ──" section in
+   Styles/main.css — promoted out of this page-specific stylesheet since
+   the pattern (a small uppercase status flag next to a name, e.g.
+   DNACPR/HIGH RISK/ACTIVE) is meant to be reused beyond just the customer
+   context bar. See component-demos/ui-kit for the demo. */
 
 .context-details {
   display: flex;
   align-items: center;
   gap: 20px;
   font-family: Barlow, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--greyscale-5-grey-35);
   flex-wrap: wrap;
 }
 
 .detail-label {
-  font-weight: 600;
-  color: var(--greyscale-8-grey-65);
+  font-weight: 500;
   margin-right: 2px;
 }
 
@@ -176,14 +158,14 @@
 
 .primary-tabs li button {
   display: block;
-  padding: 12px 16px;
+  padding: 8px 16px;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
   font-family: Barlow, sans-serif;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--greyscale-5-grey-35);
+  font-weight: 400;
+  color: #4a5565;
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
@@ -193,16 +175,16 @@
 /* Hover: subtle grey fill + grey underline (ported from the copied design) */
 .primary-tabs li button:hover {
   color: #000;
-  background: #f9fafb;
-  border-bottom-color: #d1d5db;
+  background: var(--greyscale-14-grey-95);
+  border-bottom-color: #d1d5dc;
 }
 
 /* Active: light-purple fill + purple text + purple underline */
 .primary-tabs li.active button,
 .primary-tabs li.active button:hover {
   color: var(--brand-purple-6-purple-4);
-  background: #f3e8fd;
-  border-bottom-color: var(--brand-purple-6-purple-4);
+  background: #faf5ff;
+  border-bottom: 3px solid var(--brand-purple-6-purple-4);
 }
 
 /* Optional per-tab count pill (see CustomerProfileNav's tabBadges prop) —
