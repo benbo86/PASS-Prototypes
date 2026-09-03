@@ -68,6 +68,8 @@
   width: 100%;
   border-collapse: collapse;
   border: none;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .mar-legacy .tasks-container { border-top: 1px solid #ccc; }
@@ -88,6 +90,7 @@
   padding-right: 7.5px;
   padding-top: 10px;
   position: sticky;
+  border-left: 1px solid #ccc;
 }
 
 .mar-legacy .marsheet-container .marsheet-task-info-panel {
@@ -125,7 +128,6 @@
   position: sticky;
   vertical-align: top;
   border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
 }
 
 .mar-legacy .marsheet_timeline-medication-panel .labelList { margin: 10px 0 10px 10px; }
