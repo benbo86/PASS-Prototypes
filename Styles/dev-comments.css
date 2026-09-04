@@ -10,7 +10,20 @@
    but the pin itself (and its matching cursor) stays amber/orange
    deliberately, since that's the one place a distinct "this is a comment,
    not a Dev Mode selection" colour actually earns its keep visually.
-   Resolved stays green — that's a status colour, not a decorative one. */
+   Resolved stays green — that's a status colour, not a decorative one.
+
+   z-index bumped +400 (pins were 10650, composer/thread panel were 10700
+   — now 11050/11100) for the same reason and at the same time as Styles/
+   dev-mode.css's own identical fix: Components/SlidePanel.jsx's
+   .slide-panel-overlay (Styles/main.css) sits at 10800, which used to
+   beat every one of these — pins, the new-comment composer, and the
+   thread panel would all render correctly but paint *behind* an open
+   slide-out's opaque backdrop, invisible even though fully functional.
+   Not reported directly for Dev Comments specifically, but it's the
+   identical root cause Dev Mode was reported for ("unable to use dev
+   mode in the slide out") and the identical fix Dev Edit already had
+   (10900) — fixed proactively rather than waiting for it to be hit here
+   too. */
 
 /* ── Pins ── */
 
@@ -20,7 +33,7 @@
    position:fixed. */
 .devcomments-pin-wrap {
   position: fixed;
-  z-index: 10650;
+  z-index: 11050;
   transform: translate(-8px, -32px);
   display: flex;
   align-items: center;
@@ -116,7 +129,7 @@
 
 .devcomments-composer {
   position: fixed;
-  z-index: 10700;
+  z-index: 11100;
   width: 260px;
   border-radius: 10px;
   padding: 12px;
@@ -183,7 +196,7 @@
 
 .devcomments-panel {
   position: fixed;
-  z-index: 10700;
+  z-index: 11100;
   width: 300px;
   max-height: 80vh;
   border-radius: 10px;

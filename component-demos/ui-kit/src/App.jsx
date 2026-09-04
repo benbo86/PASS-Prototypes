@@ -150,6 +150,7 @@ export default function App() {
   const filterAnchorRef = useRef(null)
 
   const [radioValue, setRadioValue] = useState('first')
+  const [layoutValue, setLayoutValue] = useState('visitList')
   const [checkedA, setCheckedA] = useState(true)
   const [checkedB, setCheckedB] = useState(false)
   const [toggleOn, setToggleOn] = useState(true)
@@ -319,6 +320,19 @@ export default function App() {
           <label className="fd-radio-row">
             <input type="radio" className="form-radio" name="uk-radio-demo" checked={radioValue === 'last'} onChange={() => setRadioValue('last')} />
             <span>Last name</span>
+          </label>
+        </div>
+      </Section>
+
+      <Section title="Radio cards" description=".radio-card + .form-radio — a bordered, selectable card per option instead of a plain radio row. Used when the choice reads more like picking a layout/template than filling in a field, where a primary/secondary button pair also doesn't fit (buttons imply an action, not a selection). First built for customer-profile/funders' Customise document modal's Layout picker.">
+        <div className="uk-row">
+          <label className={`radio-card${layoutValue === 'visitList' ? ' selected' : ''}`}>
+            <input type="radio" className="form-radio" name="uk-radio-card-demo" checked={layoutValue === 'visitList'} onChange={() => setLayoutValue('visitList')} />
+            <span>Visit list</span>
+          </label>
+          <label className={`radio-card${layoutValue === 'weeklyTotals' ? ' selected' : ''}`}>
+            <input type="radio" className="form-radio" name="uk-radio-card-demo" checked={layoutValue === 'weeklyTotals'} onChange={() => setLayoutValue('weeklyTotals')} />
+            <span>Weekly totals</span>
           </label>
         </div>
       </Section>

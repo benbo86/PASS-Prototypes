@@ -340,6 +340,28 @@ h6 {
   transform: translate(-50%, -50%);
 }
 
+/* ── Global: radio card ──────────────────────────────────────
+   A bordered, selectable card wrapping a .form-radio — for picking one of
+   a few options that reads as a genuine selection (a template, a layout),
+   not an action, which is what makes a primary/secondary button pair the
+   wrong control for this. First built for customer-profile/funders'
+   Customise document modal's Layout picker, promoted here since it's a
+   general-purpose pattern, not specific to that one prototype. */
+.radio-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  font-size: 15px; color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.radio-card:hover { border-color: var(--ui-purple-3-grape-grey); }
+.radio-card.selected {
+  border-color: var(--brand-purple-6-purple-4);
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
 /* ── Global: search bar ───────────────────────────────────── */
 .search-bar {
   display: flex; align-items: center; gap: 8px;

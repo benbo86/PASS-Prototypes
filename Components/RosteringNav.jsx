@@ -42,9 +42,9 @@ const FunderAllocationIcon = () => (
 )
 
 const NAV_ITEMS = [
-  { key: 'funders',            label: 'Funders',            href: null, Icon: FunderIcon },
+  { key: 'funders',            label: 'Funders',            href: '../funders/', Icon: FunderIcon },
   { key: 'care-requirements',  label: 'Care requirements',  href: null, Icon: CheckIcon },
-  { key: 'service-agreement',  label: 'Service agreement',  href: null, Icon: ServiceAgreementIcon },
+  { key: 'service-agreement',  label: 'Service agreement',  href: '../service-agreement/', Icon: ServiceAgreementIcon },
   { key: 'funder-allocation',  label: 'Funder allocation',  href: null, Icon: FunderAllocationIcon },
 ]
 

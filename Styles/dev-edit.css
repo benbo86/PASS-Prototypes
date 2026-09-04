@@ -87,6 +87,18 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* Draggable too, same as .devedit-panel-header — a panel that's drifted
+     off-screen (bottom-anchored, or pushed past a viewport edge) can leave
+     the header unreachable while the body is still visible. Real form
+     controls (inputs/textareas/buttons/links) keep their own cursor via
+     the browser default / their own rule winning by specificity. */
+  cursor: move;
+  user-select: none;
+}
+.devedit-panel-body input,
+.devedit-panel-body textarea {
+  cursor: auto;
+  user-select: text;
 }
 
 .devedit-panel-empty {

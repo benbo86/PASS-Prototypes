@@ -248,11 +248,102 @@ const findThreadBySlug = (slug) =>
 
 // ─── Inbox Screen ────────────────────────────────────────────
 
-function ThreadRow({ thread, onClick, showArchivedTag }) {
+// Swipe left (right-to-left) to archive — same shape as
+// mobile/notifications' own SwipeableNotifRow (pointer events, a 6px
+// dead-zone to lock horizontal-vs-vertical so native list scroll stays
+// intact via touch-action: pan-y, a threshold ratio to decide commit vs.
+// snap-back, then a slide-out + collapse-height/fade before the row
+// actually leaves the list). Reused rather than reinvented — see that
+// component for the original. Purple (not notifications' red) since
+// archiving isn't destructive — reversible via the Archived tab or the
+// thread's own info menu, unlike delete.
+const THREAD_SWIPE_THRESHOLD_RATIO = 0.35
+const THREAD_SWIPE_SLIDE_MS = 200
+const THREAD_SWIPE_COLLAPSE_MS = 200
+
+function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
+  const wrapRef = useRef(null)
+  const gestureRef = useRef({ startX: 0, startY: 0, width: 0, locked: null, pointerId: null })
+  const [dragX, setDragX] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const [collapsedHeight, setCollapsedHeight] = useState(null)
+  const [collapsing, setCollapsing] = useState(false)
+
+  const handlePointerDown = (e) => {
+    if (collapsedHeight != null) return
+    const g = gestureRef.current
+    g.startX = e.clientX
+    g.startY = e.clientY
+    g.width = wrapRef.current.offsetWidth
+    g.locked = null
+    g.pointerId = e.pointerId
+    wrapRef.current.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }
+
+  const handlePointerMove = (e) => {
+    const g = gestureRef.current
+    if (g.pointerId !== e.pointerId) return
+    const dx = e.clientX - g.startX
+    const dy = e.clientY - g.startY
+    if (g.locked === null) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return
+      g.locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+    }
+    if (g.locked !== 'x') return
+    setDragX(Math.min(0, Math.max(-g.width, dx)))
+  }
+
+  const finishGesture = (e) => {
+    const g = gestureRef.current
+    if (g.pointerId !== e.pointerId) return
+    setDragging(false)
+
+    if (g.locked === 'x') {
+      const threshold = g.width * THREAD_SWIPE_THRESHOLD_RATIO
+      if (Math.abs(dragX) >= threshold) {
+        setDragX(-g.width)
+        const height = wrapRef.current.offsetHeight
+        setTimeout(() => {
+          setCollapsedHeight(height)
+          requestAnimationFrame(() => requestAnimationFrame(() => setCollapsing(true)))
+          setTimeout(() => onArchive(thread.id), THREAD_SWIPE_COLLAPSE_MS + 30)
+        }, THREAD_SWIPE_SLIDE_MS)
+        g.locked = null
+        g.pointerId = null
+        return
+      }
+      setDragX(0)
+    } else if (g.locked === null) {
+      onClick()
+    }
+    g.locked = null
+    g.pointerId = null
+  }
+
+  const armed = Math.abs(dragX) >= gestureRef.current.width * THREAD_SWIPE_THRESHOLD_RATIO
+  const bgOpacity = Math.min(1, Math.abs(dragX) / ((gestureRef.current.width || 1) * THREAD_SWIPE_THRESHOLD_RATIO))
+
   const isUnread = thread.unread
   return (
-    <div className="thread-row-outer" onClick={onClick}>
-      <div className="thread-row">
+    <div
+      className="thread-row-outer"
+      ref={wrapRef}
+      style={collapsedHeight != null ? { height: collapsing ? 0 : collapsedHeight, opacity: collapsing ? 0 : 1 } : undefined}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={finishGesture}
+      onPointerCancel={finishGesture}
+    >
+      <div className="thread-swipe-bg" style={{ opacity: bgOpacity }}>
+        <div className={`thread-swipe-bg-icon${armed ? ' armed' : ''}`}>
+          <ArchiveIcon size={20} />
+        </div>
+      </div>
+      <div
+        className="thread-row"
+        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? 'none' : `transform ${THREAD_SWIPE_SLIDE_MS}ms ease` }}
+      >
         <div className={`thread-avatar ${thread.isBroadcast ? 'broadcast' : ''}`}>
           {thread.isBroadcast ? <BroadcastIcon /> : <PersonIcon />}
         </div>
@@ -286,7 +377,7 @@ function ThreadRow({ thread, onClick, showArchivedTag }) {
   )
 }
 
-function InboxScreen({ threads, onOpenThread, onCompose, onBack, totalUnread }) {
+function InboxScreen({ threads, onOpenThread, onToggleArchive, onCompose, onBack, totalUnread }) {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('inbox')
 
@@ -337,6 +428,7 @@ function InboxScreen({ threads, onOpenThread, onCompose, onBack, totalUnread }) 
             key={t.id}
             thread={t}
             onClick={() => onOpenThread(t.id)}
+            onArchive={onToggleArchive}
             showArchivedTag={isSearching && t.archivedByCarer}
           />
         ))}
@@ -1202,6 +1294,7 @@ export default function App() {
                     <InboxScreen
                       threads={threads}
                       onOpenThread={openThread}
+                      onToggleArchive={handleToggleArchive}
                       onCompose={openCompose}
                       onBack={goToAccount}
                       totalUnread={totalUnread}

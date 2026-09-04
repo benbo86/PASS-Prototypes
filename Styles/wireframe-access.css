@@ -16,11 +16,17 @@
    tool itself renders inside an iframe (see WireframeToggle.jsx for why),
    which is what makes its own height:100vh/position:fixed chrome correctly
    scope to this box instead of the real browser viewport, with no changes
-   needed on that side. z-index sits above the toolbar's own 10700. */
+   needed on that side. z-index sits above the toolbar's own 10700 —
+   bumped from an original 10800 to 10900 for the same reason as Styles/
+   dev-mode.css's/dev-comments.css's own identical fix: 10800 ties with
+   Components/SlidePanel.jsx's own .slide-panel-overlay, and this modal
+   can genuinely coexist with an open slide-out (WireframeToggle doesn't
+   participate in the toolbar's mutual-exclusivity bus), so a tie here is
+   a real, not just theoretical, risk. */
 .wireframeaccess-modal-scrim {
   position: fixed;
   inset: 0;
-  z-index: 10800;
+  z-index: 10900;
   background: var(--web-skrim, rgba(60, 57, 72, 0.7));
   display: flex;
   align-items: center;

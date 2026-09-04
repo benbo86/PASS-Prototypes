@@ -56,8 +56,8 @@ const ContractsIcon = () => (
   </svg>
 )
 
-const ChargingIcon = () => (
-  <svg width="25" height="25" viewBox="0 0 25 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+const ChargingIcon = ({ size = 25 }) => (
+  <svg width={size} height={size} viewBox="0 0 25 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" fillRule="evenodd">
       <path d="M.395 0h24v24h-24z"/>
       <path d="m20.543 14.608-3.208 2.566a2.21 2.21 0 0 1-1.39.486H11.84a.556.556 0 0 1 0-1.111h2.719c.552 0 1.066-.379 1.154-.924a1.111 1.111 0 0 0-1.095-1.299h-4.555c-.937 0-1.846.323-2.573.913l-1.615 1.31H3.951a.556.556 0 0 0-.556.555v3.334c0 .306.249.555.556.555h11.387c.505 0 .995-.17 1.389-.486l5.251-4.201a1.111 1.111 0 0 0 .044-1.698c-.41-.372-1.049-.347-1.48 0z" fill="currentColor" fillRule="nonzero"/>
@@ -257,6 +257,68 @@ const INITIAL_HOLIDAY_CONFIG = {
   // dates/amount) the fixed template always includes.
   note: '',
 }
+
+// ─── Charging and invoicing: static reference groups ───────────
+// Verbatim from Ben's own reference screenshots of the real (unbuilt-here)
+// settings — read-only this round, no working edit on these individually.
+// The page's single pencil (next to the section title) only opens the new
+// Invoice templates editor below; the other groups get their own working
+// edit in a later round, per Ben's own steer.
+const CHARGING_STATIC_GROUPS = [
+  {
+    title: 'Basis for charging customers',
+    description: 'Select default charging method, this can be overridden per funder if required',
+    rows: [{ label: 'Charge method', value: 'Planned time' }],
+  },
+  {
+    title: 'Charge rate calculation',
+    description: 'Select how the visit charge will be calculated according to the visit time',
+    rows: [{ label: 'Charge rate calculation', value: 'Only use the rate applicable at the start time of the visit' }],
+  },
+  {
+    title: 'Basis for how visits are included in an invoice cycle',
+    description: 'Choose the visit start or end time to determine which invoice cycle the visit goes into',
+    rows: [{ label: 'Basis', value: 'Start time' }],
+  },
+  {
+    title: 'Invoice number',
+    description: 'Set the invoice number to count from for future invoices',
+    rows: [
+      { label: 'Prefix characters (Max 6)', value: 'RED' },
+      { label: 'Number of digits (Max 24)', value: '2' },
+      { label: 'Invoice number', value: '31000' },
+      { label: 'Your next invoice number is', value: 'RED31000' },
+    ],
+  },
+  {
+    title: 'Invoice date and cycle',
+    description: 'Set the start date and cycle that invoices will be sent from',
+    rows: [
+      { label: 'Invoice cycle', value: 'Manual' },
+      { label: 'Start from date', value: '-' },
+    ],
+  },
+  {
+    title: 'Credit note number',
+    description: 'Set the credit note number to count from for future credit notes',
+    rows: [
+      { label: 'Prefix characters (Max 6)', value: 'R.C' },
+      { label: 'Number of digits (Max 24)', value: '1' },
+      { label: 'Credit note number', value: '1' },
+      { label: 'Your next credit note number is', value: 'R.C1' },
+    ],
+  },
+  {
+    title: 'Invoice payment terms',
+    description: 'This will be used to calculate the due date on the invoice',
+    rows: [{ label: 'Days', value: 'N/A' }],
+  },
+  {
+    title: 'Invoice template footnote',
+    description: 'For information such as payment details.',
+    rows: [{ label: 'Footnote', value: 'Payment Details: Care & Wellbeing Group Limited Account Number: 02648057 Sort Code: 30-92-90 Or call 01245 207715 Payment Terms: 7 Days If payment method is via direct debit, payment will be collected 10 days from the date of the invoice Thank you' }],
+  },
+]
 
 // ─── Communications edit-panel pieces ──────────────────────────
 // Shared by every comms block (the 4 real ones + Holiday requests) — each
@@ -477,6 +539,11 @@ function HolidayRequestsPanelBody({ draft, onPatch, recipientInput, setRecipient
 export default function App() {
   const pageRef = useRef(null)
 
+  // Which settings section the sidebar is showing — only these two
+  // NAV_ITEMS are actually wired up; every other item stays the inert,
+  // decorative label it's always been.
+  const [activeSection, setActiveSection] = useState('communications')
+
   // ─── Communications: the 4 real blocks + Holiday requests ──────
   // `activePanel` is one of a COMMS_BLOCKS key, 'holiday-requests', or null.
   const [commsConfigs, setCommsConfigs] = useState(INITIAL_COMMS_CONFIGS)
@@ -497,7 +564,10 @@ export default function App() {
     setActivePanel('holiday-requests')
   }
 
-  const closeCommsPanel = () => {
+  // Shared by every panel (Comms/Holiday) — resets whichever draft(s)
+  // happen to be in flight, so there's never stale draft state left over
+  // from a previously-open, different panel.
+  const closePanel = () => {
     setActivePanel(null)
     setCommsDraft(null)
     setHolidayDraft(null)
@@ -505,12 +575,12 @@ export default function App() {
 
   const saveCommsPanel = () => {
     setCommsConfigs(prev => ({ ...prev, [activePanel]: commsDraft }))
-    closeCommsPanel()
+    closePanel()
   }
 
   const saveHolidayPanel = () => {
     setHolidayConfig(holidayDraft)
-    closeCommsPanel()
+    closePanel()
   }
 
   const patchCommsDraft = (partial) => setCommsDraft(d => d && ({ ...d, ...partial }))
@@ -588,104 +658,143 @@ export default function App() {
             own left sub-nav), not this page's own bordered-white-card look */}
         <nav className="rn-nav">
           <ul className="rn-list">
-            {NAV_ITEMS.map(({ key, label, Icon }) => (
-              <li key={key}>
-                <button
-                  className={`rn-item${key === 'communications' ? ' active' : ''}`}
-                  style={{ cursor: 'default' }}
-                >
-                  <span className="rn-item-icon"><Icon /></span>
-                  <span>{label}</span>
-                </button>
-              </li>
-            ))}
+            {NAV_ITEMS.map(({ key, label, Icon }) => {
+              const isReal = key === 'communications' || key === 'charging'
+              return (
+                <li key={key}>
+                  <button
+                    className={`rn-item${key === activeSection ? ' active' : ''}`}
+                    style={{ cursor: isReal ? 'pointer' : 'default' }}
+                    onClick={isReal ? () => setActiveSection(key) : undefined}
+                  >
+                    <span className="rn-item-icon"><Icon /></span>
+                    <span>{label}</span>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </nav>
 
         {/* Main content */}
         <main className="settings-content">
-          <div className="settings-section">
-            <div className="settings-section-header">
-              <div className="settings-section-icon-title">
-                <CommunicationsIcon size={32} />
-                <h2 className="settings-section-title">Communications</h2>
+          {activeSection === 'communications' && (
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <div className="settings-section-icon-title">
+                  <CommunicationsIcon size={32} />
+                  <h2 className="settings-section-title">Communications</h2>
+                </div>
               </div>
-            </div>
 
-            {COMMS_BLOCKS.map(block => {
-              const cfg = commsConfigs[block.key]
-              return (
-                <div className="settings-subsection" key={block.key}>
+              {COMMS_BLOCKS.map(block => {
+                const cfg = commsConfigs[block.key]
+                return (
+                  <div className="settings-subsection" key={block.key}>
+                    <div className="settings-subsection-header">
+                      <div>
+                        <h3 className="settings-subsection-title">{block.title}</h3>
+                        <p className="settings-subsection-desc">{block.description}</p>
+                      </div>
+                      <button className="settings-edit-btn" onClick={() => openCommsPanel(block.key)} title="Edit">
+                        <EditIcon />
+                      </button>
+                    </div>
+                    <div className="comms-summary-row">
+                      <span className="comms-summary-label">From address</span>
+                      <span className="comms-summary-value">{cfg.source === 'pass' ? 'PASS email address' : cfg.customAddress}</span>
+                    </div>
+                    <div className="comms-summary-row">
+                      <span className="comms-summary-label">Email subject and body</span>
+                      <span className="comms-summary-value comms-configured">Configured</span>
+                    </div>
+                  </div>
+                )
+              })}
+
+              <div className="settings-subsection">
+                <div className="settings-subsection-header">
+                  <div>
+                    <h3 className="settings-subsection-title">Holiday requests</h3>
+                    <p className="settings-subsection-desc">Define who should be notified by email when an employee submits or cancels a holiday request.</p>
+                  </div>
+                  <button className="settings-edit-btn" onClick={openHolidayPanel} title="Edit">
+                    <EditIcon />
+                  </button>
+                </div>
+                <div className="comms-summary-row">
+                  <span className="comms-summary-label">Status</span>
+                  <span className={`comms-summary-value${holidayConfig.enabled ? ' comms-configured' : ''}`}>
+                    {holidayConfig.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                {holidayConfig.enabled && (
+                  <>
+                    <div className="comms-summary-row">
+                      <span className="comms-summary-label">Recipients</span>
+                      <span className="comms-summary-value">
+                        {holidayConfig.recipients.length > 0
+                          ? holidayConfig.recipients.map(r => r.email).join(', ')
+                          : <span className="settings-value-empty">None added</span>}
+                      </span>
+                    </div>
+                    <div className="comms-summary-row">
+                      <span className="comms-summary-label">Note from your organisation</span>
+                      <span className="comms-summary-value">
+                        {holidayConfig.note.trim() ? holidayConfig.note : <span className="settings-value-empty">None added</span>}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+            </div>
+          )}
+
+          {activeSection === 'charging' && (
+            <div className="settings-section">
+              <div className="settings-section-header">
+                <div className="settings-section-icon-title">
+                  <ChargingIcon size={32} />
+                  <h2 className="settings-section-title">Charging and invoicing</h2>
+                </div>
+              </div>
+
+              {CHARGING_STATIC_GROUPS.map(group => (
+                <div className="settings-subsection" key={group.title}>
                   <div className="settings-subsection-header">
                     <div>
-                      <h3 className="settings-subsection-title">{block.title}</h3>
-                      <p className="settings-subsection-desc">{block.description}</p>
+                      <h3 className="settings-subsection-title">{group.title}</h3>
+                      <p className="settings-subsection-desc">{group.description}</p>
                     </div>
-                    <button className="settings-edit-btn" onClick={() => openCommsPanel(block.key)} title="Edit">
-                      <EditIcon />
-                    </button>
                   </div>
-                  <div className="comms-summary-row">
-                    <span className="comms-summary-label">From address</span>
-                    <span className="comms-summary-value">{cfg.source === 'pass' ? 'PASS email address' : cfg.customAddress}</span>
-                  </div>
-                  <div className="comms-summary-row">
-                    <span className="comms-summary-label">Email subject and body</span>
-                    <span className="comms-summary-value comms-configured">Configured</span>
-                  </div>
+                  {group.rows.map(row => (
+                    <div className="comms-summary-row" key={row.label}>
+                      <span className="comms-summary-label">{row.label}</span>
+                      <span className="comms-summary-value">{row.value}</span>
+                    </div>
+                  ))}
                 </div>
-              )
-            })}
+              ))}
 
-            <div className="settings-subsection">
-              <div className="settings-subsection-header">
-                <div>
-                  <h3 className="settings-subsection-title">Holiday requests</h3>
-                  <p className="settings-subsection-desc">Define who should be notified by email when an employee submits or cancels a holiday request.</p>
-                </div>
-                <button className="settings-edit-btn" onClick={openHolidayPanel} title="Edit">
-                  <EditIcon />
-                </button>
-              </div>
-              <div className="comms-summary-row">
-                <span className="comms-summary-label">Status</span>
-                <span className={`comms-summary-value${holidayConfig.enabled ? ' comms-configured' : ''}`}>
-                  {holidayConfig.enabled ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
-              {holidayConfig.enabled && (
-                <>
-                  <div className="comms-summary-row">
-                    <span className="comms-summary-label">Recipients</span>
-                    <span className="comms-summary-value">
-                      {holidayConfig.recipients.length > 0
-                        ? holidayConfig.recipients.map(r => r.email).join(', ')
-                        : <span className="settings-value-empty">None added</span>}
-                    </span>
-                  </div>
-                  <div className="comms-summary-row">
-                    <span className="comms-summary-label">Note from your organisation</span>
-                    <span className="comms-summary-value">
-                      {holidayConfig.note.trim() ? holidayConfig.note : <span className="settings-value-empty">None added</span>}
-                    </span>
-                  </div>
-                </>
-              )}
             </div>
-
-          </div>
+          )}
         </main>
       </div>
 
       {/* Communications / Holiday requests edit panel — one shared panel
-          for whichever block's own pencil was clicked */}
+          for whichever pencil was clicked */}
       <SlidePanel
         open={activePanel !== null}
-        onClose={closeCommsPanel}
-        title={activePanel === 'holiday-requests' ? 'Holiday request communications' : activeCommsBlock ? `${activeCommsBlock.title} communications` : ''}
+        onClose={closePanel}
+        title={
+          activePanel === 'holiday-requests' ? 'Holiday request communications'
+          : activeCommsBlock ? `${activeCommsBlock.title} communications`
+          : ''
+        }
         footer={
           <>
-            <button className="round-btn tertiary-btn" onClick={closeCommsPanel}>Cancel</button>
+            <button className="round-btn tertiary-btn" onClick={closePanel}>Cancel</button>
             <button
               className="round-btn primary-btn"
               disabled={activePanel === 'holiday-requests' ? !holidayCanSave : !commsCanSave}

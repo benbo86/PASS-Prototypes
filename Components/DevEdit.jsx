@@ -794,10 +794,23 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // apply they need to refresh to notice its a permanent change." Message
   // differs by what genuinely happened — a real file write (dev-only,
   // resolvable path) vs. a session/live-only commit — so this never claims
-  // more permanence than actually occurred. Auto-clears via a ref-tracked
-  // timeout (same pattern as the Wireframe tool's own Save-confirmation
-  // button state) so two Saves in quick succession restart the window
-  // rather than the first timeout cutting the second confirmation short.
+  // more permanence than actually occurred.
+  //
+  // Real bug, reported directly: "it states saved but also states 1 unsaved
+  // edit. I thought we were saving when the user saves in the dev edit
+  // panel?" The non-file case originally read plain "✓ Saved" — every path
+  // that reaches it (an Element/Icon edit, which never has a file-write
+  // option at all, or a CSS edit with no resolvable file) is, by
+  // definition, exactly the set `editedEntriesNeedingDecision()` still
+  // counts as at-risk — so the session bar's own "N unsaved edit(s)" text
+  // was correct right next to a banner actively contradicting it. Fixed by
+  // never using the word "Saved" for that case — "Applied — not yet saved"
+  // — so the two pieces of UI agree instead of contradicting each other.
+  //
+  // Auto-clears via a ref-tracked timeout (same pattern as the Wireframe
+  // tool's own Save-confirmation button state) so two Saves in quick
+  // succession restart the window rather than the first timeout cutting
+  // the second confirmation short.
   const [saveConfirmation, setSaveConfirmation] = useState(null)
   const saveConfirmationTimeoutRef = useRef(null)
   const showSaveConfirmation = (toFile) => {
@@ -2163,7 +2176,7 @@ function SessionBar({ dirtyCount, atRiskCount, fileSavedCount, saveConfirmation,
     <div className="devedit-session-bar" data-devedit-ui="true">
       {saveConfirmation && (
         <span className="devedit-session-confirmation">
-          ✓ {saveConfirmation === 'file' ? 'Saved to file' : 'Saved'}
+          ✓ {saveConfirmation === 'file' ? 'Saved to file' : 'Applied — not yet saved'}
         </span>
       )}
       {previewing && (
@@ -2457,8 +2470,7 @@ function EditPanel({
   const dragStateRef = useRef(null)
   useEffect(() => { setDragPos(null) }, [selection.el])
 
-  const handleHeaderMouseDown = (e) => {
-    if (e.button !== 0 || e.target.closest('button')) return
+  const startPanelDrag = (e) => {
     const panelEl = e.currentTarget.closest('.devedit-panel')
     const startRect = panelEl.getBoundingClientRect()
     dragStateRef.current = {
@@ -2478,6 +2490,24 @@ function EditPanel({
     }
     document.addEventListener('mousemove', onMove)
     document.addEventListener('mouseup', onUp)
+  }
+
+  const handleHeaderMouseDown = (e) => {
+    if (e.button !== 0 || e.target.closest('button')) return
+    startPanelDrag(e)
+  }
+
+  // Ben: "part of the modal sometimes moves out of the visible window and I
+  // can't drag it back in" — the header alone isn't always reachable once
+  // the panel has drifted (e.g. positioned bottom-anchored, or off a screen
+  // edge), so the body also drags the panel, on any mousedown that doesn't
+  // land on a real interactive control — otherwise every checkbox/textarea/
+  // button/link inside the body (rule textareas, the Element tab's inputs,
+  // the Icon tab's picker) would start a drag instead of doing its own job.
+  const handleBodyMouseDown = (e) => {
+    if (e.button !== 0) return
+    if (e.target.closest('button, input, textarea, select, a, label, [contenteditable="true"], [draggable="true"]')) return
+    startPanelDrag(e)
   }
 
   const pos = dragPos || basePos
@@ -2503,7 +2533,7 @@ function EditPanel({
         </div>
         <button className="devedit-panel-close" onClick={onClose} aria-label="Close">×</button>
       </div>
-      <div className="devedit-panel-body">
+      <div className="devedit-panel-body" onMouseDown={handleBodyMouseDown}>
         {isSvgTab ? (
           <IconSwapPanel
             svgEl={selection.svgEl}

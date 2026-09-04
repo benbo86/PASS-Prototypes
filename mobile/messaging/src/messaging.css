@@ -105,6 +105,31 @@
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  touch-action: pan-y;
+  user-select: none;
+  transition: height 200ms ease, opacity 200ms ease;
+}
+
+/* ── Swipe to archive — same shape as mobile/notifications' own
+   .notif-swipe-* (purple, not red, since archiving isn't destructive) ── */
+.thread-swipe-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 28px;
+}
+
+.thread-swipe-bg-icon {
+  display: flex;
+  transition: transform 150ms ease;
+}
+
+.thread-swipe-bg-icon.armed {
+  transform: scale(1.15);
 }
 
 .thread-tags {
@@ -151,6 +176,7 @@
 }
 
 .thread-row {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
