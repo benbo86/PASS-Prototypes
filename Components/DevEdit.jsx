@@ -1175,7 +1175,27 @@ export default function DevEdit({ containerRef, prototypeId }) {
         iconRuntimeRef.current.setActiveSwaps(swaps)
       }
 
-      const rawMatches = findMatchingRules(target)
+      // Real bug, reported directly: an icon-only interactive control (a
+      // close button wrapping just a CloseIcon, no other content) has its
+      // own real CSS — including a :hover state — that becomes completely
+      // unreachable once `target` normalizes to the icon's own <svg>: the
+      // button's selectors never match an <svg> with no class of its own.
+      // Whenever the click actually landed on/inside a resolved icon, also
+      // match its immediate parent element (in every icon-only-button case
+      // in this repo, that parent IS the actual button) and merge the two
+      // rule sets — the icon's own matches are almost always just the
+      // universal reset rule, so the parent's real, editable styles
+      // (including :hover) are what this is actually for. Purely additive:
+      // nothing previously shown is ever hidden by this.
+      const parentMatches = clickWasOnSvgItself && target.parentElement
+        ? findMatchingRules(target.parentElement)
+        : []
+      const rawMatches = [
+        ...parentMatches,
+        ...findMatchingRules(target).filter(m =>
+          !parentMatches.some(pm => ruleKey(pm.selectorText, pm.mediaText) === ruleKey(m.selectorText, m.mediaText))
+        ),
+      ]
       const keys = []
       const newEntries = {}
       const toLookup = []

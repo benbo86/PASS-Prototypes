@@ -31,6 +31,12 @@ const GripIcon = () => (
 // Native HTML5 drag-and-drop — array order IS display/column order.
 // Toggling a field's checkbox never changes its position, so a field
 // unchecked and later re-checked reappears exactly where it was.
+//
+// A field can carry `locked: true` (e.g. Date on Visit list) — Ben:
+// "add Date ... this should be locked (cannot uncheck)," then "you can
+// still re-order Date." So `locked` only disables the checkbox (always
+// checked, ignores clicks); the drag handle and all drag/drop wiring are
+// completely untouched for a locked row, same as any other field.
 
 function ReorderableFieldList({ fields, onReorder, onToggle }) {
   const [dragIndex, setDragIndex] = useState(null)
@@ -60,8 +66,13 @@ function ReorderableFieldList({ fields, onReorder, onToggle }) {
           onDragEnd={() => { setDragIndex(null); setOverIndex(null) }}
         >
           <span className="fd-drag-handle" aria-hidden="true"><GripIcon /></span>
-          <label className="fd-field-checkbox-row">
-            <input type="checkbox" checked={f.enabled} onChange={() => onToggle(f.key)} />
+          <label className={`fd-field-checkbox-row${f.locked ? ' fd-field-checkbox-row--locked' : ''}`}>
+            <input
+              type="checkbox"
+              checked={f.locked || f.enabled}
+              disabled={f.locked}
+              onChange={() => onToggle(f.key)}
+            />
             <span>{f.label}</span>
           </label>
         </div>
@@ -134,7 +145,6 @@ export default function CustomiseInvoiceModal({ open, invoiceConfig, onClose, on
 
           <div>
             <h3 className="fd-modal-section-heading">Layout</h3>
-            <p className="fd-modal-section-desc">Pick a layout for the itemised list of visits</p>
             {/* Ben: primary/secondary buttons "don't feel like the right UI
                 here" — picking a layout is a single selection, not an
                 action, so a button-toggle was the wrong control semantically

@@ -31,6 +31,13 @@ const initials = (name) => name
 // Toggleable visit-list columns, in the order they'd fall back to if no
 // config is supplied — matches the original component's own fixed order.
 const VISIT_LIST_COLUMN_RENDERERS = {
+  // Locked (always enabled, checkbox disabled in the picker — data.js) but
+  // still a real, reorderable field, not a hardcoded leading column — Ben,
+  // 2026-09-04: "add Date as a field option to Visit list, positioned
+  // first, this should be locked (cannot uncheck)," then "you can still
+  // re-order Date." Positioned first only via DEFAULT_VISIT_LIST_FIELDS'
+  // own array order / data.js's own field order — nothing pins it here.
+  date: { label: 'Date', render: (item) => item.date },
   type: { label: 'Type', render: (item) => item.type },
   carer: { label: 'Carer', render: (item) => item.carer },
   carerInitials: { label: 'Carer initials', render: (item) => initials(item.carer) },
@@ -38,8 +45,23 @@ const VISIT_LIST_COLUMN_RENDERERS = {
   duration: { label: 'Duration', render: (item) => item.duration },
   status: { label: 'Status', render: (item) => item.status },
   rate: { label: 'Rate', render: (item, fmtGBP) => `${fmtGBP(item.rate)}/hr` },
+  // Visit charge used to be a locked, always-shown column (hardcoded as
+  // "Charge" outside the toggle system entirely) — Ben, 2026-09-04, made it
+  // a real toggleable/orderable field instead, positioned after Rate.
+  // `footerValue` is what lets it keep showing a totals-row sum (the one
+  // thing a locked column got "for free" that a plain toggle doesn't).
+  // Column header text stays "Charge" (its original, pre-toggle wording) —
+  // deliberately distinct from the picker's own checklist label ("Visit
+  // charge", data.js's INVOICE_LAYOUTS), which is what keeps
+  // invoices/recurring-expense-document's unconfigured page byte-for-byte
+  // unaffected by this becoming a real field.
+  visitCharge: {
+    label: 'Charge',
+    render: (item, fmtGBP) => fmtGBP(item.charge),
+    footerValue: (totals, fmtGBP) => fmtGBP(totals.charge),
+  },
 }
-const DEFAULT_VISIT_LIST_FIELDS = ['type', 'carer', 'start', 'duration', 'status', 'rate']
+const DEFAULT_VISIT_LIST_FIELDS = ['date', 'type', 'carer', 'start', 'duration', 'status', 'rate', 'visitCharge']
   .map(key => ({ key, enabled: true }))
 
 function OfficeAddressBlock({ headerFields }) {
@@ -147,9 +169,7 @@ export default function InvoiceDocument({
       <table className="inv-doc-table">
         <thead>
           <tr>
-            <th>Date</th>
             {activeVisitListFields.map(f => <th key={f.key}>{VISIT_LIST_COLUMN_RENDERERS[f.key].label}</th>)}
-            <th>Charge</th>
             <th>Expenses</th>
             <th>Total Charge</th>
           </tr>
@@ -157,11 +177,9 @@ export default function InvoiceDocument({
         <tbody>
           {items.map((item, i) => (
             <tr key={i}>
-              <td>{item.date}</td>
               {activeVisitListFields.map(f => (
                 <td key={f.key}>{VISIT_LIST_COLUMN_RENDERERS[f.key].render(item, fmtGBP)}</td>
               ))}
-              <td>{fmtGBP(item.charge)}</td>
               <td>
                 {item.expenses.length > 0 ? item.expenses.map((exp, j) => (
                   <div key={j} className={j > 0 ? 'inv-doc-cell-extra' : undefined}>
@@ -176,9 +194,9 @@ export default function InvoiceDocument({
         </tbody>
         <tfoot>
           <tr className="inv-doc-totals-row">
-            <td></td>
-            {activeVisitListFields.map(f => <td key={f.key}></td>)}
-            <td>{fmtGBP(totals.charge)}</td>
+            {activeVisitListFields.map(f => (
+              <td key={f.key}>{VISIT_LIST_COLUMN_RENDERERS[f.key].footerValue?.(totals, fmtGBP)}</td>
+            ))}
             <td>{fmtGBP(totals.expenses)}</td>
             <td>{fmtGBP(totals.totalCharge)}</td>
           </tr>

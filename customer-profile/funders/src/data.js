@@ -7,10 +7,22 @@
 // it was if re-checked later).
 //
 // Deliberately excluded from both lists — genuinely locked, not just
-// defaulted-on, so they're never shown as toggles at all: Date, Visit
-// charge and Total charge (the visit-list family), Week start and Total
-// charge (Weekly totals). Removing any of these breaks what the layout
-// structurally *is*.
+// defaulted-on, so they're never shown as toggles at all: Total charge (both
+// layouts), Week start (Weekly totals). Removing any of these breaks what
+// the layout structurally *is*.
+// Visit charge/Total visit charge are NOT locked — Ben, 2026-09-04, added
+// them as real toggleable/orderable fields (Visit charge after Rate, Total
+// visit charge after Total duration) — see INVOICE_LAYOUTS below.
+//
+// Date (Visit list only) is a third category: locked, but shown, AND
+// reorderable — Ben, 2026-09-04: "add Date as a field option to Visit
+// list, positioned first, this should be locked (cannot uncheck)," then
+// corrected the same day: "you can still re-order Date." So `date` is a
+// real entry in the same reorderable `fields` array below (positioned
+// first by default, not pinned there), carrying a `locked: true` flag that
+// `ReorderableFieldList`/`InvoiceDocument.jsx` read to keep its checkbox
+// permanently checked+disabled while leaving its drag handle fully
+// functional like any other field.
 //
 // Expenses / Expense name deliberately NOT offered anywhere either —
 // Ben, 2026-09-04: "This was my mistake, it was discussed with product
@@ -47,6 +59,7 @@ export const INVOICE_LAYOUTS = [
     name: 'Visit list',
     description: 'Displays details for each visit as a separate line item',
     fields: [
+      { key: 'date', label: 'Date', locked: true },
       { key: 'type', label: 'Type' },
       { key: 'carer', label: 'Carer' },
       { key: 'carerInitials', label: 'Carer initials' },
@@ -54,6 +67,7 @@ export const INVOICE_LAYOUTS = [
       { key: 'duration', label: 'Duration' },
       { key: 'status', label: 'Status' },
       { key: 'rate', label: 'Rate' },
+      { key: 'visitCharge', label: 'Visit charge' },
     ],
   },
   {
@@ -63,6 +77,7 @@ export const INVOICE_LAYOUTS = [
     fields: [
       { key: 'totalVisits', label: 'Total visits' },
       { key: 'totalDuration', label: 'Total duration' },
+      { key: 'totalVisitCharge', label: 'Total visit charge' },
     ],
   },
 ]
