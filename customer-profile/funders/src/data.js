@@ -203,5 +203,23 @@ export const SAMPLE_PREVIEW_INVOICE = {
       rate: 28, charge: 28,
       expenses: [], expenseTotal: 0, totalCharge: 28,
     },
+    // A visit spanning two rates (e.g. crossing from a standard into a
+    // bank holiday rate mid-visit) — Ben, 2026-09-04, discussed with
+    // product: still one line item (not two rows, which they felt would
+    // read as confusing), with the per-rate breakdown shown as a stacked
+    // note under the Visit charge value instead — same value+note visual
+    // language Expenses already uses. `rate` is null (there's no single
+    // rate for this visit) — Components/InvoiceDocument.jsx's Rate column
+    // renders "—" for that case; `charge` is still the real total
+    // (3h × £28 + 2h × £56 = £196), so Total Charge/the totals-row sum
+    // are completely unaffected — only the Visit charge cell's own
+    // rendering branches on `rateSegments` being present.
+    {
+      date: '05/04/2026', type: 'Home Care', carer: 'Michael Osei',
+      start: '22:00', duration: '5hrs 0m', status: 'Complete',
+      rate: null, charge: 196,
+      rateSegments: [{ hours: 3, rate: 28 }, { hours: 2, rate: 56 }],
+      expenses: [], expenseTotal: 0, totalCharge: 196,
+    },
   ],
 }

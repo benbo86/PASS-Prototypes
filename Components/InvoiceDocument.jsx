@@ -44,7 +44,10 @@ const VISIT_LIST_COLUMN_RENDERERS = {
   start: { label: 'Start', render: (item) => item.start },
   duration: { label: 'Duration', render: (item) => item.duration },
   status: { label: 'Status', render: (item) => item.status },
-  rate: { label: 'Rate', render: (item, fmtGBP) => `${fmtGBP(item.rate)}/hr` },
+  // `item.rate` is null for a visit spanning two rates (see visitCharge
+  // below) — there's no single rate to show, so this renders "—" rather
+  // than a broken "£NaN/hr".
+  rate: { label: 'Rate', render: (item, fmtGBP) => item.rate != null ? `${fmtGBP(item.rate)}/hr` : '—' },
   // Visit charge used to be a locked, always-shown column (hardcoded as
   // "Charge" outside the toggle system entirely) — Ben, 2026-09-04, made it
   // a real toggleable/orderable field instead, positioned after Rate.
@@ -55,9 +58,28 @@ const VISIT_LIST_COLUMN_RENDERERS = {
   // charge", data.js's INVOICE_LAYOUTS), which is what keeps
   // invoices/recurring-expense-document's unconfigured page byte-for-byte
   // unaffected by this becoming a real field.
+  //
+  // A visit spanning two rates (e.g. crossing into a bank holiday rate
+  // mid-visit) shows a rate-segment breakdown under the total, using the
+  // exact same value+note visual language as the Expenses cell below —
+  // Ben, 2026-09-04, agreed with product not to add a second row for this
+  // ("we didn't think two visit rows would cause confusion" was the
+  // alternative considered and rejected). The bold headline value stays
+  // the real total (never just the segments alone, unlike Expenses' own
+  // per-item amounts) — an invoice line needs to be scannable for its
+  // actual cost without the reader doing mental arithmetic.
   visitCharge: {
     label: 'Charge',
-    render: (item, fmtGBP) => fmtGBP(item.charge),
+    render: (item, fmtGBP) => item.rateSegments ? (
+      <>
+        <div>{fmtGBP(item.charge)}</div>
+        {item.rateSegments.map((seg, i) => (
+          <div key={i} className={`inv-doc-cell-note${i > 0 ? ' inv-doc-cell-extra' : ''}`}>
+            {seg.hours}h@{fmtGBP(seg.rate)}/hr
+          </div>
+        ))}
+      </>
+    ) : fmtGBP(item.charge),
     footerValue: (totals, fmtGBP) => fmtGBP(totals.charge),
   },
 }

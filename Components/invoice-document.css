@@ -49,7 +49,7 @@ tbody tr:last-child td {padding-bottom:8px;}
 
 /* Spacing between a second (or third) expense on the same visit — each one
    is its own value+note pair, stacked in the same Expenses cell. */
-.inv-doc-cell-extra { margin-top: 8px; }
+.inv-doc-cell-extra { }
 
 .inv-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
 
