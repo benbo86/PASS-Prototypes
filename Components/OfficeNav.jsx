@@ -4,7 +4,7 @@ const TABS = [
   { key: 'documents',                label: 'Documents',                href: '../../office/customer-assessments/' },
   { key: 'care-groups',              label: 'Care Groups',              href: null },
   { key: 'tags',                     label: 'Tags',                     href: null },
-  { key: 'roster-settings',          label: 'Roster Settings',          href: '../../roster/communications/' },
+  { key: 'roster-settings',          label: 'Roster Settings',          href: '../../roster-settings/settings/' },
   { key: 'settings-and-permissions', label: 'Settings and Permissions', href: null },
 ]
 

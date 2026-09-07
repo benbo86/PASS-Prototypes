@@ -10,7 +10,7 @@
 // GrossPayAdviceDocument.jsx (still the only place it's imported from at
 // that path — that prototype's own App.jsx now imports it from here
 // instead). Extracted into Components/ and given three new OPTIONAL config
-// props — headerFields/visitTableFields/fmtGBP — so roster/communications'
+// props — headerFields/visitTableFields/fmtGBP — so roster-settings/settings'
 // "Contracts and pay" → "Pay advice document" customisation can render a
 // live preview driven by its own draft config, same extraction discipline
 // as Components/InvoiceDocument.jsx. Every prop defaults to reproducing
@@ -18,6 +18,14 @@
 // recurring-expense-document page passes none of these and is completely
 // unaffected by this extension.
 const GPA_TABLE_COLUMN_RENDERERS = {
+  // Locked (always enabled, checkbox disabled in the picker — see
+  // gpaCustomisation.js) but still a real, reorderable field, not a
+  // hardcoded leading column — Ben, 2026-09-05: "Date (fixed, cannot be
+  // reordered or unselected)," then "Lets make the date reorderable, my
+  // mistake." Positioned first only via DEFAULT_GPA_TABLE_FIELDS' own
+  // array order / gpaCustomisation.js's own field order — nothing pins it
+  // here, same as Components/InvoiceDocument.jsx's own `date` field.
+  date: { label: 'Date', render: (item) => item.date },
   type: { label: 'Type', render: (item) => item.type },
   customer: { label: 'Customer', render: (item) => item.customer },
   time: { label: 'Time', render: (item) => item.timeLabel },
@@ -25,7 +33,7 @@ const GPA_TABLE_COLUMN_RENDERERS = {
   mileage: { label: 'Mileage', render: (item, fmtGBP) => fmtGBP(item.mileage), footerValue: (gpa, fmtGBP) => fmtGBP(gpa.totalMileage) },
   travel: { label: 'Travel', render: (item, fmtGBP) => fmtGBP(item.travel), footerValue: (gpa, fmtGBP) => fmtGBP(gpa.totalTravel) },
 }
-const DEFAULT_GPA_TABLE_FIELDS = ['type', 'customer', 'time', 'pay', 'mileage', 'travel']
+const DEFAULT_GPA_TABLE_FIELDS = ['date', 'type', 'customer', 'time', 'pay', 'mileage', 'travel']
   .map(key => ({ key, enabled: true }))
 
 function OfficeAddressBlock({ headerFields }) {
@@ -172,7 +180,6 @@ export default function GrossPayAdviceDocument({
       <table className="gpa-doc-table">
         <thead>
           <tr>
-            <th>Date</th>
             {activeTableFields.map(f => <th key={f.key}>{GPA_TABLE_COLUMN_RENDERERS[f.key].label}</th>)}
             <th>Expenses</th>
             <th>Total pay</th>
@@ -181,7 +188,6 @@ export default function GrossPayAdviceDocument({
         <tbody>
           {items.map((item, i) => (
             <tr key={i}>
-              <td>{item.date}</td>
               {activeTableFields.map(f => (
                 <td key={f.key}>{GPA_TABLE_COLUMN_RENDERERS[f.key].render(item, fmtGBP)}</td>
               ))}
@@ -199,7 +205,6 @@ export default function GrossPayAdviceDocument({
         </tbody>
         <tfoot>
           <tr className="gpa-doc-totals-row">
-            <td></td>
             {activeTableFields.map(f => (
               <td key={f.key}>{GPA_TABLE_COLUMN_RENDERERS[f.key].footerValue?.(gpa, fmtGBP)}</td>
             ))}

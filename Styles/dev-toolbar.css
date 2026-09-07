@@ -14,7 +14,7 @@
 
    --dev-toolbar-height is the single source of truth for the bar's
    height — referenced from several other stylesheets (Styles/mobile.css,
-   web/messaging/src/messages.css, roster/communications/src/
+   web/messaging/src/messages.css, roster-settings/settings/src/
    communications.css, schedule/assign-visit-absent-employee-event-
    panel/src/EventPanel.css, Styles/modal.css) wherever a prototype's own
    layout needs to subtract the bar's height to avoid clipping content

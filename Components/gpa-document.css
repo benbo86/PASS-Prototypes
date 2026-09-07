@@ -15,7 +15,15 @@
 .gpa-doc-header-col { display: flex; flex-direction: column; }
 .gpa-doc-title { font-size: 28px; font-weight: bold; margin-top: 0px; margin-bottom: 130px; }
 .gpa-doc-address { margin: 0 0 48px 48px; line-height: 22px; }
-.gpa-doc-header .gpa-doc-address:first-child { margin: 0px 0px 24px 0px; }
+/* The office/logo address block used to visually sit further left than
+   the invoice document's own equivalent — Ben: "it should be far right,
+   the same position as the invoice document." Root cause: this column
+   also holds .gpa-doc-stats-row (two summary blocks side by side), which
+   is wider than the address content alone, so the column's own box grows
+   wider than the invoice document's equivalent (which has no such wide
+   sibling) — align-self: flex-end hugs the address specifically to the
+   column's right edge regardless of how wide the stats row grows it. */
+.gpa-doc-header .gpa-doc-address:first-child { margin: 0px 0px 24px 0px; align-self: flex-end; }
 .gpa-doc-address-name { font-weight: bold; }
 
 .gpa-doc-stats-row { display: flex; gap: 32px; }
@@ -31,9 +39,16 @@
 }
 .gpa-doc-total-payable span:first-child { min-width: 130px; }
 
-.gpa-doc-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
-.gpa-doc-meta-col > div { display: flex; gap: 8px; white-space: nowrap; }
-.gpa-doc-meta-col span:first-child { font-weight: bold; min-width: 60px; }
+/* gap reduced from 16px — with 5 meta columns (vs. the invoice document's
+   3), the combined content width plus 4×16px of gap ran just over the
+   document's own available width, wrapping "Print date" onto its own
+   line. Ben: "Can we get Employee, ref, payroll id, period and print date
+   on one line." Also drops the 60px label min-width — every label here is
+   already wider than 60px, so it was reserving no useful space, just an
+   invoice-document leftover irrelevant to the wider column set. */
+.gpa-doc-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0px; }
+.gpa-doc-meta-col > div { display: flex; gap: 6px; white-space: nowrap; }
+.gpa-doc-meta-col span:first-child { font-weight: bold; }
 
 .gpa-doc-table { width: 100%; border-collapse: collapse; text-align: left; }
 .gpa-doc-table thead tr th { padding-bottom: 24px; }
@@ -45,10 +60,18 @@
 .gpa-doc-cell-extra { margin-top: 8px; }
 
 .gpa-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
+/* Ben: "the horizontal rule should only cover the monetary amounts,
+   currently it runs the full length of the table." Date/Type/Customer/
+   Time have no footer total (see Components/GrossPayAdviceDocument.jsx's
+   `footerValue`), so their <td> renders with no child content at all —
+   :empty is what lets the rule stop under the last non-monetary column
+   without needing to know in JS which columns are "monetary" ahead of
+   time. */
+.gpa-doc-totals-row td:empty { border-top: none; padding-top: 0; }
 
 .gpa-doc-page { text-align: right; font-size: 11px; color: #888; margin-top: 24px; }
 
-/* ── Config-driven additions (roster/communications' live preview) ──
+/* ── Config-driven additions (roster-settings/settings' live preview) ──
    Only ever render when a consumer passes headerFields/visitTableFields —
    gross-pay-advice/recurring-expense-document's own unconfigured usage
    never touches these. Same shape as Components/invoice-document.css's own

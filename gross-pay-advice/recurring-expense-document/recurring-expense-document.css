@@ -15,5 +15,5 @@
 
 /* .gpa-doc-* rules moved to Components/gpa-document.css, alongside the
    component itself (Components/GrossPayAdviceDocument.jsx), so both can be
-   shared with roster/communications' own config-driven "Contracts and pay"
+   shared with roster-settings/settings' own config-driven "Contracts and pay"
    preview. */

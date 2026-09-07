@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react'
+import ModalPanel from '../../../Components/ModalPanel'
 import { defaultGpaConfig } from './gpaCustomisation'
 import GpaPreviewModal from './GpaPreviewModal'
 
 // ─── Icons ────────────────────────────────────────────────────
-
-const CloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" strokeLinejoin="round" />
-  </svg>
-)
 
 const GripIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -20,10 +15,14 @@ const GripIcon = () => (
 
 // ─── Reorderable field list ─────────────────────────────────────
 // Same native-HTML5-drag-and-drop mechanism as customer-profile/funders'
-// own CustomiseInvoiceModal.jsx — array order IS column order. Date isn't
-// part of this list at all (see below), so there's no `locked` flag to
-// handle here the way the invoice modal's own list needs — every row in
-// this particular list is always fully checkable/draggable.
+// own CustomiseInvoiceModal.jsx — array order IS column order.
+//
+// A field can carry `locked: true` (Date) — Ben: "Date (fixed, cannot be
+// reordered or unselected)," then corrected the same round: "Lets make
+// the date reorderable, my mistake." So `locked` only disables the
+// checkbox (always checked, ignores clicks); the drag handle and all
+// drag/drop wiring are completely untouched for a locked row, same as any
+// other field — matching customer-profile/funders' own Date field exactly.
 
 function ReorderableFieldList({ fields, onReorder, onToggle }) {
   const [dragIndex, setDragIndex] = useState(null)
@@ -53,8 +52,13 @@ function ReorderableFieldList({ fields, onReorder, onToggle }) {
           onDragEnd={() => { setDragIndex(null); setOverIndex(null) }}
         >
           <span className="gpa-drag-handle" aria-hidden="true"><GripIcon /></span>
-          <label className="gpa-field-checkbox-row">
-            <input type="checkbox" checked={f.enabled} onChange={() => onToggle(f.key)} />
+          <label className={`gpa-field-checkbox-row${f.locked ? ' gpa-field-checkbox-row--locked' : ''}`}>
+            <input
+              type="checkbox"
+              checked={f.locked || f.enabled}
+              disabled={f.locked}
+              onChange={() => onToggle(f.key)}
+            />
             <span>{f.label}</span>
           </label>
         </div>
@@ -66,16 +70,9 @@ function ReorderableFieldList({ fields, onReorder, onToggle }) {
 // ─── Modal ────────────────────────────────────────────────────
 // Structural copy of customer-profile/funders' CustomiseInvoiceModal.jsx,
 // minus the Layout/radio-card section entirely — a Gross Pay Advice only
-// ever has one document shape, so there's nothing to pick between.
-//
-// Date is genuinely locked here — Ben: "Date (fixed, cannot be reordered
-// or unselected)" — a deliberate difference from how the invoice modal's
-// own Date ended up (reorderable, only its checkbox locked). Rather than
-// mixing a `locked` flag into the reorderable array (which would need the
-// drag logic itself to special-case never dropping another field onto
-// index 0), Date is rendered as its own static, non-draggable row directly
-// above <ReorderableFieldList> — the same approach originally tried for
-// the invoice modal's Date field before that spec changed.
+// ever has one document shape, so there's nothing to pick between. Now
+// built on Components/ModalPanel.jsx (see CustomiseInvoiceModal.jsx's own
+// equivalent note) instead of bespoke .gpa-modal-* chrome.
 export default function CustomiseGpaModal({ open, gpaConfig, onClose, onConfirm }) {
   const [draft, setDraft] = useState(defaultGpaConfig())
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -98,22 +95,52 @@ export default function CustomiseGpaModal({ open, gpaConfig, onClose, onConfirm 
   const reorderTableFields = (nextFields) =>
     setDraft(d => ({ ...d, tableFields: nextFields }))
 
-  return (
-    <div className="gpa-modal-overlay" onClick={onClose}>
-      <div className="gpa-modal" onClick={e => e.stopPropagation()}>
-        <div className="gpa-modal-header">
-          <h2 className="gpa-modal-title">Customise layout</h2>
-          <button className="gpa-modal-close" onClick={onClose} aria-label="Close">
-            <CloseIcon />
-          </button>
-        </div>
+  // Header fields split into two picker sections — Ben: "split out the
+  // header fields, one for company details and the other employee summary
+  // which contains the new fields I requested." draft.header stays one
+  // flat array (order = company fields then employee-summary fields,
+  // fixed by gpaCustomisation.js's own field order); these two derived
+  // lists are purely a rendering split, not a second piece of state.
+  const companyFields = draft.header.filter(f => f.group === 'company')
+  const employeeSummaryFields = draft.header.filter(f => f.group === 'employeeSummary')
 
-        <div className="gpa-modal-body">
+  return (
+    <>
+      <ModalPanel
+        open={open}
+        onClose={onClose}
+        title="Customise layout"
+        footer={
+          <>
+            <button className="round-btn secondary-btn" onClick={() => setPreviewOpen(true)}>
+              Preview
+            </button>
+            <div className="gpa-modal-footer-actions">
+              <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
+              <button className="round-btn primary-btn" onClick={() => onConfirm(draft)}>Confirm</button>
+            </div>
+          </>
+        }
+      >
+        <div className="gpa-modal-body-content">
           <div>
-            <h3 className="gpa-modal-section-heading">Header fields</h3>
+            <h3 className="gpa-modal-section-heading">Company details</h3>
             <p className="gpa-modal-section-desc">These fields appear at the top of every Gross Pay Advice.</p>
             <div className="gpa-field-list">
-              {draft.header.map(f => (
+              {companyFields.map(f => (
+                <label className="gpa-field-checkbox-row" key={f.key}>
+                  <input type="checkbox" checked={f.enabled} onChange={() => toggleHeaderField(f.key)} />
+                  <span>{f.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="gpa-modal-section-heading">Employee summary</h3>
+            <p className="gpa-modal-section-desc">These totals appear alongside the pay breakdown at the top of every Gross Pay Advice.</p>
+            <div className="gpa-field-list">
+              {employeeSummaryFields.map(f => (
                 <label className="gpa-field-checkbox-row" key={f.key}>
                   <input type="checkbox" checked={f.enabled} onChange={() => toggleHeaderField(f.key)} />
                   <span>{f.label}</span>
@@ -125,14 +152,6 @@ export default function CustomiseGpaModal({ open, gpaConfig, onClose, onConfirm 
           <div>
             <h3 className="gpa-modal-section-heading">Visit table fields</h3>
             <p className="gpa-modal-section-desc">Choose which fields appear. Fields can be ordered (left to right)</p>
-            <div className="gpa-field-list">
-              {/* Static, non-draggable — Date is always the first column
-                  and can never be turned off. */}
-              <label className="gpa-field-checkbox-row gpa-field-checkbox-row--locked">
-                <input type="checkbox" checked readOnly disabled />
-                <span>Date</span>
-              </label>
-            </div>
             <ReorderableFieldList
               fields={draft.tableFields}
               onReorder={reorderTableFields}
@@ -140,23 +159,13 @@ export default function CustomiseGpaModal({ open, gpaConfig, onClose, onConfirm 
             />
           </div>
         </div>
-
-        <div className="gpa-modal-footer">
-          <button className="round-btn secondary-btn" onClick={() => setPreviewOpen(true)}>
-            Preview
-          </button>
-          <div className="gpa-modal-footer-actions">
-            <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
-            <button className="round-btn primary-btn" onClick={() => onConfirm(draft)}>Confirm</button>
-          </div>
-        </div>
-      </div>
+      </ModalPanel>
 
       <GpaPreviewModal
         open={previewOpen}
         draft={draft}
         onClose={() => setPreviewOpen(false)}
       />
-    </div>
+    </>
   )
 }

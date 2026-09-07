@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 // Search-to-add, pick-many input — type to filter `items`, click a result to
 // add it, added items render as removable rows below. Mirrors the
-// search-to-add employee UX originally built for roster/communications'
+// search-to-add employee UX originally built for roster-settings/settings'
 // (then roster/contactable-staff's) own Contactable employees feature —
 // since removed from that prototype, but this remains the established
 // precedent for "search and add people" (row-based, not react-select's

@@ -7,32 +7,45 @@
 // setting (Roster Settings → Contracts and pay), so there's no array of
 // records — just one config object held directly in App.jsx's own state.
 //
-// Date is genuinely locked on the visit table — Ben, 2026-09-05: "Date
-// (fixed, cannot be reordered or unselected)" — a deliberate difference
-// from how customer-profile/funders' own Date field ended up (reorderable,
-// only its checkbox locked). Date is therefore NOT one of the GPA_TABLE_
-// FIELDS below at all; it's rendered as its own fixed leading item, both
-// in CustomiseGpaModal's picker UI and as Components/GrossPayAdviceDocument's
-// own unconditional first column.
-
-export const GPA_HEADER_FIELDS = [
-  { key: 'officeLogo', label: 'Office logo' },
-  { key: 'officeName', label: 'Office name' },
-  { key: 'companyName', label: 'Company name' },
-  { key: 'addressLine1', label: 'Address line 1' },
-  { key: 'addressLine2', label: 'Address line 2' },
-  { key: 'city', label: 'City' },
-  { key: 'county', label: 'County' },
-  { key: 'country', label: 'Country' },
-  { key: 'postcode', label: 'Postcode' },
-  { key: 'totalVisits', label: 'Total visits' },
-  { key: 'totalWeekdayHours', label: 'Total weekday hours' },
-  { key: 'totalWeekendHours', label: 'Total weekend hours' },
-  { key: 'totalHours', label: 'Total hours' },
-  { key: 'totalHolidays', label: 'Total holidays' },
+// Date is back to being reorderable — Ben, 2026-09-05: "Date (fixed,
+// cannot be reordered or unselected)," then corrected the same round:
+// "Lets make the date reorderable, my mistake." So `date` is a real entry
+// in GPA_TABLE_FIELDS (positioned first by default, not pinned), carrying
+// `locked: true` so CustomiseGpaModal keeps its checkbox permanently
+// checked+disabled while its drag handle stays fully functional — the
+// exact same shape customer-profile/funders' own Date field ended up with.
+//
+// Header fields are split into two groups (Ben: "split out the header
+// fields, one for company details and the other employee summary which
+// contains the new fields I requested") — `group` tags which section of
+// CustomiseGpaModal's picker a field renders under. Kept as one flat
+// array (not two separate config keys) since toggling only ever needs to
+// find-and-update by key regardless of group, and it's simpler for
+// defaultGpaConfig()/the draft shape to stay a single ordered list.
+export const GPA_COMPANY_FIELDS = [
+  { key: 'officeLogo', label: 'Office logo', group: 'company' },
+  { key: 'officeName', label: 'Office name', group: 'company' },
+  { key: 'companyName', label: 'Company name', group: 'company' },
+  { key: 'addressLine1', label: 'Address line 1', group: 'company' },
+  { key: 'addressLine2', label: 'Address line 2', group: 'company' },
+  { key: 'city', label: 'City', group: 'company' },
+  { key: 'county', label: 'County', group: 'company' },
+  { key: 'country', label: 'Country', group: 'company' },
+  { key: 'postcode', label: 'Postcode', group: 'company' },
 ]
 
+export const GPA_EMPLOYEE_SUMMARY_FIELDS = [
+  { key: 'totalVisits', label: 'Total visits', group: 'employeeSummary' },
+  { key: 'totalWeekdayHours', label: 'Total weekday hours', group: 'employeeSummary' },
+  { key: 'totalWeekendHours', label: 'Total weekend hours', group: 'employeeSummary' },
+  { key: 'totalHours', label: 'Total hours', group: 'employeeSummary' },
+  { key: 'totalHolidays', label: 'Total holidays', group: 'employeeSummary' },
+]
+
+export const GPA_HEADER_FIELDS = [...GPA_COMPANY_FIELDS, ...GPA_EMPLOYEE_SUMMARY_FIELDS]
+
 export const GPA_TABLE_FIELDS = [
+  { key: 'date', label: 'Date', locked: true },
   { key: 'type', label: 'Type' },
   { key: 'customer', label: 'Customer' },
   { key: 'time', label: 'Time' },
@@ -60,7 +73,12 @@ export const fmtGBP = (n) => `£${Number(n).toFixed(2)}`
 export const SAMPLE_PREVIEW_GPA = {
   gpaRef: 'GPA-260901',
   payrollId: 'PR-20391',
-  employeeName: 'Demi Lee Mullan',
+  // Dummy employee — Ben: "can we use dummy content in the document rather
+  // than what I supplied" (his own reference PDF named a real employee).
+  // "Stephen Nicholls" matches the dummy name already established
+  // elsewhere for a Gross Pay Advice example (gross-pay-advice/
+  // holiday-deduction, the original recurring-expense-document EXAMPLE).
+  employeeName: 'Stephen Nicholls',
   employeeRef: 'EMP-2201',
   payDate: '10/09/26',
   printDate: '10/09/26',

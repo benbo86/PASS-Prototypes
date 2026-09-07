@@ -1359,6 +1359,11 @@
         },
         {
           "kind": "inline",
+          "ref": "component-demos/modal-panel/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
           "ref": "component-demos/office-nav/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
@@ -1424,7 +1429,7 @@
         },
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#ChevronLeftIcon",
+          "ref": "roster-settings/settings/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
         {
@@ -1438,7 +1443,7 @@
           "name": "ChevronLeftIcon"
         }
       ],
-      "usageCount": 22
+      "usageCount": 23
     },
     {
       "hash": "edf28168",
@@ -1775,41 +1780,12 @@
         },
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#RemoveIcon",
+          "ref": "roster-settings/settings/src/App.jsx#RemoveIcon",
           "name": "RemoveIcon"
         },
         {
           "kind": "inline",
           "ref": "web/messaging/src/App.jsx#CloseIcon",
-          "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 4
-    },
-    {
-      "hash": "229be296",
-      "name": "Close",
-      "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linejoin=\"round\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/funders/src/CustomiseInvoiceModal.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "customer-profile/funders/src/InvoicePreviewModal.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "roster/communications/src/CustomiseGpaModal.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "roster/communications/src/GpaPreviewModal.jsx#CloseIcon",
           "name": "CloseIcon"
         }
       ],
@@ -2014,7 +1990,7 @@
         },
         {
           "kind": "inline",
-          "ref": "roster/communications/src/CustomiseGpaModal.jsx#GripIcon",
+          "ref": "roster-settings/settings/src/CustomiseGpaModal.jsx#GripIcon",
           "name": "GripIcon"
         }
       ],
@@ -2090,7 +2066,7 @@
         },
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#EditIcon",
+          "ref": "roster-settings/settings/src/App.jsx#EditIcon",
           "name": "EditIcon"
         }
       ],
@@ -2104,7 +2080,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#WarningIcon",
+          "ref": "roster-settings/settings/src/App.jsx#WarningIcon",
           "name": "WarningIcon"
         },
         {
@@ -2214,6 +2190,20 @@
           "kind": "inline",
           "ref": "Components/IOSTimeKeypadPopover.jsx#BackspaceIcon",
           "name": "BackspaceIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "229be296",
+      "name": "Close",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linejoin=\"round\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/ModalPanel.jsx#CloseIcon",
+          "name": "CloseIcon"
         }
       ],
       "usageCount": 1
@@ -3332,7 +3322,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#VisitTypesIcon",
+          "ref": "roster-settings/settings/src/App.jsx#VisitTypesIcon",
           "name": "VisitTypesIcon"
         }
       ],
@@ -3346,7 +3336,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#ContractsIcon",
+          "ref": "roster-settings/settings/src/App.jsx#ContractsIcon",
           "name": "ContractsIcon"
         }
       ],
@@ -3360,7 +3350,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#ChargingIcon",
+          "ref": "roster-settings/settings/src/App.jsx#ChargingIcon",
           "name": "ChargingIcon"
         }
       ],
@@ -3374,7 +3364,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#TimeThresholdsIcon",
+          "ref": "roster-settings/settings/src/App.jsx#TimeThresholdsIcon",
           "name": "TimeThresholdsIcon"
         }
       ],
@@ -3388,7 +3378,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#ExpenseTypesIcon",
+          "ref": "roster-settings/settings/src/App.jsx#ExpenseTypesIcon",
           "name": "ExpenseTypesIcon"
         }
       ],
@@ -3402,7 +3392,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#CancellationIcon",
+          "ref": "roster-settings/settings/src/App.jsx#CancellationIcon",
           "name": "CancellationIcon"
         }
       ],
@@ -3416,7 +3406,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#HolidaysIcon",
+          "ref": "roster-settings/settings/src/App.jsx#HolidaysIcon",
           "name": "HolidaysIcon"
         }
       ],
@@ -3430,7 +3420,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#OfficeCalendarIcon",
+          "ref": "roster-settings/settings/src/App.jsx#OfficeCalendarIcon",
           "name": "OfficeCalendarIcon"
         }
       ],
@@ -3444,7 +3434,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#CommunicationsIcon",
+          "ref": "roster-settings/settings/src/App.jsx#CommunicationsIcon",
           "name": "CommunicationsIcon"
         }
       ],
@@ -3458,7 +3448,7 @@
       "sources": [
         {
           "kind": "inline",
-          "ref": "roster/communications/src/App.jsx#AdvancedSettingsIcon",
+          "ref": "roster-settings/settings/src/App.jsx#AdvancedSettingsIcon",
           "name": "AdvancedSettingsIcon"
         }
       ],
@@ -3857,5 +3847,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-07T09:54:24.706Z"
+  "generatedAt": "2026-09-07T12:23:13.072Z"
 }

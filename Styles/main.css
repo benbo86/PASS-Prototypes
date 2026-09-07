@@ -949,11 +949,21 @@ h6 {
 /* ── Modal overlay ───────────────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
-  inset: 0;
+  /* top offset (not inset:0) — same fix, same reason as .slide-panel-overlay
+     and .modal-panel-overlay above: leaves the dev toolbar's own strip
+     uncovered so it stays visible and clickable while this modal is open,
+     rather than painting over it. This one was missed when that convention
+     was established elsewhere and got reported directly — Ben: "the dev
+     options appear in front of [the newer ModalPanel] but not the other
+     modal component" — z-index alone (10800, below Dev Edit's fixed UI at
+     10900) doesn't help here, since the dev toolbar's own sticky BAR sits
+     at a lower 10700 and relies on this exact non-overlapping geometry, not
+     z-index, to stay visible/clickable underneath any full-viewport overlay. */
+  top: var(--dev-toolbar-height, 0px);
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--web-skrim);
-  /* Same fix, same reason as .slide-panel-overlay above — must exceed the
-     dev toolbar's z-index (10700) or the always-on-top toolbar swallows
-     clicks on this modal's own controls whenever they share screen space. */
   z-index: 10800;
   display: flex;
   align-items: center;
@@ -982,10 +992,75 @@ h6 {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--buttons-lozenge-1-primary-1-default);
+  color: var(--brand-purple-7-purple-5);
   display: flex;
   padding: 4px;
   line-height: 0;
+}
+
+/* ── Modal panel (Components/ModalPanel.jsx) ──────────────────────────
+   A centered-and-boxed sibling to .slide-panel- above — same header/
+   scrollable-body/footer shape, just boxed instead of sliding from the
+   side. Deliberately separate from .modal-overlay/.modal-box above (the
+   simple Components/Modal.jsx case: title + close + freeform children,
+   no footer) — first built ad hoc as customer-profile/funders' own fd-modal
+   classes and roster-settings/settings' own gpa-modal classes, consolidated
+   here once a second near-identical copy made the duplication worth
+   removing. */
+.modal-panel-overlay {
+  position: fixed;
+  top: var(--dev-toolbar-height, 0px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--web-skrim);
+  /* Above .slide-panel-overlay (10800) so this can open on top of an
+     already-open SlidePanel, below Dev Edit's fixed UI (10900) so that
+     stays usable regardless of what else is open. */
+  z-index: 10850;
+  display: flex; align-items: center; justify-content: center;
+}
+/* A second ModalPanel stacked on top of an already-open one (e.g. a
+   Preview opened from within a Customise modal) — bumped one tier up so
+   it visually wins, same convention as the .fd-preview-overlay/
+   .gpa-preview-overlay this replaces. */
+.modal-panel-overlay--stacked { z-index: 10855; }
+
+.modal-panel {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  flex-shrink: 0;
+}
+.modal-panel-title { font-size: 20px; font-weight: 600; color: #000; }
+.modal-panel-close {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--brand-purple-7-purple-5); display: flex;
+  border-radius: 4px; transition: background 0.12s, color 0.12s;
+}
+.modal-panel-close:hover { }
+
+/* Deliberately unopinionated beyond scrolling — the two known consumers
+   want genuinely different inner layouts (a padded flex column of form
+   sections vs. a plain scrollable area with its own background wrapping a
+   preview document), so each supplies its own inner wrapper/padding as
+   children rather than this imposing one shape on both. */
+.modal-panel-body { overflow-y: auto; flex: 1; }
+
+.modal-panel-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  flex-shrink: 0;
 }
 
 /* ── Side nav page shell ──────────────────────────────────────── */
@@ -1322,7 +1397,7 @@ h6 {
   cursor: pointer;
   color: var(--brand-purple-7-purple-5);
 }
-.slide-panel-close:hover { color: #333; }
+.slide-panel-close:hover { }
 
 .slide-panel-body {
   flex: 1;
@@ -1341,7 +1416,7 @@ h6 {
   gap: 12px;
   flex-shrink: 0;
 }
-.modal-close-btn:hover { opacity: 0.7; }
+.modal-close-btn:hover { }
 
 /* ── Components/ActionsMenu.jsx — generic bulk-actions dropdown ─── */
 .actions-menu-wrap { position: relative; display: inline-flex; }

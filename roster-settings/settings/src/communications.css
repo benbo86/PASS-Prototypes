@@ -79,11 +79,18 @@ body {
   gap: 12px;
 }
 
+/* Bumped to match Styles/main.css's own h1 (28px/500) — Ben applied this
+   via Dev Edit's Element tab to the Communications heading specifically
+   (changing its tag to <h1> and clearing its class, so it fell through to
+   main.css's global h1 rule) and asked for it "on all sections." Baked
+   directly into this shared class instead of touching every section's own
+   <h2> tag/class, so the change applies everywhere for free and doesn't
+   depend on a live per-element override surviving. */
 .settings-section-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 500;
   margin: 0;
-  color: #1a1a1a;
+  color: #000;
 }
 
 .settings-edit-btn {
@@ -125,11 +132,17 @@ body {
   gap: 16px;
 }
 
+/* Bumped to match Styles/main.css's own h6 (18px !important/600/margin
+   12px 0) — Ben applied this via Dev Edit's Element tab to one subsection
+   heading ("Invoicing", changing its tag to <h6>, keeping the class) and
+   asked for it "on all sections." Baked directly into this shared class
+   instead of changing every subsection's own tag, same reasoning as
+   .settings-section-title above. */
 .settings-subsection-title {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 4px;
+  margin: 12px 0px;
 }
 
 .settings-subsection-desc {
@@ -503,66 +516,19 @@ body {
 }
 
 /* ─── Customise Gross Pay Advice layout — modal ──────────────────
-   Structural copy of customer-profile/funders/funders.css's own
-   fd-modal / fd-field / fd-reorder / fd-preview rules, renamed
-   .gpa-* for this file's own namespace — same z-index reasoning (sits
-   above Components/SlidePanel.jsx's own .slide-panel-overlay at 10800,
-   below Dev Edit's fixed UI at 10900), same reason for the second overlay
-   (.gpa-preview-overlay stacks on top of .gpa-modal-overlay rather than an
-   inline split-pane). No Layout/radio-card section here — see
-   CustomiseGpaModal.jsx for why. */
+   Chrome (overlay/box/header/footer) now comes from Components/ModalPanel
+   — only this prototype's own content-level classes remain here. No
+   Layout/radio-card section here — see CustomiseGpaModal.jsx for why. */
 
-.gpa-modal-overlay {
-  position: fixed;
-  top: var(--dev-toolbar-height, 0px);
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--web-skrim);
-  z-index: 10850;
-  display: flex; align-items: center; justify-content: center;
-}
+/* The padded content wrapper CustomiseGpaModal.jsx renders as ModalPanel's
+   own children — scrolling itself is handled by ModalPanel's own
+   .modal-panel-body, so this only needs padding. */
+.gpa-modal-body-content { padding: 24px; }
 
-.gpa-modal {
-  background: #fff;
-  border-radius: 8px;
-  width: 648px;
-  max-width: 90vw;
-  max-height: 85vh;
-  display: flex; flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-.gpa-modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
-  flex-shrink: 0;
-}
-.gpa-modal-title { font-size: 20px; font-weight: 600; color: #000; }
-.gpa-modal-close {
-  background: none; border: none; cursor: pointer; padding: 4px;
-  color: var(--ui-purple-3-grape-grey); display: flex;
-  border-radius: 4px; transition: background 0.12s, color 0.12s;
-}
-.gpa-modal-close:hover { background: var(--ui-purple-7-lightest-lavendar); color: var(--brand-purple-6-purple-4); }
-
-.gpa-modal-body {
-  padding: 24px;
-  overflow-y: auto;
-  display: flex; flex-direction: column; gap: 32px;
-}
-
-.gpa-modal-footer {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
-  flex-shrink: 0;
-}
 .gpa-modal-footer-actions { display: flex; gap: 12px; }
 
-.gpa-modal-section-heading { font-size: 14px; font-weight: 400; color: #000; margin-bottom: 8px; }
-.gpa-modal-section-desc { font-size: 14px; color: var(--greyscale-6-grey-50); margin-bottom: 16px; }
+.gpa-modal-section-heading { font-size: 14px; font-weight: 600; color: #000; margin-bottom: 8px; }
+.gpa-modal-section-desc { font-size: 14px; color: var(--greyscale-6-grey-50); margin-bottom: 8px; }
 
 .gpa-field-list { display: flex; flex-direction: column; }
 
@@ -609,17 +575,8 @@ body {
   flex: 1;
 }
 
-.gpa-preview-overlay { z-index: 10855; }
-
-.gpa-preview-modal {
-  background: #fff;
-  border-radius: 8px;
-  width: 1040px;
-  max-width: 95vw;
-  max-height: 92vh;
-  display: flex; flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-}
+/* A second ModalPanel stacked on top of the Customise one (via its own
+   `stacked` prop) — no bespoke overlay/box chrome needed here anymore. */
 
 .gpa-preview-body {
   padding: 24px;

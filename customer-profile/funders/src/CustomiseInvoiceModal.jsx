@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react'
+import ModalPanel from '../../../Components/ModalPanel'
 import Tooltip from '../../../Components/Tooltip'
 import { INVOICE_LAYOUTS, defaultInvoiceConfig } from './data'
 import InvoicePreviewModal from './InvoicePreviewModal'
 
 // ─── Icons ────────────────────────────────────────────────────
-
-const CloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" strokeLinejoin="round" />
-  </svg>
-)
 
 // Copied verbatim from Icons/Info.svg, per this repo's own icon-copy-
 // fidelity convention.
@@ -82,6 +77,13 @@ function ReorderableFieldList({ fields, onReorder, onToggle }) {
 }
 
 // ─── Modal ────────────────────────────────────────────────────
+// Now built on Components/ModalPanel.jsx (a centered/boxed sibling to
+// SlidePanel) instead of bespoke .fd-modal-* chrome — that chrome moved
+// there once roster-settings/settings' near-identical CustomiseGpaModal made
+// the duplication worth removing. Everything below .fd-modal-body's old
+// role (header fields, layout picker, reorderable list, footer content)
+// stays exactly as it was, just as ModalPanel's children/footer props
+// instead of raw overlay/box/header markup.
 
 export default function CustomiseInvoiceModal({ open, invoiceConfig, onClose, onConfirm }) {
   const [draft, setDraft] = useState(defaultInvoiceConfig())
@@ -120,16 +122,35 @@ export default function CustomiseInvoiceModal({ open, invoiceConfig, onClose, on
   const activeLayoutFields = draft.fieldOrders[draft.layout]
 
   return (
-    <div className="fd-modal-overlay" onClick={onClose}>
-      <div className="fd-modal" onClick={e => e.stopPropagation()}>
-        <div className="fd-modal-header">
-          <h2 className="fd-modal-title">Customise document</h2>
-          <button className="fd-modal-close" onClick={onClose} aria-label="Close">
-            <CloseIcon />
-          </button>
-        </div>
-
-        <div className="fd-modal-body">
+    <>
+      <ModalPanel
+        open={open}
+        onClose={onClose}
+        title="Customise document"
+        footer={
+          <>
+            {/* Weekly totals has no real document to preview yet — Ben:
+                "This is an example of the visits list not the weekly
+                totals, lets leave the preview for the weekly totals as we
+                don't have this yet." Disabled rather than hidden, so the
+                option's presence/absence doesn't shift depending on which
+                layout is selected. */}
+            <button
+              className="round-btn secondary-btn"
+              onClick={() => setPreviewOpen(true)}
+              disabled={draft.layout === 'weeklyTotals'}
+              title={draft.layout === 'weeklyTotals' ? "Preview isn't available for Weekly totals yet" : undefined}
+            >
+              Preview
+            </button>
+            <div className="fd-modal-footer-actions">
+              <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
+              <button className="round-btn primary-btn" onClick={() => onConfirm(draft)}>Confirm</button>
+            </div>
+          </>
+        }
+      >
+        <div className="fd-modal-body-content">
           <div>
             <h3 className="fd-modal-section-heading">Header fields</h3>
             <p className="fd-modal-section-desc">These fields appear at the top of every invoice.</p>
@@ -183,34 +204,13 @@ export default function CustomiseInvoiceModal({ open, invoiceConfig, onClose, on
             />
           </div>
         </div>
-
-        <div className="fd-modal-footer">
-          {/* Weekly totals has no real document to preview yet — Ben:
-              "This is an example of the visits list not the weekly totals,
-              lets leave the preview for the weekly totals as we don't have
-              this yet." Disabled rather than hidden, so the option's
-              presence/absence doesn't shift depending on which layout is
-              selected. */}
-          <button
-            className="round-btn secondary-btn"
-            onClick={() => setPreviewOpen(true)}
-            disabled={draft.layout === 'weeklyTotals'}
-            title={draft.layout === 'weeklyTotals' ? "Preview isn't available for Weekly totals yet" : undefined}
-          >
-            Preview
-          </button>
-          <div className="fd-modal-footer-actions">
-            <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
-            <button className="round-btn primary-btn" onClick={() => onConfirm(draft)}>Confirm</button>
-          </div>
-        </div>
-      </div>
+      </ModalPanel>
 
       <InvoicePreviewModal
         open={previewOpen}
         draft={draft}
         onClose={() => setPreviewOpen(false)}
       />
-    </div>
+    </>
   )
 }

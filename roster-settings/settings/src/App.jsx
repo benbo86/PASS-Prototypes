@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import OfficeNav from '../../../Components/OfficeNav'
@@ -697,7 +697,62 @@ export default function App() {
   // Which settings section the sidebar is showing — only these two
   // NAV_ITEMS are actually wired up; every other item stays the inert,
   // decorative label it's always been.
-  const [activeSection, setActiveSection] = useState('communications')
+  // Now only drives the sidebar's own purple highlight — the page itself
+  // renders every real section stacked (see the settings-content JSX
+  // below), so this no longer gates what's visible. Defaults to
+  // 'contracts' since that's the section actually at the top of the page
+  // on first load now that Contracts and pay is rendered first.
+  const [activeSection, setActiveSection] = useState('contracts')
+
+  // Ben: "clicking a side menu item should scroll to the relevant
+  // section." Still updates the highlight (same as the old tab-switch
+  // behaviour), but now also scrolls .settings-content (the actual
+  // scrolling ancestor, not the window) to the clicked section's own id.
+  // Also mirrors the section into the URL hash (#communications/#charging/
+  // #contracts) — Ben: "include a hash in the url ... so I can have a more
+  // accurate prototype url" (a direct link to one section, not just the
+  // page). `replaceState`, not `pushState` — this is a scroll position on
+  // one long page, not a real navigation, so it shouldn't add its own
+  // back-button history entries (manually scrolling the page never does
+  // either, and a click-driven entry would be the only inconsistent one).
+  // The hash never touches `pathname`, so it has zero effect on Dev
+  // Comments'/Dev Edit's own prototypeId scoping (both key off pathname
+  // only) — unlike a query-string multi-view (see Timesheets/GPA), this
+  // is genuinely one page with every section rendered at once, so there's
+  // nothing here that should be scoped separately anyway.
+  const scrollToSection = (key) => {
+    setActiveSection(key)
+    document.getElementById(`section-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    history.replaceState(null, '', `#${key}`)
+  }
+
+  // A direct link with a section hash (e.g. .../settings/#charging) lands
+  // straight on that section instead of always opening at the top —
+  // what makes the hash actually worth sharing. An unrecognized/missing
+  // hash is a silent no-op (stays on whichever section is already active).
+  // `behavior: 'auto'` (instant), not 'smooth' — landing on a page should
+  // put you there already, the animated scroll is only for the sidebar's
+  // own in-page click.
+  //
+  // Also listens for `hashchange`, not just a mount-time read — a fresh
+  // page load (pasting/opening the shared link) already works from the
+  // mount read alone, but a *same-document* hash change (e.g. clicking
+  // another hash link while this page is already open) fires no 'load'
+  // event at all, only 'hashchange' — without this listener the address
+  // bar would silently update while the page itself never moved. Caught
+  // by testing exactly that sequence via Playwright, not assumed.
+  useEffect(() => {
+    const applyHash = () => {
+      const key = window.location.hash.slice(1)
+      if (['communications', 'charging', 'contracts'].includes(key)) {
+        setActiveSection(key)
+        document.getElementById(`section-${key}`)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+      }
+    }
+    applyHash()
+    window.addEventListener('hashchange', applyHash)
+    return () => window.removeEventListener('hashchange', applyHash)
+  }, [])
 
   // ─── Communications: the 4 real blocks + Holiday requests ──────
   // `activePanel` is one of a COMMS_BLOCKS key, 'holiday-requests', or null.
@@ -836,7 +891,7 @@ export default function App() {
                   <button
                     className={`rn-item${key === activeSection ? ' active' : ''}`}
                     style={{ cursor: isReal ? 'pointer' : 'default' }}
-                    onClick={isReal ? () => setActiveSection(key) : undefined}
+                    onClick={isReal ? () => scrollToSection(key) : undefined}
                   >
                     <span className="rn-item-icon"><Icon /></span>
                     <span>{label}</span>
@@ -849,236 +904,240 @@ export default function App() {
 
         {/* Main content */}
         <main className="settings-content">
-          {activeSection === 'communications' && (
-            <div className="settings-section">
-              <div className="settings-section-header">
-                <div className="settings-section-icon-title">
-                  <CommunicationsIcon size={32} />
-                  <h2 className="settings-section-title">Communications</h2>
-                </div>
+          {/* Ben: "The Roster Settings page should be one long page
+              displaying all sections, and clicking a side menu item should
+              scroll to the relevant section." All 3 real sections now
+              render unconditionally, stacked in the same order as the
+              sidebar (Contracts and pay, Charging and invoicing,
+              Communications) — activeSection is still set on click (for
+              the sidebar's own purple highlight), but no longer gates
+              what's rendered; scrollToSection (below) is what actually
+              moves the page. Each section's own id is what scrollIntoView
+              targets. */}
+          <div className="settings-section" id="section-contracts">
+            {/* One page-level pencil, not per-subsection — unlike
+                Communications' own 4+1 independently-editable blocks,
+                only one thing here is becoming editable (the pay advice
+                document), so a single section-level edit button is the
+                right shape. .settings-section-header is already
+                space-between, so this drops straight in as a second
+                child with zero CSS changes. */}
+            <div className="settings-section-header">
+              <div className="settings-section-icon-title">
+                <ContractsIcon size={40} />
+                <h2 className="settings-section-title">Contracts and pay</h2>
               </div>
+              <button className="settings-edit-btn" onClick={() => setContractsPanelOpen(true)} title="Edit">
+                <EditIcon />
+              </button>
+            </div>
 
-              {COMMS_BLOCKS.map(block => {
-                const cfg = commsConfigs[block.key]
-                return (
-                  <div className="settings-subsection" key={block.key}>
-                    <div className="settings-subsection-header">
-                      <div>
-                        <h3 className="settings-subsection-title">{block.title}</h3>
-                        <p className="settings-subsection-desc">{block.description}</p>
-                      </div>
-                      <button className="settings-edit-btn" onClick={() => openCommsPanel(block.key)} title="Edit">
-                        <EditIcon />
-                      </button>
-                    </div>
-                    <div className="comms-summary-row">
-                      <span className="comms-summary-label">From address</span>
-                      <span className="comms-summary-value">{cfg.source === 'pass' ? 'PASS email address' : cfg.customAddress}</span>
-                    </div>
-                    <div className="comms-summary-row">
-                      <span className="comms-summary-label">Email subject and body</span>
-                      <span className="comms-summary-value comms-configured">Configured</span>
-                    </div>
-                  </div>
-                )
-              })}
-
-              <div className="settings-subsection">
+            {CONTRACTS_STATIC_GROUPS.slice(0, 2).map(group => (
+              <div className="settings-subsection" key={group.title}>
                 <div className="settings-subsection-header">
                   <div>
-                    <h3 className="settings-subsection-title">Holiday requests</h3>
-                    <p className="settings-subsection-desc">Define who should be notified by email when an employee submits or cancels a holiday request.</p>
+                    <h3 className="settings-subsection-title">{group.title}</h3>
+                    {group.description && <p className="settings-subsection-desc">{group.description}</p>}
                   </div>
-                  <button className="settings-edit-btn" onClick={openHolidayPanel} title="Edit">
-                    <EditIcon />
-                  </button>
                 </div>
-                <div className="comms-summary-row">
-                  <span className="comms-summary-label">Status</span>
-                  <span className={`comms-summary-value${holidayConfig.enabled ? ' comms-configured' : ''}`}>
-                    {holidayConfig.enabled ? 'Enabled' : 'Disabled'}
-                  </span>
+                {group.rows.map(row => (
+                  <div className="comms-summary-row" key={row.label}>
+                    <span className="comms-summary-label">{row.label}</span>
+                    <span className="comms-summary-value">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Contract types — a real table, not label/value rows.
+                Reuses this file's own pre-existing (previously unused)
+                .settings-table for the shell; the coloured swatch and
+                the nested, divider-separated detail groups inside the
+                Description cell are new (communications.css). */}
+            <div className="settings-subsection">
+              <div className="settings-subsection-header">
+                <div>
+                  <h3 className="settings-subsection-title">Contract types</h3>
+                  <p className="settings-subsection-desc">Contract types are used to identify availability periods within the schedule and to define pay rates for payroll</p>
                 </div>
-                {holidayConfig.enabled && (
-                  <>
-                    <div className="comms-summary-row">
-                      <span className="comms-summary-label">Recipients</span>
-                      <span className="comms-summary-value">
-                        {holidayConfig.recipients.length > 0
-                          ? holidayConfig.recipients.map(r => r.email).join(', ')
-                          : <span className="settings-value-empty">None added</span>}
-                      </span>
-                    </div>
-                    <div className="comms-summary-row">
-                      <span className="comms-summary-label">Note from your organisation</span>
-                      <span className="comms-summary-value">
-                        {holidayConfig.note.trim() ? holidayConfig.note : <span className="settings-value-empty">None added</span>}
-                      </span>
-                    </div>
-                  </>
+              </div>
+              <table className="settings-table">
+                <thead>
+                  <tr>
+                    <th>Contract name &amp; color</th>
+                    <th>Description</th>
+                    <th>Enabled</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {CONTRACT_TYPES.map(ct => (
+                    <tr key={ct.name}>
+                      <td>
+                        <div className="contract-name-cell">
+                          <span className="contract-swatch" style={{ background: ct.color }} />
+                          {ct.name}
+                        </div>
+                      </td>
+                      <td className="contract-description-cell">
+                        <p style={{ marginBottom: 12 }}>{ct.description}</p>
+                        {ct.detailGroups.map((group, i) => (
+                          <div className="contract-detail-group" key={i}>
+                            {group.map(row => (
+                              <div className="contract-detail-row" key={row.label}>
+                                <strong>{row.label}:</strong>
+                                <span>{row.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </td>
+                      <td>{ct.enabled ? 'Yes' : 'No'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {CONTRACTS_STATIC_GROUPS.slice(2).map(group => (
+              <div className="settings-subsection" key={group.title}>
+                <div className="settings-subsection-header">
+                  <div>
+                    <h3 className="settings-subsection-title">{group.title}</h3>
+                    {group.description && <p className="settings-subsection-desc">{group.description}</p>}
+                  </div>
+                </div>
+                {group.rows.map(row => (
+                  <div className="comms-summary-row" key={row.label}>
+                    <span className="comms-summary-label">{row.label}</span>
+                    <span className="comms-summary-value">{row.value}</span>
+                  </div>
+                ))}
+                {/* Sage 50 Payroll's own reference table renders inside
+                    its own group, right after the description above —
+                    the group itself carries no rows (see
+                    CONTRACTS_STATIC_GROUPS). */}
+                {group.title === 'Sage 50 Payroll' && (
+                  <table className="settings-table">
+                    <thead>
+                      <tr>
+                        <th>Pay component</th>
+                        <th>Payment reference code</th>
+                        <th>Sage description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {SAGE_PAYMENT_COMPONENTS.map(row => (
+                        <tr key={row.component}>
+                          <td>{row.component}</td>
+                          <td>{row.code}</td>
+                          <td>{row.description}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </div>
+            ))}
 
-            </div>
-          )}
+          </div>
 
-          {activeSection === 'charging' && (
-            <div className="settings-section">
-              <div className="settings-section-header">
-                <div className="settings-section-icon-title">
-                  <ChargingIcon size={32} />
-                  <h2 className="settings-section-title">Charging and invoicing</h2>
-                </div>
+          <div className="settings-section" id="section-charging">
+            <div className="settings-section-header">
+              <div className="settings-section-icon-title">
+                <ChargingIcon size={40} />
+                <h2 className="settings-section-title">Charging and invoicing</h2>
               </div>
+            </div>
 
-              {CHARGING_STATIC_GROUPS.map(group => (
-                <div className="settings-subsection" key={group.title}>
+            {CHARGING_STATIC_GROUPS.map(group => (
+              <div className="settings-subsection" key={group.title}>
+                <div className="settings-subsection-header">
+                  <div>
+                    <h3 className="settings-subsection-title">{group.title}</h3>
+                    <p className="settings-subsection-desc">{group.description}</p>
+                  </div>
+                </div>
+                {group.rows.map(row => (
+                  <div className="comms-summary-row" key={row.label}>
+                    <span className="comms-summary-label">{row.label}</span>
+                    <span className="comms-summary-value">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+          </div>
+
+          <div className="settings-section" id="section-communications">
+            <div className="settings-section-header">
+              <div className="settings-section-icon-title">
+                <CommunicationsIcon size={40} />
+                <h2 className="settings-section-title">Communications</h2>
+              </div>
+            </div>
+
+            {COMMS_BLOCKS.map(block => {
+              const cfg = commsConfigs[block.key]
+              return (
+                <div className="settings-subsection" key={block.key}>
                   <div className="settings-subsection-header">
                     <div>
-                      <h3 className="settings-subsection-title">{group.title}</h3>
-                      <p className="settings-subsection-desc">{group.description}</p>
+                      <h3 className="settings-subsection-title">{block.title}</h3>
+                      <p className="settings-subsection-desc">{block.description}</p>
                     </div>
+                    <button className="settings-edit-btn" onClick={() => openCommsPanel(block.key)} title="Edit">
+                      <EditIcon />
+                    </button>
                   </div>
-                  {group.rows.map(row => (
-                    <div className="comms-summary-row" key={row.label}>
-                      <span className="comms-summary-label">{row.label}</span>
-                      <span className="comms-summary-value">{row.value}</span>
-                    </div>
-                  ))}
+                  <div className="comms-summary-row">
+                    <span className="comms-summary-label">From address</span>
+                    <span className="comms-summary-value">{cfg.source === 'pass' ? 'PASS email address' : cfg.customAddress}</span>
+                  </div>
+                  <div className="comms-summary-row">
+                    <span className="comms-summary-label">Email subject and body</span>
+                    <span className="comms-summary-value comms-configured">Configured</span>
+                  </div>
                 </div>
-              ))}
+              )
+            })}
 
-            </div>
-          )}
-
-          {activeSection === 'contracts' && (
-            <div className="settings-section">
-              {/* One page-level pencil, not per-subsection — unlike
-                  Communications' own 4+1 independently-editable blocks,
-                  only one thing here is becoming editable (the pay advice
-                  document), so a single section-level edit button is the
-                  right shape. .settings-section-header is already
-                  space-between, so this drops straight in as a second
-                  child with zero CSS changes. */}
-              <div className="settings-section-header">
-                <div className="settings-section-icon-title">
-                  <ContractsIcon size={32} />
-                  <h2 className="settings-section-title">Contracts and pay</h2>
+            <div className="settings-subsection">
+              <div className="settings-subsection-header">
+                <div>
+                  <h3 className="settings-subsection-title">Holiday requests</h3>
+                  <p className="settings-subsection-desc">Define who should be notified by email when an employee submits or cancels a holiday request.</p>
                 </div>
-                <button className="settings-edit-btn" onClick={() => setContractsPanelOpen(true)} title="Edit">
+                <button className="settings-edit-btn" onClick={openHolidayPanel} title="Edit">
                   <EditIcon />
                 </button>
               </div>
-
-              {CONTRACTS_STATIC_GROUPS.slice(0, 2).map(group => (
-                <div className="settings-subsection" key={group.title}>
-                  <div className="settings-subsection-header">
-                    <div>
-                      <h3 className="settings-subsection-title">{group.title}</h3>
-                      {group.description && <p className="settings-subsection-desc">{group.description}</p>}
-                    </div>
-                  </div>
-                  {group.rows.map(row => (
-                    <div className="comms-summary-row" key={row.label}>
-                      <span className="comms-summary-label">{row.label}</span>
-                      <span className="comms-summary-value">{row.value}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-
-              {/* Contract types — a real table, not label/value rows.
-                  Reuses this file's own pre-existing (previously unused)
-                  .settings-table for the shell; the coloured swatch and
-                  the nested, divider-separated detail groups inside the
-                  Description cell are new (communications.css). */}
-              <div className="settings-subsection">
-                <div className="settings-subsection-header">
-                  <div>
-                    <h3 className="settings-subsection-title">Contract types</h3>
-                    <p className="settings-subsection-desc">Contract types are used to identify availability periods within the schedule and to define pay rates for payroll</p>
-                  </div>
-                </div>
-                <table className="settings-table">
-                  <thead>
-                    <tr>
-                      <th>Contract name &amp; color</th>
-                      <th>Description</th>
-                      <th>Enabled</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {CONTRACT_TYPES.map(ct => (
-                      <tr key={ct.name}>
-                        <td>
-                          <div className="contract-name-cell">
-                            <span className="contract-swatch" style={{ background: ct.color }} />
-                            {ct.name}
-                          </div>
-                        </td>
-                        <td className="contract-description-cell">
-                          <p style={{ marginBottom: 12 }}>{ct.description}</p>
-                          {ct.detailGroups.map((group, i) => (
-                            <div className="contract-detail-group" key={i}>
-                              {group.map(row => (
-                                <div className="contract-detail-row" key={row.label}>
-                                  <strong>{row.label}:</strong>
-                                  <span>{row.value}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ))}
-                        </td>
-                        <td>{ct.enabled ? 'Yes' : 'No'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="comms-summary-row">
+                <span className="comms-summary-label">Status</span>
+                <span className={`comms-summary-value${holidayConfig.enabled ? ' comms-configured' : ''}`}>
+                  {holidayConfig.enabled ? 'Enabled' : 'Disabled'}
+                </span>
               </div>
-
-              {CONTRACTS_STATIC_GROUPS.slice(2).map(group => (
-                <div className="settings-subsection" key={group.title}>
-                  <div className="settings-subsection-header">
-                    <div>
-                      <h3 className="settings-subsection-title">{group.title}</h3>
-                      {group.description && <p className="settings-subsection-desc">{group.description}</p>}
-                    </div>
+              {holidayConfig.enabled && (
+                <>
+                  <div className="comms-summary-row">
+                    <span className="comms-summary-label">Recipients</span>
+                    <span className="comms-summary-value">
+                      {holidayConfig.recipients.length > 0
+                        ? holidayConfig.recipients.map(r => r.email).join(', ')
+                        : <span className="settings-value-empty">None added</span>}
+                    </span>
                   </div>
-                  {group.rows.map(row => (
-                    <div className="comms-summary-row" key={row.label}>
-                      <span className="comms-summary-label">{row.label}</span>
-                      <span className="comms-summary-value">{row.value}</span>
-                    </div>
-                  ))}
-                  {/* Sage 50 Payroll's own reference table renders inside
-                      its own group, right after the description above —
-                      the group itself carries no rows (see
-                      CONTRACTS_STATIC_GROUPS). */}
-                  {group.title === 'Sage 50 Payroll' && (
-                    <table className="settings-table">
-                      <thead>
-                        <tr>
-                          <th>Pay component</th>
-                          <th>Payment reference code</th>
-                          <th>Sage description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {SAGE_PAYMENT_COMPONENTS.map(row => (
-                          <tr key={row.component}>
-                            <td>{row.component}</td>
-                            <td>{row.code}</td>
-                            <td>{row.description}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              ))}
-
+                  <div className="comms-summary-row">
+                    <span className="comms-summary-label">Note from your organisation</span>
+                    <span className="comms-summary-value">
+                      {holidayConfig.note.trim() ? holidayConfig.note : <span className="settings-value-empty">None added</span>}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
-          )}
+
+          </div>
         </main>
       </div>
 
