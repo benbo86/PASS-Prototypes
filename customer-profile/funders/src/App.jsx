@@ -21,16 +21,18 @@ const ChevronLeftIcon = () => (
 )
 
 const EditIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
   </svg>
 )
 
+// Copied verbatim from Icons/Delete outline.svg, per this repo's own
+// icon-copy-fidelity convention — Ben: "use the Delete outline icon rather
+// than an actual svg" (the previous TrashIcon was a hand-drawn generic
+// trash-can glyph, not the shared repo icon).
 const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18" /><path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" />
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-    <line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M17.3321482,7.55624688 L17.3321482,18.222321 C17.3321482,19.1545359 16.6150014,19.9198978 15.7004386,19.9941034 L15.5544692,20 L8.44464196,20 C7.51158269,20 6.74617855,19.2812488 6.67197078,18.3680498 L6.66607411,18.222321 L6.66607411,7.55624688 L17.3321482,7.55624688 Z M15.332,9.556 L8.666,9.556 L8.666,18 L15.332,18 L15.332,9.556 Z M14.2212099,4 L15.1109383,4.88972835 L17.3321482,4.88972835 C17.7858666,4.88972835 18.1600628,5.22902311 18.2149467,5.66642439 L18.2218766,5.77767902 L18.2218766,6.66740737 L5.77812344,6.66740737 L5.77812344,5.77767902 C5.77812344,5.32560157 6.1174182,4.95153162 6.55481948,4.89665741 L6.66607411,4.88972835 L8.88906172,4.88972835 L9.77701239,4 L14.2212099,4 Z" fill="currentColor" fillRule="nonzero" />
   </svg>
 )
 
@@ -66,7 +68,7 @@ function FunderCard({ funder, index, onEdit, onDelete }) {
           <button className="fd-icon-btn fd-icon-btn--delete" onClick={onDelete} aria-label="Delete funder" title="Delete funder">
             <TrashIcon />
           </button>
-          <button className="fd-icon-btn" onClick={onEdit} aria-label="Edit funder" title="Edit funder">
+          <button className="fd-icon-btn fd-icon-btn--edit" onClick={onEdit} aria-label="Edit funder" title="Edit funder">
             <EditIcon />
           </button>
         </div>

@@ -123,22 +123,28 @@ body {
   color: #000;
 }
 
+/* Standardised edit-button look, matching Ben's own direct edit to
+   customer-profile/service-agreement's .sa-edit-btn (and applied
+   identically to customer-profile/funders' own .fd-icon-btn--edit) — a
+   44px circle, plain black icon, no hover recolour. Used for every edit
+   pencil on this page (the section-level "Contracts and pay" button, each
+   Communications block's own pencil, and Holiday requests') since they
+   all share this one class. */
 .settings-edit-btn {
-  background: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   border: none;
-  cursor: pointer;
-  color: var(--ui-purple-3-grape-grey);
+  background: var(--ui-purple-6-lavendar-grey);
+  color: #000;
   display: flex;
   align-items: center;
-  padding: 6px;
-  border-radius: 4px;
-  transition: color 0.12s, background 0.12s;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
 }
 
-.settings-edit-btn:hover {
-  color: var(--brand-purple-6-purple-4);
-  background: var(--ui-purple-7-lightest-lavendar);
-}
+.settings-edit-btn:hover { }
 
 /* ─── Subsection ─────────────────────────────────────────────── */
 

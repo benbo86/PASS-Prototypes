@@ -52,13 +52,13 @@ body { background: #f5f5f6; min-height: 100vh; }
 }
 .sa-edit-btn {
   position: absolute; top: 20px; right: 24px;
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: none; background: var(--ui-purple-6-lavendar-grey);
-  color: var(--ui-purple-3-grape-grey);
+  color: #000;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: background 0.12s, color 0.12s;
 }
-.sa-edit-btn:hover { background: var(--ui-purple-5-languid-lavendar); color: var(--brand-purple-6-purple-4); }
+.sa-edit-btn:hover { }
 
 .sa-row { display: flex; align-items: baseline; gap: 24px; }
 .sa-row-label { width: 220px; flex-shrink: 0; font-size: 14px; font-weight: 600; color: #000; }

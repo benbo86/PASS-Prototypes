@@ -50,14 +50,25 @@ body { background: #f5f5f6; min-height: 100vh; }
 }
 
 .fd-icon-btn {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: none; background: var(--ui-purple-6-lavendar-grey);
-  color: var(--ui-purple-3-grape-grey);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: background 0.12s, color 0.12s;
 }
-.fd-icon-btn:hover { background: var(--ui-purple-5-languid-lavendar); color: var(--brand-purple-6-purple-4); }
-.fd-icon-btn--delete:hover { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue); }
+.fd-icon-btn:hover { }
+.fd-icon-btn--delete:hover { }
+
+/* Standardised edit-button look, matching Ben's own direct edit to
+   customer-profile/service-agreement's .sa-edit-btn — bigger circle,
+   plain black icon, no hover recolour. Scoped to a dedicated `--edit`
+   modifier (mirrors the existing `--delete` one) rather than changing the
+   shared base rule above, since that base is also delete's own resting
+   style and delete isn't part of this standardisation. */
+.fd-icon-btn--edit {
+  width: 44px; height: 44px;
+  color: #000;
+}
+.fd-icon-btn--edit:hover { }
 
 .fd-group { display: flex; flex-direction: column; gap: 12px; }
 .fd-group-title { font-size: 16px; font-weight: 600; color: #000; }
