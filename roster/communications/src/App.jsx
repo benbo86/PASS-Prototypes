@@ -10,6 +10,8 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import CustomiseGpaModal from './CustomiseGpaModal'
+import { defaultGpaConfig } from './gpaCustomisation'
 // ─── Icons ────────────────────────────────────────────────────
 
 const ChevronLeftIcon = () => (
@@ -47,8 +49,8 @@ const VisitTypesIcon = () => (
   </svg>
 )
 
-const ContractsIcon = () => (
-  <svg width="25" height="25" viewBox="0 0 25 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+const ContractsIcon = ({ size = 25 }) => (
+  <svg width={size} height={size} viewBox="0 0 25 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" fillRule="evenodd">
       <path d="M.395 0h24v24h-24z"/>
       <path d="M8.84 3a3.318 3.318 0 0 0-3.326 3.31v11.38A3.318 3.318 0 0 0 8.839 21h7.216a3.318 3.318 0 0 0 3.323-3.31V8.467a2 2 0 0 0-.644-1.471l-3.761-3.467A2 2 0 0 0 13.617 3zm.092 1.982h4.529v2.297c0 .985.801 1.783 1.79 1.783h2.17v8.45a1.5 1.5 0 0 1-1.5 1.5h-6.99a1.5 1.5 0 0 1-1.5-1.5V6.483a1.5 1.5 0 0 1 1.5-1.5zm3.463 8.898a1.44 1.44 0 1 1 0-2.88 1.44 1.44 0 0 1 0 2.88zm-1.008.6h.188a1.96 1.96 0 0 0 1.64 0h.188c.835 0 1.512.87 1.512 1.705v.275a.54.54 0 0 1-.54.54h-3.96a.54.54 0 0 1-.54-.54v-.275c0-.835.677-1.705 1.512-1.705z" fill="currentColor" fillRule="nonzero"/>
@@ -318,6 +320,159 @@ const CHARGING_STATIC_GROUPS = [
     description: 'For information such as payment details.',
     rows: [{ label: 'Footnote', value: 'Payment Details: Care & Wellbeing Group Limited Account Number: 02648057 Sort Code: 30-92-90 Or call 01245 207715 Payment Terms: 7 Days If payment method is via direct debit, payment will be collected 10 days from the date of the invoice Thank you' }],
   },
+]
+
+// ─── Contracts and pay (read-only) ──────────────────────────────
+// Copy/values taken verbatim from Ben's own reference screenshot — same
+// "not rebuilt, just faithfully reproduced" convention CHARGING_STATIC_
+// GROUPS above already established for its own reference screenshots.
+// Only "Pay advice document" (reached via this section's own single
+// page-level pencil, not shown here at all) is genuinely editable —
+// everything below is static, matching "I'm not expecting us to recreate
+// the existing options in the edit panel."
+const CONTRACTS_STATIC_GROUPS = [
+  {
+    title: 'Travel time and mileage pay',
+    rows: [
+      { label: 'Travel time pay', value: 'Set the same rate of pay for travel time for all employees on the contract type' },
+      { label: 'Mileage pay', value: 'Set the same rate of pay for mileage for all employees on the contract type' },
+      { label: 'Pay mileage beyond break threshold for shifts', value: 'No' },
+    ],
+  },
+  {
+    title: 'Mileage and travel between visits crossing midnight',
+    rows: [{ label: 'Pay mileage and travel between visits crossing midnight', value: 'No' }],
+  },
+  // Contract types (a real table, not label/value rows) renders directly
+  // in JSX between this group and the next — see CONTRACT_TYPES below.
+  {
+    title: 'Basis for paying non-salaried employees',
+    description: 'Select the basis for paying employees on variable and fixed hour contacts',
+    rows: [{ label: 'Pay method', value: 'Planned time' }],
+  },
+  {
+    title: 'Pay rate calculation',
+    description: 'Select how the visit pay will be calculated according to the visit time',
+    rows: [{ label: 'Pay rate calculation', value: 'Change the rate according to the time period' }],
+  },
+  {
+    title: 'Flat pay rate calculation',
+    description: 'Select how the visit pay will be calculated according to the visit time for flat rates',
+    rows: [{ label: 'Pay rate calculation', value: 'Only use the rate applicable at the start time of the visit' }],
+  },
+  {
+    title: 'Basis for calculating and paying travel time',
+    description: 'Select the basis for calculating and paying travel time for your employees, this will also impact travel time warnings on the daily schedule. Google maps calculates based on travel method and current traffic conditions',
+    rows: [{ label: 'Basis for calculating and paying travel time', value: 'Google maps' }],
+  },
+  {
+    title: 'Basis for how visits and shifts are included in a gross pay advice cycle',
+    description: 'Choose the start or end time to determine which gross pay advice cycle applies',
+    rows: [{ label: 'Basis', value: 'Start time' }],
+  },
+  {
+    title: 'Gross Pay Advice number',
+    description: 'Set the Gross Advice number to count from for future Gross Pay Advice',
+    rows: [
+      { label: 'Prefix characters (Max 6)', value: 'RED' },
+      { label: 'Number of digits (Max 24)', value: '2' },
+      { label: 'Gross Pay Advice number', value: '1' },
+      { label: 'Your next Gross Pay Advice number is', value: 'RED01' },
+    ],
+  },
+  {
+    title: 'Gross Pay Advice date and cycle',
+    description: 'Set the start date and cycle that Gross Pay Advice will be sent from',
+    rows: [
+      { label: 'Gross Pay Advice cycle', value: 'Manual' },
+      { label: 'Start from date', value: '-' },
+    ],
+  },
+  {
+    title: 'GPA Document Settings',
+    description: "Customise how the customer's name is displayed on Gross Pay Advice documents.",
+    rows: [{ label: 'Customer name', value: 'Full customer name' }],
+  },
+  // Sage 50 Payroll (a real table) renders directly in JSX after this
+  // group — see SAGE_PAYMENT_COMPONENTS below.
+  {
+    title: 'Sage 50 Payroll',
+    description: 'Only populate these settings if you intend to use the Sage 50 Payroll export report to upload data from PASS to Sage. This section lets you configure the payment reference codes for each pay component managed within PASS so that payroll data can be uploaded directly into your Sage system without manual file preparation.',
+    rows: [],
+  },
+]
+
+// Each entry's `detailGroups` is an array of groups, rendered with a
+// divider between groups (never within one) — matches the screenshot's own
+// visual rhythm: the mileage trio reads as one tight cluster, while Travel
+// time/Overtime/Expense pay/Holiday scheme each get their own clearly
+// separated line.
+const CONTRACT_TYPES = [
+  {
+    name: 'Salary',
+    color: '#f2f2f4',
+    description: 'Full-time salaried staff, paid based on contracted hours',
+    enabled: true,
+    detailGroups: [
+      [
+        { label: 'What mileage will be paid?', value: 'Travel between visits' },
+        { label: 'Mileage pay during a break', value: 'None' },
+        { label: 'Mileage rate', value: '£0.40 per mile' },
+      ],
+      [{ label: 'Travel time', value: 'None' }],
+      [{ label: 'Overtime', value: 'Yes' }],
+      [{ label: 'Expense pay', value: 'Yes' }],
+      [{ label: 'Holiday scheme', value: '3.5 Days Flex' }],
+    ],
+  },
+  {
+    name: 'Fixed hours',
+    color: '#f3e6b8',
+    description: 'Guaranteed hours per week',
+    enabled: true,
+    detailGroups: [
+      [
+        { label: 'What mileage will be paid?', value: 'Travel between visits' },
+        { label: 'Mileage pay during a break', value: 'None' },
+        { label: 'Mileage rate', value: '£0.35 per mile' },
+      ],
+      [{ label: 'Travel time', value: 'None' }],
+      [{ label: 'Overtime', value: 'Yes' }],
+      [{ label: 'Expense pay', value: 'Yes' }],
+      [{ label: 'Holiday scheme', value: '5 Days Full Time' }],
+      [{ label: 'Calculate holiday pay', value: 'No' }],
+    ],
+  },
+  {
+    name: 'Variable hours',
+    color: '#d9ecd9',
+    description: 'Flexible Contract',
+    enabled: true,
+    detailGroups: [
+      [
+        { label: 'What mileage will be paid?', value: 'Travel between visits' },
+        { label: 'Mileage pay during a break', value: 'None' },
+        { label: 'Mileage rate', value: '£0.35 per mile' },
+      ],
+      [{ label: 'Travel time', value: 'None' }],
+      [{ label: 'Overtime', value: 'Yes' }],
+      [{ label: 'Expense pay', value: 'Yes' }],
+      [{ label: 'Holiday scheme', value: '5 Days Full Time' }],
+      [
+        { label: 'Calculate holiday pay', value: 'Yes' },
+        { label: 'Holiday pay travel setting', value: 'None' },
+        { label: 'Include overtime in holiday pay', value: 'Yes' },
+      ],
+    ],
+  },
+]
+
+const SAGE_PAYMENT_COMPONENTS = [
+  { component: 'Visit / Shift / Event pay', code: '7', description: 'Care Work' },
+  { component: 'Mileage', code: '9', description: 'NT Expenses' },
+  { component: 'Travel time', code: '-', description: '-' },
+  { component: 'Expenses', code: '-', description: '-' },
+  { component: 'Holiday pay', code: '57', description: 'Holiday Pay' },
 ]
 
 // ─── Communications edit-panel pieces ──────────────────────────
@@ -632,6 +787,22 @@ export default function App() {
     ? COMMS_BLOCKS.find(b => b.key === activePanel)
     : null
 
+  // ─── Contracts and pay: Pay advice document customisation ──────
+  // A separate, dedicated SlidePanel (not folded into the shared
+  // activePanel/commsDraft/holidayDraft machinery above) — same reasoning
+  // as customer-profile/funders' own FunderPanel.jsx: nothing here needs
+  // the comms/holiday-specific save-validity checks (commsCanSave/
+  // holidayCanSave), and this is a single, office-wide config (not a
+  // per-record draft), so there's no genuine overlap to share.
+  const [contractsPanelOpen, setContractsPanelOpen] = useState(false)
+  const [gpaConfig, setGpaConfig] = useState(defaultGpaConfig())
+  const [gpaModalOpen, setGpaModalOpen] = useState(false)
+
+  const handleConfirmGpaConfig = (config) => {
+    setGpaConfig(config)
+    setGpaModalOpen(false)
+  }
+
   return (
     <>
       <DevToolbar>
@@ -659,7 +830,7 @@ export default function App() {
         <nav className="rn-nav">
           <ul className="rn-list">
             {NAV_ITEMS.map(({ key, label, Icon }) => {
-              const isReal = key === 'communications' || key === 'charging'
+              const isReal = key === 'communications' || key === 'charging' || key === 'contracts'
               return (
                 <li key={key}>
                   <button
@@ -779,8 +950,166 @@ export default function App() {
 
             </div>
           )}
+
+          {activeSection === 'contracts' && (
+            <div className="settings-section">
+              {/* One page-level pencil, not per-subsection — unlike
+                  Communications' own 4+1 independently-editable blocks,
+                  only one thing here is becoming editable (the pay advice
+                  document), so a single section-level edit button is the
+                  right shape. .settings-section-header is already
+                  space-between, so this drops straight in as a second
+                  child with zero CSS changes. */}
+              <div className="settings-section-header">
+                <div className="settings-section-icon-title">
+                  <ContractsIcon size={32} />
+                  <h2 className="settings-section-title">Contracts and pay</h2>
+                </div>
+                <button className="settings-edit-btn" onClick={() => setContractsPanelOpen(true)} title="Edit">
+                  <EditIcon />
+                </button>
+              </div>
+
+              {CONTRACTS_STATIC_GROUPS.slice(0, 2).map(group => (
+                <div className="settings-subsection" key={group.title}>
+                  <div className="settings-subsection-header">
+                    <div>
+                      <h3 className="settings-subsection-title">{group.title}</h3>
+                      {group.description && <p className="settings-subsection-desc">{group.description}</p>}
+                    </div>
+                  </div>
+                  {group.rows.map(row => (
+                    <div className="comms-summary-row" key={row.label}>
+                      <span className="comms-summary-label">{row.label}</span>
+                      <span className="comms-summary-value">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              {/* Contract types — a real table, not label/value rows.
+                  Reuses this file's own pre-existing (previously unused)
+                  .settings-table for the shell; the coloured swatch and
+                  the nested, divider-separated detail groups inside the
+                  Description cell are new (communications.css). */}
+              <div className="settings-subsection">
+                <div className="settings-subsection-header">
+                  <div>
+                    <h3 className="settings-subsection-title">Contract types</h3>
+                    <p className="settings-subsection-desc">Contract types are used to identify availability periods within the schedule and to define pay rates for payroll</p>
+                  </div>
+                </div>
+                <table className="settings-table">
+                  <thead>
+                    <tr>
+                      <th>Contract name &amp; color</th>
+                      <th>Description</th>
+                      <th>Enabled</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {CONTRACT_TYPES.map(ct => (
+                      <tr key={ct.name}>
+                        <td>
+                          <div className="contract-name-cell">
+                            <span className="contract-swatch" style={{ background: ct.color }} />
+                            {ct.name}
+                          </div>
+                        </td>
+                        <td className="contract-description-cell">
+                          <p style={{ marginBottom: 12 }}>{ct.description}</p>
+                          {ct.detailGroups.map((group, i) => (
+                            <div className="contract-detail-group" key={i}>
+                              {group.map(row => (
+                                <div className="contract-detail-row" key={row.label}>
+                                  <strong>{row.label}:</strong>
+                                  <span>{row.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </td>
+                        <td>{ct.enabled ? 'Yes' : 'No'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {CONTRACTS_STATIC_GROUPS.slice(2).map(group => (
+                <div className="settings-subsection" key={group.title}>
+                  <div className="settings-subsection-header">
+                    <div>
+                      <h3 className="settings-subsection-title">{group.title}</h3>
+                      {group.description && <p className="settings-subsection-desc">{group.description}</p>}
+                    </div>
+                  </div>
+                  {group.rows.map(row => (
+                    <div className="comms-summary-row" key={row.label}>
+                      <span className="comms-summary-label">{row.label}</span>
+                      <span className="comms-summary-value">{row.value}</span>
+                    </div>
+                  ))}
+                  {/* Sage 50 Payroll's own reference table renders inside
+                      its own group, right after the description above —
+                      the group itself carries no rows (see
+                      CONTRACTS_STATIC_GROUPS). */}
+                  {group.title === 'Sage 50 Payroll' && (
+                    <table className="settings-table">
+                      <thead>
+                        <tr>
+                          <th>Pay component</th>
+                          <th>Payment reference code</th>
+                          <th>Sage description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {SAGE_PAYMENT_COMPONENTS.map(row => (
+                          <tr key={row.component}>
+                            <td>{row.component}</td>
+                            <td>{row.code}</td>
+                            <td>{row.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              ))}
+
+            </div>
+          )}
         </main>
       </div>
+
+      {/* Contracts and pay — Pay advice document customisation panel */}
+      <SlidePanel
+        open={contractsPanelOpen}
+        onClose={() => setContractsPanelOpen(false)}
+        title="Edit contracts and pay"
+        footer={
+          <>
+            <button className="round-btn tertiary-btn" onClick={() => setContractsPanelOpen(false)}>Cancel</button>
+            <button className="round-btn primary-btn" onClick={() => setContractsPanelOpen(false)}>Save</button>
+          </>
+        }
+      >
+        <div className="contracts-panel-doc-section">
+          <div>
+            <h3 className="settings-subsection-title">Pay advice document</h3>
+          </div>
+          <button className="round-btn primary-btn" onClick={() => setGpaModalOpen(true)}>
+            Customise layout
+          </button>
+        </div>
+      </SlidePanel>
+
+      <CustomiseGpaModal
+        open={gpaModalOpen}
+        gpaConfig={gpaConfig}
+        onClose={() => setGpaModalOpen(false)}
+        onConfirm={handleConfirmGpaConfig}
+      />
 
       {/* Communications / Holiday requests edit panel — one shared panel
           for whichever pencil was clicked */}

@@ -5,8 +5,8 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
-import GrossPayAdviceDocument from './GrossPayAdviceDocument'
-import { EXAMPLE } from './data'
+import GrossPayAdviceDocument from '../../../Components/GrossPayAdviceDocument'
+import { EXAMPLE, fmtGBP } from './data'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -30,7 +30,7 @@ export default function App() {
         <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
 
         <div className="gpa-doc-wrap">
-          <GrossPayAdviceDocument gpa={EXAMPLE} />
+          <GrossPayAdviceDocument gpa={EXAMPLE} fmtGBP={fmtGBP} />
         </div>
       </div>
     </>

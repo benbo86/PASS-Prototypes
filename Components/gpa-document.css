@@ -1,0 +1,64 @@
+/* ── Gross Pay Advice document — mirrors Components/invoice-document.css's
+   own extraction exactly (same reasoning: shared with a config-driven
+   consumer, gross-pay-advice/recurring-expense-document's own unconfigured
+   usage stays completely unaffected). Not part of the Barlow-based design
+   system, so it uses --legacy-font-family (Styles/legacy.css) — a consumer
+   must still import that itself for the variable to resolve. */
+.gpa-doc {
+  font-family: var(--legacy-font-family);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000;
+}
+
+.gpa-doc-header { display: flex; justify-content: space-between; gap: 32px; margin-bottom: 32px; }
+.gpa-doc-header-col { display: flex; flex-direction: column; }
+.gpa-doc-title { font-size: 28px; font-weight: bold; margin-top: 0px; margin-bottom: 130px; }
+.gpa-doc-address { margin: 0 0 48px 48px; line-height: 22px; }
+.gpa-doc-header .gpa-doc-address:first-child { margin: 0px 0px 24px 0px; }
+.gpa-doc-address-name { font-weight: bold; }
+
+.gpa-doc-stats-row { display: flex; gap: 32px; }
+
+.gpa-doc-summary { line-height: 22px; margin-bottom: 12px; }
+.gpa-doc-summary > div { display: flex; gap: 16px; }
+.gpa-doc-summary > div > span:first-child { font-weight: bold; min-width: 130px; }
+.gpa-doc-total-payable {
+  display: flex; gap: 16px;
+  padding: 4px 0px; border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  font-weight: bold; font-size: 13px;
+}
+.gpa-doc-total-payable span:first-child { min-width: 130px; }
+
+.gpa-doc-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+.gpa-doc-meta-col > div { display: flex; gap: 8px; white-space: nowrap; }
+.gpa-doc-meta-col span:first-child { font-weight: bold; min-width: 60px; }
+
+.gpa-doc-table { width: 100%; border-collapse: collapse; text-align: left; }
+.gpa-doc-table thead tr th { padding-bottom: 24px; }
+.gpa-doc-table th { font-weight: bold; padding: 4px 12px 4px 0; }
+.gpa-doc-table td { padding: 4px 12px 4px 0; vertical-align: top; }
+.gpa-doc-table tbody tr:last-child td { padding-bottom: 8px; }
+
+.gpa-doc-cell-note { font-size: 11px; color: #000; }
+.gpa-doc-cell-extra { margin-top: 8px; }
+
+.gpa-doc-totals-row td { border-top: 1px solid #000; padding-top: 12px; }
+
+.gpa-doc-page { text-align: right; font-size: 11px; color: #888; margin-top: 24px; }
+
+/* ── Config-driven additions (roster/communications' live preview) ──
+   Only ever render when a consumer passes headerFields/visitTableFields —
+   gross-pay-advice/recurring-expense-document's own unconfigured usage
+   never touches these. Same shape as Components/invoice-document.css's own
+   equivalent additions. */
+.gpa-doc-address--with-logo { display: flex; align-items: flex-start; gap: 12px; }
+.gpa-doc-logo-placeholder {
+  width: 56px; height: 56px; flex-shrink: 0;
+  background: var(--ui-purple-6-lavendar-grey, #edecf1);
+  border: 1px dashed var(--ui-purple-3-grape-grey, #968caf);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--ui-purple-3-grape-grey, #968caf);
+}

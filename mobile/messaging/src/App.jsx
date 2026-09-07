@@ -215,7 +215,7 @@ const THREAD_MESSAGES = {
   2: [
     { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday' },
     { id: 2, isMe: true, text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday', receipt: 'read', attachments: [{ type: 'file', name: 'Visit_Notes_Margaret_12May.pdf', size: '148 KB' }] },
-    { id: 3, isMe: false, sender: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday' },
+    { id: 3, isMe: false, sender: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', replyTo: { isMe: true, text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference." } },
     { id: 4, isMe: false, sender: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today' },
   ],
   3: [
