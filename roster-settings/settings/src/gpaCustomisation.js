@@ -48,16 +48,30 @@ export const GPA_TABLE_FIELDS = [
   { key: 'date', label: 'Date', locked: true },
   { key: 'type', label: 'Type' },
   { key: 'customer', label: 'Customer' },
+  { key: 'customerInitials', label: 'Customer initials' },
   { key: 'time', label: 'Time' },
   { key: 'pay', label: 'Pay' },
-  { key: 'mileage', label: 'Mileage' },
-  { key: 'travel', label: 'Travel' },
+  // "(if applicable)" — Ben: the office may not pay these, so the picker
+  // label says so explicitly. Scoped to the picker's own checklist label
+  // only, same decoupling GrossPayAdviceDocument.jsx's own column-header
+  // label already uses (see e.g. Funders' Visit charge/Charge split) — the
+  // real document's rendered column header stays the plain, concise
+  // "Mileage"/"Travel", not this longer explanatory wording.
+  { key: 'mileage', label: 'Mileage (if applicable)' },
+  { key: 'travel', label: 'Travel (if applicable)' },
 ]
+
+// Fields that default OFF — Ben: "Company name, Total weekday hours, Total
+// weekend hours and Customer initials [should be] deselected by default as
+// these are new fields not currently on an employee's pay advice." Same
+// "genuinely new, not something the current real document already shows"
+// reasoning Funders' own Carer initials field already uses.
+const DEFAULT_OFF_FIELDS = new Set(['companyName', 'totalWeekdayHours', 'totalWeekendHours', 'customerInitials'])
 
 export function defaultGpaConfig() {
   return {
-    header: GPA_HEADER_FIELDS.map(f => ({ ...f, enabled: true })),
-    tableFields: GPA_TABLE_FIELDS.map(f => ({ ...f, enabled: true })),
+    header: GPA_HEADER_FIELDS.map(f => ({ ...f, enabled: !DEFAULT_OFF_FIELDS.has(f.key) })),
+    tableFields: GPA_TABLE_FIELDS.map(f => ({ ...f, enabled: !DEFAULT_OFF_FIELDS.has(f.key) })),
   }
 }
 

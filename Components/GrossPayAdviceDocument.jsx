@@ -17,6 +17,14 @@
 // the exact original fixed-column, fixed-stats markup byte-for-byte — the
 // recurring-expense-document page passes none of these and is completely
 // unaffected by this extension.
+// Same helper, same reasoning as Components/InvoiceDocument.jsx's own
+// `initials` — backs the "Customer initials" toggleable column below.
+const initials = (name) => name
+  .split(' ')
+  .filter(Boolean)
+  .map(part => part[0].toUpperCase())
+  .join('')
+
 const GPA_TABLE_COLUMN_RENDERERS = {
   // Locked (always enabled, checkbox disabled in the picker — see
   // gpaCustomisation.js) but still a real, reorderable field, not a
@@ -28,6 +36,7 @@ const GPA_TABLE_COLUMN_RENDERERS = {
   date: { label: 'Date', render: (item) => item.date },
   type: { label: 'Type', render: (item) => item.type },
   customer: { label: 'Customer', render: (item) => item.customer },
+  customerInitials: { label: 'Customer initials', render: (item) => initials(item.customer) },
   time: { label: 'Time', render: (item) => item.timeLabel },
   pay: { label: 'Pay', render: (item, fmtGBP) => fmtGBP(item.pay), footerValue: (gpa, fmtGBP) => fmtGBP(gpa.totalPay) },
   mileage: { label: 'Mileage', render: (item, fmtGBP) => fmtGBP(item.mileage), footerValue: (gpa, fmtGBP) => fmtGBP(gpa.totalMileage) },

@@ -1156,6 +1156,7 @@ export default function App() {
         <div className="contracts-panel-doc-section">
           <div>
             <h3 className="settings-subsection-title">Pay advice document</h3>
+            <p className="settings-subsection-desc">Customise what is displayed on the gross pay advice document</p>
           </div>
           <button className="round-btn primary-btn" onClick={() => setGpaModalOpen(true)}>
             Customise layout
