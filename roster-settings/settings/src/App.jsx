@@ -1039,6 +1039,23 @@ export default function App() {
               </div>
             ))}
 
+            {/* Ben: "put at the bottom of the summary please" — moved here
+                from the top of the section (its original placement). Still
+                rendered directly (not folded into CONTRACTS_STATIC_GROUPS,
+                which would need its own slice(2) to also cover this) with
+                no summary row of current field state — see this repo's own
+                memory for the discoverability-vs-status discussion this
+                came out of; the point is surfacing that the setting
+                exists, not reporting what it's currently set to. */}
+            <div className="settings-subsection">
+              <div className="settings-subsection-header">
+                <div>
+                  <h3 className="settings-subsection-title">Pay advice document</h3>
+                  <p className="settings-subsection-desc">Customise what is displayed on the gross pay advice document</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <div className="settings-section" id="section-charging">
