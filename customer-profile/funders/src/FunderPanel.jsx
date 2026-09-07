@@ -43,6 +43,7 @@ export default function FunderPanel({ open, funder, onClose, onSaveInvoiceConfig
               <h3 className="fd-modal-section-heading">
                 <span className="fd-required-asterisk">*</span> Invoice document
               </h3>
+              <p className="fd-modal-section-desc">Customise what is displayed on the invoice document</p>
               <p className="fd-invoice-doc-layout">
                 <strong>Layout:</strong> {invoiceLayoutName(funder?.invoiceConfig?.layout)}
               </p>
