@@ -9,25 +9,39 @@ body {
   background: var(--ui-purple-7-lightest-lavendar);
 }
 
+/* Ben: "only the summary section is scrollable, the entire page should
+   be. The side nav should remain fixed." Previously `.settings-page` was a
+   fixed-height, `overflow:hidden` shell (like web/messaging's own
+   .messages-page) with only `.settings-content` scrolling internally —
+   the one place on this page that deviated from the plain, whole-page-
+   scrolls layout every other SideNav-shell prototype uses (e.g.
+   customer-profile/service-agreement's own .sa-page, which has no
+   height/overflow constraint at all). Reverted to that same growable
+   pattern: `min-height`, not a fixed `height` + `overflow:hidden` — a
+   short page still fills the viewport, a tall one (this page, with 3 full
+   sections) grows past it and the real window/body scrolls, exactly like
+   Components/SideNav.jsx's own `.side-nav` (position:sticky; height:100vh)
+   already expects on every other page it's used on. */
 .settings-page {
   display: flex;
   flex-direction: row;
-  /* Components/DevToolbar.jsx renders as a real sibling before this
-     element now, pushing it down by --dev-toolbar-height — subtracted
-     here so the fixed-height, overflow:hidden layout doesn't get its own
-     bottom edge clipped past the viewport. */
-  height: calc(100vh - var(--dev-toolbar-height, 0px));
-  overflow: hidden;
+  min-height: calc(100vh - var(--dev-toolbar-height, 0px));
 }
 
-/* Same reasoning as web/messaging/src/messages.css's identical override:
-   .settings-page's own overflow:hidden makes it (not the viewport)
-   .top-nav's nearest scrolling ancestor for position:sticky purposes.
-   Its box already starts below the toolbar (via the height calc above),
-   so Styles/top-nav.css's shared `top: var(--dev-toolbar-height)` rule
-   double-counts the toolbar's height here — confirmed via Playwright
-   (.top-nav rendered 96px down instead of 48px). Reset back to 0. */
-.top-nav { top: 0; }
+/* Real, pre-existing bug found while making this page scroll normally,
+   NOT something this round introduced: Styles/top-nav.css's own shared
+   `.top-nav` rule is hardcoded `top: 0px`, not toolbar-aware at all — a
+   comment elsewhere (Styles/customer-profile-nav.css's own `.context-bar`)
+   claims `.top-nav` "now" offsets by `--dev-toolbar-height`, but that fix
+   doesn't actually exist in the shared file. Confirmed live on a real
+   normal-scrolling page (customer-profile/timeline): `.top-nav` sticks at
+   y:0 after scrolling, sitting underneath the dev toolbar bar instead of
+   below it — a repo-wide regression, out of scope to fix everywhere as
+   part of this change, but left unaddressed here it would newly affect
+   this page too, now that it scrolls normally for the first time. Scoped
+   fix, same technique already used elsewhere (e.g. web/messaging's own
+   page-local override) rather than touching the shared file blind. */
+.top-nav { top: var(--dev-toolbar-height, 0px); }
 
 /* ─── Layout ─────────────────────────────────────────────────── */
 
@@ -39,21 +53,37 @@ body {
 .settings-layout {
   display: flex;
   flex: 1;
-  overflow: hidden;
-  padding: 32px 40px 48px;
-  justify-content:space-between;
+  padding: 32px 40px 0px;
+  justify-content: space-between;
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
 /* Uses the shared .rn-nav/.rn-list/.rn-item styling from Styles/main.css
    (Components/RosteringNav.jsx's own left sub-nav, first built for
    customer-profile/service-agreement/) — this page's own bordered white-
-   card sidebar look was replaced with it, per Ben's own ask to match. */
+   card sidebar look was replaced with it, per Ben's own ask to match.
+
+   "The side nav should remain fixed" — sticky, scoped to this page only
+   (not the shared .rn-nav rule in main.css, which every other Rostering-
+   Nav consumer also uses and shouldn't have this forced on it). `top`
+   clears .top-nav's own 44px height plus the dev toolbar's height plus
+   the same 32px top padding .settings-layout already gives it at rest, so
+   the stuck position reads as a continuation of its own resting gap
+   rather than jumping flush against .top-nav the moment it sticks.
+   `align-self: flex-start` is required for sticky to actually have room
+   to move within .settings-layout — a flex item stretches to match its
+   tallest sibling's height by default, which would leave `.rn-nav` exactly
+   as tall as `.settings-content` with nowhere to "stick" (sticky only
+   engages while there's spare space in its own box to travel through). */
+.settings-layout .rn-nav {
+  position: sticky;
+  top: calc(44px + var(--dev-toolbar-height, 0px) + 32px);
+  align-self: flex-start;
+}
 
 /* ─── Content ────────────────────────────────────────────────── */
 
 .settings-content {
-  overflow-y: auto;
   width:70%;
 }
 

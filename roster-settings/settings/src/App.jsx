@@ -706,8 +706,12 @@ export default function App() {
 
   // Ben: "clicking a side menu item should scroll to the relevant
   // section." Still updates the highlight (same as the old tab-switch
-  // behaviour), but now also scrolls .settings-content (the actual
-  // scrolling ancestor, not the window) to the clicked section's own id.
+  // behaviour), but now also scrolls to the clicked section's own id.
+  // The window itself is the scrolling ancestor (communications.css'
+  // `.settings-page`/`.settings-layout`/`.settings-content` no longer
+  // constrain their own height/overflow — see that file's own "entire
+  // page should be [scrollable]" note), not an internal fixed-height div,
+  // so a plain scrollIntoView here resolves against the real page scroll.
   // Also mirrors the section into the URL hash (#communications/#charging/
   // #contracts) — Ben: "include a hash in the url ... so I can have a more
   // accurate prototype url" (a direct link to one section, not just the
