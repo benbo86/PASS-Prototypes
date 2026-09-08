@@ -1,0 +1,724 @@
+/* ── Screen shell — same per-prototype convention every mobile/*
+   prototype defines locally (there's no shared .screen in main.css). ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ── Booking/Tasks demo stub screens ──────────────────────────────
+   Deliberately plain — these exist only to reach Tag In/Tag Out
+   realistically, not as a real Bookings/Tasks feature. */
+.tag-demo-header {
+  flex-shrink: 0;
+  padding: 16px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.tag-demo-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.tag-demo-body--centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.tag-demo-customer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tag-demo-customer-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.tag-demo-customer-meta {
+  font-size: 13px;
+  color: var(--greyscale-6-grey-50);
+}
+
+.tag-demo-task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+.tag-demo-task-time {
+  color: var(--greyscale-6-grey-50);
+  font-size: 13px;
+}
+
+.tag-demo-footer {
+  flex-shrink: 0;
+  padding: 16px 20px;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+/* ── Customer avatar (initials, no real photo asset in this prototype) ── */
+.tag-avatar {
+  width: 142px;
+  height: 142px;
+  border-radius: 50%;
+  background: var(--ui-purple-5-languid-lavendar);
+  color: var(--brand-purple-6-purple-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.tag-avatar--small {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* ── Bookings screen ───────────────────────────────────────────── */
+
+.day-strip {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 8px;
+  background: var(--greyscale-14-grey-95);
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.day-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: var(--greyscale-6-grey-50);
+}
+
+.day-strip-date {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000;
+}
+
+/* Only the number gets highlighted for "today" — a purple-5 circle
+   around the date, not the whole column (the day-letter above stays
+   plain regardless of active state). Matches the real Figma reference
+   (node 591:7056) exactly. */
+.day-strip-date--active {
+  background: var(--brand-purple-7-purple-5, #b02cf7);
+  color: #fff;
+}
+
+.booking-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 0px 12px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Structure matches the real Figma reference (node 591:11011): a
+   top-right avatar, a purple clock+time row, a single-weight title
+   combining visit type + customer name, an address row with an inline
+   key icon, a divider, then the flags row. */
+.booking-card {
+  position: relative;
+  background: var(--greyscale-14-grey-95);
+  border-radius: 12px 0 0 12px;
+  padding: 16px 16px 16px 20px;
+}
+
+.booking-card--clickable {
+  cursor: pointer;
+}
+
+/* 'pending' (default) needs no extra card styling — plain white card,
+   matching the Figma "State=Default" card exactly. */
+.booking-card--in-progress {
+  border: 1px solid var(--rag-green-green-5, #21a621);
+}
+
+.booking-card--complete {
+  background: #eef6e9;
+}
+
+/* Left-edge "Task states" marker — straddles the card's own left border,
+   half in/half out, vertically centred (matches the source component's
+   own x:-12/y:67/24x24-in-a-160-tall-card positioning). */
+.booking-card-status {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+}
+
+.booking-card-avatar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--ui-purple-5-languid-lavendar);
+  color: var(--brand-purple-6-purple-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.booking-card-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--brand-purple-3-purple-2);
+  margin-bottom: 8px;
+}
+
+.booking-card-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #000;
+  padding-right: 60px;
+  margin-bottom: 8px;
+}
+
+.booking-card-title strong {
+  font-weight: 600;
+}
+
+.booking-card-address-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.booking-card-address {
+  flex: 1;
+  font-size: 13px;
+  color: #000;
+}
+
+.booking-card-key-icon {
+  flex-shrink: 0;
+  color: var(--ui-purple-3-grape-grey);
+  display: flex;
+}
+
+.booking-card-divider {
+  border: none;
+  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  margin: 0 0 12px;
+}
+
+.booking-card-flags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── Visit screen (not tagged in) ──────────────────────────────── */
+
+.visit-body {
+  flex: 1;
+  overflow-y: auto;
+  background: #FFF;
+  padding-bottom: 96px;
+}
+
+.visit-customer-card {
+  background: var(--brand-purple-3-purple-2);
+  padding: 16px;
+  position: relative;
+}
+
+.visit-customer-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 8px;
+  padding-right: 88px;
+}
+
+.visit-customer-meta {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 10px;
+}
+
+.visit-customer-meta-item {
+  font-size: 13px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.visit-customer-meta-label {
+  margin-bottom: 2px;
+}
+
+.visit-customer-card .legal-flags-row {
+  margin-top: 4px;
+}
+
+.visit-customer-avatar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ui-purple-4-lavendar);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.visit-high-risk-badge-wrap {
+  position: absolute;
+  top: 78px;
+  right: 16px;
+}
+
+.visit-key-icon {
+  position: absolute;
+  top: 108px;
+  right: 20px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Restyled to match the real Figma "Task card small" component (node
+   471:5038 and its live instances on 97:3219) — each task is its own
+   rounded card with a spaced gap between them, not a continuous
+   bordered-row list. No completion-status icon on any row: the visit
+   hasn't been tagged into yet, so nothing has a status to show (matches
+   the reference's own "To do" state, which is genuinely blank of
+   anything meaningful before a visit starts) — only the right-hand
+   action-type badge (TaskTypeBadge) remains, since that identifies what
+   kind of task it is, not its progress. */
+.visit-task-list {
+  padding: 16px 0px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.visit-task-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 16px 20px;
+  border-radius: 5px 0 0 5px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.visit-task-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.visit-task-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+}
+
+.visit-task-time {
+  font-size: 14px;
+}
+
+.visit-task-badge {
+  flex-shrink: 0;
+  display: flex;
+}
+
+/* Left-hand status marker — only rendered once the visit is actually in
+   progress (VisitScreen.jsx's `inProgress` prop), reusing icons.jsx's
+   TaskStateIcon (the exact same "Task states" component already used for
+   the booking card's own marker) rather than a new one, since Figma's
+   "Task card small" instances confirm it's the identical component.
+   Straddles the row's own left edge, half in/half out, the same
+   position:absolute + translate(-50%,-50%) treatment as the booking
+   card's own .booking-card-status marker (round 9). */
+.visit-task-status {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+}
+
+/* Green FAB — full-width, using the shared .fab-square shape (Styles/
+   mobile.css: square 10px corners, padding/type/gap) rather than a
+   bespoke pill. .fab-square alone carries no colour of its own (that
+   normally comes from pairing it with .primary-btn/.secondary-btn/
+   .tertiary-btn), but none of those are green — this prototype's Figma
+   reference ("FAB Simple", node 1:293) shows a solid green button, so
+   .visit-fab supplies just the colour/width on top of .fab-square's
+   shape, the same "shape class + one-off colour" pattern .fab-square's
+   own doc comment describes for its 3 standard variants. */
+.visit-fab-wrap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 24px;
+  z-index: 30;
+}
+
+.visit-fab {
+  width: 100%;
+  justify-content: center;
+  background: var(--rag-green-green-5);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* In-progress footer — two buttons side by side in place of the single
+   Tag In FAB (node 538:6439, "Footer actions"), same .fab-square shape
+   as above. Neither colour matches one of .fab-square's own 3 standard
+   variants (Add notes is a light-lavender fill with purple text/icon,
+   Cancel visit a solid red), so both supply their own colour the same
+   "shape class + one-off colour" way .visit-fab already does. */
+.visit-fab-wrap--split {
+  display: flex;
+  gap: 10px;
+}
+
+.visit-fab-wrap--split .fab-square {
+  flex: 1;
+  justify-content: center;
+  border: none;
+}
+
+.visit-notes-btn {
+  background: var(--buttons-lozenge-3-tertiary-1-default, #edecf1);
+  color: var(--brand-purple-3-purple-2, #6d1b98);
+}
+
+.visit-cancel-btn {
+  background: var(--rag-red-red-overdue, #e31c4a);
+  color: #fff;
+}
+
+/* ── Tag In / Tag Out screen ───────────────────────────────────── */
+
+/* Presented as a modal sliding up from the bottom (Tag In and Tag Out
+   alike, since both are the same shared screen presented the same way) —
+   a plain mount-triggered CSS animation, same technique this file's own
+   .tag-sheet-panel already uses for the reason-code sheet, rather than a
+   React-state toggle: TagScreen already gets a fresh mount each time
+   App.jsx swaps `view` to 'tagIn'/'tagOut', so there's no need to track
+   an extra "just entered" flag. Closing (the X button) mirrors this: a
+   `closing` flag (TagScreen.jsx) swaps in .tag-screen--closing, which
+   plays the reverse animation, before the component actually unmounts —
+   see TagScreen.jsx's own handleClose for why a plain unmount alone
+   can't do this (it would vanish instantly, mid-slide never shown). */
+.tag-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ui-purple-6-lavendar-grey);
+  animation: tag-screen-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tag-screen.tag-screen--closing {
+  animation: tag-screen-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes tag-screen-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes tag-screen-slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.tag-header {
+  flex-shrink: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--brand-purple-3-purple-2);
+  color: #fff;
+}
+
+.tag-header-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tag-header-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tag-intro {
+  flex-shrink: 0;
+  background: var(--greyscale-14-grey-95);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.tag-heading {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+}
+
+.tag-info-note {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--greyscale-2-grey-20);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  text-align: left;
+  margin: 0;
+}
+
+.tag-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 35px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ── Method list ───────────────────────────────────────────────── */
+
+.tag-method-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tag-method-row:not(:last-child) {
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+}
+
+.tag-method-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.tag-method-row:active {
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+
+.tag-method-icon {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--brand-purple-7-purple-5);
+}
+
+.tag-method-label {
+  flex: 1;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+/* The escalation link — "Preferred tag in/out option not available" — per
+   AIOP-20690's own spec, this is what unlocks Manual (+ reason), not a
+   plain 3rd row alongside QR/NFC. */
+.tag-fallback-link {
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--brand-purple-6-purple-4);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ── Reason code step ──────────────────────────────────────────── */
+
+.tag-reason-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.tag-reason-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-reason-card {
+  width: 100%;
+}
+
+.tag-reason-other-input {
+  margin-top: 10px;
+}
+
+/* ── Reason sheet — slides up from the bottom, dismissed by tapping
+   outside it. Same shape as mobile/customer-documents' own
+   .docs-sheet-overlay/.docs-sheet-panel/.docs-sheet-handle convention
+   (each prototype keeps its own copy — this isn't a shared class). ──── */
+.tag-sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--web-skrim);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+}
+
+.tag-sheet-panel {
+  background: #fff;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+  animation: tag-sheet-slide-up 0.25s ease-out;
+}
+
+@keyframes tag-sheet-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.tag-sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--ui-purple-4-lavendar);
+  border-radius: 2px;
+  margin: 12px auto 4px;
+  flex-shrink: 0;
+}
+
+.tag-sheet-content {
+  overflow-y: auto;
+  padding: 16px 20px 0;
+}
+
+.tag-sheet-footer {
+  flex-shrink: 0;
+  padding: 16px 20px 24px;
+}
+
+.tag-sheet-footer .round-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Scanning / success ────────────────────────────────────────── */
+
+.tag-success {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.tag-success-heading {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+}
+
+.tag-success-body {
+  font-size: 14px;
+  color: var(--greyscale-6-grey-50);
+  margin: 0;
+}
+
+.tag-scanning-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid var(--ui-purple-5-languid-lavendar);
+  border-top-color: var(--brand-purple-6-purple-4);
+  animation: tag-spin 0.8s linear infinite;
+}
+
+@keyframes tag-spin {
+  to { transform: rotate(360deg); }
+}

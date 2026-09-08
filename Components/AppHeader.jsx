@@ -4,14 +4,17 @@ const ArrowLeftIcon = () => (
   </svg>
 )
 
-export default function AppHeader({ title, onBack, right, className = '' }) {
+export default function AppHeader({ title, subtitle, onBack, right, className = '' }) {
   return (
     <div className={`app-header${className ? ' ' + className : ''}`}>
       {onBack
         ? <button className="app-header-back" onClick={onBack}><ArrowLeftIcon /></button>
         : <div style={{ width: 36 }} />
       }
-      <span className="app-header-title">{title}</span>
+      <div className="app-header-title-wrap">
+        <span className="app-header-title">{title}</span>
+        {subtitle && <span className="app-header-subtitle">{subtitle}</span>}
+      </div>
       {right !== undefined
         ? right
         : <div style={{ width: 36 }} />

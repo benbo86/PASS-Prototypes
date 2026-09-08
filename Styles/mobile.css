@@ -121,6 +121,33 @@ html, body {
   text-align: center;
 }
 
+/* Wraps .app-header-title + an optional .app-header-subtitle underneath it
+   (Components/AppHeader.jsx's own `subtitle` prop) — new, additive only.
+   .app-header-title itself is untouched above, since several prototypes
+   (customer-documents, notifications, messaging) render a bare
+   `<span className="app-header-title">` directly as their own header's
+   flex-row child, not through the shared component — this wrapper is
+   only ever used from inside AppHeader.jsx itself, so those other,
+   unrelated usages can't be affected by it. */
+.app-header-title-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-header-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: Barlow, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .app-header-back {
   display: flex;
   align-items: center;
@@ -281,7 +308,7 @@ html, body {
   transition: background 0.15s;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 11px;
 }
 /* Removes the browser default button border for primary/tertiary (mirroring
    .round-btn's own unconditional border:none) via a 2-class selector, so it
@@ -290,4 +317,48 @@ html, body {
 .fab-square.primary-btn,
 .fab-square.tertiary-btn {
   border: none;
+}
+
+/* ── Outlined legal-flag pill + HIGH RISK badge ────────────────────────
+   Promoted out of mobile/tag-in-out (built for its Bookings/Visit
+   screens, Components/LegalFlags.jsx) since any mobile prototype showing
+   a customer's legal decisions/risk status can reuse the same pair. The
+   Figma reference (node 1:222, "Legal decisions") uses an outlined red
+   style (border+icon+text all red), distinct from mobile/customer-
+   documents' own pastel-filled .docs-legal-chip — a different, older
+   variant, not reused here. */
+.legal-flags-row {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.legal-flag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 9px;
+  border-radius: 15px;
+  border: 2px solid var(--rag-red-red-overdue);
+  color: var(--rag-red-red-overdue);
+  background: #FFF;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.legal-flag-pill svg {
+  flex-shrink: 0;
+}
+
+.high-risk-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--rag-red-red-overdue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
 }

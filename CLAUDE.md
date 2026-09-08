@@ -74,6 +74,7 @@ employee-contract/
 | `Components/ElementEditPanel.jsx` | Presentational panel for Dev Edit's "Element" tab — draft-then-validate-then-commit (not live-as-you-type), all durable state lives in `DevEdit.jsx` — see Dev Edit's own "Element tab" round below |
 | `Components/cssAutocomplete.js` | Pure, React-free CSS property/value autocomplete engine backing Dev Edit's "Edit styles" tab (Chrome-Styles-pane-style suggestions) — property list read live off the browser's own `CSSStyleDeclaration`, not hand-maintained — see Dev Edit's own "CSS autocomplete" round below |
 | `Components/CssAutocompletePopup.jsx` | Presentational suggestion dropdown for `cssAutocomplete.js`, rendered by `RuleTextarea` (defined inline in `DevEdit.jsx`) — see Dev Edit's own "CSS autocomplete" round below |
+| `Components/LegalFlags.jsx` | Mobile-only: exports `HighRiskBadge` + `LegalFlags` (outlined red Allergies/DNACPR/DoLS pills) — promoted out of `mobile/tag-in-out` once a second consumer (the "Legal flags" story in `component-demos/mobile-components`) needed it; styling lives in `Styles/mobile.css`, not `main.css` |
 
 **Always read `Styles/main.css` before adding local CSS.**
 

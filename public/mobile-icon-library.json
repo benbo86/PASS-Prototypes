@@ -320,6 +320,25 @@
       "usageCount": 2
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Holidays",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
       "hash": "a5beeb02",
       "name": "Person",
       "group": "Used across multiple mobile screens",
@@ -792,20 +811,6 @@
           "kind": "inline",
           "ref": "mobile/customer-documents/src/App.jsx#DocumentNotStartedIcon",
           "name": "DocumentNotStartedIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Holidays",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/holidays/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
         }
       ],
       "usageCount": 1
@@ -1285,7 +1290,161 @@
         }
       ],
       "usageCount": 1
+    },
+    {
+      "hash": "dd02547a",
+      "name": "Search",
+      "group": "Tag In Out",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M10.8488372,18.6872093 C12.627907,18.6872093 14.2813953,18.0802326 15.6,17.0755814 L19.2209302,20.6965116 C19.4302326,20.905814 19.7023256,21.0104651 19.9534884,21.0104651 C20.2046512,21.0104651 20.4976744,20.905814 20.6860465,20.6965116 C21.1046512,20.277907 21.1046512,19.6290698 20.6860465,19.2104651 L17.0860465,15.5895349 C18.0906977,14.2709302 18.6976744,12.6174419 18.6976744,10.8383721 C18.6976744,6.50581395 15.1813953,2.98953488 10.8488372,2.98953488 C6.51627907,2.98953488 3,6.50581395 3,10.8383721 C3,15.1709302 6.51627907,18.6872093 10.8488372,18.6872093 Z M10.8488372,5.08255814 C14.0093023,5.08255814 16.6046512,7.65697674 16.6046512,10.8383721 C16.6046512,14.0197674 14.0093023,16.594186 10.8488372,16.594186 C7.68837209,16.594186 5.09302326,13.9988372 5.09302326,10.8383721 C5.09302326,7.67790698 7.66744186,5.08255814 10.8488372,5.08255814 Z\" fill=\"currentColor\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/BookingsScreen.jsx#SearchIcon",
+          "name": "SearchIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "229be296",
+      "name": "Close",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <polygon points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linejoin=\"round\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/TagScreen.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "7496c84b",
+      "name": "Qr",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M9.5 13C10.3284 13 11 13.6716 11 14.5V20.5C11 21.3284 10.3284 22 9.5 22H3.5C2.67157 22 2 21.3284 2 20.5V14.5C2 13.6716 2.67157 13 3.5 13H9.5ZM15 20V22H13V20H15ZM18.5 20V22H16.5V20H18.5ZM22 20V22H20V20H22ZM9 14H4C3.44772 14 3 14.4477 3 15V20C3 20.5523 3.44772 21 4 21H9C9.55228 21 10 20.5523 10 20V15C10 14.4477 9.55228 14 9 14ZM8 15.5C8.27614 15.5 8.5 15.7239 8.5 16V19C8.5 19.2761 8.27614 19.5 8 19.5H5C4.72386 19.5 4.5 19.2761 4.5 19V16C4.5 15.7239 4.72386 15.5 5 15.5H8ZM15 16.5V18.5H13V16.5H15ZM18.5 16.5V18.5H16.5V16.5H18.5ZM22 16.5V18.5H20V16.5H22ZM15 13V15H13V13H15ZM18.5 13V15H16.5V13H18.5ZM22 13V15H20V13H22ZM20.5 2C21.3284 2 22 2.67157 22 3.5V9.5C22 10.3284 21.3284 11 20.5 11H14.5C13.6716 11 13 10.3284 13 9.5V3.5C13 2.67157 13.6716 2 14.5 2H20.5ZM9.5 2C10.3284 2 11 2.67157 11 3.5V9.5C11 10.3284 10.3284 11 9.5 11H3.5C2.67157 11 2 10.3284 2 9.5V3.5C2 2.67157 2.67157 2 3.5 2H9.5ZM20 3H15C14.4477 3 14 3.44772 14 4V9C14 9.55228 14.4477 10 15 10H20C20.5523 10 21 9.55228 21 9V4C21 3.44772 20.5523 3 20 3ZM9 3H4C3.44772 3 3 3.44772 3 4V9C3 9.55228 3.44772 10 4 10H9C9.55228 10 10 9.55228 10 9V4C10 3.44772 9.55228 3 9 3ZM19 4.5C19.2761 4.5 19.5 4.72386 19.5 5V8C19.5 8.27614 19.2761 8.5 19 8.5H16C15.7239 8.5 15.5 8.27614 15.5 8V5C15.5 4.72386 15.7239 4.5 16 4.5H19ZM8 4.5C8.27614 4.5 8.5 4.72386 8.5 5V8C8.5 8.27614 8.27614 8.5 8 8.5H5C4.72386 8.5 4.5 8.27614 4.5 8V5C4.5 4.72386 4.72386 4.5 5 4.5H8Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/TagScreen.jsx#QrIcon",
+          "name": "QrIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "a11bc46e",
+      "name": "Nfc",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 22 22\" fill=\"currentColor\">\n    <path d=\"M10.865 0C4.86339 0 0 4.87011 0 10.875C0 16.8799 4.86339 21.75 10.865 21.75C16.8766 21.75 21.75 16.8799 21.75 10.875C21.75 4.87007 16.8766 0 10.865 0ZM10.865 1.75C15.9103 1.75 20 5.83684 20 10.875C20 15.9132 15.9103 20 10.865 20C5.83043 20 1.75 15.9139 1.75 10.875C1.75 5.83607 5.83043 1.75 10.865 1.75Z\" />\n    <path d=\"M10.868 3C6.52181 3 3 6.52669 3 10.875C3 15.2233 6.52181 18.75 10.868 18.75C15.221 18.75 18.75 15.2235 18.75 10.875C18.75 6.52653 15.221 3 10.868 3ZM10.868 4.75C14.2548 4.75 17 7.4933 17 10.875C17 14.2567 14.2548 17 10.868 17C7.48885 17 4.75 14.2574 4.75 10.875C4.75 7.49264 7.48885 4.75 10.868 4.75Z\" />\n    <path d=\"M10.871 6C8.18024 6 6 8.18326 6 10.875C6 13.5667 8.18024 15.75 10.871 15.75C13.5655 15.75 15.75 13.567 15.75 10.875C15.75 8.183 13.5655 6 10.871 6ZM10.871 7.75C12.5993 7.75 14 9.14977 14 10.875C14 12.6002 12.5993 14 10.871 14C9.14728 14 7.75 12.6008 7.75 10.875C7.75 9.14922 9.14728 7.75 10.871 7.75Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/TagScreen.jsx#NfcIcon",
+          "name": "NfcIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "1b7b252d",
+      "name": "Manual",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M11 2C11.55 2 12.05 2.22 12.41 2.58L21.41 11.58C21.77 11.94 22 12.45 22 13C22 13.55 21.78 14.05 21.41 14.41L14.41 21.41C14.05 21.78 13.55 22 13 22C12.45 22 11.95 21.78 11.59 21.42L2.59 12.42C2.22 12.05 2 11.55 2 11V4C2 2.9 2.9 2 4 2H11ZM11 3.99V4H4V11L13 20.01L20 12.99L11 3.99ZM6.5 5C7.32843 5 8 5.67157 8 6.5C8 7.32843 7.32843 8 6.5 8C5.67157 8 5 7.32843 5 6.5C5 5.67157 5.67157 5 6.5 5Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/TagScreen.jsx#ManualIcon",
+          "name": "ManualIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "f7c58c6c",
+      "name": "Check Circle",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"var(--rag-green-green-3-aa, #2e9e4f)\" />\n    <path d=\"M7 12.5L10.5 16L17 8.5\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/TagScreen.jsx#CheckCircleIcon",
+          "name": "CheckCircleIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "fb321682",
+      "name": "Play",
+      "group": "Tag In Out",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M8 5v14l11-7z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/VisitScreen.jsx#PlayIcon",
+          "name": "PlayIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "b93e17fe",
+      "name": "Clock",
+      "group": "Tag In Out",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 25 25\" fill=\"currentColor\">\n    <path d=\"M12,0.375 C5.578125,0.375 0.375,5.578125 0.375,12 C0.375,18.421875 5.578125,23.625 12,23.625 C18.421875,23.625 23.625,18.421875 23.625,12 C23.625,5.578125 18.421875,0.375 12,0.375 Z M12,21.375 C6.8203125,21.375 2.625,17.1796875 2.625,12 C2.625,6.8203125 6.8203125,2.625 12,2.625 C17.1796875,2.625 21.375,6.8203125 21.375,12 C21.375,17.1796875 17.1796875,21.375 12,21.375 Z M14.896875,16.48125 L10.9171875,13.5890625 C10.771875,13.48125 10.6875,13.3125 10.6875,13.134375 L10.6875,5.4375 C10.6875,5.128125 10.940625,4.875 11.25,4.875 L12.75,4.875 C13.059375,4.875 13.3125,5.128125 13.3125,5.4375 L13.3125,12.0796875 L16.44375,14.3578125 C16.696875,14.540625 16.7484375,14.8921875 16.565625,15.1453125 L15.684375,16.359375 C15.5015625,16.6078125 15.15,16.6640625 14.896875,16.48125 Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/icons.jsx#ClockIcon",
+          "name": "ClockIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "58194fa5",
+      "name": "Key",
+      "group": "Tag In Out",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/icons.jsx#KeyIcon",
+          "name": "KeyIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "53b4c0cb",
+      "name": "Note",
+      "group": "Tag In Out",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M17.25 3C17.8972 3 18.4295 3.49187 18.4935 4.12219L18.5 4.25V4.933C18.5 5.34721 18.1642 5.683 17.75 5.683C17.3358 5.683 17 5.34721 17 4.933V4.5H5.5V19H17V16.521C17 16.1068 17.3358 15.771 17.75 15.771C18.1642 15.771 18.5 16.1068 18.5 16.521V19.25C18.5 19.8972 18.0081 20.4295 17.3778 20.4935L17.25 20.5H5.25C4.60279 20.5 4.07047 20.0081 4.00645 19.3778L4 19.25V4.25C4 3.60279 4.49187 3.07047 5.12219 3.00645L5.25 3H17.25ZM17.3936 8.52337L19.4766 10.6064L13.4108 16.6667C13.3608 16.7222 13.2886 16.75 13.2164 16.75H11.5277C11.3722 16.75 11.25 16.6278 11.25 16.4723V14.7836C11.25 14.7058 11.2778 14.6392 11.3333 14.5836L17.3936 8.52337ZM19.0045 6.91248C19.2211 6.69584 19.5711 6.69584 19.7877 6.91248L21.0875 8.2123C21.3042 8.42893 21.3042 8.77888 21.0875 8.99552L20.071 10.012L17.988 7.929L19.0045 6.91248Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/icons.jsx#NoteIcon",
+          "name": "NoteIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "d74c3e49",
+      "name": "Cancel",
+      "group": "Tag In Out",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M18 7.2L16.8 6L12 10.8L7.2 6L6 7.2L10.8 12L6 16.8L7.2 18L12 13.2L16.8 18L18 16.8L13.2 12L18 7.2Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/icons.jsx#CancelIcon",
+          "name": "CancelIcon"
+        }
+      ],
+      "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-01T09:14:03.723Z"
+  "generatedAt": "2026-09-08T15:03:45.133Z"
 }

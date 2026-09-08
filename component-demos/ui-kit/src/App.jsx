@@ -6,6 +6,7 @@ import NumberStepper from '../../../Components/NumberStepper'
 import SearchMultiSelect from '../../../Components/SearchMultiSelect'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { HeartbeatIcon } from '../../../Components/CustomerProfileNav'
+import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -395,6 +396,12 @@ export default function App() {
             <span className="ctx-badge ctx-badge--danger-soft">HIGH RISK</span>
             <span className="ctx-badge ctx-badge--success">ACTIVE</span>
           </div>
+        </div>
+
+        <span className="uk-caption">Mobile — HighRiskBadge + LegalFlags (Components/LegalFlags.jsx, Styles/mobile.css). Outlined red pills for a customer's legal decisions (Allergies/DNACPR/DoLS), used by mobile/tag-in-out's Bookings and Visit screens — a different visual variant from the web flag badges above, not a reuse of them.</span>
+        <div className="uk-row">
+          <HighRiskBadge />
+          <LegalFlags flags={['allergies', 'dnacpr', 'dols']} />
         </div>
       </Section>
 

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(*)",
-      "mcp__claude_ai_Figma__search_design_system"
+      "mcp__claude_ai_Figma__search_design_system",
+      "mcp__claude_ai_Figma__download_assets",
+      "mcp__claude_ai_Atlassianv2__getJiraIssue"
     ],
     "defaultMode": "acceptEdits"
   }
