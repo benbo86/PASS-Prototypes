@@ -169,19 +169,9 @@ export const FILL_SWATCH_GROUPS = [
 
 export const STROKE_SWATCHES = FILL_SWATCH_GROUPS.flatMap(g => g.swatches).filter(s => s.hex !== null)
 
-// A separate, smaller, curated list for *text* colour specifically (used
-// only by the font panel) — the full FILL_SWATCH_GROUPS above is meant for
-// background tints (many of them light/low-contrast), which make poor
-// choices for text itself. These favor readable, higher-contrast values.
-export const TEXT_COLOR_SWATCHES = [
-  { label: 'Grey 20 (default)', token: '--greyscale-2-grey-20', hex: '#333333' },
-  { label: 'Black', token: '--greyscale-01-black', hex: '#000000' },
-  { label: 'White', token: '--greyscale-16-white', hex: '#ffffff' },
-  { label: 'Brand purple', token: '--brand-purple-6-purple-4', hex: '#9a26d6' },
-  // No repo token maps cleanly to a dark, text-legible red (the design
-  // system's own red tokens are pastel/light, meant for warning-banner
-  // backgrounds, not text) — hex-only, no live var() link for this one.
-  { label: 'Red', token: null, hex: '#c0392b' },
-  { label: 'Green', token: '--rag-green-green-5', hex: '#21a621' },
-  { label: 'Amber', token: '--rag-amber-amber-7', hex: '#f0a205' },
-]
+// TEXT_COLOR_SWATCHES (a separate curated list, used only by the old
+// inline text-colour swatch row) was removed — the floating toolbar's
+// text-colour control now opens the same ColorPickerPopup (Picker +
+// Swatches, backed by FILL_SWATCH_GROUPS above) that Fill/Border already
+// use, per Ben's own "reveal the same colour fill options we have for
+// shapes" ask, rather than a second, smaller swatch list.

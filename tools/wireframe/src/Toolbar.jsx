@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import ColorPickerPopup from './ColorPickerPopup'
 
 // Inline SVG icons for this toolbar — dev-tool chrome, not a product
 // prototype icon, so (matching Components/DevEdit.jsx's own PenIcon/
 // HistoryIcon/TrashIcon precedent) these live directly in the component
 // rather than going through the Icons/-folder/Figma convention.
+//
+// Fill/Border (and their icons/popups) moved out to FontToolbar.jsx —
+// Ben: "Move the fill and border options in the main menu to the
+// context menu so I don't have to go to the menu at the bottom of the
+// screen to apply." They're still reachable from here implicitly: the
+// contextual toolbar now shows for a multi-select too (Fill/Border
+// only, no font section), so nothing that used to work from this bottom
+// bar stopped working — it just moved to float above the selection.
 const FrameIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6 2v16a2 2 0 002 2h16" />
@@ -16,22 +23,6 @@ const ShapesIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="9" width="12" height="12" rx="1.5" />
     <circle cx="16" cy="7" r="5.5" />
-  </svg>
-)
-
-const FillIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 12l8-8 8 8-8 8-8-8z" />
-    <path d="M4 15.5s-2 2-2 3.5a2 2 0 004 0c0-1.5-2-3.5-2-3.5z" fill="currentColor" stroke="none" />
-  </svg>
-)
-
-// Distinct from FillIcon (a solid paint-bucket-adjacent diamond) — this is
-// the same diamond outline only, unfilled, with a dashed inner square to
-// read as "the edge/border," not the interior.
-const BorderIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="4" y="4" width="16" height="16" rx="1.5" strokeDasharray="3.5 3" />
   </svg>
 )
 
@@ -65,12 +56,8 @@ const SHAPE_TOOLS = [
 
 const SHAPE_TOOL_KEYS = new Set(SHAPE_TOOLS.map((t) => t.key))
 
-export default function Toolbar({
-  activeTool, setActiveTool,
-  canFill, currentFill, onFillChange,
-  canBorderFill, currentStroke, onStrokeChange, currentStrokeWidth, onStrokeWidthChange,
-}) {
-  const [openPopup, setOpenPopup] = useState(null) // null | 'shapes' | 'fill' | 'border'
+export default function Toolbar({ activeTool, setActiveTool }) {
+  const [openPopup, setOpenPopup] = useState(null) // null | 'shapes'
   const toolbarRef = useRef(null)
 
   // Close an open popup on any click outside the toolbar (e.g. clicking
@@ -112,16 +99,6 @@ export default function Toolbar({
     setOpenPopup(null)
   }
 
-  const toggleFillPopup = () => {
-    if (!canFill) return
-    setOpenPopup((p) => (p === 'fill' ? null : 'fill'))
-  }
-
-  const toggleBorderPopup = () => {
-    if (!canBorderFill) return
-    setOpenPopup((p) => (p === 'border' ? null : 'border'))
-  }
-
   return (
     <div className="wf-toolbar" ref={toolbarRef}>
       <div className="wf-toolbar-item">
@@ -159,58 +136,6 @@ export default function Toolbar({
                 <Icon />
               </button>
             ))}
-          </div>
-        )}
-      </div>
-
-      <div className="wf-toolbar-item">
-        <button
-          className={`wf-icon-btn${openPopup === 'fill' ? ' active' : ''}`}
-          disabled={!canFill}
-          onClick={toggleFillPopup}
-        >
-          <FillIcon />
-        </button>
-        {!openPopup && <span className="wf-toolbar-tooltip">Colour Fill</span>}
-        {openPopup === 'fill' && (
-          <div className="wf-popup wf-popup-fill">
-            <ColorPickerPopup
-              value={currentFill}
-              onChange={onFillChange}
-              onApply={(hex) => { onFillChange(hex); setOpenPopup(null) }}
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="wf-toolbar-item">
-        <button
-          className={`wf-icon-btn${openPopup === 'border' ? ' active' : ''}`}
-          disabled={!canBorderFill}
-          onClick={toggleBorderPopup}
-        >
-          <BorderIcon />
-        </button>
-        {!openPopup && <span className="wf-toolbar-tooltip">Border</span>}
-        {openPopup === 'border' && (
-          <div className="wf-popup wf-popup-fill">
-            <ColorPickerPopup
-              value={currentStroke}
-              onChange={onStrokeChange}
-              onApply={(hex) => { onStrokeChange(hex); setOpenPopup(null) }}
-            />
-            <div className="wf-thickness-row">
-              <label className="wf-thickness-label" htmlFor="wf-thickness-input">Thickness</label>
-              <input
-                id="wf-thickness-input"
-                type="number"
-                className="wf-thickness-input"
-                min={1}
-                max={20}
-                value={currentStrokeWidth}
-                onChange={(e) => onStrokeWidthChange(Math.max(1, Number(e.target.value) || 1))}
-              />
-            </div>
           </div>
         )}
       </div>

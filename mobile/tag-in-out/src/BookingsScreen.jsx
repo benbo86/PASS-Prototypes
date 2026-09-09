@@ -9,7 +9,7 @@ import { BOOKINGS } from './data'
 // SearchIcon, per this repo's icon-copy-fidelity convention — this
 // prototype doesn't wire up real search, the button is just there to
 // match the Figma header (node 591:7034).
-const SearchIcon = ({ size = 20 }) => (
+const SearchIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M10.8488372,18.6872093 C12.627907,18.6872093 14.2813953,18.0802326 15.6,17.0755814 L19.2209302,20.6965116 C19.4302326,20.905814 19.7023256,21.0104651 19.9534884,21.0104651 C20.2046512,21.0104651 20.4976744,20.905814 20.6860465,20.6965116 C21.1046512,20.277907 21.1046512,19.6290698 20.6860465,19.2104651 L17.0860465,15.5895349 C18.0906977,14.2709302 18.6976744,12.6174419 18.6976744,10.8383721 C18.6976744,6.50581395 15.1813953,2.98953488 10.8488372,2.98953488 C6.51627907,2.98953488 3,6.50581395 3,10.8383721 C3,15.1709302 6.51627907,18.6872093 10.8488372,18.6872093 Z M10.8488372,5.08255814 C14.0093023,5.08255814 16.6046512,7.65697674 16.6046512,10.8383721 C16.6046512,14.0197674 14.0093023,16.594186 10.8488372,16.594186 C7.68837209,16.594186 5.09302326,13.9988372 5.09302326,10.8383721 C5.09302326,7.67790698 7.66744186,5.08255814 10.8488372,5.08255814 Z" fill="currentColor" />
   </svg>
@@ -83,7 +83,7 @@ export default function BookingsScreen({ onSelectBooking }) {
       <StatusBar />
       <AppHeader
         title="Bookings"
-        right={<button className="app-header-action" aria-label="Search"><SearchIcon /></button>}
+        right={<button className="bookings-search-btn" aria-label="Search"><SearchIcon /></button>}
       />
       <div className="day-strip">
         {DAYS.map(d => (
@@ -98,7 +98,7 @@ export default function BookingsScreen({ onSelectBooking }) {
           <BookingCard key={b.key} booking={b} onClick={b.key === 'real' ? onSelectBooking : undefined} />
         ))}
       </div>
-      <AppNav activeTab="bookings" />
+      <AppNav activeTab="bookings" links={{ account: '../account/' }} />
     </div>
   )
 }

@@ -691,7 +691,7 @@ export default function App() {
           activeTab="notifications"
           notifCount={badgeCount}
           messagesUnread={messagesUnread}
-          links={{ account: '../account/' }}
+          links={{ bookings: '../tag-in-out/', account: '../account/' }}
         />
       </div>
       </div>

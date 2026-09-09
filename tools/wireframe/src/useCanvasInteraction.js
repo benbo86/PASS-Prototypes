@@ -99,7 +99,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
           // textAlign, which doesn't apply to a single floating label
           // centered on the line) — lets the font panel style an arrow's
           // label once it has text, same as any other shape.
-          fontFamily: 'Barlow', fontWeight: 400, fontSize: 14, textColor: '#333333',
+          fontFamily: 'Barlow', fontWeight: 400, fontStyle: 'normal', fontSize: 14, textColor: '#333333',
           groupId: null,
         }
       : isText
@@ -117,6 +117,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
           strokeWidth: 0,
           fontFamily: textDefaults.fontFamily,
           fontWeight: textDefaults.fontWeight,
+          fontStyle: textDefaults.fontStyle,
           fontSize: textDefaults.fontSize,
           textAlign: textDefaults.textAlign,
           textColor: textDefaults.textColor,
@@ -144,7 +145,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
           // 'center' to match the pre-existing CSS-driven centered look
           // (.wf-el-label), so a brand-new shape looks identical to before
           // this field existed.
-          ...(activeTool !== 'frame' ? { fontFamily: 'Barlow', fontWeight: 400, textAlign: 'center', textColor: '#333333' } : {}),
+          ...(activeTool !== 'frame' ? { fontFamily: 'Barlow', fontWeight: 400, fontStyle: 'normal', textAlign: 'center', textColor: '#333333' } : {}),
           groupId: null,
           rotation: 0,
           flipX: false,

@@ -111,6 +111,7 @@ export default function ArrowLayer({ arrows, selectedIds, activeTool, onMouseDow
                 fontSize={a.fontSize || 13}
                 fontFamily={a.fontFamily || 'Barlow'}
                 fontWeight={a.fontWeight || 400}
+                fontStyle={a.fontStyle || 'normal'}
                 fill={a.textColor || '#333333'}
                 pointerEvents="none"
               >

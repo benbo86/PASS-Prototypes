@@ -140,6 +140,7 @@ export default function ElementRenderer({ el, isSelected, isGrouped, activeTool,
     ...(el.type !== 'frame' ? {
       fontFamily: el.fontFamily || 'Barlow',
       fontWeight: el.fontWeight || 400,
+      fontStyle: el.fontStyle || 'normal',
       textAlign: el.textAlign || 'center',
       color: el.textColor || '#333333',
       // Vertical position within the box — set inline (not left to

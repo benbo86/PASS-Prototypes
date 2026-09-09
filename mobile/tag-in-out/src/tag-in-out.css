@@ -97,6 +97,26 @@
 
 /* ── Bookings screen ───────────────────────────────────────────── */
 
+/* Header search button — deliberately its own local class rather than
+   reusing the shared .app-header-action (Styles/mobile.css), which also
+   backs mobile/messaging's own header buttons and carries a hover state
+   Ben asked to remove specifically here, not repo-wide. Same button
+   shape/position as .app-header-action, just no :hover rule, and the
+   icon itself sized 24x24 (was 20x20). */
+.bookings-search-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
 .day-strip {
   flex-shrink: 0;
   display: flex;

@@ -3,7 +3,7 @@ import Toolbar from './Toolbar'
 import WireframeMenu from './WireframeMenu'
 import FontToolbar from './FontToolbar'
 import Canvas from './Canvas'
-import { cloneElements, clampZoom, ZOOM_STEP, computeBoundingBox } from './geometry'
+import { cloneElements, clampZoom, ZOOM_STEP, computeBoundingBox, alignElements, nudgeElements, GRID, makeId, snap, DEFAULT_SIZE } from './geometry'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { auth, db, SHARED_EMAIL } from '../../../Components/firebase'
@@ -11,13 +11,20 @@ import { getStoredAuthor, storeAuthor } from '../../../Components/authorIdentity
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from '../../../Components/sharedAuthSession'
 
 const FILLABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'text'])
-// Types that actually render a stroke/border at all (text never does —
-// created with stroke:null/strokeWidth:0 and ElementRenderer never draws
-// one for it) — Border Fill is scoped to this set, one step broader than
-// FILLABLE_TYPES since arrow has a stroke (its line colour) but no fill.
-const STROKEABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'arrow'])
+// Every real element type except Frame — used to gate the floating
+// toolbar's font/alignment/text-colour section (Frame's `label` is a
+// name badge above the box, not styleable body text).
+const FONT_CAPABLE_TYPES = new Set(['text', 'rect', 'ellipse', 'triangle', 'arrow'])
+// Types that render a stroke/border. Text used to be excluded here
+// (created with stroke:null/strokeWidth:0) since Border Fill only ever
+// lived in the bottom toolbar and wasn't offered for text — Ben's own
+// "these options should also apply to text objects" ask (moving Fill/
+// Border into the floating toolbar) removes that exclusion; ElementRenderer
+// already draws a border for any type generically off el.stroke/
+// strokeWidth, so no rendering change was needed, only this set.
+const STROKEABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'arrow', 'text'])
 const HISTORY_LIMIT = 50
-const DEFAULT_TEXT_STYLE = { fontFamily: 'Barlow', fontWeight: 400, fontSize: 16, textAlign: 'left', verticalAlign: 'top', textColor: '#333333' }
+const DEFAULT_TEXT_STYLE = { fontFamily: 'Barlow', fontWeight: 400, fontStyle: 'normal', fontSize: 16, textAlign: 'left', verticalAlign: 'top', textColor: '#333333' }
 // Bare-letter tool shortcuts (no modifier) — Ellipse uses O (circle/oval)
 // rather than its own first letter, since Rect/Frame/Text/Arrow already
 // claim R/F/T/A and "O" reads more intuitively for a circular shape.
@@ -116,6 +123,14 @@ export default function App() {
   const activeToolRef = useRef(activeTool)
   activeToolRef.current = activeTool
 
+  // Lifted up from Canvas.jsx (which used to create its own) specifically so
+  // the keyboard-paste handler below can convert a screen point (the
+  // current viewport's own center, since a keyboard paste has no cursor
+  // position of its own to anchor to) into canvas-space coordinates —
+  // otherwise identical to how useCanvasInteraction's own getCanvasPoint
+  // already does this for every mouse-driven interaction.
+  const canvasRef = useRef(null)
+
   // Plain ref, not state — clipboard contents don't need to trigger a
   // render, only to be read back on the next ⌘V.
   const clipboardRef = useRef(null)
@@ -180,43 +195,208 @@ export default function App() {
   const currentStroke = selectedStrokeable[0]?.stroke || null
   const currentStrokeWidth = selectedStrokeable[0]?.strokeWidth ?? 1
 
-  // Font-toolbar-eligible selection: any single text/rect/ellipse/
-  // triangle/arrow, regardless of whether it has text yet — shown as soon
-  // as the element exists (on drop) or is simply selected (a click), not
-  // gated on already having a label. Lets the toolbar double as a way to
-  // preset style *before* typing (double-click still opens the actual text
-  // edit), rather than requiring text to exist first. Frame stays excluded
-  // — its label is a name badge above the box, not styleable body text.
-  const STYLEABLE_SHAPE_TYPES = new Set(['rect', 'ellipse', 'triangle', 'arrow'])
-  const selectedStyleableEl = selectedIds.length === 1
-    ? elements.find((el) => el.id === selectedIds[0]
-        && (el.type === 'text' || STYLEABLE_SHAPE_TYPES.has(el.type)))
-    : null
-  // The toolbar floats above a real element box, so — unlike the old docked
-  // panel — it has nothing to anchor to before something is actually
-  // selected. Dropped the old "customize defaults for the next placed text"
-  // case (armed Text tool, nothing selected yet): a freshly placed element
-  // auto-selects immediately, so this only costs one beat, not a real
-  // capability, and pendingTextStyle still supplies its fixed defaults.
-  const fontToolbarBox = selectedStyleableEl ? computeBoundingBox(elements, [selectedStyleableEl.id]) : null
-  const fontToolbarValue = selectedStyleableEl
+  // The one selected element, regardless of type, whenever exactly one is
+  // selected — this is what the floating toolbar anchors its box to when
+  // nothing else is selected alongside it. Not gated on already having
+  // text, so the toolbar doubles as a way to preset style *before* typing
+  // (double-click/type-to-edit still opens the actual text edit).
+  const selectedSoleEl = selectedIds.length === 1 ? elements.find((el) => el.id === selectedIds[0]) : null
+  const isMultiSelect = selectedIds.length > 1
+  // Font/alignment/text-colour section — Ben: "have the same options when
+  // multiple elements" — now shows for a multi-select too, as long as at
+  // least one member is font-capable (mirrors how Fill/Border already
+  // bulk-apply across a multi-select below). Frame is still excluded
+  // regardless of selection count — its own `label` is a name badge
+  // above the box, not styleable body text, so it only ever gets Fill/
+  // Border.
+  const selectedFontCapable = elements.filter((el) => selectedIds.includes(el.id) && FONT_CAPABLE_TYPES.has(el.type))
+  const fontToolbarShowFontControls = selectedFontCapable.length > 0
+  // Alignment: hidden only for a *lone* selected arrow (no meaningful
+  // "align this text" for a single floating line label) — a multi-select
+  // that happens to include an arrow still shows it, since "align these
+  // elements to each other" is a perfectly sensible geometric operation
+  // regardless of type (see alignElements in geometry.js).
+  const fontToolbarShowAlignment = fontToolbarShowFontControls && !(selectedSoleEl?.type === 'arrow')
+  // The toolbar itself shows for any single selection (Fill/Border always
+  // apply per that one element's own type; Frame gets Fill/Border only),
+  // AND for a multi-select where at least one member is fillable/
+  // strokeable/font-capable. This is what makes moving Fill/Border out of
+  // the bottom Toolbar (Ben: "so I don't have to go to the menu at the
+  // bottom of the screen") not a regression for the bulk-apply-to-a-
+  // multi-select case that toolbar used to also cover.
+  const showContextToolbar = selectedSoleEl != null || (isMultiSelect && (canFill || canBorderFill || fontToolbarShowFontControls))
+  // The toolbar floats above the real selection box, so — unlike the old
+  // docked panel — it has nothing to anchor to before something is
+  // actually selected. Dropped the old "customize defaults for the next
+  // placed text" case (armed Text tool, nothing selected yet): a freshly
+  // placed element auto-selects immediately, so this only costs one beat,
+  // not a real capability, and pendingTextStyle still supplies its fixed
+  // defaults.
+  const fontToolbarBox = showContextToolbar ? computeBoundingBox(elements, selectedIds) : null
+  // For a multi-select, the displayed "current" value is just the first
+  // font-capable member's own — same convention selectedFillable[0]/
+  // selectedStrokeable[0] already use above for Fill/Border, rather than
+  // a genuine mixed-value indicator (not worth the extra complexity for
+  // this tool). For font/weight/size/text-colour this is a real (if
+  // approximate) preview; for alignment specifically it's not shown at
+  // all in multi-select mode — see FontToolbar.jsx's own `isMultiSelect`
+  // branch, since clicking an alignment option there triggers an
+  // immediate align action instead of reflecting/setting a shared value.
+  const fontToolbarValue = fontToolbarShowFontControls
     ? {
-        fontFamily: selectedStyleableEl.fontFamily,
-        fontWeight: selectedStyleableEl.fontWeight,
-        fontSize: selectedStyleableEl.fontSize,
-        textAlign: selectedStyleableEl.textAlign,
-        verticalAlign: selectedStyleableEl.verticalAlign || (selectedStyleableEl.type === 'text' ? 'top' : 'middle'),
-        textColor: selectedStyleableEl.textColor,
+        fontFamily: selectedFontCapable[0].fontFamily,
+        fontWeight: selectedFontCapable[0].fontWeight,
+        fontSize: selectedFontCapable[0].fontSize,
+        textAlign: selectedFontCapable[0].textAlign,
+        verticalAlign: selectedFontCapable[0].verticalAlign || (selectedFontCapable[0].type === 'text' ? 'top' : 'middle'),
+        textColor: selectedFontCapable[0].textColor,
       }
     : null
 
-  // Only ever called while selectedStyleableEl exists (the toolbar that
-  // calls this doesn't render otherwise) — always a real, undoable mutation
-  // of the selected element.
+  // Only ever called while fontToolbarShowFontControls is true (the
+  // toolbar section that calls this doesn't render otherwise) — bulk-
+  // applies to every selected font-capable element, same "single and
+  // multi are the same operation" pattern handleFillChange/
+  // handleStrokeChange already use (a single selection is just the N=1
+  // case of the same map, no special-casing needed).
   const handleFontChange = (patch) => {
-    if (!selectedStyleableEl) return
+    if (selectedFontCapable.length === 0) return
     pushHistory()
-    setElements((prev) => prev.map((el) => (el.id === selectedStyleableEl.id ? { ...el, ...patch } : el)))
+    setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && FONT_CAPABLE_TYPES.has(el.type) ? { ...el, ...patch } : el)))
+  }
+
+  // Ben: "when a vertical alignment option is selected then it should
+  // align the elements" — for 2+ selected elements, the same Alignment
+  // popup's buttons reposition the elements relative to each other
+  // (Figma-style) instead of setting each one's own text/vertical-align
+  // field (that meaning stays exactly as before for a single selection —
+  // see FontToolbar.jsx's own `isMultiSelect` branch, which decides which
+  // of the two this actually calls). Only ever invoked with 2+ selected;
+  // a lone element aligning to its own bounding box would be a no-op.
+  const handleAlignElements = (axis, mode) => {
+    if (selectedIds.length < 2) return
+    pushHistory()
+    setElements((prev) => alignElements(prev, selectedIds, axis, mode))
+  }
+
+  // Ben: "I'd like the ability to paste into a group, so double clicking
+  // into the group, pasting and the new element being part of the group."
+  // Double-clicking an already-grouped element isolates it as the sole
+  // selection (Canvas.jsx's handleDoubleClick — a pre-existing mechanism,
+  // not something new added for this) while its own `groupId` stays set —
+  // that's the "inside the group" signal this hooks into: whenever the
+  // CURRENT selection is exactly one element that already belongs to a
+  // group, a paste right after should join that same group rather than
+  // landing as an ungrouped sibling on top of it. Read via refs (not the
+  // closured selectedIds/elements state) since both paste paths that call
+  // this run from the keydown handler, same reasoning as everything else
+  // in that handler.
+  const contextGroupId = () => {
+    const ids = selectedIdsRef.current
+    if (ids.length !== 1) return null
+    return elementsRef.current.find((el) => el.id === ids[0])?.groupId || null
+  }
+
+  // The internal element-clipboard paste (⌘C a shape, ⌘V it back) — pulled
+  // out of the keydown handler into its own function specifically so the
+  // group-context logic below exists in exactly one place, not duplicated
+  // across this handler's two separate ⌘V call sites (the general one and
+  // the narrower one that also fires while mid-rename-edit).
+  const pasteInternalClipboard = () => {
+    pushHistory()
+    pasteCountRef.current += 1
+    const step = pasteCountRef.current * 16
+    const { elements: pasted } = cloneElements(clipboardRef.current, { x: step, y: step })
+    // Only join the current context group when the copied elements had none
+    // of their own — cloneElements (geometry.js) already remaps a COPIED
+    // group's own shared groupId to a fresh one, so pasting a group you
+    // copied correctly keeps forming its own distinct new group, unchanged
+    // by this. Forcing that case into the current context group too would
+    // silently merge two unrelated groups together — a bigger, more
+    // surprising change than what was actually asked for.
+    const groupId = contextGroupId()
+    const finalPasted = groupId && !clipboardRef.current.some((el) => el.groupId)
+      ? pasted.map((el) => ({ ...el, groupId }))
+      : pasted
+    setElements((prev) => [...prev, ...finalPasted])
+    setSelectedIds(finalPasted.map((el) => el.id))
+  }
+
+  // Ben: "add the ability to paste text straight onto canvas" — ⌘V with
+  // nothing internally copied (clipboardRef empty, see the keydown handler
+  // below) now falls through to the real OS clipboard instead of being a
+  // no-op. `navigator.clipboard.readText()` is async and only reliably
+  // resolves without a permission prompt when called directly from a user
+  // gesture — the keydown handler calling this synchronously (not awaited)
+  // is exactly that gesture.
+  //
+  // Placed at the current viewport's own center (converted to canvas-space
+  // via canvasRef + zoom, the same conversion useCanvasInteraction's own
+  // getCanvasPoint does for a mouse position) — a keyboard paste has no
+  // cursor position of its own to anchor to, so "wherever you're currently
+  // looking" is the only sensible default, same reasoning any design tool
+  // uses for a paste with no prior copy on the same canvas.
+  //
+  // Single-line text becomes an autoSize element (matches a plain click
+  // with the Text tool exactly — sized to content, no visible box) with a
+  // placeholder w/h from DEFAULT_SIZE.text, corrected the first time it's
+  // actually re-edited (ElementRenderer's own commit-time measurement) —
+  // the same "wrong until first edit" tolerance a freshly click-placed
+  // empty text element already has, not a new gap this introduces.
+  // Multi-line text becomes a bound (non-autoSize) box instead, since an
+  // autoSize text element's editor is always a single-line <input> (v5) —
+  // pasting a paragraph into that would silently collapse every line
+  // break; a bound box's <textarea> editor preserves them.
+  const pasteTextFromClipboard = () => {
+    if (!navigator.clipboard?.readText) return
+    // Captured synchronously, before the async readText() resolves — the
+    // selection at the moment ⌘V was actually pressed is what "pasting
+    // into this group" should mean, not whatever it might be by the time
+    // the promise settles (nothing else can change it in between in
+    // practice, but reading it now is the correct thing regardless).
+    const groupId = contextGroupId()
+    navigator.clipboard.readText().then((text) => {
+      const trimmed = text?.trim()
+      if (!trimmed) return
+      const rect = canvasRef.current?.getBoundingClientRect()
+      const center = rect
+        ? { x: (window.innerWidth / 2 - rect.left) / zoom, y: (window.innerHeight / 2 - rect.top) / zoom }
+        : { x: 200, y: 200 }
+      const isMultiline = trimmed.includes('\n')
+      const w = isMultiline ? 320 : DEFAULT_SIZE.text.w
+      const h = isMultiline ? Math.min(400, Math.max(80, trimmed.split('\n').length * 24 + 16)) : DEFAULT_SIZE.text.h
+      const newEl = {
+        id: makeId(),
+        type: 'text',
+        x: snap(center.x - w / 2),
+        y: snap(center.y - h / 2),
+        w,
+        h,
+        autoSize: !isMultiline,
+        label: trimmed,
+        fill: null,
+        stroke: null,
+        strokeWidth: 0,
+        // Same fields (and the same source — pendingTextStyle, whatever the
+        // user currently has the Text tool's own defaults set to) a
+        // click/drag-placed text element gets in useCanvasInteraction.js —
+        // pasting stays consistent with placing text any other way rather
+        // than reverting to a fixed, ask-agnostic style.
+        fontFamily: pendingTextStyle.fontFamily,
+        fontWeight: pendingTextStyle.fontWeight,
+        fontStyle: pendingTextStyle.fontStyle,
+        fontSize: pendingTextStyle.fontSize,
+        textAlign: pendingTextStyle.textAlign,
+        textColor: pendingTextStyle.textColor,
+        groupId,
+        rotation: 0,
+        flipX: false,
+        flipY: false,
+      }
+      pushHistory()
+      setElements((prev) => [...prev, newEl])
+      setSelectedIds([newEl.id])
+    }).catch(() => {})
   }
 
   // ── Undo: snapshot-based. pushHistory captures a pre-mutation elements
@@ -405,6 +585,73 @@ export default function App() {
         return
       }
 
+      // Arrow-key nudge — Ben: "allow the user to move them using the
+      // keyboard arrows". Plain arrow = 1px (fine, unsnapped — the only way
+      // to get an element off the otherwise-everywhere 8px grid, until a
+      // real grid-snap toggle exists); Shift+arrow = a full GRID step,
+      // matching this tool's own established grid unit rather than an
+      // arbitrary Figma-style 10px. Excludes every other modifier so it
+      // never collides with a future Cmd/Option+arrow shortcut. `e.repeat`
+      // (true for the auto-generated events while a key is held) gates
+      // history — only the initial press pushes a snapshot, so holding an
+      // arrow down to nudge repeatedly undoes as ONE step, the same
+      // "one entry per gesture" convention a mouse drag already gets.
+      //
+      // Guarded by a broader check than the narrow `isTyping` above
+      // (textarea/text-input only) — a focused <select> (font family/
+      // weight) or a number <input> (font size, stroke thickness) both
+      // have their own native arrow-key behaviour (change option / step
+      // the value) that this must not steal just because a canvas element
+      // also happens to be selected underneath.
+      const isArrowKeyFormControl = active?.tagName === 'SELECT' || active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA'
+      if (
+        (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')
+        && !isArrowKeyFormControl && !e.metaKey && !e.ctrlKey && !e.altKey
+      ) {
+        const ids = selectedIdsRef.current
+        if (ids.length === 0) return
+        e.preventDefault()
+        const step = e.shiftKey ? GRID : 1
+        const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+        const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+        if (!e.repeat) pushHistory()
+        setElements((prev) => nudgeElements(prev, ids, dx, dy))
+        return
+      }
+
+      // ⌘B/⌘I — Ben: "bold or italicise text using the keyboard shortcuts
+      // command + b and command + i", working both "when selecting an
+      // element/s" and "when editing in the bounding box". Scoped (confirmed
+      // via AskUserQuestion) to a whole-element toggle for now, not true
+      // per-character rich text — a label here is one plain string with one
+      // fontWeight/fontStyle for its entire text, not a set of independently
+      // formatted spans, so highlighting only part of the text while editing
+      // still toggles the WHOLE element's style rather than just the
+      // selected portion. Real per-character rich text (contentEditable,
+      // span storage, save/load format changes) is a separate, larger
+      // future project. Reads/writes go through refs (elementsRef/
+      // selectedIdsRef), not the closured elements/selectedIds state, for
+      // the same reason every other shortcut in this handler already does —
+      // this effect only resubscribes on a handful of unrelated
+      // dependencies (see its own dependency array), so closured state can
+      // go stale between re-subscriptions.
+      const toggleFontField = (field, nextValue) => {
+        const ids = selectedIdsRef.current
+        const targets = elementsRef.current.filter((el) => ids.includes(el.id) && FONT_CAPABLE_TYPES.has(el.type))
+        if (targets.length === 0) return false
+        const newValue = nextValue(targets[0][field])
+        pushHistory()
+        setElements((prev) => prev.map((el) => (ids.includes(el.id) && FONT_CAPABLE_TYPES.has(el.type) ? { ...el, [field]: newValue } : el)))
+        return true
+      }
+      // Toggles to/from exactly 'Bold' (700) rather than restoring whatever
+      // specific weight was active before — this tool's typography model
+      // has no separate "remembered previous weight" field, and Medium/
+      // Semibold are rare enough starting points that always landing back
+      // on Regular (400) is an acceptable simplification over adding one.
+      const toggleBold = () => toggleFontField('fontWeight', (w) => (w >= 700 ? 400 : 700))
+      const toggleItalic = () => toggleFontField('fontStyle', (s) => (s === 'italic' ? 'normal' : 'italic'))
+
       // ⌘C/⌘V get a narrower, separate gate from every other Cmd-shortcut
       // below — real bug, reported directly: double-clicking a shape (this
       // tool's own, if unintuitive, way to isolate a single member of a
@@ -432,14 +679,11 @@ export default function App() {
         }
         if (key === 'v' && clipboardRef.current && clipboardRef.current.length > 0) {
           e.preventDefault()
-          pushHistory()
-          pasteCountRef.current += 1
-          const step = pasteCountRef.current * 16
-          const { elements: pasted } = cloneElements(clipboardRef.current, { x: step, y: step })
-          setElements((prev) => [...prev, ...pasted])
-          setSelectedIds(pasted.map((el) => el.id))
+          pasteInternalClipboard()
           return
         }
+        if (key === 'b') { if (toggleBold()) e.preventDefault(); return }
+        if (key === 'i') { if (toggleItalic()) e.preventDefault(); return }
         // No matching clipboard content (⌘V with nothing copied) or some
         // other Cmd-combo while editing a label — fall through to native
         // input behaviour rather than returning early.
@@ -463,20 +707,25 @@ export default function App() {
           return
         }
         if (key === 'v') {
-          if (!clipboardRef.current || clipboardRef.current.length === 0) return
+          if (!clipboardRef.current || clipboardRef.current.length === 0) {
+            // Nothing internally copied — try the real OS clipboard instead
+            // of treating this as a no-op (Ben: "add the ability to paste
+            // text straight onto canvas").
+            e.preventDefault()
+            pasteTextFromClipboard()
+            return
+          }
           e.preventDefault()
-          pushHistory()
           // Cascades further from the clipboard's original position with
           // each successive paste (16px per step, matching Figma's own
           // repeated-paste convention) instead of every paste landing at
-          // the same fixed +16/+16 offset and stacking exactly on the last.
-          pasteCountRef.current += 1
-          const step = pasteCountRef.current * 16
-          const { elements: pasted } = cloneElements(clipboardRef.current, { x: step, y: step })
-          setElements((prev) => [...prev, ...pasted])
-          setSelectedIds(pasted.map((el) => el.id))
+          // the same fixed +16/+16 offset and stacking exactly on the last —
+          // handled inside pasteInternalClipboard via pasteCountRef.
+          pasteInternalClipboard()
           return
         }
+        if (key === 'b') { if (toggleBold()) e.preventDefault(); return }
+        if (key === 'i') { if (toggleItalic()) e.preventDefault(); return }
         if (key === 'g') {
           e.preventDefault()
           if (e.shiftKey) {
@@ -506,8 +755,7 @@ export default function App() {
       if (!isTyping && !e.altKey && !e.metaKey && !e.ctrlKey && e.key.length === 1) {
         const ids = selectedIdsRef.current
         const target = ids.length === 1
-          ? elementsRef.current.find((el) => el.id === ids[0]
-              && (el.type === 'text' || STYLEABLE_SHAPE_TYPES.has(el.type)))
+          ? elementsRef.current.find((el) => el.id === ids[0] && FONT_CAPABLE_TYPES.has(el.type))
           : null
         if (target) {
           e.preventDefault()
@@ -542,7 +790,12 @@ export default function App() {
   const handleStrokeChange = (hex) => {
     if (selectedIds.length === 0) return
     pushHistory()
-    setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && STROKEABLE_TYPES.has(el.type) ? { ...el, stroke: hex } : el)))
+    setElements((prev) => prev.map((el) => (selectedIds.includes(el.id) && STROKEABLE_TYPES.has(el.type)
+      // Text is created with strokeWidth:0 (no border UI used to exist for
+      // it) — setting a real colour with a 0 width would render invisibly.
+      // Only bumps a genuinely-unset width; never touches one already set.
+      ? { ...el, stroke: hex, strokeWidth: hex && !el.strokeWidth ? 1 : el.strokeWidth }
+      : el)))
   }
 
   const handleStrokeWidthChange = (width) => {
@@ -940,6 +1193,7 @@ export default function App() {
       />
 
       <Canvas
+        canvasRef={canvasRef}
         elements={elements}
         setElements={setElements}
         activeTool={activeTool}
@@ -963,12 +1217,10 @@ export default function App() {
         fontToolbarBox={fontToolbarBox}
         fontToolbarValue={fontToolbarValue}
         onFontToolbarChange={handleFontChange}
-        fontToolbarShowAlignment={selectedStyleableEl?.type !== 'arrow'}
-      />
-
-      <Toolbar
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
+        fontToolbarShowFontControls={fontToolbarShowFontControls}
+        fontToolbarShowAlignment={fontToolbarShowAlignment}
+        fontToolbarIsMultiSelect={isMultiSelect}
+        onAlignElements={handleAlignElements}
         canFill={canFill}
         currentFill={currentFill}
         onFillChange={handleFillChange}
@@ -977,6 +1229,11 @@ export default function App() {
         onStrokeChange={handleStrokeChange}
         currentStrokeWidth={currentStrokeWidth}
         onStrokeWidthChange={handleStrokeWidthChange}
+      />
+
+      <Toolbar
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
       />
 
       {showExitPrompt && (

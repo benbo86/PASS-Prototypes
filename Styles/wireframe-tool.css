@@ -156,7 +156,27 @@
 .wf-popup-tab.active { background: #9a26d6; color: #ffffff; }
 
 .wf-popup-picker { display: flex; flex-direction: column; gap: 8px; }
+
+/* Search box for the Swatches tab — sits above the scrollable list
+   (not inside it) so it stays put while the results below scroll. Same
+   sizing/border language as .wf-hex-input, just a plain text field. */
+.wf-swatch-search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #333333;
+  border: 1px solid #cac6d7;
+  border-radius: 6px;
+  outline: none;
+}
+.wf-swatch-search:focus { border-color: #9a26d6; }
+
 .wf-popup-swatches { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+.wf-swatch-empty { padding: 12px 8px; font-size: 13px; color: #968caf; text-align: center; }
 
 .wf-swatch-group + .wf-swatch-group { margin-top: 6px; }
 .wf-swatch-group-label {
@@ -724,7 +744,17 @@
   white-space: nowrap;
 }
 
-.wf-frame-label-input {
+/* Real bug, same class as the v25 alignment-button one: this used to be a
+   single-class selector (.wf-frame-label-input), equal specificity to the
+   base .wf-label-input rule below it — and since .wf-label-input is
+   declared LATER in this file, its own position:relative/width:90% always
+   won the cascade regardless of source intent, silently flattening this
+   input back to inline/90%-wide and making it render centered in the
+   frame's body instead of as a small badge above it (matching the static
+   .wf-frame-label it replaces while editing). Fixed with a compound
+   selector (two classes) so this always wins on specificity alone,
+   immune to any future reordering of either rule. */
+.wf-label-input.wf-frame-label-input {
   box-sizing: border-box;
   position: absolute;
   top: -22px;
@@ -732,6 +762,7 @@
   width: 160px;
   font-size: 12px;
   font-family: inherit;
+  text-align: left;
   border: 1px solid #9a26d6;
   border-radius: 2px;
   padding: 1px 4px;
@@ -766,6 +797,17 @@
   width: 90%;
   font-size: inherit;
   font-family: inherit;
+  /* Real gap, surfaced by ⌘B/⌘I now working while actively editing a
+     label (Ben: "...or when selecting some or all of a text when editing
+     in the bounding box") — form controls don't inherit font-weight/
+     font-style from an ancestor by default the way font-size/font-family
+     already correctly do above (both already needed an explicit `inherit`
+     here for the identical reason). Without this, toggling bold/italic
+     mid-edit changed the element's real data (confirmed correct on
+     commit) but the input itself kept rendering as if nothing had
+     changed until you clicked away. */
+  font-weight: inherit;
+  font-style: inherit;
   text-align: center;
   border: 1px solid #9a26d6;
   border-radius: 2px;
@@ -980,28 +1022,112 @@ textarea.wf-label-input {
 }
 .wf-font-toolbar-align-btn.active { background: #9a26d6; border-color: #9a26d6; }
 
-.wf-font-toolbar-swatches { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.wf-font-toolbar-swatch {
+/* Every item in this toolbar (selects/input, Alignment/Text colour/
+   Border/Fill icon buttons) shares this one wrapper — gives each a
+   position:relative anchor for its own hover tooltip and/or popup. */
+.wf-font-toolbar-item { position: relative; display: flex; pointer-events: auto; }
+
+/* Alignment/Text-colour/Border/Fill icon buttons — the latter three
+   moved into this toolbar from the bottom Toolbar.jsx (Ben: "so I don't
+   have to go to the menu at the bottom of the screen to apply").
+   Sized/styled to sit comfortably in this dark bar, distinct from
+   .wf-icon-btn's own larger light-theme button used at the bottom. */
+.wf-font-toolbar-icon-btn {
   box-sizing: border-box;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
-  border: 1px solid #3a3a3c;
-  border-radius: 5px;
+  border: none;
+  border-radius: 6px;
+  background: #2c2c2e;
+  color: #f2f2f2;
   cursor: pointer;
   pointer-events: auto;
 }
-.wf-font-toolbar-swatch.active { outline: 2px solid #9a26d6; outline-offset: 1px; }
+.wf-font-toolbar-icon-btn:hover { background: #3a3a3c; }
+.wf-font-toolbar-icon-btn.active { background: #9a26d6; }
 
-.wf-font-toolbar-color-input {
-  box-sizing: border-box;
-  width: 24px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #3a3a3c;
-  border-radius: 5px;
-  background: #2c2c2e;
+/* Hover tooltip for every item in this toolbar — same visual language as
+   Toolbar.jsx's own .wf-toolbar-tooltip, but opening *downward*
+   (below the item) rather than upward: unlike the bottom Toolbar (which
+   sits at the very bottom of the screen, so its tooltips/popups only
+   ever have room to open up), this toolbar already floats above the
+   selection, so opening upward risks running off the top of the
+   viewport for a shape near the top of the canvas. Hidden while any
+   popup in this toolbar is open, same as Toolbar.jsx's own suppression
+   rule, so it never visually stacks with a popup's own position. */
+.wf-font-toolbar-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #333333;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: 'Barlow', sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 5;
+}
+.wf-font-toolbar-item:hover .wf-font-toolbar-tooltip { opacity: 1; }
+
+/* This toolbar's own popups (Fill/Border/Text colour/Alignment) open
+   *below* their button, for the same reason the tooltip above does.
+   Reuses .wf-popup-fill/.wf-popup-tabs/.wf-popup-picker/.wf-popup-
+   swatches/.wf-swatch-* for the shared inner content — only the outer
+   positioning differs. Needs its own pointer-events:auto since it's a
+   descendant of .wf-font-toolbar's pointer-events:none. */
+.wf-font-toolbar-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 8px;
   pointer-events: auto;
+  white-space: normal;
+}
+
+/* Alignment popup — two labeled sections (Text align / Vertical align),
+   each the same 3-button row that used to always sit inline in the
+   toolbar itself. */
+.wf-popup-align { width: 160px; display: flex; flex-direction: column; gap: 4px; }
+.wf-popup-align-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #968caf;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 2px 0;
+}
+.wf-popup-align .wf-font-toolbar-align-group { gap: 4px; }
+/* Real bug, reported directly: this rule and the base
+   .wf-font-toolbar-align-btn.active (dark toolbar, sets background:
+   #9a26d6) share equal specificity (two classes each) — this one, being
+   declared later, always won the background for every button regardless
+   of active state, flattening the active state's purple bg down to the
+   same light grey as an inactive button while its own `color: #ffffff`
+   (below) kept applying — white text on a near-white background,
+   reported as "the icon ... is white." Fixed by dropping that colour
+   override entirely so an active button's letter reads the same dark
+   grey as every other option in this popup, matching what was asked
+   ("the same colour as the other options") — no separate active-state
+   colour treatment inside this specific popup. */
+.wf-popup-align .wf-font-toolbar-align-btn {
+  flex: 1;
+  color: #333333;
+  background: #f5f5f6;
+  border-color: #e6e6e6;
 }
 
 /* ── Exit confirmation — mirrors Components/DevEdit.jsx's own ExitPrompt

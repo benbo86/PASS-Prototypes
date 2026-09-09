@@ -15,6 +15,7 @@ export const CANVAS_WIDTH = 4000
 export const CANVAS_HEIGHT = 2800
 
 export default function Canvas({
+  canvasRef,
   elements,
   setElements,
   activeTool,
@@ -38,9 +39,19 @@ export default function Canvas({
   fontToolbarBox,
   fontToolbarValue,
   onFontToolbarChange,
+  fontToolbarShowFontControls,
   fontToolbarShowAlignment,
+  fontToolbarIsMultiSelect,
+  onAlignElements,
+  canFill,
+  currentFill,
+  onFillChange,
+  canBorderFill,
+  currentStroke,
+  onStrokeChange,
+  currentStrokeWidth,
+  onStrokeWidthChange,
 }) {
-  const canvasRef = useRef(null)
   const scrollRef = useRef(null)
   // Set by the wheel-zoom handler right before setZoom — applied in the
   // useLayoutEffect below once the DOM has actually re-rendered at the new
@@ -256,7 +267,18 @@ export default function Canvas({
           box={fontToolbarBox}
           value={fontToolbarValue}
           onChange={onFontToolbarChange}
+          showFontControls={fontToolbarShowFontControls}
           showAlignment={fontToolbarShowAlignment}
+          isMultiSelect={fontToolbarIsMultiSelect}
+          onAlignElements={onAlignElements}
+          canFill={canFill}
+          currentFill={currentFill}
+          onFillChange={onFillChange}
+          canBorderFill={canBorderFill}
+          currentStroke={currentStroke}
+          onStrokeChange={onStrokeChange}
+          currentStrokeWidth={currentStrokeWidth}
+          onStrokeWidthChange={onStrokeWidthChange}
         />
       )}
 

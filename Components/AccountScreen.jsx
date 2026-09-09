@@ -191,7 +191,7 @@ export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHol
         <div className="account-version">Version 3.6.0</div>
       </div>
       {!hideNav && (
-        <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ notifications: '../notifications/' }} />
+        <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
       )}
     </>
   )

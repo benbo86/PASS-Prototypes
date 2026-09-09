@@ -173,6 +173,68 @@ export function computeBoundingBox(elements, ids) {
   return { x: minX, y: minY, w: Math.max(GRID, maxX - minX), h: Math.max(GRID, maxY - minY) }
 }
 
+// Figma/Illustrator-style "align these elements to each other" — used by
+// the floating toolbar's Alignment popup specifically when 2+ elements
+// are selected (for exactly one, aligning it to its own bounding box is
+// a no-op, so a single selection keeps the alignment buttons' original
+// meaning of setting that one element's own text/vertical-align field
+// instead — see App.jsx's own `isMultiSelect` branch). `mode` mirrors the
+// same 'start'|'center'|'end' vocabulary along whichever `axis` ('x' or
+// 'y') the caller picks, rather than separate left/right/top/bottom
+// named modes, since the maths is identical either way — only which
+// field moves differs. Each element moves independently (unlike
+// transformSelection, which scales the whole selection together as one
+// rigid group) — every element keeps its own size, just repositioned
+// relative to the shared selection bounding box. Arrows move by shifting
+// both endpoints by the same raw delta, which trivially preserves their
+// exact length/angle (no separate "re-derive one shared snapped delta"
+// step is needed here the way moveArrow's own drag handling requires,
+// since there's only one delta to begin with, not two independently-
+// snapped endpoints to reconcile).
+export function alignElements(elements, ids, axis, mode) {
+  const box = computeBoundingBox(elements, ids)
+  const boxStart = axis === 'x' ? box.x : box.y
+  const boxSize = axis === 'x' ? box.w : box.h
+  return elements.map((el) => {
+    if (!ids.includes(el.id)) return el
+    const elBox = getElementBox(el)
+    const elStart = axis === 'x' ? elBox.x : elBox.y
+    const elSize = axis === 'x' ? elBox.w : elBox.h
+    const target = snap(
+      mode === 'start' ? boxStart
+        : mode === 'end' ? boxStart + boxSize - elSize
+          : boxStart + (boxSize - elSize) / 2
+    )
+    const delta = target - elStart
+    if (delta === 0) return el
+    if (el.type === 'arrow') {
+      return axis === 'x'
+        ? { ...el, x1: el.x1 + delta, x2: el.x2 + delta }
+        : { ...el, y1: el.y1 + delta, y2: el.y2 + delta }
+    }
+    return axis === 'x' ? { ...el, x: el.x + delta } : { ...el, y: el.y + delta }
+  })
+}
+
+// Plain, unsnapped translate — backs App.jsx's arrow-key nudge (Ben: "allow
+// the user to move them using the keyboard arrows"). Deliberately NOT
+// reusing moveBox/moveArrow (both round to GRID on every call): that's
+// correct for a mouse-drag accumulating many raw pixels before landing,
+// but wrong for a keyboard nudge — snapping a 1px step would almost always
+// round straight back to the same position, since GRID (8) dwarfs it,
+// making the nudge invisible. Arrows move by shifting both endpoints by
+// the identical raw delta, trivially preserving length/angle (same
+// reasoning as alignElements's own arrow handling above).
+export function nudgeElements(elements, ids, dx, dy) {
+  return elements.map((el) => {
+    if (!ids.includes(el.id)) return el
+    if (el.type === 'arrow') {
+      return { ...el, x1: el.x1 + dx, x2: el.x2 + dx, y1: el.y1 + dy, y2: el.y2 + dy }
+    }
+    return { ...el, x: el.x + dx, y: el.y + dy }
+  })
+}
+
 // Same "which edges move" shape as resizeBox, but the two free edges for a
 // *corner* handle are derived from the box's original aspect ratio (picking
 // whichever axis moved more, relatively, as the driving one) instead of

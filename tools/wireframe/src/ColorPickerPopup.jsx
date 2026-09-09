@@ -22,6 +22,11 @@ export default function ColorPickerPopup({ value, onChange, onApply }) {
   const [tab, setTab] = useState('picker') // 'picker' | 'swatches'
   const [hexDraft, setHexDraft] = useState(value || '')
   const [hsv, setHsv] = useState(() => hexToHsv(value))
+  // Search filters the Swatches tab only — local state, resets naturally
+  // whenever a fresh ColorPickerPopup instance mounts (each Fill/Border/
+  // Text colour popup is a brand-new instance per open, since they're
+  // conditionally rendered by their own parent).
+  const [swatchSearch, setSwatchSearch] = useState('')
   const draggingRef = useRef(false)
   const wheelRef = useRef(null)
   const brightnessRef = useRef(null)
@@ -107,6 +112,20 @@ export default function ColorPickerPopup({ value, onChange, onApply }) {
   const thumbX = wheelRadius + thumbR * Math.cos(thumbAngleRad)
   const thumbY = wheelRadius + thumbR * Math.sin(thumbAngleRad)
 
+  // Swatches search — plain case-insensitive substring match on each
+  // swatch's own label, so "purple" finds every purple-family token
+  // across every category at once rather than needing to know which
+  // group it lives in first. A category only renders if at least one of
+  // its own swatches still matches; None is filtered the same way so
+  // typing something that doesn't match "None" hides it too.
+  const query = swatchSearch.trim().toLowerCase()
+  const noneMatches = !query || NONE_SWATCH.label.toLowerCase().includes(query)
+  const filteredGroups = query
+    ? FILL_SWATCH_GROUPS
+        .map((group) => ({ ...group, swatches: group.swatches.filter((s) => s.label.toLowerCase().includes(query)) }))
+        .filter((group) => group.swatches.length > 0)
+    : FILL_SWATCH_GROUPS
+
   return (
     <>
       <div className="wf-popup-tabs">
@@ -149,26 +168,41 @@ export default function ColorPickerPopup({ value, onChange, onApply }) {
           </div>
         </div>
       ) : (
-        <div className="wf-popup-swatches">
-          <button key={NONE_SWATCH.label} className="wf-swatch-row" onClick={() => onApply(NONE_SWATCH.hex)}>
-            <span className="wf-swatch-dot wf-swatch-none" />
-            <span>{NONE_SWATCH.label}</span>
-          </button>
-          {FILL_SWATCH_GROUPS.map((group) => (
-            <div key={group.category} className="wf-swatch-group">
-              <div className="wf-swatch-group-label">{group.category}</div>
-              {group.swatches.map((s) => (
-                <button key={s.label} className="wf-swatch-row" onClick={() => onApply(s.hex)}>
-                  <span
-                    className={`wf-swatch-dot${s.hex === null ? ' wf-swatch-none' : ''}`}
-                    style={s.hex === null ? undefined : { background: s.token ? `var(${s.token})` : s.hex }}
-                  />
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
+        <>
+          <input
+            type="text"
+            className="wf-swatch-search"
+            placeholder="Search colours"
+            spellCheck={false}
+            value={swatchSearch}
+            onChange={(e) => setSwatchSearch(e.target.value)}
+          />
+          <div className="wf-popup-swatches">
+            {noneMatches && (
+              <button key={NONE_SWATCH.label} className="wf-swatch-row" onClick={() => onApply(NONE_SWATCH.hex)}>
+                <span className="wf-swatch-dot wf-swatch-none" />
+                <span>{NONE_SWATCH.label}</span>
+              </button>
+            )}
+            {filteredGroups.map((group) => (
+              <div key={group.category} className="wf-swatch-group">
+                <div className="wf-swatch-group-label">{group.category}</div>
+                {group.swatches.map((s) => (
+                  <button key={s.label} className="wf-swatch-row" onClick={() => onApply(s.hex)}>
+                    <span
+                      className={`wf-swatch-dot${s.hex === null ? ' wf-swatch-none' : ''}`}
+                      style={s.hex === null ? undefined : { background: s.token ? `var(${s.token})` : s.hex }}
+                    />
+                    <span>{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+            {!noneMatches && filteredGroups.length === 0 && (
+              <div className="wf-swatch-empty">No colours match "{swatchSearch}"</div>
+            )}
+          </div>
+        </>
       )}
     </>
   )
