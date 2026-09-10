@@ -176,6 +176,33 @@ export default function DevComments({ containerRef, prototypeId }) {
     return unsub
   }, [prototypeId])
 
+  // Real bug: pins are `position: fixed` (Styles/dev-comments.css's own
+  // .devcomments-pin-wrap) with their left/top computed from
+  // containerRef.getBoundingClientRect() — a viewport-relative value that
+  // changes on every scroll. That computation only re-runs when this
+  // component actually re-renders, though, and nothing here was ever
+  // triggering a re-render on scroll — so a pin rendered correctly once,
+  // then stayed frozen at that same screen position as the real page
+  // content scrolled underneath it, drifting away from whatever it was
+  // originally pointing at. Same fix Components/Tooltip.jsx already uses
+  // for its own fixed-position popup: a scroll/resize listener that forces
+  // a re-render so containerRect gets recomputed fresh each tick. Capture
+  // phase on scroll, matching Tooltip's own, so this also tracks scrolling
+  // within a nested scrollable ancestor, not just the window itself.
+  // Always on (not gated behind `active`) since pins render regardless of
+  // comment mode — see the "Pins render regardless of `active`" comment
+  // below.
+  const [, forceReposition] = useState(0)
+  useEffect(() => {
+    const onScrollOrResize = () => forceReposition(n => n + 1)
+    window.addEventListener('scroll', onScrollOrResize, true)
+    window.addEventListener('resize', onScrollOrResize)
+    return () => {
+      window.removeEventListener('scroll', onScrollOrResize, true)
+      window.removeEventListener('resize', onScrollOrResize)
+    }
+  }, [])
+
   const toggleActive = useCallback(() => {
     setActive(a => {
       const next = !a
