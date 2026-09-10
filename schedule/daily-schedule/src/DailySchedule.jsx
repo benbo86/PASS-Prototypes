@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react'
+import { Fragment, useState, useMemo, useRef } from 'react'
 import DatePicker from 'react-datepicker'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
@@ -6,6 +6,7 @@ import ScheduleNav from '../../../Components/ScheduleNav'
 import EventPanel from '../../../Components/EventPanel'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import Tooltip from '../../../Components/Tooltip'
+import ScheduleFilterDropdown from '../../../Components/ScheduleFilterDropdown'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -15,7 +16,7 @@ import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { AreaTag, VisitTypeTag } from './Tags'
 import {
-  UNASSIGNED_VISITS, UNASSIGNED_TOTAL_LIVE, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES,
+  UNASSIGNED_VISITS, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES, AREAS,
   toMinutes, fmtDuration,
 } from './data'
 
@@ -100,6 +101,12 @@ const ListViewIcon = () => (
     <rect x="8" y="16.2" width="13" height="2.6" rx="1" fill="currentColor" />
   </svg>
 )
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <polygon fill="currentColor" stroke="currentColor" strokeLinejoin="round"
+      points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />
+  </svg>
+)
 const SortIcon = ({ dir }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" className={`col-icon sort-icon ${dir ? 'col-icon--active' : ''}`} strokeLinecap="square">
     <polyline points="7.5,9 12,5 16.5,9" stroke="currentColor" strokeWidth="2" fill="none" opacity={dir === 'desc' ? 0.35 : 1} />
@@ -174,12 +181,41 @@ const RECURRENCE_TEXT = {
   'Wellbeing check': '14 days, fortnightly',
 }
 
+// ─── Toolbar filters ────────────────────────────────────────────────────────
+
+// Option lists for the toolbar's own 7 filters. Customers/Employees are
+// derived from this prototype's own sample data; Area reuses data.js's
+// own AREAS list (already the real field on every unassigned visit).
+// Shifts/Medical Conditions/More have no corresponding field on either
+// data set in this prototype, so their own dropdowns are fully functional
+// (search, select, badge, Clear) but — unlike Customers/Employees/Area/
+// Contract types below — selecting an item there has no filtering effect,
+// same "decorative but real chrome" treatment already used elsewhere in
+// this file (Show clashes, Daily/Weekly, Employees/Customers view mode).
+const CUSTOMER_NAMES = [...new Set(UNASSIGNED_VISITS.map(v => v.customer))].sort()
+const EMPLOYEE_NAMES = SAMPLE_EMPLOYEES.map(e => e.name)
+const CONTRACT_TYPE_OPTIONS = ['Fulltime', 'Part time', 'Variable', 'Bank']
+const SHIFT_OPTIONS = ['Morning', 'Afternoon', 'Evening', 'Overnight']
+const MEDICAL_CONDITION_OPTIONS = ['Dementia', 'Diabetes', 'Mobility support', 'Epilepsy', 'Allergies']
+const MORE_OPTIONS = ['Recently added', 'High priority', 'Recurring visits']
+
+const FILTER_DEFS = [
+  { key: 'customers', label: 'Customers', items: CUSTOMER_NAMES },
+  { key: 'employees', label: 'Employees', items: EMPLOYEE_NAMES },
+  { key: 'shifts', label: 'Shifts', items: SHIFT_OPTIONS },
+  { key: 'area', label: 'Area', items: AREAS },
+  { key: 'medicalConditions', label: 'Medical Conditions', items: MEDICAL_CONDITION_OPTIONS },
+  { key: 'contractTypes', label: 'Contract types', items: CONTRACT_TYPE_OPTIONS },
+  { key: 'more', label: 'More', items: MORE_OPTIONS },
+]
+const EMPTY_FILTERS = FILTER_DEFS.reduce((acc, f) => { acc[f.key] = new Set(); return acc }, {})
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function DailySchedule() {
   const pageRef = useRef(null)
 
-  const [visitDate, setVisitDate] = useState(new Date(2026, 8, 8))
+  const [visitDate, setVisitDate] = useState(() => new Date())
   const [viewBy, setViewBy] = useState('employees')       // 'employees' | 'customers'
   const [period, setPeriod] = useState('daily')           // 'daily' | 'weekly'
   const [showClashes, setShowClashes] = useState(false)
@@ -189,14 +225,36 @@ export default function DailySchedule() {
   const [unassignedView, setUnassignedView] = useState('timeline') // 'timeline' | 'list'
   const [sort, setSort] = useState({ col: null, dir: 'asc' })
 
+  const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS)
+  const [openFilterKey, setOpenFilterKey] = useState(null)
+  const filterAnchorRefs = useRef({})
+
   const [assignVisit, setAssignVisit] = useState(null)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
 
   const toggleSort = (col) => setSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
 
-  const lanes = useMemo(() => packLanes(visits), [visits])
-  const sortedVisits = useMemo(() => sortVisits(visits, sort), [visits, sort])
+  const setFilter = (key, set) => setActiveFilters(prev => ({ ...prev, [key]: set }))
+  const clearAllFilters = () => setActiveFilters(EMPTY_FILTERS)
+  const anyFilterActive = Object.values(activeFilters).some(s => s.size > 0)
+
+  // Only Customers/Area (real fields on every unassigned visit) and
+  // Employees/Contract types (real fields on the sample employees below)
+  // actually narrow anything down — see the FILTER_DEFS comment above for
+  // why Shifts/Medical Conditions/More don't.
+  const filteredVisits = useMemo(() => visits.filter(v =>
+    (activeFilters.customers.size === 0 || activeFilters.customers.has(v.customer)) &&
+    (activeFilters.area.size === 0 || activeFilters.area.has(v.area))
+  ), [visits, activeFilters.customers, activeFilters.area])
+
+  const filteredEmployees = useMemo(() => SAMPLE_EMPLOYEES.filter(e =>
+    (activeFilters.employees.size === 0 || activeFilters.employees.has(e.name)) &&
+    (activeFilters.contractTypes.size === 0 || activeFilters.contractTypes.has(e.type))
+  ), [activeFilters.employees, activeFilters.contractTypes])
+
+  const lanes = useMemo(() => packLanes(filteredVisits), [filteredVisits])
+  const sortedVisits = useMemo(() => sortVisits(filteredVisits, sort), [filteredVisits, sort])
 
   // Fires from Components/EventPanel's own Save/Accept-assignment action
   // (never on a lone "+ Add" — that only fills a slot locally within the
@@ -266,9 +324,30 @@ export default function DailySchedule() {
                 onChange={setPeriod}
               />
               <div className="ds-filters">
-                {['Customers', 'Employees', 'Shifts', 'Area', 'Medical Conditions', 'Contract types', 'More'].map(f => (
-                  <button key={f} className="ds-filter-btn">{f} <ChevronDown /></button>
+                {FILTER_DEFS.map(f => (
+                  <Fragment key={f.key}>
+                    <button
+                      ref={el => { filterAnchorRefs.current[f.key] = el }}
+                      className="ds-filter-btn"
+                      onClick={() => setOpenFilterKey(prev => prev === f.key ? null : f.key)}
+                    >
+                      {f.label}
+                      {activeFilters[f.key].size > 0 && <span className="ds-filter-badge">{activeFilters[f.key].size}</span>}
+                      <ChevronDown />
+                    </button>
+                    <ScheduleFilterDropdown
+                      items={f.items}
+                      selected={activeFilters[f.key]}
+                      onChange={(next) => setFilter(f.key, next)}
+                      isOpen={openFilterKey === f.key}
+                      onClose={() => setOpenFilterKey(null)}
+                      anchorEl={filterAnchorRefs.current[f.key]}
+                    />
+                  </Fragment>
                 ))}
+                {anyFilterActive && (
+                  <button className="clear-btn" onClick={clearAllFilters}><CloseIcon /> Clear</button>
+                )}
               </div>
               <label className="checkbox-wrap ds-clashes">
                 <input type="checkbox" checked={showClashes} onChange={e => setShowClashes(e.target.checked)} />
@@ -294,7 +373,7 @@ export default function DailySchedule() {
             ) : (
               <div className="ds-grid">
                 <div className="ds-row ds-timeline-header-row">
-                  <div className="ds-row-label"><span>Employees<span className="ds-count">({SAMPLE_EMPLOYEES.length})</span></span></div>
+                  <div className="ds-row-label"><span>Employees<span className="ds-count">({filteredEmployees.length})</span></span></div>
                   <div className="ds-row-track ds-hour-marks">
                     {HOURS.map(h => <span key={h} className="ds-hour-mark">{h}</span>)}
                   </div>
@@ -303,7 +382,7 @@ export default function DailySchedule() {
                 <div className="ds-unassigned">
                   <div className="ds-row ds-unassigned-row">
                     <div className="ds-row-label ds-unassigned-label">
-                      <span>Unassigned<span className="ds-count">({UNASSIGNED_TOTAL_LIVE})</span></span>
+                      <span>Unassigned<span className="ds-count">({filteredVisits.length})</span></span>
                       <div className="ds-view-toggle">
                         <Tooltip text="Timeline">
                           <button
@@ -400,7 +479,7 @@ export default function DailySchedule() {
                   </div>
                 </div>
 
-                {SAMPLE_EMPLOYEES.map(emp => (
+                {filteredEmployees.map(emp => (
                   <div key={emp.id} className="ds-row">
                     <div className="ds-row-label ds-employee-label">
                       <div className="ds-avatar ds-avatar--employee">{emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>

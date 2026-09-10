@@ -61,12 +61,6 @@ export const UNASSIGNED_VISITS = [
   { id: 24, customer: 'Paula Quinn',       start: '21:00', end: '22:00', area: 'Castlerock',        visitType: 'Wellbeing check',    employeesRequired: 1 },
 ];
 
-// The real backlog is much larger than what's practical to render row-by-
-// row in a prototype — this is what the "Unassigned (N)" badge/header
-// shows, distinct from `UNASSIGNED_VISITS.length` (the sample actually
-// rendered). Matches the live product's own count of 117.
-export const UNASSIGNED_TOTAL_LIVE = 117;
-
 // Static "who's available" list for the assign panel — same shape/fields
 // as schedule/assign-visit-absent-employee-event-panel's own EMPLOYEES,
 // reused rather than reinvented (avatarBg tints, fill %, travel distance).
@@ -94,9 +88,9 @@ export const RECOMMENDED_EMPLOYEES = [
 // correctly and aren't important for this prototype's own focus (the
 // Unassigned Visits list toggle above).
 export const SAMPLE_EMPLOYEES = [
-  { id: 'e1', name: 'Abigail Harbison', hoursDone: '14 hrs', hoursTotal: '20 hrs scheduled' },
-  { id: 'e2', name: 'Amanda McCullough', hoursDone: '9 hrs', hoursTotal: '24 hrs scheduled' },
-  { id: 'e3', name: 'Amy - Leigh McKinney', hoursDone: '0 hrs', hoursTotal: '37 hrs 30 m scheduled' },
-  { id: 'e4', name: 'Amy McFetridge', hoursDone: '0 hrs', hoursTotal: '30 hrs scheduled' },
-  { id: 'e5', name: 'Andrea Lappin', hoursDone: '3 hrs 50 m', hoursTotal: '16 hrs scheduled' },
+  { id: 'e1', name: 'Abigail Harbison', hoursDone: '14 hrs', hoursTotal: '20 hrs scheduled', type: 'Fulltime' },
+  { id: 'e2', name: 'Amanda McCullough', hoursDone: '9 hrs', hoursTotal: '24 hrs scheduled', type: 'Part time' },
+  { id: 'e3', name: 'Amy - Leigh McKinney', hoursDone: '0 hrs', hoursTotal: '37 hrs 30 m scheduled', type: 'Variable' },
+  { id: 'e4', name: 'Amy McFetridge', hoursDone: '0 hrs', hoursTotal: '30 hrs scheduled', type: 'Bank' },
+  { id: 'e5', name: 'Andrea Lappin', hoursDone: '3 hrs 50 m', hoursTotal: '16 hrs scheduled', type: 'Fulltime' },
 ];

@@ -55,6 +55,17 @@
 }
 .ds-filter-btn:hover { }
 
+/* Selected-count notification next to an active filter's own label —
+   matches web/messaging's own .msg-filter-badge colour/shape, just laid
+   out inline (this button is a text pill, not an icon-only trigger, so
+   an absolutely-positioned corner badge doesn't apply here). */
+.ds-filter-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+  background: var(--brand-purple-6-purple-4); color: #fff;
+  font-size: 10px; font-weight: 600; line-height: 1;
+}
+
 .ds-clashes { font-size: 14px; color: var(--greyscale-2-grey-20); white-space: nowrap; }
 
 /* Timeline/Map view toggle — Components/SegmentedToggle.jsx (same white-
