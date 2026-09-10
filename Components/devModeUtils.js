@@ -352,6 +352,60 @@ const HTML_TO_IMAGE_OPTS = { skipFonts: true }
 // that scope, which would otherwise silently cancel this exact download.
 // Tagging it data-devmode-ui exempts it, same as the rest of Dev Mode's UI.
 
+// Real bug, reported directly: "if I select a icon and export as svg its
+// not displaying the icon." html-to-image's toSvg() (used for every other
+// SVG export below) never produces a true vector file — per its own docs
+// it clones the target, inlines computed style onto the clone's root only,
+// and wraps the whole thing inside <svg><foreignObject>…clone…</foreignObject></svg>.
+// That opens and renders fine in a browser (the only environment that
+// understands foreignObject), but the icon's actual vector content is
+// trapped inside it — any other SVG consumer (an import tool, a sanitizer
+// that strips foreignObject as an XSS vector, an older/stricter renderer)
+// shows a blank <svg> with nothing visible, exactly "downloads fine but
+// the icon isn't there." A plain inline icon is already a real, valid
+// vector <svg> — there's no need to snapshot it through the DOM-clone
+// pipeline at all, so this builds the file directly from the live node
+// instead whenever the exported element genuinely is one.
+function serializeVectorSvg(svgEl) {
+  const clone = svgEl.cloneNode(true)
+
+  // Bakes in whatever currentColor/inherited fill|stroke would otherwise
+  // only resolve correctly inside the original page's DOM context — a
+  // standalone file has no such context to inherit from. Walking the live
+  // tree and its clone in lockstep (cloneNode preserves structure 1:1)
+  // finds the real resolved value regardless of which attribute/ancestor
+  // actually set it, rather than guessing at `currentColor` specifically.
+  const liveNodes = [svgEl, ...svgEl.querySelectorAll('*')]
+  const cloneNodes = [clone, ...clone.querySelectorAll('*')]
+  liveNodes.forEach((liveNode, i) => {
+    const cloneNode = cloneNodes[i]
+    if (!cloneNode) return
+    const cs = getComputedStyle(liveNode)
+    if (cs.fill && cs.fill !== 'none') cloneNode.setAttribute('fill', cs.fill)
+    if (cs.stroke && cs.stroke !== 'none') cloneNode.setAttribute('stroke', cs.stroke)
+  })
+
+  // Ensure the file is valid, self-contained standalone XML — none of
+  // this is guaranteed just by living inline in an HTML page.
+  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  if (clone.querySelector('use') && !clone.getAttribute('xmlns:xlink')) {
+    clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+  }
+  if (!clone.getAttribute('viewBox') && !clone.getAttribute('width')) {
+    const rect = svgEl.getBoundingClientRect()
+    clone.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`)
+  }
+  if (!clone.getAttribute('width')) clone.setAttribute('width', clone.getAttribute('viewBox').split(' ')[2])
+  if (!clone.getAttribute('height')) clone.setAttribute('height', clone.getAttribute('viewBox').split(' ')[3])
+
+  const svgText = new XMLSerializer().serializeToString(clone)
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`
+}
+
+function isSvgElement(el) {
+  return el?.tagName?.toLowerCase() === 'svg'
+}
+
 export async function exportElement(el, { format = 'png', scale = 1, filename } = {}) {
   await document.fonts.ready
   const name = filename || `devmode-export-${Date.now()}`
@@ -359,7 +413,7 @@ export async function exportElement(el, { format = 'png', scale = 1, filename } 
   let dataUrl
   if (format === 'png') dataUrl = await toPng(el, { ...HTML_TO_IMAGE_OPTS, pixelRatio: scale })
   else if (format === 'jpg' || format === 'jpeg') dataUrl = await toJpeg(el, { ...HTML_TO_IMAGE_OPTS, pixelRatio: scale, quality: 0.95 })
-  else if (format === 'svg') dataUrl = await toSvg(el, HTML_TO_IMAGE_OPTS)
+  else if (format === 'svg') dataUrl = isSvgElement(el) ? serializeVectorSvg(el) : await toSvg(el, HTML_TO_IMAGE_OPTS)
   else throw new Error(`Unsupported export format: ${format}`)
 
   downloadDataUrl(dataUrl, `${name}.${extensionFor(format)}`)
@@ -408,6 +462,14 @@ export async function exportSelection(elements, { format = 'png', scale = 1, fil
   }
 
   if (format === 'svg') {
+    // A single selected icon gets the same true-vector export as
+    // exportElement's own single-selection path above, bypassing the
+    // ancestor-crop approach entirely — cropping only makes sense once
+    // there's a real multi-element union to crop down to.
+    if (elements.length === 1 && isSvgElement(elements[0])) {
+      downloadDataUrl(serializeVectorSvg(elements[0]), `${name}.svg`)
+      return
+    }
     const svgDataUrl = await toSvg(ancestor, HTML_TO_IMAGE_OPTS)
     downloadDataUrl(cropSvgDataUrl(svgDataUrl, crop), `${name}.svg`)
     return

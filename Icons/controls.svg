@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>controls</title>
+    <g id="controls" stroke="none" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+        <g id="Group" stroke="#000000">
+            <line x1="20" y1="7" x2="11" y2="7" id="Path" stroke-width="2"></line>
+            <line x1="14" y1="17" x2="5" y2="17" id="Path" stroke-width="2"></line>
+            <circle id="Oval" stroke-width="2" cx="17" cy="17" r="3"></circle>
+            <circle id="Oval" stroke-width="2" cx="7" cy="7" r="3"></circle>
+        </g>
+    </g>
+</svg>

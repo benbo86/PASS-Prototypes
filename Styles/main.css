@@ -32,7 +32,7 @@ h2 {
 
 h6 {
     font-size: 18px !important;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.33;
     color: #000;
     margin: 12px 0px;
@@ -718,6 +718,7 @@ h6 {
   padding: 3px;
   background-color: var(--ui-purple-6-lavendar-grey);
   border-radius: 8px;
+  min-width:200px;
 }
 .seg-toggle-item {
   border-radius: 6px;
@@ -725,12 +726,10 @@ h6 {
   font-family: Barlow, sans-serif; font-size: 14px; font-weight: 500;
   line-height: 20px;
   color: var(--greyscale-4-grey-40);
-  /* Harmless on the original <span> (which has no default browser chrome
-     to begin with) — needed once Components/SegmentedToggle.jsx renders
-     this as a real <button> for its optional interactive (onChange) mode. */
   border: none;
   background: none;
   cursor: pointer;
+  width:50%;
 }
 .seg-toggle-item.active {
   color: #000;

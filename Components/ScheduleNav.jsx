@@ -6,9 +6,12 @@
 // always links to the Employee view specifically (no ?view=funders query),
 // since that's this menu's own definition of "the Timesheets page" — the
 // Funders toggle is a page-internal concern, not a separate destination.
-// Schedule/Shifts/Holidays & Absences stay inert placeholders until built.
+// Shifts/Holidays & Absences stay inert placeholders until built. Schedule
+// itself now links to schedule/daily-schedule/ (AIOP-23738's Daily Schedule
+// grid, built for the Unassigned Visits list toggle) — the last of the two
+// that had none.
 const TABS = [
-  { key: 'schedule',              label: 'Schedule',              href: null },
+  { key: 'schedule',              label: 'Schedule',              href: '../../schedule/daily-schedule/' },
   { key: 'shifts',                label: 'Shifts',                href: null },
   { key: 'holidays-absences',     label: 'Holidays & Absences',   href: null },
   { key: 'leave-requests',        label: 'Leave Requests',        href: '../../schedule/leave-requests/' },

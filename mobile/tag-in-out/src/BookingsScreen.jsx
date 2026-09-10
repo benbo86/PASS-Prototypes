@@ -98,7 +98,7 @@ export default function BookingsScreen({ onSelectBooking }) {
           <BookingCard key={b.key} booking={b} onClick={b.key === 'real' ? onSelectBooking : undefined} />
         ))}
       </div>
-      <AppNav activeTab="bookings" links={{ account: '../account/' }} />
+      <AppNav activeTab="bookings" links={{ notifications: '../notifications/', account: '../account/' }} />
     </div>
   )
 }
