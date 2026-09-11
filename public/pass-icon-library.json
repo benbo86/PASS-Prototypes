@@ -3825,6 +3825,20 @@
       "usageCount": 1
     },
     {
+      "hash": "e368b1bd",
+      "name": "Check",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\">\n    <polygon fill=\"currentColor\" points=\"9.29090299 15.7925373 5.47272117 12.0313433 4.1999939 13.2850746 9.29090299 18.3 20.1999939 7.55373134 18.9272666 6.3\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#CheckIcon",
+          "name": "CheckIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "15296c9f",
       "name": "Settings",
       "group": "Inline",
@@ -4189,5 +4203,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-10T15:52:31.708Z"
+  "generatedAt": "2026-09-11T08:00:01.388Z"
 }

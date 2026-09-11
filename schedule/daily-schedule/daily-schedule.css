@@ -146,20 +146,19 @@
    own flex-start above (it's the label's one and only child). */
 .ds-unassigned-heading { display: flex; align-items: center; justify-content: space-between; width:100%; }
 
-/* Same track/active-pill colours as the Timeline/Map view-mode toggle
-   (.ds-view-mode-toggle, Components/SegmentedToggle.jsx's own .seg-toggle/
-   .seg-toggle-item look) — light lavender-grey track, white active pill
-   with a soft shadow, purple active icon — rather than this toggle's own
-   previous white-track/lavender-active look. */
-.ds-view-toggle { display: inline-flex; gap: 4px; background: var(--ui-purple-6-lavendar-grey); border-radius: 8px; padding: 3px; }
-.ds-view-toggle-btn {
+/* A single icon button (not a toggle — see the JSX comment above this
+   markup) that switches the Unassigned section between timeline and list.
+   Plain lavender-grey fill at rest, matching the view-mode toggle's own
+   track colour so it still reads as part of the same view-switching family
+   even though it's no longer a segmented control. */
+.ds-view-switch-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  border: none; background: none; padding: 6px 8px; border-radius: 6px;
+  width: 34px; height: 34px; border: none; border-radius: 8px;
+  background: var(--ui-purple-6-lavendar-grey); color: var(--greyscale-2-grey-20);
   cursor: pointer; font-family: inherit;
 }
-.ds-view-toggle-btn .col-icon { width: 16px; height: 16px; }
-.ds-view-toggle-btn.active { background: #fff; box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 4px 0px; }
-.ds-view-toggle-btn.active .col-icon { }
+.ds-view-switch-btn:hover { background: var(--ui-purple-5-languid-lavendar); }
+.ds-view-switch-btn .col-icon { width: 16px; height: 16px; }
 
 .ds-unassigned-lanes { display: flex; flex-direction: column; min-height: 0; }
 .ds-lane { position: relative; height: 40px; }
