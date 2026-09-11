@@ -58,6 +58,94 @@ function normalizeSelectorText(sel) {
   return sel.replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').trim()
 }
 
+// ─── New-rule file target (see handleClick's own class auto-seeding) ──
+// A brand-new selector (one of a selected element's own classes with no
+// existing matching rule, auto-seeded the moment it's selected — see
+// handleClick below) has no rule to infer a source file from the way an
+// existing one does — the user picks one via a dropdown instead.
+// Naturally dev-only: data-vite-dev-id (what getFilePath reads) doesn't
+// exist in a production build, so this list is empty there and the
+// dropdown simply doesn't render, same as every other Apply-to-file
+// affordance's existing dev-only scoping.
+function getWritableStylesheetPaths() {
+  const paths = new Set()
+  Array.from(document.styleSheets).forEach(sheet => {
+    const p = getFilePath(sheet)
+    if (p) paths.add(p)
+  })
+  return Array.from(paths)
+}
+
+// A short, readable label for a dropdown option — the full absolute path
+// is meaningless at a glance, but its last few segments (e.g.
+// "schedule/daily-schedule/daily-schedule.css") are exactly how CLAUDE.md's
+// own `location/prototype-name/` folder convention already names things.
+function shortFileLabel(filePath) {
+  const parts = filePath.replace(/\\/g, '/').split('/')
+  return parts.slice(-3).join('/')
+}
+
+// Which currently-loaded stylesheet is "this prototype's own local CSS
+// file" — the sensible default for a brand-new rule. Derived from the
+// current URL against Vite's own base path rather than a hardcoded lookup,
+// so it works for every prototype without a per-file table to maintain.
+function currentPrototypeFolder() {
+  const base = import.meta.env.BASE_URL || '/'
+  let path = window.location.pathname
+  if (path.startsWith(base)) path = path.slice(base.length)
+  const segments = path.split('/').filter(Boolean)
+  return segments.slice(0, 2).join('/') // location/prototype-name
+}
+
+function pickDefaultStylesheetPath(paths) {
+  const folder = currentPrototypeFolder()
+  if (folder) {
+    const match = paths.find(p => p.replace(/\\/g, '/').includes(`/${folder}/`))
+    if (match) return match
+  }
+  return paths[0] || null
+}
+
+// Auto-seeds an empty, ready-to-edit rule for any of `target`'s own
+// classes that don't already have one — replaces the old "+ Create rule
+// for .cls" button (Ben: "I don't think we need it") by doing this
+// automatically wherever the target's classes might have just changed,
+// not only the one place (a fresh element selection) it originally ran.
+// Real bug this generalization fixes: adding a class via the Element tab
+// and confirming it through the tab-switch prompt's "Apply changes" (or
+// the main unified Save button) commits the class onto the live element
+// via a *different* path than a fresh selection — the CSS tab's own
+// `selection.keys` was computed once, at the ORIGINAL selection moment,
+// and never revisited, so the just-added class's own rule never appeared
+// until the element was deselected and re-selected from scratch. Called
+// from both handleClick (a fresh selection) and the element-edit
+// reconcile effect below (right after an edit actually lands on the DOM),
+// so either path picks up a newly-unstyled class the same way.
+//
+// Matched against `existingKeys ` by normalized selector text alone
+// (ignoring mediaText) — a class matched only inside an @media block still
+// counts as "already has a rule." Returns `{ newKeys, newEntries }`
+// (both empty when there's nothing new to seed) rather than mutating
+// anything itself, so each caller can merge them into whatever batch of
+// state updates it's already making.
+function computeUnstyledClassEntries(target, existingKeys, sessionEditsSnapshot) {
+  if (!target.classList || target.classList.length === 0) return { newKeys: [], newEntries: {} }
+  const matchedSelectors = new Set(findMatchingRules(target).map(m => normalizeSelectorText(m.selectorText)))
+  const writablePaths = import.meta.env.DEV ? getWritableStylesheetPaths() : []
+  const defaultFilePath = writablePaths.length > 0 ? pickDefaultStylesheetPath(writablePaths) : null
+  const newKeys = []
+  const newEntries = {}
+  Array.from(target.classList).forEach(cls => {
+    const selector = `.${cls}`
+    if (matchedSelectors.has(normalizeSelectorText(selector))) return
+    const key = ruleKey(selector, null)
+    if (existingKeys.includes(key) || sessionEditsSnapshot[key] || newEntries[key]) return
+    newKeys.push(key)
+    newEntries[key] = { selectorText: selector, mediaText: null, filePath: defaultFilePath, original: '', committed: '', draft: '', loading: false, isNew: true }
+  })
+  return { newKeys, newEntries }
+}
+
 function ruleKey(selectorText, mediaText) {
   return `${normalizeSelectorText(selectorText)}|${mediaText ? normalizeSelectorText(mediaText) : ''}`
 }
@@ -157,6 +245,48 @@ function pruneInjectedSheet(keepKeys) {
     if (rule.type === CSSRule.STYLE_RULE && keepKeys.has(ruleKey(rule.selectorText, null))) continue
     sheet.deleteRule(i)
   }
+}
+
+// Real bug, caught via testing: a brand-new rule (auto-seeded, see
+// handleClick's own class auto-seeding below) lives
+// only in the injected sheet until it's actually Saved to a real file —
+// but the moment that file write lands, Vite's HMR swaps in a fresh
+// <style> tag serving that same selector for real, WITHOUT the injected
+// sheet's own now-redundant copy ever getting cleaned up (nothing else
+// prunes it — pruneInjectedSheet above only runs during version
+// reconciliation, not after an ordinary Save). Re-selecting that same
+// element afterward then finds BOTH rules matching (one from each sheet),
+// producing two identical ruleKeys in `selection.keys` — React warns about
+// duplicate list keys, and the panel shows the same rule block twice.
+// Fixed by deduping on ruleKey right where the matches are collected,
+// preferring whichever copy is NOT in the injected sheet (the real,
+// file-backed one) and deleting the stale injected duplicate outright —
+// there's never a legitimate reason for the same selector to exist in both
+// places at once once the real file has caught up.
+function dedupeInjectedDuplicates(matches) {
+  const isInjected = (m) => m.rule.parentStyleSheet?.ownerNode?.id === INJECTED_STYLE_ID
+  const kept = new Map() // ruleKey -> kept match
+  const result = []
+  matches.forEach(m => {
+    const key = ruleKey(m.selectorText, m.mediaText)
+    const existing = kept.get(key)
+    if (!existing) {
+      kept.set(key, m)
+      result.push(m)
+      return
+    }
+    // Same selector matched twice — keep the non-injected (real) one,
+    // delete whichever copy lives in the injected sheet.
+    const [staleInjected, real] = isInjected(existing) ? [existing, m] : [m, existing]
+    if (isInjected(existing) === isInjected(m)) return // both the same kind — drop the extra silently
+    const sheet = staleInjected.rule.parentStyleSheet
+    const idx = sheet ? Array.from(sheet.cssRules).indexOf(staleInjected.rule) : -1
+    if (idx >= 0) sheet.deleteRule(idx)
+    kept.set(key, real)
+    const i = result.indexOf(existing)
+    if (i >= 0) result[i] = real
+  })
+  return result
 }
 
 // Always re-resolves the live rule(s) for a selector fresh, rather than
@@ -274,12 +404,17 @@ function setLiveRuleTextInSheet(sheetIndex, selectorText, mediaText, cssText) {
 // for this selector," which is exactly what undoing an edit needs too.
 // Fire-and-forget (best effort) — the caller is always about to revert the
 // live DOM/close the panel regardless of whether this particular network
-// request succeeds.
+// request succeeds. For a brand-new rule (isNew, auto-seeded on selection
+// — see handleClick), `original` is always '' — devEditPlugin.js's
+// applyEdit treats empty declarations as "remove this rule" rather than
+// leaving a stray empty block behind, so reverting a new rule that was
+// already applied to file correctly deletes it again, not just blanks it
+// out.
 function revertFileWrites(entries) {
   if (!import.meta.env.DEV) return
   const edits = entries
     .filter(e => e && e.filePath && e.committed !== e.original)
-    .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.original }))
+    .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.original, create: !!e.isNew }))
   if (edits.length === 0) return
   fetch('/__dev-edit/apply', {
     method: 'POST',
@@ -925,6 +1060,26 @@ export default function DevEdit({ containerRef, prototypeId }) {
   useEffect(() => {
     if (!elementRuntimeRef.current) return
     elementRuntimeRef.current.setActiveEdits(mergeElementEdits(elementEdits, activeOverrides?.elementEdits))
+
+    // Real bug, reported directly: adding a class via the Element tab and
+    // confirming it through the tab-switch prompt's "Apply changes" (or
+    // the main Save button) commits the class right here, not through
+    // handleClick — the CSS tab's own `selection.keys` had already been
+    // computed once, at the original selection moment, and never
+    // revisited, so the just-added class's rule never showed up until the
+    // element was deselected and freshly re-selected. `setActiveEdits`
+    // above runs its own reconcile synchronously, so the DOM already
+    // reflects the committed class by this point — the right moment to
+    // check whether that just introduced a class with no rule yet, same
+    // as a fresh selection already does via computeUnstyledClassEntries.
+    const sel = selectionRef.current
+    if (sel) {
+      const { newKeys, newEntries } = computeUnstyledClassEntries(sel.el, sel.keys, sessionEditsRef.current)
+      if (newKeys.length > 0) {
+        setSessionEdits(prev => ({ ...prev, ...newEntries }))
+        setSelection(s => (s ? { ...s, keys: [...s.keys, ...newKeys] } : s))
+      }
+    }
   }, [activeOverrides, elementEdits])
 
   // 'deactivate' | 'signout' | null — which exit path is waiting on the
@@ -1190,12 +1345,12 @@ export default function DevEdit({ containerRef, prototypeId }) {
       const parentMatches = clickWasOnSvgItself && target.parentElement
         ? findMatchingRules(target.parentElement)
         : []
-      const rawMatches = [
+      const rawMatches = dedupeInjectedDuplicates([
         ...parentMatches,
         ...findMatchingRules(target).filter(m =>
           !parentMatches.some(pm => ruleKey(pm.selectorText, pm.mediaText) === ruleKey(m.selectorText, m.mediaText))
         ),
-      ]
+      ])
       const keys = []
       const newEntries = {}
       const toLookup = []
@@ -1208,6 +1363,14 @@ export default function DevEdit({ containerRef, prototypeId }) {
         newEntries[key] = { selectorText: m.selectorText, mediaText: m.mediaText, filePath: m.filePath, original, committed: original, draft: original, loading: true }
         toLookup.push({ key, filePath: m.filePath, selector: m.selectorText, mediaText: m.mediaText })
       })
+
+      // Auto-seed an empty, ready-to-edit rule for any of this element's
+      // own classes that don't already have one (see
+      // computeUnstyledClassEntries's own comment for the full reasoning
+      // and the other call site this same seeding also needs to run from).
+      const unstyled = computeUnstyledClassEntries(target, keys, sessionEditsRef.current)
+      keys.push(...unstyled.newKeys)
+      Object.assign(newEntries, unstyled.newEntries)
 
       if (Object.keys(newEntries).length > 0) {
         setSessionEdits(prev => ({ ...prev, ...newEntries }))
@@ -1428,7 +1591,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
     const fileEdits = dirtyKeys
       .map(k => sessionEditsRef.current[k])
       .filter(e => import.meta.env.DEV && e.filePath)
-      .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.draft }))
+      .map(e => ({ filePath: e.filePath, selector: e.selectorText, mediaText: e.mediaText, declarations: e.draft, create: !!e.isNew }))
 
     if (fileEdits.length > 0) {
       setApplyingAll(true)
@@ -1512,22 +1675,12 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setSelection(null)
   }
 
-  // ── Add rule: for an element with no existing stylesheet rule at all
-  // ("No editable stylesheet rule matches this element") — creates a
-  // brand-new sessionEdits entry for one of the element's own classes, with
-  // empty original/committed/draft. Everything downstream (Apply, Cancel,
-  // Discard, Save as version) already treats a rule generically via that
-  // same three-state shape, so a rule that started out empty needs no
-  // special-casing anywhere else — only the live CSSOM insert
-  // (setLiveRuleText's injected-sheet fallback) and the reconcile-time
-  // prune (applyOverrideSet) above needed to change to make this possible.
-  const handleAddRule = (selector) => {
-    const key = ruleKey(selector, null)
-    setSessionEdits(prev => (prev[key] ? prev : {
-      ...prev,
-      [key]: { selectorText: selector, mediaText: null, filePath: null, original: '', committed: '', draft: '', loading: false },
-    }))
-    setSelection(sel => (sel && !sel.keys.includes(key) ? { ...sel, keys: [...sel.keys, key] } : sel))
+  // Lets the file-target dropdown (only shown for isNew rows) change which
+  // real file a not-yet-applied new rule will write to — irrelevant to
+  // every other rule, whose filePath comes from wherever it was actually
+  // found and isn't user-editable.
+  const setRuleFilePath = (key, filePath) => {
+    setSessionEdits(prev => (prev[key] ? { ...prev, [key]: { ...prev[key], filePath } } : prev))
   }
 
   // ── Save as version ──
@@ -1856,7 +2009,13 @@ export default function DevEdit({ containerRef, prototypeId }) {
   const elementEditInitial = selection ? {
     tag: selection.el.tagName.toLowerCase(),
     text: selection.el.children.length === 0 ? selection.el.textContent : '',
-    className: selection.el.className || '',
+    // `.className` reads back a plain string on an HTML element but a
+    // read-only SVGAnimatedString object on an SVG one (stringifies to the
+    // useless "[object SVGAnimatedString]") — getAttribute works
+    // identically for both, so it's used everywhere an element's class
+    // list needs reading, not just here (see the matching fix in
+    // elementEdit.js's applyElementEdit and handleElementApply below).
+    className: selection.el.getAttribute('class') || '',
     elementId: selection.el.id || '',
   } : null
 
@@ -1965,7 +2124,10 @@ export default function DevEdit({ containerRef, prototypeId }) {
       const domPath = buildDomPath(target, containerRef.current)
       const pathHint = buildPathHint(target, containerRef.current)
       const savedValues = {
-        tag: target.tagName.toLowerCase(), text: target.textContent, className: target.className, elementId: target.id,
+        // getAttribute, not .className — see elementEditInitial's own
+        // comment above for why (an SVG's .className is a read-only
+        // SVGAnimatedString, not a plain string).
+        tag: target.tagName.toLowerCase(), text: target.textContent, className: target.getAttribute('class') || '', elementId: target.id,
       }
       entry = {
         id: makeElementEditId(), domPath, pathHint, originalHash: hash, originalLen: len,
@@ -2033,7 +2195,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 selection={selection}
                 rows={rows}
                 onDraftChange={updateDraft}
-                onAddRule={handleAddRule}
+                onSetRuleFilePath={setRuleFilePath}
                 onClose={closeSelection}
                 error={error}
                 activeTab={activeTab}
@@ -2456,15 +2618,15 @@ function RuleTextarea({ value, onChange, disabled, rows }) {
 // ─── Edit panel (per selected element) ───────────────────────────────
 
 function EditPanel({
-  selection, rows, onDraftChange, onAddRule, onClose, error,
+  selection, rows, onDraftChange, onSetRuleFilePath, onClose, error,
   activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
   elementEditInitial, elementPanelRef, elementDraftDirty, onElementDirtyChange, elementResetNonce, hasElementEditToReset,
   applyingAll, onPanelApply, onPanelCancel, onPanelReset,
 }) {
-  // Only read when rows.length === 0 below ("no rule matches this element")
-  // — offers one of the element's own classes as a selector to create a
-  // brand-new rule under.
-  const addableClasses = selection.el.classList ? Array.from(selection.el.classList) : []
+  // Populates the file-target dropdown for a not-yet-applied new rule (see
+  // handleClick's own class auto-seeding in the parent) — empty in
+  // production, where there's nothing resolvable to write to anyway.
+  const writableStylesheetPaths = getWritableStylesheetPaths()
   // The Icon tab only ever exists when the selection resolves to one <svg>
   // AND that svg passes isLikelyIcon (square/small/monochrome) — for every
   // other element, including a matched-but-not-icon-shaped svg (an
@@ -2576,20 +2738,13 @@ function EditPanel({
           />
         ) : (
           <>
+            {/* Only reachable when the element has no class at all — any
+                class with no rule yet is already auto-seeded as its own
+                editable (empty) rule block below (see handleClick in the
+                parent), not offered as a separate step here. */}
             {rows.length === 0 && (
               <div className="devedit-panel-empty">
-                No editable stylesheet rule matches this element.
-                {addableClasses.length > 0 ? (
-                  <div className="devedit-add-rule-list">
-                    {addableClasses.map(cls => (
-                      <button key={cls} className="devedit-btn-secondary" onClick={() => onAddRule(`.${cls}`)}>
-                        + Add rule for .{cls}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="devedit-add-rule-hint">This element has no class name to attach a new rule to.</div>
-                )}
+                No editable stylesheet rule matches this element, and it has no class name to attach a new rule to.
               </div>
             )}
 
@@ -2608,6 +2763,31 @@ function EditPanel({
                     rows={Math.max(3, m.draft.split('\n').length)}
                     disabled={m.loading || applyingAll}
                   />
+                  {/* Only a brand-new rule (auto-seeded in handleClick for
+                      any of the element's own classes with no rule yet) has
+                      a choosable file target — an already-found rule's
+                      filePath comes from wherever it actually lives, and
+                      isn't something editing here should be able to move.
+                      Locked once it's actually been saved to that file at
+                      least once this session (committed !== '') — changing
+                      the target after the rule already exists somewhere
+                      would leave a stale copy behind in the original file,
+                      rather than moving it. */}
+                  {m.isNew && writableStylesheetPaths.length > 0 && (
+                    <div className="devedit-new-rule-file">
+                      <label>Save to file</label>
+                      <select
+                        className="devedit-select"
+                        value={m.filePath || ''}
+                        onChange={(e) => onSetRuleFilePath(key, e.target.value)}
+                        disabled={applyingAll || m.committed !== ''}
+                      >
+                        {writableStylesheetPaths.map(p => (
+                          <option key={p} value={p}>{shortFileLabel(p)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )
             })}

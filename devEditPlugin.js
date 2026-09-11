@@ -20,7 +20,11 @@ import postcss from 'postcss'
 //    Postcss, by contrast, never expands anything it wasn't asked to —
 //    reading through it preserves exactly what's in the file.
 //  - /__dev-edit/apply: write edited declarations back into the same
-//    rule in its source file.
+//    rule in its source file. An edit marked `create: true` (a brand-new
+//    rule with no existing match, see Components/DevEdit.jsx's
+//    handleAddRule) appends a new rule instead of erroring when nothing is
+//    found; any edit whose declarations end up empty removes the rule
+//    from the file entirely, rather than leaving an empty `{}` behind.
 export default function devEditPlugin() {
   return {
     name: 'dev-edit-apply',
@@ -125,9 +129,67 @@ async function lookupDeclarations({ filePath, selector, mediaText }) {
   }
 }
 
-async function applyEdit({ filePath, selector, mediaText, declarations }) {
+// Appends a brand-new rule (optionally inside a new @media block) to the
+// end of the file — used only when `create: true` was explicitly passed
+// AND no existing rule was found (see applyEdit below). Never invoked for
+// a normal edit-existing-rule request, so a selector genuinely expected to
+// already exist still fails loudly if it's somehow missing, rather than
+// silently creating a duplicate.
+function appendRule(root, selector, mediaText, declarations) {
+  const rule = postcss.rule({ selector, raws: { before: '\n\n', between: ' ' } })
+  const declRoot = postcss.parse(`a{${declarations}}`)
+  declRoot.first.nodes.forEach(decl => {
+    const clone = decl.clone()
+    clone.raws.before = '\n  '
+    rule.append(clone)
+  })
+  rule.raws.after = '\n'
+  if (mediaText) {
+    const atRule = postcss.atRule({ name: 'media', params: mediaText, raws: { before: '\n\n', between: ' ', after: '\n' } })
+    rule.raws.before = '\n  '
+    atRule.append(rule)
+    root.append(atRule)
+  } else {
+    root.append(rule)
+  }
+}
+
+// Declarations arrive empty in exactly two cases: Reset/Discard reverting
+// a brand-new rule (see Components/DevEdit.jsx's revertFileWrites — a new
+// rule's `original` is always '', since it never existed before this
+// session) back past its only-ever-applied state, or a normal edit whose
+// textarea was cleared out entirely. Either way, a rule with zero
+// declarations serves no purpose sitting in the file — removing it
+// outright (rather than leaving `.foo {\n}` behind) is what actually makes
+// "revert a new rule" a clean no-trace undo instead of a cosmetic stain.
+async function applyEdit({ filePath, selector, mediaText, declarations, create }) {
   const resolvedPath = assertSafePath(filePath)
-  const { root, target } = await findRule(resolvedPath, selector, mediaText)
+  const isEmpty = !declarations || !declarations.trim()
+
+  let found
+  try {
+    found = await findRule(resolvedPath, selector, mediaText)
+  } catch (err) {
+    if (!create) throw err
+    found = null
+  }
+
+  if (!found) {
+    if (isEmpty) return // nothing to create, nothing to remove
+    const css = await readFile(resolvedPath, 'utf-8')
+    const root = postcss.parse(css)
+    appendRule(root, selector, mediaText, declarations)
+    await writeFile(resolvedPath, root.toString(), 'utf-8')
+    return
+  }
+
+  const { root, target } = found
+
+  if (isEmpty) {
+    target.remove()
+    await writeFile(resolvedPath, root.toString(), 'utf-8')
+    return
+  }
 
   // Preserve the rule's original indentation/formatting rather than
   // letting every declaration fall back to whatever raws a throwaway

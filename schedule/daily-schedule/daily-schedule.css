@@ -77,8 +77,18 @@
    (Employees/Customers, Daily/Weekly). Overridden here, scoped to this one
    icon-only instance, rather than changing the shared rule itself. */
 .ds-view-mode-toggle .seg-toggle { min-width: 0; }
-.ds-view-mode-toggle .seg-toggle-item { display: flex; width: auto; padding: 8px; color: var(--greyscale-2-grey-20); }
-.ds-view-mode-toggle .seg-toggle-item.active { color: var(--brand-purple-6-purple-4); }
+/* No existing colors.css token matches #5C6B80 — used as a plain literal
+   rather than inventing a fake variable name for it. */
+.ds-view-mode-toggle .seg-toggle-item { display: flex; width: auto; padding: 8px; color: #5C6B80; width: 36px; height: 30px; }
+.ds-view-mode-toggle .seg-toggle-item.active { color: #000; }
+/* Each icon is wrapped in Components/Tooltip.jsx for its label — its own
+   .tooltip-wrap (Styles/main.css) sets a fixed muted-purple `color` by
+   default (the right look for its other, plain icon-only consumers), but
+   that sits BETWEEN .seg-toggle-item and the icon's own `stroke=
+   currentColor`, silently overriding the colours set just above instead of
+   letting them reach the svg. Scoped to inherit here rather than changing
+   the shared default, which other Tooltip consumers still rely on. */
+.ds-view-mode-toggle .tooltip-wrap { color: inherit; }
 
 .ds-placeholder {
   padding: 48px; text-align: center; color: var(--greyscale-6-grey-50);
@@ -153,7 +163,7 @@
    even though it's no longer a segmented control. */
 .ds-view-switch-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border: none; border-radius: 8px;
+  width: 34px; height: 34px; border: none; border-radius: 999px;
   background: var(--ui-purple-6-lavendar-grey); color: var(--greyscale-2-grey-20);
   cursor: pointer; font-family: inherit;
 }
@@ -226,4 +236,14 @@
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
   background: var(--greyscale-2-grey-20); color: #fff; padding: 12px 24px;
   border-radius: 8px; font-size: 14px; z-index: 11000; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.map-toggle-item {
+  width: 36px;
+  height: 30px;
+}
+
+.map-toggle-icon {
+  width: 36px;
+  height: 30px;
 }

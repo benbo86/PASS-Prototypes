@@ -123,17 +123,6 @@
   flex-shrink: 0;
 }
 
-.devedit-add-rule-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.devedit-add-rule-hint {
-  margin-top: 6px;
-}
-
 .devedit-rule-block {
   display: flex;
   flex-direction: column;
@@ -163,6 +152,33 @@
   font-style: italic;
   color: #8e8e93;
 }
+
+/* File-target dropdown for a brand-new rule (see handleAddRule) — only
+   ever shown alongside a rule's own textarea, never standalone. */
+.devedit-new-rule-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.devedit-new-rule-file label {
+  font-family: Barlow, sans-serif;
+  font-size: 10.5px;
+  color: #8e8e93;
+  white-space: nowrap;
+}
+.devedit-select {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  background: #2c2c2e;
+  color: #f2f2f2;
+  border: 1px solid #3a3a3c;
+  border-radius: 6px;
+  padding: 5px 6px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+}
+.devedit-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .devedit-rule-textarea {
   box-sizing: border-box;

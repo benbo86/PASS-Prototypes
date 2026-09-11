@@ -177,8 +177,30 @@ export function applyElementEdit(el, edit, registry) {
     target = next
   }
 
-  if (typeof edit.text === 'string') target.textContent = edit.text
-  if (typeof edit.className === 'string') target.className = edit.className
+  // Real bug, reported directly: editing ANY field (e.g. just adding a
+  // class) on an element with children silently wiped out its entire
+  // content too, making it look like the element itself had vanished.
+  // ElementEditPanel.commit() always returns the *whole* draft object,
+  // including `text` (seeded to '' for a with-children element, since the
+  // Text field is hidden and never touched) — `typeof edit.text ===
+  // 'string'` is true for that empty string just as much as for a real
+  // edit, so `target.textContent = ''` ran unconditionally and deleted
+  // every child node, not just "no text to set". Guarding on
+  // isLeafTextElement(target) here — the exact same eligibility check
+  // that decides whether the Text field is even shown — means this can
+  // never fire for a container element regardless of what any upstream
+  // caller passes, rather than relying on every caller to remember to
+  // omit `text` correctly.
+  if (typeof edit.text === 'string' && isLeafTextElement(target)) target.textContent = edit.text
+  // `.className` is a plain string on an HTML element but a read-only
+  // SVGAnimatedString on an SVG one (assigning to it is a silent no-op,
+  // not an error) — since class/id editing is offered for every element
+  // including icons, `setAttribute('class', ...)` is used instead, which
+  // works identically for both element kinds.
+  if (typeof edit.className === 'string') {
+    if (edit.className) target.setAttribute('class', edit.className)
+    else target.removeAttribute('class')
+  }
   if (typeof edit.elementId === 'string') {
     if (edit.elementId) target.id = edit.elementId
     else target.removeAttribute('id')
