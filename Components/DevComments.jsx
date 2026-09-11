@@ -531,8 +531,13 @@ function ThreadPanel({ comment, position, authorName, setAuthorName, onClose, on
   const canReply = replyText.trim() && authorName.trim()
   // Same non-authoritative identity model as editing (see EditableMessage)
   // — only whoever's currently-typed name matches the comment's original
-  // author sees the delete action at all.
-  const canDelete = !!authorName.trim() && comment.authorName === authorName
+  // author sees the delete action on a still-open thread, protecting
+  // active feedback from being deleted by anyone else. Once a thread is
+  // resolved, though, it's done — anyone can clear it out, since that's
+  // the actual point of resolving something (so it can eventually be
+  // cleaned up), not just the original author who may no longer be
+  // around to do it.
+  const canDelete = comment.resolved || (!!authorName.trim() && comment.authorName === authorName)
 
   const handleReply = async () => {
     if (!canReply || submitting) return

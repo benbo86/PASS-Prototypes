@@ -7,6 +7,7 @@ import EventPanel from '../../../Components/EventPanel'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import Tooltip from '../../../Components/Tooltip'
 import ScheduleFilterDropdown from '../../../Components/ScheduleFilterDropdown'
+import Pagination from '../../../Components/Pagination'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -14,7 +15,7 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
-import { AreaTag, VisitTypeTag } from './Tags'
+import { AreaTag } from './Tags'
 import {
   UNASSIGNED_VISITS, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES, AREAS,
   toMinutes, fmtDuration,
@@ -233,10 +234,13 @@ export default function DailySchedule() {
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
 
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+
   const toggleSort = (col) => setSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
 
-  const setFilter = (key, set) => setActiveFilters(prev => ({ ...prev, [key]: set }))
-  const clearAllFilters = () => setActiveFilters(EMPTY_FILTERS)
+  const setFilter = (key, set) => { setActiveFilters(prev => ({ ...prev, [key]: set })); setPage(1) }
+  const clearAllFilters = () => { setActiveFilters(EMPTY_FILTERS); setPage(1) }
   const anyFilterActive = Object.values(activeFilters).some(s => s.size > 0)
 
   // Only Customers/Area (real fields on every unassigned visit) and
@@ -255,6 +259,15 @@ export default function DailySchedule() {
 
   const lanes = useMemo(() => packLanes(filteredVisits), [filteredVisits])
   const sortedVisits = useMemo(() => sortVisits(filteredVisits, sort), [filteredVisits, sort])
+
+  // List view pagination — Components/Pagination.jsx, same wiring as
+  // schedule/leave-requests' own table.
+  const totalRows = sortedVisits.length
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage))
+  const safePage = Math.min(page, totalPages)
+  const pageVisits = sortedVisits.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage)
+  const showStart = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1
+  const showEnd = Math.min(safePage * rowsPerPage, totalRows)
 
   // Fires from Components/EventPanel's own Save/Accept-assignment action
   // (never on a lone "+ Add" — that only fills a slot locally within the
@@ -382,24 +395,26 @@ export default function DailySchedule() {
                 <div className="ds-unassigned">
                   <div className="ds-row ds-unassigned-row">
                     <div className="ds-row-label ds-unassigned-label">
-                      <span>Unassigned<span className="ds-count">({filteredVisits.length})</span></span>
-                      <div className="ds-view-toggle">
-                        <Tooltip text="Timeline">
-                          <button
-                            className={`ds-view-toggle-btn ${unassignedView === 'timeline' ? 'active' : ''}`}
-                            onClick={() => setUnassignedView('timeline')}
-                          >
-                            <TimelineViewIcon />
-                          </button>
-                        </Tooltip>
-                        <Tooltip text="List">
-                          <button
-                            className={`ds-view-toggle-btn ${unassignedView === 'list' ? 'active' : ''}`}
-                            onClick={() => setUnassignedView('list')}
-                          >
-                            <ListViewIcon />
-                          </button>
-                        </Tooltip>
+                      <div className="ds-unassigned-heading">
+                        <span>Unassigned<span className="ds-count">({filteredVisits.length})</span></span>
+                        <div className="ds-view-toggle">
+                          <Tooltip text="Timeline">
+                            <button
+                              className={`ds-view-toggle-btn ${unassignedView === 'timeline' ? 'active' : ''}`}
+                              onClick={() => setUnassignedView('timeline')}
+                            >
+                              <TimelineViewIcon />
+                            </button>
+                          </Tooltip>
+                          <Tooltip text="List">
+                            <button
+                              className={`ds-view-toggle-btn ${unassignedView === 'list' ? 'active' : ''}`}
+                              onClick={() => setUnassignedView('list')}
+                            >
+                              <ListViewIcon />
+                            </button>
+                          </Tooltip>
+                        </div>
                       </div>
                     </div>
 
@@ -455,25 +470,32 @@ export default function DailySchedule() {
                               </tr>
                             </thead>
                             <tbody>
-                              {sortedVisits.map(v => (
+                              {pageVisits.map(v => (
                                 <tr key={v.id} className="data-row" onClick={() => setAssignVisit(v)}>
                                   <td className="nowrap">{v.start} – {v.end}</td>
                                   <td className="td-name">{v.customer}</td>
                                   <td className="nowrap">{fmtDuration(v.start, v.end)}</td>
                                   <td><AreaTag area={v.area} /></td>
-                                  <td><VisitTypeTag visitType={v.visitType} /></td>
+                                  <td>{v.visitType}</td>
                                   <td className="td-num">0/{v.employeesRequired}</td>
                                   <td>
                                     <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); setAssignVisit(v) }}>Assign</button>
                                   </td>
                                 </tr>
                               ))}
-                              {sortedVisits.length === 0 && (
+                              {totalRows === 0 && (
                                 <tr><td colSpan={7} className="table-empty">All sample unassigned visits have been assigned</td></tr>
                               )}
                             </tbody>
                           </table>
                         </div>
+
+                        <Pagination
+                          page={safePage} totalPages={totalPages} rowsPerPage={rowsPerPage}
+                          showStart={showStart} showEnd={showEnd} totalRows={totalRows}
+                          onPageChange={setPage}
+                          onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1) }}
+                        />
                       </div>
                     )}
                   </div>

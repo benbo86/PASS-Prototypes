@@ -134,25 +134,32 @@
 
 .ds-unassigned { background: var(--ui-purple-7-lightest-lavendar); border-bottom: 1px solid var(--ui-purple-5-languid-lavendar); }
 
-/* Title, then the view toggle below it, both pinned to the top of the
-   label column — that column stretches to match the (often much taller)
-   lanes/list content beside it, and centering short content in a tall
-   cell reads as misplaced, so this overrides .ds-row-label's own
-   vertically-centered default. */
-.ds-unassigned-label {
-  flex-direction: column; align-items: flex-start; justify-content: flex-start;
-  gap: 8px; padding: 20px 24px;
+/* Title, then the view toggle, both pinned to the top of the label column —
+   that column stretches to match the (often much taller) lanes/list content
+   beside it, and centering short content in a tall cell reads as misplaced,
+   so this overrides .ds-row-label's own vertically-centered default. */
+.ds-unassigned-label { align-items: flex-start; justify-content: flex-start;
+  padding: 20px 24px;
 }
+/* Title and view toggle sit on one line, horizontally aligned — this inner
+   row is what actually stays pinned to the top via .ds-unassigned-label's
+   own flex-start above (it's the label's one and only child). */
+.ds-unassigned-heading { display: flex; align-items: center; justify-content: space-between; width:100%; }
 
-.ds-view-toggle { display: inline-flex; gap: 4px; background: #fff; border-radius: 8px; padding: 4px; border: 1px solid var(--ui-purple-5-languid-lavendar); }
+/* Same track/active-pill colours as the Timeline/Map view-mode toggle
+   (.ds-view-mode-toggle, Components/SegmentedToggle.jsx's own .seg-toggle/
+   .seg-toggle-item look) — light lavender-grey track, white active pill
+   with a soft shadow, purple active icon — rather than this toggle's own
+   previous white-track/lavender-active look. */
+.ds-view-toggle { display: inline-flex; gap: 4px; background: var(--ui-purple-6-lavendar-grey); border-radius: 8px; padding: 3px; }
 .ds-view-toggle-btn {
   display: inline-flex; align-items: center; justify-content: center;
   border: none; background: none; padding: 6px 8px; border-radius: 6px;
   cursor: pointer; font-family: inherit;
 }
-.ds-view-toggle-btn .col-icon { color: var(--greyscale-6-grey-50); width: 16px; height: 16px; }
-.ds-view-toggle-btn.active { background: var(--ui-purple-7-lightest-lavendar); }
-.ds-view-toggle-btn.active .col-icon { color: var(--brand-purple-6-purple-4); }
+.ds-view-toggle-btn .col-icon { width: 16px; height: 16px; }
+.ds-view-toggle-btn.active { background: #fff; box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 4px 0px; }
+.ds-view-toggle-btn.active .col-icon { }
 
 .ds-unassigned-lanes { display: flex; flex-direction: column; min-height: 0; }
 .ds-lane { position: relative; height: 40px; }
