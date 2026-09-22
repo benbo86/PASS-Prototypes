@@ -1855,6 +1855,40 @@
       "usageCount": 5
     },
     {
+      "hash": "05cd5cb3",
+      "name": "Map Pin",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /><circle cx=\"12\" cy=\"10\" r=\"3\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EventPanel.jsx#MapPinIcon",
+          "name": "MapPinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/SideNav.jsx#LocationPinIcon",
+          "name": "LocationPinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "component-demos/ui-kit/src/App.jsx#PinIcon",
+          "name": "PinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#MapPinViewIcon",
+          "name": "MapPinViewIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/Tags.jsx#PinIcon",
+          "name": "PinIcon"
+        }
+      ],
+      "usageCount": 5
+    },
+    {
       "hash": "355fe673",
       "name": "Chevron Down",
       "group": "Inline",
@@ -1887,35 +1921,6 @@
         }
       ],
       "usageCount": 5
-    },
-    {
-      "hash": "05cd5cb3",
-      "name": "Map Pin",
-      "group": "Inline",
-      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /><circle cx=\"12\" cy=\"10\" r=\"3\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/EventPanel.jsx#MapPinIcon",
-          "name": "MapPinIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "Components/SideNav.jsx#LocationPinIcon",
-          "name": "LocationPinIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#MapPinViewIcon",
-          "name": "MapPinViewIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/Tags.jsx#PinIcon",
-          "name": "PinIcon"
-        }
-      ],
-      "usageCount": 4
     },
     {
       "hash": "d9048ac6",
@@ -4203,5 +4208,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-11T08:00:01.388Z"
+  "generatedAt": "2026-09-11T14:03:53.037Z"
 }

@@ -59,6 +59,13 @@ const CloseIcon = () => (
   </svg>
 )
 
+// Copied verbatim from schedule/daily-schedule/src/Tags.jsx's own PinIcon.
+const PinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+  </svg>
+)
+
 const ClockIcon = () => (
   <svg width="24" height="24" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <g transform="translate(0.0374, 0.7143)" fillRule="nonzero">
@@ -200,6 +207,11 @@ export default function App() {
           <button className="round-btn primary-btn btn-icon-left"><PlusIcon /> Add employee</button>
           <button className="round-btn secondary-btn btn-icon-right">Select <ChevronDownIcon /></button>
           <button className="round-btn tertiary-btn btn-icon-left btn-icon-right"><SettingsIcon /> Actions <ChevronDownIcon /></button>
+        </div>
+
+        <span className="uk-caption">Compact — .round-btn secondary-btn at a smaller size, for a row-level action (e.g. schedule/daily-schedule's own unassigned-visit "Assign" button).</span>
+        <div className="uk-row">
+          <button className="round-btn secondary-btn uk-assign-btn">Assign</button>
         </div>
 
         <span className="uk-caption">Mobile — .fab-square (10px radius, Styles/mobile.css). Same primary/secondary/tertiary modifiers, square corners instead of .round-btn's pill shape.</span>
@@ -416,6 +428,22 @@ export default function App() {
         <span className="uk-caption">Unrecognised status (falls back to grey, never invisible)</span>
         <div className="uk-row">
           <span className="cc-task-chip cc-task-chip--pending"><FaIcon code={''} />Assist with mobility</span>
+        </div>
+      </Section>
+
+      <Section title="Area tag" description=".ds-tag + an inline colour/icon lookup keyed by area name — used on schedule/daily-schedule/'s unassigned visits (both timeline bars and the list view). A local pattern (copied here from Tags.jsx), not yet promoted to Styles/main.css — colours are explicitly assigned per name rather than hashed, since a hash landed too many of the fixed area names on the same colour to read as genuinely distinct.">
+        <span className="uk-caption">Area variants</span>
+        <div className="uk-row">
+          <span className="ds-tag" style={{ background: 'var(--rag-red-action-med-pastel)', color: 'var(--rag-red-red-overdue-text)' }}><PinIcon /> Coleraine Central</span>
+          <span className="ds-tag" style={{ background: 'var(--availability-4-blue-tint)', color: 'var(--ui-blue-edited-text)' }}><PinIcon /> Portstewart</span>
+          <span className="ds-tag" style={{ background: 'var(--rag-green-green-lightest)', color: 'var(--rag-green-green-3-aa)' }}><PinIcon /> Portrush</span>
+          <span className="ds-tag" style={{ background: 'var(--rag-amber-amber-lightest)', color: 'var(--rag-amber-amber-6)' }}><PinIcon /> Ballymoney</span>
+          <span className="ds-tag" style={{ background: 'var(--availability-6-mauve-tint)', color: 'var(--brand-purple-3-purple-2)' }}><PinIcon /> Castlerock</span>
+        </div>
+
+        <span className="uk-caption">Unrecognised area (falls back to mauve, never invisible)</span>
+        <div className="uk-row">
+          <span className="ds-tag" style={{ background: 'var(--availability-6-mauve-tint)', color: 'var(--brand-purple-3-purple-2)' }}><PinIcon /> Newtownabbey</span>
         </div>
       </Section>
 

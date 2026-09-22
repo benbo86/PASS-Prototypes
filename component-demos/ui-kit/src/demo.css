@@ -73,6 +73,21 @@ html, body {
   gap: 16px;
 }
 
+/* Matches schedule/daily-schedule/daily-schedule.css's own .ds-assign-btn
+   exactly — a compact secondary button for a row-level action, not a new
+   shared class in main.css (this one prototype's own local override). */
+.uk-assign-btn { padding: 6px 16px; font-size: 13px; height: 30px; }
+
+/* Matches schedule/daily-schedule/daily-schedule.css's own .ds-tag exactly
+   — the area-tag pill (colour/icon come from an inline style per variant,
+   see App.jsx, mirroring Tags.jsx's own SWATCH/AREA_COLORS lookup). */
+.ds-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+}
+.ds-tag svg { flex-shrink: 0; }
+
 .uk-field-row {
   display: flex;
   gap: 24px;

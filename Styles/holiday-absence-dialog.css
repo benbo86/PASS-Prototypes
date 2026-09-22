@@ -20,6 +20,7 @@
 
 .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.time-row--compact { grid-template-columns: 1fr 1fr; }
 
 .option-card {
   border: 1.5px solid #e5e7eb;
@@ -59,3 +60,78 @@
 
 .opt-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px; }
 .opt-desc { color: var(--greyscale-3-grey-30); margin: 0; }
+
+/* "Which days will be paid?" breakdown — see HolidayAbsenceDialog.jsx's own
+   showDayBreakdown comment for the reasoning. */
+.day-plan-hint {
+  font-size: 13px;
+  color: var(--greyscale-4-grey-40);
+  margin-bottom: 10px;
+}
+
+.day-plan-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.day-plan-row {
+  display: grid;
+  grid-template-columns: 1fr 116px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+}
+
+.day-plan-header {
+  padding: 10px 12px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--greyscale-6-grey-50, #757575);
+  border-bottom: 1.5px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+.day-plan-header span:last-child { text-align: right; }
+
+.day-plan-deduction-input {
+  justify-self: end;
+  width: 56px;
+  flex-shrink: 0;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #1a1a1a;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.day-plan-deduction-input::-webkit-outer-spin-button,
+.day-plan-deduction-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.day-plan-deduction-input:focus { border-color: var(--brand-purple-6-purple-4); }
+
+.day-plan-date { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.day-plan-weekday { font-weight: 400; color: var(--greyscale-4-grey-40); }
+
+.day-plan-total {
+  text-align: right;
+  font-size: 14px;
+  color: var(--greyscale-2-grey-20);
+  margin-bottom: 12px;
+}
+.day-plan-total strong { font-weight: 600; }

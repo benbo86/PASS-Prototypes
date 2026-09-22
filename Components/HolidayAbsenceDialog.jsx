@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import Select, { components } from 'react-select'
 import DatePicker from 'react-datepicker'
 
@@ -158,6 +158,54 @@ export const ABSENCE_TYPES = [
   { value: 'other',     label: 'Other' },
 ]
 
+// ── "Which days are actually paid?" breakdown — opt-in via showDayBreakdown,
+// off by default so schedule/leave-requests' existing usage (no prop passed)
+// is completely unaffected. Deliberately has no defaulting logic tied to an
+// employee's contract availability — availability is only ever a scheduling
+// visibility aid (not enforced, not necessarily accurate, never something
+// anyone's been asked to maintain for pay purposes), so basing a pay default
+// on it risks implying a link between the two that doesn't really exist.
+// Every day in the range simply starts at a full day; the person adding the
+// holiday adjusts whichever days this employee wouldn't have worked a full
+// day (down to a half day, or 0 for a day not worked at all). A per-day
+// number — rather than a plain tick — is what lets a half day still produce
+// its own dated record at the correct fractional amount, instead of forcing
+// a manual override of the total that would have nowhere to say which date
+// it applies to (the whole reason this is per-day in the first place).
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DEFAULT_DAY_DEDUCTION = 1
+
+function roundDeduction(value) {
+  if (Number.isNaN(value)) return 0
+  // Rounds off float drift (e.g. 0.1 + 0.2) rather than letting it surface
+  // in the total — this field is 2-decimal-place input, not arbitrary
+  // precision. No min/max clamp — any number is accepted, per-day.
+  return Math.round(value * 100) / 100
+}
+
+function eachDateInRange(start, end) {
+  const days = []
+  const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+  while (cur <= last) {
+    days.push(new Date(cur))
+    cur.setDate(cur.getDate() + 1)
+  }
+  return days
+}
+
+function buildDayPlan(startDate, endDate) {
+  return eachDateInRange(startDate, endDate).map((date) => ({
+    date,
+    weekday: WEEKDAYS[date.getDay()],
+    deduction: DEFAULT_DAY_DEDUCTION,
+  }))
+}
+
+function fmtDay(date) {
+  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+}
+
 export default function HolidayAbsenceDialog({
   employee: employeeProp,
   absenceType: absenceTypeProp,
@@ -168,6 +216,7 @@ export default function HolidayAbsenceDialog({
   daysDeducted = 1,
   deductedLabel = 'Days deducted',
   showVisitsStep = true,
+  showDayBreakdown = false,
   onClose,
   onConfirm,
 }) {
@@ -180,6 +229,24 @@ export default function HolidayAbsenceDialog({
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState('keep')
 
+  // Recomputed whenever the date range changes — every day starts ticked,
+  // with no per-employee difference (see the module comment above for why).
+  // A fresh date range always starts from that default rather than carrying
+  // forward manual adjustments made against a different range.
+  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate) : []))
+  useEffect(() => {
+    if (!showDayBreakdown) return
+    setDayPlan(buildDayPlan(startDate, endDate))
+  }, [showDayBreakdown, startDate, endDate])
+
+  const updateDayDeduction = (idx, rawValue) => {
+    const value = roundDeduction(parseFloat(rawValue))
+    setDayPlan((prev) => prev.map((d, i) => (i === idx ? { ...d, deduction: value } : d)))
+  }
+
+  const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + d.deduction, 0)
+  const effectiveDaysDeducted = showDayBreakdown ? computedDaysDeducted : daysDeducted
+
   // Skips straight to confirming when the visits-affected warning/choice
   // (step 2) doesn't apply to the calling flow — e.g. a leave request being
   // approved has no "visits already assigned" context to weigh in on.
@@ -187,7 +254,7 @@ export default function HolidayAbsenceDialog({
     if (showVisitsStep) {
       setStep(2)
     } else {
-      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null })
+      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null, daysDeducted: effectiveDaysDeducted })
     }
   }
 
@@ -228,8 +295,8 @@ export default function HolidayAbsenceDialog({
             <div>Scheme name: Everylife</div>
             <div>Entitlement: 28 days</div>
             <div>Adjustment: 0 days</div>
-            <div>Booked &amp; taken: 0 days</div>
-            <div>Remaining: 28 days</div>
+            <div>Booked &amp; taken: {showDayBreakdown ? computedDaysDeducted : 0} days</div>
+            <div>Remaining: {showDayBreakdown ? Math.max(0, 28 - computedDaysDeducted) : 28} days</div>
           </div>
 
           <div className="date-row field">
@@ -253,7 +320,7 @@ export default function HolidayAbsenceDialog({
             </div>
           </div>
 
-          <div className="time-row field">
+          <div className={`time-row field${showDayBreakdown ? ' time-row--compact' : ''}`}>
             <div>
               <label>Start time</label>
               <DatePicker
@@ -282,11 +349,44 @@ export default function HolidayAbsenceDialog({
                 customInput={<TimeInput />}
               />
             </div>
-            <div>
-              <label htmlFor="days-deducted">{deductedLabel}</label>
-              <input type="text" id="days-deducted" value={daysDeducted} readOnly />
-            </div>
+            {!showDayBreakdown && (
+              <div>
+                <label htmlFor="days-deducted">{deductedLabel}</label>
+                <input type="text" id="days-deducted" value={effectiveDaysDeducted} readOnly />
+              </div>
+            )}
           </div>
+
+          {showDayBreakdown && (
+            <div className="field">
+              <label>Which days will be paid?</label>
+              <div className="day-plan-hint">Every day is included by default</div>
+              <div className="day-plan-list">
+                <div className="day-plan-row day-plan-header">
+                  <span>Date</span>
+                  <span>Days deducted</span>
+                </div>
+                {dayPlan.map((d, i) => (
+                  <div key={i} className="day-plan-row">
+                    <span className="day-plan-date">
+                      {fmtDay(d.date)} <span className="day-plan-weekday">{d.weekday}</span>
+                    </span>
+                    <input
+                      type="number"
+                      className="day-plan-deduction-input"
+                      step={0.01}
+                      value={d.deduction}
+                      onChange={(e) => updateDayDeduction(i, e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      onMouseUp={(e) => e.preventDefault()}
+                      aria-label={`Days deducted for ${fmtDay(d.date)}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="day-plan-total">Total days deducted: <strong>{computedDaysDeducted}</strong></div>
+            </div>
+          )}
 
           <div className="btn-row">
             <button className="round-btn primary-btn" onClick={handlePrimary}>Add absence</button>
@@ -334,7 +434,7 @@ export default function HolidayAbsenceDialog({
             <button className="round-btn secondary-btn" onClick={() => setStep(1)}>Back</button>
             <button
               className="round-btn primary-btn"
-              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option })}
+              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted })}
             >
               Confirm
             </button>

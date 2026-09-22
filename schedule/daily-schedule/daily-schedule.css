@@ -193,7 +193,7 @@
    hour lines would just show through the table's own borders/padding. */
 .ds-row-track--plain { background-image: none; min-height: 0; }
 .ds-unassigned-list { padding: 16px; }
-.ds-assign-btn { padding: 6px 16px; font-size: 13px; }
+.ds-assign-btn { padding: 6px 16px; font-size: 13px; height: 30px; }
 
 /* ── Area / Visit Type tags ──────────────────────────────────── */
 
