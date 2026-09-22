@@ -232,16 +232,37 @@ export default function HolidayAbsenceDialog({
   // Recomputed whenever the date range changes — every day starts ticked,
   // with no per-employee difference (see the module comment above for why).
   // A fresh date range always starts from that default rather than carrying
-  // forward manual adjustments made against a different range.
+  // forward manual adjustments made against a different range. Exclude
+  // weekends resets alongside it — it's a one-off bulk action against
+  // whatever's currently in the table, not a sticky setting, so a new range
+  // shouldn't silently claim to still be "excluding weekends" against days
+  // it's never actually been applied to.
   const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate) : []))
+  const [excludeWeekends, setExcludeWeekends] = useState(false)
   useEffect(() => {
     if (!showDayBreakdown) return
     setDayPlan(buildDayPlan(startDate, endDate))
+    setExcludeWeekends(false)
   }, [showDayBreakdown, startDate, endDate])
 
   const updateDayDeduction = (idx, rawValue) => {
     const value = roundDeduction(parseFloat(rawValue))
     setDayPlan((prev) => prev.map((d, i) => (i === idx ? { ...d, deduction: value } : d)))
+  }
+
+  // A bulk action, not a persistent filter — toggling it off restores every
+  // weekend row to a full day regardless of what it held before, same as
+  // toggling it on zeroes every weekend row regardless of any prior manual
+  // edit. Simpler and more predictable than trying to remember/protect
+  // hand-edited weekend values across the toggle.
+  const toggleExcludeWeekends = () => {
+    const next = !excludeWeekends
+    setExcludeWeekends(next)
+    setDayPlan((prev) => prev.map((d) => (
+      d.weekday === 'Sat' || d.weekday === 'Sun'
+        ? { ...d, deduction: next ? 0 : DEFAULT_DAY_DEDUCTION }
+        : d
+    )))
   }
 
   const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + d.deduction, 0)
@@ -363,7 +384,16 @@ export default function HolidayAbsenceDialog({
               <div className="day-plan-hint">Every day is included by default</div>
               <div className="day-plan-list">
                 <div className="day-plan-row day-plan-header">
-                  <span>Date</span>
+                  <span className="day-plan-header-date-cell">
+                    Date
+                    <label className="day-plan-exclude-weekends">
+                      <span className="checkbox-wrap">
+                        <input type="checkbox" checked={excludeWeekends} onChange={toggleExcludeWeekends} />
+                        <span className="checkbox-box" />
+                      </span>
+                      Exclude weekends
+                    </label>
+                  </span>
                   <span>Days deducted</span>
                 </div>
                 {dayPlan.map((d, i) => (

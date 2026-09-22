@@ -8,6 +8,7 @@
 
 .modal-add-absence h1 {
   color: var(--greyscale-3-grey-30);
+  margin-bottom:16px;
 }
 
 .modal-add-absence h2 {
@@ -100,6 +101,26 @@
   background: #fff;
 }
 .day-plan-header span:last-child { text-align: right; }
+
+.day-plan-header-date-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.day-plan-exclude-weekends {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--greyscale-2-grey-20);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: 0px;
+}
 
 .day-plan-deduction-input {
   justify-self: end;
