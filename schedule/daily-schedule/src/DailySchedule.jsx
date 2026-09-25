@@ -1,9 +1,11 @@
-import { Fragment, useState, useMemo, useRef } from 'react'
+import { Fragment, useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import DatePicker from 'react-datepicker'
 import SideNav from '../../../Components/SideNav'
 import TopNav from '../../../Components/TopNav'
 import ScheduleNav from '../../../Components/ScheduleNav'
 import EventPanel from '../../../Components/EventPanel'
+import ModalPanel from '../../../Components/ModalPanel'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import Tooltip from '../../../Components/Tooltip'
 import ScheduleFilterDropdown from '../../../Components/ScheduleFilterDropdown'
@@ -15,9 +17,10 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import { useDevEditActive, useDevEditStickyDismiss } from '../../../Components/devEditHoverSticky'
 import { AreaTag } from './Tags'
 import {
-  UNASSIGNED_VISITS, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES, AREAS,
+  UNASSIGNED_VISITS, UNASSIGNED_SHIFTS, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES, AREAS,
   toMinutes, fmtDuration,
 } from './data'
 
@@ -89,16 +92,9 @@ const EllipsisIcon = () => (
     <path fill="currentColor" fillRule="evenodd" d="M12 6.5c.825 0 1.5-.675 1.5-1.5s-.675-1.5-1.5-1.5-1.5.675-1.5 1.5.675 1.5 1.5 1.5zm0 4c-.825 0-1.5.675-1.5 1.5s.675 1.5 1.5 1.5 1.5-.675 1.5-1.5-.675-1.5-1.5-1.5zm0 7c-.825 0-1.5.675-1.5 1.5s.675 1.5 1.5 1.5 1.5-.675 1.5-1.5-.675-1.5-1.5-1.5z" />
   </svg>
 )
-// Timeline/List view-toggle icons — deliberately distinct from every other
-// icon set in the repo (this is a new, narrow concept: "how is the
-// Unassigned area itself rendered", not a filter/sort on a column).
-const TimelineViewIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" className="col-icon">
-    <rect x="3" y="5" width="13" height="3" rx="1" fill="currentColor" />
-    <rect x="3" y="10.5" width="9" height="3" rx="1" fill="currentColor" />
-    <rect x="3" y="16" width="16" height="3" rx="1" fill="currentColor" />
-  </svg>
-)
+// List-view button icon — opens the Unassigned list as a modal (see the
+// listModalOpen state comment further down); no longer paired with a
+// timeline-view icon since this stopped being a toggle.
 const ListViewIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" className="col-icon">
     <circle cx="4.5" cy="6.5" r="1.5" fill="currentColor" />
@@ -120,6 +116,75 @@ const SortIcon = ({ dir }) => (
     <polyline points="7.5,9 12,5 16.5,9" stroke="currentColor" strokeWidth="2" fill="none" opacity={dir === 'desc' ? 0.35 : 1} />
     <polyline points="7.5,19 12,15 16.5,19" stroke="currentColor" strokeWidth="2" fill="none"
       style={{ transform: 'scaleY(-1)', transformOrigin: '12px 17px' }} opacity={dir === 'asc' ? 0.35 : 1} />
+  </svg>
+)
+// A generic swap/repeat pictogram (not sourced from Figma, same "kept
+// local and minimal" treatment as the hover-card icons below) — the
+// time-adjusted indicator next to a visit's time, replacing an earlier
+// plain edit-pencil version per Ben's own attached reference (two curved
+// arrows swapping direction, reading more clearly as "this time changed"
+// than a generic edit icon did). Coloured amber via CSS, matching the
+// reference image's own colouring rather than inheriting currentColor.
+const TimeAdjustedIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 10 3 6l4-4" />
+    <path d="M3 6h13a4 4 0 0 1 4 4v1" />
+    <path d="M17 14l4 4-4 4" />
+    <path d="M21 18H8a4 4 0 0 1-4-4v-1" />
+  </svg>
+)
+// Small clock/calendar/person glyphs for the shift hover card only — kept
+// local and minimal (not promoted to Icons/) since they're not sourced
+// from Figma, just plain generic pictograms for this one card.
+const HoverClockIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+)
+const HoverCalendarIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </svg>
+)
+const HoverPersonIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+  </svg>
+)
+const HoverPinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+  </svg>
+)
+const HoverPhoneIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.3-1.4a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z" />
+  </svg>
+)
+const HoverHomeIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" />
+  </svg>
+)
+// Icons/Warning.svg, copied verbatim (fill swapped to currentColor) — the
+// visit hover card's own bottom "requires N employees" banner.
+const HoverWarningIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15
+      C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7
+      C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z" />
+  </svg>
+)
+// Icons/Run.svg, copied verbatim (fill swapped to currentColor) — the
+// shift hover card's own top badge icon, per Ben's own request to use the
+// existing Run icon rather than the Recurs icon this originally reused.
+const ShiftBadgeIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" fillRule="nonzero" d="M17.5316862,2.25 C19.9042089,2.25 21.8103775,4.17252165 21.8103775,6.56109363 C21.8103775,7.8496122 21.3837488,8.78195426 20.3219865,10.0738404 L20.1732443,10.2523025 L19.7081836,10.7935427 C19.1579376,11.4366344 18.7242877,11.9825709 18.3228589,12.5536133 L18.1736687,12.7691698 L18.0521069,12.9635835 C18.0043383,13.0406934 17.9396825,13.1058825 17.8632144,13.1546699 C17.5785244,13.3363048 17.2004933,13.2527621 17.0191918,12.9678594 L16.9463007,12.854717 L16.890097,12.77017 C16.5022598,12.200899 16.0833253,11.658275 15.5733798,11.0511815 L15.3490849,10.7867858 L14.8755401,10.2352557 L14.6389457,9.94903468 L14.4294845,9.68356497 C14.1341575,9.2985939 13.9203798,8.96793102 13.7430368,8.62080199 C13.4137771,7.97631297 13.25,7.31890047 13.25,6.56109363 C13.25,4.17297543 15.1583415,2.25 17.5316862,2.25 Z M17.5316862,3.47291108 C15.8362095,3.47291108 14.4729111,4.84590921 14.4729111,6.56109363 C14.4729111,7.11498404 14.585996,7.58279609 14.8320591,8.06443701 C14.9496979,8.29470185 15.0899372,8.51980245 15.2738098,8.77155709 L15.3895377,8.92606291 L15.5815192,9.16988989 L15.8033741,9.43861563 L16.27801,9.99141826 C16.7207576,10.5085118 17.0915491,10.9673927 17.427079,11.4177677 L17.5314117,11.5594769 L17.5879302,11.4818583 C17.8822707,11.0833493 18.204096,10.6790482 18.5850789,10.226845 L18.7806467,9.99655663 L19.238958,9.46323938 C20.2743722,8.2372622 20.5874665,7.54526007 20.5874665,6.56109363 C20.5874665,4.84511326 19.2259968,3.47291108 17.5316862,3.47291108 Z M17.5301888,5.61300546 C18.0342755,5.61300546 18.4473721,6.02610205 18.4473721,6.53018877 C18.4473721,7.0342755 18.0342755,7.44737208 17.5301888,7.44737208 C17.026102,7.44737208 16.6130055,7.0342755 16.6130055,6.53018877 C16.6130055,6.02610205 17.026102,5.61300546 17.5301888,5.61300546 Z" />
+    <path fill="currentColor" fillRule="nonzero" d="M17.2801888,14.25 C17.6944023,14.25 18.0301888,14.5857864 18.0301888,15 C18.0301888,15.3796958 17.7480349,15.693491 17.3819593,15.7431534 L17.2801888,15.75 L9.72977518,15.75 C9.30206188,15.75 8.95533174,16.0967301 8.95533174,16.5244434 C8.95533174,16.916514 9.24668137,17.2405361 9.62468779,17.2918171 L9.72977518,17.2988869 L19.3963725,17.2988869 C20.7092665,17.2988869 21.7735774,18.3631977 21.7735774,19.6760918 C21.7735774,20.9342819 20.7961113,21.9641725 19.5591305,22.0478124 L19.3963725,22.0532967 L5.75,22.0532967 C5.33578644,22.0532967 5,21.7175102 5,21.3032967 C5,20.9236009 5.28215388,20.6098057 5.64822944,20.5601433 L5.75,20.5532967 L19.3963725,20.5532967 C19.8808394,20.5532967 20.2735774,20.1605586 20.2735774,19.6760918 C20.2735774,19.2288916 19.9389367,18.8598509 19.5064072,18.8057215 L19.3963725,18.7988869 L9.72977518,18.7988869 C8.47363475,18.7988869 7.45533174,17.7805839 7.45533174,16.5244434 C7.45533174,15.3206422 8.39054406,14.3352715 9.57405282,14.2552472 L9.72977518,14.25 L17.2801888,14.25 Z M3.1628418,20.5532967 C3.57705536,20.5532967 3.9128418,20.8890831 3.9128418,21.3032967 C3.9128418,21.6829924 3.63068792,21.9967876 3.26461235,22.04645 L3.1628418,22.0532967 L2.84210526,22.0532967 C2.4278917,22.0532967 2.09210526,21.7175102 2.09210526,21.3032967 C2.09210526,20.9236009 2.37425914,20.6098057 2.74033471,20.5601433 L2.84210526,20.5532967 L3.1628418,20.5532967 Z" />
   </svg>
 )
 
@@ -189,6 +254,195 @@ const RECURRENCE_TEXT = {
   'Wellbeing check': '14 days, fortnightly',
 }
 
+// "Tuesday, Sept 8th, 2026" — the shift hover card's own long-date format
+// (matches the live product screenshot exactly, including "Sept" rather
+// than the more usual 3-letter "Sep"), always reflecting whichever date
+// is currently selected at the top of the page — a shift preview only
+// ever means "this shift, on the day currently being viewed".
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+const WEEKDAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+function ordinalSuffix(n) {
+  const j = n % 10, k = n % 100
+  if (j === 1 && k !== 11) return 'st'
+  if (j === 2 && k !== 12) return 'nd'
+  if (j === 3 && k !== 13) return 'rd'
+  return 'th'
+}
+function fmtLongDate(date) {
+  const day = date.getDate()
+  return `${WEEKDAY_FULL[date.getDay()]}, ${MONTH_ABBR[date.getMonth()]} ${day}${ordinalSuffix(day)}, ${date.getFullYear()}`
+}
+
+// "Morning with Roger Sadgrove" — the visit hover card's own heading,
+// reproduced from Ben's attached reference. Derived from the visit's own
+// start time rather than a stored field, same "decorative but real chrome"
+// treatment RECURRENCE_TEXT above already uses.
+function timeOfDayLabel(start) {
+  const hour = toMinutes(start) / 60
+  if (hour < 12) return 'Morning'
+  if (hour < 17) return 'Afternoon'
+  if (hour < 21) return 'Evening'
+  return 'Night'
+}
+
+// Address/phone number aren't real fields anywhere in this prototype's
+// data — both are derived deterministically from the visit's own id/area
+// so the same visit always shows the same plausible-looking (but entirely
+// fictional) contact details, without needing to hand-author ~30 addresses
+// and phone numbers that would never be read anywhere else.
+const HOVER_STREET_NAMES = ['Grove Park', 'Mill Road', 'Church Street', 'Station Road', 'Kings Avenue', 'Highfield Drive', 'Orchard Close', 'Willow Way']
+const HOVER_AREA_POSTCODE = {
+  'Coleraine Central': 'BT52', 'Portstewart': 'BT55', 'Portrush': 'BT56', 'Ballymoney': 'BT53', 'Castlerock': 'BT51',
+}
+function deriveAddress(visit) {
+  const n = typeof visit.id === 'number' ? visit.id : visit.id.length
+  const houseNumber = (n * 7) % 90 + 1
+  const street = HOVER_STREET_NAMES[n % HOVER_STREET_NAMES.length]
+  const prefix = HOVER_AREA_POSTCODE[visit.area] || 'BT1'
+  return `${houseNumber}${n % 3 === 0 ? 'A' : ''} ${street}, ${prefix} ${(n % 9) + 1}${String.fromCharCode(65 + (n % 26))}${String.fromCharCode(65 + ((n * 3) % 26))}`
+}
+function derivePhone(visit) {
+  const n = typeof visit.id === 'number' ? visit.id : visit.id.length
+  const digits = String(100000000 + (n * 137) % 799999999)
+  return `07${digits}`
+}
+
+// ─── Shift hover card ───────────────────────────────────────────────────────
+
+// Reproduces the live product's own shift hover-preview (see the attached
+// screenshot this was built from), with this prototype's own shift data
+// substituted in. Portaled to document.body — a plain `position:fixed`
+// child of the shift row would be clipped by Components/ModalPanel's own
+// `overflow-y:auto` body, since the card needs to render fully visible
+// above (and clear of) that scroll container. `rect`/`cursorX` are both
+// captured once on mouseenter (viewport-relative, so they stay correct
+// regardless of the modal's internal scroll position) — no live-follow
+// needed for a hover card that disappears the moment the mouse actually
+// leaves the row. Horizontal position follows the cursor (per Ben's own
+// follow-up ask), vertical stays anchored to the row's own top edge so
+// the card is reliably above the row regardless of where in it the mouse
+// entered — the two axes are deliberately independent. `cardWidth` mirrors
+// .ds-shift-hover-card's own CSS width — kept in sync by hand since the
+// clamp below needs it before the card has ever actually rendered.
+const HOVER_CARD_WIDTH = 240
+const HOVER_CARD_GAP = 8
+
+// Prefers 'above' (the established default), but flips to 'below' when
+// there genuinely isn't room above and there is below — and the reverse,
+// for a row low enough that 'below' would itself run off the bottom of
+// the viewport. Needs the card's own actual rendered height, which isn't
+// known until it's already in the DOM (its content varies — a shift's
+// Template section, a visit's optional Plan time line, etc. — so it can't
+// be hardcoded), hence the two-step "render once, measure via ref, correct
+// before paint" approach every position-flipping popover in this repo uses
+// (Components/Tooltip.jsx's own updatePosition does the same for its
+// width). useLayoutEffect specifically — it runs synchronously after the
+// DOM update but before the browser paints, so a correction here is never
+// visible as a flicker the way a plain useEffect's (paint-then-correct)
+// would be. No dependency array: cheap (one offsetHeight read plus a
+// comparison) and needs to re-check on every render of a given card
+// instance, not just its first — safe because setPlacement is a no-op
+// once the computed value stops changing, so this can't loop.
+function useCardPlacement(cardRef, rect) {
+  const [placement, setPlacement] = useState('above')
+  useLayoutEffect(() => {
+    if (!cardRef.current) return
+    const cardHeight = cardRef.current.offsetHeight
+    const fitsAbove = rect.top >= cardHeight + HOVER_CARD_GAP
+    const fitsBelow = (window.innerHeight - rect.bottom) >= cardHeight + HOVER_CARD_GAP
+    // 'above' unless it's cropped at the top and 'below' genuinely has
+    // room; if 'below' would ALSO be cropped (at the bottom), fall back to
+    // 'above' regardless — matching "above" being the one true default,
+    // with "below" only ever a deliberate exception for the one case it
+    // actually solves (a row too close to the top of the window).
+    const next = (!fitsAbove && fitsBelow) ? 'below' : 'above'
+    setPlacement(prev => prev === next ? prev : next)
+  })
+  return placement
+}
+
+function cardPlacementStyle(placement, rect) {
+  return placement === 'below'
+    ? { top: rect.bottom + HOVER_CARD_GAP }
+    : { bottom: window.innerHeight - rect.top + HOVER_CARD_GAP }
+}
+
+function ShiftHoverCard({ shift, rect, cursorX, visitDate, interactive }) {
+  const cardRef = useRef(null)
+  const placement = useCardPlacement(cardRef, rect)
+  const left = Math.min(cursorX, window.innerWidth - HOVER_CARD_WIDTH - 16)
+  return createPortal(
+    <div ref={cardRef} className="ds-shift-hover-card" style={{ ...cardPlacementStyle(placement, rect), left, pointerEvents: interactive ? 'auto' : 'none' }}>
+      <div className="ds-shift-hover-badge"><ShiftBadgeIcon /></div>
+      <div className="ds-shift-hover-row"><HoverClockIcon /> {shift.start} – {shift.end}</div>
+      <div className="ds-shift-hover-row"><HoverCalendarIcon /> {fmtLongDate(visitDate)}</div>
+      <div className="ds-shift-hover-assigned">0/{shift.employeesRequired} employees assigned</div>
+      <div className="ds-shift-hover-divider" />
+      <div className="ds-shift-hover-heading">Template</div>
+      <div className="ds-shift-hover-line">Payable: {shift.template.payable ? 'Yes' : 'No'}</div>
+      <div className="ds-shift-hover-line">Chargeable: {shift.template.chargeable ? 'Yes' : 'No'}</div>
+      <div className="ds-shift-hover-line">{shift.template.cadence}, {shift.visits.length} visits</div>
+      <div className="ds-shift-hover-divider" />
+      <div className="ds-shift-hover-heading">Default employee</div>
+      <div className="ds-shift-hover-row"><HoverPersonIcon /> {shift.defaultEmployee}</div>
+    </div>,
+    document.body,
+  )
+}
+
+// ─── Visit hover card ───────────────────────────────────────────────────────
+
+// Same portal/positioning approach as ShiftHoverCard just above, reused for
+// a plain (or shift-nested) visit row instead of a shift row — see that
+// component's own comment for why it's portaled and how positioning works.
+// Deliberately a separate component rather than one merged/branching card:
+// the two show almost entirely different fields (a shift's Template/
+// Default-employee sections have no visit equivalent, and a visit's own
+// address/phone/plan-time have no shift equivalent), so a shared shell
+// would end up as more conditionals than actual sharing.
+function VisitHoverCard({ visit, rect, cursorX, visitDate, interactive }) {
+  const cardRef = useRef(null)
+  const placement = useCardPlacement(cardRef, rect)
+  const initials = visit.customer.split(' ').map(n => n[0]).join('').slice(0, 2)
+  const left = Math.min(cursorX, window.innerWidth - HOVER_CARD_WIDTH - 16)
+  return createPortal(
+    <div ref={cardRef} className="ds-visit-hover-card" style={{ ...cardPlacementStyle(placement, rect), left, pointerEvents: interactive ? 'auto' : 'none' }}>
+      <div className="ds-visit-hover-top">
+        <div className="ds-avatar ds-avatar--employee ds-visit-hover-avatar">{initials}</div>
+        <span className="ep-unassigned-badge">Unassigned</span>
+      </div>
+      <div className="ds-visit-hover-heading">{timeOfDayLabel(visit.start)} with <strong>{visit.customer}</strong></div>
+      <div className="ds-visit-hover-tags">
+        <span className="ds-visit-hover-tag ds-visit-hover-tag--service"><HoverHomeIcon /> Home Care</span>
+        <AreaTag area={visit.area} />
+      </div>
+      <div className="ds-shift-hover-divider" />
+      {visit.timeAdjusted ? (
+        <>
+          <div className="ds-shift-hover-row ds-visit-hover-adjusted-row">
+            <HoverClockIcon /> Adjusted time
+            <span className="ds-time-adjusted-icon"><TimeAdjustedIcon /></span>
+            {visit.start} – {visit.end}
+          </div>
+          <div className="ds-visit-hover-plan-row">Plan time: <span className="ds-visit-hover-plan-strike">{visit.planStart} – {visit.planEnd}</span></div>
+        </>
+      ) : (
+        <div className="ds-shift-hover-row"><HoverClockIcon /> {visit.start} – {visit.end}</div>
+      )}
+      <div className="ds-shift-hover-row"><HoverCalendarIcon /> {fmtLongDate(visitDate)}</div>
+      <div className="ds-shift-hover-row"><HoverPinIcon /> {deriveAddress(visit)}</div>
+      <div className="ds-shift-hover-row"><HoverPhoneIcon /> {derivePhone(visit)}</div>
+      <div className="ds-shift-hover-divider" />
+      <div className="ds-shift-hover-assigned">0/{visit.employeesRequired} employees assigned</div>
+      <div className="ds-shift-hover-row"><HoverPersonIcon /> Unassigned</div>
+      <div className="ds-visit-hover-warning">
+        <HoverWarningIcon /> Visit requires {visit.employeesRequired} employee{visit.employeesRequired > 1 ? 's' : ''}
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
 // ─── Toolbar filters ────────────────────────────────────────────────────────
 
 // Option lists for the toolbar's own 7 filters. Customers/Employees are
@@ -230,8 +484,41 @@ export default function DailySchedule() {
   const [scheduleViewMode, setScheduleViewMode] = useState('timeline') // 'timeline' | 'map' — decorative, no map view built
 
   const [visits, setVisits] = useState(UNASSIGNED_VISITS)
-  const [unassignedView, setUnassignedView] = useState('timeline') // 'timeline' | 'list'
+  const [shifts, setShifts] = useState(UNASSIGNED_SHIFTS)
+  const [expandedShiftIds, setExpandedShiftIds] = useState(() => new Set())
+  // Opened via the same button as before, but no longer a toggle — the
+  // Unassigned area itself always shows the timeline/lanes view now (the
+  // engineering team flagged the inline-list-view approach as hard to
+  // reconcile with the FullCalendar plugin this row's timeline is actually
+  // built on), and the list is its own modal instead.
+  const [listModalOpen, setListModalOpen] = useState(false)
+  // A single slot for whichever hover card is currently showing (a shift
+  // row's or a plain/shift-visit row's) — one state rather than two so
+  // moving the cursor straight from a shift row onto a visit row (or vice
+  // versa) naturally replaces one card with the other, with no possibility
+  // of both being considered "current" at once.
+  const [hoverCard, setHoverCard] = useState(null) // { type: 'shift', shift, rect, cursorX } | { type: 'visit', visit, rect, cursorX } | null
   const [sort, setSort] = useState({ col: null, dir: 'asc' })
+
+  // Whenever Dev Edit is active, the shift/visit hover cards switch from
+  // their normal transient behavior to staying open past mouseleave and
+  // becoming clickable — the whole point of Dev Edit being active is to
+  // select/style things, and a card that vanishes the instant you try to
+  // move the cursor into it can never be reached otherwise. An earlier
+  // version gated this behind its own separate "Show hover elements"
+  // checkbox on top of Dev Edit already being active — removed as a
+  // redundant extra step once it was clear Dev Edit active is already the
+  // only signal that matters here. Hovering a different row still swaps to
+  // that row's card rather than stacking multiple at once; turning Dev
+  // Edit off, Escape, or a click elsewhere all still dismiss whichever
+  // card is currently pinned — see Components/devEditHoverSticky.js for
+  // the shared mechanism (originally hand-rolled here first, then
+  // extracted once Components/Tooltip.jsx needed the identical behavior;
+  // consolidated back onto the shared version once a real bug surfaced in
+  // the exclusion list — see that file's own comment on the fix).
+  const devEditActive = useDevEditActive()
+  const hoverCardSticky = devEditActive
+  useDevEditStickyDismiss(devEditActive, !!hoverCard, () => setHoverCard(null), '.ds-shift-hover-card, .ds-visit-hover-card')
 
   const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS)
   const [openFilterKey, setOpenFilterKey] = useState(null)
@@ -240,6 +527,20 @@ export default function DailySchedule() {
   const [assignVisit, setAssignVisit] = useState(null)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
+
+  // Clicking a row hides the list modal (see the ModalPanel's own `open`
+  // prop below) to make room for the assign flow — but that click never
+  // fires the row's own onMouseLeave, since the row itself is what
+  // disappears. Without this, the hover card captured from that hover
+  // stays floating on screen indefinitely, with nothing left to hide it.
+  // Clearing it whenever the modal isn't actually visible (closed outright,
+  // or hidden behind the assign panel) covers both that path and the
+  // "closed the modal by some other means while still hovering a row" case
+  // uniformly, rather than duplicating a setHoverCard(null) call at every
+  // click handler that can make the modal disappear.
+  useEffect(() => {
+    if (!listModalOpen || assignVisit) setHoverCard(null)
+  }, [listModalOpen, assignVisit])
 
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -259,35 +560,95 @@ export default function DailySchedule() {
     (activeFilters.area.size === 0 || activeFilters.area.has(v.area))
   ), [visits, activeFilters.customers, activeFilters.area])
 
+  // A shift has no single customer (it covers several), so only Area
+  // narrows it down — the Customers filter is deliberately skipped for
+  // shift rows rather than hiding a shift because one of its several
+  // customers doesn't match.
+  const filteredShifts = useMemo(() => shifts.filter(s =>
+    (activeFilters.area.size === 0 || activeFilters.area.has(s.area))
+  ), [shifts, activeFilters.area])
+
   const filteredEmployees = useMemo(() => SAMPLE_EMPLOYEES.filter(e =>
     (activeFilters.employees.size === 0 || activeFilters.employees.has(e.name)) &&
     (activeFilters.contractTypes.size === 0 || activeFilters.contractTypes.has(e.type))
   ), [activeFilters.employees, activeFilters.contractTypes])
 
+  // The timeline view (bars on the hour grid) is deliberately unchanged by
+  // this round — it stays scoped to plain visits only, same as before.
+  // Shifts are a list-view-only concept for now (an expandable row needs a
+  // row to expand); representing a shift as a single bar covering several
+  // non-contiguous visits on the hour grid is a different, bigger design
+  // problem this round doesn't attempt to solve.
   const lanes = useMemo(() => packLanes(filteredVisits), [filteredVisits])
-  const sortedVisits = useMemo(() => sortVisits(filteredVisits, sort), [filteredVisits, sort])
+
+  // Shifts and plain visits share the exact same field names (customer/
+  // start/end/area/visitType/employeesRequired — see data.js's own comment
+  // on UNASSIGNED_SHIFTS), so they combine into one sortable/paginatable
+  // list with no special-casing in sortVisits itself.
+  const combinedRows = useMemo(() => [...filteredVisits, ...filteredShifts], [filteredVisits, filteredShifts])
+  const sortedRows = useMemo(() => sortVisits(combinedRows, sort), [combinedRows, sort])
+
+  // "Unassigned (N)" counts individual visits still needing cover, whether
+  // shown as their own row or nested inside a shift — a more meaningful
+  // number than "rows in the list", which would shrink misleadingly the
+  // moment 3 visits collapse into 1 shift row.
+  const totalUnassignedVisits = filteredVisits.length + filteredShifts.reduce((sum, s) => sum + s.visits.length, 0)
 
   // List view pagination — Components/Pagination.jsx, same wiring as
-  // schedule/leave-requests' own table.
-  const totalRows = sortedVisits.length
+  // schedule/leave-requests' own table. Paginates top-level rows only — a
+  // shift's own nested visit rows render as part of their parent shift's
+  // row and aren't separately counted/paged, same as any other expandable
+  // table convention.
+  const totalRows = sortedRows.length
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage))
   const safePage = Math.min(page, totalPages)
-  const pageVisits = sortedVisits.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage)
+  const pageRows = sortedRows.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage)
   const showStart = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1
   const showEnd = Math.min(safePage * rowsPerPage, totalRows)
+
+  const toggleShiftExpanded = (id) => setExpandedShiftIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+
+  // Assigning the shift as a whole vs. assigning one visit within it are
+  // two different actions with two different outcomes on Save (see
+  // handleAssignSave below) — both open the same EventPanel, distinguished
+  // only by `assignKind` (and `shiftId` for the nested-visit case) carried
+  // on the synthesized object passed to setAssignVisit.
+  const handleAssignShift = (shift) => setAssignVisit({
+    id: shift.id, customer: shift.customer, start: shift.start, end: shift.end,
+    visitType: shift.visitType, employeesRequired: shift.employeesRequired,
+    assignKind: 'shift',
+  })
+  const handleAssignShiftVisit = (shiftId, visit) => setAssignVisit({ ...visit, assignKind: 'shiftVisit', shiftId })
 
   // Fires from Components/EventPanel's own Save/Accept-assignment action
   // (never on a lone "+ Add" — that only fills a slot locally within the
   // panel, same as the original absent-employee prototype's own flow).
   // Per the ticket's own scope, "unassigned" means zero carers at all, so
   // the visit leaves this list the moment Save completes with anyone in a
-  // slot — regardless of whether every required slot got filled.
+  // slot — regardless of whether every required slot got filled. A shift
+  // assignment removes the whole shift (every visit in it is now covered
+  // by whoever was just assigned); a single shift-visit assignment only
+  // removes that one visit from its shift, and the shift itself disappears
+  // too once its last remaining visit has been individually assigned.
   const handleAssignSave = (slots) => {
     const assignedNames = slots.filter(Boolean).map(s => s.name)
-    setVisits(prev => prev.filter(v => v.id !== assignVisit.id))
+    if (assignVisit.assignKind === 'shift') {
+      setShifts(prev => prev.filter(s => s.id !== assignVisit.id))
+    } else if (assignVisit.assignKind === 'shiftVisit') {
+      setShifts(prev => prev
+        .map(s => s.id === assignVisit.shiftId ? { ...s, visits: s.visits.filter(sv => sv.id !== assignVisit.id) } : s)
+        .filter(s => s.visits.length > 0))
+    } else {
+      setVisits(prev => prev.filter(v => v.id !== assignVisit.id))
+    }
     setAssignVisit(null)
     clearTimeout(toastTimer.current)
-    setToast(`Assigned ${assignedNames.join(' and ')} to ${assignVisit.customer}'s visit`)
+    const target = assignVisit.assignKind === 'shift' ? `${assignVisit.customer} shift` : `${assignVisit.customer}'s visit`
+    setToast(`Assigned ${assignedNames.join(' and ')} to ${target}`)
     toastTimer.current = setTimeout(() => setToast(null), 3000)
   }
 
@@ -403,103 +764,36 @@ export default function DailySchedule() {
                   <div className="ds-row ds-unassigned-row">
                     <div className="ds-row-label ds-unassigned-label">
                       <div className="ds-unassigned-heading">
-                        <span>Unassigned<span className="ds-count">({filteredVisits.length})</span></span>
-                        {/* A single icon button, not a toggle — schedule already has
-                            several segmented toggles (Employees/Customers, Daily/
-                            Weekly, Timeline/Map), so this one switches view on click
-                            rather than adding another. Shows the icon for whichever
-                            view clicking it switches TO, not the current view. */}
-                        <Tooltip text={unassignedView === 'timeline' ? 'Switch to list view' : 'Switch to timeline view'}>
-                          <button
-                            className="ds-view-switch-btn"
-                            onClick={() => setUnassignedView(v => v === 'timeline' ? 'list' : 'timeline')}
-                          >
-                            {unassignedView === 'timeline' ? <ListViewIcon /> : <TimelineViewIcon />}
+                        <span>Unassigned<span className="ds-count">({totalUnassignedVisits})</span></span>
+                        {/* No longer a toggle (see the listModalOpen state comment
+                            above for why) — this always opens the list as a modal,
+                            so it always shows the same icon/tooltip regardless of
+                            whether the modal happens to be open right now. */}
+                        <Tooltip text="View as list">
+                          <button className="ds-view-switch-btn" onClick={() => setListModalOpen(true)}>
+                            <ListViewIcon />
                           </button>
                         </Tooltip>
                       </div>
                     </div>
 
-                    {unassignedView === 'timeline' ? (
-                      <div className="ds-row-track ds-unassigned-lanes">
-                        {lanes.map((lane, i) => (
-                          <div key={i} className="ds-lane">
-                            {lane.map(v => (
-                              <button
-                                key={v.id}
-                                className="ds-unassigned-bar"
-                                style={barStyle(v.start, v.end)}
-                                onClick={() => setAssignVisit(v)}
-                                title={`${v.customer} · ${v.start}–${v.end}`}
-                              >
-                                {v.customer}
-                              </button>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="ds-row-track ds-row-track--plain ds-unassigned-list">
-                        <div className="table-wrap">
-                          <table className="data-table">
-                            <thead>
-                              <tr>
-                                <th className={sort.col === 'time' ? 'sorted' : ''}>
-                                  <span>Time</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('time')}><SortIcon dir={sort.col === 'time' ? sort.dir : null} /></button>
-                                </th>
-                                <th className={`th-name ${sort.col === 'customer' ? 'sorted' : ''}`}>
-                                  <span>Customer</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('customer')}><SortIcon dir={sort.col === 'customer' ? sort.dir : null} /></button>
-                                </th>
-                                <th className={sort.col === 'duration' ? 'sorted' : ''}>
-                                  <span>Duration</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('duration')}><SortIcon dir={sort.col === 'duration' ? sort.dir : null} /></button>
-                                </th>
-                                <th className={sort.col === 'area' ? 'sorted' : ''}>
-                                  <span>Area</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('area')}><SortIcon dir={sort.col === 'area' ? sort.dir : null} /></button>
-                                </th>
-                                <th className={sort.col === 'visitType' ? 'sorted' : ''}>
-                                  <span>Visit Type</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('visitType')}><SortIcon dir={sort.col === 'visitType' ? sort.dir : null} /></button>
-                                </th>
-                                <th className={`th-num ${sort.col === 'assigned' ? 'sorted' : ''}`}>
-                                  <span>Assigned</span>
-                                  <button className="col-icon-btn" onClick={() => toggleSort('assigned')}><SortIcon dir={sort.col === 'assigned' ? sort.dir : null} /></button>
-                                </th>
-                                <th><span>Actions</span></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {pageVisits.map(v => (
-                                <tr key={v.id} className="data-row" onClick={() => setAssignVisit(v)}>
-                                  <td className="nowrap">{v.start} – {v.end}</td>
-                                  <td className="td-name">{v.customer}</td>
-                                  <td className="nowrap">{fmtDuration(v.start, v.end)}</td>
-                                  <td><AreaTag area={v.area} /></td>
-                                  <td>{v.visitType}</td>
-                                  <td className="td-num">0/{v.employeesRequired}</td>
-                                  <td>
-                                    <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); setAssignVisit(v) }}>Assign</button>
-                                  </td>
-                                </tr>
-                              ))}
-                              {totalRows === 0 && (
-                                <tr><td colSpan={7} className="table-empty">All sample unassigned visits have been assigned</td></tr>
-                              )}
-                            </tbody>
-                          </table>
+                    <div className="ds-row-track ds-unassigned-lanes">
+                      {lanes.map((lane, i) => (
+                        <div key={i} className="ds-lane">
+                          {lane.map(v => (
+                            <button
+                              key={v.id}
+                              className="ds-unassigned-bar"
+                              style={barStyle(v.start, v.end)}
+                              onClick={() => setAssignVisit(v)}
+                              title={`${v.customer} · ${v.start}–${v.end}`}
+                            >
+                              {v.customer}
+                            </button>
+                          ))}
                         </div>
-
-                        <Pagination
-                          page={safePage} totalPages={totalPages} rowsPerPage={rowsPerPage}
-                          showStart={showStart} showEnd={showEnd} totalRows={totalRows}
-                          onPageChange={setPage}
-                          onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1) }}
-                        />
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -522,6 +816,157 @@ export default function DailySchedule() {
             )}
           </main>
         </div>
+
+        {/* Components/ModalPanel.jsx's own overlay (z-index 10850) sits
+            well above Components/EventPanel.jsx's (100/200 — it was only
+            ever designed to layer over this page's own plain content, not
+            another modal) — opening the assign flow from a row inside this
+            modal would otherwise render EventPanel invisibly behind it.
+            `open` is gated on `!assignVisit` rather than closing the modal
+            outright, so it reappears automatically once the assign flow
+            finishes (Save or Close) and the office user can carry on
+            working through the rest of the list without re-opening it. */}
+        <ModalPanel
+          open={listModalOpen && !assignVisit}
+          onClose={() => setListModalOpen(false)}
+          title="Unassigned visits"
+          width={1160}
+          footer={
+            <Pagination
+              page={safePage} totalPages={totalPages} rowsPerPage={rowsPerPage}
+              showStart={showStart} showEnd={showEnd} totalRows={totalRows}
+              onPageChange={setPage}
+              onRowsPerPageChange={n => { setRowsPerPage(n); setPage(1) }}
+            />
+          }
+        >
+          <div className="ds-list-modal-body table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className={sort.col === 'time' ? 'sorted' : ''}>
+                    <span>Time</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('time')}><SortIcon dir={sort.col === 'time' ? sort.dir : null} /></button>
+                  </th>
+                  <th className={`th-name ${sort.col === 'customer' ? 'sorted' : ''}`}>
+                    <span>Customer/Shift</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('customer')}><SortIcon dir={sort.col === 'customer' ? sort.dir : null} /></button>
+                  </th>
+                  <th className={sort.col === 'duration' ? 'sorted' : ''}>
+                    <span>Duration</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('duration')}><SortIcon dir={sort.col === 'duration' ? sort.dir : null} /></button>
+                  </th>
+                  <th className={sort.col === 'area' ? 'sorted' : ''}>
+                    <span>Area</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('area')}><SortIcon dir={sort.col === 'area' ? sort.dir : null} /></button>
+                  </th>
+                  <th className={sort.col === 'visitType' ? 'sorted' : ''}>
+                    <span>Visit/Shift type</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('visitType')}><SortIcon dir={sort.col === 'visitType' ? sort.dir : null} /></button>
+                  </th>
+                  <th className={`th-num ${sort.col === 'assigned' ? 'sorted' : ''}`}>
+                    <span>Assigned</span>
+                    <button className="col-icon-btn" onClick={() => toggleSort('assigned')}><SortIcon dir={sort.col === 'assigned' ? sort.dir : null} /></button>
+                  </th>
+                  <th><span>Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map(row => row.kind === 'shift' ? (
+                  <Fragment key={row.id}>
+                    <tr
+                      className="data-row ds-shift-row"
+                      onClick={() => handleAssignShift(row)}
+                      onMouseEnter={(e) => setHoverCard({ type: 'shift', shift: row, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
+                      onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
+                    >
+                      <td className="nowrap">{row.start} – {row.end}</td>
+                      <td className="td-name">
+                        <button
+                          className={`ds-shift-expand-btn${expandedShiftIds.has(row.id) ? ' expanded' : ''}`}
+                          onClick={(e) => { e.stopPropagation(); toggleShiftExpanded(row.id) }}
+                          aria-label={expandedShiftIds.has(row.id) ? 'Collapse shift' : 'Expand shift'}
+                        >
+                          <ChevronDown />
+                        </button>
+                        {row.customer}
+                        <span className="ds-shift-visit-count">({row.visits.length} visits)</span>
+                      </td>
+                      <td className="nowrap">{fmtDuration(row.start, row.end)}</td>
+                      <td><AreaTag area={row.area} /></td>
+                      <td>{row.visitType}</td>
+                      <td className="td-num">0/{row.employeesRequired}</td>
+                      <td>
+                        <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShift(row) }}>Assign</button>
+                      </td>
+                    </tr>
+                    {expandedShiftIds.has(row.id) && row.visits.map(sv => (
+                      <tr
+                        key={sv.id}
+                        className="data-row ds-shift-visit-row"
+                        onClick={() => handleAssignShiftVisit(row.id, sv)}
+                        onMouseEnter={(e) => setHoverCard({ type: 'visit', visit: { ...sv, area: row.area }, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
+                        onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
+                      >
+                        <td className="nowrap">
+                          {sv.start} – {sv.end}
+                          {sv.timeAdjusted && (
+                            <Tooltip text="Time adjusted from the original schedule">
+                              <span className="ds-time-adjusted-icon"><TimeAdjustedIcon /></span>
+                            </Tooltip>
+                          )}
+                        </td>
+                        <td className="td-name ds-shift-visit-name">{sv.customer}</td>
+                        <td className="nowrap">{fmtDuration(sv.start, sv.end)}</td>
+                        <td><AreaTag area={row.area} /></td>
+                        <td>{sv.visitType}</td>
+                        <td className="td-num">0/{sv.employeesRequired}</td>
+                        <td>
+                          <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShiftVisit(row.id, sv) }}>Assign</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </Fragment>
+                ) : (
+                  <tr
+                    key={row.id}
+                    className="data-row"
+                    onClick={() => setAssignVisit({ ...row, assignKind: 'visit' })}
+                    onMouseEnter={(e) => setHoverCard({ type: 'visit', visit: row, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
+                    onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
+                  >
+                    <td className="nowrap">
+                      {row.start} – {row.end}
+                      {row.timeAdjusted && (
+                        <Tooltip text="Time adjusted from the original schedule">
+                          <span className="ds-time-adjusted-icon"><TimeAdjustedIcon /></span>
+                        </Tooltip>
+                      )}
+                    </td>
+                    <td className="td-name">{row.customer}</td>
+                    <td className="nowrap">{fmtDuration(row.start, row.end)}</td>
+                    <td><AreaTag area={row.area} /></td>
+                    <td>{row.visitType}</td>
+                    <td className="td-num">0/{row.employeesRequired}</td>
+                    <td>
+                      <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); setAssignVisit({ ...row, assignKind: 'visit' }) }}>Assign</button>
+                    </td>
+                  </tr>
+                ))}
+                {totalRows === 0 && (
+                  <tr><td colSpan={7} className="table-empty">All sample unassigned visits have been assigned</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </ModalPanel>
+
+        {/* key forces a fresh mount (and therefore a fresh 'above'-first
+            placement guess) whenever the hovered row genuinely changes,
+            rather than carrying over whichever placement the previous
+            target's card settled on. */}
+        {hoverCard?.type === 'shift' && <ShiftHoverCard key={hoverCard.shift.id} shift={hoverCard.shift} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
+        {hoverCard?.type === 'visit' && <VisitHoverCard key={hoverCard.visit.id} visit={hoverCard.visit} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
 
         {/* Rendered inside the pageRef-wrapped subtree (not as a sibling
             after it) so DevMode/DevEdit's own "is this click inside our

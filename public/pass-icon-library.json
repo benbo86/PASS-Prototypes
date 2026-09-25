@@ -1704,6 +1704,45 @@
       "usageCount": 7
     },
     {
+      "hash": "05cd5cb3",
+      "name": "Map Pin",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /><circle cx=\"12\" cy=\"10\" r=\"3\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EventPanel.jsx#MapPinIcon",
+          "name": "MapPinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/SideNav.jsx#LocationPinIcon",
+          "name": "LocationPinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "component-demos/ui-kit/src/App.jsx#PinIcon",
+          "name": "PinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#MapPinViewIcon",
+          "name": "MapPinViewIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverPinIcon",
+          "name": "HoverPinIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/Tags.jsx#PinIcon",
+          "name": "PinIcon"
+        }
+      ],
+      "usageCount": 6
+    },
+    {
       "hash": "d0cc47c8",
       "name": "Settings",
       "group": "Inline",
@@ -1855,40 +1894,6 @@
       "usageCount": 5
     },
     {
-      "hash": "05cd5cb3",
-      "name": "Map Pin",
-      "group": "Inline",
-      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\" /><circle cx=\"12\" cy=\"10\" r=\"3\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/EventPanel.jsx#MapPinIcon",
-          "name": "MapPinIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "Components/SideNav.jsx#LocationPinIcon",
-          "name": "LocationPinIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "component-demos/ui-kit/src/App.jsx#PinIcon",
-          "name": "PinIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#MapPinViewIcon",
-          "name": "MapPinViewIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/Tags.jsx#PinIcon",
-          "name": "PinIcon"
-        }
-      ],
-      "usageCount": 5
-    },
-    {
       "hash": "355fe673",
       "name": "Chevron Down",
       "group": "Inline",
@@ -1950,6 +1955,30 @@
         }
       ],
       "usageCount": 4
+    },
+    {
+      "hash": "fa7449ac",
+      "name": "Calendar",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" />\n    <path d=\"M16 2v4M8 2v4M3 10h18\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/VisitPanel.jsx#CalendarIcon",
+          "name": "CalendarIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#CalendarViewIcon",
+          "name": "CalendarViewIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverCalendarIcon",
+          "name": "HoverCalendarIcon"
+        }
+      ],
+      "usageCount": 3
     },
     {
       "hash": "e4e62cd8",
@@ -2166,25 +2195,6 @@
           "kind": "inline",
           "ref": "roster-settings/settings/src/CustomiseGpaModal.jsx#GripIcon",
           "name": "GripIcon"
-        }
-      ],
-      "usageCount": 2
-    },
-    {
-      "hash": "fa7449ac",
-      "name": "Calendar",
-      "group": "Inline",
-      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" />\n    <path d=\"M16 2v4M8 2v4M3 10h18\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/VisitPanel.jsx#CalendarIcon",
-          "name": "CalendarIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#CalendarViewIcon",
-          "name": "CalendarViewIcon"
         }
       ],
       "usageCount": 2
@@ -3886,20 +3896,6 @@
       "usageCount": 1
     },
     {
-      "hash": "d6bcf5d5",
-      "name": "Timeline View",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\">\n    <rect x=\"3\" y=\"5\" width=\"13\" height=\"3\" rx=\"1\" fill=\"currentColor\" />\n    <rect x=\"3\" y=\"10.5\" width=\"9\" height=\"3\" rx=\"1\" fill=\"currentColor\" />\n    <rect x=\"3\" y=\"16\" width=\"16\" height=\"3\" rx=\"1\" fill=\"currentColor\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#TimelineViewIcon",
-          "name": "TimelineViewIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "d5a538ee",
       "name": "List View",
       "group": "Inline",
@@ -3923,6 +3919,104 @@
           "kind": "inline",
           "ref": "schedule/daily-schedule/src/DailySchedule.jsx#CloseIcon",
           "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "773709d8",
+      "name": "Time Adjusted",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M7 10 3 6l4-4\" />\n    <path d=\"M3 6h13a4 4 0 0 1 4 4v1\" />\n    <path d=\"M17 14l4 4-4 4\" />\n    <path d=\"M21 18H8a4 4 0 0 1-4-4v-1\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#TimeAdjustedIcon",
+          "name": "TimeAdjustedIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "85a6012e",
+      "name": "Hover Clock",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <circle cx=\"12\" cy=\"12\" r=\"9\" />\n    <path d=\"M12 7v5l3 2\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverClockIcon",
+          "name": "HoverClockIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "bf24f893",
+      "name": "Hover Person",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <circle cx=\"12\" cy=\"8\" r=\"4\" />\n    <path d=\"M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverPersonIcon",
+          "name": "HoverPersonIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "fc48ca12",
+      "name": "Hover Phone",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.3-1.4a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverPhoneIcon",
+          "name": "HoverPhoneIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "ebc24cf5",
+      "name": "Hover Home",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M3 11l9-8 9 8\" /><path d=\"M5 10v10h14V10\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverHomeIcon",
+          "name": "HoverHomeIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "afeff12c",
+      "name": "Hover Warning",
+      "group": "Inline",
+      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path fill=\"currentColor\" d=\"M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15\n      C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7\n      C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#HoverWarningIcon",
+          "name": "HoverWarningIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "d27b5f1c",
+      "name": "Shift Badge",
+      "group": "Inline",
+      "svg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path fill=\"currentColor\" fill-rule=\"nonzero\" d=\"M17.5316862,2.25 C19.9042089,2.25 21.8103775,4.17252165 21.8103775,6.56109363 C21.8103775,7.8496122 21.3837488,8.78195426 20.3219865,10.0738404 L20.1732443,10.2523025 L19.7081836,10.7935427 C19.1579376,11.4366344 18.7242877,11.9825709 18.3228589,12.5536133 L18.1736687,12.7691698 L18.0521069,12.9635835 C18.0043383,13.0406934 17.9396825,13.1058825 17.8632144,13.1546699 C17.5785244,13.3363048 17.2004933,13.2527621 17.0191918,12.9678594 L16.9463007,12.854717 L16.890097,12.77017 C16.5022598,12.200899 16.0833253,11.658275 15.5733798,11.0511815 L15.3490849,10.7867858 L14.8755401,10.2352557 L14.6389457,9.94903468 L14.4294845,9.68356497 C14.1341575,9.2985939 13.9203798,8.96793102 13.7430368,8.62080199 C13.4137771,7.97631297 13.25,7.31890047 13.25,6.56109363 C13.25,4.17297543 15.1583415,2.25 17.5316862,2.25 Z M17.5316862,3.47291108 C15.8362095,3.47291108 14.4729111,4.84590921 14.4729111,6.56109363 C14.4729111,7.11498404 14.585996,7.58279609 14.8320591,8.06443701 C14.9496979,8.29470185 15.0899372,8.51980245 15.2738098,8.77155709 L15.3895377,8.92606291 L15.5815192,9.16988989 L15.8033741,9.43861563 L16.27801,9.99141826 C16.7207576,10.5085118 17.0915491,10.9673927 17.427079,11.4177677 L17.5314117,11.5594769 L17.5879302,11.4818583 C17.8822707,11.0833493 18.204096,10.6790482 18.5850789,10.226845 L18.7806467,9.99655663 L19.238958,9.46323938 C20.2743722,8.2372622 20.5874665,7.54526007 20.5874665,6.56109363 C20.5874665,4.84511326 19.2259968,3.47291108 17.5316862,3.47291108 Z M17.5301888,5.61300546 C18.0342755,5.61300546 18.4473721,6.02610205 18.4473721,6.53018877 C18.4473721,7.0342755 18.0342755,7.44737208 17.5301888,7.44737208 C17.026102,7.44737208 16.6130055,7.0342755 16.6130055,6.53018877 C16.6130055,6.02610205 17.026102,5.61300546 17.5301888,5.61300546 Z\" />\n    <path fill=\"currentColor\" fill-rule=\"nonzero\" d=\"M17.2801888,14.25 C17.6944023,14.25 18.0301888,14.5857864 18.0301888,15 C18.0301888,15.3796958 17.7480349,15.693491 17.3819593,15.7431534 L17.2801888,15.75 L9.72977518,15.75 C9.30206188,15.75 8.95533174,16.0967301 8.95533174,16.5244434 C8.95533174,16.916514 9.24668137,17.2405361 9.62468779,17.2918171 L9.72977518,17.2988869 L19.3963725,17.2988869 C20.7092665,17.2988869 21.7735774,18.3631977 21.7735774,19.6760918 C21.7735774,20.9342819 20.7961113,21.9641725 19.5591305,22.0478124 L19.3963725,22.0532967 L5.75,22.0532967 C5.33578644,22.0532967 5,21.7175102 5,21.3032967 C5,20.9236009 5.28215388,20.6098057 5.64822944,20.5601433 L5.75,20.5532967 L19.3963725,20.5532967 C19.8808394,20.5532967 20.2735774,20.1605586 20.2735774,19.6760918 C20.2735774,19.2288916 19.9389367,18.8598509 19.5064072,18.8057215 L19.3963725,18.7988869 L9.72977518,18.7988869 C8.47363475,18.7988869 7.45533174,17.7805839 7.45533174,16.5244434 C7.45533174,15.3206422 8.39054406,14.3352715 9.57405282,14.2552472 L9.72977518,14.25 L17.2801888,14.25 Z M3.1628418,20.5532967 C3.57705536,20.5532967 3.9128418,20.8890831 3.9128418,21.3032967 C3.9128418,21.6829924 3.63068792,21.9967876 3.26461235,22.04645 L3.1628418,22.0532967 L2.84210526,22.0532967 C2.4278917,22.0532967 2.09210526,21.7175102 2.09210526,21.3032967 C2.09210526,20.9236009 2.37425914,20.6098057 2.74033471,20.5601433 L2.84210526,20.5532967 L3.1628418,20.5532967 Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#ShiftBadgeIcon",
+          "name": "ShiftBadgeIcon"
         }
       ],
       "usageCount": 1
@@ -4208,5 +4302,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-11T14:03:53.037Z"
+  "generatedAt": "2026-09-25T14:58:51.793Z"
 }

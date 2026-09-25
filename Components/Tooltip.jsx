@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useDevEditActive, useDevEditStickyDismiss } from './devEditHoverSticky'
 
 // wrapClassName is optional — applied to both the trigger wrap AND the
 // portaled tooltip content, so an instance-specific override (e.g.
@@ -27,6 +28,7 @@ export default function Tooltip({ children, text, wrapClassName, placement = 'to
   const tooltipRef = useRef(null)
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ left: -9999, top: -9999 })
+  const devEditActive = useDevEditActive()
 
   // Centers on the trigger by default, then clamps within the viewport so a
   // trigger near the left/right edge (e.g. the last column of a wide table)
@@ -55,7 +57,11 @@ export default function Tooltip({ children, text, wrapClassName, placement = 'to
   }, [placement])
 
   const show = () => { updatePosition(); setVisible(true) }
-  const hide = () => setVisible(false)
+  // While Dev Edit is active, mouseleave no longer hides the tooltip — it
+  // stays open/clickable until explicitly dismissed (click elsewhere or
+  // Escape, below), the same "pin it open so you can actually reach it"
+  // behavior the daily-schedule hover cards already established.
+  const hide = () => { if (!devEditActive) setVisible(false) }
 
   // Keeps the tooltip glued to its trigger if the page/table scrolls or the
   // window resizes while it's open — only wired up while actually visible.
@@ -69,6 +75,11 @@ export default function Tooltip({ children, text, wrapClassName, placement = 'to
       window.removeEventListener('resize', updatePosition)
     }
   }, [visible, updatePosition])
+
+  // Click-away/Escape dismissal, only relevant once Dev Edit has made the
+  // tooltip sticky above — see Components/devEditHoverSticky.js for the
+  // shared mechanism and why it's capture-phase.
+  useDevEditStickyDismiss(devEditActive, visible, setVisible, '.tooltip')
 
   const wrapClasses = ['tooltip-wrap', wrapClassName].filter(Boolean).join(' ')
   const tooltipClasses = [
@@ -85,7 +96,7 @@ export default function Tooltip({ children, text, wrapClassName, placement = 'to
         <div
           ref={tooltipRef}
           className={tooltipClasses}
-          style={{ left: pos.left, top: pos.top }}
+          style={{ left: pos.left, top: pos.top, pointerEvents: devEditActive ? 'auto' : 'none' }}
         >
           {text}
         </div>,

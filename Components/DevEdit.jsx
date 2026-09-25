@@ -700,7 +700,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
   // ── Auth + identity gate ──
   const [authUser, setAuthUser] = useState(null)
   const [authReady, setAuthReady] = useState(false)
-  const [authorName, setAuthorName] = useState(getStoredAuthor)
+  const [authorName, setAuthorName] = useState(() => getStoredAuthor())
   const [gateStep, setGateStep] = useState(null) // null | 'password' | 'name'
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState(null)
@@ -1227,9 +1227,26 @@ export default function DevEdit({ containerRef, prototypeId }) {
     // follow, or activating this tool would swallow clicks meant for the
     // other toggles/panels.
     const isOtherUi = (target) => target.closest && target.closest('[data-devedit-ui], [data-devmode-ui], [data-devcomments-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
-    const isRecognized = (target) =>
-      container.contains(target) ||
-      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap'))
+    // Anything that isn't another tool's own chrome counts as real page
+    // content — deliberately NOT scoped to `container.contains(target)`
+    // plus a hand-maintained allowlist of portaled-popup class names (an
+    // earlier version of this line kept one, growing by one entry every
+    // time a new popup needed it — react-datepicker, FilterDropdown, then
+    // the daily-schedule hover cards, then Tooltip). A prototype's own
+    // `container` only ever existed to distinguish "this page's content"
+    // from "dev-tool chrome floating over it" — and `isOtherUi` above
+    // already draws that exact line by itself, comprehensively (every dev
+    // tool's own UI is fully tagged with its own marker — confirmed by
+    // grepping each one's own file). So the container check was never
+    // actually doing independent work; it was just one more way of arguing
+    // "not dev-tool chrome" that happened to miss anything portaled to
+    // document.body, which is why every new hover/popover/portal kept
+    // needing its own manual exemption here. Dropping it means any
+    // *future* hover element, tooltip variant, or portaled popup is
+    // automatically selectable with no line to add here — the only thing
+    // a new one still needs to opt into is *staying open long enough to
+    // click into* (Components/devEditHoverSticky.js's own hook).
+    const isRecognized = (target) => !isOtherUi(target)
 
     const handleMove = (e) => {
       if (isOtherUi(e.target)) return

@@ -144,23 +144,22 @@
 
 .ds-unassigned { background: var(--ui-purple-7-lightest-lavendar); border-bottom: 1px solid var(--ui-purple-5-languid-lavendar); }
 
-/* Title, then the view toggle, both pinned to the top of the label column —
-   that column stretches to match the (often much taller) lanes/list content
+/* Title, then the list button, both pinned to the top of the label column —
+   that column stretches to match the (often much taller) lanes content
    beside it, and centering short content in a tall cell reads as misplaced,
    so this overrides .ds-row-label's own vertically-centered default. */
 .ds-unassigned-label { align-items: flex-start; justify-content: flex-start;
   padding: 20px 24px;
 }
-/* Title and view toggle sit on one line, horizontally aligned — this inner
+/* Title and list button sit on one line, horizontally aligned — this inner
    row is what actually stays pinned to the top via .ds-unassigned-label's
    own flex-start above (it's the label's one and only child). */
 .ds-unassigned-heading { display: flex; align-items: center; justify-content: space-between; width:100%; }
 
-/* A single icon button (not a toggle — see the JSX comment above this
-   markup) that switches the Unassigned section between timeline and list.
-   Plain lavender-grey fill at rest, matching the view-mode toggle's own
-   track colour so it still reads as part of the same view-switching family
-   even though it's no longer a segmented control. */
+/* Opens the Unassigned list as a modal (no longer a toggle — see the
+   listModalOpen state comment in DailySchedule.jsx for why). Plain
+   lavender-grey fill at rest, matching the view-mode toggle's own track
+   colour so it still reads as part of the same family of view controls. */
 .ds-view-switch-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; border: none; border-radius: 999px;
@@ -188,12 +187,52 @@
 }
 .ds-unassigned-bar:hover { }
 
-/* Overrides the plain track's hour-gridline background — the list-view
-   table is a normal white data table, not a timeline, so those vertical
-   hour lines would just show through the table's own borders/padding. */
-.ds-row-track--plain { background-image: none; min-height: 0; }
-.ds-unassigned-list { padding: 16px; }
-.ds-assign-btn { padding: 6px 16px; font-size: 13px; height: 30px; }
+/* ── Unassigned list modal (Components/ModalPanel.jsx) ──────────
+   The table/pagination markup itself is unchanged from the old inline
+   list view — only its container changed, from a plain row-track to this
+   modal's own scrollable body — so this is just padding around it. */
+.ds-list-modal-body { padding: 8px 24px 24px; }
+.ds-assign-btn { padding: 6px 16px; font-size: 13px; height: 30px; white-space: nowrap; flex-shrink: 0; }
+
+/* A visit's own time, plus its optional time-adjusted icon — inline so the
+   icon sits directly to the right of the time text, not on its own line.
+   Coloured amber (matching the reference image) rather than inheriting
+   currentColor, same reasoning WarningIcon's own .warning-icon uses. */
+.ds-time-adjusted-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+  color: var(--rag-amber-amber-7);
+}
+
+/* ── Shift/run rows (Unassigned list view) ──────────────────────
+   A shift row sits slightly tinted so it visually reads as a grouping
+   row distinct from the plain visit rows above/below it; its own nested
+   visit rows (shown when expanded) stay plain white, indented under the
+   shift's own name to read as children of it. */
+.ds-shift-row td,
+.ds-shift-visit-row td { background: var(--ui-purple-7-lightest-lavendar); }
+.ds-shift-expand-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  color: var(--ui-purple-3-grape-grey);
+  transform: rotate(-90deg);
+  transition: transform 0.15s;
+}
+.ds-shift-expand-btn.expanded { transform: rotate(0deg); }
+.ds-shift-visit-count {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--greyscale-4-grey-40);
+}
+.ds-shift-visit-name { padding-left: 34px; }
 
 /* ── Area / Visit Type tags ──────────────────────────────────── */
 
@@ -247,3 +286,126 @@
   width: 36px;
   height: 30px;
 }
+
+/* ── Shift/visit hover cards ─────────────────────────────────────
+   Portaled to document.body (see each component's own comment in
+   DailySchedule.jsx for why) and positioned via inline bottom/left — fixed
+   positioning here is deliberate, matching every other portaled overlay
+   in this repo (Dev Mode/Comments/Edit panels, Tooltip). Above
+   Components/ModalPanel.jsx's own overlay (10850, the modal either card is
+   shown from) and below Dev Edit's fixed UI (10900), same z-index
+   reasoning already established repo-wide. One shared container rule for
+   both cards (identical box/typography), everything below it either
+   shared between them (.ds-shift-hover-*, reused as-is by the visit card
+   too) or visit-only (.ds-visit-hover-*). */
+.ds-shift-hover-card,
+.ds-visit-hover-card {
+  position: fixed;
+  z-index: 10860;
+  width: 240px;
+  background: #fff;
+  border: 1px solid var(--ui-purple-6-lavendar-grey);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  font-size: 13px;
+  color: var(--greyscale-2-grey-20);
+  pointer-events: none;
+}
+
+/* No employee-initials avatar here — a shift covers several visits/
+   customers, so there's no single "whose visit is this" identity the way
+   a plain visit's own customer initials would give; the badge alone
+   (this is a shift/run, not a visit) is all the top of the card needs. */
+.ds-shift-hover-badge {
+  width: 70px; height: 70px; border-radius: 999px; flex-shrink: 0;
+  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--ui-purple-2-glossy-grape);
+}
+
+.ds-shift-hover-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--greyscale-2-grey-20);
+}
+.ds-shift-hover-row svg { flex-shrink: 0; color: var(--greyscale-4-grey-40); }
+
+.ds-shift-hover-assigned { color: var(--greyscale-4-grey-40); margin-bottom: 4px; }
+
+.ds-shift-hover-divider {
+  height: 1px;
+  background: var(--ui-purple-6-lavendar-grey);
+  margin: 12px 0;
+}
+
+.ds-shift-hover-heading { font-weight: 600; color: #000; margin-bottom: 8px; }
+.ds-shift-hover-line { margin-bottom: 4px; }
+.ds-shift-hover-line:last-child { margin-bottom: 0; }
+
+/* ── Visit hover card — visit-only bits (rows/divider/assigned/heading
+   above are all shared with the shift card, see .ds-shift-hover-card's own
+   comment) ──────────────────────────────────────────────────────── */
+.ds-visit-hover-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+/* Bigger + green-tinted vs. the plain employee-row avatar this class
+   normally renders (36px, blue) — a customer avatar reads more clearly at
+   a slightly larger size, and green matches the customer-avatar tint
+   Components/EventPanel.jsx already uses (customerAvatarBg) elsewhere in
+   this same assign flow, so the two stay visually consistent.
+   flex-basis (not just width) has to be overridden too — this element also
+   carries .ds-avatar, whose own `flex: 0 0 36px` shorthand sets a 36px
+   flex-basis on it. Inside .ds-visit-hover-top's row flex layout,
+   flex-basis governs the item's actual rendered width regardless of what
+   `width` says, so `width: 70px` alone silently had no visible effect
+   (height isn't part of flex-basis in a row layout, which is why only
+   height ever visibly changed when this was edited via Dev Edit). */
+.ds-visit-hover-avatar {
+  width: 70px; height: 70px; flex-basis: 70px; font-size: 15px;
+  background: var(--availability-3-green-tint);
+}
+
+.ds-visit-hover-heading { font-size: 14px; font-weight: 400; color: var(--greyscale-2-grey-20); margin-bottom: 10px; }
+.ds-visit-hover-heading strong { font-size: 14px; font-weight: 700; }
+
+.ds-visit-hover-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.ds-visit-hover-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.ds-visit-hover-tag--service { background: var(--availability-4-blue-tint); color: var(--greyscale-2-grey-20); }
+
+/* The adjusted-time row and its own plan-time line both read amber (the
+   colour the list view's own time-adjusted icon already uses) — this is
+   the one row on either hover card that isn't plain neutral text, since
+   it's flagging something the office user should notice, not just
+   reference detail. */
+.ds-visit-hover-adjusted-row { color: var(--rag-amber-amber-7); }
+.ds-visit-hover-adjusted-row svg:first-child { color: var(--greyscale-4-grey-40); }
+.ds-visit-hover-adjusted-row .ds-time-adjusted-icon { margin-left: 0; }
+.ds-visit-hover-plan-row {
+  margin: -2px 0 6px 22px;
+  color: var(--greyscale-4-grey-40);
+}
+.ds-visit-hover-plan-strike { text-decoration: line-through; }
+
+.ds-visit-hover-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--rag-amber-amber-lightest);
+  color: #7b3306;
+  font-size: 12px;
+}
+.ds-visit-hover-warning svg { flex-shrink: 0; color: var(--rag-amber-amber-7); }
