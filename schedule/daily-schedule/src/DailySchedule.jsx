@@ -538,8 +538,18 @@ export default function DailySchedule() {
   // "closed the modal by some other means while still hovering a row" case
   // uniformly, rather than duplicating a setHoverCard(null) call at every
   // click handler that can make the modal disappear.
+  //
+  // That effect alone wasn't enough, though: a mouseenter can still land
+  // after it runs (the row sits under the cursor as the modal unmounts),
+  // re-setting the card with nothing left to clear it — it then floated
+  // over the assign panel and survived the panel closing too. So the
+  // cards' own render is also gated on `hoverCardAllowed` below (a stale
+  // value can never paint while the list isn't visible), and the effect
+  // re-runs on every assign-panel open AND close (keyed on assignVisit
+  // itself), so whatever got captured is dropped before the list reappears.
+  const hoverCardAllowed = listModalOpen && !assignVisit
   useEffect(() => {
-    if (!listModalOpen || assignVisit) setHoverCard(null)
+    setHoverCard(null)
   }, [listModalOpen, assignVisit])
 
   const [page, setPage] = useState(1)
@@ -965,8 +975,8 @@ export default function DailySchedule() {
             placement guess) whenever the hovered row genuinely changes,
             rather than carrying over whichever placement the previous
             target's card settled on. */}
-        {hoverCard?.type === 'shift' && <ShiftHoverCard key={hoverCard.shift.id} shift={hoverCard.shift} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
-        {hoverCard?.type === 'visit' && <VisitHoverCard key={hoverCard.visit.id} visit={hoverCard.visit} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
+        {hoverCardAllowed && hoverCard?.type === 'shift' && <ShiftHoverCard key={hoverCard.shift.id} shift={hoverCard.shift} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
+        {hoverCardAllowed && hoverCard?.type === 'visit' && <VisitHoverCard key={hoverCard.visit.id} visit={hoverCard.visit} rect={hoverCard.rect} cursorX={hoverCard.cursorX} visitDate={visitDate} interactive={hoverCardSticky} />}
 
         {/* Rendered inside the pageRef-wrapped subtree (not as a sibling
             after it) so DevMode/DevEdit's own "is this click inside our
