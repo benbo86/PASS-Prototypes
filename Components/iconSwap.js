@@ -408,6 +408,7 @@ export function reconcile(container, nextSwaps, registry) {
   restoreAll(registry)
   if (!container) return
   for (const swap of nextSwaps) {
+    if (!swap?.svg) continue
     const targets = resolveTargets(swap, container)
     targets.forEach((el) => applySwap(el, swap, registry))
   }
@@ -430,6 +431,7 @@ export function createIconSwapRuntime(container) {
   function reapply() {
     applying = true
     for (const swap of activeSwaps) {
+      if (!swap?.svg) continue
       const targets = resolveTargets(swap, container)
       targets.forEach((el) => {
         if (el.getAttribute('data-passicon') !== swap.id) applySwap(el, swap, registry)

@@ -249,6 +249,14 @@ export default function DevMode({ containerRef }) {
     document.addEventListener('pointerdown', handleSuppress, true)
     document.addEventListener('mousedown', handleSuppress, true)
     document.addEventListener('click', handleClick, true)
+    // Browsers never dispatch mousedown/click to a *disabled* form control
+    // (a locked <select>, a disabled button) — only pointer events — so
+    // without this such elements highlight on hover but can't be selected.
+    // Only routed for disabled targets, so ordinary clicks aren't handled twice.
+    const handleDisabledPointerUp = (e) => {
+      if (e.target instanceof Element && e.target.matches(':disabled')) handleClick(e)
+    }
+    document.addEventListener('pointerup', handleDisabledPointerUp, true)
 
     return () => {
       document.removeEventListener('mousemove', handleMove, true)
@@ -256,6 +264,7 @@ export default function DevMode({ containerRef }) {
       document.removeEventListener('pointerdown', handleSuppress, true)
       document.removeEventListener('mousedown', handleSuppress, true)
       document.removeEventListener('click', handleClick, true)
+      document.removeEventListener('pointerup', handleDisabledPointerUp, true)
     }
   }, [isActive, containerRef])
 

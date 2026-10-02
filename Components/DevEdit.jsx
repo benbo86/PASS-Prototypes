@@ -620,7 +620,9 @@ function mergeIconSwaps(iconEditsMap, activeSwaps) {
   })
   ;(activeSwaps || []).forEach((s) => {
     const key = `${s.originalHash}:${s.originalLen}`
-    if (!sessionKeys.has(key)) result.push(s)
+    // s.svg guard: tolerate a malformed persisted swap (svg: null, written
+    // by the pre-fix save path) rather than crashing reconcile.
+    if (!sessionKeys.has(key) && s.svg) result.push(s)
   })
   return result
 }
@@ -1493,12 +1495,21 @@ export default function DevEdit({ containerRef, prototypeId }) {
     document.addEventListener('pointerdown', handleSuppress, true)
     document.addEventListener('mousedown', handleSuppress, true)
     document.addEventListener('click', handleClick, true)
+    // Browsers never dispatch mousedown/click to a *disabled* form control
+    // (a locked <select>, a disabled button) — only pointer events — so
+    // without this such elements highlight on hover but can't be selected.
+    // Only routed for disabled targets, so ordinary clicks aren't handled twice.
+    const handleDisabledPointerUp = (e) => {
+      if (e.target instanceof Element && e.target.matches(':disabled')) handleClick(e)
+    }
+    document.addEventListener('pointerup', handleDisabledPointerUp, true)
     return () => {
       document.removeEventListener('mousemove', handleMove, true)
       document.removeEventListener('mouseleave', handleLeave, true)
       document.removeEventListener('pointerdown', handleSuppress, true)
       document.removeEventListener('mousedown', handleSuppress, true)
       document.removeEventListener('click', handleClick, true)
+      document.removeEventListener('pointerup', handleDisabledPointerUp, true)
     }
   }, [active, containerRef, closeSelection, revertDirtyRules])
 
@@ -1737,7 +1748,12 @@ export default function DevEdit({ containerRef, prototypeId }) {
       // panel is deliberately left out, same as it wouldn't survive a
       // click-away either.
       const newOverrides = edited.map(e => ({ selector: e.selectorText, mediaText: e.mediaText || null, declarations: e.committed, filePath: e.filePath || null }))
-      const newIconSwaps = editedIcons.map(([, e]) => ({
+      // svg: null is a pending Reset (tombstone, see handleIconReset) —
+      // excluded from what's persisted, but its key still suppresses the
+      // carried-over saved swap below (newIconKeys reads editedIcons, not
+      // this filtered list). Real bug: this filter was missing, so Reset-
+      // then-save persisted an svg:null swap that crashed every page load.
+      const newIconSwaps = editedIcons.filter(([, e]) => e.svg).map(([, e]) => ({
         id: e.id, scope: e.scope || 'all', originalHash: e.originalHash, originalLen: e.originalLen,
         domPath: e.domPath || null, pathHint: e.pathHint || null,
         svg: e.svg, source: e.source, authorName: e.authorName, createdAt: e.createdAt || new Date().toISOString(),
@@ -1773,7 +1789,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
         .filter(o => !newOverrideKeys.has(ruleKey(o.selector, o.mediaText)))
       const overrides = [...carriedOverrides, ...newOverrides]
 
-      const newIconKeys = new Set(newIconSwaps.map(s => `${s.originalHash}:${s.originalLen}`))
+      const newIconKeys = new Set(editedIcons.map(([, e]) => `${e.originalHash}:${e.originalLen}`))
       const carriedIconSwaps = (activeOverridesRef.current?.iconSwaps || [])
         .filter(s => !newIconKeys.has(`${s.originalHash}:${s.originalLen}`))
       const iconSwaps = [...carriedIconSwaps, ...newIconSwaps]

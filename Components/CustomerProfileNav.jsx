@@ -17,7 +17,7 @@ export const HeartbeatIcon = () => (
 
 const PRIMARY_TABS = [
   { label: 'Dashboard', href: null },
-  { label: 'Care Management', href: null },
+  { label: 'Care Management', href: '../care-management/' },
   { label: 'Care Notes', href: null },
   { label: 'MAR Chart', href: '../mar-chart/' },
   { label: 'Timeline', href: '../timeline/' },
