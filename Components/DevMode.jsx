@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { announceState, subscribeToState } from './devToolbarBus'
 import Tooltip from './Tooltip'
+import AncestorBreadcrumb from './AncestorBreadcrumb'
+import { ancestorTrail, selectableParent } from './ancestorTrail'
 import {
   toPlainRect, getElementMetrics, computeElementGap, uniformDirs,
   computeNearestGaps, isAncestorOrDescendant, findVisibleAncestor,
@@ -74,6 +76,12 @@ export default function DevMode({ containerRef }) {
   const [selectedEls, setSelectedEls] = useState([])
   const [hoverRect, setHoverRect] = useState(null)
   const [selectedRects, setSelectedRects] = useState([])
+  // Deepest element of the Inspect panel's ancestor breadcrumb — kept while
+  // moving up/down the trail (⌥-click or the breadcrumb itself) so the
+  // trail doesn't shrink to whatever's selected.
+  const [trailLeaf, setTrailLeaf] = useState(null)
+  const trailLeafRef = useRef(null)
+  const setLeaf = (el) => { trailLeafRef.current = el; setTrailLeaf(el) }
   const [gapInfo, setGapInfo] = useState(null)
   const [exportFormat, setExportFormat] = useState('png')
   const [exportScale, setExportScale] = useState(1)
@@ -232,6 +240,22 @@ export default function DevMode({ containerRef }) {
 
       e.preventDefault()
       e.stopPropagation()
+
+      // ⌥-click selects the parent — anything fully covered by its
+      // children (a table, a wrapper div) can't otherwise be clicked.
+      // Repeated ⌥-clicks inside the current selection keep climbing.
+      if (e.altKey && !e.shiftKey) {
+        const current = selectedElsRef.current.length === 1 ? selectedElsRef.current[0] : null
+        const climbing = current && current.contains(rawTarget)
+        const parent = selectableParent(climbing ? current : target, containerRef.current)
+        if (!parent) return
+        setLeaf(climbing ? (trailLeafRef.current || current) : target)
+        selectedElsRef.current = [parent]
+        setSelectedEls([parent])
+        return
+      }
+
+      if (!e.shiftKey) setLeaf(target)
       setSelectedEls(prev => {
         let next
         if (e.shiftKey) {
@@ -474,6 +498,9 @@ export default function DevMode({ containerRef }) {
           {selectedEls.length === 1 && (
             <InspectPanel
               el={selectedEls[0]}
+              trail={ancestorTrail(trailLeaf && selectedEls[0].contains(trailLeaf) ? trailLeaf : selectedEls[0], containerRef.current)}
+              onSelectAncestor={el => { selectedElsRef.current = [el]; setSelectedEls([el]) }}
+              onHoverAncestor={el => { setHoveredEl(el); setHoverRect(el ? el.getBoundingClientRect() : null) }}
               onClose={clearSelection}
               format={exportFormat}
               setFormat={setExportFormat}
@@ -729,7 +756,7 @@ function MarginOverlay({ el, rect }) {
 
 // ─── Inspect panel (single-select) ───────────────────────────────
 
-function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExport, isExporting }) {
+function InspectPanel({ el, trail, onSelectAncestor, onHoverAncestor, onClose, format, setFormat, scale, setScale, onExport, isExporting }) {
   const metrics = getElementMetrics(el)
   const cssSnippet = generateCssSnippet(metrics)
 
@@ -742,6 +769,7 @@ function InspectPanel({ el, onClose, format, setFormat, scale, setScale, onExpor
           <CloseIcon />
         </button>
       </div>
+      <AncestorBreadcrumb trail={trail} current={el} onSelect={onSelectAncestor} onHover={onHoverAncestor} />
       <div className="devmode-panel-body">
         <div className="devmode-panel-section">
           <div className="devmode-panel-section-title">Dimensions</div>

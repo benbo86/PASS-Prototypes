@@ -6,7 +6,9 @@ const CloseIcon = () => (
   </svg>
 )
 
-export default function SlidePanel({ open, onClose, title, children, footer }) {
+// className is optional — added to .slide-panel for a per-prototype width
+// override (e.g. roster-settings' 70%-wide panels). Defaults to the 937px panel.
+export default function SlidePanel({ open, onClose, title, children, footer, className }) {
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = ''
@@ -17,7 +19,7 @@ export default function SlidePanel({ open, onClose, title, children, footer }) {
 
   return (
     <div className="slide-panel-overlay" onClick={onClose}>
-      <div className="slide-panel" onClick={e => e.stopPropagation()}>
+      <div className={`slide-panel${className ? ` ${className}` : ''}`} onClick={e => e.stopPropagation()}>
         <div className="slide-panel-header">
           <h1 className="slide-panel-title">{title}</h1>
           <button className="slide-panel-close" onClick={onClose} aria-label="Close panel">

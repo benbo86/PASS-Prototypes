@@ -15,6 +15,8 @@ import { canonicalizeElement, createElementEditRuntime, isEligibleForTagChange, 
 import ElementEditPanel from './ElementEditPanel'
 import { getSuggestions, getCaretCoordinates } from './cssAutocomplete'
 import CssAutocompletePopup from './CssAutocompletePopup'
+import AncestorBreadcrumb from './AncestorBreadcrumb'
+import { ancestorTrail, selectableParent } from './ancestorTrail'
 
 const PenIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -789,6 +791,9 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
   const selectionRef = useRef(null)
   selectionRef.current = selection
+  // Set by the select/highlight effect while active — lets the panel's
+  // ancestor breadcrumb select an element directly (see selectTarget).
+  const selectElementRef = useRef(null)
 
   // Each entry tracks three states, not two — this distinction is what
   // makes Cancel/click-away and Save-as-version both work correctly at
@@ -1292,6 +1297,28 @@ export default function DevEdit({ containerRef, prototypeId }) {
         return
       }
 
+      // ⌥-click selects the parent instead — a table or a wrapper div that
+      // its children cover edge to edge can never be the topmost element
+      // under the cursor, so a plain click can't reach it. Repeated
+      // ⌥-clicks inside the current selection keep climbing one level.
+      if (e.altKey) {
+        const current = selectionRef.current?.el
+        const climbing = current && current.contains(rawTarget)
+        const parent = selectableParent(climbing ? current : rawTarget, containerRef.current)
+        if (parent) selectTarget(parent, { exact: true, leaf: climbing ? selectionRef.current.leaf : rawTarget })
+        return
+      }
+
+      selectTarget(rawTarget)
+    }
+
+    // Selects one element: shared by a plain click, ⌥-click and the panel's
+    // ancestor breadcrumb. `exact` skips the svg normalization (the element
+    // was picked deliberately, not hit-tested). `leaf` is the deepest
+    // element of the current breadcrumb trail, kept while moving up/down it
+    // so the trail doesn't shrink to whatever's selected.
+    const selectTarget = (rawTarget, { exact = false, leaf = null } = {}) => {
+
       // Real bug: a click landing on an icon's own inner <path>/<circle>
       // used to keep THAT raw node as selection.el — but the stale-
       // selection watchdog a bit below (the `el.isConnected` check) treats
@@ -1332,8 +1359,9 @@ export default function DevEdit({ containerRef, prototypeId }) {
       // way, only selection.el/the CSS-matching target changes here.
       const rawSvgEl = resolveSvgTarget(rawTarget)
       const svgEl = rawSvgEl && isLikelyIcon(rawSvgEl) ? rawSvgEl : null
-      const clickWasOnSvgItself = svgEl && svgEl.contains(rawTarget)
+      const clickWasOnSvgItself = !exact && svgEl && svgEl.contains(rawTarget)
       const target = clickWasOnSvgItself ? svgEl : rawTarget
+      const trailLeaf = leaf && target.contains(leaf) ? leaf : target
 
       if (selectionRef.current && selectionRef.current.el === target) return // already open on this element
 
@@ -1434,7 +1462,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
         }))
       }
 
-      setSelection({ el: target, rect: target.getBoundingClientRect(), keys, svgEl, iconSwapKey, elementEditKey })
+      setSelection({ el: target, rect: target.getBoundingClientRect(), keys, svgEl, iconSwapKey, elementEditKey, leaf: trailLeaf })
       setActiveTab('styles')
       setShowTabSwitchPrompt(false)
       setError(null)
@@ -1490,6 +1518,8 @@ export default function DevEdit({ containerRef, prototypeId }) {
         })
     }
 
+    selectElementRef.current = selectTarget
+
     document.addEventListener('mousemove', handleMove, true)
     document.addEventListener('mouseleave', handleLeave, true)
     document.addEventListener('pointerdown', handleSuppress, true)
@@ -1510,6 +1540,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
       document.removeEventListener('mousedown', handleSuppress, true)
       document.removeEventListener('click', handleClick, true)
       document.removeEventListener('pointerup', handleDisabledPointerUp, true)
+      selectElementRef.current = null
     }
   }, [active, containerRef, closeSelection, revertDirtyRules])
 
@@ -1552,7 +1583,7 @@ export default function DevEdit({ containerRef, prototypeId }) {
           ? resolveElementTarget({ domPath: entry.domPath, id: entry.id, originalHash: entry.originalHash, originalLen: entry.originalLen }, containerRef.current)
           : null
         if (resolved) {
-          setSelection(sel => (sel ? { ...sel, el: resolved, rect: resolved.getBoundingClientRect() } : sel))
+          setSelection(sel => (sel ? { ...sel, el: resolved, rect: resolved.getBoundingClientRect(), leaf: sel.leaf === sel.el ? resolved : sel.leaf } : sel))
           rafId = requestAnimationFrame(tick)
           return
         }
@@ -2249,6 +2280,9 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 onPanelApply={handlePanelApply}
                 onPanelCancel={handlePanelCancel}
                 onPanelReset={handlePanelReset}
+                trail={ancestorTrail(selection.leaf || selection.el, containerRef.current)}
+                onSelectAncestor={el => selectElementRef.current?.(el, { exact: true, leaf: selection.leaf })}
+                onHoverAncestor={el => { setHoveredEl(el); setHoverRect(el ? el.getBoundingClientRect() : null) }}
               />
               {showTabSwitchPrompt && (
                 <TabSwitchPrompt
@@ -2655,6 +2689,7 @@ function EditPanel({
   activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
   elementEditInitial, elementPanelRef, elementDraftDirty, onElementDirtyChange, elementResetNonce, hasElementEditToReset,
   applyingAll, onPanelApply, onPanelCancel, onPanelReset,
+  trail, onSelectAncestor, onHoverAncestor,
 }) {
   // Populates the file-target dropdown for a not-yet-applied new rule (see
   // handleClick's own class auto-seeding in the parent) — empty in
@@ -2748,6 +2783,7 @@ function EditPanel({
         </div>
         <button className="devedit-panel-close" onClick={onClose} aria-label="Close">×</button>
       </div>
+      <AncestorBreadcrumb trail={trail} current={selection.el} onSelect={onSelectAncestor} onHover={onHoverAncestor} />
       <div className="devedit-panel-body" onMouseDown={handleBodyMouseDown}>
         {isSvgTab ? (
           <IconSwapPanel

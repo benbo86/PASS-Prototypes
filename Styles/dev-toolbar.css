@@ -121,3 +121,25 @@
   z-index: 10701;
 }
 .audit-toast--error { background: var(--rag-red-red-overdue, #c0392b); }
+
+/* ─── Ancestor breadcrumb (Components/AncestorBreadcrumb.jsx) ─────
+   Used inside Dev Edit's and Dev Mode's own dark panels — lets a parent
+   element (a table, a wrapper div fully covered by its children) be
+   selected. Colours are neutral-on-dark so it suits both panels. */
+.anc-crumbs {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; line-height: 1.4;
+}
+.anc-crumb-item { display: inline-flex; align-items: center; }
+.anc-crumb-sep { color: rgba(255, 255, 255, 0.35); padding: 0 4px; }
+.anc-crumb {
+  background: none; border: none; padding: 2px 4px; border-radius: 4px;
+  font: inherit; color: rgba(255, 255, 255, 0.7); cursor: pointer;
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.anc-crumb:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.anc-crumb.active { background: rgba(176, 44, 247, 0.35); color: #fff; }
+.anc-crumb-more { color: rgba(255, 255, 255, 0.5); }

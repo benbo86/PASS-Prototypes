@@ -178,12 +178,13 @@ body {
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 12px 0px;
+  margin: 0 0 10px 0;
 }
 
 .settings-subsection-desc {
   font-size: 14px;
   color: #000;
+  margin-bottom: 24px;
 }
 
 .settings-subsection-header .settings-edit-btn {
@@ -492,21 +493,22 @@ body {
 
 .settings-table th {
   text-align: left;
-  font-weight: 600;
-  font-size: 13px;
-  color: #555;
-  padding: 8px 16px;
-  background: var(--ui-purple-6-lavendar-grey);
-  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 15.5px 12px;
+  background: #f4f3f6;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
 }
 
 .settings-table th:first-child { border-radius: 4px 0 0 4px; }
 .settings-table th:last-child  { border-radius: 0 4px 4px 0; }
 
 .settings-table td {
-  padding: 12px 16px;
+  padding: 16px;
   border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
   color: #333;
+  background: #FFF;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
 }
 
 .settings-table tr:last-child td {
@@ -644,20 +646,66 @@ body {
   flex-shrink: 0;
 }
 
-.settings-table td.contract-description-cell { vertical-align: top; }
+.settings-table td.contract-description-cell,
+.contract-types-table td { vertical-align: top; }
 
 .contract-detail-group {
   display: flex; flex-direction: column; gap: 6px;
   padding: 12px 0;
+  font-size: 16px;
 }
 .contract-detail-group:first-child { padding-top: 0; }
 .contract-detail-group:not(:last-child) { border-bottom: 1px solid var(--ui-purple-6-lavendar-grey); }
 
 .contract-detail-row { display: flex; gap: 8px; }
-.contract-detail-row strong { font-weight: 600; min-width: 190px; flex-shrink: 0; }
+.contract-detail-row strong { font-weight: 500; flex-shrink: 0; }
 
 /* ─── Contracts and pay — edit panel body ─────────────────────── */
 
-.contracts-panel-doc-section {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+/* Section spacing comes from main.css's shared .slide-panel-section. */
+
+/* ─── Contract type (Salary) — edit form, inside the panel ────────
+   Same table shell as the read-only Contract types table; the
+   Description cell holds the form. */
+
+.ct-edit-table td { vertical-align: top; }
+.ct-edit-table th:nth-child(1) { width: 245px; }
+.ct-edit-table th:nth-child(3) { width: 120px; }
+
+.ct-field { margin-bottom: 24px; }
+.ct-field:last-child { margin-bottom: 0; }
+
+.ct-field-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 500; color: #1a1a1a;
+  margin: 0 0 4px;
 }
+.ct-field-desc { font-size: 14px; color: #555; line-height: 1.5; margin: 0 0 12px; }
+
+.ct-radio-list { display: flex; flex-direction: column; gap: 8px; }
+
+.ct-input-label { display: block; font-size: 14px; color: #555; margin-bottom: 8px; }
+.ct-rate-input { max-width: 160px; box-sizing: border-box; }
+.ct-select { max-width: 350px; }
+.ct-textarea { box-sizing: border-box; resize: vertical; font-family: inherit; }
+
+/* Info-icon tooltip on the salaried-hours settings — several sentences,
+   so it wraps instead of running on one line. */
+.tooltip.ct-tip-wrap { max-width: 360px; white-space: normal; text-align: left; }
+.ct-tip p { margin: 0 0 8px; font-size: inherit; line-height: inherit; color: inherit; }
+.ct-tip p:last-child { margin-bottom: 0; }
+.ct-tip ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+
+.ct-edit-table th.ct-action-col, .ct-edit-table td.ct-action-col { width: 56px; text-align: center; }
+.ct-readonly-desc { margin: 0 0 32px; font-size: 14px; }
+.ct-icon-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: #000; display: inline-flex;
+}
+
+.seg-toggle-small {
+  min-width: 115px !important;
+}
+
+/* Roster Settings' edit panels are wider than the shared 937px default. */
+.slide-panel.rs-slide-panel { width: 70%; }

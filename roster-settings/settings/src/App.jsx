@@ -12,6 +12,8 @@ import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import CustomiseGpaModal from './CustomiseGpaModal'
 import { defaultGpaConfig } from './gpaCustomisation'
+import SalaryContractForm from './SalaryContractForm'
+import { INITIAL_SALARY_CONTRACT, salaryContractRow } from './salaryContract'
 // ─── Icons ────────────────────────────────────────────────────
 
 const ChevronLeftIcon = () => (
@@ -407,24 +409,9 @@ const CONTRACTS_STATIC_GROUPS = [
 // visual rhythm: the mileage trio reads as one tight cluster, while Travel
 // time/Overtime/Expense pay/Holiday scheme each get their own clearly
 // separated line.
+// Salary isn't listed here — it's editable (Contracts and pay panel), so its
+// row is built from live state via salaryContractRow (salaryContract.js).
 const CONTRACT_TYPES = [
-  {
-    name: 'Salary',
-    color: '#f2f2f4',
-    description: 'Full-time salaried staff, paid based on contracted hours',
-    enabled: true,
-    detailGroups: [
-      [
-        { label: 'What mileage will be paid?', value: 'Travel between visits' },
-        { label: 'Mileage pay during a break', value: 'None' },
-        { label: 'Mileage rate', value: '£0.40 per mile' },
-      ],
-      [{ label: 'Travel time', value: 'None' }],
-      [{ label: 'Overtime', value: 'Yes' }],
-      [{ label: 'Expense pay', value: 'Yes' }],
-      [{ label: 'Holiday scheme', value: '3.5 Days Flex' }],
-    ],
-  },
   {
     name: 'Fixed hours',
     color: '#f3e6b8',
@@ -857,6 +844,16 @@ export default function App() {
   const [gpaConfig, setGpaConfig] = useState(defaultGpaConfig())
   const [gpaModalOpen, setGpaModalOpen] = useState(false)
 
+  // Salary contract type — saved values drive the read-only table; the panel
+  // edits a draft copy, committed on Save and discarded on Cancel.
+  const [salaryContract, setSalaryContract] = useState(INITIAL_SALARY_CONTRACT)
+  const [salaryDraft, setSalaryDraft] = useState(INITIAL_SALARY_CONTRACT)
+  const patchSalaryDraft = patch => setSalaryDraft(d => ({ ...d, ...patch }))
+  // Bumped on every open so the Salary row always starts read-only.
+  const [panelOpenCount, setPanelOpenCount] = useState(0)
+  const openContractsPanel = () => { setSalaryDraft(salaryContract); setPanelOpenCount(n => n + 1); setContractsPanelOpen(true) }
+  const saveContractsPanel = () => { setSalaryContract(salaryDraft); setContractsPanelOpen(false) }
+
   const handleConfirmGpaConfig = (config) => {
     setGpaConfig(config)
     setGpaModalOpen(false)
@@ -931,7 +928,7 @@ export default function App() {
                 <ContractsIcon size={40} />
                 <h2 className="settings-section-title">Contracts and pay</h2>
               </div>
-              <button className="settings-edit-btn" onClick={() => setContractsPanelOpen(true)} title="Edit">
+              <button className="settings-edit-btn" onClick={openContractsPanel} title="Edit">
                 <EditIcon />
               </button>
             </div>
@@ -965,7 +962,7 @@ export default function App() {
                   <p className="settings-subsection-desc">Contract types are used to identify availability periods within the schedule and to define pay rates for payroll</p>
                 </div>
               </div>
-              <table className="settings-table">
+              <table className="settings-table contract-types-table">
                 <thead>
                   <tr>
                     <th>Contract name &amp; color</th>
@@ -974,7 +971,7 @@ export default function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {CONTRACT_TYPES.map(ct => (
+                  {[salaryContractRow(salaryContract), ...CONTRACT_TYPES].map(ct => (
                     <tr key={ct.name}>
                       <td>
                         <div className="contract-name-cell">
@@ -995,7 +992,7 @@ export default function App() {
                           </div>
                         ))}
                       </td>
-                      <td>{ct.enabled ? 'Yes' : 'No'}</td>
+                      <td><SegmentedToggle options={[{ value: false, label: 'No' }, { value: true, label: 'Yes', tone: 'green' }]} value={ct.enabled} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -1164,21 +1161,25 @@ export default function App() {
 
       {/* Contracts and pay — Pay advice document customisation panel */}
       <SlidePanel
+        className="rs-slide-panel"
         open={contractsPanelOpen}
         onClose={() => setContractsPanelOpen(false)}
         title="Edit contracts and pay"
         footer={
           <>
             <button className="round-btn tertiary-btn" onClick={() => setContractsPanelOpen(false)}>Cancel</button>
-            <button className="round-btn primary-btn" onClick={() => setContractsPanelOpen(false)}>Save</button>
+            <button className="round-btn primary-btn" onClick={saveContractsPanel}>Save</button>
           </>
         }
       >
-        <div className="contracts-panel-doc-section">
-          <div>
-            <h3 className="settings-subsection-title">Pay advice document</h3>
-            <p className="settings-subsection-desc">Customise what is displayed on the gross pay advice document</p>
-          </div>
+        <div className="slide-panel-section">
+          <h3 className="settings-subsection-title">Contract types</h3>
+          <p className="settings-subsection-desc">Contract types are used to identify availability periods within the schedule and to define pay rates for payroll</p>
+          <SalaryContractForm key={panelOpenCount} draft={salaryDraft} onPatch={patchSalaryDraft} />
+        </div>
+        <div className="slide-panel-section">
+          <h3 className="settings-subsection-title">Pay advice document</h3>
+          <p className="settings-subsection-desc">Customise what is displayed on the gross pay advice document</p>
           <button className="round-btn primary-btn" onClick={() => setGpaModalOpen(true)}>
             Customise layout
           </button>
@@ -1195,6 +1196,7 @@ export default function App() {
       {/* Communications / Holiday requests edit panel — one shared panel
           for whichever pencil was clicked */}
       <SlidePanel
+        className="rs-slide-panel"
         open={activePanel !== null}
         onClose={closePanel}
         title={

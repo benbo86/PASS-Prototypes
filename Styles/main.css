@@ -1409,6 +1409,13 @@ h6 {
   background: var(--ui-purple-7-lightest-lavendar);
 }
 
+/* Wrapper for each section inside a SlidePanel body (heading, description,
+   content) — keeps the spacing between sections the same in every panel.
+   No margin after the last one, so the body's own 48px padding is all
+   that sits above the footer. */
+.slide-panel-section { margin-bottom: 48px; }
+.slide-panel-section:last-child { margin-bottom: 0; }
+
 .slide-panel-footer {
   padding: 16px 24px;
   border-top: 1px solid var(--ui-purple-5-languid-lavendar);

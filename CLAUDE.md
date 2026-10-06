@@ -74,6 +74,8 @@ employee-contract/
 | `Components/ElementEditPanel.jsx` | Presentational panel for Dev Edit's "Element" tab — draft-then-validate-then-commit (not live-as-you-type), all durable state lives in `DevEdit.jsx` — see Dev Edit's own "Element tab" round below |
 | `Components/cssAutocomplete.js` | Pure, React-free CSS property/value autocomplete engine backing Dev Edit's "Edit styles" tab (Chrome-Styles-pane-style suggestions) — property list read live off the browser's own `CSSStyleDeclaration`, not hand-maintained — see Dev Edit's own "CSS autocomplete" round below |
 | `Components/CssAutocompletePopup.jsx` | Presentational suggestion dropdown for `cssAutocomplete.js`, rendered by `RuleTextarea` (defined inline in `DevEdit.jsx`) — see Dev Edit's own "CSS autocomplete" round below |
+| `Components/ancestorTrail.js` | Pure helpers (`ancestorTrail`/`selectableParent`/`elementLabel`) behind the "select a parent element" breadcrumb and ⌥-click shared by Dev Edit and Dev Mode — see Dev Edit's own "Ancestor breadcrumb" round below |
+| `Components/AncestorBreadcrumb.jsx` | The breadcrumb itself, rendered in both Dev Edit's and Dev Mode's panels; styles live in `Styles/dev-toolbar.css` (`.anc-crumb*`, already loaded everywhere) |
 | `Components/LegalFlags.jsx` | Mobile-only: exports `HighRiskBadge` + `LegalFlags` (outlined red Allergies/DNACPR/DoLS pills) — promoted out of `mobile/tag-in-out` once a second consumer (the "Legal flags" story in `component-demos/mobile-components`) needed it; styling lives in `Styles/mobile.css`, not `main.css` |
 
 **Always read `Styles/main.css` before adding local CSS.**
@@ -954,6 +956,25 @@ Ben, with exact repro steps: add a class in the Element tab → switch to Edit s
 **Fixed by extracting the seeding logic into a shared, non-mutating function**, `computeUnstyledClassEntries(target, existingKeys, sessionEditsSnapshot)`, returning `{ newKeys, newEntries }` for the caller to merge in. Called from both `handleClick` (unchanged behavior) and, newly, the element-edit reconcile effect right after it reconciles the DOM — checking `selectionRef.current` and merging in any new keys/entries if the just-landed edit introduced an unstyled class.
 
 **Verified via Playwright**: reproduced the exact reported steps — after "Apply changes," the new class's rule row is present immediately, no re-selection needed; typing declarations and Save still writes a real file correctly. Regression: the main Save button path (which always closes the panel, so any re-open is a fresh `handleClick`) still works correctly. `npm run build` clean.
+
+
+### v20 — ancestor breadcrumb + ⌥-click: selecting a table or a parent wrapper (Dev Edit and Dev Mode)
+
+Ben: "How can we make it possible to edit a tables styling? I can't select it when using dev edit, only its contents. I've had other issues in terms of trying to style parent divs." Both tools hit-test the deepest element under the cursor, so any element fully covered by its children — a `<table>` (every pixel is a cell), a wrapper div whose children fill it edge to edge — can never be the click target. Neither tool had any way to move up a level.
+
+**Two ways in, shared by both tools** (`Components/ancestorTrail.js` + `Components/AncestorBreadcrumb.jsx`):
+- **Breadcrumb** under each panel's header — `… › div.table-wrap › table.data-table › tbody › tr.data-row › td.td-name` (tag + `#id` + first class). Click to select, hover to highlight the element on the page. Long trails show the innermost 5 levels (always including the current one) behind a "…" that expands the rest.
+- **⌥-click** selects the clicked element's parent; repeated ⌥-clicks *inside the current selection* keep climbing one level. ⌥-clicking outside the selection starts fresh from that element's parent. In Dev Mode, Shift-click multi-select is unchanged (⌥ is ignored while Shift is held).
+
+**The trail keeps its leaf.** Each selection carries a `leaf` (Dev Edit: `selection.leaf`; Dev Mode: `trailLeaf` state + ref) — the deepest element of the trail. Moving up via the breadcrumb or ⌥-click keeps the leaf, so the trail doesn't shrink to whatever's selected and you can step back down. A plain click resets it. Dev Edit's tag-change watchdog (which swaps `selection.el` for the replaced node) also swaps `leaf` when the two were the same element.
+
+**The trail never climbs above the prototype's own root** (`containerRef`) — so it can't reach the dev toolbar or `<body>` — and skips any `display: contents` level (no box of its own, e.g. the modal prototypes' `pageRef` wrapper).
+
+**Dev Edit refactor**: `handleClick`'s selection body became `selectTarget(rawTarget, { exact, leaf })` inside the same select/highlight effect, exposed via `selectElementRef` for the panel's breadcrumb. `exact: true` (breadcrumb/⌥-click) skips the svg-icon normalization — the element was picked deliberately, not hit-tested. Everything else (dirty-draft revert on switch, rule matching, unstyled-class seeding, icon/element seeding) is unchanged and runs identically for all three entry points.
+
+**Watch out**: many outer wrappers use shared `Styles/main.css` classes (`.data-table`, `.table-wrap`) — Saving a change to them affects every prototype using them, same as any shared class, just easier to reach now.
+
+**Verified via Playwright** (temporary `useState(true)` auth bypass, reverted after, `git status` confirmed no stray file writes): on `gross-pay-advice/salaried-travel-time`, clicking a cell shows the full trail; clicking `table.data-table` in the breadcrumb selects it and loads its `.data-table` rules, trail unchanged; stepping back down works; four ⌥-clicks climb row → tbody → table → `div.table-wrap`. Dev Mode: same breadcrumb in the Inspect panel, selecting the table reports its real 1370px width, ⌥-click climbs. Zero console errors; `npm run build` clean.
 
 ---
 
