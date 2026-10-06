@@ -59,7 +59,7 @@ body { background: var(--ui-purple-7-lightest-lavendar); min-height: 100vh; }
 .cm-task-card {
   display: block; width: 100%; text-align: left;
   background: #fff; font-family: inherit;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
   border-radius: 8px; overflow: hidden; cursor: pointer;
   transition: box-shadow 0.15s;
 }

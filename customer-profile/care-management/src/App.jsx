@@ -610,7 +610,6 @@ export default function App() {
         initialReviewDate={nextReview}
         approvalChanges={saveModal ? approvalItems(saveModal.ops) : []}
         closingChanges={saveModal ? closingItems(saveModal.ops) : []}
-        immediateCount={saveModal?.immediate.length || 0}
         onCancel={() => setSaveModal(null)}
         onConfirm={confirmSave}
       />

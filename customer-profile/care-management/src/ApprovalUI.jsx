@@ -119,7 +119,7 @@ export function PendingBanner({ request, persona, onApprove, onReject, onWithdra
       <StepTable request={request} />
 
       <p className="cm-approval-note">
-        {request.kind === 'edit' && 'Carers see the current version until this is approved. The form below shows the proposed version: changing a clinical field updates this request and restarts approval, other fields save straight away.'}
+        {request.kind === 'edit' && 'Carers see the current version until this is approved. The form below shows the proposed version: changing a clinical field updates this request and restarts approval.'}
         {request.kind === 'create' && 'This task will not appear on visits until it is approved. Any edits update this request and restart approval.'}
         {request.kind === 'delete' && 'Carers see this task until the removal is approved. It can\u2019t be edited while the removal is pending.'}
       </p>
@@ -184,7 +184,7 @@ const describeChange = ({ before, after, pending }) => {
 
 // `closingChanges` = pending requests this save closes because the edits put
 // every clinical field back to the live version.
-export function CarePlanReviewModal({ open, approvalChanges, closingChanges = [], immediateCount, initialReviewDate, onCancel, onConfirm }) {
+export function CarePlanReviewModal({ open, approvalChanges, closingChanges = [], initialReviewDate, onCancel, onConfirm }) {
   const [saveType, setSaveType] = useState('')
   const [reviewDate, setReviewDate] = useState(initialReviewDate)
   const [notes, setNotes] = useState('')
@@ -226,7 +226,7 @@ export function CarePlanReviewModal({ open, approvalChanges, closingChanges = []
               <p>
                 <strong>{approvalChanges.length} medication {approvalChanges.length === 1 ? 'change' : 'changes'} will be sent for approval</strong>
                 {approvalChanges.length === 1 && <>: {describeChange(approvalChanges[0])}</>}.
-                {' '}{immediateCount > 0 ? 'Other changes save straight away.' : 'Carers see the current version until approved.'}
+                {' '}Carers see the current version until approved.
               </p>
               {approvalChanges.length > 1 && (
                 <ul>{approvalChanges.map(c => <li key={c.taskId}>{describeChange(c)}</li>)}</ul>

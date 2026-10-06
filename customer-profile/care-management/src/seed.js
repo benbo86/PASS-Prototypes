@@ -70,9 +70,14 @@ const rivaroxaban = INITIAL_TASKS.find(t => t.id === 't2')
 // from → to) — none of them can approve it.
 export const INITIAL_REQUESTS = [
   {
-    id: 'r1', taskId: 't1', origin: 'Edit', kind: 'edit', keys: ['dosage', 'visitIds'],
+    id: 'r1', taskId: 't1', origin: 'Edit', kind: 'edit', keys: ['dosage', 'visitIds', 'description'],
     before: metformin,
-    after: { ...clone(metformin), visitIds: ['morning', 'evening'], medication: { ...metformin.medication, dosage: '1 x 500mg tablet twice daily - with breakfast and evening meal' } },
+    after: {
+      ...clone(metformin), visitIds: ['morning', 'evening'],
+      medication: { ...metformin.medication, dosage: '1 x 500mg tablet twice daily - with breakfast and evening meal' },
+      description: metformin.description
+        .replace('with food or just after - AM only.', 'with food or just after - twice daily, with breakfast and my evening meal.'),
+    },
     requestedBy: 'Jane Smith', requestedAt: '30/09/2026 15:12', source: SOURCE_WEB,
     status: 'pending',
     review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'GP letter 29/09: Metformin increased to twice daily following a high HbA1c result. Added the evening visit for the second dose.' },

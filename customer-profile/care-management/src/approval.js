@@ -43,7 +43,7 @@ const FIELDS = [
   ['outcomes', 'Outcomes aided', false, ['outcomes'], v => v.join(', ')],
   ['alerts', 'Alerts', false, ['alerts'],
     v => [v.missed && 'Missed', v.notDone && 'Not done', v.incomplete && 'Incomplete'].filter(Boolean).join(', ')],
-  ['description', 'Description', false, ['description']],
+  ['description', 'Description', true, ['description']],
 ]
 
 const MED_ONLY = new Set(['form', 'route', 'dosage', 'controlCategory', 'support', 'prn', 'location', 'bodyZones'])
