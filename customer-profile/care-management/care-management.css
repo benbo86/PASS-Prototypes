@@ -78,7 +78,9 @@ body { background: var(--ui-purple-7-lightest-lavendar); min-height: 100vh; }
   background: #fefce8;
   border-bottom-color: #fff085;
 }
-.cm-task-title { flex: 1; font-size: 16px; font-weight: 600; }
+.cm-task-title { flex: 0 1 auto; min-width: 0; font-size: 16px; font-weight: 600; }
+/* Chips sit right after the title; the status badge is pushed to the far right. */
+.cm-task-head .cm-status-badge { margin-left: auto; }
 .cm-task-card--medication .cm-task-title { color: var(--rag-red-red-overdue-dark); }
 .cm-task-card--general .cm-task-title { color: #894b00; }
 

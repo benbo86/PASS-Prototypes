@@ -60,7 +60,7 @@ export const INITIAL_VERSIONS = [
     summary: ['Visits synced from PASSroster'], approval: null, preWorkflow: true, snapshot: v25 },
 ]
 
-const paracetamol = INITIAL_TASKS.find(t => t.id === 't4')
+const metformin = INITIAL_TASKS.find(t => t.id === 't1')
 const rivaroxaban = INITIAL_TASKS.find(t => t.id === 't2')
 
 // Request shape (no-lock model, 2026-10-05): `kind` edit/create/delete;
@@ -70,12 +70,20 @@ const rivaroxaban = INITIAL_TASKS.find(t => t.id === 't2')
 // from → to) — none of them can approve it.
 export const INITIAL_REQUESTS = [
   {
-    id: 'r1', taskId: 't4', origin: 'Edit', kind: 'edit', keys: ['dosage'],
-    before: paracetamol,
-    after: { ...clone(paracetamol), medication: { ...paracetamol.medication, dosage: '1 x 500mg tablet when required' } },
+    id: 'r1', taskId: 't1', origin: 'Edit', kind: 'edit', keys: ['dosage', 'visitIds'],
+    before: metformin,
+    after: { ...clone(metformin), visitIds: ['morning', 'evening'], medication: { ...metformin.medication, dosage: '1 x 500mg tablet twice daily - with breakfast and evening meal' } },
     requestedBy: 'Jane Smith', requestedAt: '30/09/2026 15:12', source: SOURCE_WEB,
     status: 'pending',
-    review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'Pat asked for paracetamol to be offered only when needed, rather than at set times. Discussed with her daughter.' },
+    review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'GP letter 29/09: Metformin increased to twice daily following a high HbA1c result. Added the evening visit for the second dose.' },
+  },
+  {
+    id: 'r2', taskId: 't2', origin: 'Edit', kind: 'edit', keys: ['visitIds'],
+    before: rivaroxaban,
+    after: { ...clone(rivaroxaban), visitIds: ['lunch'] },
+    requestedBy: 'Sam Patel', requestedAt: '02/10/2026 09:41', source: SOURCE_WEB,
+    status: 'pending',
+    review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'Pat often skips breakfast, so moving Rivaroxaban to the lunch visit when she has her main meal. Agreed with the pharmacy.' },
   },
 ].map(withContributor)
 
