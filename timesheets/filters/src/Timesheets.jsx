@@ -412,7 +412,7 @@ function VisitDetail({ employee, visits, onUpdateVisits, onBack, period = '' }) 
   const [payRefFilter,    setPayRefFilter]    = useState({ search: '', sortDir: null });
   const [invRefFilter,    setInvRefFilter]    = useState({ search: '', sortDir: null });
   const [page,            setPage]            = useState(1);
-  const [rowsPerPage,     setRowsPerPage]     = useState(12);
+  const [rowsPerPage,     setRowsPerPage]     = useState(25);
   const [openDD,          setOpenDD]          = useState(null);
   const anchorRefs = useRef({});
 
@@ -1088,7 +1088,7 @@ export default function Timesheets() {
 
   // Pagination
   const [page,       setPage]       = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
 
   // Filter bar checkbox
   const [copies, setCopies] = useState(false);

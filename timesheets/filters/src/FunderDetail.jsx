@@ -92,7 +92,7 @@ export default function FunderDetail({ funder, visits, onVerify, onUnverify, onB
   const [typeFilter, setTypeFilter] = useState({ selected: new Set() });
   const [statusFilter, setStatusFilter] = useState({ selected: new Set() });
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
   const [openDD, setOpenDD] = useState(null);
   const anchorRefs = useRef({});
   const [selected, setSelected] = useState({});

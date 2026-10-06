@@ -289,7 +289,7 @@ export default function App() {
         <span className="uk-caption">Plain select (.rows-select)</span>
         <div className="uk-row">
           <select className="rows-select" value={rows} onChange={e => setRows(Number(e.target.value))}>
-            {[10, 12, 25, 50].map(n => <option key={n} value={n}>{n} rows</option>)}
+            {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n} rows</option>)}
           </select>
         </div>
       </Section>

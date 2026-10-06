@@ -130,7 +130,7 @@ export default function Invoices() {
   const [openDD, setOpenDD] = useState(null);
   const anchorRefs           = useRef({});
   const [page, setPage]             = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
 
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [previewRow, setPreviewRow] = useState(null);

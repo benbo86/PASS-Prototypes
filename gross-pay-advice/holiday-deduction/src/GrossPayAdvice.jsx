@@ -190,7 +190,7 @@ function GPADetail({ record, onBack }) {
   const [openDD, setOpenDD]         = useState(null);
   const anchorRefs                  = useRef({});
   const [page, setPage]             = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const allVisits  = GPA_L2_VISITS[record.id] || [];
   const allCustomers = useMemo(() =>
@@ -493,12 +493,13 @@ export default function GrossPayAdvice() {
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('employee');
     if (slug) {
-      const rec = GPA_RECORDS.find(r => r.employeeName.toLowerCase().replace(/\s+/g, '-') === slug);
+      const rec = GPA_RECORDS.find(r => !r.href && r.employeeName.toLowerCase().replace(/\s+/g, '-') === slug);
       if (rec) setSelectedRecord(rec);
     }
   }, []);
 
   const navigateTo = (record) => {
+    if (record.href) { window.location.href = record.href; return; }
     history.pushState(null, '', `?employee=${record.employeeName.toLowerCase().replace(/\s+/g, '-')}`);
     setSelectedRecord(record);
   };
@@ -516,7 +517,7 @@ export default function GrossPayAdvice() {
   const [openDD, setOpenDD]                 = useState(null);
   const anchorRefs                          = useRef({});
   const [page, setPage]                     = useState(1);
-  const [rowsPerPage, setRowsPerPage]       = useState(12);
+  const [rowsPerPage, setRowsPerPage]       = useState(15);
   const pageRef = useRef(null);
 
   const [startDate, endDate] = dateRange;

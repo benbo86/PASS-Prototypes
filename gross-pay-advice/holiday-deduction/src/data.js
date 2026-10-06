@@ -1,4 +1,20 @@
+import { EMPLOYEE as SALARIED_EMPLOYEE, buildGpa as buildSalariedGpa } from '../../salaried-travel-time/src/data';
+
 const r2 = n => Math.round(n * 100) / 100;
+
+// Salaried employee whose GPA lives in its own prototype
+// (gross-pay-advice/salaried-travel-time). Figures come from that prototype's
+// own data so the two can't drift apart; the row links there instead of to L2.
+const salariedRows = buildSalariedGpa('visit').rows;
+const salariedRecord = {
+  id: 15, gpaRef: SALARIED_EMPLOYEE.gpaRef, employeeId: 15, employeeName: SALARIED_EMPLOYEE.name,
+  cycleFrom: SALARIED_EMPLOYEE.cycleFrom, cycleTo: SALARIED_EMPLOYEE.cycleTo,
+  visitShiftPay: r2(salariedRows.reduce((sum, r) => sum + r.pay + r.travelPay, 0)),
+  holidayPay: 0,
+  mileagePay: r2(salariedRows.reduce((sum, r) => sum + r.mileage, 0)),
+  status: SALARIED_EMPLOYEE.status,
+  href: '../salaried-travel-time/',
+};
 
 const raw = [
   { id: 1,  gpaRef: 'GPA-241001', employeeId: 1,  employeeName: 'Stephen Nicholls', cycleFrom: '01/10/2024', cycleTo: '31/10/2024', visitShiftPay: 1284.50, holidayPay: 240.00, mileagePay:  38.25, status: 'Ready' },
@@ -15,6 +31,7 @@ const raw = [
   { id: 12, gpaRef: 'GPA-241012', employeeId: 12, employeeName: 'Rachel Clarke',    cycleFrom: '01/10/2024', cycleTo: '31/10/2024', visitShiftPay: 1512.00, holidayPay: 130.00, mileagePay:  44.55, status: 'Sent'  },
   { id: 13, gpaRef: 'GPA-241013', employeeId: 13, employeeName: 'Tom Briggs',       cycleFrom: '01/10/2024', cycleTo: '31/10/2024', visitShiftPay:  478.50, holidayPay:   0.00, mileagePay:  13.50, status: 'Sent'  },
   { id: 14, gpaRef: 'GPA-241014', employeeId: 14, employeeName: 'Louise Patel',     cycleFrom: '01/10/2024', cycleTo: '31/10/2024', visitShiftPay: 1176.00, holidayPay:  54.00, mileagePay:  36.45, status: 'Ready' },
+  salariedRecord,
 ];
 
 export const GPA_RECORDS = raw.map(r => ({

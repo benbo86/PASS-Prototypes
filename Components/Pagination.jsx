@@ -2,7 +2,7 @@ export default function Pagination({
   page,
   totalPages,
   rowsPerPage,
-  rowsPerPageOptions = [10, 12, 25, 50],
+  rowsPerPageOptions = [10, 15, 25, 50, 100],
   showStart,
   showEnd,
   totalRows,

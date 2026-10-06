@@ -1,0 +1,32 @@
+/* Layout/table styles come from main.css + the Holiday Deduction GPA's own
+   gross-pay-advice.css; only the threshold indicator is local. */
+
+.sth-amount { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; }
+
+/* Indicator on the one line the contracted-hours threshold falls in. */
+.tooltip-wrap.sth-threshold-tip { color: var(--brand-purple-6-purple-4); }
+.tooltip.sth-threshold-tip { max-width: 300px; white-space: normal; }
+
+/* ── Prototype-only scenario switcher (same look as care-management's persona switcher) ── */
+.sth-scenario {
+  position: fixed; right: 24px; bottom: 24px; z-index: 200;
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; padding: 8px 12px; border-radius: 8px;
+  border: 1.5px dashed var(--brand-purple-6-purple-4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-size: 14px;
+}
+.sth-scenario-tag {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  color: #fff; background: var(--brand-purple-6-purple-4); padding: 2px 6px; border-radius: 4px;
+}
+.sth-scenario-label { color: var(--greyscale-4-grey-40); }
+.sth-scenario-select {
+  font-family: inherit; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 6px; padding: 6px 8px; background: #fff;
+}
+
+/* One more column than the other employee GPA tables (Travel pay), so the
+   customer column gives up a little of main.css's 180px minimum to keep the
+   table within the page without a horizontal scroll. */
+.sth-table .td-name { min-width: 160px; }

@@ -130,7 +130,7 @@ export default function LeaveRequests() {
   const [openDD, setOpenDD] = useState(null);
   const anchorRefs = useRef({});
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const [approveRow, setApproveRow] = useState(null);
   // Decline (Pending -> Declined, an initial office decision) and Cancel

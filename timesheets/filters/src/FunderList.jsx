@@ -124,7 +124,7 @@ export default function FunderList({
   const [openDD, setOpenDD] = useState(null);
   const anchorRefs = useRef({});
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selected, setSelected] = useState({});
   const [selectAll, setSelectAll] = useState(false);
 
