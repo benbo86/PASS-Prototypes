@@ -20,7 +20,8 @@ import {
 } from './data'
 import { PERSONAS, INITIAL_VERSIONS, INITIAL_REQUESTS, SOURCE_WEB } from './seed'
 import {
-  diffTaskLists, applyChanges, needsApproval, isMedication, summariseChange, fmtDateTime,
+  diffTaskLists, applyChanges, isMedication, summariseChange, fmtDateTime,
+  overlayPending, proposedTask, planSave, withFields,
 } from './approval'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -168,22 +169,24 @@ const readCareplanParam = () => {
 }
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
-const pendingKind = r => (!r.before ? 'create' : !r.after ? 'delete' : 'edit')
 let requestCounter = 100
 
-// State model:
+// State model (no-lock, 2026-10-05):
 // - `live`     — the care plan carers actually see (last saved/approved).
-// - `working`  — live plus this session's unsaved edits. Saving happens
-//                from the list (as in the live product); edits on the task
-//                page only change `working`.
-// - `requests` — medication changes awaiting/after approval. A task with a
-//                pending request is locked, and its working copy = live.
+// - `requests` — medication changes awaiting/after approval. Nothing is
+//                locked while one is pending (except a pending removal).
+// - baseline   — derived: live with every pending proposal shown in place.
+//                This is what the list and task page show, and what unsaved
+//                edits are measured against.
+// - `working`  — baseline plus this session's unsaved edits. Saving happens
+//                from the list (as in the live product).
 // - `versions` — the careplan version history.
+const INITIAL_PENDING = INITIAL_REQUESTS.filter(r => r.status === 'pending')
 export default function App() {
   const pageRef = useRef(null)
   const [persona, setPersona] = useState(PERSONAS[0])
   const [live, setLive] = useState(INITIAL_TASKS)
-  const [working, setWorking] = useState(INITIAL_TASKS)
+  const [working, setWorking] = useState(() => overlayPending(INITIAL_TASKS, INITIAL_PENDING))
   const [requests, setRequests] = useState(INITIAL_REQUESTS)
   const [versions, setVersions] = useState(INITIAL_VERSIONS)
   const [nextReview, setNextReview] = useState(NEXT_REVIEW)
@@ -242,7 +245,9 @@ export default function App() {
     if (pendingRequests.length === 0) setPendingOnly(false)
   }, [pendingRequests.length])
   const liveById = Object.fromEntries(live.map(t => [t.id, t]))
-  const unsavedChanges = diffTaskLists(live, working)
+  const baseline = overlayPending(live, pendingRequests)
+  const baselineById = Object.fromEntries(baseline.map(t => [t.id, t]))
+  const unsavedChanges = diffTaskLists(baseline, working)
   const dirty = unsavedChanges.length > 0
   const nextVersion = Math.max(...versions.map(v => v.version)) + 1
 
@@ -251,60 +256,100 @@ export default function App() {
     return forTask[forTask.length - 1]
   }
 
-  // ── Core commit: one place that applies immediate changes and raises
-  //    approval requests, so Save, Delete and Revert all behave the same ──
+  // ── Core commit: one place that applies immediate changes and raises,
+  //    updates or closes approval requests (see planSave in approval.js), so
+  //    Save, Delete and Revert all behave the same ──
   // `review` = the Care plan review answers ({ saveType, reviewDate, notes })
   // when the commit came from the list's Save; Delete/Revert don't ask.
-  const commit = ({ immediate = [], approval = [], origin = 'Edit', review = null }) => {
+  const commit = ({ immediate = [], ops = [], origin = 'Edit', review = null }) => {
     const now = fmtDateTime(new Date())
-    let nextLive = applyChanges(live, immediate)
-    let nextWorking = applyChanges(working, immediate)
-    // A task going for approval reverts to its live version in `working`
-    // (a new task disappears until approved).
-    nextWorking = applyChanges(nextWorking, approval.map(c => ({ taskId: c.taskId, after: c.before })))
+    const ts = Date.now()
+    const nextLive = applyChanges(live, immediate)
 
     if (immediate.length) {
       setVersions(prev => [{
-        version: nextVersion, modifiedAt: now, receivedAt: now, ts: Date.now(),
+        version: nextVersion, modifiedAt: now, receivedAt: now, ts,
         employee: persona.name, source: SOURCE_WEB,
         summary: immediate.map(summariseChange), changes: immediate,
         approval: null, origin: origin === 'Edit' ? undefined : origin,
         review, snapshot: nextLive,
       }, ...prev])
     }
-    if (approval.length) {
-      setRequests(prev => [...prev, ...approval.map(c => ({
-        id: `r${++requestCounter}`, taskId: c.taskId,
+
+    let nextRequests = requests
+    ops.forEach(op => {
+      if (op.type === 'close') {
+        nextRequests = nextRequests.map(r => (r.id === op.pending.id
+          ? { ...r, status: 'withdrawn', decidedAt: now, closedBy: persona.name, closedNote: op.note,
+              before: liveById[r.taskId] || null, after: proposedTask(liveById[r.taskId], r) }
+          : r))
+        return
+      }
+      const contributor = { name: persona.name, at: now, review, step: op.step }
+      const fields = {
+        kind: op.kind, keys: op.keys, before: op.before, after: op.after,
+        requestedAt: now, ts, source: SOURCE_WEB, review,
         origin: origin === 'Edit' ? 'Edit' : origin.replace('Reverted', 'Revert'),
-        before: c.before, after: c.after,
-        requestedBy: persona.name, requestedAt: now, source: SOURCE_WEB, ts: Date.now(),
-        status: 'pending', review,
-      }))])
-    }
+      }
+      if (op.pending) {
+        // A further edit to a pending change: same request, approval restarts.
+        nextRequests = nextRequests.map(r => (r.id === op.pending.id
+          ? { ...r, ...fields, contributors: [...r.contributors, contributor] }
+          : r))
+      } else {
+        nextRequests = [...nextRequests, {
+          id: `r${++requestCounter}`, taskId: op.taskId, ...fields,
+          requestedBy: persona.name, status: 'pending', contributors: [contributor],
+        }]
+      }
+    })
+    setRequests(nextRequests)
     setLive(nextLive)
-    setWorking(nextWorking)
+
+    // Every task this commit touched now shows its new baseline; unsaved
+    // edits to other tasks are left alone.
+    const nextBaseline = overlayPending(nextLive, nextRequests.filter(r => r.status === 'pending'))
+    const nextBaselineById = Object.fromEntries(nextBaseline.map(t => [t.id, t]))
+    const touched = new Set([...immediate.map(c => c.taskId), ...ops.map(o => o.taskId || o.pending.taskId)])
+    setWorking(prev => {
+      let next = prev.filter(t => !touched.has(t.id) || nextBaselineById[t.id])
+      next = next.map(t => (touched.has(t.id) ? nextBaselineById[t.id] : t))
+      touched.forEach(id => { if (nextBaselineById[id] && !next.some(t => t.id === id)) next.push(nextBaselineById[id]) })
+      return next
+    })
     // The review date belongs to the review, not the medication change, so
     // it applies straight away even if every change is waiting on approval.
     if (review) setNextReview(review.reviewDate)
   }
 
+  const planFrom = (target) => planSave({ live, baseline, target, pendingByTask })
+  // For the dialogs: what each request op will propose, compared with live.
+  const approvalItems = ops => ops.filter(o => o.type === 'request').map(o => ({
+    taskId: o.taskId,
+    before: o.kind === 'create' ? null : liveById[o.taskId],
+    after: o.kind === 'delete' ? null : o.kind === 'create' ? o.after : withFields(liveById[o.taskId], o.after, o.keys),
+    pending: o.pending,
+  }))
+  const closingItems = ops => ops.filter(o => o.type === 'close').map(o => ({
+    taskId: o.pending.taskId, name: (o.pending.after || o.pending.before).name, requestedBy: o.pending.requestedBy,
+  }))
+
   // ── List actions ────────────────────────────────────────────
   const handleSave = () => {
     if (!dirty) { showToast('No changes to save'); return }
-    const approval = unsavedChanges.filter(c => needsApproval(c.before, c.after))
-    const immediate = unsavedChanges.filter(c => !needsApproval(c.before, c.after))
     // Every save goes through the Care plan review dialog, as in the live
     // product — it also lists any medication changes going for approval.
-    setSaveModal({ approval, immediate })
+    setSaveModal(planFrom(working))
   }
 
   const confirmSave = (review) => {
-    const { approval, immediate } = saveModal
-    commit({ immediate, approval, review })
+    const { immediate, ops } = saveModal
+    commit({ immediate, ops, review })
     setSaveModal(null)
-    showToast(approval.length
-      ? `${immediate.length ? `Saved · version ${nextVersion}. ` : ''}${approval.length} medication ${approval.length === 1 ? 'change' : 'changes'} sent for approval`
-      : `Care plan saved · version ${nextVersion}`)
+    const requested = ops.filter(o => o.type === 'request').length
+    showToast(requested
+      ? `${immediate.length ? `Saved · version ${nextVersion}. ` : ''}${requested} medication ${requested === 1 ? 'change' : 'changes'} sent for approval`
+      : `Care plan saved${immediate.length ? ` · version ${nextVersion}` : ''}`)
   }
 
   const addTask = () => { setDraftNew({ ...blankTask(), id: null }); navigate('new') }
@@ -312,7 +357,7 @@ export default function App() {
   // ── Task page actions ───────────────────────────────────────
   const openTaskObj = openId === 'new'
     ? (draftNew || blankTask())
-    : working.find(t => t.id === openId) || pendingRequests.find(r => r.taskId === openId && !r.before)?.after
+    : working.find(t => t.id === openId)
   const inDetail = !!openId && !!openTaskObj
   const openPending = openId ? pendingByTask[openId] : null
   const openLatest = openId && openId !== 'new' ? latestRequestFor(openId) : null
@@ -329,7 +374,7 @@ export default function App() {
   }
 
   const updateTask = (updated) => {
-    if (openPending) return
+    if (openPending?.kind === 'delete') return
     if (openId === 'new') setDraftNew(updated)
     else setWorking(prev => prev.map(t => (t.id === updated.id ? updated : t)))
   }
@@ -337,19 +382,31 @@ export default function App() {
   const deleteTask = () => {
     if (openId === 'new') { setDraftNew(null); navigate(null); return }
     const liveTask = liveById[openId]
-    if (!liveTask) {
+    if (!liveTask && !openPending) {
       // Never saved — just drop it from the working copy.
       setWorking(prev => prev.filter(t => t.id !== openId))
       navigate(null)
       return
     }
-    if (isMedication(liveTask)) {
-      if (!window.confirm('Removing a medication task needs approval from a Care Manager. It stays live until then. Send for approval?')) return
-      commit({ approval: [{ taskId: openId, before: liveTask, after: null }] })
+    const target = working.filter(t => t.id !== openId)
+    const { immediate, ops } = planFrom(target)
+    const ownOps = ops.filter(o => (o.taskId || o.pending.taskId) === openId)
+    const ownImmediate = immediate.filter(c => c.taskId === openId)
+    if (!liveTask) {
+      if (!window.confirm('Discard this new medication task? Its approval request will be withdrawn.')) return
+      commit({ ops: ownOps })
+      showToast('New task discarded')
+      navigate(null)
+    } else if (isMedication(liveTask)) {
+      const msg = openPending
+        ? 'Removing a medication task needs approval from a Care Manager. This replaces the change already waiting for approval. Send for approval?'
+        : 'Removing a medication task needs approval from a Care Manager. It stays live until then. Send for approval?'
+      if (!window.confirm(msg)) return
+      commit({ ops: ownOps })
       showToast('Removal sent for approval')
     } else {
       if (!window.confirm('Delete this task?')) return
-      commit({ immediate: [{ taskId: openId, before: liveTask, after: null }] })
+      commit({ immediate: ownImmediate })
       showToast(`Task deleted · version ${nextVersion}`)
       navigate(null)
     }
@@ -357,64 +414,70 @@ export default function App() {
 
   const decide = (request, patch) => setRequests(prev => prev.map(r => (r.id === request.id ? { ...r, ...patch } : r)))
 
+  // Approving applies only the request's clinical fields to whatever is live
+  // now, so housekeeping edits saved while it waited are kept.
   const approve = (request) => {
     const now = fmtDateTime(new Date())
-    const change = { taskId: request.taskId, after: request.after }
+    const liveTask = liveById[request.taskId] || null
+    const after = request.kind === 'delete' ? null : proposedTask(liveTask, request)
+    const change = { taskId: request.taskId, before: liveTask, after }
     const nextLive = applyChanges(live, [change])
     setLive(nextLive)
-    setWorking(prev => applyChanges(prev, [change]))
+    if (request.kind === 'delete') setWorking(prev => prev.filter(t => t.id !== request.taskId))
     setVersions(prev => [{
       version: nextVersion, modifiedAt: now, receivedAt: now, ts: Date.now(),
-      employee: request.requestedBy, source: request.source,
-      summary: [summariseChange(request)], changes: [request],
+      employee: [...new Set(request.contributors.map(c => c.name))].join(', '), source: request.source,
+      summary: [summariseChange(change)], changes: [change],
       approval: { by: persona.name, at: now },
       origin: request.origin === 'Edit' ? undefined : request.origin,
       review: request.review, snapshot: nextLive,
     }, ...prev])
-    decide(request, { status: 'approved', decidedBy: persona.name, decidedAt: now })
+    decide(request, { status: 'approved', decidedBy: persona.name, decidedAt: now, before: liveTask, after })
     showToast(`Change approved · version ${nextVersion} is now live`)
-    if (!request.after) navigate(null)
+    if (request.kind === 'delete') navigate(null)
+  }
+
+  // Rejected/withdrawn: the task's pending fields go back to live.
+  const closeRequest = (request, patch) => {
+    const liveTask = liveById[request.taskId] || null
+    decide(request, { ...patch, before: liveTask, after: request.kind === 'delete' ? null : proposedTask(liveTask, request) })
+    setWorking(prev => {
+      if (request.kind === 'create') return prev.filter(t => t.id !== request.taskId)
+      if (request.kind === 'edit') return prev.map(t => (t.id === request.taskId ? withFields(t, liveTask, request.keys) : t))
+      return prev
+    })
+    if (request.kind === 'create') navigate(null)
   }
 
   const reject = (reason) => {
-    const request = rejectTarget
-    decide(request, { status: 'rejected', decidedBy: persona.name, decidedAt: fmtDateTime(new Date()), reason })
+    closeRequest(rejectTarget, { status: 'rejected', decidedBy: persona.name, decidedAt: fmtDateTime(new Date()), reason })
     setRejectTarget(null)
     showToast('Change rejected')
-    if (!request.before) navigate(null)
   }
 
   const withdraw = (request) => {
-    decide(request, { status: 'withdrawn', decidedAt: fmtDateTime(new Date()) })
+    closeRequest(request, { status: 'withdrawn', decidedAt: fmtDateTime(new Date()), closedBy: persona.name })
     showToast('Request withdrawn')
-    if (!request.before) navigate(null)
   }
 
   // ── Revert (from History) ───────────────────────────────────
   const openRevert = (version) => {
-    const changes = diffTaskLists(live, version.snapshot)
-    const blocked = changes.filter(c => pendingByTask[c.taskId])
-    const rest = changes.filter(c => !pendingByTask[c.taskId])
-    setRevert({
-      version,
-      blocked,
-      approval: rest.filter(c => needsApproval(c.before, c.after)),
-      immediate: rest.filter(c => !needsApproval(c.before, c.after)),
-    })
+    const plan = planFrom(version.snapshot)
+    setRevert({ version, ...plan })
   }
 
   const confirmRevert = () => {
-    const { version, immediate, approval } = revert
-    commit({ immediate, approval, origin: `Reverted to version ${version.version}` })
+    const { version, immediate, ops } = revert
+    commit({ immediate, ops, origin: `Reverted to version ${version.version}` })
     setRevert(null)
-    showToast(approval.length
-      ? `Revert to version ${version.version}: ${approval.length} medication ${approval.length === 1 ? 'change' : 'changes'} sent for approval`
+    const requested = ops.filter(o => o.type === 'request').length
+    showToast(requested
+      ? `Revert to version ${version.version}: ${requested} medication ${requested === 1 ? 'change' : 'changes'} sent for approval`
       : `Reverted to version ${version.version}`)
   }
 
   // ── List data ───────────────────────────────────────────────
-  const pendingCreates = pendingRequests.filter(r => !r.before).map(r => r.after)
-  const listTasks = [...working, ...pendingCreates]
+  const listTasks = working
   let displayed = hideInactive ? listTasks.filter(t => t.status === 'active') : listTasks
   if (pendingOnly) displayed = listTasks.filter(t => pendingByTask[t.id])
 
@@ -453,7 +516,7 @@ export default function App() {
                   {inDetail ? (
                     <>
                       <button className="round-btn secondary-btn" onClick={backToList}>Back to list</button>
-                      <button className="round-btn cm-danger-btn" onClick={deleteTask} disabled={!!openPending}>Delete task</button>
+                      <button className="round-btn cm-danger-btn" onClick={deleteTask} disabled={openPending?.kind === 'delete'}>Delete task</button>
                     </>
                   ) : (
                     <>
@@ -497,7 +560,7 @@ export default function App() {
                 {!openPending && showRejected && (
                   <RejectedBanner request={openLatest} onDismiss={() => decide(openLatest, { dismissed: true })} />
                 )}
-                <TaskDetail key={openId} task={openTaskObj} onChange={updateTask} readOnly={!!openPending} />
+                <TaskDetail key={openId} task={openTaskObj} onChange={updateTask} readOnly={openPending?.kind === 'delete'} />
               </>
             ) : (
               <>
@@ -522,8 +585,8 @@ export default function App() {
                     <TaskCard
                       key={task.id}
                       task={task}
-                      pending={pendingByTask[task.id] ? pendingKind(pendingByTask[task.id]) : null}
-                      unsaved={!pendingByTask[task.id] && !same(task, liveById[task.id])}
+                      pending={pendingByTask[task.id]?.kind || null}
+                      unsaved={!same(task, baselineById[task.id])}
                       onOpen={() => navigate(task.id)}
                     />
                   ))}
@@ -545,7 +608,8 @@ export default function App() {
       <CarePlanReviewModal
         open={!!saveModal}
         initialReviewDate={nextReview}
-        approvalChanges={saveModal?.approval || []}
+        approvalChanges={saveModal ? approvalItems(saveModal.ops) : []}
+        closingChanges={saveModal ? closingItems(saveModal.ops) : []}
         immediateCount={saveModal?.immediate.length || 0}
         onCancel={() => setSaveModal(null)}
         onConfirm={confirmSave}
@@ -563,8 +627,9 @@ export default function App() {
         open={!!revert}
         version={revert?.version}
         immediate={revert?.immediate || []}
-        approval={revert?.approval || []}
-        blocked={revert?.blocked || []}
+        approval={revert ? approvalItems(revert.ops) : []}
+        closing={revert ? closingItems(revert.ops) : []}
+        blocked={revert?.skipped || []}
         dirty={dirty}
         onCancel={() => setRevert(null)}
         onConfirm={confirmRevert}

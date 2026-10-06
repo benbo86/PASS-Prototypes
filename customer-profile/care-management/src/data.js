@@ -27,6 +27,68 @@ export const SUPPORT_OPTIONS = ['Self-administer', 'Prompt', 'Assist', 'Administ
 
 export const CONTROL_CATEGORIES = ['N/A', 'Schedule 2', 'Schedule 3', 'Schedule 4', 'Schedule 5']
 
+// Task Schedule → cadence ("Every [1] [week]" + day circles) and scheduled
+// times ("at HH:MM for HH:MM until HH:MM"). Both are null until added.
+export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+export const CADENCE_UNITS = ['day', 'week', 'alternate week', 'month']
+export const CADENCE_INTERVALS = Array.from({ length: 12 }, (_, i) => i + 1)
+
+// `days` = week 1, `days2` = week 2 (only used by 'alternate week'),
+// `monthDays` = dates 1–28 (only used by 'month').
+export const MONTH_DATES = Array.from({ length: 28 }, (_, i) => i + 1)
+export const blankCadence = () => ({ every: 1, unit: 'week', days: [], days2: [], monthDays: [] })
+export const cadenceUsesDays = unit => unit === 'week' || unit === 'alternate week'
+export const blankScheduledTime = () => ({ at: '00:00', for: '00:00' })
+
+const toMinutes = hhmm => {
+  const [h, m] = (hhmm || '00:00').split(':').map(Number)
+  return h * 60 + m
+}
+const fromMinutes = mins => {
+  const m = ((mins % 1440) + 1440) % 1440
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+}
+export const untilTime = st => fromMinutes(toMinutes(st.at) + toMinutes(st.for))
+
+// Live's rule (tooltip, 2026-10-05): "Schedule times should not overlap and
+// duration can't be 0 or less than 15 minutes if there are two or more
+// occurrences". Returns the indexes of rows that break it.
+export const SCHEDULE_TIME_WARNING = 'Schedule times should not overlap and duration can\u2019t be 0 or less than 15 minutes if there are two or more occurrences'
+export function invalidScheduleRows(times) {
+  const bad = new Set()
+  const span = st => [toMinutes(st.at), toMinutes(st.at) + toMinutes(st.for)]
+  times.forEach((st, i) => {
+    const dur = toMinutes(st.for)
+    if (dur === 0 || (times.length > 1 && dur < 15)) bad.add(i)
+    const [a1, a2] = span(st)
+    times.forEach((other, j) => {
+      if (j === i) return
+      const [b1, b2] = span(other)
+      if (a1 < b2 && b1 < a2) bad.add(i)
+    })
+  })
+  return bad
+}
+export { toMinutes }
+
+export function fmtCadence(c) {
+  if (!c) return 'None'
+  const base = `Every ${c.every} ${c.unit}`
+  const list = ds => WEEKDAYS.filter(d => (ds || []).includes(d)).join(', ') || 'no days'
+  if (c.unit === 'week') return `${base} on ${list(c.days)}`
+  if (c.unit === 'alternate week') return `${base} — week 1: ${list(c.days)}; week 2: ${list(c.days2)}`
+  if (c.unit === 'month') {
+    const dates = [...(c.monthDays || [])].sort((a, b) => a - b)
+    return dates.length ? `${base} on day ${dates.join(', ')}` : `${base} (no days)`
+  }
+  return base
+}
+
+export function fmtScheduleTimes(times) {
+  if (!times || times.length === 0) return 'None'
+  return times.map(st => `${st.at} for ${st.for} (until ${untilTime(st)})`).join(', ')
+}
+
 const MEDICATION_DEFAULTS = {
   form: '', route: '', dosage: '', controlCategory: 'N/A', location: '',
   support: 'Prompt', prn: false,
@@ -46,6 +108,8 @@ export function blankTask() {
     outcomes: [],
     alerts: { missed: true, notDone: true, incomplete: true },
     bodyZones: [],
+    cadence: null,
+    scheduleTimes: null,
     medication: { ...MEDICATION_DEFAULTS },
     description: '',
   }
@@ -59,6 +123,8 @@ export const INITIAL_TASKS = [
     beginsOn: '2025-03-26',
     bodyZones: ['front:zone-mouth_and_chin'],
     visitIds: ['morning'],
+    cadence: { every: 1, unit: 'week', days: [...WEEKDAYS], days2: [] },
+    scheduleTimes: [{ at: '10:30', for: '00:15' }],
     outcomes: ['Management of Medical Conditions and Medication'],
     medication: {
       form: 'Tablet', route: 'Oral', dosage: '1 x 500mg tablet - AM ONLY',

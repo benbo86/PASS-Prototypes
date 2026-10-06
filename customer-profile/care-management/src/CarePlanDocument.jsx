@@ -1,4 +1,4 @@
-import { VISITS, OUTCOMES, fmtDate } from './data'
+import { VISITS, OUTCOMES, fmtDate, fmtCadence, fmtScheduleTimes } from './data'
 import { PrintIcon } from './icons'
 
 // Read-only care plan document for one careplan version — what the live
@@ -32,6 +32,8 @@ function TaskEntry({ task }) {
       <dl className="cm-doc-fields">
         <Field label="Begins">{fmtDate(task.beginsOn)}</Field>
         <Field label="Ends">{task.endsOn ? fmtDate(task.endsOn) : 'Ongoing'}</Field>
+        {task.cadence && <Field label="Cadence">{fmtCadence(task.cadence)}</Field>}
+        {task.scheduleTimes?.length > 0 && <Field label="Scheduled times">{fmtScheduleTimes(task.scheduleTimes)}</Field>}
         <Field label="Visits">{task.visitIds.map(visitLabel).join(', ') || 'None'}</Field>
         <Field label="Outcomes">{task.outcomes.join(', ') || 'None'}</Field>
         {isMed && (
@@ -43,6 +45,7 @@ function TaskEntry({ task }) {
             <Field label="Control category">{m.controlCategory}</Field>
             <Field label="Location">{m.location}</Field>
             <Field label="PRN">{m.prn ? 'Yes' : 'No'}</Field>
+            <Field label="Allow retry">{task.allowRetry ? 'Yes' : 'No'}</Field>
             <Field label="Require witness">{task.requireWitness ? 'Yes' : 'No'}</Field>
           </>
         )}

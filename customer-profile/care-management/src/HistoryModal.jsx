@@ -1,6 +1,6 @@
 import { useState, Fragment } from 'react'
 import ModalPanel from '../../../Components/ModalPanel'
-import { ChangeTable, ReviewDetails } from './ApprovalUI'
+import { ChangeTable, StepTable } from './ApprovalUI'
 
 // Recreates the live "Careplan Version History" modal, extended for the
 // approval workflow:
@@ -54,7 +54,7 @@ function buildRows(versions, requests) {
       kind: 'request',
       modifiedAt: r.requestedAt,
       receivedAt: r.requestedAt,
-      employee: r.requestedBy,
+      employee: [...new Set(r.contributors.map(c => c.name))].join(', '),
       source: r.source,
       version: '—',
       status: r.status,
@@ -71,10 +71,9 @@ function RequestDetail({ request: r }) {
         {r.origin !== 'Edit' && <>{r.origin} · </>}
         {r.status === 'pending' && 'Waiting for a Care Manager to approve. The current version stays live until then.'}
         {r.status === 'rejected' && <>Rejected by <strong>{r.decidedBy}</strong> on {r.decidedAt}: “{r.reason}”</>}
-        {r.status === 'withdrawn' && <>Withdrawn by {r.requestedBy} on {r.decidedAt}.</>}
+        {r.status === 'withdrawn' && <>Withdrawn by {r.closedBy || r.requestedBy} on {r.decidedAt}{r.closedNote ? ` (${r.closedNote.toLowerCase()})` : ''}.</>}
       </p>
-      <ReviewDetails review={r.review} />
-      <ChangeTable before={r.before} after={r.after} />
+      <StepTable request={r} />
     </div>
   )
 }
@@ -164,9 +163,9 @@ export default function HistoryModal({ open, onClose, versions, requests, onReve
 
 // Confirmation shown before a revert: splits what would change into what
 // applies straight away and what goes for approval.
-export function RevertModal({ open, version, immediate, approval, blocked, dirty, onCancel, onConfirm }) {
+export function RevertModal({ open, version, immediate, approval, closing = [], blocked, dirty, onCancel, onConfirm }) {
   if (!version) return null
-  const nothing = !immediate.length && !approval.length
+  const nothing = !immediate.length && !approval.length && !closing.length
   return (
     <ModalPanel
       open={open}
@@ -199,6 +198,7 @@ export function RevertModal({ open, version, immediate, approval, blocked, dirty
             {approval.map(c => (
               <div key={c.taskId} className="cm-modal-change">
                 <h4>{(c.after || c.before).name}</h4>
+                {c.pending && <p className="cm-modal-note">Updates {c.pending.requestedBy}'s pending change — approval restarts.</p>}
                 <ChangeTable before={c.before} after={c.after} />
               </div>
             ))}
@@ -210,9 +210,15 @@ export function RevertModal({ open, version, immediate, approval, blocked, dirty
             {immediate.map(c => (c.after || c.before).name).join(', ')}.
           </p>
         )}
+        {closing.length > 0 && (
+          <p className="cm-modal-note">
+            Pending {closing.length === 1 ? 'change' : 'changes'} withdrawn, as the revert puts {closing.length === 1 ? 'it' : 'them'} back to the current version:{' '}
+            {closing.map(c => c.name).join(', ')}.
+          </p>
+        )}
         {blocked.length > 0 && (
           <p className="cm-modal-note">
-            Skipped because {blocked.length === 1 ? 'it already has' : 'they already have'} a change awaiting approval:{' '}
+            Skipped because {blocked.length === 1 ? 'its removal is' : 'their removals are'} awaiting approval:{' '}
             {blocked.map(c => (c.after || c.before).name).join(', ')}.
           </p>
         )}

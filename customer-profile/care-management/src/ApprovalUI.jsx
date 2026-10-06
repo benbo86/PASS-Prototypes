@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import ModalPanel from '../../../Components/ModalPanel'
-import { diffTask } from './approval'
+import Tooltip from '../../../Components/Tooltip'
+import { diffTask, stepRows } from './approval'
 import { SAVE_TYPES } from './data'
 import { InfoIcon } from './icons.jsx'
 import { Field, DateField } from './TaskDetail'
@@ -58,46 +59,69 @@ export function ChangeTable({ before, after }) {
 
 // ─── Task page banners ────────────────────────────────────────
 
-// Shown at the top of a task with a pending change. What it offers depends
-// on who's looking: an eligible approver gets Approve/Reject, the requester
-// can withdraw, anyone else just sees that it's waiting.
-// The requester's Care plan review answers — gives the approver the "why"
-// (notes) alongside the "what" (the change table). Also used in History.
-export function ReviewDetails({ review }) {
-  if (!review) return null
+// Step-by-step log of a request: one row per field each contributor changed,
+// with who, when and why. Rows from the same submission share one Changed
+// by / Date / Notes cell, so a note is never repeated. "From" is the value
+// before that step (live, or the previous contributor's proposal), so a
+// field edited twice shows both steps.
+export function StepTable({ request }) {
+  const groups = request.contributors
+    .map(c => ({ c, rows: c.step ? stepRows(c.step) : [] }))
+    .filter(g => g.rows.length)
   return (
-    <dl className="cm-review-details">
-      <div><dt>Type of save</dt><dd>{review.saveType}</dd></div>
-      <div><dt>Notes</dt><dd>{review.notes || '—'}</dd></div>
-    </dl>
+    <table className="cm-change-table cm-step-table">
+      <thead>
+        <tr><th>Field</th><th>From</th><th>To</th><th>Changed by</th><th>Date</th><th>Notes</th></tr>
+      </thead>
+      {groups.map(({ c, rows }, gi) => (
+        <tbody key={gi} className="cm-step-group">
+          {rows.map((r, i) => (
+            <tr key={r.key}>
+              <td className="cm-change-field">{r.label}</td>
+              <td className="cm-change-before">{r.from}</td>
+              <td className="cm-change-after">{r.to}</td>
+              {i === 0 && (
+                <>
+                  <td rowSpan={rows.length} className="cm-step-who">{c.name}</td>
+                  <td rowSpan={rows.length} className="cm-step-when">{c.at}</td>
+                  <td rowSpan={rows.length} className="cm-step-notes">
+                    {c.review?.saveType && <span className="cm-step-savetype">{c.review.saveType}</span>}
+                    {c.review?.notes || (c.review ? '—' : '')}
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      ))}
+    </table>
   )
 }
 
+// Shown at the top of a task with a pending change. Nothing is locked (except
+// a pending removal): the form below shows the proposed version and anyone
+// can keep editing it. An eligible approver gets Approve/Reject — unless they
+// contributed to it; contributors can withdraw.
 export function PendingBanner({ request, persona, onApprove, onReject, onWithdraw }) {
-  const isRequester = persona.name === request.requestedBy
-  const canDecide = persona.canApprove && !isRequester
-  const what = !request.before ? 'New medication task' : !request.after ? 'Removal of this medication task' : 'Medication change'
+  const isContributor = request.contributors.some(c => c.name === persona.name)
+  const canDecide = persona.canApprove && !isContributor
+  const what = request.kind === 'create' ? 'New medication task' : request.kind === 'delete' ? 'Removal of this medication task' : 'Medication change'
 
   return (
     <section className="cm-approval-banner cm-approval-banner--pending">
       <div className="cm-approval-banner-head">
         <div className="cm-approval-banner-text">
           <h4>{what} awaiting approval</h4>
-          <p>
-            Requested by <strong>{request.requestedBy}</strong> on {request.requestedAt}
-            {request.origin !== 'Edit' && <> · {request.origin}</>}
-          </p>
+          {request.origin !== 'Edit' && <p>{request.origin}</p>}
         </div>
       </div>
 
-      <ReviewDetails review={request.review} />
-
-      <ChangeTable before={request.before} after={request.after} />
+      <StepTable request={request} />
 
       <p className="cm-approval-note">
-        {request.before
-          ? 'Until this is approved, carers continue to see the current version. The form below shows the current version and is locked.'
-          : 'This task will not appear on visits until it is approved.'}
+        {request.kind === 'edit' && 'Carers see the current version until this is approved. The form below shows the proposed version: changing a clinical field updates this request and restarts approval, other fields save straight away.'}
+        {request.kind === 'create' && 'This task will not appear on visits until it is approved. Any edits update this request and restart approval.'}
+        {request.kind === 'delete' && 'Carers see this task until the removal is approved. It can\u2019t be edited while the removal is pending.'}
       </p>
 
       <div className="cm-approval-actions">
@@ -107,10 +131,13 @@ export function PendingBanner({ request, persona, onApprove, onReject, onWithdra
             <button className="round-btn cm-danger-btn" onClick={onReject}>Reject</button>
           </>
         )}
-        {isRequester && (
+        {isContributor && (
           <button className="round-btn secondary-btn" onClick={onWithdraw}>Withdraw request</button>
         )}
-        {!canDecide && !isRequester && (
+        {isContributor && persona.canApprove && (
+          <span className="cm-approval-hint">You contributed to this change, so another Care Manager needs to approve it.</span>
+        )}
+        {!persona.canApprove && !isContributor && (
           <span className="cm-approval-hint">Only a Care Manager can approve medication changes.</span>
         )}
       </div>
@@ -126,13 +153,13 @@ export function RejectedBanner({ request, onDismiss }) {
         <div className="cm-approval-banner-text">
           <h4>Change rejected</h4>
           <p>
-            <strong>{request.decidedBy}</strong> rejected {request.requestedBy}'s change on {request.decidedAt}
+            <strong>{request.decidedBy}</strong> rejected {[...new Set(request.contributors.map(c => c.name))].join(' and ')}'s change on {request.decidedAt}
           </p>
           <p className="cm-approval-reason">“{request.reason}”</p>
         </div>
         <button className="cm-link-btn cm-approval-dismiss" onClick={onDismiss}>Dismiss</button>
       </div>
-      <ChangeTable before={request.before} after={request.after} />
+      <StepTable request={request} />
     </section>
   )
 }
@@ -148,14 +175,16 @@ export function RejectedBanner({ request, onDismiss }) {
 // picking "Minor corrections / typos" can't skip the check.
 // "Metformin 500mg tablets (Dosage)" — one line per change, so the dialog
 // says what's going for approval without the full comparison table.
-const describeChange = ({ before, after }) => {
+const describeChange = ({ before, after, pending }) => {
   const task = after || before
-  if (!before) return `${task.name} (new task)`
-  if (!after) return `${task.name} (removal)`
-  return `${task.name} (${diffTask(before, after).filter(c => c.clinical).map(c => c.label).join(', ')})`
+  const what = !before ? 'new task' : !after ? 'removal' : diffTask(before, after).filter(c => c.clinical).map(c => c.label).join(', ')
+  const updates = pending ? ` — updates ${pending.requestedBy}'s pending change, approval restarts` : ''
+  return `${task.name} (${what})${updates}`
 }
 
-export function CarePlanReviewModal({ open, approvalChanges, immediateCount, initialReviewDate, onCancel, onConfirm }) {
+// `closingChanges` = pending requests this save closes because the edits put
+// every clinical field back to the live version.
+export function CarePlanReviewModal({ open, approvalChanges, closingChanges = [], immediateCount, initialReviewDate, onCancel, onConfirm }) {
   const [saveType, setSaveType] = useState('')
   const [reviewDate, setReviewDate] = useState(initialReviewDate)
   const [notes, setNotes] = useState('')
@@ -213,6 +242,14 @@ export function CarePlanReviewModal({ open, approvalChanges, immediateCount, ini
               ))}
             </div>
           </div>
+        )}
+
+        {closingChanges.length > 0 && (
+          <p className="cm-review-closing">
+            {closingChanges.map(c => (
+              <span key={c.taskId}>{c.name}: {c.requestedBy}'s pending change will be withdrawn — your edits put it back to the current version. </span>
+            ))}
+          </p>
         )}
 
         <p className="cm-review-instructions">Select the type of the save, reason for the care plan change and update review date.</p>
@@ -278,6 +315,21 @@ export function RejectModal({ open, request, onCancel, onConfirm }) {
 
 // ─── Prototype-only persona switcher ──────────────────────────
 
+// Reminder of what the switcher is for and the approval rules it lets you demo.
+function PersonaRules() {
+  return (
+    <>
+      <strong>Switch who you're viewing as</strong> to try the medication approval workflow.
+      <ul>
+        <li>Medication changes need a Care Manager's approval. The current version stays live until then.</li>
+        <li>A Supervisor can make changes but can't approve them.</li>
+        <li>Anyone can edit a pending change, and approval starts again.</li>
+        <li>You can't approve a change you contributed to, which is why there are two Care Managers.</li>
+      </ul>
+    </>
+  )
+}
+
 export function PersonaSwitcher({ personas, persona, onChange }) {
   return (
     <div className="cm-persona" data-devmode-passthrough="true">
@@ -291,6 +343,9 @@ export function PersonaSwitcher({ personas, persona, onChange }) {
       >
         {personas.map(p => <option key={p.id} value={p.id}>{p.name} ({p.role})</option>)}
       </select>
+      <Tooltip text={<PersonaRules />} wrapClassName="cm-persona-help">
+        <InfoIcon />
+      </Tooltip>
     </div>
   )
 }

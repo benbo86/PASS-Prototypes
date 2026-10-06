@@ -10,7 +10,8 @@ import { INITIAL_TASKS } from './data'
 // Prototype-only "viewing as" personas (see PersonaSwitcher).
 export const PERSONAS = [
   { id: 'priya', name: 'Priya Shah', role: 'Care Manager', canApprove: true },
-  { id: 'jane', name: 'Jane Smith', role: 'Senior Carer', canApprove: false },
+  { id: 'sam', name: 'Sam Patel', role: 'Care Manager', canApprove: true },
+  { id: 'jane', name: 'Jane Smith', role: 'Supervisor', canApprove: false },
 ]
 
 export const SOURCE_WEB = 'Web 1.206.1'
@@ -62,17 +63,29 @@ export const INITIAL_VERSIONS = [
 const paracetamol = INITIAL_TASKS.find(t => t.id === 't4')
 const rivaroxaban = INITIAL_TASKS.find(t => t.id === 't2')
 
+// Request shape (no-lock model, 2026-10-05): `kind` edit/create/delete;
+// `keys` = the clinical fields it changes (only these are applied on
+// approval); `contributors` = everyone who submitted or updated it, each with
+// their own Care plan review answers and `step` (the fields they changed,
+// from → to) — none of them can approve it.
 export const INITIAL_REQUESTS = [
   {
-    id: 'r1', taskId: 't4', origin: 'Edit',
+    id: 'r1', taskId: 't4', origin: 'Edit', kind: 'edit', keys: ['dosage'],
     before: paracetamol,
     after: { ...clone(paracetamol), medication: { ...paracetamol.medication, dosage: '1 x 500mg tablet when required' } },
     requestedBy: 'Jane Smith', requestedAt: '30/09/2026 15:12', source: SOURCE_WEB,
     status: 'pending',
     review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'Pat asked for paracetamol to be offered only when needed, rather than at set times. Discussed with her daughter.' },
   },
+].map(withContributor)
+
+function withContributor(r) {
+  return { ...r, contributors: [{ name: r.requestedBy, at: r.requestedAt, review: r.review, step: { before: r.before, after: r.after, keys: r.keys } }] }
+}
+
+const INITIAL_REQUESTS_DECIDED = [
   {
-    id: 'r0', taskId: 't2', origin: 'Edit',
+    id: 'r0', taskId: 't2', origin: 'Edit', kind: 'edit', keys: ['dosage'],
     before: rivaroxaban,
     after: { ...clone(rivaroxaban), medication: { ...rivaroxaban.medication, dosage: 'TWO 15mg tablets' } },
     requestedBy: 'Jane Smith', requestedAt: '15/05/2026 10:04', source: SOURCE_WEB,
@@ -80,4 +93,5 @@ export const INITIAL_REQUESTS = [
     status: 'rejected', decidedBy: 'Priya Shah', decidedAt: '15/05/2026 11:30',
     reason: "This doesn't match the latest GP letter (ONE 15mg tablet daily). Please check with the pharmacy before resubmitting.",
   },
-]
+].map(withContributor)
+INITIAL_REQUESTS.unshift(...INITIAL_REQUESTS_DECIDED)

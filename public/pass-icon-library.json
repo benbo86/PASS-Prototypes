@@ -1266,6 +1266,20 @@
       "usageCount": 1
     },
     {
+      "hash": "4a9fc3d8",
+      "name": "Remove Circle",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z\" fill=\"#000000\"/></svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Remove Circle.svg",
+          "name": "Remove Circle"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "ad7a0202",
       "name": "Repeat",
       "group": "Icons",
@@ -1471,6 +1485,20 @@
           "kind": "repo-file",
           "ref": "Icons/Users.svg",
           "name": "Users"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "780dcdb5",
+      "name": "Warning Outline",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z\" fill=\"#000000\"/></svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Warning Outline.svg",
+          "name": "Warning Outline"
         }
       ],
       "usageCount": 1
@@ -3449,6 +3477,34 @@
       "usageCount": 1
     },
     {
+      "hash": "3a6d4b96",
+      "name": "Remove Circle",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/care-management/src/TaskDetail.jsx#RemoveCircleIcon",
+          "name": "RemoveCircleIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "8153d195",
+      "name": "Warning Outline",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 5.99L19.53 19H4.47L12 5.99M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "customer-profile/care-management/src/TaskDetail.jsx#WarningOutlineIcon",
+          "name": "WarningOutlineIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "90ba3886",
       "name": "Print",
       "group": "Inline",
@@ -4625,5 +4681,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-10-02T11:18:49.906Z"
+  "generatedAt": "2026-10-05T08:33:09.071Z"
 }
