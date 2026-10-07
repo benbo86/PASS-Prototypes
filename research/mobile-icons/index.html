@@ -200,7 +200,7 @@
   <p class="sub">Every distinct inline SVG icon defined across the mobile app prototypes and the shared mobile shell components (<code>AppNav</code>, <code>AppHeader</code>, <code>StatusBar</code>, <code>AccountScreen</code>). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 95 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 96 icons (.zip)</button>
     <button class="new-section-upload-btn" onclick="openUploadPanel(null)">Upload icon to a new section</button>
   </div>
 
@@ -1273,7 +1273,7 @@
   </section>
 
   <section data-section-slug="staff-messaging">
-    <div class="section-head"><h2>Staff Messaging</h2><span class="count">22 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Staff Messaging')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Staff Messaging</h2><span class="count">23 icons</span><button class="section-upload-btn" onclick="openUploadPanel('Staff Messaging')">Upload icon</button><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="CheckSentIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -1515,6 +1515,21 @@
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M11.916 5.00275L12.0151 5C12.5912 5.00028 13.0705 5.47958 13.0705 6.07082V10.9295H17.9292C18.4906 10.9295 18.9557 11.3634 18.9968 11.9197L19 12.0151C18.9997 12.5912 18.5204 13.0705 17.9292 13.0705H13.0705V17.9292C13.0705 18.4906 12.6366 18.9557 12.0803 18.9968L11.9849 19C11.4088 18.9997 10.9295 18.5204 10.9295 17.9292V13.0705H6.07082C5.5094 13.0705 5.04427 12.6366 5.00323 12.0803L5 11.9849C5.00028 11.4088 5.47958 10.9295 6.07082 10.9295H10.9295V6.07082L10.9351 5.95992C10.9841 5.48574 11.3434 5.10031 11.8101 5.01699L11.916 5.00275Z"/&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="AddCircleIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download AddCircleIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z"/>
+  </svg></span>
+        <span class="label">AddCircleIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;
+    &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z"/&gt;
   &lt;/svg&gt;</template>
       </div>
 

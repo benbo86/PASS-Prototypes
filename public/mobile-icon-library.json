@@ -1096,6 +1096,20 @@
       "usageCount": 1
     },
     {
+      "hash": "580704b2",
+      "name": "Add Circle",
+      "group": "Staff Messaging",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#AddCircleIcon",
+          "name": "AddCircleIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "3ed40bf6",
       "name": "Play",
       "group": "Staff Messaging",
@@ -1446,5 +1460,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-09-08T15:03:45.133Z"
+  "generatedAt": "2026-10-07T08:27:55.991Z"
 }

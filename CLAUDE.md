@@ -976,6 +976,16 @@ Ben: "How can we make it possible to edit a tables styling? I can't select it wh
 
 **Verified via Playwright** (temporary `useState(true)` auth bypass, reverted after, `git status` confirmed no stray file writes): on `gross-pay-advice/salaried-travel-time`, clicking a cell shows the full trail; clicking `table.data-table` in the breadcrumb selects it and loads its `.data-table` rules, trail unchanged; stepping back down works; four ⌥-clicks climb row → tbody → table → `div.table-wrap`. Dev Mode: same breadcrumb in the Inspect panel, selecting the table reports its real 1370px width, ⌥-click climbs. Zero console errors; `npm run build` clean.
 
+
+### v21 — Icon size field in the Icon tab
+
+Ben: "can we not add the ability to edit the svg size". An icon's size comes from its own `width`/`height` attributes (a `size` prop in JSX), never a CSS rule, so "Edit styles" had nothing to edit. A CSS width/height overrides those attributes, so the Icon tab (`IconSwapPanel.jsx`'s `IconSizeControl`) now has a **Size** field that writes a plain rule through the existing `sessionEdits`/file-write path: typing previews live, **Save** writes it to the prototype's own stylesheet (dev) / keeps it for Save-as-version, Close/Cancel revert an unsaved preview, **Reset** undoes it (an emptied new rule is removed from the file). The rule is added to `selection.keys`, so it also shows in "Edit styles".
+
+**Selector** (`iconSizeSelectorFor` in `DevEdit.jsx`): one of the svg's own classes, else a class on its nearest classed ancestor (`.cls > svg` for a direct parent, `.cls svg` otherwise), whichever matches the fewest svgs on the page; ties go to the later class (modifiers follow their base class). The panel shows the selector and how many icons it affects. No all/instance toggle: the selector itself decides reach. An icon with no class anywhere up its ancestry shows a note to add one via the Element tab first.
+
+**Existing rule for that selector**: re-read via `/__dev-edit/lookup` before writing, so authored shorthands aren't replaced by the browser's expanded serialization. **Known limitation**: the JSX `size` prop still says the old number; the CSS overrides it.
+
+Verified via Playwright (temporary `useState(true)` bypass, reverted, `messaging.css` diffed back to its pre-test state) on `mobile/messaging`'s New message icon: field reads 38, selector `.new-message-action > svg`, preview resizes live, closing reverts, Save writes a real rule, Reset removes it from the file.
 ---
 
 ## Audit tool (6th dev toolbar member)

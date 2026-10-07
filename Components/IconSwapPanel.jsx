@@ -14,7 +14,7 @@ import { loadMobileIconLibrary, loadPassIconLibrary, searchIconify, fetchIconify
 // durable state (the session's icon edits) lives in DevEdit.jsx; this
 // component only manages its own transient UI (search text, which
 // candidate is currently selected in the grid, scope choice).
-export default function IconSwapPanel({ svgEl, iconSwapKey, containerRef, hasSwap, onPreview, onClearPreview, onApply, onReset }) {
+export default function IconSwapPanel({ svgEl, iconSwapKey, containerRef, hasSwap, onPreview, onClearPreview, onApply, onReset, iconSize, error }) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null) // { svg, source, name } | null
   const [mobileIcons, setMobileIcons] = useState([])
@@ -145,6 +145,8 @@ export default function IconSwapPanel({ svgEl, iconSwapKey, containerRef, hasSwa
 
   return (
     <div className="devedit-svg-tab">
+      {iconSize && <IconSizeControl svgEl={svgEl} {...iconSize} />}
+      {error && <div className="devedit-error">{error}</div>}
       {occurrences > 1 && (
         <div className="devedit-svg-occurrences">This icon appears {occurrences} times on this page</div>
       )}
@@ -199,6 +201,63 @@ export default function IconSwapPanel({ svgEl, iconSwapKey, containerRef, hasSwa
       )}
       <div className="devedit-rule-actions">
         <button className="devedit-btn-primary" onClick={handleApply} disabled={!selected}>Apply</button>
+      </div>
+    </div>
+  )
+}
+
+// Size field — writes a width/height CSS rule for the icon (see
+// iconSizeSelectorFor in DevEdit.jsx for how the selector is chosen).
+// Typing previews live; Save writes it; Reset undoes a saved size.
+function IconSizeControl({ svgEl, target, edited, saving, onPreview, onSave, onReset }) {
+  const readSize = () => Math.round(svgEl.getBoundingClientRect().width)
+  const [value, setValue] = useState(() => String(readSize()))
+  const [saved, setSaved] = useState(() => readSize())
+  useEffect(() => { const n = readSize(); setValue(String(n)); setSaved(n) }, [svgEl]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!target) {
+    return <div className="devedit-icon-size-note">This icon has no class to size it by — add one to it (or its parent) in the Element tab first.</div>
+  }
+
+  const px = Number(value)
+  const valid = Number.isInteger(px) && px > 0 && px <= 512
+  const handleChange = (e) => {
+    setValue(e.target.value)
+    const n = Number(e.target.value)
+    if (Number.isInteger(n) && n > 0 && n <= 512) onPreview(n)
+  }
+  const handleSave = async () => {
+    if (!valid) return
+    await onSave(px)
+    setSaved(px)
+  }
+  const handleReset = () => {
+    onReset()
+    requestAnimationFrame(() => { const n = readSize(); setValue(String(n)); setSaved(n) })
+  }
+
+  return (
+    <div className="devedit-icon-size">
+      <div className="devedit-icon-size-row">
+        <label className="devedit-icon-size-label" htmlFor="devedit-icon-size-input">Size</label>
+        <input
+          id="devedit-icon-size-input"
+          type="number"
+          min={1}
+          max={512}
+          className="devedit-icon-size-input"
+          value={value}
+          onChange={handleChange}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSave() }}
+        />
+        <span className="devedit-icon-size-unit">px</span>
+        {edited && <button className="devedit-btn-secondary" onClick={handleReset} disabled={saving}>Reset</button>}
+        <button className="devedit-btn-primary" onClick={handleSave} disabled={!valid || saving || px === saved}>
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+      <div className="devedit-icon-size-note">
+        Applies to <code>{target.selector}</code> — {target.count} {target.count === 1 ? 'icon' : 'icons'} on this page
       </div>
     </div>
   )

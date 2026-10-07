@@ -491,6 +491,71 @@ function formatDeclarations(cssText) {
     .join('\n')
 }
 
+// ─── Icon size (Icon tab) ──────────────────────────────────────────────
+// An icon's size comes from its own width/height attributes (a `size`
+// prop in the JSX), never a CSS rule — so there was nothing for "Edit
+// styles" to edit. A CSS width/height overrides those attributes, so the
+// Icon tab's Size field writes a plain rule instead, through the exact
+// same sessionEdits/file-write path as any other CSS edit (Save writes it
+// to a real file, Close/Cancel revert an unsaved preview, Reset undoes it).
+//
+// Picks the narrowest selector that reaches this icon: one of the svg's
+// own classes if it has any, otherwise a class on its nearest classed
+// ancestor (`.cls > svg` when that's the direct parent, `.cls svg`
+// otherwise) — whichever candidate matches the fewest svgs on the page,
+// so a shared, generic class (e.g. a header-button class used by several
+// buttons) loses to a more specific one when both exist. Ties go to the
+// later class — modifiers conventionally follow the base class they
+// modify (`app-header-action new-message-action`).
+function iconSizeSelectorFor(svgEl) {
+  const candidates = []
+  const own = (svgEl.getAttribute('class') || '').trim().split(/\s+/).filter(Boolean)
+  own.forEach(c => candidates.push(`svg.${CSS.escape(c)}`))
+  if (candidates.length === 0) {
+    let el = svgEl.parentElement
+    let direct = true
+    while (el && el !== document.body) {
+      if (el.classList.length > 0) {
+        Array.from(el.classList).forEach(c => candidates.push(`.${CSS.escape(c)} ${direct ? '> ' : ''}svg`))
+        break
+      }
+      el = el.parentElement
+      direct = false
+    }
+  }
+  let best = null
+  candidates.forEach(selector => {
+    let count
+    try { count = document.querySelectorAll(selector).length } catch { return }
+    if (count > 0 && (!best || count <= best.count)) best = { selector, count }
+  })
+  return best
+}
+
+// Swaps any width/height declarations in a rule's text for the new size,
+// leaving every other declaration untouched.
+function withIconSize(declarations, px) {
+  const kept = declarations.split(';').map(d => d.trim()).filter(d => d && !/^(width|height)\s*:/i.test(d))
+  return [...kept, `width: ${px}px`, `height: ${px}px`].map(d => d + ';').join('\n')
+}
+
+// The first top-level rule for exactly this selector, plus the source file
+// it came from (dev only) — or null when no rule exists yet.
+function findSelectorSource(selectorText) {
+  const want = ruleKey(selectorText, null)
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules
+    try { rules = sheet.cssRules } catch { continue }
+    if (!rules) continue
+    for (const rule of Array.from(rules)) {
+      if (rule.type === CSSRule.STYLE_RULE && ruleKey(rule.selectorText, null) === want) {
+        return { selectorText: rule.selectorText, cssText: rule.style.cssText, filePath: getFilePath(sheet) }
+      }
+    }
+  }
+  return null
+}
+
 function toMillis(value) {
   if (!value) return 0
   if (typeof value.toMillis === 'function') return value.toMillis()
@@ -2168,6 +2233,96 @@ export default function DevEdit({ containerRef, prototypeId }) {
     setIconEdits(prev => (prev[selection.iconSwapKey] ? { ...prev, [selection.iconSwapKey]: { ...prev[selection.iconSwapKey], svg: null } } : prev))
   }
 
+  // ── Icon size handlers (Icon tab's Size field) ── see iconSizeSelectorFor
+  // above. The rule lives in sessionEdits and is added to selection.keys,
+  // so it also shows (and stays editable) in the "Edit styles" tab, and an
+  // unsaved preview is reverted by closeSelection like any other CSS draft.
+  const iconSizeTarget = selection?.svgEl ? iconSizeSelectorFor(selection.svgEl) : null
+  const iconSizeEntry = iconSizeTarget ? sessionEdits[ruleKey(iconSizeTarget.selector, null)] : null
+  const [iconSizeSaving, setIconSizeSaving] = useState(false)
+
+  // Existing session entry, else one built from the live rule (if any),
+  // else a brand-new rule for the prototype's own stylesheet.
+  const iconSizeEntryFor = (selector) => {
+    const key = ruleKey(selector, null)
+    const existing = sessionEditsRef.current[key]
+    if (existing) return { key, entry: existing }
+    const src = findSelectorSource(selector)
+    if (src) {
+      const text = formatDeclarations(src.cssText)
+      return { key, entry: { selectorText: src.selectorText, mediaText: null, filePath: src.filePath, original: text, committed: text, draft: text, loading: false, fromBrowser: true } }
+    }
+    const paths = import.meta.env.DEV ? getWritableStylesheetPaths() : []
+    return { key, entry: { selectorText: selector, mediaText: null, filePath: paths.length > 0 ? pickDefaultStylesheetPath(paths) : null, original: '', committed: '', draft: '', loading: false, isNew: true } }
+  }
+
+  const trackIconSizeKey = (key) => {
+    setSelection(sel => (sel && !sel.keys.includes(key) ? { ...sel, keys: [...sel.keys, key] } : sel))
+  }
+
+  const handleIconSizePreview = (px) => {
+    if (!iconSizeTarget || !(px > 0)) return
+    const { key, entry } = iconSizeEntryFor(iconSizeTarget.selector)
+    const draft = withIconSize(entry.committed, px)
+    setLiveRuleText(entry.selectorText, null, draft)
+    setSessionEdits(prev => ({ ...prev, [key]: { ...(prev[key] || entry), draft } }))
+    trackIconSizeKey(key)
+  }
+
+  const handleIconSizeSave = async (px) => {
+    if (!iconSizeTarget || !(px > 0) || iconSizeSaving) return
+    const { key, entry } = iconSizeEntryFor(iconSizeTarget.selector)
+    const canWrite = import.meta.env.DEV && !!entry.filePath
+    let base = entry.committed
+    let original = entry.original
+    setError(null)
+    setIconSizeSaving(true)
+    try {
+      // A rule read off the live CSSOM comes back browser-serialized
+      // (shorthands expanded) — writing that back would degrade the source
+      // file, so fetch the declarations exactly as authored first (same
+      // reason handleClick does a /lookup for every existing rule).
+      if (canWrite && entry.fromBrowser && entry.committed === entry.original) {
+        const res = await fetch('/__dev-edit/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rules: [{ filePath: entry.filePath, selector: entry.selectorText, mediaText: null }] }),
+        })
+        const data = await res.json()
+        const result = data.ok && data.results[0]
+        if (result && result.found) { base = result.declarations; original = result.declarations }
+      }
+      const declarations = withIconSize(base, px)
+      if (canWrite) {
+        const res = await fetch('/__dev-edit/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ edits: [{ filePath: entry.filePath, selector: entry.selectorText, mediaText: null, declarations, create: !!entry.isNew }] }),
+        })
+        const data = await res.json()
+        if (!data.ok) throw new Error(data.error || 'Failed to save icon size')
+      }
+      setLiveRuleText(entry.selectorText, null, declarations)
+      setSessionEdits(prev => ({ ...prev, [key]: { ...(prev[key] || entry), original, committed: declarations, draft: declarations, fromBrowser: false } }))
+      trackIconSizeKey(key)
+      showSaveConfirmation(canWrite)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIconSizeSaving(false)
+    }
+  }
+
+  const handleIconSizeReset = () => {
+    if (!iconSizeTarget) return
+    const key = ruleKey(iconSizeTarget.selector, null)
+    const entry = sessionEditsRef.current[key]
+    if (!entry) return
+    revertFileWrites([entry])
+    setLiveRuleText(entry.selectorText, null, entry.original)
+    setSessionEdits(prev => ({ ...prev, [key]: { ...prev[key], committed: entry.original, draft: entry.original } }))
+  }
+
   // ── Element edit handlers (Element tab) ── ElementEditPanel has already
   // validated `draftValues` before ever calling this — this only ever
   // updates state, never the DOM directly; the combined reconcile effect
@@ -2270,6 +2425,14 @@ export default function DevEdit({ containerRef, prototypeId }) {
                 onIconClearPreview={handleIconClearPreview}
                 onIconApply={handleIconApply}
                 onIconReset={handleIconReset}
+                iconSize={{
+                  target: iconSizeTarget,
+                  edited: !!iconSizeEntry && iconSizeEntry.committed !== iconSizeEntry.original,
+                  saving: iconSizeSaving,
+                  onPreview: handleIconSizePreview,
+                  onSave: handleIconSizeSave,
+                  onReset: handleIconSizeReset,
+                }}
                 elementEditInitial={elementEditInitial}
                 elementPanelRef={elementPanelRef}
                 elementDraftDirty={elementDraftDirty}
@@ -2686,7 +2849,7 @@ function RuleTextarea({ value, onChange, disabled, rows }) {
 
 function EditPanel({
   selection, rows, onDraftChange, onSetRuleFilePath, onClose, error,
-  activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset,
+  activeTab, onTabChange, containerRef, hasIconSwap, onIconPreview, onIconClearPreview, onIconApply, onIconReset, iconSize,
   elementEditInitial, elementPanelRef, elementDraftDirty, onElementDirtyChange, elementResetNonce, hasElementEditToReset,
   applyingAll, onPanelApply, onPanelCancel, onPanelReset,
   trail, onSelectAncestor, onHoverAncestor,
@@ -2795,6 +2958,8 @@ function EditPanel({
             onClearPreview={onIconClearPreview}
             onApply={onIconApply}
             onReset={onIconReset}
+            iconSize={iconSize}
+            error={error}
           />
         ) : isElementTab ? (
           <ElementEditPanel

@@ -13,6 +13,8 @@
 //
 // The commute (first journey of the day) isn't working time, and this
 // contract only pays travel between visits, so it's never paid here.
+// A gap longer than the break threshold is a rest break: the journey after
+// it gets no travel time or mileage, and the gap doesn't count as working time.
 
 const r2 = n => Math.round(n * 100) / 100
 
@@ -117,6 +119,9 @@ function buildRows(schedule) {
 
     // Only travel/wait between visits (not the commute, not across a rest break) counts.
     const travelMins = sameDay && !isBreak ? travel : 0
+    // Same for mileage: nothing is paid for the journey after a rest break
+    // ("Mileage pay during a break: None" on this contract).
+    const paidMileage = isBreak ? 0 : mileage
     const waitMins = sameDay && !isBreak ? Math.min(Math.max(gap - travel, 0), maxWaitMins) : 0
 
     // Paid minutes = the part of each segment that sits above contracted hours.
@@ -160,8 +165,8 @@ function buildRows(schedule) {
       duration: fmtDur(visitMins), durationMins: visitMins,
       status: 'Completed',
       travelMins, waitMins, paidVisitMins, paidTravelMins,
-      pay, mileage, travelPay,
-      total: r2(pay + mileage + travelPay),
+      pay, mileage: paidMileage, travelPay,
+      total: r2(pay + paidMileage + travelPay),
       workedAfter: worked,
       salaried: startedBelow && paidVisitMins === 0 && paidTravelMins === 0,
       partial,
