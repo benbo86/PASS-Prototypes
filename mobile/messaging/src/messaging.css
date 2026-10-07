@@ -1458,6 +1458,7 @@
 .app-header-action.new-message-action:hover { background: none; }
 
 .new-message-action > svg {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
