@@ -82,6 +82,14 @@ export const INVOICE_LAYOUTS = [
   },
 ]
 
+// Fields that can't both be shown: ticking one unticks its partner. Carer
+// and Carer initials are alternatives, not separate columns (decided
+// 2026-10-09). Unticking both is still allowed.
+export const EXCLUSIVE_FIELD_PAIRS = {
+  carer: 'carerInitials',
+  carerInitials: 'carer',
+}
+
 const layoutName = (key) => INVOICE_LAYOUTS.find(l => l.key === key)?.name || null
 
 export const invoiceLayoutName = layoutName

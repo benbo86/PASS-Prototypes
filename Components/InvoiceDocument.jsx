@@ -40,7 +40,11 @@ const VISIT_LIST_COLUMN_RENDERERS = {
   date: { label: 'Date', render: (item) => item.date },
   type: { label: 'Type', render: (item) => item.type },
   carer: { label: 'Carer', render: (item) => item.carer },
-  carerInitials: { label: 'Carer initials', render: (item) => initials(item.carer) },
+  // Header reads "Carer" either way: Carer and Carer initials are mutually
+  // exclusive in the picker (2026-10-09), so the document never shows both
+  // and doesn't need to tell them apart. The picker label stays "Carer
+  // initials" (data.js).
+  carerInitials: { label: 'Carer', render: (item) => initials(item.carer) },
   start: { label: 'Start', render: (item) => item.start },
   duration: { label: 'Duration', render: (item) => item.duration },
   status: { label: 'Status', render: (item) => item.status },

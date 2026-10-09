@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import ModalPanel from '../../../Components/ModalPanel'
 import Tooltip from '../../../Components/Tooltip'
-import { INVOICE_LAYOUTS, defaultInvoiceConfig } from './data'
+import { INVOICE_LAYOUTS, EXCLUSIVE_FIELD_PAIRS, defaultInvoiceConfig } from './data'
 import InvoicePreviewModal from './InvoicePreviewModal'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -112,7 +112,15 @@ export default function CustomiseInvoiceModal({ open, invoiceConfig, onClose, on
       ...d,
       fieldOrders: {
         ...d.fieldOrders,
-        [d.layout]: d.fieldOrders[d.layout].map(f => f.key === key ? { ...f, enabled: !f.enabled } : f),
+        [d.layout]: (() => {
+          const fields = d.fieldOrders[d.layout]
+          const turningOn = !fields.find(f => f.key === key)?.enabled
+          const partner = turningOn ? EXCLUSIVE_FIELD_PAIRS[key] : null
+          return fields.map(f =>
+            f.key === key ? { ...f, enabled: !f.enabled }
+              : f.key === partner ? { ...f, enabled: false }
+              : f)
+        })(),
       },
     }))
 
