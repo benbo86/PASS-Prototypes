@@ -51,6 +51,7 @@ export default function Canvas({
   onStrokeChange,
   currentStrokeWidth,
   onStrokeWidthChange,
+  onDropFiles,
 }) {
   const scrollRef = useRef(null)
   // Set by the wheel-zoom handler right before setZoom — applied in the
@@ -179,7 +180,25 @@ export default function Canvas({
   const isSoleRotatableSelected = !!soleSelectedEl && soleSelectedEl.type !== 'arrow' && !isLoneEmptyTextSelected
 
   return (
-    <div className="wf-canvas-scroll" ref={scrollRef}>
+    <div
+      className="wf-canvas-scroll"
+      ref={scrollRef}
+      // Image files dragged in from Finder/the desktop. Only claims the drag
+      // when it actually carries files, so nothing else is affected.
+      onDragOver={(e) => {
+        if (!e.dataTransfer?.types?.includes('Files')) return
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'copy'
+      }}
+      onDrop={(e) => {
+        const files = [...(e.dataTransfer?.files || [])]
+        if (files.length === 0) return
+        e.preventDefault()
+        const rect = canvasRef.current?.getBoundingClientRect()
+        if (!rect) return
+        onDropFiles?.(files, { x: (e.clientX - rect.left) / zoom, y: (e.clientY - rect.top) / zoom })
+      }}
+    >
     <div
       ref={canvasRef}
       className={`wf-canvas wf-tool-${activeTool}`}

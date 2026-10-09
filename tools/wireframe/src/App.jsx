@@ -6,6 +6,8 @@ import Canvas from './Canvas'
 import { cloneElements, clampZoom, ZOOM_STEP, computeBoundingBox, alignElements, nudgeElements, GRID, makeId, snap, DEFAULT_SIZE } from './geometry'
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
+import DevComments from '../../../Components/DevComments'
+import { compressImage, placedSize, stripImageSrc, collectImageData, uploadImages, hydrateImages, deleteUnusedImages } from './imageStore'
 import { auth, db, SHARED_EMAIL } from '../../../Components/firebase'
 import { getStoredAuthor, storeAuthor } from '../../../Components/authorIdentity'
 import { getSignInAt, setSignInAt, clearSignInAt, isSessionExpired } from '../../../Components/sharedAuthSession'
@@ -22,7 +24,7 @@ const FONT_CAPABLE_TYPES = new Set(['text', 'rect', 'ellipse', 'triangle', 'arro
 // Border into the floating toolbar) removes that exclusion; ElementRenderer
 // already draws a border for any type generically off el.stroke/
 // strokeWidth, so no rendering change was needed, only this set.
-const STROKEABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'arrow', 'text'])
+const STROKEABLE_TYPES = new Set(['frame', 'rect', 'ellipse', 'triangle', 'arrow', 'text', 'image'])
 const HISTORY_LIMIT = 50
 const DEFAULT_TEXT_STYLE = { fontFamily: 'Barlow', fontWeight: 400, fontStyle: 'normal', fontSize: 16, textAlign: 'left', verticalAlign: 'top', textColor: '#333333' }
 // Bare-letter tool shortcuts (no modifier) — Ellipse uses O (circle/oval)
@@ -67,7 +69,6 @@ export default function App() {
   const [zoom, setZoom] = useState(1)
 
   const [wireframeName, setWireframeName] = useState('')
-  const [currentFileName, setCurrentFileName] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
   // Brief post-save confirmation on the Save button itself ("Saved", with a
@@ -81,8 +82,6 @@ export default function App() {
   const justSavedTimeoutRef = useRef(null)
   const [showExitPrompt, setShowExitPrompt] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-
-  const [savedFiles, setSavedFiles] = useState([])
 
   // ── Shared save (Firestore) ── same shared password/Firebase Auth
   // session Components/DevEdit.jsx uses (Components/firebase.js's `auth`,
@@ -99,21 +98,13 @@ export default function App() {
   const [nameInput, setNameInput] = useState('')
   const isAuthed = !!authUser
 
-  // currentFileName (above) tracks the local dev-only file; this is its
-  // Firestore counterpart, so a repeated save updates the same doc rather
-  // than creating a duplicate. Persisted INSIDE the local file itself
-  // (a `firestoreId` field, written by performSave's local mirror, read
-  // back by performLoad's local branch) — without that, reopening a local
-  // file always reset this to null, so the very next save silently created
-  // a brand-new cloud doc under the same name, effectively "undeleting" a
-  // cloud copy that had been deliberately removed on the live site.
+  // The open wireframe's shared (Firestore) doc, so a repeated save updates
+  // it rather than creating a duplicate. Shared copies are the only
+  // wireframes the tool lists and opens (2026-10-09 — previously there were
+  // separate local and shared copies, which got confusing). Running
+  // locally, each save is also mirrored to wireframes/<name>.json as a
+  // silent backup Claude can read, but those files are never listed.
   const [currentFirestoreId, setCurrentFirestoreId] = useState(null)
-  // Set once a save discovers its linked cloud doc no longer exists (it was
-  // deleted, e.g. from the live site) — from then on, saves for THIS file
-  // never automatically recreate a cloud copy, even though currentFirestoreId
-  // is null (same null value a file that never had a cloud copy would have).
-  // Also persisted in the local file, for the same reason as firestoreId.
-  const [cloudUnlinked, setCloudUnlinked] = useState(false)
   const [firestoreFiles, setFirestoreFiles] = useState([])
 
   const elementsRef = useRef(elements)
@@ -140,11 +131,21 @@ export default function App() {
   // top of the 1st and looked like nothing had happened. Reset on every
   // fresh ⌘C so a new copy always starts its own cascade from scratch.
   const pasteCountRef = useRef(0)
+  // An internal ⌘C also writes this marker to the OS clipboard, so ⌘V can
+  // tell whether the OS clipboard still holds our own copy or something
+  // newer from outside (a screenshot, copied text). Without it, an earlier
+  // shape copy would always win over a screenshot taken afterwards. Null
+  // when the write failed (no clipboard permission): ⌘V then keeps the
+  // old "internal copy wins" behaviour.
+  const copyMarkerRef = useRef(null)
+  // imageIds already in Firestore's wireframe_images, so a save only
+  // uploads new images. Reset whenever a different wireframe is opened.
+  const uploadedImagesRef = useRef(new Set())
 
   // What to do once the dirty-check (showExitPrompt) resolves — set by
   // requestSwitch() before showing the prompt, read by handleExitDiscard/
   // handleExitSave (via saveAndMaybeContinue) once the user decides.
-  // { type: 'exit' } | { type: 'load', source, id } | { type: 'new' } | null.
+  // { type: 'exit' } | { type: 'load', id } | { type: 'new' } | null.
   // Generalizes what used to be a single boolean (pendingExitAfterSaveRef)
   // only ever meaning "exit" — now the same gate also covers switching to a
   // different saved wireframe or starting a new one.
@@ -347,6 +348,13 @@ export default function App() {
   // autoSize text element's editor is always a single-line <input> (v5) —
   // pasting a paragraph into that would silently collapse every line
   // break; a bound box's <textarea> editor preserves them.
+  const viewportCenter = () => {
+    const rect = canvasRef.current?.getBoundingClientRect()
+    return rect
+      ? { x: (window.innerWidth / 2 - rect.left) / zoom, y: (window.innerHeight / 2 - rect.top) / zoom }
+      : { x: 200, y: 200 }
+  }
+
   const pasteTextFromClipboard = () => {
     if (!navigator.clipboard?.readText) return
     // Captured synchronously, before the async readText() resolves — the
@@ -355,39 +363,70 @@ export default function App() {
     // the promise settles (nothing else can change it in between in
     // practice, but reading it now is the correct thing regardless).
     const groupId = contextGroupId()
-    navigator.clipboard.readText().then((text) => {
-      const trimmed = text?.trim()
-      if (!trimmed) return
-      const rect = canvasRef.current?.getBoundingClientRect()
-      const center = rect
-        ? { x: (window.innerWidth / 2 - rect.left) / zoom, y: (window.innerHeight / 2 - rect.top) / zoom }
-        : { x: 200, y: 200 }
-      const isMultiline = trimmed.includes('\n')
-      const w = isMultiline ? 320 : DEFAULT_SIZE.text.w
-      const h = isMultiline ? Math.min(400, Math.max(80, trimmed.split('\n').length * 24 + 16)) : DEFAULT_SIZE.text.h
+    navigator.clipboard.readText().then((text) => pasteText(text, groupId)).catch(() => {})
+  }
+
+  const pasteText = (text, groupId) => {
+    const trimmed = text?.trim()
+    if (!trimmed) return
+    const center = viewportCenter()
+    const isMultiline = trimmed.includes('\n')
+    const w = isMultiline ? 320 : DEFAULT_SIZE.text.w
+    const h = isMultiline ? Math.min(400, Math.max(80, trimmed.split('\n').length * 24 + 16)) : DEFAULT_SIZE.text.h
+    const newEl = {
+      id: makeId(),
+      type: 'text',
+      x: snap(center.x - w / 2),
+      y: snap(center.y - h / 2),
+      w,
+      h,
+      autoSize: !isMultiline,
+      label: trimmed,
+      fill: null,
+      stroke: null,
+      strokeWidth: 0,
+      // Same fields (and the same source — pendingTextStyle, whatever the
+      // user currently has the Text tool's own defaults set to) a
+      // click/drag-placed text element gets in useCanvasInteraction.js —
+      // pasting stays consistent with placing text any other way rather
+      // than reverting to a fixed, ask-agnostic style.
+      fontFamily: pendingTextStyle.fontFamily,
+      fontWeight: pendingTextStyle.fontWeight,
+      fontStyle: pendingTextStyle.fontStyle,
+      fontSize: pendingTextStyle.fontSize,
+      textAlign: pendingTextStyle.textAlign,
+      textColor: pendingTextStyle.textColor,
+      groupId,
+      rotation: 0,
+      flipX: false,
+      flipY: false,
+    }
+    pushHistory()
+    setElements((prev) => [...prev, newEl])
+    setSelectedIds([newEl.id])
+  }
+
+  // Pasted or dropped image → a new 'image' element, centred on `point`
+  // (canvas-space) or on the current viewport. Compressed up front (see
+  // imageStore.js) so what's on the canvas is exactly what gets saved.
+  const addImageFromBlob = async (blob, point, groupId = null) => {
+    try {
+      const { dataUrl, width, height } = await compressImage(blob)
+      const { w, h } = placedSize(width, height)
+      const at = point || viewportCenter()
       const newEl = {
         id: makeId(),
-        type: 'text',
-        x: snap(center.x - w / 2),
-        y: snap(center.y - h / 2),
+        type: 'image',
+        imageId: makeId().replace(/^el_/, 'img_'),
+        src: dataUrl,
+        x: snap(at.x - w / 2),
+        y: snap(at.y - h / 2),
         w,
         h,
-        autoSize: !isMultiline,
-        label: trimmed,
+        label: '',
         fill: null,
         stroke: null,
         strokeWidth: 0,
-        // Same fields (and the same source — pendingTextStyle, whatever the
-        // user currently has the Text tool's own defaults set to) a
-        // click/drag-placed text element gets in useCanvasInteraction.js —
-        // pasting stays consistent with placing text any other way rather
-        // than reverting to a fixed, ask-agnostic style.
-        fontFamily: pendingTextStyle.fontFamily,
-        fontWeight: pendingTextStyle.fontWeight,
-        fontStyle: pendingTextStyle.fontStyle,
-        fontSize: pendingTextStyle.fontSize,
-        textAlign: pendingTextStyle.textAlign,
-        textColor: pendingTextStyle.textColor,
         groupId,
         rotation: 0,
         flipX: false,
@@ -396,7 +435,61 @@ export default function App() {
       pushHistory()
       setElements((prev) => [...prev, newEl])
       setSelectedIds([newEl.id])
-    }).catch(() => {})
+      setActiveTool('pointer')
+    } catch (err) {
+      setSaveError(err.message || "Couldn't add that image")
+    }
+  }
+
+  // Dropped files: images only, stacked slightly so several don't land
+  // exactly on top of each other.
+  const handleDropFiles = (files, point) => {
+    files.filter((f) => f.type.startsWith('image/')).forEach((file, i) => {
+      addImageFromBlob(file, { x: point.x + i * 24, y: point.y + i * 24 })
+    })
+  }
+
+  // Internal ⌘C: remember the elements, and mark the OS clipboard as ours
+  // (see copyMarkerRef).
+  const copySelection = () => {
+    const ids = selectedIdsRef.current
+    if (ids.length === 0) return false
+    clipboardRef.current = elementsRef.current.filter((el) => ids.includes(el.id))
+    pasteCountRef.current = 0
+    const marker = `pass-wireframe-copy:${makeId()}`
+    copyMarkerRef.current = null
+    navigator.clipboard?.writeText?.(marker)
+      .then(() => { copyMarkerRef.current = marker })
+      .catch(() => {})
+    return true
+  }
+
+  // ⌘V outside a text field. Order: an image on the OS clipboard, then our
+  // own copied elements (if the OS clipboard still holds our marker), then
+  // plain text. Falls back to the old behaviour when the clipboard can't
+  // be read.
+  const pasteFromClipboard = () => {
+    const hasInternal = !!clipboardRef.current && clipboardRef.current.length > 0
+    if (hasInternal && copyMarkerRef.current === null) { pasteInternalClipboard(); return }
+    if (!navigator.clipboard?.read) {
+      if (hasInternal) pasteInternalClipboard()
+      else pasteTextFromClipboard()
+      return
+    }
+    const groupId = contextGroupId()
+    navigator.clipboard.read().then(async (items) => {
+      for (const item of items) {
+        const imageType = item.types.find((t) => t.startsWith('image/'))
+        if (imageType) { addImageFromBlob(await item.getType(imageType), null, groupId); return }
+      }
+      const textItem = items.find((item) => item.types.includes('text/plain'))
+      const text = textItem ? await (await textItem.getType('text/plain')).text() : ''
+      if (hasInternal && (text === copyMarkerRef.current || !text.trim())) { pasteInternalClipboard(); return }
+      pasteText(text, groupId)
+    }).catch(() => {
+      if (hasInternal) pasteInternalClipboard()
+      else pasteTextFromClipboard()
+    })
   }
 
   // ── Undo: snapshot-based. pushHistory captures a pre-mutation elements
@@ -441,18 +534,6 @@ export default function App() {
     setElements(next)
     setSelectedIds([])
   }, [])
-
-  const refreshFileList = useCallback(async () => {
-    try {
-      const data = await postJson('/__wireframe/list')
-      if (data.ok) setSavedFiles(data.files)
-    } catch {
-      // Dev-only endpoint — silently no-op if it's unreachable (e.g. this
-      // page loaded outside `vite dev`, though it's not expected to).
-    }
-  }, [])
-
-  useEffect(() => { refreshFileList() }, [refreshFileList])
 
   // Mirrors Components/DevEdit.jsx's own auth effect exactly — same
   // Firebase project, same self-enforced one-week expiry timestamp, so a
@@ -555,9 +636,14 @@ export default function App() {
       // silently stop working until something else was clicked. Only a
       // genuine text-entry field (a plain text <input> or a <textarea>)
       // should suppress these.
+      // Password counts as typing too: it used to be missed, so the
+      // save gate's password field lost every R/O/F/T/A keystroke to the
+      // tool shortcuts below (and ⌘V/Backspace acted on the canvas instead
+      // of the field), making a correct password fail.
       const active = document.activeElement
+      const TEXT_INPUT_TYPES = ['text', 'password', 'search', 'email', 'url', 'tel']
       const isTyping = active?.tagName === 'TEXTAREA'
-        || (active?.tagName === 'INPUT' && (!active.type || active.type === 'text'))
+        || (active?.tagName === 'INPUT' && (!active.type || TEXT_INPUT_TYPES.includes(active.type)))
 
       if (e.key === 'Escape') {
         if (showExitPrompt) { setShowExitPrompt(false); return }
@@ -670,11 +756,9 @@ export default function App() {
       if ((e.metaKey || e.ctrlKey) && isEditingElementLabel) {
         const key = e.key.toLowerCase()
         if (key === 'c') {
-          const ids = selectedIdsRef.current
-          if (ids.length === 0) return
+          if (selectedIdsRef.current.length === 0) return
           e.preventDefault()
-          clipboardRef.current = elementsRef.current.filter((el) => ids.includes(el.id))
-          pasteCountRef.current = 0
+          copySelection()
           return
         }
         if (key === 'v' && clipboardRef.current && clipboardRef.current.length > 0) {
@@ -699,29 +783,17 @@ export default function App() {
         if (key === '-' || key === '_') { e.preventDefault(); setZoom((z) => clampZoom(z - ZOOM_STEP)); return }
         if (key === '0') { e.preventDefault(); setZoom(1); return }
         if (key === 'c') {
-          const ids = selectedIdsRef.current
-          if (ids.length === 0) return
+          if (selectedIdsRef.current.length === 0) return
           e.preventDefault()
-          clipboardRef.current = elementsRef.current.filter((el) => ids.includes(el.id))
-          pasteCountRef.current = 0
+          copySelection()
           return
         }
         if (key === 'v') {
-          if (!clipboardRef.current || clipboardRef.current.length === 0) {
-            // Nothing internally copied — try the real OS clipboard instead
-            // of treating this as a no-op (Ben: "add the ability to paste
-            // text straight onto canvas").
-            e.preventDefault()
-            pasteTextFromClipboard()
-            return
-          }
+          // Images, our own copied elements and plain text all come through
+          // here — see pasteFromClipboard for the order. Repeated internal
+          // pastes still cascade 16px each (pasteInternalClipboard).
           e.preventDefault()
-          // Cascades further from the clipboard's original position with
-          // each successive paste (16px per step, matching Figma's own
-          // repeated-paste convention) instead of every paste landing at
-          // the same fixed +16/+16 offset and stacking exactly on the last —
-          // handled inside pasteInternalClipboard via pasteCountRef.
-          pasteInternalClipboard()
+          pasteFromClipboard()
           return
         }
         if (key === 'b') { if (toggleBold()) e.preventDefault(); return }
@@ -837,10 +909,9 @@ export default function App() {
   // The actual write — assumes auth is already satisfied (requestSave,
   // below, is the gatekeeper that guarantees this). An empty name defaults
   // to "Untitled" rather than blocking the save at all. Also best-effort
-  // mirrors the same content to the existing local dev-only endpoint
-  // (silently ignored if unreachable, e.g. this page loaded outside `vite
-  // dev`) so Ben's existing workflow of reading a wireframe's JSON straight
-  // off disk keeps working unchanged. Returns true/false so callers (the
+  // mirrors the same content to a local backup file when running locally
+  // (silently ignored if unreachable, e.g. on the live site), so Claude can
+  // still read a wireframe's JSON straight off disk. Returns true/false so callers (the
   // gate-completion handlers, the exit flow) can react to success.
   const performSave = async () => {
     if (saving) return false
@@ -848,51 +919,46 @@ export default function App() {
     setSaving(true)
     setSaveError(null)
     try {
-      const payload = { name, authorName: authorName.trim(), elements, updatedAt: serverTimestamp() }
+      // Image data never goes in the wireframe doc itself (1MiB limit) —
+      // see imageStore.js. Elements keep only each image's imageId.
+      const storedElements = stripImageSrc(elements)
+      const payload = { name, authorName: authorName.trim(), elements: storedElements, updatedAt: serverTimestamp() }
       let firestoreId = currentFirestoreId
-      let unlinked = cloudUnlinked
       let infoMessage = null
-      if (unlinked) {
-        // This file's cloud copy was previously found to be deleted — never
-        // auto-recreate it from here. Local-only for as long as this stays
-        // true (there's no "re-publish to shared" action yet).
-      } else if (firestoreId) {
+      await uploadImages(elements, uploadedImagesRef.current)
+      if (firestoreId) {
         try {
           await updateDoc(doc(db, 'wireframe_saves', firestoreId), payload)
         } catch (err) {
-          if (err.code === 'not-found') {
-            // The linked cloud doc is gone (deleted from the live site,
-            // most likely) — do NOT fall back to creating a fresh one here;
-            // that would silently resurrect something deliberately removed.
-            // Remember this so every future save of this same file also
-            // stays local-only, not just this one.
-            firestoreId = null
-            unlinked = true
-            setCurrentFirestoreId(null)
-            setCloudUnlinked(true)
-            infoMessage = 'Shared copy was deleted — saved locally only.'
-          } else {
-            throw err
-          }
+          if (err.code !== 'not-found') throw err
+          // Someone deleted it while it was open here. The user is
+          // explicitly saving what's on screen, so keep their work as a new
+          // shared wireframe rather than losing it.
+          firestoreId = null
+          infoMessage = 'This wireframe had been deleted, so it was saved as a new copy.'
         }
-      } else {
+      }
+      if (!firestoreId) {
         const ref = await addDoc(collection(db, 'wireframe_saves'), { ...payload, createdAt: serverTimestamp() })
         firestoreId = ref.id
-        setCurrentFirestoreId(ref.id)
       }
+      setCurrentFirestoreId(firestoreId)
       setWireframeName(name)
       savedSnapshotRef.current = elements
-      const fileName = currentFileName || slugify(name)
-      postJson('/__wireframe/save', { fileName, name, elements, authorName: authorName.trim(), firestoreId, cloudUnlinked: unlinked })
-        .then((data) => { if (data?.ok) { setCurrentFileName(fileName); refreshFileList() } })
-        .catch(() => { /* dev-only endpoint — silently no-op if unreachable */ })
+      // Silent local backup (running locally only — the endpoint doesn't
+      // exist on the live site). The plugin replaces any older backup of
+      // the same firestoreId, so renaming doesn't leave stale files.
+      postJson('/__wireframe/save', { fileName: slugify(name), name, elements: storedElements, images: collectImageData(elements), authorName: authorName.trim(), firestoreId })
+        .catch(() => {})
       if (infoMessage) setSaveError(infoMessage)
       clearTimeout(justSavedTimeoutRef.current)
       setJustSaved(true)
       justSavedTimeoutRef.current = setTimeout(() => setJustSaved(false), 2000)
       return true
     } catch (err) {
-      setSaveError(err.message || 'Failed to save')
+      setSaveError(err.code === 'permission-denied'
+        ? "Couldn't save to the shared copy (permission denied). If this wireframe has images, the wireframe_images Firestore rule may not be published yet."
+        : (err.message || 'Failed to save'))
       return false
     } finally {
       setSaving(false)
@@ -907,7 +973,7 @@ export default function App() {
     if (!action) return
     if (action.type === 'exit') exitTool()
     else if (action.type === 'new') performNew()
-    else if (action.type === 'load') performLoad(action.source, action.id)
+    else if (action.type === 'load') performLoad(action.id)
   }
 
   // The one gate every "this would discard unsaved changes" flow goes
@@ -1014,66 +1080,34 @@ export default function App() {
   }
 
   // The actual load — no dirty-check here, requestLoad (called from
-  // WireframeMenu) always routes through requestSwitch first. `source`/
-  // `id` come directly from whichever row was clicked (`cloud`/`local`),
-  // replacing the old prefixed-dropdown-value parsing.
-  const performLoad = async (source, id) => {
+  // WireframeMenu) always routes through requestSwitch first. Only shared
+  // wireframes are listed, so `id` is always a wireframe_saves doc id.
+  const performLoad = async (id) => {
     setSaveError(null)
-
-    if (source === 'cloud') {
-      const match = firestoreFiles.find((f) => f.id === id)
-      if (!match) { setSaveError('Failed to load'); return }
-      const loadedElements = match.elements || []
-      setElements(loadedElements)
-      savedSnapshotRef.current = loadedElements
-      setWireframeName(match.name || 'Untitled')
-      setCurrentFirestoreId(match.id)
-      setCurrentFileName(null)
-      // A cloud-sourced load always corresponds to a real, currently-live
-      // doc (it's in firestoreFiles, the live onSnapshot list) — never
-      // treat it as unlinked just because a previous local session was.
-      setCloudUnlinked(false)
-      setSelectedIds([])
-      setActiveTool('pointer')
-      historyRef.current = []
-      redoRef.current = []
-      setMenuOpen(false)
-      return
-    }
-
-    try {
-      const data = await postJson('/__wireframe/load', { fileName: id })
-      if (!data.ok) throw new Error(data.error || 'Failed to load')
-      const loadedElements = data.data.elements || []
-      setElements(loadedElements)
-      savedSnapshotRef.current = loadedElements
-      setWireframeName(data.data.name || id)
-      setCurrentFileName(id)
-      // Restore whichever cloud link (or deliberate absence of one) this
-      // local file itself remembers, instead of always resetting to null —
-      // see the fields' own declarations above for why this matters.
-      setCurrentFirestoreId(data.data.firestoreId || null)
-      setCloudUnlinked(!!data.data.cloudUnlinked)
-      setSelectedIds([])
-      setActiveTool('pointer')
-      historyRef.current = []
-      redoRef.current = []
-      setMenuOpen(false)
-    } catch (err) {
-      setSaveError(err.message || 'Failed to load')
-    }
+    const match = firestoreFiles.find((f) => f.id === id)
+    if (!match) { setSaveError('Failed to load'); return }
+    const { elements: loadedElements, fromCloud } = await hydrateImages(match.elements || [])
+    uploadedImagesRef.current = fromCloud
+    setElements(loadedElements)
+    savedSnapshotRef.current = loadedElements
+    setWireframeName(match.name || 'Untitled')
+    setCurrentFirestoreId(match.id)
+    setSelectedIds([])
+    setActiveTool('pointer')
+    historyRef.current = []
+    redoRef.current = []
+    setMenuOpen(false)
   }
-  const requestLoad = (source, id) => requestSwitch({ type: 'load', source, id })
+  const requestLoad = (id) => requestSwitch({ type: 'load', id })
 
   const performNew = () => {
     const empty = []
+    uploadedImagesRef.current = new Set()
     setElements(empty)
     savedSnapshotRef.current = empty
     setSelectedIds([])
     setWireframeName('')
-    setCurrentFileName(null)
     setCurrentFirestoreId(null)
-    setCloudUnlinked(false)
     setActiveTool('pointer')
     setSaveError(null)
     historyRef.current = []
@@ -1082,42 +1116,28 @@ export default function App() {
   }
   const requestNew = () => requestSwitch({ type: 'new' })
 
-  // Local delete is ungated (same trust level as the local save-to-disk
-  // endpoint already has — dev-only, Ben's own machine). Cloud delete goes
-  // through requestDeleteCloud above since it needs the shared sign-in.
-  const performDeleteLocal = async (fileName) => {
-    setSaveError(null)
-    try {
-      const data = await postJson('/__wireframe/delete', { fileName })
-      if (!data.ok) throw new Error(data.error || 'Failed to delete')
-      if (currentFileName === fileName) setCurrentFileName(null)
-      refreshFileList()
-    } catch (err) {
-      setSaveError(err.message || 'Failed to delete')
-    }
-  }
   const performDeleteCloud = async (id) => {
     setSaveError(null)
     try {
+      const deleted = firestoreFiles.find((f) => f.id === id)
       await deleteDoc(doc(db, 'wireframe_saves', id))
-      // If this was the currently-open wireframe's own cloud copy, mark it
-      // unlinked too (not just clear the id) — otherwise saving again right
-      // away (no reload in between) would immediately recreate it, same bug
-      // as the stale-reload case performSave's not-found catch handles.
-      if (currentFirestoreId === id) {
-        setCurrentFirestoreId(null)
-        setCloudUnlinked(true)
-      }
+      // Remove its images from wireframe_images unless another shared
+      // wireframe still uses them. Best-effort: a failure here leaves an
+      // unused image behind, never breaks the delete itself.
+      const others = firestoreFiles.filter((f) => f.id !== id)
+      deleteUnusedImages(deleted?.elements || [], others).catch(() => {})
+      // Remove its local backup too (running locally only).
+      postJson('/__wireframe/delete', { firestoreId: id }).catch(() => {})
+      // Deleting the open wireframe starts a fresh blank one rather than
+      // leaving the deleted one on screen.
+      if (currentFirestoreId === id) performNew()
     } catch (err) {
       setSaveError(err.message || 'Failed to delete')
     }
   }
-  // Single entry point WireframeMenu calls for either source — confirms
-  // once, then dispatches to the right backend.
-  const requestDelete = (source, id, name) => {
+  const requestDelete = (id, name) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
-    if (source === 'local') performDeleteLocal(id)
-    else requestDeleteCloud(id, name)
+    requestDeleteCloud(id, name)
   }
 
   // ── Exit confirmation ── mirrors Components/DevEdit.jsx's own
@@ -1140,30 +1160,14 @@ export default function App() {
     requestSave()
   }
 
-  // Normalizes each backend's own shape into one common shape, sorted
-  // newest-first within itself. Kept as two separate lists (rather than
-  // merging into one flat array here) so WireframeMenu can decide whether
-  // to show them under separate headings — local saves only exist at all
-  // when running `vite dev` locally (the deployed site has no local
-  // endpoints to list), so a "Local" heading only makes sense to show when
-  // there's actually something under it. Firestore's updatedAt is a
-  // Timestamp (.toMillis()); the local plugin's is a plain ISO string (or
-  // null for a file whose own stat() lookup failed) — both normalized to
-  // epoch ms so they still sort correctly against each other if ever
-  // merged into one flat list.
-  const cloudFiles = firestoreFiles
-    .map((f) => ({
-      source: 'cloud', id: f.id, name: f.name || 'Untitled', authorName: f.authorName || null,
-      updatedAtMs: f.updatedAt?.toMillis?.() ?? 0,
-    }))
+  // Newest first. Firestore's updatedAt is a Timestamp.
+  const files = firestoreFiles
+    .map((f) => ({ id: f.id, name: f.name || 'Untitled', authorName: f.authorName || null, updatedAtMs: f.updatedAt?.toMillis?.() ?? 0 }))
     .sort((a, b) => b.updatedAtMs - a.updatedAtMs)
-  const localFiles = savedFiles
-    .map((f) => ({
-      source: 'local', id: f.fileName, name: f.name || f.fileName, authorName: f.authorName || null,
-      updatedAtMs: f.updatedAt ? new Date(f.updatedAt).getTime() : 0,
-    }))
-    .sort((a, b) => b.updatedAtMs - a.updatedAtMs)
-  const currentFileKey = currentFirestoreId ? `cloud:${currentFirestoreId}` : currentFileName ? `local:${currentFileName}` : null
+  // Comments belong to one wireframe, not to this page (every wireframe
+  // shares the same URL). A never-saved wireframe has no id, so commenting
+  // waits until the first save.
+  const commentsKey = currentFirestoreId ? `wireframe:${currentFirestoreId}` : null
 
   return (
     <div className="wf-page">
@@ -1180,9 +1184,8 @@ export default function App() {
         setWireframeName={setWireframeName}
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
-        cloudFiles={cloudFiles}
-        localFiles={localFiles}
-        currentFileKey={currentFileKey}
+        files={files}
+        currentId={currentFirestoreId}
         onSelectFile={requestLoad}
         onNew={requestNew}
         onDelete={requestDelete}
@@ -1229,7 +1232,26 @@ export default function App() {
         onStrokeChange={handleStrokeChange}
         currentStrokeWidth={currentStrokeWidth}
         onStrokeWidthChange={handleStrokeWidthChange}
+        onDropFiles={handleDropFiles}
       />
+
+      <div className="wf-comments-dock">
+        {commentsKey ? (
+          <DevComments
+            key={commentsKey}
+            containerRef={canvasRef}
+            prototypeId={commentsKey}
+            scopeClicksToContainer
+            getPinBounds={() => canvasRef.current?.parentElement?.getBoundingClientRect()}
+          />
+        ) : (
+          <button className="dev-toolbar-icon-btn wf-comments-disabled" disabled title="Save this wireframe to add comments" aria-label="Comments (save first)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       <Toolbar
         activeTool={activeTool}

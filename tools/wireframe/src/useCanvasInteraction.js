@@ -280,6 +280,10 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         ? { id: el.id, type: 'arrow', x1: el.x1, y1: el.y1, x2: el.x2, y2: el.y2 }
         : { id: el.id, type: el.type, x: el.x, y: el.y, w: el.w, h: el.h, flipX: !!el.flipX, flipY: !!el.flipY }))
     const isCorner = handle === 'nw' || handle === 'ne' || handle === 'se' || handle === 'sw'
+    // Images keep their proportions on a corner drag by default (Shift
+    // frees them), the reverse of every other shape, so a screenshot isn't
+    // distorted by accident. Edge handles still stretch freely.
+    const hasImage = startSnapshots.some((snap) => snap.type === 'image')
     const pt = getCanvasPoint(e)
     // Only ever nonzero for a SOLE selected non-arrow element (multi-select
     // or an arrow always get 0 here) — this is what makes the rotation-aware
@@ -298,6 +302,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
       // never engaged unless Shift happened to already be held at the
       // exact moment of mousedown.
       isCorner,
+      hasImage,
       startMouse: pt,
       groupBox0,
       startSnapshots,
@@ -386,7 +391,7 @@ export function useCanvasInteraction({ elements, setElements, activeTool, setAct
         })
         updateElements(patches)
       } else if (drag.kind === 'resizeGroup') {
-        const lockAspect = e.shiftKey && drag.isCorner
+        const lockAspect = drag.isCorner && (drag.hasImage ? !e.shiftKey : e.shiftKey)
         // Only ever a no-op identity when drag.rotation is 0 (multi-select,
         // or a sole element with no rotation) — resizeVector(dx,dy,0) would
         // return dx,dy unchanged anyway, but skipping the call entirely

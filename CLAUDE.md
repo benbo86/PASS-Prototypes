@@ -411,9 +411,16 @@ service cloud.firestore {
       allow create, update: if request.auth != null;
       allow delete: if false;
     }
+    match /wireframe_images/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
   }
 }
 ```
+**✅ `wireframe_images` (Wireframe tool v22, pasted images) was published and confirmed on 2026-10-09** with a direct, no-UI check. An unauthenticated read succeeded (open read), an unauthenticated write was rejected with `permission-denied`, and no test doc persisted. The full rule set above was republished at the same time, so `wireframe_saves`' `allow delete: if request.auth != null` should now be live too. Still not checked: an authenticated write.
+
 Re-verify afterward by attempting an **unauthenticated** write and confirming it's rejected — don't just confirm sign-in works, since test-mode rules allow authenticated writes too and wouldn't tell the two states apart.
 
 **Pins are visible whenever Dev Mode isn't active**, regardless of whether comment mode itself is on — anyone browsing a prototype normally should be able to see existing feedback without turning anything on. `active` (the comment-mode toggle) only gates the "click anywhere to drop a new pin" interception; viewing a thread, replying, resolving, editing, and deleting all work regardless of whether comment mode is on. Pins hide entirely while Dev Mode is active (see the mutual-exclusivity/state-sharing entry below) so they don't clutter element inspection. Each pin shows its own reply-count badge (red circle, top-right of the pin) when it has replies — there's no aggregate "unresolved count" badge on the toggle itself anymore, since with pins always visible that count is redundant (just look at the pins).
@@ -1349,3 +1356,70 @@ Ben: saving currently gives no feedback at all — the button just reverts from 
 **The Save button (`WireframeMenu.jsx`) itself becomes the confirmation** — no separate toast/banner element. While `justSaved` is true it shows a checkmark + "Saved" and a distinct green fill (`.wf-tool-btn-saved`, `#1e8e5a`) instead of its normal resting purple, then reverts to plain "Save" — same three-state pattern (`Save` / `Saving…` / `✓ Saved`) already established for the button's existing saving-in-flight state, just extended by one. Fires even on the "shared copy was deleted, saved locally only" path (v19) — that save still genuinely succeeded, just without a cloud write, so showing the confirmation there is accurate, not misleading; the separate `saveError`-driven info message still surfaces alongside it.
 
 **Verified**: visually confirmed the green "✓ Saved" state renders correctly (using this repo's own established temporary-state-override technique — briefly forcing the state's default to `true`, screenshotting, then reverting and confirming via grep that no debug trace was left behind) and a full production build succeeds. Not verified end-to-end through a real authenticated save (needs the real shared password, same recurring limitation as every other password-gated check in this file's history) — though a real save Ben performed independently during this same session (`wireframes/kids-central.json`'s `updatedAt` advancing, `cloudUnlinked:true` correctly recorded per v19) confirms the underlying save path this feature hooks into is genuinely working live, not just in a mocked test.
+
+### v22 — paste or drop images onto the canvas
+
+Ben: "I'd like to be able to paste images into the wireframe tool." Chose storing each image as its own Firestore doc (over inlining it in the wireframe doc, which would hit Firestore's 1MiB doc limit after two or three screenshots, or Firebase Storage, which needs the paid Blaze plan).
+
+- **New `image` element**, created by ⌘V with an image on the OS clipboard or by dropping image files onto the canvas. `{ type: 'image', imageId, src, x, y, w, h, ... }`. It moves, groups, rotates, flips, duplicates and undoes like any other box element, and can take a Border. It has no label or text editing.
+- **Compressed on the way in** (`tools/wireframe/src/imageStore.js`): longest side at most 1600px, WebP at 0.85 quality (JPEG on a white background where the browser can't encode WebP, e.g. Safari). It shrinks further until the data URL is under about 900KB. It's first placed at 800px max on the canvas.
+- **Corner resize keeps the aspect ratio by default for images** (Shift frees it), the reverse of other shapes. Edge handles still stretch freely.
+- **Storage.** In memory each image element carries `src`, so undo, copy/paste and duplicate need no special handling. On save, `src` is stripped from the elements, so the wireframe doc only holds `imageId`.
+  - **Shared save:** new images are uploaded to `wireframe_images/{imageId}` as `{ dataUrl, createdAt }`, before the wireframe doc is written. `uploadedImagesRef` tracks which ones are already there.
+  - **Local save:** `wireframePlugin.js` writes each image to `wireframes/images/<imageId>.webp`, so the images can be opened directly as files. Its `/load` endpoint returns them as `images`. Missing images fall back to Firestore, then to an "Image unavailable" placeholder.
+  - **Deleting a wireframe cleans up its images** (added the same day, Ben's ask). Locally, `/__wireframe/delete` removes every file in `wireframes/images/` that no remaining wireframe JSON references; it keeps everything if any wireframe file can't be read. For a shared delete, `deleteUnusedImages` (imageStore.js) removes the deleted wireframe's image docs unless another doc in the live `wireframe_saves` list still uses them. The check covers all wireframes because an image can be copied into more than one. **Known gap:** a session that loaded the now-deleted wireframe, copied an image from it and pasted it into a different unsaved wireframe won't re-upload it (`uploadedImagesRef` thinks it's already there). The local file copy is unaffected.
+- **Deleting the currently open wireframe** now starts a fresh blank one (performNew), unless a local or shared copy of it still exists. In that case it stays open as that copy.
+- **⌘V precedence changed.** An internal ⌘C now also writes a `pass-wireframe-copy:<id>` marker to the OS clipboard. ⌘V then reads the OS clipboard and pastes, in this order:
+  1. an image;
+  2. our own copied elements, if the marker is still there;
+  3. plain text.
+
+  Before this, an earlier shape copy always won, so a screenshot taken afterwards could never be pasted. If the marker write or the clipboard read fails, the old behaviour applies. The ⌘V branch used while editing a label is unchanged: it only does the internal paste.
+- **Not verified:** the shared (Firestore) save and load of images. That needs the shared password and the published `wireframe_images` rule.
+- **Verified via Playwright:**
+  - pasting a 1200×600 PNG gives an 800×400 WebP image element;
+  - a corner drag keeps 2:1, and Shift+corner frees it;
+  - ⌘C then ⌘V duplicates an image even with a different image still on the OS clipboard;
+  - text copied from outside afterwards pastes as text;
+  - dropping a file adds an image, and undo removes it;
+  - a local save writes a real WebP to `wireframes/images/`, the JSON has no `src`, and loading the file through the menu shows the image again;
+  - no console errors, and `vite build` is clean.
+
+
+### v23 — comments on wireframes
+
+Ben: "Could we have the comment tool available in the wireframe." Reuses `Components/DevComments.jsx` unchanged in behaviour for prototypes.
+- **The toggle** sits in a small dark pill top-right (`.wf-comments-dock`). Pins are anchored to the canvas (`canvasRef`), so they follow scrolling and zoom.
+- **Comments are scoped per wireframe, not per page** (every wireframe shares one URL). `prototypeId` is `wireframe:<firestoreId>`. A never-saved wireframe shows a disabled toggle ("Save this wireframe to add comments").
+- **Two new opt-in DevComments props** (default off, so prototypes are unaffected):
+  - `scopeClicksToContainer`: in comment mode, only clicks inside the canvas drop a pin, so the tool's own menu and toolbars keep working.
+  - `getPinBounds`: hides pins scrolled outside the visible canvas, so they don't float over the chrome.
+- **Styles.** The wireframe tool now imports `dev-toolbar.css` and `dev-comments.css`. It doesn't load `main.css`, so `wireframe-tool.css` carries a minimal copy of `Components/Tooltip.jsx`'s `.tooltip` styles.
+- **Verified via Playwright:**
+  - the toggle is disabled when unsaved;
+  - the menu still opens in comment mode;
+  - a canvas click opens the composer and posting adds a pin;
+  - the pin moves correctly on zoom and hides when the canvas scrolls away;
+  - deleting the pin works, and no test comment was left in Firestore;
+  - `vite build` is clean.
+
+### v24 — shared copies only; local files become a hidden backup
+
+Ben, after asking why there were both local and shared wireframes: "I agree we should make it simpler." **This supersedes the local/shared split described in v7, v12 and v19 above.**
+
+- **One kind of wireframe.** The menu lists only shared (Firestore `wireframe_saves`) wireframes, in one newest-first list with no headings. Load, save and delete all act on the shared copy, and save always needs the shared password.
+- **Local backup, written silently.** When running locally (`npm run dev`), every save also writes `wireframes/<slug-of-name>.json` (plus `wireframes/images/`) via `wireframePlugin.js`, so Claude can still read wireframes straight from the repo. Each backup is tied to its shared wireframe by `firestoreId`:
+  - a rename replaces the old backup file;
+  - deleting the shared wireframe deletes its backup (`/__wireframe/delete` now takes `{ firestoreId }`) and any images no remaining backup uses.
+
+  The `/list` and `/load` endpoints were removed, since the tool never reads backups.
+- **Removed:** `currentFileName`, `cloudUnlinked`, the local list and local delete, and the `wireframe:local:` comment key.
+- **Saving changed in one case.** If the open wireframe was deleted elsewhere, Save now creates a new shared copy and says so. Previously it refused and saved locally only (v19). v19's "never resurrect" rule existed because reopening a local file could silently recreate a deleted shared copy, and that path no longer exists.
+- **Ben's six old local-only wireframes were deleted** at his request (none had a live shared copy). They're tracked in git, so they're recoverable from history. That includes `icon-finder.json`, `wireframe-nav.json` and `wireframe-colour-picker.json`, which history notes above refer to.
+- **Verified via Playwright and the endpoints directly:**
+  - the menu shows a single list, with no Local heading;
+  - a renamed save leaves exactly one backup file;
+  - deleting by firestoreId removes the backup;
+  - drawing still works, there are no console errors, and the build is clean.
+- **Not verified:** a real signed-in save, load or delete, which needs the shared password.
+

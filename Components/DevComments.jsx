@@ -130,7 +130,16 @@ function computePanelPosition(pinLeft, pinTop) {
 // Independent of Dev Mode's inspect mode — comments can be left without
 // turning inspection on. Reuses the same containerRef Dev Mode uses, so
 // pins are positioned relative to the same outermost content frame.
-export default function DevComments({ containerRef, prototypeId }) {
+// Two optional props, both off by default so every prototype behaves
+// exactly as before (added for the Wireframe tool, whose canvas sits under
+// its own floating chrome):
+// - scopeClicksToContainer: in comment mode, only clicks inside
+//   containerRef drop a pin; clicks elsewhere (the tool's own menus and
+//   toolbars) pass through untouched instead of being swallowed.
+// - getPinBounds: returns a rect; pins outside it are hidden. Used where
+//   containerRef is larger than what's visible (a scrollable canvas), so
+//   off-screen pins don't float over surrounding UI.
+export default function DevComments({ containerRef, prototypeId, scopeClicksToContainer = false, getPinBounds }) {
   const [active, setActive] = useState(false)
   const [comments, setComments] = useState([])
   const [composerAt, setComposerAt] = useState(null) // {x, y, xPercent, yPercent} | null
@@ -279,8 +288,10 @@ export default function DevComments({ containerRef, prototypeId }) {
     // the mirror case, now extended to a fourth tool.
     const isOtherFeatureUi = (target) => target.closest && target.closest('[data-devcomments-ui], [data-devmode-ui], [data-devedit-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]')
 
+    const isOutOfScope = (target) => scopeClicksToContainer && !container.contains(target)
+
     const handleClick = (e) => {
-      if (isOtherFeatureUi(e.target)) return
+      if (isOtherFeatureUi(e.target) || isOutOfScope(e.target)) return
       e.preventDefault()
       e.stopPropagation()
       const rect = getPositioningRect(container)
@@ -291,7 +302,7 @@ export default function DevComments({ containerRef, prototypeId }) {
     }
 
     const handleSuppress = (e) => {
-      if (isOtherFeatureUi(e.target)) return
+      if (isOtherFeatureUi(e.target) || isOutOfScope(e.target)) return
       e.preventDefault()
       e.stopPropagation()
     }
@@ -304,7 +315,7 @@ export default function DevComments({ containerRef, prototypeId }) {
       document.removeEventListener('mousedown', handleSuppress, true)
       document.removeEventListener('pointerdown', handleSuppress, true)
     }
-  }, [active, containerRef])
+  }, [active, containerRef, scopeClicksToContainer])
 
   // ── Escape closes whatever's open, then exits comment mode ──
   useEffect(() => {
@@ -372,6 +383,9 @@ export default function DevComments({ containerRef, prototypeId }) {
   // interception below, not pin visibility.
   const containerRect = containerRef.current ? getPositioningRect(containerRef.current) : null
   const openThread = comments.find(c => c.id === openThreadId) || null
+  const pinBounds = getPinBounds?.() || null
+  const isPinVisible = (left, top) => !pinBounds
+    || (left >= pinBounds.left && left <= pinBounds.right && top >= pinBounds.top && top <= pinBounds.bottom)
 
   let openThreadPos = null
   if (openThread && containerRect) {
@@ -396,16 +410,21 @@ export default function DevComments({ containerRef, prototypeId }) {
 
       {containerRect && createPortal(
         <div data-devcomments-ui="true">
-          {!devModeActive && comments.map(c => (
-            <Pin
-              key={c.id}
-              comment={c}
-              left={containerRect.left + (c.xPercent / 100) * containerRect.width}
-              top={containerRect.top + (c.yPercent / 100) * containerRect.height}
-              isOpen={openThreadId === c.id}
-              onClick={() => { setComposerAt(null); setOpenThreadId(id => id === c.id ? null : c.id) }}
-            />
-          ))}
+          {!devModeActive && comments.map(c => {
+            const left = containerRect.left + (c.xPercent / 100) * containerRect.width
+            const top = containerRect.top + (c.yPercent / 100) * containerRect.height
+            if (!isPinVisible(left, top)) return null
+            return (
+              <Pin
+                key={c.id}
+                comment={c}
+                left={left}
+                top={top}
+                isOpen={openThreadId === c.id}
+                onClick={() => { setComposerAt(null); setOpenThreadId(id => id === c.id ? null : c.id) }}
+              />
+            )
+          })}
 
           {composerAt && (
             <CommentComposer

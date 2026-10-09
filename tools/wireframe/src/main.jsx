@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import '../../../Styles/colors.css'
 import '../../../Styles/wireframe-tool.css'
+import '../../../Styles/dev-toolbar.css'
+import '../../../Styles/dev-comments.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -684,6 +684,29 @@
 }
 .wf-el-selected { outline: 1.5px dashed #9a26d6; outline-offset: 2px; }
 
+/* Pasted/dropped image — fills its box exactly (stretches if squashed via
+   an edge handle). pointer-events: none so clicks and drags reach the
+   element itself, same as any other shape. */
+.wf-el-image { overflow: hidden; }
+.wf-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.wf-image-missing {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f6;
+  border: 1px dashed #dcd9e4;
+  color: #968caf;
+  font-size: 13px;
+}
+
 /* Text elements top/left-anchor their content — the other three types stay
    centered as before. A *bound* text box (autoSize: false — created by a
    click-drag) additionally stretches its content to the full box width so
@@ -1202,3 +1225,47 @@ textarea.wf-label-input {
 }
 
 .wf-gate-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+/* ── Comments (Components/DevComments.jsx) ──
+   Top-right dark pill holding the Dev Comments toggle, matching the dev
+   toolbar's own look. Pins, composer and thread panel come from
+   Styles/dev-comments.css. */
+.wf-comments-dock {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  background: #000;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+.wf-comments-disabled { opacity: 0.4; cursor: not-allowed; }
+.wf-comments-disabled:hover { background: transparent; }
+
+/* Components/Tooltip.jsx's portaled popup. Its real styles live in
+   Styles/main.css, which this tool deliberately doesn't load, so a minimal
+   copy of the essentials lives here. */
+.tooltip-wrap { position: relative; display: inline-flex; align-items: center; }
+.tooltip {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: #fff;
+  color: #333;
+  border: 1px solid #dcd9e4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  width: max-content;
+  max-width: 260px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 20000;
+}
+.tooltip.tooltip-visible { opacity: 1; }
+.tooltip.tooltip-below { transform: translate(-50%, 0); }

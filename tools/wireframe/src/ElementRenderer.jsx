@@ -120,6 +120,9 @@ export default function ElementRenderer({ el, isSelected, isGrouped, activeTool,
   // below), which draws a real stroke along the diagonal sides for free —
   // so the div's own background/border stay switched off for this type.
   const isTriangle = el.type === 'triangle'
+  // Pasted/dropped image — no label, no text editing; the picture fills
+  // its box (stretched if the box has been squashed via an edge handle).
+  const isImage = el.type === 'image'
 
   const style = {
     left: el.x,
@@ -173,6 +176,7 @@ export default function ElementRenderer({ el, isSelected, isGrouped, activeTool,
       onDoubleClick={(e) => {
         if (el.type === 'frame') return // the frame's own badge handles its double-click instead, see below
         if (activeTool !== 'pointer') return
+        if (isImage) { e.stopPropagation(); onDoubleClick(el); return }
         e.stopPropagation()
         onDoubleClick(el)
         // Real bug, reported directly: double-click is this tool's own way
@@ -249,7 +253,13 @@ export default function ElementRenderer({ el, isSelected, isGrouped, activeTool,
         )
       )}
 
-      {el.type !== 'frame' && (
+      {isImage && (
+        el.src
+          ? <img className="wf-image" src={el.src} alt="" draggable={false} />
+          : <div className="wf-image-missing">Image unavailable</div>
+      )}
+
+      {el.type !== 'frame' && !isImage && (
         editing ? (
           isBoundText ? (
             // A bound text box (drawn via click-drag) wraps/holds multiple
