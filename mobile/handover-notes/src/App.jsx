@@ -25,31 +25,28 @@ const ChevronLeftIcon = () => (
 // around 16:52.
 const WRITTEN_AT = 'Today, 16:52'
 
-// Arriving from Tag In/Out's Finish visit button: the afternoon visit has
+// The prototype starts at the point of finishing the afternoon visit: it has
 // been running ~52 minutes with every task done, and we land straight on
-// the Visit notes screen, so the two prototypes read as one flow.
-function initialVisits(fromTagInOut) {
+// the Visit notes screen. Tag In/Out's Finish visit button links here too,
+// so the two prototypes read as one flow.
+function initialVisits() {
   const visits = {}
   for (const v of Object.values(VISITS)) {
     visits[v.key] = { status: 'pending', tasks: v.tasks, startedAt: null }
   }
-  if (fromTagInOut) {
-    visits.afternoon = {
-      status: 'in-progress',
-      tasks: VISITS.afternoon.tasks.map(t => ({ ...t, status: 'complete' })),
-      startedAt: Date.now() - 52 * 60 * 1000,
-    }
+  visits.afternoon = {
+    status: 'in-progress',
+    tasks: VISITS.afternoon.tasks.map(t => ({ ...t, status: 'complete' })),
+    startedAt: Date.now() - 52 * 60 * 1000,
   }
   return visits
 }
 
 export default function App() {
   const pageRef = useRef(null)
-  const fromTagInOut = new URLSearchParams(window.location.search).get('from') === 'tag-in-out'
-
-  const [view, setView] = useState(fromTagInOut ? 'notes' : 'bookings')
+  const [view, setView] = useState('notes')
   const [current, setCurrent] = useState('afternoon')
-  const [visits, setVisits] = useState(() => initialVisits(fromTagInOut))
+  const [visits, setVisits] = useState(() => initialVisits())
   const [careNote, setCareNote] = useState('')
   const [handoverDraft, setHandoverDraft] = useState('')
   // Keyed by the visit the note is FOR: { evening: { text, author, when } }
