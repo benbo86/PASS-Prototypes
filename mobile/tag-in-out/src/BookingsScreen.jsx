@@ -66,6 +66,7 @@ function BookingCard({ booking, onClick }) {
         <span className="booking-card-address">{booking.address}</span>
         <span className="booking-card-key-icon"><KeyIcon size={18} /></span>
       </div>
+      {booking.extra}
       {hasFlags && <hr className="booking-card-divider" />}
       {hasFlags && (
         <div className="booking-card-flags">
@@ -77,7 +78,11 @@ function BookingCard({ booking, onClick }) {
   )
 }
 
-export default function BookingsScreen({ onSelectBooking }) {
+// `bookings`, each booking's optional `onSelect` and its optional `extra`
+// node (rendered under the address row) let mobile/handover-notes reuse
+// this screen with its own list, more than one tappable card, and a
+// "Handover note" badge.
+export default function BookingsScreen({ onSelectBooking, bookings = BOOKINGS }) {
   return (
     <div className="screen">
       <StatusBar />
@@ -94,8 +99,8 @@ export default function BookingsScreen({ onSelectBooking }) {
         ))}
       </div>
       <div className="booking-list">
-        {BOOKINGS.map(b => (
-          <BookingCard key={b.key} booking={b} onClick={b.key === 'real' ? onSelectBooking : undefined} />
+        {bookings.map(b => (
+          <BookingCard key={b.key} booking={b} onClick={b.onSelect || (b.key === 'real' ? onSelectBooking : undefined)} />
         ))}
       </div>
       <AppNav activeTab="bookings" links={{ notifications: '../notifications/', account: '../account/' }} />

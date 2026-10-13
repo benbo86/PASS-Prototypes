@@ -353,28 +353,11 @@
 .hol-submit-btn { width: 100%; justify-content: center; }
 
 /* ── Delete/cancel confirmation bottom sheet ────────────────────────
-   Same overlay+sheet technique as mobile/customer-documents' own
-   .docs-sheet-overlay/.docs-sheet-panel (and mobile/messaging's
-   .picker-overlay/.picker-sheet) — not shared across prototypes, each
-   copies its own per this repo's established convention. Two distinct
+   The scrim/panel/slide animation come from Components/BottomSheet.jsx
+   (Styles/mobile.css); only the content styles live here. Two distinct
    copy variants render through the same sheet (Approved vs Awaiting
    approval — see HolidayApp.jsx), matching the Figma's own two bottom
    sheets exactly. */
-.hol-sheet-overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--web-skrim, rgba(60,57,72,0.7));
-  display: flex;
-  align-items: flex-end;
-  z-index: 50;
-}
-.hol-sheet-panel {
-  width: 100%;
-  box-sizing: border-box;
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  padding: 24px 16px 32px;
-}
 .hol-sheet-body {
   font: 14px/1.5 Barlow, sans-serif;
   color: #333;
@@ -382,5 +365,3 @@
 }
 .hol-sheet-title { font: 16px Barlow, sans-serif; font-weight: 600; color: #333; margin-bottom: 4px; }
 .hol-sheet-subtitle { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50); margin-bottom: 20px; }
-.hol-sheet-btn { width: 100%; justify-content: center; }
-.hol-sheet-btn + .hol-sheet-btn { margin-top: 12px; }

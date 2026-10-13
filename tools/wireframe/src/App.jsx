@@ -167,6 +167,30 @@ export default function App() {
   const savedSnapshotRef = useRef(elements)
   const isDirty = elements !== savedSnapshotRef.current
 
+  // ── Autosave + remote changes ──
+  // The name as last saved, so a rename alone also counts as unsaved.
+  const savedNameRef = useRef('')
+  const wireframeNameRef = useRef(wireframeName)
+  wireframeNameRef.current = wireframeName
+  const nameDirty = wireframeName !== savedNameRef.current
+  // Identifies this tab's own writes in the live wireframe_saves list, so
+  // a snapshot of our own save isn't mistaken for someone else's.
+  const sessionIdRef = useRef(makeId())
+  // updatedAt (ms) of the newest version of the open wireframe we know of.
+  const lastRemoteMsRef = useRef(0)
+  // Whether the open wireframe has appeared in the live list yet — so a
+  // just-created one isn't mistaken for "deleted by someone else".
+  const seenInListRef = useRef(false)
+  // Set while this tab is deleting a wireframe, so its own delete isn't
+  // reported as someone else's.
+  const deletingIdRef = useRef(null)
+  // imageIds already written to the local backup, so autosave doesn't
+  // resend every image's data each time.
+  const localImagesWrittenRef = useRef(new Set())
+  // null | { kind: 'changed', authorName } | { kind: 'deleted' }. While
+  // set, autosave is paused until the user decides.
+  const [remoteConflict, setRemoteConflict] = useState(null)
+
   // Reached via a prototype's own Wireframe toggle (Components/
   // WireframeToggle.jsx), which opens this page inside an iframe within a
   // modal rather than navigating — ?embedded=1 marks that case. The
@@ -913,16 +937,20 @@ export default function App() {
   // (silently ignored if unreachable, e.g. on the live site), so Claude can
   // still read a wireframe's JSON straight off disk. Returns true/false so callers (the
   // gate-completion handlers, the exit flow) can react to success.
-  const performSave = async () => {
+  // `auto` = called by autosave: never renames an empty name to
+  // "Untitled" mid-typing, never recreates a wireframe deleted elsewhere,
+  // and doesn't flash the Saved confirmation.
+  const performSave = async ({ auto = false } = {}) => {
     if (saving) return false
-    const name = wireframeName.trim() || 'Untitled'
+    const name = auto ? wireframeName.trim() : (wireframeName.trim() || 'Untitled')
+    if (!name) return false
     setSaving(true)
     setSaveError(null)
     try {
       // Image data never goes in the wireframe doc itself (1MiB limit) —
       // see imageStore.js. Elements keep only each image's imageId.
       const storedElements = stripImageSrc(elements)
-      const payload = { name, authorName: authorName.trim(), elements: storedElements, updatedAt: serverTimestamp() }
+      const payload = { name, authorName: authorName.trim(), elements: storedElements, savedBySession: sessionIdRef.current, updatedAt: serverTimestamp() }
       let firestoreId = currentFirestoreId
       let infoMessage = null
       await uploadImages(elements, uploadedImagesRef.current)
@@ -931,6 +959,7 @@ export default function App() {
           await updateDoc(doc(db, 'wireframe_saves', firestoreId), payload)
         } catch (err) {
           if (err.code !== 'not-found') throw err
+          if (auto) { setRemoteConflict({ kind: 'deleted' }); return false }
           // Someone deleted it while it was open here. The user is
           // explicitly saving what's on screen, so keep their work as a new
           // shared wireframe rather than losing it.
@@ -942,18 +971,26 @@ export default function App() {
         const ref = await addDoc(collection(db, 'wireframe_saves'), { ...payload, createdAt: serverTimestamp() })
         firestoreId = ref.id
       }
+      if (firestoreId !== currentFirestoreId) seenInListRef.current = false
       setCurrentFirestoreId(firestoreId)
-      setWireframeName(name)
+      if (!auto) setWireframeName(name)
+      savedNameRef.current = name
       savedSnapshotRef.current = elements
+      if (!auto) setRemoteConflict(null)
       // Silent local backup (running locally only — the endpoint doesn't
       // exist on the live site). The plugin replaces any older backup of
-      // the same firestoreId, so renaming doesn't leave stale files.
-      postJson('/__wireframe/save', { fileName: slugify(name), name, elements: storedElements, images: collectImageData(elements), authorName: authorName.trim(), firestoreId })
+      // the same firestoreId, so renaming doesn't leave stale files. Only
+      // images not already written are sent.
+      const newImages = Object.fromEntries(Object.entries(collectImageData(elements)).filter(([id]) => !localImagesWrittenRef.current.has(id)))
+      postJson('/__wireframe/save', { fileName: slugify(name), name, elements: storedElements, images: newImages, authorName: authorName.trim(), firestoreId })
+        .then((data) => { if (data?.ok) Object.keys(newImages).forEach((id) => localImagesWrittenRef.current.add(id)) })
         .catch(() => {})
       if (infoMessage) setSaveError(infoMessage)
-      clearTimeout(justSavedTimeoutRef.current)
-      setJustSaved(true)
-      justSavedTimeoutRef.current = setTimeout(() => setJustSaved(false), 2000)
+      if (!auto) {
+        clearTimeout(justSavedTimeoutRef.current)
+        setJustSaved(true)
+        justSavedTimeoutRef.current = setTimeout(() => setJustSaved(false), 2000)
+      }
       return true
     } catch (err) {
       setSaveError(err.code === 'permission-denied'
@@ -1091,7 +1128,11 @@ export default function App() {
     setElements(loadedElements)
     savedSnapshotRef.current = loadedElements
     setWireframeName(match.name || 'Untitled')
+    savedNameRef.current = match.name || 'Untitled'
     setCurrentFirestoreId(match.id)
+    lastRemoteMsRef.current = match.updatedAt?.toMillis?.() ?? 0
+    seenInListRef.current = true
+    setRemoteConflict(null)
     setSelectedIds([])
     setActiveTool('pointer')
     historyRef.current = []
@@ -1107,7 +1148,11 @@ export default function App() {
     savedSnapshotRef.current = empty
     setSelectedIds([])
     setWireframeName('')
+    savedNameRef.current = ''
     setCurrentFirestoreId(null)
+    seenInListRef.current = false
+    lastRemoteMsRef.current = 0
+    setRemoteConflict(null)
     setActiveTool('pointer')
     setSaveError(null)
     historyRef.current = []
@@ -1120,6 +1165,7 @@ export default function App() {
     setSaveError(null)
     try {
       const deleted = firestoreFiles.find((f) => f.id === id)
+      deletingIdRef.current = id
       await deleteDoc(doc(db, 'wireframe_saves', id))
       // Remove its images from wireframe_images unless another shared
       // wireframe still uses them. Best-effort: a failure here leaves an
@@ -1160,6 +1206,97 @@ export default function App() {
     requestSave()
   }
 
+  // Replaces what's on screen with the latest shared version of the open
+  // wireframe (someone else saved it).
+  const applyRemoteVersion = async (remote) => {
+    const { elements: remoteElements, fromCloud } = await hydrateImages(remote.elements || [])
+    fromCloud.forEach((id) => uploadedImagesRef.current.add(id))
+    setElements(remoteElements)
+    savedSnapshotRef.current = remoteElements
+    setWireframeName(remote.name || 'Untitled')
+    savedNameRef.current = remote.name || 'Untitled'
+    lastRemoteMsRef.current = remote.updatedAt?.toMillis?.() ?? lastRemoteMsRef.current
+    setSelectedIds([])
+    // Undo would step back into the pre-update version and autosave it
+    // over theirs.
+    historyRef.current = []
+    redoRef.current = []
+    setRemoteConflict(null)
+  }
+
+  // Watches the live list for changes to the open wireframe made elsewhere.
+  // No unsaved changes here → their version loads in quietly. Unsaved
+  // changes → autosave pauses and the banner asks. Deleted elsewhere →
+  // autosave pauses rather than quietly recreating it.
+  useEffect(() => {
+    if (!currentFirestoreId) return
+    const remote = firestoreFiles.find((f) => f.id === currentFirestoreId)
+    if (!remote) {
+      if (seenInListRef.current && deletingIdRef.current !== currentFirestoreId) setRemoteConflict({ kind: 'deleted' })
+      return
+    }
+    seenInListRef.current = true
+    const ms = remote.updatedAt?.toMillis?.() ?? 0
+    if (remote.savedBySession === sessionIdRef.current) {
+      if (ms) lastRemoteMsRef.current = ms
+      return
+    }
+    if (!ms || ms <= lastRemoteMsRef.current) return
+    lastRemoteMsRef.current = ms
+    const dirtyNow = elementsRef.current !== savedSnapshotRef.current || wireframeNameRef.current !== savedNameRef.current
+    if (dirtyNow) setRemoteConflict({ kind: 'changed', authorName: remote.authorName || 'Someone' })
+    else applyRemoteVersion(remote)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firestoreFiles, currentFirestoreId])
+
+  // Autosave: ~2s after the last change, once a wireframe has been saved
+  // manually at least once (so trying things out doesn't fill the shared
+  // list with drafts) and while signed in. Never prompts for the password
+  // mid-drawing — it just pauses, and the Save button says why.
+  const sessionValid = isAuthed && !isSessionExpired()
+  const canAutosave = !!currentFirestoreId && sessionValid && !remoteConflict
+  const hasUnsaved = isDirty || nameDirty
+  const performSaveRef = useRef(performSave)
+  performSaveRef.current = performSave
+  useEffect(() => {
+    if (!canAutosave || saving || gateStep || !hasUnsaved) return
+    const t = setTimeout(() => performSaveRef.current({ auto: true }), 2000)
+    return () => clearTimeout(t)
+  }, [elements, wireframeName, canAutosave, saving, gateStep, hasUnsaved])
+
+  // Save straight away when the tab is hidden or closed, rather than
+  // waiting out the 2s. Best-effort — a closing tab may not finish.
+  const autosaveNowRef = useRef(null)
+  autosaveNowRef.current = () => { if (canAutosave && hasUnsaved && !saving) performSaveRef.current({ auto: true }) }
+  useEffect(() => {
+    const flush = () => { if (document.visibilityState === 'hidden') autosaveNowRef.current() }
+    const flushOnLeave = () => autosaveNowRef.current()
+    document.addEventListener('visibilitychange', flush)
+    window.addEventListener('pagehide', flushOnLeave)
+    return () => {
+      document.removeEventListener('visibilitychange', flush)
+      window.removeEventListener('pagehide', flushOnLeave)
+    }
+  }, [])
+
+  const saveLabel = saving ? 'saving' : (currentFirestoreId && !hasUnsaved ? 'saved' : 'save')
+  const saveHint = currentFirestoreId && hasUnsaved && !sessionValid ? 'Not saved — click Save to sign in' : null
+
+  const handleConflictLoadTheirs = () => {
+    const remote = firestoreFiles.find((f) => f.id === currentFirestoreId)
+    if (remote) applyRemoteVersion(remote)
+  }
+  const handleConflictKeepMine = () => {
+    setRemoteConflict(null)
+    requestSave()
+  }
+  const handleDeletedSaveAsNew = () => {
+    setCurrentFirestoreId(null)
+    seenInListRef.current = false
+    setRemoteConflict(null)
+    requestSave()
+  }
+
   // Newest first. Firestore's updatedAt is a Timestamp.
   const files = firestoreFiles
     .map((f) => ({ id: f.id, name: f.name || 'Untitled', authorName: f.authorName || null, updatedAtMs: f.updatedAt?.toMillis?.() ?? 0 }))
@@ -1192,6 +1329,8 @@ export default function App() {
         onSave={requestSave}
         saving={saving}
         justSaved={justSaved}
+        saveLabel={saveLabel}
+        saveHint={saveHint}
         error={saveError}
       />
 
@@ -1234,6 +1373,24 @@ export default function App() {
         onStrokeWidthChange={handleStrokeWidthChange}
         onDropFiles={handleDropFiles}
       />
+
+      {remoteConflict && (
+        <div className="wf-remote-banner" role="status">
+          {remoteConflict.kind === 'changed' ? (
+            <>
+              <span>{remoteConflict.authorName} just saved changes to this wireframe. Autosave is paused so neither version is lost.</span>
+              <button className="wf-tool-btn" onClick={handleConflictLoadTheirs}>Load their version</button>
+              <button className="wf-tool-btn wf-primary" onClick={handleConflictKeepMine}>Keep mine</button>
+            </>
+          ) : (
+            <>
+              <span>This wireframe was deleted by someone else. Autosave is paused.</span>
+              <button className="wf-tool-btn" onClick={performNew}>Close it</button>
+              <button className="wf-tool-btn wf-primary" onClick={handleDeletedSaveAsNew}>Save as a new copy</button>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="wf-comments-dock">
         {commentsKey ? (

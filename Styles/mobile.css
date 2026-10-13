@@ -362,3 +362,49 @@ html, body {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* ── Bottom sheet (Components/BottomSheet.jsx) ─────────────────────────
+   Promoted out of mobile/holidays' delete/cancel sheet once the handover
+   badge sheet (mobile/handover-notes) needed the same thing. Slides up on
+   open and back down on close; the scrim fades with it. */
+.bottom-sheet-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  z-index: 50;
+  background: rgba(60, 57, 72, 0);
+  transition: background 0.25s ease;
+}
+.bottom-sheet-overlay--shown {
+  background: var(--web-skrim, rgba(60, 57, 72, 0.7));
+}
+.bottom-sheet-panel {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  max-height: 80%;
+  overflow-y: auto;
+  padding: 24px 16px 32px;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+.bottom-sheet-overlay--shown .bottom-sheet-panel {
+  transform: translateY(0);
+}
+/* Actions in a sheet are full-width square FABs, stacked. No drag handle:
+   the live app's sheets don't have one, and these close by tapping the
+   scrim, not by dragging. */
+.bottom-sheet-panel .fab-square {
+  display: flex; /* block-level, so its top margin collapses with the content's bottom margin */
+  width: 100%;
+  justify-content: center;
+  box-shadow: none;
+}
+.bottom-sheet-panel .fab-square:first-of-type { margin-top: 24px; }
+.bottom-sheet-panel .fab-square + .fab-square { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet-overlay,
+  .bottom-sheet-panel { transition-duration: 0.01s; }
+}

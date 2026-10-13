@@ -462,6 +462,15 @@
   color: var(--brand-purple-3-purple-2, #6d1b98);
 }
 
+.visit-finish-btn {
+  background: var(--rag-green-green-5);
+  color: #fff;
+}
+
+.visit-task-row--tappable {
+  cursor: pointer;
+}
+
 .visit-cancel-btn {
   background: var(--rag-red-red-overdue, #e31c4a);
   color: #fff;
@@ -472,7 +481,7 @@
 /* Presented as a modal sliding up from the bottom (Tag In and Tag Out
    alike, since both are the same shared screen presented the same way) —
    a plain mount-triggered CSS animation, same technique this file's own
-   .tag-sheet-panel already uses for the reason-code sheet, rather than a
+   the reason-code sheet used before it moved to Components/BottomSheet, rather than a
    React-state toggle: TagScreen already gets a fresh mount each time
    App.jsx swaps `view` to 'tagIn'/'tagOut', so there's no need to track
    an extra "just entered" flag. Closing (the X button) mirrors this: a
@@ -650,58 +659,6 @@
 
 .tag-reason-other-input {
   margin-top: 10px;
-}
-
-/* ── Reason sheet — slides up from the bottom, dismissed by tapping
-   outside it. Same shape as mobile/customer-documents' own
-   .docs-sheet-overlay/.docs-sheet-panel/.docs-sheet-handle convention
-   (each prototype keeps its own copy — this isn't a shared class). ──── */
-.tag-sheet-overlay {
-  position: absolute;
-  inset: 0;
-  background: var(--web-skrim);
-  z-index: 20;
-  display: flex;
-  align-items: flex-end;
-}
-
-.tag-sheet-panel {
-  background: #fff;
-  width: 100%;
-  border-radius: 20px 20px 0 0;
-  max-height: 80%;
-  display: flex;
-  flex-direction: column;
-  animation: tag-sheet-slide-up 0.25s ease-out;
-}
-
-@keyframes tag-sheet-slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.tag-sheet-handle {
-  width: 36px;
-  height: 4px;
-  background: var(--ui-purple-4-lavendar);
-  border-radius: 2px;
-  margin: 12px auto 4px;
-  flex-shrink: 0;
-}
-
-.tag-sheet-content {
-  overflow-y: auto;
-  padding: 16px 20px 0;
-}
-
-.tag-sheet-footer {
-  flex-shrink: 0;
-  padding: 16px 20px 24px;
-}
-
-.tag-sheet-footer .round-btn {
-  width: 100%;
-  justify-content: center;
 }
 
 /* ── Scanning / success ────────────────────────────────────────── */

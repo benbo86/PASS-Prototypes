@@ -28,6 +28,14 @@ export const NoteIcon = ({ size = 24 }) => (
   </svg>
 )
 
+// Finish visit / Save and tag out — copied from Icons/Tag Out.svg (the
+// live app's exit-door glyph), fill swapped to currentColor.
+export const FinishVisitIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path fillRule="evenodd" clipRule="evenodd" d="M18 2C18.5523 2 19 2.44772 19 3V5H17V4H6.199L10.53 6.70625C10.8224 6.88899 11 7.20946 11 7.55425V17H17V16H19V18C19 18.5523 18.5523 19 18 19H11V22.1958C11 22.748 10.5523 23.1958 10 23.1958C9.81258 23.1958 9.62893 23.1431 9.47 23.0438L3.47 19.2938C3.17762 19.111 3 18.7905 3 18.4458V3C3 2.44772 3.44772 2 4 2H18ZM17.5 7.20711C17.6326 7.20711 17.7598 7.25979 17.8536 7.35355L20.6464 10.1464C20.8417 10.3417 20.8417 10.6583 20.6464 10.8536L17.8536 13.6464C17.6583 13.8417 17.3417 13.8417 17.1464 13.6464C17.0527 13.5527 17 13.4255 17 13.2929V11.3484H13.5C13.2239 11.3484 13 11.1246 13 10.8484V10.1842C13 9.90804 13.2239 9.68418 13.5 9.68418H17V7.70711C17 7.43096 17.2239 7.20711 17.5 7.20711Z" fill="currentColor" />
+  </svg>
+)
+
 export const CancelIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path fillRule="evenodd" clipRule="evenodd" d="M18 7.2L16.8 6L12 10.8L7.2 6L6 7.2L10.8 12L6 16.8L7.2 18L12 13.2L16.8 18L18 16.8L13.2 12L18 7.2Z" />

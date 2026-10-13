@@ -56,7 +56,16 @@ export default function App() {
   // prototype's own internal-navigation convention for a single flow that
   // doesn't need to go back and forth (ScreenSlider is for list<->detail).
   const [view, setView] = useState('bookings')
+  // Tapping a task while the visit is in progress marks it complete. Once
+  // all are complete, Finish visit appears and hands off to the Handover
+  // notes prototype (mobile/handover-notes), which continues from the
+  // Visit notes sheet onward.
+  const [tasks, setTasks] = useState(TASKS)
   const pageRef = useRef(null)
+
+  const toggleTask = key => setTasks(ts => ts.map(t => (
+    t.key === key ? { ...t, status: t.status === 'complete' ? 'pending' : 'complete' } : t
+  )))
 
   return (
     <>
@@ -96,6 +105,9 @@ export default function App() {
               <VisitScreen
                 inProgress
                 booking={CUSTOMER}
+                tasks={tasks}
+                onToggleTask={toggleTask}
+                onFinishVisit={() => { window.location.href = '../handover-notes/?from=tag-in-out' }}
                 onBack={() => setView('bookings')}
                 onCancelVisit={() => {
                   if (window.confirm('Cancel this visit? This can\'t be undone.')) setView('bookings')

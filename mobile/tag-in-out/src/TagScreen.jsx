@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import BottomSheet from '../../../Components/BottomSheet'
 import { PREFERRED_METHOD, REASON_CODES } from './data'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -58,7 +59,13 @@ const METHOD_LABEL = {
 // the real Figma copy exactly (no "with" before "manually").
 const methodRowLabel = (verb, key) => key === 'manual' ? `${verb} manually` : `${verb} with ${METHOD_LABEL[key]}`
 
-export default function TagScreen({ direction, customerName, onClose, onComplete }) {
+// Optional, added for mobile/handover-notes:
+// - `skipSuccess`: Tag Out also skips the confirmation and slides down
+//   (Tag In always does). Defaults to Tag In only, as before.
+// - `onConfirmed`: fires the moment the tag is accepted, before the slide
+//   down, so the screen underneath can already show the new state (e.g.
+//   the booking marked complete) as it's revealed.
+export default function TagScreen({ direction, customerName, onClose, onComplete, skipSuccess = direction === 'in', onConfirmed }) {
   // 'select' -> the office's one preferred method, plus the escalation
   // link; 'reason' -> picking a reason code (manual is the only path that
   // ever reaches here); 'scanning' -> brief simulated delay (this is a
@@ -94,7 +101,8 @@ export default function TagScreen({ direction, customerName, onClose, onComplete
     setConfirmedMethod(method)
     setStep('scanning')
     scanTimer.current = setTimeout(() => {
-      if (direction === 'in') {
+      onConfirmed?.(method)
+      if (skipSuccess) {
         // Ben: "we don't need the tagged in confirmation screen, after
         // tapping the tag in method the screen should slide down
         // revealing the visit in progress screen" — Tag In skips
@@ -180,43 +188,34 @@ export default function TagScreen({ direction, customerName, onClose, onComplete
         </div>
       )}
 
-      {step === 'reason' && (
-        <div className="tag-sheet-overlay" onClick={closeReasonSheet}>
-          <div className="tag-sheet-panel" onClick={e => e.stopPropagation()}>
-            <div className="tag-sheet-handle" />
-            <div className="tag-sheet-content">
-              <h2 className="tag-reason-heading">For what reason?</h2>
-              <div className="tag-reason-list">
-                {REASON_CODES.map(r => (
-                  <label key={r.key} className={`radio-card tag-reason-card${reasonKey === r.key ? ' selected' : ''}`}>
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      name="tag-reason"
-                      checked={reasonKey === r.key}
-                      onChange={() => setReasonKey(r.key)}
-                    />
-                    <span>{r.label}</span>
-                  </label>
-                ))}
-              </div>
-              {reasonKey === 'other' && (
-                <input
-                  type="text"
-                  className="form-input tag-reason-other-input"
-                  placeholder="Please specify"
-                  value={otherText}
-                  onChange={e => setOtherText(e.target.value)}
-                  autoFocus
-                />
-              )}
-            </div>
-            <div className="tag-sheet-footer">
-              <button className="round-btn primary-btn" disabled={!reasonReady} onClick={handleConfirmReason}>Confirm</button>
-            </div>
-          </div>
+      <BottomSheet open={step === 'reason'} onClose={closeReasonSheet}>
+        <h2 className="tag-reason-heading">For what reason?</h2>
+        <div className="tag-reason-list">
+          {REASON_CODES.map(r => (
+            <label key={r.key} className={`radio-card tag-reason-card${reasonKey === r.key ? ' selected' : ''}`}>
+              <input
+                type="radio"
+                className="form-radio"
+                name="tag-reason"
+                checked={reasonKey === r.key}
+                onChange={() => setReasonKey(r.key)}
+              />
+              <span>{r.label}</span>
+            </label>
+          ))}
         </div>
-      )}
+        {reasonKey === 'other' && (
+          <input
+            type="text"
+            className="form-input tag-reason-other-input"
+            placeholder="Please specify"
+            value={otherText}
+            onChange={e => setOtherText(e.target.value)}
+            autoFocus
+          />
+        )}
+        <button className="fab-square primary-btn" disabled={!reasonReady} onClick={handleConfirmReason}>Confirm</button>
+      </BottomSheet>
 
       {step === 'scanning' && (
         <div className="tag-success">

@@ -81,6 +81,8 @@ export default function WireframeMenu({
   onSave,
   saving,
   justSaved,
+  saveLabel,
+  saveHint,
   error,
 }) {
   const toggleRef = useRef(null)
@@ -119,9 +121,18 @@ export default function WireframeMenu({
           value={wireframeName}
           onChange={(e) => setWireframeName(e.target.value)}
         />
-        <button className={`wf-tool-btn wf-primary${justSaved ? ' wf-tool-btn-saved' : ''}`} disabled={saving} onClick={onSave}>
-          {saving ? 'Saving…' : justSaved ? (<><CheckIcon /> Saved</>) : 'Save'}
+        {/* With autosave, the button mostly reports status: "Saved" once
+            everything's in the shared copy (still clickable to save again),
+            "Saving…" while writing. justSaved still flashes green after a
+            manual save. */}
+        <button
+          className={`wf-tool-btn wf-primary${justSaved ? ' wf-tool-btn-saved' : saveLabel === 'saved' ? ' wf-tool-btn-clean' : ''}`}
+          disabled={saving}
+          onClick={onSave}
+        >
+          {saveLabel === 'saving' ? 'Saving…' : saveLabel === 'saved' || justSaved ? (<><CheckIcon /> Saved</>) : 'Save'}
         </button>
+        {saveHint && <span className="wf-save-hint">{saveHint}</span>}
         {error && <span className="wf-toolbar-error">{error}</span>}
       </div>
 

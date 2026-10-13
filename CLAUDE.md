@@ -77,6 +77,7 @@ employee-contract/
 | `Components/ancestorTrail.js` | Pure helpers (`ancestorTrail`/`selectableParent`/`elementLabel`) behind the "select a parent element" breadcrumb and ⌥-click shared by Dev Edit and Dev Mode — see Dev Edit's own "Ancestor breadcrumb" round below |
 | `Components/AncestorBreadcrumb.jsx` | The breadcrumb itself, rendered in both Dev Edit's and Dev Mode's panels; styles live in `Styles/dev-toolbar.css` (`.anc-crumb*`, already loaded everywhere) |
 | `Components/LegalFlags.jsx` | Mobile-only: exports `HighRiskBadge` + `LegalFlags` (outlined red Allergies/DNACPR/DoLS pills) — promoted out of `mobile/tag-in-out` once a second consumer (the "Legal flags" story in `component-demos/mobile-components`) needed it; styling lives in `Styles/mobile.css`, not `main.css` |
+| `Components/BottomSheet.jsx` | Mobile-only slide-up bottom sheet (`open`/`onClose`, slides back down on close, tap scrim to close; keeps its last content during the exit animation) — promoted out of `mobile/holidays`' delete sheet; also used by `mobile/tag-in-out`'s reason sheet and `mobile/handover-notes`' two sheets. No drag handle (the live app's sheets don't have one). Actions inside are full-width stacked `.fab-square` buttons; styles in `Styles/mobile.css` (`.bottom-sheet-*`) |
 
 **Always read `Styles/main.css` before adding local CSS.**
 
@@ -1423,3 +1424,18 @@ Ben, after asking why there were both local and shared wireframes: "I agree we s
   - drawing still works, there are no console errors, and the build is clean.
 - **Not verified:** a real signed-in save, load or delete, which needs the shared password.
 
+
+### v25 — autosave, and handling changes made elsewhere
+
+Ben: "Is it possible to have an auto save function?" then "Sounds good, please go ahead."
+- **When it saves.** About 2s after the last change, including a rename. It also saves immediately when the tab is hidden or closed (best-effort).
+- **When it runs.** Only once a wireframe has been saved manually at least once (named, plus the password), so trying things out doesn't fill the shared list with drafts. It also needs a valid shared sign-in.
+- **When it can't run.** It never opens the password gate by itself. If the session is missing or expired and there are unsaved changes, a hint reads "Not saved — click Save to sign in".
+- **The Save button reports status.** It shows a quiet green-text "✓ Saved" (`.wf-tool-btn-clean`) when everything is saved, "Saving…" while writing, and "Save" otherwise. A manual save still flashes the green `justSaved` state.
+- **Changes made elsewhere.** Each save writes `savedBySession` (a per-tab id), so this tab recognises its own writes in the live `wireframe_saves` snapshot. Someone else's newer save of the open wireframe either:
+  - loads in quietly (`applyRemoteVersion`, which also clears undo history), if there are no unsaved changes here; or
+  - pauses autosave and shows `.wf-remote-banner` with **Load their version / Keep mine**, if there are.
+
+  A wireframe deleted elsewhere (it disappears from the live list after having been seen there) pauses autosave and offers **Close it / Save as a new copy**. An autosave that hits `not-found` does the same instead of recreating it. Last write still wins if two people save within the same couple of seconds; this isn't real-time co-editing.
+- **The local backup only sends images it hasn't already written** (`localImagesWrittenRef`), so autosave doesn't resend image data every time.
+- **Verified signed out only:** a new wireframe doesn't autosave or prompt, manual Save opens the gate, there are no console errors, and the build is clean. Every signed-in path (the autosave timing, the remote change/delete banners) needs the shared password and was **not** exercised.

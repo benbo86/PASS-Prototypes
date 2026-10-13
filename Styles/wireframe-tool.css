@@ -1269,3 +1269,38 @@ textarea.wf-label-input {
 }
 .tooltip.tooltip-visible { opacity: 1; }
 .tooltip.tooltip-below { transform: translate(-50%, 0); }
+
+/* ── Autosave ── Save button at rest once everything is saved: quiet,
+   not the solid purple call-to-action. */
+.wf-tool-btn-clean.wf-primary {
+  background: #ffffff;
+  border-color: #dcd9e4;
+  color: #1e8e5a;
+}
+.wf-save-hint {
+  font-size: 12px;
+  color: #7b3306;
+  background: #f7f4ed;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+/* Shown when the open wireframe changed or was deleted elsewhere. */
+.wf-remote-banner {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 8px 8px 8px 16px;
+  background: #f7f4ed;
+  border: 1px solid #f0a205;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+  color: #333;
+}

@@ -7,6 +7,7 @@ import ScreenSlider from '../../../Components/ScreenSlider'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import IOSCalendarPopover from '../../../Components/IOSCalendarPopover'
 import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
+import BottomSheet from '../../../Components/BottomSheet'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -137,6 +138,42 @@ function PickersStory() {
   )
 }
 
+// ─── "Bottom sheet" story — Components/BottomSheet.jsx. Slides up on
+// open, back down on close; tap the scrim to close. No drag handle (the
+// live app's sheets don't have one). Actions inside are full-width square
+// FABs, stacked. Used by mobile/holidays, mobile/tag-in-out and
+// mobile/handover-notes. ────────────────────────────────────────────────
+
+function BottomSheetStory() {
+  // Which example sheet is open — 'info' | 'confirm' | null.
+  const [open, setOpen] = useState(null)
+  const close = () => setOpen(null)
+  return (
+    <div className="screen">
+      <StatusBar />
+      <AppHeader title="Bottom sheet" />
+      <div className="shell-demo-body">
+        <p>Information only: no buttons, tap outside the sheet to close it.</p>
+        <button className="fab-square secondary-btn demo-sheet-trigger" onClick={() => setOpen('info')}>Show information sheet</button>
+        <p>Confirmation: actions stacked at the bottom. Every way of closing it slides it down.</p>
+        <button className="fab-square secondary-btn demo-sheet-trigger" onClick={() => setOpen('confirm')}>Show confirmation sheet</button>
+      </div>
+
+      <BottomSheet open={open === 'info'} onClose={close}>
+        <div className="demo-sheet-title">Handover note</div>
+        <div className="demo-sheet-text">Pharmacy delivering new meds at 7pm.</div>
+      </BottomSheet>
+
+      <BottomSheet open={open === 'confirm'} onClose={close}>
+        <div className="demo-sheet-title">Delete leave request?</div>
+        <div className="demo-sheet-text">This action cannot be undone</div>
+        <button className="fab-square primary-btn" onClick={close}>Delete request</button>
+        <button className="fab-square tertiary-btn" onClick={close}>Cancel</button>
+      </BottomSheet>
+    </div>
+  )
+}
+
 // ─── Root ────────────────────────────────────────────────────────────
 
 const STORIES = [
@@ -149,6 +186,11 @@ const STORIES = [
     key: 'pickers',
     label: 'Pickers',
     description: 'Components/IOSCalendarPopover.jsx + Components/IOSTimeKeypadPopover.jsx — the iOS-style date/time pickers built for mobile/holidays.',
+  },
+  {
+    key: 'sheet',
+    label: 'Bottom sheet',
+    description: 'Components/BottomSheet.jsx — slides up from the bottom, closes by tapping outside. No drag handle. Actions are full-width square buttons, stacked. Used in Holidays, Tag In/Out and Handover Notes.',
   },
 ]
 
@@ -181,6 +223,7 @@ export default function App() {
       <PhoneFrame>
         {story === 'shell' && <ShellStory />}
         {story === 'pickers' && <PickersStory />}
+        {story === 'sheet' && <BottomSheetStory />}
       </PhoneFrame>
     </div>
     </>

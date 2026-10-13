@@ -14,6 +14,7 @@ import AuditCapture from '../../../Components/AuditCapture'
 import IOSCalendarPopover from '../../../Components/IOSCalendarPopover'
 import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
+import BottomSheet from '../../../Components/BottomSheet'
 import {
   DAYS_LEAVE_TYPES, HALF_DAY_OPTIONS, DAYS_ENTITLEMENT, DAYS_INITIAL_REQUESTS, fmtDays,
   HOURS_ENTITLEMENT, HOURS_INITIAL_REQUESTS, hoursBetween, fmtHours,
@@ -387,27 +388,27 @@ function HoursRequestLeaveScreen({ onBack, onSubmit }) {
 // withdrawing a still-undecided request is immediate with no office
 // involvement; cancelling an already-Approved one goes through the office.
 
+// Content only; Components/BottomSheet supplies the scrim, panel and
+// slide up/down.
 function DeleteSheet({ request, onClose, onConfirm }) {
   const isApproved = request.status === 'Approved'
   return (
-    <div className="hol-sheet-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="hol-sheet-panel">
-        {isApproved ? (
-          <div className="hol-sheet-body">
-            Your line manager will be notified of the cancellation. Once approved, you will receive confirmation and your balance will be updated.
-          </div>
-        ) : (
-          <>
-            <div className="hol-sheet-title">Delete leave request?</div>
-            <div className="hol-sheet-subtitle">This action cannot be undone</div>
-          </>
-        )}
-        <button className="fab-square primary-btn hol-sheet-btn" onClick={() => onConfirm(request, isApproved)}>
-          {isApproved ? 'Submit cancellation' : 'Delete request'}
-        </button>
-        <button className="fab-square tertiary-btn hol-sheet-btn" onClick={onClose}>Cancel</button>
-      </div>
-    </div>
+    <>
+      {isApproved ? (
+        <div className="hol-sheet-body">
+          Your line manager will be notified of the cancellation. Once approved, you will receive confirmation and your balance will be updated.
+        </div>
+      ) : (
+        <>
+          <div className="hol-sheet-title">Delete leave request?</div>
+          <div className="hol-sheet-subtitle">This action cannot be undone</div>
+        </>
+      )}
+      <button className="fab-square primary-btn" onClick={() => onConfirm(request, isApproved)}>
+        {isApproved ? 'Submit cancellation' : 'Delete request'}
+      </button>
+      <button className="fab-square tertiary-btn" onClick={onClose}>Cancel</button>
+    </>
   )
 }
 
@@ -461,9 +462,9 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
             : <HoursRequestLeaveScreen onBack={() => setView('list')} onSubmit={handleSubmit} />
         }
       />
-      {deleteTarget && (
-        <DeleteSheet request={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDeleteConfirm} />
-      )}
+      <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+        {deleteTarget && <DeleteSheet request={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDeleteConfirm} />}
+      </BottomSheet>
     </>
   )
 }
