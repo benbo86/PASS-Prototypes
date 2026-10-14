@@ -191,7 +191,9 @@
    The table/pagination markup itself is unchanged from the old inline
    list view — only its container changed, from a plain row-track to this
    modal's own scrollable body — so this is just padding around it. */
-.ds-list-modal-body { padding: 8px 24px 24px; }
+/* No .table-wrap border here: inside the modal it drew a full-width rule
+   across the body, between the header and the table. */
+.ds-list-modal-body { padding: 8px 24px 24px; border: none; }
 .ds-assign-btn { padding: 6px 16px; font-size: 13px; height: 30px; white-space: nowrap; flex-shrink: 0; }
 
 /* A visit's own time, plus its optional time-adjusted icon — inline so the
@@ -227,12 +229,14 @@
 }
 .ds-shift-expand-btn.expanded { transform: rotate(0deg); }
 .ds-shift-visit-count {
+  white-space: nowrap;
   margin-left: 8px;
   font-size: 13px;
   font-weight: 400;
   color: var(--greyscale-4-grey-40);
 }
-.ds-shift-visit-name { padding-left: 34px; }
+/* Lines shift visits up under the shift name, past the chevron + icon. */
+.ds-shift-visit-name { padding-left: 62px; }
 
 /* ── Area / Visit Type tags ──────────────────────────────────── */
 
@@ -409,3 +413,150 @@
   font-size: 12px;
 }
 .ds-visit-hover-warning svg { flex-shrink: 0; color: var(--rag-amber-amber-7); }
+
+/* ── Bulk selection (list modal) ─────────────────────────────── */
+/* Always shown above the table ("0 visits selected", Assign disabled until
+   something is ticked). The summary line mirrors the schedule swimlane's
+   own multi-select menu ("2 visits selected · Starting from…, ends…"). */
+.ds-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 40px;
+  padding: 16px 24px 0;
+  font-size: 15px;
+  color: var(--greyscale-2-grey-20);
+}
+.ds-selection-count { font-weight: 600; }
+.ds-selection-range { color: var(--greyscale-6-grey-50); }
+.ds-selection-actions { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+
+/* Partial state for a shift/page with only some visits selected — same
+   filled box as .checkbox-box's checked state, with a dash instead of a
+   tick. */
+.checkbox-box.checkbox-box--partial {
+  background: var(--brand-purple-7-purple-5);
+  border-color: var(--brand-purple-7-purple-5);
+}
+.checkbox-box.checkbox-box--partial::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 2px;
+  background: #fff;
+}
+
+/* Marks a shift row in the Customer/Shift column (Icons/Run.svg), now
+   that the Visit type column no longer says what the row is. */
+.ds-shift-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-right: 8px;
+  color: var(--ui-purple-3-grape-grey);
+}
+
+/* ── Bulk assign panel ───────────────────────────────────────── */
+.ds-bulk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+.ds-bulk-summary { margin: 0; color: var(--greyscale-6-grey-50); font-size: 15px; }
+.ds-bulk-visits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.ds-bulk-visits li {
+  display: grid;
+  grid-template-columns: 112px 1fr auto;
+  gap: 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+.ds-bulk-visits li + li { border-top: 1px solid var(--ui-purple-6-lavendar-grey); }
+.ds-bulk-visit-time { white-space: nowrap; color: var(--greyscale-2-grey-20); }
+.ds-bulk-visit-name { font-weight: 500; color: #000; }
+.ds-bulk-visit-meta { color: var(--greyscale-6-grey-50); text-align: right; }
+.ds-bulk-field { display: flex; flex-direction: column; gap: 8px; }
+.ds-bulk-label { font-size: 16px; font-weight: 500; color: var(--greyscale-2-grey-20); }
+.ds-bulk-footer { display: flex; justify-content: flex-end; gap: 12px; width: 100%; }
+
+/* Untitled info column — hovering (or focusing) the icon shows the
+   visit/shift card. */
+.ds-info-col, .ds-info-cell { width: 48px; text-align: center; }
+.ds-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--ui-purple-3-grape-grey);
+  cursor: pointer;
+}
+.ds-info-btn:hover,
+.ds-info-btn:focus-visible { color: var(--brand-purple-6-purple-4); }
+
+/* ── Bulk actions menu (?version=actions) ────────────────────── */
+/* Recreates the schedule's own multi-select menu from the unassigned
+   swimlane. Portaled to <body>: position:fixed, above ModalPanel (10850)
+   and below the dev tools (10900). */
+.ds-bulk-menu {
+  position: fixed;
+  z-index: 10860;
+  box-sizing: border-box;
+  padding: 16px 16px 12px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+.ds-bulk-menu-header h4 { margin: 0; font-size: 20px; font-weight: 600; color: #000; }
+.ds-bulk-menu-header p { margin: 4px 0 0; font-size: 16px; color: #000; }
+.ds-bulk-menu-body {
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  margin-top: 16px;
+}
+.ds-bulk-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 0 0;
+  border-right: 1px solid var(--ui-purple-5-languid-lavendar);
+}
+.ds-bulk-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ds-bulk-menu-item:hover:not(:disabled),
+.ds-bulk-menu-item.active { background: var(--ui-purple-6-lavendar-grey); }
+.ds-bulk-menu-item:disabled { color: var(--greyscale-8-grey-65); cursor: default; }
+.ds-bulk-menu-item svg { flex-shrink: 0; }
+.ds-bulk-menu-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 16px;
+}
+.ds-bulk-menu-submit { align-self: flex-end; margin-top: 4px; }

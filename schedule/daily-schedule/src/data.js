@@ -74,9 +74,11 @@ export const UNASSIGNED_VISITS = [
 // the same field names a plain visit uses (`customer`/`start`/`end`/`area`/
 // `visitType`/`employeesRequired`) so a shift can flow through the exact
 // same sort/filter code as a visit in the list view — `customer` holds the
-// shift's own name (it's what renders in the Customer/Shift column), and
-// `visitType` is the fixed value 'Run' rather than one of VISIT_TYPES,
-// distinguishing a shift row from a plain visit row at a glance. Each
+// shift's own name (it's what renders in the Customer/Shift column). A
+// shift has no `visitType` of its own: the list derives one from its
+// visits (that type, or 'Mixed'), since a shift is a group of visits, not
+// a kind of care. "Shift" is office-customisable terminology in PASS
+// (e.g. "Run"); this prototype uses "Shift". Each
 // shift's own `visits` array is its constituent unassigned visits — deliberately
 // using customer names that don't otherwise appear in UNASSIGNED_VISITS
 // above, so a name never appears to be both a standalone unassigned visit
@@ -92,8 +94,8 @@ export const UNASSIGNED_VISITS = [
 export const UNASSIGNED_SHIFTS = [
   {
     id: 'shift-1', kind: 'shift',
-    customer: 'Coleraine Morning Run', start: '07:00', end: '09:15',
-    area: 'Coleraine Central', visitType: 'Run', employeesRequired: 1,
+    customer: 'Coleraine Morning Shift', start: '07:00', end: '09:15',
+    area: 'Coleraine Central', employeesRequired: 1,
     template: { payable: true, chargeable: true, cadence: 'Daily' },
     defaultEmployee: 'Katheryn Perry',
     visits: [
@@ -104,14 +106,14 @@ export const UNASSIGNED_SHIFTS = [
   },
   {
     id: 'shift-2', kind: 'shift',
-    customer: 'Portstewart Evening Run', start: '18:00', end: '20:30',
-    area: 'Portstewart', visitType: 'Run', employeesRequired: 1,
+    customer: 'Portstewart Evening Shift', start: '18:00', end: '20:30',
+    area: 'Portstewart', employeesRequired: 1,
     template: { payable: true, chargeable: false, cadence: 'Weekly' },
     defaultEmployee: 'Sarah Mitchell',
     visits: [
       { id: 104, customer: 'Valerie Dunbar',  start: '18:00', end: '18:30', visitType: 'Personal care',   employeesRequired: 1 },
-      { id: 105, customer: 'William Erskine', start: '18:45', end: '19:15', visitType: 'Companionship',   employeesRequired: 1 },
-      { id: 106, customer: 'Yvonne Fulton',   start: '19:30', end: '20:30', visitType: 'Wellbeing check', employeesRequired: 1 },
+      { id: 105, customer: 'William Erskine', start: '18:45', end: '19:15', visitType: 'Personal care',   employeesRequired: 1 },
+      { id: 106, customer: 'Yvonne Fulton',   start: '19:30', end: '20:30', visitType: 'Personal care',   employeesRequired: 1 },
     ],
   },
 ];

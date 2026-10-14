@@ -128,6 +128,12 @@ h6 {
     background: var(--buttons-lozenge-3-tertiary-1-default);
     color: var(--greyscale-3-grey-30);
 }
+/* No visible disabled state existed for tertiary buttons (e.g. the
+   Invoices "Actions" button looked the same with nothing selected). */
+.tertiary-btn:disabled {
+    color: var(--greyscale-10-grey-75);
+    cursor: default;
+}
 
 .back-link {
   position: fixed;
@@ -707,6 +713,36 @@ h6 {
   transition: color 0.12s;
 }
 .sms-remove-btn:hover { color: var(--rag-red-red-7, #c0392b); }
+
+/* ── SearchSelect (Components/SearchSelect.jsx) ──────────────────
+   Pick-one search field. The field reuses .sms-search-bar; the dropdown is
+   portaled to <body>, so it's position:fixed and sits above ModalPanel
+   (10850/10855) but below the dev tools (10900+). */
+.ss-field { cursor: text; }
+.ss-field--select { padding: 0 12px 0 16px; }
+.ss-chevron { display: inline-flex; color: var(--ui-purple-3-grape-grey); transition: transform 0.15s; }
+.ss-chevron.open { transform: rotate(180deg); }
+.ss-dropdown {
+  position: fixed;
+  z-index: 10860;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1.5px solid var(--ui-purple-4-lavendar);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+.ss-option {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--greyscale-2-grey-20);
+  cursor: pointer;
+}
+.ss-option.active { background: var(--ui-purple-7-lightest-lavendar); }
+.ss-option.selected { color: var(--brand-purple-6-purple-4); }
+.ss-empty { padding: 10px 14px; font-size: 14px; color: var(--greyscale-8-grey-65); font-style: italic; }
 
 /* ── Segmented toggle (Components/SegmentedToggle.jsx) ────────
    Display-only — no hover/cursor styling, since no consumer of this

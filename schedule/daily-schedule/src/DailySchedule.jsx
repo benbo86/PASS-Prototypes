@@ -10,6 +10,7 @@ import SegmentedToggle from '../../../Components/SegmentedToggle'
 import Tooltip from '../../../Components/Tooltip'
 import ScheduleFilterDropdown from '../../../Components/ScheduleFilterDropdown'
 import Pagination from '../../../Components/Pagination'
+import SearchSelect from '../../../Components/SearchSelect'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -33,8 +34,8 @@ const BackIcon = () => (
     <polyline points="15,18 9,12 15,6" />
   </svg>
 )
-const ChevronDown = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+const ChevronDown = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <polygon points="16.6 8.6 12 13.2 7.4 8.6 6 10 12 16 18 10" />
   </svg>
 )
@@ -181,10 +182,54 @@ const HoverWarningIcon = () => (
 // Icons/Run.svg, copied verbatim (fill swapped to currentColor) — the
 // shift hover card's own top badge icon, per Ben's own request to use the
 // existing Run icon rather than the Recurs icon this originally reused.
-const ShiftBadgeIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+const ShiftBadgeIcon = ({ size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path fill="currentColor" fillRule="nonzero" d="M17.5316862,2.25 C19.9042089,2.25 21.8103775,4.17252165 21.8103775,6.56109363 C21.8103775,7.8496122 21.3837488,8.78195426 20.3219865,10.0738404 L20.1732443,10.2523025 L19.7081836,10.7935427 C19.1579376,11.4366344 18.7242877,11.9825709 18.3228589,12.5536133 L18.1736687,12.7691698 L18.0521069,12.9635835 C18.0043383,13.0406934 17.9396825,13.1058825 17.8632144,13.1546699 C17.5785244,13.3363048 17.2004933,13.2527621 17.0191918,12.9678594 L16.9463007,12.854717 L16.890097,12.77017 C16.5022598,12.200899 16.0833253,11.658275 15.5733798,11.0511815 L15.3490849,10.7867858 L14.8755401,10.2352557 L14.6389457,9.94903468 L14.4294845,9.68356497 C14.1341575,9.2985939 13.9203798,8.96793102 13.7430368,8.62080199 C13.4137771,7.97631297 13.25,7.31890047 13.25,6.56109363 C13.25,4.17297543 15.1583415,2.25 17.5316862,2.25 Z M17.5316862,3.47291108 C15.8362095,3.47291108 14.4729111,4.84590921 14.4729111,6.56109363 C14.4729111,7.11498404 14.585996,7.58279609 14.8320591,8.06443701 C14.9496979,8.29470185 15.0899372,8.51980245 15.2738098,8.77155709 L15.3895377,8.92606291 L15.5815192,9.16988989 L15.8033741,9.43861563 L16.27801,9.99141826 C16.7207576,10.5085118 17.0915491,10.9673927 17.427079,11.4177677 L17.5314117,11.5594769 L17.5879302,11.4818583 C17.8822707,11.0833493 18.204096,10.6790482 18.5850789,10.226845 L18.7806467,9.99655663 L19.238958,9.46323938 C20.2743722,8.2372622 20.5874665,7.54526007 20.5874665,6.56109363 C20.5874665,4.84511326 19.2259968,3.47291108 17.5316862,3.47291108 Z M17.5301888,5.61300546 C18.0342755,5.61300546 18.4473721,6.02610205 18.4473721,6.53018877 C18.4473721,7.0342755 18.0342755,7.44737208 17.5301888,7.44737208 C17.026102,7.44737208 16.6130055,7.0342755 16.6130055,6.53018877 C16.6130055,6.02610205 17.026102,5.61300546 17.5301888,5.61300546 Z" />
     <path fill="currentColor" fillRule="nonzero" d="M17.2801888,14.25 C17.6944023,14.25 18.0301888,14.5857864 18.0301888,15 C18.0301888,15.3796958 17.7480349,15.693491 17.3819593,15.7431534 L17.2801888,15.75 L9.72977518,15.75 C9.30206188,15.75 8.95533174,16.0967301 8.95533174,16.5244434 C8.95533174,16.916514 9.24668137,17.2405361 9.62468779,17.2918171 L9.72977518,17.2988869 L19.3963725,17.2988869 C20.7092665,17.2988869 21.7735774,18.3631977 21.7735774,19.6760918 C21.7735774,20.9342819 20.7961113,21.9641725 19.5591305,22.0478124 L19.3963725,22.0532967 L5.75,22.0532967 C5.33578644,22.0532967 5,21.7175102 5,21.3032967 C5,20.9236009 5.28215388,20.6098057 5.64822944,20.5601433 L5.75,20.5532967 L19.3963725,20.5532967 C19.8808394,20.5532967 20.2735774,20.1605586 20.2735774,19.6760918 C20.2735774,19.2288916 19.9389367,18.8598509 19.5064072,18.8057215 L19.3963725,18.7988869 L9.72977518,18.7988869 C8.47363475,18.7988869 7.45533174,17.7805839 7.45533174,16.5244434 C7.45533174,15.3206422 8.39054406,14.3352715 9.57405282,14.2552472 L9.72977518,14.25 L17.2801888,14.25 Z M3.1628418,20.5532967 C3.57705536,20.5532967 3.9128418,20.8890831 3.9128418,21.3032967 C3.9128418,21.6829924 3.63068792,21.9967876 3.26461235,22.04645 L3.1628418,22.0532967 L2.84210526,22.0532967 C2.4278917,22.0532967 2.09210526,21.7175102 2.09210526,21.3032967 C2.09210526,20.9236009 2.37425914,20.6098057 2.74033471,20.5601433 L2.84210526,20.5532967 L3.1628418,20.5532967 Z" />
+  </svg>
+)
+
+// Icons/Info.svg, copied verbatim (fill swapped to currentColor) — the
+// list's info column, which reveals the visit/shift hover card.
+const InfoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z" />
+  </svg>
+)
+
+// Invoices' own Actions-button icon (invoices/list), so the two Actions
+// buttons match.
+const ActionsSettingsIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13.5759 2.85953C14.1433 1.88245 15.341 1.47271 16.3181 1.88245C17.1375 2.22915 17.894 2.67041 18.6189 3.20623C19.4699 3.8366 19.7221 5.06583 19.1547 6.04291C18.8395 6.61024 18.8395 7.30365 19.1547 7.87099C19.4699 8.43832 20.0688 8.78503 20.7307 8.78503C21.8653 8.78503 22.8109 9.63603 22.937 10.7392C23 11.1489 23 11.5902 23 11.9999C23 12.4097 23 12.8509 22.937 13.2607C22.8109 14.3638 21.8653 15.2148 20.7307 15.2148C20.1003 15.2148 19.4699 15.5615 19.1547 16.1289C18.8395 16.6962 18.8395 17.3896 19.1547 17.9569C19.7221 18.934 19.4699 20.1317 18.6189 20.7936C17.894 21.3294 17.1375 21.7707 16.3181 22.1174C16.0344 22.212 15.7822 22.275 15.4986 22.275C14.7421 22.275 13.9857 21.8653 13.5759 21.1403C13.2607 20.573 12.6304 20.2263 12 20.2263C11.3696 20.2263 10.7393 20.573 10.4241 21.1403C9.85673 22.1174 8.65903 22.5271 7.68195 22.1174C6.86246 21.7707 6.10602 21.3294 5.38109 20.7936C4.53009 20.1633 4.27794 18.934 4.84527 17.9569C5.16046 17.3896 5.16046 16.6962 4.84527 16.1289C4.53009 15.5615 3.93123 15.2148 3.26934 15.2148C2.13467 15.2148 1.18911 14.3638 1.06304 13.2607C1.03152 12.8509 1 12.4097 1 11.9999C1 11.5902 1 11.1489 1.06304 10.7392C1.18911 9.63603 2.13467 8.78503 3.26934 8.78503C3.89971 8.78503 4.53009 8.43832 4.84527 7.87099C5.16046 7.30365 5.16046 6.61024 4.84527 6.04291C4.27794 5.06583 4.53009 3.86812 5.38109 3.20623C6.10602 2.67041 6.86246 2.22915 7.68195 1.88245C8.69054 1.47271 9.85673 1.88245 10.4241 2.85953C10.7393 3.42686 11.3696 3.77357 12 3.77357C12.6304 3.77357 13.2607 3.42686 13.5759 2.85953ZM15.6246 3.58445C15.4355 3.4899 15.2779 3.61597 15.1834 3.77357C14.5215 4.90824 13.3238 5.60165 12 5.60165C10.6762 5.60165 9.47851 4.90824 8.81662 3.77357C8.72206 3.64749 8.53295 3.52142 8.37536 3.58445C7.68195 3.86812 7.05158 4.24635 6.45272 4.68761C6.32665 4.78216 6.32665 5.00279 6.4212 5.16039C7.08309 6.29506 7.08309 7.68188 6.4212 8.81655C5.79083 9.9197 4.5616 10.6446 3.26934 10.6446C3.08023 10.6446 2.92264 10.7707 2.89112 10.9598C2.8596 11.3065 2.82808 11.6532 2.82808 11.9999C2.82808 12.3466 2.8596 12.6933 2.89112 13.04C2.89112 13.2292 3.04871 13.3552 3.26934 13.3552C4.5616 13.3552 5.75931 14.0486 6.4212 15.1833C7.05158 16.318 7.08309 17.7048 6.4212 18.8395C6.32665 18.9971 6.29513 19.2177 6.45272 19.3122C7.05158 19.7535 7.68195 20.1317 8.37536 20.4154C8.56447 20.51 8.72206 20.3839 8.81662 20.2263C9.47851 19.0916 10.6762 18.3982 12 18.3982C13.3238 18.3982 14.5215 19.0916 15.1834 20.2263C15.2779 20.3524 15.467 20.4784 15.6246 20.4154C16.3181 20.1317 16.9484 19.7535 17.5473 19.3122C17.6734 19.2177 17.6734 18.9971 17.5788 18.8395C16.9169 17.7048 16.9169 16.318 17.5788 15.1833C18.2092 14.0802 19.4384 13.3552 20.7307 13.3552C20.9198 13.3552 21.0774 13.2292 21.1089 13.04C21.1719 12.6933 21.1719 12.3466 21.1719 11.9999C21.1719 11.6532 21.1404 11.3065 21.1089 10.9598C21.1089 10.7707 20.9513 10.6446 20.7307 10.6446C19.4384 10.6446 18.2407 9.95122 17.5788 8.81655C16.9484 7.68188 16.9169 6.29506 17.5788 5.16039C17.6734 5.00279 17.7049 4.78216 17.5473 4.68761C16.9484 4.24635 16.2865 3.86812 15.6246 3.58445ZM12 8.34377C14.0172 8.34377 15.6562 9.98274 15.6562 11.9999C15.6562 14.0171 14.0172 15.6561 12 15.6561C9.98281 15.6561 8.34384 14.0171 8.34384 11.9999C8.34384 9.98274 9.98281 8.34377 12 8.34377ZM12 10.1718C10.9914 10.1718 10.1719 10.9913 10.1719 11.9999C10.1719 13.0085 10.9914 13.828 12 13.828C13.0086 13.828 13.8281 13.0085 13.8281 11.9999C13.8281 10.9913 13.0086 10.1718 12 10.1718Z"/>
+  </svg>
+);
+
+// ─── Bulk actions menu icons ────────────────────────────────────────────────
+// For the ?version=actions menu, mirroring the schedule's own multi-select
+// menu in the unassigned swimlane. Repeat/Date/Close are copied from Icons/;
+// Unassign, Person Add/Remove, Adjust Time, Reset and Checkbox Checked are
+// Material Design stand-ins also saved to Icons/ — swap for PASS's own if
+// they turn up in Figma.
+const menuIcon = (d) => () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d={d} /></svg>
+)
+const MenuUnassignIcon = menuIcon('M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z')
+const MenuPersonAddIcon = menuIcon('M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z')
+const MenuPersonRemoveIcon = menuIcon('M14 8c0-2.21-1.79-4-4-4S6 5.79 6 8s1.79 4 4 4 4-1.79 4-4zm3 2v2h6v-2h-6zM2 18v2h16v-2c0-2.66-5.33-4-8-4s-8 1.34-8 4z')
+const MenuAdjustTimeIcon = menuIcon('M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z')
+const MenuDateIcon = menuIcon('M19 4H18V3C18 2.45 17.55 2 17 2C16.45 2 16 2.45 16 3V4H8V3C8 2.45 7.55 2 7 2C6.45 2 6 2.45 6 3V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 19C19 19.55 18.55 20 18 20H6C5.45 20 5 19.55 5 19V9H19V19ZM7 11H9V13H7V11ZM11 11H13V13H11V11ZM15 11H17V13H15V11ZM7 15H9V17H7V15ZM11 15H13V17H11V15ZM15 15H17V17H15V15Z')
+const MenuResetIcon = menuIcon('M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z')
+const MenuReinstateIcon = menuIcon('M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z')
+const MenuCloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />
+  </svg>
+)
+// Icons/Repeat.svg (stroke-based, so stroke rather than fill).
+const MenuRepeatIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m2 9 3-3 3 3" /><path d="M13 18H7a2 2 0 0 1-2-2V6" /><path d="m22 15-3 3-3-3" /><path d="M11 6h6a2 2 0 0 1 2 2v10" />
   </svg>
 )
 
@@ -233,6 +278,21 @@ function sortVisits(visits, sort) {
     }
   })
 }
+
+// A shift is a group of visits, not a kind of care, so its Visit type cell
+// shows its visits' type when they all match, or 'Mixed'. (An earlier
+// version showed the fixed value 'Run' here, which product feedback found
+// confusing under a "Visit type" heading.)
+const shiftVisitType = (shift) => {
+  const types = [...new Set(shift.visits.map(v => v.visitType))]
+  return types.length === 1 ? types[0] : 'Mixed'
+}
+
+// Bulk-selection keys. Selection is per visit — a shift row's checkbox
+// just selects/deselects all of its visits — so "assign these" always
+// works on a flat list of visits however they were picked.
+const visitKey = (id) => `v:${id}`
+const shiftVisitKey = (shiftId, id) => `sv:${shiftId}:${id}`
 
 // "Sleeping night" (the tag's own sentence-case label) → "Sleeping Night"
 // for the assign panel's own title line — Components/EventPanel.jsx's
@@ -472,7 +532,156 @@ const FILTER_DEFS = [
 ]
 const EMPTY_FILTERS = FILTER_DEFS.reduce((acc, f) => { acc[f.key] = new Set(); return acc }, {})
 
+// main.css's .checkbox-wrap/.checkbox-box, plus a partial state (a dash)
+// for a shift or page with only some of its visits selected.
+function CheckBox({ checked, partial = false, onChange, label }) {
+  return (
+    <label className="checkbox-wrap" aria-label={label}>
+      <input type="checkbox" checked={checked} onChange={onChange} />
+      <span className={`checkbox-box${partial ? ' checkbox-box--partial' : ''}`} />
+    </label>
+  )
+}
+
+// ─── Bulk assign panel ───────────────────────────────────────────────────────
+// Assigns every selected visit to one employee. Modelled on the schedule's
+// existing multi-select "Assign" in the unassigned swimlane, which has no
+// recommendations — so this is a plain employee search, not the single-
+// visit EventPanel with its recommended employees. No overlap warning here:
+// PASS flags overlapping visits when the schedule is published.
+
+const BULK_EMPLOYEES = [...new Set([...RECOMMENDED_EMPLOYEES, ...SAMPLE_EMPLOYEES].map(e => e.name))]
+  .sort()
+  .map(name => ({ id: name, name }))
+
+function BulkAssignPanel({ items, onClose, onAssign }) {
+  const [employee, setEmployee] = useState(null)
+
+  const sorted = [...items].sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
+  const firstStart = sorted[0]?.start
+  const lastEnd = sorted.reduce((max, v) => toMinutes(v.end) > toMinutes(max) ? v.end : max, sorted[0]?.end)
+
+  return (
+    <ModalPanel
+      open
+      onClose={onClose}
+      title={`Assign ${items.length} visit${items.length === 1 ? '' : 's'}`}
+      width={648}
+      footer={
+        <div className="ds-bulk-footer">
+          <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
+          <button className="round-btn primary-btn" disabled={!employee} onClick={() => onAssign(employee)}>Assign</button>
+        </div>
+      }
+    >
+      <div className="ds-bulk-body">
+        <p className="ds-bulk-summary">Starting from {firstStart}, ends {lastEnd}</p>
+        <ul className="ds-bulk-visits">
+          {sorted.map(v => (
+            <li key={v.key}>
+              <span className="ds-bulk-visit-time">{v.start} – {v.end}</span>
+              <span className="ds-bulk-visit-name">{v.customer}</span>
+              <span className="ds-bulk-visit-meta">{v.visitType}{v.shiftName ? ` · ${v.shiftName}` : ''}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="ds-bulk-field">
+          <label className="ds-bulk-label">Employee</label>
+          <SearchSelect items={BULK_EMPLOYEES} value={employee} onChange={setEmployee} placeholder="Search employees" />
+        </div>
+      </div>
+    </ModalPanel>
+  )
+}
+
+// ─── Bulk actions menu (?version=actions) ───────────────────────────────────
+// The same menu the schedule shows when several visits are multi-selected
+// in the unassigned swimlane, opened from an Actions button instead of
+// Assign. Only Assign works here; the other actions are shown disabled.
+// Portaled under the Actions button so the list modal's scrolling body
+// can't clip it.
+
+const BULK_MENU_ACTIONS = [
+  { key: 'unassign', label: 'Unassign', Icon: MenuUnassignIcon },
+  { key: 'assign', label: 'Assign', Icon: MenuRepeatIcon },
+  { key: 'reassign', label: 'Reassign', Icon: MenuRepeatIcon },
+  { key: 'shadow', label: 'Add/Reassign shadow', Icon: MenuPersonAddIcon },
+  { key: 'unshadow', label: 'Unassign shadow', Icon: MenuPersonRemoveIcon },
+  { key: 'times', label: 'Adjust times', Icon: MenuAdjustTimeIcon },
+  { key: 'date', label: 'Adjust date', Icon: MenuDateIcon },
+  { key: 'reset', label: 'Reset times', Icon: MenuResetIcon },
+  { key: 'cancel', label: 'Cancel all', Icon: MenuCloseIcon },
+  { key: 'reinstate', label: 'Reinstate cancelled', Icon: MenuReinstateIcon },
+]
+const BULK_MENU_WIDTH = 530 // the live swimlane menu's width
+
+function BulkActionsMenu({ count, start, end, anchorEl, onClose, onAssign }) {
+  // Assign is the only working action, so it opens already selected.
+  const [action, setAction] = useState('assign')
+  const [employee, setEmployee] = useState(null)
+  const menuRef = useRef(null)
+  const rect = anchorEl.getBoundingClientRect()
+
+  useEffect(() => {
+    function handleMouseDown(e) {
+      if (menuRef.current?.contains(e.target) || anchorEl.contains(e.target) || e.target.closest('.ss-dropdown')) return
+      onClose()
+    }
+    function handleKeyDown(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [anchorEl, onClose])
+
+  return createPortal(
+    <div
+      ref={menuRef}
+      className="ds-bulk-menu"
+      style={{ top: rect.bottom + 8, left: Math.max(16, rect.right - BULK_MENU_WIDTH), width: BULK_MENU_WIDTH }}
+    >
+      <div className="ds-bulk-menu-header">
+        <h4>{count} visit{count === 1 ? '' : 's'} selected</h4>
+        <p>Starting from {start}, ends {end}</p>
+      </div>
+      <div className="ds-bulk-menu-body">
+        <ul className="ds-bulk-menu-list">
+          {BULK_MENU_ACTIONS.map(({ key, label, Icon }) => (
+            <li key={key}>
+              <button
+                type="button"
+                className={`ds-bulk-menu-item${action === key ? ' active' : ''}`}
+                disabled={key !== 'assign'}
+                onClick={() => setAction(key)}
+              >
+                <Icon /> {label}
+              </button>
+            </li>
+          ))}
+        </ul>
+        {action === 'assign' && (
+          <div className="ds-bulk-menu-pane">
+            <label className="ds-bulk-label">Assign visits to</label>
+            <SearchSelect items={BULK_EMPLOYEES} value={employee} onChange={setEmployee} placeholder="Select" variant="select" />
+            <button className="round-btn primary-btn ds-bulk-menu-submit" disabled={!employee} onClick={() => onAssign(employee)}>Assign visits</button>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  )
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
+
+// Two versions of the bulk flow, compared side by side:
+//   default            — an Assign button opening BulkAssignPanel
+//   ?version=actions   — an Actions button opening BulkActionsMenu, the
+//                        swimlane's own multi-select menu
+const BULK_VERSION = new URLSearchParams(window.location.search).get('version') === 'actions' ? 'actions' : 'assign'
 
 export default function DailySchedule() {
   const pageRef = useRef(null)
@@ -525,6 +734,13 @@ export default function DailySchedule() {
   const filterAnchorRefs = useRef({})
 
   const [assignVisit, setAssignVisit] = useState(null)
+  // Bulk selection in the list modal — a set of visit keys (see visitKey/
+  // shiftVisitKey). Kept across pages, so visits can be picked from more
+  // than one page before assigning them together.
+  const [selectedKeys, setSelectedKeys] = useState(() => new Set())
+  const [bulkAssignOpen, setBulkAssignOpen] = useState(false)
+  const [bulkMenuOpen, setBulkMenuOpen] = useState(false)
+  const actionsBtnRef = useRef(null)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
 
@@ -547,13 +763,38 @@ export default function DailySchedule() {
   // value can never paint while the list isn't visible), and the effect
   // re-runs on every assign-panel open AND close (keyed on assignVisit
   // itself), so whatever got captured is dropped before the list reappears.
-  const hoverCardAllowed = listModalOpen && !assignVisit
+  const hoverCardAllowed = listModalOpen && !assignVisit && !bulkAssignOpen
   useEffect(() => {
     setHoverCard(null)
-  }, [listModalOpen, assignVisit])
+  }, [listModalOpen, assignVisit, bulkAssignOpen])
 
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  // Visit/shift details live behind an info icon in their own untitled
+  // column. The card used to open on hovering anywhere in the row, which
+  // got in the way while working through the list. It's still positioned
+  // against the whole row, centred on the icon.
+  const showCard = (card, e) => {
+    const icon = e.currentTarget.getBoundingClientRect()
+    setHoverCard({ ...card, rect: e.currentTarget.closest('tr').getBoundingClientRect(), cursorX: icon.left + icon.width / 2 })
+  }
+  const hideCard = () => { if (!hoverCardSticky) setHoverCard(null) }
+  const infoCell = (card, label) => (
+    <td className="ds-info-cell" onClick={e => e.stopPropagation()}>
+      <button
+        type="button"
+        className="ds-info-btn"
+        aria-label={label}
+        onMouseEnter={e => showCard(card, e)}
+        onMouseLeave={hideCard}
+        onFocus={e => showCard(card, e)}
+        onBlur={hideCard}
+      >
+        <InfoIcon />
+      </button>
+    </td>
+  )
 
   const toggleSort = (col) => setSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
 
@@ -595,7 +836,10 @@ export default function DailySchedule() {
   // start/end/area/visitType/employeesRequired — see data.js's own comment
   // on UNASSIGNED_SHIFTS), so they combine into one sortable/paginatable
   // list with no special-casing in sortVisits itself.
-  const combinedRows = useMemo(() => [...filteredVisits, ...filteredShifts], [filteredVisits, filteredShifts])
+  const combinedRows = useMemo(() => [
+    ...filteredVisits,
+    ...filteredShifts.map(s => ({ ...s, visitType: shiftVisitType(s) })),
+  ], [filteredVisits, filteredShifts])
   const sortedRows = useMemo(() => sortVisits(combinedRows, sort), [combinedRows, sort])
 
   // "Unassigned (N)" counts individual visits still needing cover, whether
@@ -616,6 +860,66 @@ export default function DailySchedule() {
   const showStart = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1
   const showEnd = Math.min(safePage * rowsPerPage, totalRows)
 
+  // Every visit currently in the list (filters applied), flattened with its
+  // selection key — what the selection bar and bulk assign panel work from.
+  // A selected visit that a filter has since hidden isn't counted or
+  // assigned; it comes back selected if the filter is cleared.
+  const selectableItems = useMemo(() => [
+    ...filteredVisits.map(v => ({ ...v, key: visitKey(v.id), kind: 'visit' })),
+    ...filteredShifts.flatMap(s => s.visits.map(sv => ({ ...sv, area: s.area, key: shiftVisitKey(s.id, sv.id), kind: 'shiftVisit', shiftId: s.id, shiftName: s.customer }))),
+  ], [filteredVisits, filteredShifts])
+  const selectedItems = useMemo(() => selectableItems.filter(i => selectedKeys.has(i.key)), [selectableItems, selectedKeys])
+  const selectionStart = selectedItems.reduce((min, i) => !min || toMinutes(i.start) < toMinutes(min) ? i.start : min, null)
+  const selectionEnd = selectedItems.reduce((max, i) => !max || toMinutes(i.end) > toMinutes(max) ? i.end : max, null)
+
+  const rowKeys = (row) => row.kind === 'shift' ? row.visits.map(sv => shiftVisitKey(row.id, sv.id)) : [visitKey(row.id)]
+  const pageKeys = pageRows.flatMap(rowKeys)
+  const checkState = (keys) => {
+    const n = keys.filter(k => selectedKeys.has(k)).length
+    return { checked: keys.length > 0 && n === keys.length, partial: n > 0 && n < keys.length }
+  }
+  // Ticking a partly-selected group (a shift, or the page) selects all of
+  // it; ticking a fully-selected one clears it — the usual tri-state rule.
+  const toggleKeys = (keys) => setSelectedKeys(prev => {
+    const next = new Set(prev)
+    const allOn = keys.every(k => next.has(k))
+    keys.forEach(k => allOn ? next.delete(k) : next.add(k))
+    return next
+  })
+  const clearSelection = () => setSelectedKeys(new Set())
+  useEffect(() => { if (selectedKeys.size === 0) setBulkMenuOpen(false) }, [selectedKeys])
+
+  // Drop keys for visits that have left the list (assigned one at a time
+  // while selected), so they can't linger in the selection.
+  useEffect(() => {
+    const live = new Set([
+      ...visits.map(v => visitKey(v.id)),
+      ...shifts.flatMap(sh => sh.visits.map(sv => shiftVisitKey(sh.id, sv.id))),
+    ])
+    setSelectedKeys(prev => {
+      const next = new Set([...prev].filter(k => live.has(k)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [visits, shifts])
+
+  // Removes every selected visit from the list in one go. A shift whose
+  // visits were all selected disappears entirely; one with only some
+  // selected keeps the rest, same as assigning its visits one at a time.
+  const handleBulkAssign = (employeeName) => {
+    const keys = new Set(selectedItems.map(i => i.key))
+    setVisits(prev => prev.filter(v => !keys.has(visitKey(v.id))))
+    setShifts(prev => prev
+      .map(s => ({ ...s, visits: s.visits.filter(sv => !keys.has(shiftVisitKey(s.id, sv.id))) }))
+      .filter(s => s.visits.length > 0))
+    const count = selectedItems.length
+    setSelectedKeys(new Set())
+    setBulkAssignOpen(false)
+    setBulkMenuOpen(false)
+    clearTimeout(toastTimer.current)
+    setToast(`Assigned ${employeeName} to ${count} visit${count === 1 ? '' : 's'}`)
+    toastTimer.current = setTimeout(() => setToast(null), 3000)
+  }
+
   const toggleShiftExpanded = (id) => setExpandedShiftIds(prev => {
     const next = new Set(prev)
     if (next.has(id)) next.delete(id); else next.add(id)
@@ -629,7 +933,7 @@ export default function DailySchedule() {
   // on the synthesized object passed to setAssignVisit.
   const handleAssignShift = (shift) => setAssignVisit({
     id: shift.id, customer: shift.customer, start: shift.start, end: shift.end,
-    visitType: shift.visitType, employeesRequired: shift.employeesRequired,
+    visitType: 'Shift', employeesRequired: shift.employeesRequired,
     assignKind: 'shift',
   })
   const handleAssignShiftVisit = (shiftId, visit) => setAssignVisit({ ...visit, assignKind: 'shiftVisit', shiftId })
@@ -667,9 +971,9 @@ export default function DailySchedule() {
   return (
     <>
       <DevToolbar>
-        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
@@ -837,10 +1141,10 @@ export default function DailySchedule() {
             finishes (Save or Close) and the office user can carry on
             working through the rest of the list without re-opening it. */}
         <ModalPanel
-          open={listModalOpen && !assignVisit}
+          open={listModalOpen && !assignVisit && !bulkAssignOpen}
           onClose={() => setListModalOpen(false)}
           title="Unassigned visits"
-          width={1160}
+          width={1216}
           footer={
             <Pagination
               page={safePage} totalPages={totalPages} rowsPerPage={rowsPerPage}
@@ -850,10 +1154,34 @@ export default function DailySchedule() {
             />
           }
         >
+          <div className="ds-selection-bar">
+            <span className="ds-selection-count">{selectedItems.length} visit{selectedItems.length === 1 ? '' : 's'} selected</span>
+            {selectedItems.length > 0 && <span className="ds-selection-range">Starting from {selectionStart}, ends {selectionEnd}</span>}
+            <div className="ds-selection-actions">
+              {selectedItems.length > 0 && <button className="clear-btn" onClick={clearSelection}>Clear selection</button>}
+              {BULK_VERSION === 'actions' ? (
+                <button
+                  ref={actionsBtnRef}
+                  className="round-btn tertiary-btn btn-icon-left btn-icon-right"
+                  disabled={selectedItems.length === 0}
+                  onClick={() => setBulkMenuOpen(o => !o)}
+                >
+                  <ActionsSettingsIcon size={20} /> Actions <ChevronDown size={24} />
+                </button>
+              ) : (
+                <button className="round-btn primary-btn" disabled={selectedItems.length === 0} onClick={() => setBulkAssignOpen(true)}>Assign</button>
+              )}
+            </div>
+          </div>
           <div className="ds-list-modal-body table-wrap">
             <table className="data-table">
               <thead>
                 <tr>
+                  <th className="check-col">
+                    <div className="header-check">
+                      <CheckBox {...checkState(pageKeys)} onChange={() => toggleKeys(pageKeys)} label="Select all visits on this page" />
+                    </div>
+                  </th>
                   <th className={sort.col === 'time' ? 'sorted' : ''}>
                     <span>Time</span>
                     <button className="col-icon-btn" onClick={() => toggleSort('time')}><SortIcon dir={sort.col === 'time' ? sort.dir : null} /></button>
@@ -871,13 +1199,14 @@ export default function DailySchedule() {
                     <button className="col-icon-btn" onClick={() => toggleSort('area')}><SortIcon dir={sort.col === 'area' ? sort.dir : null} /></button>
                   </th>
                   <th className={sort.col === 'visitType' ? 'sorted' : ''}>
-                    <span>Visit/Shift type</span>
+                    <span>Visit type</span>
                     <button className="col-icon-btn" onClick={() => toggleSort('visitType')}><SortIcon dir={sort.col === 'visitType' ? sort.dir : null} /></button>
                   </th>
                   <th className={`th-num ${sort.col === 'assigned' ? 'sorted' : ''}`}>
                     <span>Assigned</span>
                     <button className="col-icon-btn" onClick={() => toggleSort('assigned')}><SortIcon dir={sort.col === 'assigned' ? sort.dir : null} /></button>
                   </th>
+                  <th className="ds-info-col" aria-label="Details" />
                   <th><span>Actions</span></th>
                 </tr>
               </thead>
@@ -887,9 +1216,10 @@ export default function DailySchedule() {
                     <tr
                       className="data-row ds-shift-row"
                       onClick={() => handleAssignShift(row)}
-                      onMouseEnter={(e) => setHoverCard({ type: 'shift', shift: row, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
-                      onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
                     >
+                      <td className="check-col" onClick={e => e.stopPropagation()}>
+                        <CheckBox {...checkState(rowKeys(row))} onChange={() => toggleKeys(rowKeys(row))} label={`Select all visits in ${row.customer}`} />
+                      </td>
                       <td className="nowrap">{row.start} – {row.end}</td>
                       <td className="td-name">
                         <button
@@ -899,6 +1229,7 @@ export default function DailySchedule() {
                         >
                           <ChevronDown />
                         </button>
+                        <span className="ds-shift-icon" aria-hidden="true"><ShiftBadgeIcon size={20} /></span>
                         {row.customer}
                         <span className="ds-shift-visit-count">({row.visits.length} visits)</span>
                       </td>
@@ -906,6 +1237,7 @@ export default function DailySchedule() {
                       <td><AreaTag area={row.area} /></td>
                       <td>{row.visitType}</td>
                       <td className="td-num">0/{row.employeesRequired}</td>
+                      {infoCell({ type: 'shift', shift: row }, `Details for ${row.customer}`)}
                       <td>
                         <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShift(row) }}>Assign</button>
                       </td>
@@ -915,9 +1247,10 @@ export default function DailySchedule() {
                         key={sv.id}
                         className="data-row ds-shift-visit-row"
                         onClick={() => handleAssignShiftVisit(row.id, sv)}
-                        onMouseEnter={(e) => setHoverCard({ type: 'visit', visit: { ...sv, area: row.area }, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
-                        onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
                       >
+                        <td className="check-col" onClick={e => e.stopPropagation()}>
+                          <CheckBox checked={selectedKeys.has(shiftVisitKey(row.id, sv.id))} onChange={() => toggleKeys([shiftVisitKey(row.id, sv.id)])} label={`Select ${sv.customer}'s visit`} />
+                        </td>
                         <td className="nowrap">
                           {sv.start} – {sv.end}
                           {sv.timeAdjusted && (
@@ -931,6 +1264,7 @@ export default function DailySchedule() {
                         <td><AreaTag area={row.area} /></td>
                         <td>{sv.visitType}</td>
                         <td className="td-num">0/{sv.employeesRequired}</td>
+                        {infoCell({ type: 'visit', visit: { ...sv, area: row.area } }, `Details for ${sv.customer}'s visit`)}
                         <td>
                           <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShiftVisit(row.id, sv) }}>Assign</button>
                         </td>
@@ -942,9 +1276,10 @@ export default function DailySchedule() {
                     key={row.id}
                     className="data-row"
                     onClick={() => setAssignVisit({ ...row, assignKind: 'visit' })}
-                    onMouseEnter={(e) => setHoverCard({ type: 'visit', visit: row, rect: e.currentTarget.getBoundingClientRect(), cursorX: e.clientX })}
-                    onMouseLeave={() => { if (!hoverCardSticky) setHoverCard(null) }}
                   >
+                    <td className="check-col" onClick={e => e.stopPropagation()}>
+                      <CheckBox checked={selectedKeys.has(visitKey(row.id))} onChange={() => toggleKeys([visitKey(row.id)])} label={`Select ${row.customer}'s visit`} />
+                    </td>
                     <td className="nowrap">
                       {row.start} – {row.end}
                       {row.timeAdjusted && (
@@ -958,13 +1293,14 @@ export default function DailySchedule() {
                     <td><AreaTag area={row.area} /></td>
                     <td>{row.visitType}</td>
                     <td className="td-num">0/{row.employeesRequired}</td>
+                    {infoCell({ type: 'visit', visit: row }, `Details for ${row.customer}'s visit`)}
                     <td>
                       <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); setAssignVisit({ ...row, assignKind: 'visit' }) }}>Assign</button>
                     </td>
                   </tr>
                 ))}
                 {totalRows === 0 && (
-                  <tr><td colSpan={7} className="table-empty">All sample unassigned visits have been assigned</td></tr>
+                  <tr><td colSpan={9} className="table-empty">All sample unassigned visits have been assigned</td></tr>
                 )}
               </tbody>
             </table>
@@ -1008,6 +1344,21 @@ export default function DailySchedule() {
             requireAtLeastOneAssigned
             onSave={handleAssignSave}
           />
+        )}
+
+        {bulkMenuOpen && actionsBtnRef.current && (
+          <BulkActionsMenu
+            count={selectedItems.length}
+            start={selectionStart}
+            end={selectionEnd}
+            anchorEl={actionsBtnRef.current}
+            onClose={() => setBulkMenuOpen(false)}
+            onAssign={handleBulkAssign}
+          />
+        )}
+
+        {bulkAssignOpen && (
+          <BulkAssignPanel items={selectedItems} onClose={() => setBulkAssignOpen(false)} onAssign={handleBulkAssign} />
         )}
 
         {toast && <div className="ds-toast">{toast}</div>}

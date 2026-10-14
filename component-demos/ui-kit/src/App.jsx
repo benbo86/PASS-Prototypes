@@ -4,6 +4,7 @@ import FilterDropdown from '../../../Components/FilterDropdown'
 import RowActionsMenu from '../../../Components/RowActionsMenu'
 import NumberStepper from '../../../Components/NumberStepper'
 import SearchMultiSelect from '../../../Components/SearchMultiSelect'
+import SearchSelect from '../../../Components/SearchSelect'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { HeartbeatIcon } from '../../../Components/CustomerProfileNav'
 import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
@@ -167,6 +168,7 @@ export default function App() {
   const [absenceType, setAbsenceType] = useState(ABSENCE_TYPES[0])
   const [stepperValue, setStepperValue] = useState(1)
   const [multiSelected, setMultiSelected] = useState([1])
+  const [singleSelected, setSingleSelected] = useState(null)
   const [careType, setCareType] = useState('Home Care')
 
   const pageRef = useRef(null)
@@ -318,6 +320,19 @@ export default function App() {
               items={CARE_WORKERS_DEMO}
               selected={multiSelected}
               onChange={setMultiSelected}
+              placeholder="Search care workers..."
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Search select" description="Components/SearchSelect.jsx — pick one: click the field to open a dropdown of every option, type to filter it, click or press Enter to choose. The single-select sibling of Search multi-select, sharing its field styling. The dropdown is portaled so it isn't clipped inside modals. First built for bulk assign in schedule/daily-schedule.">
+        <div className="uk-row" style={{ alignItems: 'flex-start' }}>
+          <div style={{ width: 320 }}>
+            <SearchSelect
+              items={CARE_WORKERS_DEMO}
+              value={singleSelected}
+              onChange={setSingleSelected}
               placeholder="Search care workers..."
             />
           </div>
