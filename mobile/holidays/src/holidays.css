@@ -365,3 +365,137 @@
 }
 .hol-sheet-title { font: 16px Barlow, sans-serif; font-weight: 600; color: #333; margin-bottom: 4px; }
 .hol-sheet-subtitle { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50); margin-bottom: 20px; }
+
+/* ── Request filters (status chips + date range) ────────────────────
+   From Ben's Figma Make prototype. Chips are smaller than the leave-type
+   .hol-pill buttons (5 of them have to fit a phone width, scrolling
+   sideways) but reuse .hol-pill's own selected colours so "selected" reads
+   the same across the feature. */
+.hol-filter-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 4px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.hol-filter-chips::-webkit-scrollbar { display: none; }
+.hol-filter-chip {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+  font: 14px Barlow, sans-serif;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hol-filter-chip.active {
+  background: #EBE1EE;
+  border-color: var(--brand-purple-7-purple-5);
+  color: var(--brand-purple-3-purple-2);
+}
+
+/* No separate ✕ to clear the date: "Clear filters" on the heading row
+   clears everything, and the sheet's own Clear clears just the date. */
+.hol-date-filter-row {
+  display: flex;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+.hol-date-filter {
+  flex: 1;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1.5px solid var(--ui-purple-5-languid-lavendar);
+  background: #fff;
+  font: 14px Barlow, sans-serif;
+  font-weight: 500;
+  color: var(--greyscale-6-grey-50);
+  cursor: pointer;
+}
+.hol-date-filter svg { color: var(--ui-purple-3-grape-grey); }
+.hol-date-filter.active {
+  background: #EBE1EE;
+  border-color: var(--brand-purple-7-purple-5);
+  color: var(--brand-purple-3-purple-2);
+}
+.hol-date-filter.active svg { color: currentColor; }
+
+/* "Clear filters" sits on the heading row, only while a filter is on — a
+   selected chip can be scrolled out of view, so this is the one place
+   that always shows a filter is active. min-height keeps the heading from
+   jumping when the link appears. */
+.hol-section-label--with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+}
+.hol-clear-filters,
+.hol-empty-clear {
+  border: none;
+  background: none;
+  font: 14px Barlow, sans-serif;
+  font-weight: 500;
+  color: var(--brand-purple-6-purple-4);
+  cursor: pointer;
+  padding: 0;
+}
+.hol-empty-clear {
+  display: block;
+  margin: 8px auto 0;
+}
+
+/* Date-range calendar inside the shared BottomSheet. */
+.hol-range-hint { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50); margin-bottom: 16px; }
+.hol-range-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.hol-range-month { font: 16px Barlow, sans-serif; font-weight: 600; color: #333; }
+.hol-range-nav {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.hol-range-nav--next svg { transform: scaleX(-1); }
+.hol-range-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.hol-range-weekday {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 13px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+}
+.hol-range-day {
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font: 16px Barlow, sans-serif;
+  color: #333;
+  cursor: pointer;
+}
+.hol-range-day--in-range { background: #EBE1EE; color: var(--brand-purple-3-purple-2); }
+.hol-range-day--edge { background: var(--brand-purple-6-purple-4); color: #fff; font-weight: 600; }

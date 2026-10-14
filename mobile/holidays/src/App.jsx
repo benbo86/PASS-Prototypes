@@ -90,9 +90,125 @@ const CONTRACT_TOGGLE_OPTIONS = [
   { value: 'hours', label: 'Hours scheme' },
 ]
 
+// ─── Request filters ────────────────────────────────────────────
+// Brought over from Ben's Figma Make prototype ("Holiday Entitlement and
+// Leave Requests") — the only part of that file still current. Status
+// chips are multi-select; none selected means "show everything" (the Make
+// file started on Pending only, which hid approved holidays until tapped —
+// agreed to start with everything showing instead). One chip per status,
+// labelled exactly as the request cards show it.
+const FILTER_STATUSES = ['Awaiting approval', 'Approved', 'Awaiting cancellation', 'Declined', 'Cancelled']
+
+// Overlap, not containment: a 23–27 Dec holiday shows for a 25 Dec–2 Jan
+// filter. A single date (no end) means that day only — the Make file
+// treated it as "from this date onwards", changed with Ben since a single
+// tap reads as "am I off that day?". ISO strings compare as plain strings.
+function matchesDateRange(r, start, end) {
+  if (!start) return true
+  const rangeEnd = end || start
+  return r.fromDate <= rangeEnd && r.toDate >= start
+}
+
+// Shared by the sheet's hint and the filter button: one date on its own,
+// two separated by ' - '.
+function fmtDateRangeLabel(start, end) {
+  return !end || end === start ? fmtDate(start) : `${fmtDate(start)} - ${fmtDate(end)}`
+}
+
+function isoFor(year, monthIndex, day) {
+  return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+// Content for the shared BottomSheet. Tap a start day, then an end day;
+// tapping before the start swaps them. Nothing applies until Apply.
+function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
+  const [draftStart, setDraftStart] = useState(start)
+  const [draftEnd, setDraftEnd] = useState(end)
+  const [[viewYear, viewMonth], setView] = useState(() => {
+    const [y, m] = (start || initialMonth).split('-').map(Number)
+    return [y, m - 1]
+  })
+
+  function shiftMonth(delta) {
+    const d = new Date(viewYear, viewMonth + delta, 1)
+    setView([d.getFullYear(), d.getMonth()])
+  }
+
+  function pick(iso) {
+    if (!draftStart || draftEnd) { setDraftStart(iso); setDraftEnd(null) }
+    else if (iso < draftStart) { setDraftEnd(draftStart); setDraftStart(iso) }
+    else setDraftEnd(iso)
+  }
+
+  const firstWeekday = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const cells = [
+    ...Array.from({ length: firstWeekday }, (_, i) => <div key={`blank-${i}`} />),
+    ...Array.from({ length: daysInMonth }, (_, i) => {
+      const iso = isoFor(viewYear, viewMonth, i + 1)
+      const isEdge = iso === draftStart || iso === draftEnd
+      const inRange = draftStart && draftEnd && iso > draftStart && iso < draftEnd
+      return (
+        <button
+          key={iso}
+          type="button"
+          className={`hol-range-day${isEdge ? ' hol-range-day--edge' : ''}${inRange ? ' hol-range-day--in-range' : ''}`}
+          onClick={() => pick(iso)}
+        >
+          {i + 1}
+        </button>
+      )
+    }),
+  ]
+
+  return (
+    <>
+      <div className="hol-sheet-title">Filter by date</div>
+      <div className="hol-range-hint">
+        {draftStart ? fmtDateRangeLabel(draftStart, draftEnd) : 'Choose a date or a range'}
+      </div>
+      <div className="hol-range-header">
+        <button type="button" className="hol-range-nav" onClick={() => shiftMonth(-1)} aria-label="Previous month"><ChevronLeftIcon size={24} /></button>
+        <span className="hol-range-month">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+        <button type="button" className="hol-range-nav hol-range-nav--next" onClick={() => shiftMonth(1)} aria-label="Next month"><ChevronLeftIcon size={24} /></button>
+      </div>
+      <div className="hol-range-grid">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i} className="hol-range-weekday">{d}</div>)}
+        {cells}
+      </div>
+      <button className="fab-square primary-btn" disabled={!draftStart} onClick={() => onApply(draftStart, draftEnd)}>Apply</button>
+      <button className="fab-square tertiary-btn" onClick={onClear}>Clear</button>
+    </>
+  )
+}
+
 // ─── Holidays list screen ───────────────────────────────────────
 
-function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, onDeleteTap }) {
+function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, onDeleteTap, dateSheetOpen, setDateSheetOpen }) {
+  const [statusFilters, setStatusFilters] = useState([])
+  const [dateStart, setDateStart] = useState(null)
+  const [dateEnd, setDateEnd] = useState(null)
+
+  function toggleStatus(status) {
+    setStatusFilters(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status])
+  }
+  function clearFilters() {
+    setStatusFilters([])
+    setDateStart(null)
+    setDateEnd(null)
+  }
+
+  const visibleRequests = requests.filter(r =>
+    (statusFilters.length === 0 || statusFilters.includes(r.status)) && matchesDateRange(r, dateStart, dateEnd)
+  )
+  const dateLabel = dateStart ? fmtDateRangeLabel(dateStart, dateEnd) : 'Filter by date'
+  // Calendar opens on the newest request's month when no range is set —
+  // the demo data sits in Dec 2025–Feb 2026, so "today" would land on an
+  // empty month.
+  const latestRequestDate = requests.reduce((max, r) => r.fromDate > max ? r.fromDate : max, requests[0]?.fromDate ?? '2026-01-01')
+
   const isDays = contractType === 'days'
   const entitlement = isDays ? DAYS_ENTITLEMENT : HOURS_ENTITLEMENT
   const fmtAmount = isDays ? fmtDays : fmtHours
@@ -127,10 +243,43 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
           <PlusIcon /> Request leave
         </button>
 
-        <div className="hol-section-label">Your requests</div>
+        <div className="hol-section-label hol-section-label--with-action">
+          Your requests
+          {(statusFilters.length > 0 || dateStart) && (
+            <button type="button" className="hol-clear-filters" onClick={clearFilters}>Clear filters</button>
+          )}
+        </div>
+        <div className="hol-filter-chips">
+          {FILTER_STATUSES.map(status => (
+            <button
+              key={status}
+              type="button"
+              className={`hol-filter-chip${statusFilters.includes(status) ? ' active' : ''}`}
+              aria-pressed={statusFilters.includes(status)}
+              onClick={() => toggleStatus(status)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+        <div className="hol-date-filter-row">
+          <button
+            type="button"
+            className={`hol-date-filter${dateStart ? ' active' : ''}`}
+            onClick={() => setDateSheetOpen(true)}
+          >
+            <CalendarIcon size={20} /> {dateLabel}
+          </button>
+        </div>
         <div className="hol-requests-list">
           {requests.length === 0 && <div className="hol-empty-state">No requests yet</div>}
-          {requests.map(r => (
+          {requests.length > 0 && visibleRequests.length === 0 && (
+            <div className="hol-empty-state">
+              No requests match these filters
+              <button type="button" className="hol-empty-clear" onClick={clearFilters}>Clear filters</button>
+            </div>
+          )}
+          {visibleRequests.map(r => (
             <div
               key={r.id}
               className={`hol-request-card${r.status === 'Awaiting cancellation' ? ' hol-request-card--awaiting-cancellation' : ''}`}
@@ -147,7 +296,7 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
               )}
               <div className="hol-request-date">
                 <CalendarIcon size={15} />
-                {r.fromDate === r.toDate ? fmtDate(r.fromDate) : `${fmtDate(r.fromDate)} – ${fmtDate(r.toDate)}`}
+                {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
               <div className="hol-request-duration">{fmtAmount(r.amount)}</div>
               {r.status === 'Declined' && r.declinedReason && (
@@ -158,6 +307,17 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
           ))}
         </div>
       </div>
+      <BottomSheet open={dateSheetOpen} onClose={() => setDateSheetOpen(false)}>
+        {dateSheetOpen && (
+          <DateRangeSheet
+            start={dateStart}
+            end={dateEnd}
+            initialMonth={latestRequestDate}
+            onApply={(start, end) => { setDateStart(start); setDateEnd(end); setDateSheetOpen(false) }}
+            onClear={() => { setDateStart(null); setDateEnd(null); setDateSheetOpen(false) }}
+          />
+        )}
+      </BottomSheet>
     </div>
   )
 }
@@ -418,7 +578,7 @@ function DeleteSheet({ request, onClose, onConfirm }) {
 // state, and a submitted request always lands in whichever list matches
 // the mode it was actually submitted under.
 
-function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteTarget, onBack }) {
+function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteTarget, dateSheetOpen, setDateSheetOpen, onBack }) {
   const [daysRequests, setDaysRequests] = useState(DAYS_INITIAL_REQUESTS)
   const [hoursRequests, setHoursRequests] = useState(HOURS_INITIAL_REQUESTS)
 
@@ -454,6 +614,8 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
             onBack={onBack}
             onRequestLeave={() => setView('form')}
             onDeleteTap={setDeleteTarget}
+            dateSheetOpen={dateSheetOpen}
+            setDateSheetOpen={setDateSheetOpen}
           />
         }
         secondary={
@@ -498,6 +660,8 @@ export default function App() {
   // it's a modal overlay on top of the list, not a distinct `view`, so it
   // needed its own state rather than folding into the check above.
   const [deleteTarget, setDeleteTarget] = useState(null)
+  // Same again for the date-filter sheet on the list screen.
+  const [dateSheetOpen, setDateSheetOpen] = useState(false)
   const phoneFrameRef = useRef(null)
 
   return (
@@ -538,12 +702,14 @@ export default function App() {
                     setView={setView}
                     deleteTarget={deleteTarget}
                     setDeleteTarget={setDeleteTarget}
+                    dateSheetOpen={dateSheetOpen}
+                    setDateSheetOpen={setDateSheetOpen}
                     onBack={() => setOuterView('account')}
                   />
                 }
               />
             </div>
-            {!(outerView === 'holidays' && (view === 'form' || deleteTarget)) && (
+            {!(outerView === 'holidays' && (view === 'form' || deleteTarget || dateSheetOpen)) && (
               <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
             )}
           </div>
