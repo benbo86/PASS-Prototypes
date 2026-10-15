@@ -110,6 +110,15 @@ const PAGE_STYLE = `
   }
   .download-all-btn:hover { filter: brightness(1.08); }
 
+  .icon-search { position: relative; max-width: 360px; margin-bottom: 16px; }
+  .icon-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); pointer-events: none; }
+  .icon-search input {
+    width: 100%; font-family: inherit; font-size: 14px; color: var(--text); background: var(--card);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px 9px 36px; box-shadow: var(--shadow);
+  }
+  .icon-search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .search-empty { display: none; font-size: 14px; color: var(--text-muted); margin: 8px 0 40px; }
+  .search-hidden { display: none !important; }
   section { margin-bottom: 44px; }
   .section-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
   .section-head h2 { font-size: 17px; font-weight: 700; margin: 0; }
@@ -261,6 +270,25 @@ function pageScript(zipPrefix) {
     navigator.clipboard?.writeText(code);
     const label = card.querySelector('.label').textContent.trim();
     showToast('Copied ' + label + ' SVG');
+  }
+
+  // Search: hides cards whose name/label doesn't contain every typed word,
+  // and hides sections left with no matching cards.
+  function filterIcons(raw) {
+    const words = raw.toLowerCase().trim().split(/\\s+/).filter(Boolean);
+    let any = false;
+    document.querySelectorAll('section').forEach(section => {
+      let visible = 0;
+      section.querySelectorAll('.card').forEach(card => {
+        const text = ((card.dataset.name || '') + ' ' + card.textContent).toLowerCase();
+        const match = words.every(w => text.includes(w));
+        card.classList.toggle('search-hidden', !match);
+        if (match) visible++;
+      });
+      section.classList.toggle('search-hidden', visible === 0);
+      if (visible) any = true;
+    });
+    document.getElementById('search-empty').style.display = any ? 'none' : 'block';
   }
 
   function showToast(msg) {
@@ -546,6 +574,11 @@ export function renderSpecimenPage({ title, eyebrow, heading, descriptionHtml, z
     <button class="download-all-btn" onclick="downloadAll()">Download all ${totalCount} icons (.zip)</button>
     ${newSectionUploadBtn}
   </div>
+  <div class="icon-search">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input type="search" id="icon-search" placeholder="Search icons by name" autocomplete="off" oninput="filterIcons(this.value)" aria-label="Search icons">
+  </div>
+  <p class="search-empty" id="search-empty">No icons match your search.</p>
 ${sectionsHtml}
 </div>
 
