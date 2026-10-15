@@ -186,7 +186,10 @@ function LockScreen({ onOpenBooking, onOpenMessage }) {
               <span className="opn-notification-title">Office</span>
               <span className="opn-notification-time">now</span>
             </div>
-            <p className="opn-notification-text">Yes that's no problem, we look forwards to seeing Margaret for her evening visit.</p>
+            {/* v2 (2026-10-15): generic body, no message content on the lock screen.
+                v1 showed the message itself as the body:
+                "Yes that's no problem, we look forwards to seeing Margaret for her evening visit." */}
+            <p className="opn-notification-text">You have a new message</p>
           </div>
         </button>
       </div>
