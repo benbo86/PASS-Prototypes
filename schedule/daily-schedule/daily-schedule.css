@@ -505,9 +505,9 @@
 .ds-bulk-menu-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  padding: 4px;
+  padding: 4px 8px;
   border: none;
   border-radius: 4px;
   background: none;
@@ -523,6 +523,13 @@
 .ds-bulk-menu-item.active { background: var(--ui-purple-6-lavendar-grey); }
 .ds-bulk-menu-item:disabled { color: var(--greyscale-8-grey-65); cursor: default; }
 .ds-bulk-menu-item svg { flex-shrink: 0; }
+/* Suggest assignments: new feature, picked out in purple with an outline. */
+.ds-bulk-menu-item--suggest {
+  color: var(--brand-purple-6-purple-4);
+  border: 1px solid var(--brand-purple-6-purple-4);
+  padding: 6px 8px;
+  margin-bottom: 4px;
+}
 .ds-bulk-menu-pane {
   display: flex;
   flex-direction: column;

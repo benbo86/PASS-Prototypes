@@ -209,7 +209,7 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 309 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 314 icons (.zip)</button>
     
   </div>
   <div class="icon-search">
@@ -264,7 +264,7 @@
   </section>
 
   <section data-section-slug="icons">
-    <div class="section-head"><h2>Icons</h2><span class="count">90 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Icons</h2><span class="count">97 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="Medication" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -361,6 +361,27 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Suggested Assignments" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Suggested Assignments.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M41.2202 3.19841L51.1749 19.9672L67.9855 29.8971C72.2607 32.4217 72.2607 38.593 67.9855 41.1177L51.1749 51.0476L41.2202 67.8164C38.6893 72.0809 32.5026 72.0809 29.9716 67.8164L20.017 51.0476L3.20638 41.1177C-1.06879 38.593 -1.06879 32.4217 3.20638 29.8971L20.017 19.9672L29.9716 3.19841C32.5026 -1.06614 38.6893 -1.06614 41.2202 3.19841Z" fill="#361843"/>
+<path d="M26.9886 48.5443L6.26056 27.8678C4.78507 26.396 4.78507 24.0081 6.26056 22.5362L13.8712 14.9446C15.3467 13.4728 17.7405 13.4728 19.216 14.9446L31.4845 27.1843L55.5195 3.20732C56.9949 1.7355 59.3888 1.7355 60.8643 3.20732L68.4749 10.799C69.9504 12.2708 69.9504 14.6587 68.4749 16.1306L35.9839 48.5407C33.4993 51.0192 29.4715 51.0192 26.9886 48.5407V48.5443Z" fill="#9966E3"/>
+<path d="M24.3669 38.9393C25.6231 38.9393 26.6415 37.4378 26.6415 35.5856C26.6415 33.7333 25.6231 32.2318 24.3669 32.2318C23.1106 32.2318 22.0923 33.7333 22.0923 35.5856C22.0923 37.4378 23.1106 38.9393 24.3669 38.9393Z" fill="#E7CCF5"/>
+<path d="M38.4259 38.9393C40.3938 38.9393 41.9891 36.5873 41.9891 33.6859C41.9891 30.7845 40.3938 28.4324 38.4259 28.4324C36.4579 28.4324 34.8626 30.7845 34.8626 33.6859C34.8626 36.5873 36.4579 38.9393 38.4259 38.9393Z" fill="#E7CCF5"/>
+</svg></span>
+        <span class="label">Suggested Assignments</span>
+        <span class="native-size">72×72</span>
+        <template class="svg-src">&lt;svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
+&lt;path d="M41.2202 3.19841L51.1749 19.9672L67.9855 29.8971C72.2607 32.4217 72.2607 38.593 67.9855 41.1177L51.1749 51.0476L41.2202 67.8164C38.6893 72.0809 32.5026 72.0809 29.9716 67.8164L20.017 51.0476L3.20638 41.1177C-1.06879 38.593 -1.06879 32.4217 3.20638 29.8971L20.017 19.9672L29.9716 3.19841C32.5026 -1.06614 38.6893 -1.06614 41.2202 3.19841Z" fill="#361843"/&gt;
+&lt;path d="M26.9886 48.5443L6.26056 27.8678C4.78507 26.396 4.78507 24.0081 6.26056 22.5362L13.8712 14.9446C15.3467 13.4728 17.7405 13.4728 19.216 14.9446L31.4845 27.1843L55.5195 3.20732C56.9949 1.7355 59.3888 1.7355 60.8643 3.20732L68.4749 10.799C69.9504 12.2708 69.9504 14.6587 68.4749 16.1306L35.9839 48.5407C33.4993 51.0192 29.4715 51.0192 26.9886 48.5407V48.5443Z" fill="#9966E3"/&gt;
+&lt;path d="M24.3669 38.9393C25.6231 38.9393 26.6415 37.4378 26.6415 35.5856C26.6415 33.7333 25.6231 32.2318 24.3669 32.2318C23.1106 32.2318 22.0923 33.7333 22.0923 35.5856C22.0923 37.4378 23.1106 38.9393 24.3669 38.9393Z" fill="#E7CCF5"/&gt;
+&lt;path d="M38.4259 38.9393C40.3938 38.9393 41.9891 36.5873 41.9891 33.6859C41.9891 30.7845 40.3938 28.4324 38.4259 28.4324C36.4579 28.4324 34.8626 30.7845 34.8626 33.6859C34.8626 36.5873 36.4579 38.9393 38.4259 38.9393Z" fill="#E7CCF5"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Add Circle" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -373,6 +394,27 @@
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
 &lt;path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z" fill="#000000"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Add Shadow" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Add Shadow.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none">
+        <path d="M0 0h16v16H0z" fill-rule="evenodd"/>
+        <path d="M5.042 8.893c.45.206.945.99 1.468.99.458 0 .896-.757 1.298-.917l.104-.045a3.487 3.487 0 0 0-.097 1.51c-.084.057-.169.122-.255.19l-.258.209c-.26.205-.525.386-.792.386-.547 0-1.083-.76-1.593-.937l-.138-.053h-.073c-.622 0-1.313.782-1.369 1.61l-.004.109v.125H8.53a3.892 3.892 0 0 0 1.824 1.285.904.904 0 0 1-.206.044l-.093.005H2.966a.967.967 0 0 1-.962-.874L2 12.437v-.492c0-1.45 1.142-2.96 2.575-3.048l.131-.004h.336zm6.625-1.667c.368 0 .667.299.667.667v1.334h1.334a.667.667 0 0 1 0 1.334h-1.335v1.335a.667.667 0 1 1-1.333 0V10.56H9.665a.667.667 0 1 1 0-1.334h1.333V7.893c0-.368.3-.667.668-.667zM6.51 2.666a2.577 2.577 0 0 1 .133 5.152l-.133.003a2.577 2.577 0 0 1-.133-5.151l.133-.003zM6.51 4a1.244 1.244 0 1 0 0 2.487A1.244 1.244 0 0 0 6.51 4z" fill="#000"/>
+    </g>
+</svg></span>
+        <span class="label">Add Shadow</span>
+        <span class="native-size">16×16</span>
+        <template class="svg-src">&lt;svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;g fill="none"&gt;
+        &lt;path d="M0 0h16v16H0z" fill-rule="evenodd"/&gt;
+        &lt;path d="M5.042 8.893c.45.206.945.99 1.468.99.458 0 .896-.757 1.298-.917l.104-.045a3.487 3.487 0 0 0-.097 1.51c-.084.057-.169.122-.255.19l-.258.209c-.26.205-.525.386-.792.386-.547 0-1.083-.76-1.593-.937l-.138-.053h-.073c-.622 0-1.313.782-1.369 1.61l-.004.109v.125H8.53a3.892 3.892 0 0 0 1.824 1.285.904.904 0 0 1-.206.044l-.093.005H2.966a.967.967 0 0 1-.962-.874L2 12.437v-.492c0-1.45 1.142-2.96 2.575-3.048l.131-.004h.336zm6.625-1.667c.368 0 .667.299.667.667v1.334h1.334a.667.667 0 0 1 0 1.334h-1.335v1.335a.667.667 0 1 1-1.333 0V10.56H9.665a.667.667 0 1 1 0-1.334h1.333V7.893c0-.368.3-.667.668-.667zM6.51 2.666a2.577 2.577 0 0 1 .133 5.152l-.133.003a2.577 2.577 0 0 1-.133-5.151l.133-.003zM6.51 4a1.244 1.244 0 1 0 0 2.487A1.244 1.244 0 0 0 6.51 4z" fill="#000"/&gt;
+    &lt;/g&gt;
 &lt;/svg&gt;</template>
       </div>
 
@@ -420,6 +462,27 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Adjust Times" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Adjust Times.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="17" height="16" viewBox="0 0 17 16" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+        <path d="M16.32 0h-16v16h16z"/>
+        <path d="M4.874 3.088a6.003 6.003 0 0 1 8.36 1.47.67.67 0 0 1 .064.113l.758-.338a.5.5 0 0 1 .69.566l-.542 2.426a.5.5 0 0 1-.733.327l-2.166-1.22a.5.5 0 0 1 .042-.893l.72-.32A4.67 4.67 0 0 0 5.64 4.18a4.664 4.664 0 0 0-1.142 6.497 4.664 4.664 0 0 0 6.495 1.149.667.667 0 0 1 .765 1.092 5.997 5.997 0 0 1-8.352-1.477 5.997 5.997 0 0 1 1.47-8.353zM8.32 4.667c.342 0 .624.257.662.589l.005.077v3.031l1.474.873a.667.667 0 0 1 .27.844l-.035.069a.667.667 0 0 1-.844.27l-.07-.035-1.801-1.066a.667.667 0 0 1-.322-.486l-.006-.088V5.333c0-.368.299-.666.667-.666z" fill="#000" fill-rule="nonzero"/>
+    </g>
+</svg></span>
+        <span class="label">Adjust Times</span>
+        <span class="native-size">17×16</span>
+        <template class="svg-src">&lt;svg width="17" height="16" viewBox="0 0 17 16" xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;g fill="none" fill-rule="evenodd"&gt;
+        &lt;path d="M16.32 0h-16v16h16z"/&gt;
+        &lt;path d="M4.874 3.088a6.003 6.003 0 0 1 8.36 1.47.67.67 0 0 1 .064.113l.758-.338a.5.5 0 0 1 .69.566l-.542 2.426a.5.5 0 0 1-.733.327l-2.166-1.22a.5.5 0 0 1 .042-.893l.72-.32A4.67 4.67 0 0 0 5.64 4.18a4.664 4.664 0 0 0-1.142 6.497 4.664 4.664 0 0 0 6.495 1.149.667.667 0 0 1 .765 1.092 5.997 5.997 0 0 1-8.352-1.477 5.997 5.997 0 0 1 1.47-8.353zM8.32 4.667c.342 0 .624.257.662.589l.005.077v3.031l1.474.873a.667.667 0 0 1 .27.844l-.035.069a.667.667 0 0 1-.844.27l-.07-.035-1.801-1.066a.667.667 0 0 1-.322-.486l-.006-.088V5.333c0-.368.299-.666.667-.666z" fill="#000" fill-rule="nonzero"/&gt;
+    &lt;/g&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Arrow Left" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -432,6 +495,27 @@
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;
 &lt;path d="M4.71969 12.6255L4.73999 12.6499C4.74414 12.6548 4.74834 12.6596 4.75259 12.6644L9.75259 18.2894C10.1195 18.7022 10.7516 18.7393 11.1644 18.3724C11.5771 18.0055 11.6143 17.3734 11.2474 16.9606L7.727 13L18.5 13C19.0523 13 19.5 12.5523 19.5 12C19.5 11.4477 19.0523 11 18.5 11L7.727 11L11.2474 7.03937C11.5861 6.65834 11.5805 6.09046 11.2529 5.71676L11.1644 5.6276C10.7516 5.26068 10.1195 5.29786 9.75259 5.71065L4.75259 11.3356L4.7402 11.3498C4.73323 11.358 4.72639 11.3662 4.71969 11.3746L4.75259 11.3356C4.72265 11.3693 4.69538 11.4045 4.67076 11.441C4.65284 11.4675 4.63629 11.4947 4.62104 11.5227C4.61696 11.5303 4.61304 11.5377 4.60922 11.5452C4.59534 11.5722 4.58258 11.6003 4.5711 11.629C4.56781 11.6375 4.5647 11.6456 4.56169 11.6537C4.52179 11.7614 4.5 11.8782 4.5 12C4.5 12.1218 4.52179 12.2386 4.56167 12.3465C4.5647 12.3544 4.56781 12.3625 4.57103 12.3706C4.58258 12.3998 4.59534 12.4278 4.60932 12.4551C4.61304 12.4623 4.61696 12.4697 4.62098 12.4771C4.63629 12.5053 4.65284 12.5325 4.67061 12.5589L4.71969 12.6255Z" fill="#333333"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Assign" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Assign.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="17" height="16" viewBox="0 0 17 16" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+        <path d="M.351 0h16v16h-16z"/>
+        <path d="M7.018 4.863h4.666v1.193c0 .3.36.447.567.234l1.86-1.86a.33.33 0 0 0 0-.474l-1.86-1.86a.333.333 0 0 0-.567.24V3.53H7.018a3.333 3.333 0 0 0-3.334 3.333c0 .367.3.667.667.667.367 0 .667-.3.667-.667a2 2 0 0 1 2-2zm2.666 6.304H5.018V9.973a.33.33 0 0 0-.567-.233l-1.86 1.86a.33.33 0 0 0 0 .473l1.86 1.86c.207.207.567.06.567-.24V12.5h4.666a3.333 3.333 0 0 0 3.334-3.333c0-.367-.3-.667-.667-.667-.367 0-.667.3-.667.667a2 2 0 0 1-2 2z" fill="#000"/>
+    </g>
+</svg></span>
+        <span class="label">Assign</span>
+        <span class="native-size">17×16</span>
+        <template class="svg-src">&lt;svg width="17" height="16" viewBox="0 0 17 16" xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;g fill="none" fill-rule="evenodd"&gt;
+        &lt;path d="M.351 0h16v16h-16z"/&gt;
+        &lt;path d="M7.018 4.863h4.666v1.193c0 .3.36.447.567.234l1.86-1.86a.33.33 0 0 0 0-.474l-1.86-1.86a.333.333 0 0 0-.567.24V3.53H7.018a3.333 3.333 0 0 0-3.334 3.333c0 .367.3.667.667.667.367 0 .667-.3.667-.667a2 2 0 0 1 2-2zm2.666 6.304H5.018V9.973a.33.33 0 0 0-.567-.233l-1.86 1.86a.33.33 0 0 0 0 .473l1.86 1.86c.207.207.567.06.567-.24V12.5h4.666a3.333 3.333 0 0 0 3.334-3.333c0-.367-.3-.667-.667-.667-.367 0-.667.3-.667.667a2 2 0 0 1-2 2z" fill="#000"/&gt;
+    &lt;/g&gt;
 &lt;/svg&gt;</template>
       </div>
 
@@ -728,6 +812,27 @@
     &lt;title&gt;Calendar&lt;/title&gt;
     &lt;g id="Calendar" stroke="none" fill="none" transform="translate(0.9024, 0.7143)" fill-rule="nonzero" stroke-width="0.1"&gt;
         &lt;path d="M8.4375,13.5 L6.5625,13.5 C6.253125,13.5 6,13.246875 6,12.9375 L6,11.0625 C6,10.753125 6.253125,10.5 6.5625,10.5 L8.4375,10.5 C8.746875,10.5 9,10.753125 9,11.0625 L9,12.9375 C9,13.246875 8.746875,13.5 8.4375,13.5 Z M13.5,12.9375 L13.5,11.0625 C13.5,10.753125 13.246875,10.5 12.9375,10.5 L11.0625,10.5 C10.753125,10.5 10.5,10.753125 10.5,11.0625 L10.5,12.9375 C10.5,13.246875 10.753125,13.5 11.0625,13.5 L12.9375,13.5 C13.246875,13.5 13.5,13.246875 13.5,12.9375 Z M18,12.9375 L18,11.0625 C18,10.753125 17.746875,10.5 17.4375,10.5 L15.5625,10.5 C15.253125,10.5 15,10.753125 15,11.0625 L15,12.9375 C15,13.246875 15.253125,13.5 15.5625,13.5 L17.4375,13.5 C17.746875,13.5 18,13.246875 18,12.9375 Z M13.5,17.4375 L13.5,15.5625 C13.5,15.253125 13.246875,15 12.9375,15 L11.0625,15 C10.753125,15 10.5,15.253125 10.5,15.5625 L10.5,17.4375 C10.5,17.746875 10.753125,18 11.0625,18 L12.9375,18 C13.246875,18 13.5,17.746875 13.5,17.4375 Z M9,17.4375 L9,15.5625 C9,15.253125 8.746875,15 8.4375,15 L6.5625,15 C6.253125,15 6,15.253125 6,15.5625 L6,17.4375 C6,17.746875 6.253125,18 6.5625,18 L8.4375,18 C8.746875,18 9,17.746875 9,17.4375 Z M18,17.4375 L18,15.5625 C18,15.253125 17.746875,15 17.4375,15 L15.5625,15 C15.253125,15 15,15.253125 15,15.5625 L15,17.4375 C15,17.746875 15.253125,18 15.5625,18 L17.4375,18 C17.746875,18 18,17.746875 18,17.4375 Z M22.5,5.25 L22.5,21.75 C22.5,22.9921875 21.4921875,24 20.25,24 L3.75,24 C2.5078125,24 1.5,22.9921875 1.5,21.75 L1.5,5.25 C1.5,4.0078125 2.5078125,3 3.75,3 L6,3 L6,0.5625 C6,0.253125 6.253125,4.97379915e-14 6.5625,4.97379915e-14 L8.4375,4.97379915e-14 C8.746875,4.97379915e-14 9,0.253125 9,0.5625 L9,3 L15,3 L15,0.5625 C15,0.253125 15.253125,4.97379915e-14 15.5625,4.97379915e-14 L17.4375,4.97379915e-14 C17.746875,4.97379915e-14 18,0.253125 18,0.5625 L18,3 L20.25,3 C21.4921875,3 22.5,4.0078125 22.5,5.25 Z M20.25,21.46875 L20.25,7.5 L3.75,7.5 L3.75,21.46875 C3.75,21.6234375 3.8765625,21.75 4.03125,21.75 L19.96875,21.75 C20.1234375,21.75 20.25,21.6234375 20.25,21.46875 Z" id="Shape" stroke="#000000" fill="#000000"&gt;&lt;/path&gt;
+    &lt;/g&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Cancel" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Cancel.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Graphic</title>
+    <g id="Graphic" stroke="none" fill="none" fill-rule="evenodd">
+        <polygon id="Path" fill="#000000" points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12"></polygon>
+    </g>
+</svg></span>
+        <span class="label">Cancel</span>
+        <span class="native-size"></span>
+        <template class="svg-src">&lt;svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;
+    &lt;title&gt;Graphic&lt;/title&gt;
+    &lt;g id="Graphic" stroke="none" fill="none" fill-rule="evenodd"&gt;
+        &lt;polygon id="Path" fill="#000000" points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12"&gt;&lt;/polygon&gt;
     &lt;/g&gt;
 &lt;/svg&gt;</template>
       </div>
@@ -2033,6 +2138,48 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Unassign Rounded" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Unassign Rounded.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8.32 4.5h.028a.67.67 0 0 1 .046.004L8.32 4.5a.67.67 0 0 1 .437.164l3.756 3.338a.667.667 0 0 1-.886.996l-2.64-2.347v7.182a.667.667 0 1 1-1.334 0V6.651l-2.64 2.347a.667.667 0 0 1-.882.004l-.06-.06a.667.667 0 0 1 .056-.94l3.75-3.334a.683.683 0 0 1 .084-.063l-.084.063A.668.668 0 0 1 8.32 4.5zM3.653 3.167c0-.369.299-.667.667-.667h8a.667.667 0 0 1 0 1.333h-8a.667.667 0 0 1-.667-.666z" fill="#000" fill-rule="nonzero"/>
+</svg></span>
+        <span class="label">Unassign Rounded</span>
+        <span class="native-size">17×17</span>
+        <template class="svg-src">&lt;svg width="17" height="17" viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg"&gt;
+    &lt;path d="M8.32 4.5h.028a.67.67 0 0 1 .046.004L8.32 4.5a.67.67 0 0 1 .437.164l3.756 3.338a.667.667 0 0 1-.886.996l-2.64-2.347v7.182a.667.667 0 1 1-1.334 0V6.651l-2.64 2.347a.667.667 0 0 1-.882.004l-.06-.06a.667.667 0 0 1 .056-.94l3.75-3.334a.683.683 0 0 1 .084-.063l-.084.063A.668.668 0 0 1 8.32 4.5zM3.653 3.167c0-.369.299-.667.667-.667h8a.667.667 0 0 1 0 1.333h-8a.667.667 0 0 1-.667-.666z" fill="#000" fill-rule="nonzero"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Unassign Shadow" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Unassign Shadow.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Glyphs/Web Nav/Outlines/Carer -</title>
+    <g id="Glyphs/Web-Nav/Outlines/Carer--" stroke="none" fill="none">
+        <g id="Icon" stroke-width="1" fill-rule="evenodd">
+            <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+        </g>
+        <path d="M7.56340171,13.3401938 C8.23688852,13.6482461 8.97983811,14.823413 9.76506937,14.823413 C10.4521467,14.823413 11.1091645,13.6893008 11.7118436,13.4494018 L11.8676746,13.3824068 C11.7329096,13.8471816 11.6609522,14.3364636 11.6609522,14.8416139 C11.6609522,15.1158679 11.6821622,15.3854445 11.7231179,15.6489614 C11.0907165,16.0717465 10.433073,16.823413 9.76506937,16.823413 C8.94380347,16.823413 8.14000026,15.6844968 7.37604017,15.4181751 L7.16789474,15.3394904 L7.05904162,15.3401938 C6.1257615,15.3401938 5.09023873,16.512544 5.00556545,17.7549658 L5,17.9173276 L4.99989474,18.1044904 L12.7933424,18.1049958 C13.475881,18.9810702 14.4262137,19.6596526 15.5303704,20.0331357 C15.4317048,20.0662977 15.327586,20.0883409 15.2200471,20.0986242 L15.080481,20.1052632 L4.44965772,20.1052632 C3.6964042,20.1052632 3.07691379,19.5300818 3.00663898,18.7951715 L3,18.6556054 L3,17.9173276 C3,15.7423081 4.71273737,13.4775352 6.86244535,13.3461947 L7.05904162,13.3401938 L7.56340171,13.3401938 Z M20.6272888,13.8410417 C21.110538,13.8410417 21.5022888,14.2327926 21.5022888,14.7160417 L21.5022888,14.9671861 C21.5022888,15.4504353 21.110538,15.8421861 20.6272888,15.8421861 L14.3727112,15.8421861 C13.889462,15.8421861 13.4977112,15.4504353 13.4977112,14.9671861 L13.4977112,14.7160417 C13.4977112,14.2327926 13.889462,13.8410417 14.3727112,13.8410417 L20.6272888,13.8410417 Z M9.76506937,4 C11.9002944,4 13.6308233,5.73052891 13.6308233,7.86575393 C13.6308233,9.93425317 12.0067625,11.6229546 9.96402062,11.7264784 L9.76506937,11.7315079 C7.62984435,11.7315079 5.89931545,10.0009789 5.89931545,7.86575393 C5.89931545,5.79725469 7.52337627,4.10855327 9.56611812,4.00502945 L9.76506937,4 Z M9.76506937,6 C8.73441385,6 7.89931545,6.83509841 7.89931545,7.86575393 C7.89931545,8.89640945 8.73441385,9.73150785 9.76506937,9.73150785 C10.7957249,9.73150785 11.6308233,8.89640945 11.6308233,7.86575393 C11.6308233,6.83509841 10.7957249,6 9.76506937,6 Z" id="Combined-Shape" fill="#000000" fill-rule="nonzero"></path>
+    </g>
+</svg></span>
+        <span class="label">Unassign Shadow</span>
+        <span class="native-size"></span>
+        <template class="svg-src">&lt;svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;
+    &lt;title&gt;Glyphs/Web Nav/Outlines/Carer -&lt;/title&gt;
+    &lt;g id="Glyphs/Web-Nav/Outlines/Carer--" stroke="none" fill="none"&gt;
+        &lt;g id="Icon" stroke-width="1" fill-rule="evenodd"&gt;
+            &lt;polygon id="Path" points="0 0 24 0 24 24 0 24"&gt;&lt;/polygon&gt;
+        &lt;/g&gt;
+        &lt;path d="M7.56340171,13.3401938 C8.23688852,13.6482461 8.97983811,14.823413 9.76506937,14.823413 C10.4521467,14.823413 11.1091645,13.6893008 11.7118436,13.4494018 L11.8676746,13.3824068 C11.7329096,13.8471816 11.6609522,14.3364636 11.6609522,14.8416139 C11.6609522,15.1158679 11.6821622,15.3854445 11.7231179,15.6489614 C11.0907165,16.0717465 10.433073,16.823413 9.76506937,16.823413 C8.94380347,16.823413 8.14000026,15.6844968 7.37604017,15.4181751 L7.16789474,15.3394904 L7.05904162,15.3401938 C6.1257615,15.3401938 5.09023873,16.512544 5.00556545,17.7549658 L5,17.9173276 L4.99989474,18.1044904 L12.7933424,18.1049958 C13.475881,18.9810702 14.4262137,19.6596526 15.5303704,20.0331357 C15.4317048,20.0662977 15.327586,20.0883409 15.2200471,20.0986242 L15.080481,20.1052632 L4.44965772,20.1052632 C3.6964042,20.1052632 3.07691379,19.5300818 3.00663898,18.7951715 L3,18.6556054 L3,17.9173276 C3,15.7423081 4.71273737,13.4775352 6.86244535,13.3461947 L7.05904162,13.3401938 L7.56340171,13.3401938 Z M20.6272888,13.8410417 C21.110538,13.8410417 21.5022888,14.2327926 21.5022888,14.7160417 L21.5022888,14.9671861 C21.5022888,15.4504353 21.110538,15.8421861 20.6272888,15.8421861 L14.3727112,15.8421861 C13.889462,15.8421861 13.4977112,15.4504353 13.4977112,14.9671861 L13.4977112,14.7160417 C13.4977112,14.2327926 13.889462,13.8410417 14.3727112,13.8410417 L20.6272888,13.8410417 Z M9.76506937,4 C11.9002944,4 13.6308233,5.73052891 13.6308233,7.86575393 C13.6308233,9.93425317 12.0067625,11.6229546 9.96402062,11.7264784 L9.76506937,11.7315079 C7.62984435,11.7315079 5.89931545,10.0009789 5.89931545,7.86575393 C5.89931545,5.79725469 7.52337627,4.10855327 9.56611812,4.00502945 L9.76506937,4 Z M9.76506937,6 C8.73441385,6 7.89931545,6.83509841 7.89931545,7.86575393 C7.89931545,8.89640945 8.73441385,9.73150785 9.76506937,9.73150785 C10.7957249,9.73150785 11.6308233,8.89640945 11.6308233,7.86575393 C11.6308233,6.83509841 10.7957249,6 9.76506937,6 Z" id="Combined-Shape" fill="#000000" fill-rule="nonzero"&gt;&lt;/path&gt;
+    &lt;/g&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Unassign" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -2262,7 +2409,7 @@
   </section>
 
   <section data-section-slug="inline">
-    <div class="section-head"><h2>Inline</h2><span class="count">191 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Inline</h2><span class="count">189 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -5129,36 +5276,6 @@
         <span class="native-size">20×20</span>
         <template class="svg-src">&lt;svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"&gt;
     &lt;path fill="currentColor" d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z" /&gt;
-  &lt;/svg&gt;</template>
-      </div>
-
-      <div class="card" tabindex="0" role="button" data-name="MenuCloseIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download MenuCloseIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />
-  </svg></span>
-        <span class="label">MenuCloseIcon</span>
-        <span class="native-size">24×24</span>
-        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"&gt;
-    &lt;polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" /&gt;
-  &lt;/svg&gt;</template>
-      </div>
-
-      <div class="card" tabindex="0" role="button" data-name="MenuRepeatIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download MenuRepeatIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="m2 9 3-3 3 3" /><path d="M13 18H7a2 2 0 0 1-2-2V6" /><path d="m22 15-3 3-3-3" /><path d="M11 6h6a2 2 0 0 1 2 2v10" />
-  </svg></span>
-        <span class="label">MenuRepeatIcon</span>
-        <span class="native-size">24×24</span>
-        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;
-    &lt;path d="m2 9 3-3 3 3" /&gt;&lt;path d="M13 18H7a2 2 0 0 1-2-2V6" /&gt;&lt;path d="m22 15-3 3-3-3" /&gt;&lt;path d="M11 6h6a2 2 0 0 1 2 2v10" /&gt;
   &lt;/svg&gt;</template>
       </div>
 

@@ -207,32 +207,39 @@ const ActionsSettingsIcon = ({ size = 24 }) => (
 );
 
 // ─── Bulk actions menu icons ────────────────────────────────────────────────
-// For the bulk actions menu, mirroring the schedule's own multi-select
-// menu in the unassigned swimlane. Repeat/Date/Close are copied from Icons/;
-// Unassign, Person Add/Remove, Adjust Time, Reset and Checkbox Checked are
-// Material Design stand-ins also saved to Icons/ — swap for PASS's own if
-// they turn up in Figma.
-const menuIcon = (d) => () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d={d} /></svg>
+// Copied from Icons/ (Ben's PASS icons), shown at 18×18 regardless of each
+// file's own viewBox. Reassign uses the same icon as Assign; Adjust date is
+// OfficeCalendarIcon (roster-settings/settings).
+const menuIcon = (viewBox, paths) => () => (
+  <svg width="18" height="18" viewBox={viewBox} fill="currentColor">{paths}</svg>
 )
-const MenuUnassignIcon = menuIcon('M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z')
-const MenuPersonAddIcon = menuIcon('M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z')
-const MenuPersonRemoveIcon = menuIcon('M14 8c0-2.21-1.79-4-4-4S6 5.79 6 8s1.79 4 4 4 4-1.79 4-4zm3 2v2h6v-2h-6zM2 18v2h16v-2c0-2.66-5.33-4-8-4s-8 1.34-8 4z')
-const MenuAdjustTimeIcon = menuIcon('M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z')
-const MenuDateIcon = menuIcon('M19 4H18V3C18 2.45 17.55 2 17 2C16.45 2 16 2.45 16 3V4H8V3C8 2.45 7.55 2 7 2C6.45 2 6 2.45 6 3V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 19C19 19.55 18.55 20 18 20H6C5.45 20 5 19.55 5 19V9H19V19ZM7 11H9V13H7V11ZM11 11H13V13H11V11ZM15 11H17V13H15V11ZM7 15H9V17H7V15ZM11 15H13V17H11V15ZM15 15H17V17H15V15Z')
-const MenuResetIcon = menuIcon('M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z')
-const MenuReinstateIcon = menuIcon('M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z')
-const MenuCloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />
+// Icons/Suggested Assignments.svg — multicolour, so it keeps its own fills.
+const MenuSuggestIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 72 72" fill="none">
+    <path d="M41.2202 3.19841L51.1749 19.9672L67.9855 29.8971C72.2607 32.4217 72.2607 38.593 67.9855 41.1177L51.1749 51.0476L41.2202 67.8164C38.6893 72.0809 32.5026 72.0809 29.9716 67.8164L20.017 51.0476L3.20638 41.1177C-1.06879 38.593 -1.06879 32.4217 3.20638 29.8971L20.017 19.9672L29.9716 3.19841C32.5026 -1.06614 38.6893 -1.06614 41.2202 3.19841Z" fill="#361843"/>
+    <path d="M26.9886 48.5443L6.26056 27.8678C4.78507 26.396 4.78507 24.0081 6.26056 22.5362L13.8712 14.9446C15.3467 13.4728 17.7405 13.4728 19.216 14.9446L31.4845 27.1843L55.5195 3.20732C56.9949 1.7355 59.3888 1.7355 60.8643 3.20732L68.4749 10.799C69.9504 12.2708 69.9504 14.6587 68.4749 16.1306L35.9839 48.5407C33.4993 51.0192 29.4715 51.0192 26.9886 48.5407V48.5443Z" fill="#9966E3"/>
+    <path d="M24.3669 38.9393C25.6231 38.9393 26.6415 37.4378 26.6415 35.5856C26.6415 33.7333 25.6231 32.2318 24.3669 32.2318C23.1106 32.2318 22.0923 33.7333 22.0923 35.5856C22.0923 37.4378 23.1106 38.9393 24.3669 38.9393Z" fill="#E7CCF5"/>
+    <path d="M38.4259 38.9393C40.3938 38.9393 41.9891 36.5873 41.9891 33.6859C41.9891 30.7845 40.3938 28.4324 38.4259 28.4324C36.4579 28.4324 34.8626 30.7845 34.8626 33.6859C34.8626 36.5873 36.4579 38.9393 38.4259 38.9393Z" fill="#E7CCF5"/>
   </svg>
 )
-// Icons/Repeat.svg (stroke-based, so stroke rather than fill).
-const MenuRepeatIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m2 9 3-3 3 3" /><path d="M13 18H7a2 2 0 0 1-2-2V6" /><path d="m22 15-3 3-3-3" /><path d="M11 6h6a2 2 0 0 1 2 2v10" />
-  </svg>
-)
+// Icons/Unassign Rounded.svg
+const MenuUnassignIcon = menuIcon('0 0 17 17', <path d="M8.32 4.5h.028a.67.67 0 0 1 .046.004L8.32 4.5a.67.67 0 0 1 .437.164l3.756 3.338a.667.667 0 0 1-.886.996l-2.64-2.347v7.182a.667.667 0 1 1-1.334 0V6.651l-2.64 2.347a.667.667 0 0 1-.882.004l-.06-.06a.667.667 0 0 1 .056-.94l3.75-3.334a.683.683 0 0 1 .084-.063l-.084.063A.668.668 0 0 1 8.32 4.5zM3.653 3.167c0-.369.299-.667.667-.667h8a.667.667 0 0 1 0 1.333h-8a.667.667 0 0 1-.667-.666z" fillRule="nonzero" />)
+// Icons/Assign.svg (also Reassign)
+const MenuAssignIcon = menuIcon('0 0 17 16', <path d="M7.018 4.863h4.666v1.193c0 .3.36.447.567.234l1.86-1.86a.33.33 0 0 0 0-.474l-1.86-1.86a.333.333 0 0 0-.567.24V3.53H7.018a3.333 3.333 0 0 0-3.334 3.333c0 .367.3.667.667.667.367 0 .667-.3.667-.667a2 2 0 0 1 2-2zm2.666 6.304H5.018V9.973a.33.33 0 0 0-.567-.233l-1.86 1.86a.33.33 0 0 0 0 .473l1.86 1.86c.207.207.567.06.567-.24V12.5h4.666a3.333 3.333 0 0 0 3.334-3.333c0-.367-.3-.667-.667-.667-.367 0-.667.3-.667.667a2 2 0 0 1-2 2z" />)
+// Icons/Add Shadow.svg
+const MenuAddShadowIcon = menuIcon('0 0 16 16', <path d="M5.042 8.893c.45.206.945.99 1.468.99.458 0 .896-.757 1.298-.917l.104-.045a3.487 3.487 0 0 0-.097 1.51c-.084.057-.169.122-.255.19l-.258.209c-.26.205-.525.386-.792.386-.547 0-1.083-.76-1.593-.937l-.138-.053h-.073c-.622 0-1.313.782-1.369 1.61l-.004.109v.125H8.53a3.892 3.892 0 0 0 1.824 1.285.904.904 0 0 1-.206.044l-.093.005H2.966a.967.967 0 0 1-.962-.874L2 12.437v-.492c0-1.45 1.142-2.96 2.575-3.048l.131-.004h.336zm6.625-1.667c.368 0 .667.299.667.667v1.334h1.334a.667.667 0 0 1 0 1.334h-1.335v1.335a.667.667 0 1 1-1.333 0V10.56H9.665a.667.667 0 1 1 0-1.334h1.333V7.893c0-.368.3-.667.668-.667zM6.51 2.666a2.577 2.577 0 0 1 .133 5.152l-.133.003a2.577 2.577 0 0 1-.133-5.151l.133-.003zM6.51 4a1.244 1.244 0 1 0 0 2.487A1.244 1.244 0 0 0 6.51 4z" />)
+// Icons/Unassign Shadow.svg
+const MenuUnassignShadowIcon = menuIcon('0 0 24 24', <path d="M7.56340171,13.3401938 C8.23688852,13.6482461 8.97983811,14.823413 9.76506937,14.823413 C10.4521467,14.823413 11.1091645,13.6893008 11.7118436,13.4494018 L11.8676746,13.3824068 C11.7329096,13.8471816 11.6609522,14.3364636 11.6609522,14.8416139 C11.6609522,15.1158679 11.6821622,15.3854445 11.7231179,15.6489614 C11.0907165,16.0717465 10.433073,16.823413 9.76506937,16.823413 C8.94380347,16.823413 8.14000026,15.6844968 7.37604017,15.4181751 L7.16789474,15.3394904 L7.05904162,15.3401938 C6.1257615,15.3401938 5.09023873,16.512544 5.00556545,17.7549658 L5,17.9173276 L4.99989474,18.1044904 L12.7933424,18.1049958 C13.475881,18.9810702 14.4262137,19.6596526 15.5303704,20.0331357 C15.4317048,20.0662977 15.327586,20.0883409 15.2200471,20.0986242 L15.080481,20.1052632 L4.44965772,20.1052632 C3.6964042,20.1052632 3.07691379,19.5300818 3.00663898,18.7951715 L3,18.6556054 L3,17.9173276 C3,15.7423081 4.71273737,13.4775352 6.86244535,13.3461947 L7.05904162,13.3401938 L7.56340171,13.3401938 Z M20.6272888,13.8410417 C21.110538,13.8410417 21.5022888,14.2327926 21.5022888,14.7160417 L21.5022888,14.9671861 C21.5022888,15.4504353 21.110538,15.8421861 20.6272888,15.8421861 L14.3727112,15.8421861 C13.889462,15.8421861 13.4977112,15.4504353 13.4977112,14.9671861 L13.4977112,14.7160417 C13.4977112,14.2327926 13.889462,13.8410417 14.3727112,13.8410417 L20.6272888,13.8410417 Z M9.76506937,4 C11.9002944,4 13.6308233,5.73052891 13.6308233,7.86575393 C13.6308233,9.93425317 12.0067625,11.6229546 9.96402062,11.7264784 L9.76506937,11.7315079 C7.62984435,11.7315079 5.89931545,10.0009789 5.89931545,7.86575393 C5.89931545,5.79725469 7.52337627,4.10855327 9.56611812,4.00502945 L9.76506937,4 Z M9.76506937,6 C8.73441385,6 7.89931545,6.83509841 7.89931545,7.86575393 C7.89931545,8.89640945 8.73441385,9.73150785 9.76506937,9.73150785 C10.7957249,9.73150785 11.6308233,8.89640945 11.6308233,7.86575393 C11.6308233,6.83509841 10.7957249,6 9.76506937,6 Z" fillRule="nonzero" />)
+// Icons/Adjust Times.svg
+const MenuAdjustTimeIcon = menuIcon('0 0 17 16', <path d="M4.874 3.088a6.003 6.003 0 0 1 8.36 1.47.67.67 0 0 1 .064.113l.758-.338a.5.5 0 0 1 .69.566l-.542 2.426a.5.5 0 0 1-.733.327l-2.166-1.22a.5.5 0 0 1 .042-.893l.72-.32A4.67 4.67 0 0 0 5.64 4.18a4.664 4.664 0 0 0-1.142 6.497 4.664 4.664 0 0 0 6.495 1.149.667.667 0 0 1 .765 1.092 5.997 5.997 0 0 1-8.352-1.477 5.997 5.997 0 0 1 1.47-8.353zM8.32 4.667c.342 0 .624.257.662.589l.005.077v3.031l1.474.873a.667.667 0 0 1 .27.844l-.035.069a.667.667 0 0 1-.844.27l-.07-.035-1.801-1.066a.667.667 0 0 1-.322-.486l-.006-.088V5.333c0-.368.299-.666.667-.666z" fillRule="nonzero" />)
+// OfficeCalendarIcon (roster-settings/settings)
+const MenuDateIcon = menuIcon('0 0 24 24', <path d="M16 3a1 1 0 0 1 1 1v1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1V4a1 1 0 1 1 2 0v1h6V4a1 1 0 0 1 1-1zm1.5 6h-11a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5zm-6 2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5h3z" />)
+// Icons/Reset.svg
+const MenuResetIcon = menuIcon('0 0 24 24', <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />)
+// Icons/Cancel.svg
+const MenuCancelIcon = menuIcon('0 0 24 24', <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" />)
+// Icons/Checkbox Checked.svg
+const MenuReinstateIcon = menuIcon('0 0 24 24', <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z" />)
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -591,20 +598,21 @@ function useDevToolActive() {
 // not <body>, so Dev Mode/Dev Edit can select and edit it.
 
 const BULK_MENU_ACTIONS = [
+  { key: 'suggest', label: 'Suggest assignments', Icon: MenuSuggestIcon }, // new feature, styled to stand out
   { key: 'unassign', label: 'Unassign', Icon: MenuUnassignIcon },
-  { key: 'assign', label: 'Assign', Icon: MenuRepeatIcon },
-  { key: 'reassign', label: 'Reassign', Icon: MenuRepeatIcon },
-  { key: 'shadow', label: 'Add/Reassign shadow', Icon: MenuPersonAddIcon },
-  { key: 'unshadow', label: 'Unassign shadow', Icon: MenuPersonRemoveIcon },
+  { key: 'assign', label: 'Assign', Icon: MenuAssignIcon },
+  { key: 'reassign', label: 'Reassign', Icon: MenuAssignIcon },
+  { key: 'shadow', label: 'Add/Reassign shadow', Icon: MenuAddShadowIcon },
+  { key: 'unshadow', label: 'Unassign shadow', Icon: MenuUnassignShadowIcon },
   { key: 'times', label: 'Adjust times', Icon: MenuAdjustTimeIcon },
   { key: 'date', label: 'Adjust date', Icon: MenuDateIcon },
   { key: 'reset', label: 'Reset times', Icon: MenuResetIcon },
-  { key: 'cancel', label: 'Cancel all', Icon: MenuCloseIcon },
+  { key: 'cancel', label: 'Cancel all', Icon: MenuCancelIcon },
   { key: 'reinstate', label: 'Reinstate cancelled', Icon: MenuReinstateIcon },
 ]
 // Clickable in the live menu for unassigned visits (per Ben). Only Assign
 // is built here; the others select but show a "not built" note.
-const BULK_MENU_ENABLED = new Set(['assign', 'shadow', 'times', 'cancel'])
+const BULK_MENU_ENABLED = new Set(['suggest', 'assign', 'shadow', 'times', 'cancel'])
 const BULK_MENU_WIDTH = 530 // the live swimlane menu's width
 
 // `title` names what's being acted on when it's a single shift (opened
@@ -657,7 +665,7 @@ function BulkActionsMenu({ title, count, start, end, anchorEl, container, onClos
             <li key={key}>
               <button
                 type="button"
-                className={`ds-bulk-menu-item${action === key ? ' active' : ''}`}
+                className={`ds-bulk-menu-item${key === 'suggest' ? ' ds-bulk-menu-item--suggest' : ''}${action === key ? ' active' : ''}`}
                 disabled={!BULK_MENU_ENABLED.has(key)}
                 onClick={() => setAction(key)}
               >
