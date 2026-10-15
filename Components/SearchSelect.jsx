@@ -7,10 +7,12 @@ import { createPortal } from 'react-dom'
 // sharing its field styling (.sms-search-bar). First built for the bulk
 // assign panel in schedule/daily-schedule.
 //
-// The dropdown is portaled to document.body and positioned from the field's
-// own rect (same approach as FilterDropdown/IOSCalendarPopover), so it
-// overlays rather than being clipped by a scrolling ancestor such as
-// ModalPanel's body.
+// The dropdown is portaled (to document.body by default) and positioned
+// from the field's own rect (same approach as FilterDropdown/
+// IOSCalendarPopover), so it overlays rather than being clipped by a
+// scrolling ancestor such as ModalPanel's body. Pass `portalContainer` (a
+// prototype's own pageRef element) to keep it inside the area Dev Mode/
+// Dev Edit can inspect — it's position:fixed either way.
 
 const SearchIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -29,7 +31,7 @@ const ChevronDownIcon = () => (
 // variant: 'search' (search icon on the left, the default) or 'select'
 // (looks like a dropdown: chevron on the right, still typeable) — the
 // latter matches the schedule's own bulk-actions "Assign visits to" field.
-export default function SearchSelect({ items, value, onChange, placeholder = 'Search...', variant = 'search' }) {
+export default function SearchSelect({ items, value, onChange, placeholder = 'Search...', variant = 'search', portalContainer }) {
   const selected = items.find(i => i.id === value) || null
   const [query, setQuery] = useState(selected?.name ?? '')
   const [open, setOpen] = useState(false)
@@ -120,7 +122,7 @@ export default function SearchSelect({ items, value, onChange, placeholder = 'Se
           ))}
           {results.length === 0 && <div className="ss-empty">No results found</div>}
         </div>,
-        document.body
+        portalContainer || document.body
       )}
     </>
   )

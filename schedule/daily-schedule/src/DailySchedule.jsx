@@ -19,6 +19,7 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { useDevEditActive, useDevEditStickyDismiss } from '../../../Components/devEditHoverSticky'
+import { subscribeToState } from '../../../Components/devToolbarBus'
 import { AreaTag } from './Tags'
 import {
   UNASSIGNED_VISITS, UNASSIGNED_SHIFTS, RECOMMENDED_EMPLOYEES, SAMPLE_EMPLOYEES, AREAS,
@@ -206,7 +207,7 @@ const ActionsSettingsIcon = ({ size = 24 }) => (
 );
 
 // ─── Bulk actions menu icons ────────────────────────────────────────────────
-// For the ?version=actions menu, mirroring the schedule's own multi-select
+// For the bulk actions menu, mirroring the schedule's own multi-select
 // menu in the unassigned swimlane. Repeat/Date/Close are copied from Icons/;
 // Unassign, Person Add/Remove, Adjust Time, Reset and Checkbox Checked are
 // Material Design stand-ins also saved to Icons/ — swap for PASS's own if
@@ -273,7 +274,7 @@ function sortVisits(visits, sort) {
       case 'duration':   return dir * ((toMinutes(a.end) - toMinutes(a.start)) - (toMinutes(b.end) - toMinutes(b.start)))
       case 'area':       return dir * a.area.localeCompare(b.area)
       case 'visitType':  return dir * a.visitType.localeCompare(b.visitType)
-      case 'assigned':   return dir * (a.employeesRequired - b.employeesRequired)
+      case 'assigned':   return dir * ((assignedOf(a).length - assignedOf(b).length) || (a.employeesRequired - b.employeesRequired))
       default: return 0
     }
   })
@@ -286,6 +287,21 @@ function sortVisits(visits, sort) {
 const shiftVisitType = (shift) => {
   const types = [...new Set(shift.visits.map(v => v.visitType))]
   return types.length === 1 ? types[0] : 'Mixed'
+}
+
+// A double-up visit (employeesRequired 2) is two instances in PASS, each
+// assigned separately — so a visit stays in this list, showing e.g. 1/2,
+// until every required employee is assigned. `assigned` holds whoever has
+// been assigned so far (absent = nobody).
+const assignedOf = (v) => v.assigned || []
+const stillNeeds = (v) => v.employeesRequired - assignedOf(v).length
+
+// An employee object in the shape Components/EventPanel's slots expect —
+// the recommended employee's full record where there is one, otherwise
+// just enough to render the name in a filled slot.
+const employeeByName = (name) => RECOMMENDED_EMPLOYEES.find(e => e.name === name) || {
+  id: `emp-${name}`, name, title: '', type: SAMPLE_EMPLOYEES.find(e => e.name === name)?.type || '',
+  visited: '—', travel: '—', fill: 0, avatarBg: 'var(--availability-4-blue-tint)',
 }
 
 // Bulk-selection keys. Selection is per visit — a shift row's checkbox
@@ -493,8 +509,10 @@ function VisitHoverCard({ visit, rect, cursorX, visitDate, interactive }) {
       <div className="ds-shift-hover-row"><HoverPinIcon /> {deriveAddress(visit)}</div>
       <div className="ds-shift-hover-row"><HoverPhoneIcon /> {derivePhone(visit)}</div>
       <div className="ds-shift-hover-divider" />
-      <div className="ds-shift-hover-assigned">0/{visit.employeesRequired} employees assigned</div>
-      <div className="ds-shift-hover-row"><HoverPersonIcon /> Unassigned</div>
+      <div className="ds-shift-hover-assigned">{assignedOf(visit).length}/{visit.employeesRequired} employees assigned</div>
+      {assignedOf(visit).length > 0
+        ? assignedOf(visit).map(e => <div key={e.id} className="ds-shift-hover-row"><HoverPersonIcon /> {e.name}</div>)
+        : <div className="ds-shift-hover-row"><HoverPersonIcon /> Unassigned</div>}
       <div className="ds-visit-hover-warning">
         <HoverWarningIcon /> Visit requires {visit.employeesRequired} employee{visit.employeesRequired > 1 ? 's' : ''}
       </div>
@@ -543,64 +561,34 @@ function CheckBox({ checked, partial = false, onChange, label }) {
   )
 }
 
-// ─── Bulk assign panel ───────────────────────────────────────────────────────
-// Assigns every selected visit to one employee. Modelled on the schedule's
-// existing multi-select "Assign" in the unassigned swimlane, which has no
-// recommendations — so this is a plain employee search, not the single-
-// visit EventPanel with its recommended employees. No overlap warning here:
-// PASS flags overlapping visits when the schedule is published.
+// Employees offered by the bulk actions menu's "Assign visits to"/"Assign shift to" field.
+// No recommendations, matching the swimlane's own multi-select Assign. No
+// overlap warning either: PASS flags overlapping visits on publish.
 
 const BULK_EMPLOYEES = [...new Set([...RECOMMENDED_EMPLOYEES, ...SAMPLE_EMPLOYEES].map(e => e.name))]
   .sort()
   .map(name => ({ id: name, name }))
 
-function BulkAssignPanel({ items, onClose, onAssign }) {
-  const [employee, setEmployee] = useState(null)
-
-  const sorted = [...items].sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
-  const firstStart = sorted[0]?.start
-  const lastEnd = sorted.reduce((max, v) => toMinutes(v.end) > toMinutes(max) ? v.end : max, sorted[0]?.end)
-
-  return (
-    <ModalPanel
-      open
-      onClose={onClose}
-      title={`Assign ${items.length} visit${items.length === 1 ? '' : 's'}`}
-      width={648}
-      footer={
-        <div className="ds-bulk-footer">
-          <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
-          <button className="round-btn primary-btn" disabled={!employee} onClick={() => onAssign(employee)}>Assign</button>
-        </div>
-      }
-    >
-      <div className="ds-bulk-body">
-        <p className="ds-bulk-summary">Starting from {firstStart}, ends {lastEnd}</p>
-        <ul className="ds-bulk-visits">
-          {sorted.map(v => (
-            <li key={v.key}>
-              <span className="ds-bulk-visit-time">{v.start} – {v.end}</span>
-              <span className="ds-bulk-visit-name">{v.customer}</span>
-              <span className="ds-bulk-visit-meta">{v.visitType}{v.shiftName ? ` · ${v.shiftName}` : ''}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="ds-bulk-field">
-          <label className="ds-bulk-label">Employee</label>
-          <SearchSelect items={BULK_EMPLOYEES} value={employee} onChange={setEmployee} placeholder="Search employees" />
-        </div>
-      </div>
-    </ModalPanel>
-  )
+// True while Dev Mode, Dev Edit or Dev Comments is on. Popovers here stay
+// open in that time instead of closing on an outside click/Escape, so they
+// can be inspected and edited (turning a tool on is itself a click
+// outside the popover).
+function useDevToolActive() {
+  const [active, setActive] = useState({})
+  useEffect(() => subscribeToState((feature, isActive) => {
+    setActive(prev => ({ ...prev, [feature]: isActive }))
+  }), [])
+  return Object.values(active).some(Boolean)
 }
 
-// ─── Bulk actions menu (?version=actions) ───────────────────────────────────
+// ─── Bulk actions menu ───────────────────────────────────
 // The same menu the schedule shows when several visits are multi-selected
 // in the unassigned swimlane, opened from an Actions button instead of
-// Assign. Only Assign works here; the other actions are shown disabled.
+// Assign. Add/Reassign shadow, Adjust times and Cancel all are clickable,
+// as in the live menu, but only Assign is built; the rest are disabled.
 // Portaled under the Actions button so the list modal's scrolling body
-// can't clip it.
+// can't clip it — into the prototype's own page element (`container`),
+// not <body>, so Dev Mode/Dev Edit can select and edit it.
 
 const BULK_MENU_ACTIONS = [
   { key: 'unassign', label: 'Unassign', Icon: MenuUnassignIcon },
@@ -614,18 +602,34 @@ const BULK_MENU_ACTIONS = [
   { key: 'cancel', label: 'Cancel all', Icon: MenuCloseIcon },
   { key: 'reinstate', label: 'Reinstate cancelled', Icon: MenuReinstateIcon },
 ]
+// Clickable in the live menu for unassigned visits (per Ben). Only Assign
+// is built here; the others select but show a "not built" note.
+const BULK_MENU_ENABLED = new Set(['assign', 'shadow', 'times', 'cancel'])
 const BULK_MENU_WIDTH = 530 // the live swimlane menu's width
 
-function BulkActionsMenu({ count, start, end, anchorEl, onClose, onAssign }) {
+// `title` names what's being acted on when it's a single shift (opened
+// from that shift's own Assign button) rather than a ticked selection.
+function BulkActionsMenu({ title, count, start, end, anchorEl, container, onClose, onAssign }) {
   // Assign is the only working action, so it opens already selected.
   const [action, setAction] = useState('assign')
   const [employee, setEmployee] = useState(null)
   const menuRef = useRef(null)
   const rect = anchorEl.getBoundingClientRect()
+  const devToolActive = useDevToolActive()
+  // Opens below its button; flips above when there isn't room below (a
+  // shift row's Assign button can sit near the bottom of the list).
+  const [top, setTop] = useState(rect.bottom + 8)
+  useLayoutEffect(() => {
+    const h = menuRef.current.offsetHeight
+    if (rect.bottom + 8 + h > window.innerHeight - 16 && rect.top - 8 - h >= 16) setTop(rect.top - 8 - h)
+  }, [])
 
   useEffect(() => {
+    if (devToolActive) return
     function handleMouseDown(e) {
       if (menuRef.current?.contains(e.target) || anchorEl.contains(e.target) || e.target.closest('.ss-dropdown')) return
+      // The dev toolbar and its panels aren't "outside" in any useful sense.
+      if (e.target.closest('[data-devtoolbar-ui], [data-devmode-ui], [data-devedit-ui], [data-devcomments-ui], [data-wireframeaccess-ui]')) return
       onClose()
     }
     function handleKeyDown(e) { if (e.key === 'Escape') onClose() }
@@ -635,16 +639,16 @@ function BulkActionsMenu({ count, start, end, anchorEl, onClose, onAssign }) {
       document.removeEventListener('mousedown', handleMouseDown)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [anchorEl, onClose])
+  }, [anchorEl, onClose, devToolActive])
 
   return createPortal(
     <div
       ref={menuRef}
       className="ds-bulk-menu"
-      style={{ top: rect.bottom + 8, left: Math.max(16, rect.right - BULK_MENU_WIDTH), width: BULK_MENU_WIDTH }}
+      style={{ top, left: Math.max(16, rect.right - BULK_MENU_WIDTH), width: BULK_MENU_WIDTH }}
     >
       <div className="ds-bulk-menu-header">
-        <h4>{count} visit{count === 1 ? '' : 's'} selected</h4>
+        <h4>{title ? `${title} · ${count} visit${count === 1 ? '' : 's'}` : `${count} visit${count === 1 ? '' : 's'} selected`}</h4>
         <p>Starting from {start}, ends {end}</p>
       </div>
       <div className="ds-bulk-menu-body">
@@ -654,7 +658,7 @@ function BulkActionsMenu({ count, start, end, anchorEl, onClose, onAssign }) {
               <button
                 type="button"
                 className={`ds-bulk-menu-item${action === key ? ' active' : ''}`}
-                disabled={key !== 'assign'}
+                disabled={!BULK_MENU_ENABLED.has(key)}
                 onClick={() => setAction(key)}
               >
                 <Icon /> {label}
@@ -662,26 +666,26 @@ function BulkActionsMenu({ count, start, end, anchorEl, onClose, onAssign }) {
             </li>
           ))}
         </ul>
+        {action && action !== 'assign' && (
+          <div className="ds-bulk-menu-pane">
+            <p className="ds-bulk-menu-note">{BULK_MENU_ACTIONS.find(a => a.key === action).label} isn't built in this prototype.</p>
+          </div>
+        )}
         {action === 'assign' && (
           <div className="ds-bulk-menu-pane">
-            <label className="ds-bulk-label">Assign visits to</label>
-            <SearchSelect items={BULK_EMPLOYEES} value={employee} onChange={setEmployee} placeholder="Select" variant="select" />
+            {/* `title` is only set when the menu was opened from a shift's own Assign button. */}
+            <label className="ds-bulk-label">{title ? 'Assign shift to' : 'Assign visits to'}</label>
+            <SearchSelect items={BULK_EMPLOYEES} value={employee} onChange={setEmployee} placeholder="Select" variant="select" portalContainer={container} />
             <button className="round-btn primary-btn ds-bulk-menu-submit" disabled={!employee} onClick={() => onAssign(employee)}>Assign visits</button>
           </div>
         )}
       </div>
     </div>,
-    document.body
+    container
   )
 }
 
 // ─── Main component ──────────────────────────────────────────────────────────
-
-// Two versions of the bulk flow, compared side by side:
-//   default            — an Assign button opening BulkAssignPanel
-//   ?version=actions   — an Actions button opening BulkActionsMenu, the
-//                        swimlane's own multi-select menu
-const BULK_VERSION = new URLSearchParams(window.location.search).get('version') === 'actions' ? 'actions' : 'assign'
 
 export default function DailySchedule() {
   const pageRef = useRef(null)
@@ -738,7 +742,6 @@ export default function DailySchedule() {
   // shiftVisitKey). Kept across pages, so visits can be picked from more
   // than one page before assigning them together.
   const [selectedKeys, setSelectedKeys] = useState(() => new Set())
-  const [bulkAssignOpen, setBulkAssignOpen] = useState(false)
   const [bulkMenuOpen, setBulkMenuOpen] = useState(false)
   const actionsBtnRef = useRef(null)
   const [toast, setToast] = useState(null)
@@ -763,10 +766,10 @@ export default function DailySchedule() {
   // value can never paint while the list isn't visible), and the effect
   // re-runs on every assign-panel open AND close (keyed on assignVisit
   // itself), so whatever got captured is dropped before the list reappears.
-  const hoverCardAllowed = listModalOpen && !assignVisit && !bulkAssignOpen
+  const hoverCardAllowed = listModalOpen && !assignVisit
   useEffect(() => {
     setHoverCard(null)
-  }, [listModalOpen, assignVisit, bulkAssignOpen])
+  }, [listModalOpen, assignVisit])
 
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -848,6 +851,14 @@ export default function DailySchedule() {
   // moment 3 visits collapse into 1 shift row.
   const totalUnassignedVisits = filteredVisits.length + filteredShifts.reduce((sum, s) => sum + s.visits.length, 0)
 
+  // Total unassigned time for the list modal's title, e.g. "21 hrs, 45 mins".
+  // Same visits counted above, summed by duration.
+  const totalUnassignedMinutes = [...filteredVisits, ...filteredShifts.flatMap(s => s.visits)]
+    .reduce((sum, v) => sum + (toMinutes(v.end) - toMinutes(v.start)), 0)
+  const unassignedHrs = Math.floor(totalUnassignedMinutes / 60)
+  const unassignedMins = totalUnassignedMinutes % 60
+  const totalUnassignedTime = `${unassignedHrs} ${unassignedHrs === 1 ? 'hr' : 'hrs'}, ${unassignedMins} ${unassignedMins === 1 ? 'min' : 'mins'}`
+
   // List view pagination — Components/Pagination.jsx, same wiring as
   // schedule/leave-requests' own table. Paginates top-level rows only — a
   // shift's own nested visit rows render as part of their parent shift's
@@ -907,18 +918,28 @@ export default function DailySchedule() {
   // selected keeps the rest, same as assigning its visits one at a time.
   const handleBulkAssign = (employeeName) => {
     const keys = new Set(selectedItems.map(i => i.key))
-    setVisits(prev => prev.filter(v => !keys.has(visitKey(v.id))))
+    const employee = employeeByName(employeeName)
+    // Each selected visit gets this employee in its next empty slot. A
+    // double-up that still needs someone else stays in the list.
+    let stillShort = 0
+    const fill = (v) => {
+      if (assignedOf(v).some(e => e.name === employeeName)) return v
+      const next = { ...v, assigned: [...assignedOf(v), employee] }
+      if (stillNeeds(next) > 0) { stillShort++; return next }
+      return null
+    }
+    setVisits(prev => prev.map(v => keys.has(visitKey(v.id)) ? fill(v) : v).filter(Boolean))
     setShifts(prev => prev
-      .map(s => ({ ...s, visits: s.visits.filter(sv => !keys.has(shiftVisitKey(s.id, sv.id))) }))
+      .map(s => ({ ...s, visits: s.visits.map(sv => keys.has(shiftVisitKey(s.id, sv.id)) ? fill(sv) : sv).filter(Boolean) }))
       .filter(s => s.visits.length > 0))
     const count = selectedItems.length
     setSelectedKeys(new Set())
-    setBulkAssignOpen(false)
     setBulkMenuOpen(false)
     clearTimeout(toastTimer.current)
-    setToast(`Assigned ${employeeName} to ${count} visit${count === 1 ? '' : 's'}`)
+    setToast(`Assigned ${employeeName} to ${count} visit${count === 1 ? '' : 's'}${stillShort ? ` · ${stillShort} still need${stillShort === 1 ? 's' : ''} another employee` : ''}`)
     toastTimer.current = setTimeout(() => setToast(null), 3000)
   }
+
 
   const toggleShiftExpanded = (id) => setExpandedShiftIds(prev => {
     const next = new Set(prev)
@@ -926,16 +947,24 @@ export default function DailySchedule() {
     return next
   })
 
-  // Assigning the shift as a whole vs. assigning one visit within it are
-  // two different actions with two different outcomes on Save (see
-  // handleAssignSave below) — both open the same EventPanel, distinguished
-  // only by `assignKind` (and `shiftId` for the nested-visit case) carried
-  // on the synthesized object passed to setAssignVisit.
-  const handleAssignShift = (shift) => setAssignVisit({
-    id: shift.id, customer: shift.customer, start: shift.start, end: shift.end,
-    visitType: 'Shift', employeesRequired: shift.employeesRequired,
-    assignKind: 'shift',
-  })
+  // A whole shift is assigned through the same Actions menu as a ticked
+  // selection — as in the live product, where assigning a shift shows the
+  // multi-select options rather than the event panel. It acts on that
+  // shift's visits only and leaves any ticked visits alone. A single visit
+  // inside a shift still opens the event panel, like a standalone visit.
+  const [shiftMenu, setShiftMenu] = useState(null) // { shiftId, anchorEl } | null
+  const openShiftMenu = (shift, anchorEl) => { setBulkMenuOpen(false); setShiftMenu({ shiftId: shift.id, anchorEl }) }
+  const menuShift = shiftMenu && shifts.find(sh => sh.id === shiftMenu.shiftId)
+  // Both menus are anchored inside the list modal, so they go when it does.
+  useEffect(() => { if (!listModalOpen) { setShiftMenu(null); setBulkMenuOpen(false) } }, [listModalOpen])
+  const handleShiftMenuAssign = (employeeName) => {
+    setShifts(prev => prev.filter(sh => sh.id !== menuShift.id))
+    setShiftMenu(null)
+    clearTimeout(toastTimer.current)
+    setToast(`Assigned ${employeeName} to ${menuShift.customer}`)
+    toastTimer.current = setTimeout(() => setToast(null), 3000)
+  }
+
   const handleAssignShiftVisit = (shiftId, visit) => setAssignVisit({ ...visit, assignKind: 'shiftVisit', shiftId })
 
   // Fires from Components/EventPanel's own Save/Accept-assignment action
@@ -943,37 +972,40 @@ export default function DailySchedule() {
   // panel, same as the original absent-employee prototype's own flow).
   // Per the ticket's own scope, "unassigned" means zero carers at all, so
   // the visit leaves this list the moment Save completes with anyone in a
-  // slot — regardless of whether every required slot got filled. A shift
-  // assignment removes the whole shift (every visit in it is now covered
-  // by whoever was just assigned); a single shift-visit assignment only
-  // removes that one visit from its shift, and the shift itself disappears
-  // too once its last remaining visit has been individually assigned.
+  // slot — regardless of whether every required slot got filled. A visit
+  // inside a shift only leaves its shift, and the shift itself disappears
+  // once its last remaining visit has been individually assigned.
   const handleAssignSave = (slots) => {
-    const assignedNames = slots.filter(Boolean).map(s => s.name)
-    if (assignVisit.assignKind === 'shift') {
-      setShifts(prev => prev.filter(s => s.id !== assignVisit.id))
-    } else if (assignVisit.assignKind === 'shiftVisit') {
+    const filled = slots.filter(Boolean)
+    const before = new Set(assignedOf(assignVisit).map(e => e.id))
+    const added = filled.filter(e => !before.has(e.id)).map(e => e.name)
+    const done = filled.length >= assignVisit.employeesRequired
+    // Fully assigned → leaves the list; a double-up with one of two filled
+    // stays, showing who's on it and that another employee is needed.
+    const update = (v) => done ? null : { ...v, assigned: filled }
+    if (assignVisit.assignKind === 'shiftVisit') {
       setShifts(prev => prev
-        .map(s => s.id === assignVisit.shiftId ? { ...s, visits: s.visits.filter(sv => sv.id !== assignVisit.id) } : s)
+        .map(s => s.id === assignVisit.shiftId ? { ...s, visits: s.visits.map(sv => sv.id === assignVisit.id ? update(sv) : sv).filter(Boolean) } : s)
         .filter(s => s.visits.length > 0))
     } else {
-      setVisits(prev => prev.filter(v => v.id !== assignVisit.id))
+      setVisits(prev => prev.map(v => v.id === assignVisit.id ? update(v) : v).filter(Boolean))
     }
     setAssignVisit(null)
     clearTimeout(toastTimer.current)
-    const target = assignVisit.assignKind === 'shift' ? `${assignVisit.customer} shift` : `${assignVisit.customer}'s visit`
-    setToast(`Assigned ${assignedNames.join(' and ')} to ${target}`)
+    const still = assignVisit.employeesRequired - filled.length
+    setToast(`Assigned ${added.join(' and ') || filled.map(e => e.name).join(' and ')} to ${assignVisit.customer}'s visit${done ? '' : ` · ${still} more employee needed`}`)
     toastTimer.current = setTimeout(() => setToast(null), 3000)
   }
+
 
   const isDailyEmployeesView = viewBy === 'employees' && period === 'daily'
 
   return (
     <>
       <DevToolbar>
-        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
         <DevMode containerRef={pageRef} />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
@@ -1141,9 +1173,9 @@ export default function DailySchedule() {
             finishes (Save or Close) and the office user can carry on
             working through the rest of the list without re-opening it. */}
         <ModalPanel
-          open={listModalOpen && !assignVisit && !bulkAssignOpen}
+          open={listModalOpen && !assignVisit}
           onClose={() => setListModalOpen(false)}
-          title="Unassigned visits"
+          title={`Unassigned visits (${totalUnassignedVisits} ${totalUnassignedVisits === 1 ? 'visit' : 'visits'}, ${totalUnassignedTime})`}
           width={1216}
           footer={
             <Pagination
@@ -1159,18 +1191,14 @@ export default function DailySchedule() {
             {selectedItems.length > 0 && <span className="ds-selection-range">Starting from {selectionStart}, ends {selectionEnd}</span>}
             <div className="ds-selection-actions">
               {selectedItems.length > 0 && <button className="clear-btn" onClick={clearSelection}>Clear selection</button>}
-              {BULK_VERSION === 'actions' ? (
-                <button
+              <button
                   ref={actionsBtnRef}
                   className="round-btn tertiary-btn btn-icon-left btn-icon-right"
                   disabled={selectedItems.length === 0}
-                  onClick={() => setBulkMenuOpen(o => !o)}
+                  onClick={() => { setShiftMenu(null); setBulkMenuOpen(o => !o) }}
                 >
                   <ActionsSettingsIcon size={20} /> Actions <ChevronDown size={24} />
                 </button>
-              ) : (
-                <button className="round-btn primary-btn" disabled={selectedItems.length === 0} onClick={() => setBulkAssignOpen(true)}>Assign</button>
-              )}
             </div>
           </div>
           <div className="ds-list-modal-body table-wrap">
@@ -1215,7 +1243,7 @@ export default function DailySchedule() {
                   <Fragment key={row.id}>
                     <tr
                       className="data-row ds-shift-row"
-                      onClick={() => handleAssignShift(row)}
+                      onClick={() => toggleShiftExpanded(row.id)}
                     >
                       <td className="check-col" onClick={e => e.stopPropagation()}>
                         <CheckBox {...checkState(rowKeys(row))} onChange={() => toggleKeys(rowKeys(row))} label={`Select all visits in ${row.customer}`} />
@@ -1236,10 +1264,10 @@ export default function DailySchedule() {
                       <td className="nowrap">{fmtDuration(row.start, row.end)}</td>
                       <td><AreaTag area={row.area} /></td>
                       <td>{row.visitType}</td>
-                      <td className="td-num">0/{row.employeesRequired}</td>
+                      <td className="td-num">{assignedOf(row).length}/{row.employeesRequired}</td>
                       {infoCell({ type: 'shift', shift: row }, `Details for ${row.customer}`)}
                       <td>
-                        <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShift(row) }}>Assign</button>
+                        <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); openShiftMenu(row, e.currentTarget) }}>Assign</button>
                       </td>
                     </tr>
                     {expandedShiftIds.has(row.id) && row.visits.map(sv => (
@@ -1263,7 +1291,7 @@ export default function DailySchedule() {
                         <td className="nowrap">{fmtDuration(sv.start, sv.end)}</td>
                         <td><AreaTag area={row.area} /></td>
                         <td>{sv.visitType}</td>
-                        <td className="td-num">0/{sv.employeesRequired}</td>
+                        <td className="td-num">{assignedOf(sv).length}/{sv.employeesRequired}</td>
                         {infoCell({ type: 'visit', visit: { ...sv, area: row.area } }, `Details for ${sv.customer}'s visit`)}
                         <td>
                           <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); handleAssignShiftVisit(row.id, sv) }}>Assign</button>
@@ -1292,7 +1320,7 @@ export default function DailySchedule() {
                     <td className="nowrap">{fmtDuration(row.start, row.end)}</td>
                     <td><AreaTag area={row.area} /></td>
                     <td>{row.visitType}</td>
-                    <td className="td-num">0/{row.employeesRequired}</td>
+                    <td className="td-num">{assignedOf(row).length}/{row.employeesRequired}</td>
                     {infoCell({ type: 'visit', visit: row }, `Details for ${row.customer}'s visit`)}
                     <td>
                       <button className="round-btn secondary-btn ds-assign-btn" onClick={(e) => { e.stopPropagation(); setAssignVisit({ ...row, assignKind: 'visit' }) }}>Assign</button>
@@ -1339,10 +1367,24 @@ export default function DailySchedule() {
             recurrenceText={RECURRENCE_TEXT[assignVisit.visitType]}
             tabs={['Assign Employee']}
             employeesRequired={assignVisit.employeesRequired}
-            initialSlots={Array(assignVisit.employeesRequired).fill(null)}
+            initialSlots={Array.from({ length: assignVisit.employeesRequired }, (_, i) => assignedOf(assignVisit)[i] || null)}
             recommendedEmployees={RECOMMENDED_EMPLOYEES}
             requireAtLeastOneAssigned
             onSave={handleAssignSave}
+          />
+        )}
+
+        {menuShift && (
+          <BulkActionsMenu
+            key={menuShift.id}
+            title={menuShift.customer}
+            count={menuShift.visits.length}
+            start={menuShift.visits.reduce((min, v) => toMinutes(v.start) < toMinutes(min) ? v.start : min, menuShift.visits[0].start)}
+            end={menuShift.visits.reduce((max, v) => toMinutes(v.end) > toMinutes(max) ? v.end : max, menuShift.visits[0].end)}
+            anchorEl={shiftMenu.anchorEl}
+            container={pageRef.current}
+            onClose={() => setShiftMenu(null)}
+            onAssign={handleShiftMenuAssign}
           />
         )}
 
@@ -1352,13 +1394,10 @@ export default function DailySchedule() {
             start={selectionStart}
             end={selectionEnd}
             anchorEl={actionsBtnRef.current}
+            container={pageRef.current}
             onClose={() => setBulkMenuOpen(false)}
             onAssign={handleBulkAssign}
           />
-        )}
-
-        {bulkAssignOpen && (
-          <BulkAssignPanel items={selectedItems} onClose={() => setBulkAssignOpen(false)} onAssign={handleBulkAssign} />
         )}
 
         {toast && <div className="ds-toast">{toast}</div>}

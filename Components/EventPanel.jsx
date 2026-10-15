@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react'
 // (all optional, render nothing if omitted), `showRequiredWarning` (a
 // red "Visit requires N employees" banner while under-staffed), and
 // `requireAtLeastOneAssigned` (disables Save until at least one slot is
-// filled). `onClose`/the Cancel button/scrim-click are now genuinely
+// filled). `onClose`/the X button/scrim-click are now genuinely
 // wired — the original page had no "close" destination to wire them to,
 // so its own X/Cancel buttons were previously inert (Cancel's onClick
 // was even a stray `setShowWarning(false)`, not a real close — fixed here
@@ -551,13 +551,16 @@ export default function EventPanel({
               </div>
             </div>
           )}
+          {/* "Cancel visit" is a placeholder for cancelling the visit itself, so
+              it deliberately does nothing here. It used to be a plain Cancel that
+              closed the panel; closing is now the scrim (click outside) or the X. */}
           <div className={`ep-footer__actions${showWarning ? ' ep-footer__actions--warning' : ''}`}>
             {!showWarning && (
-              <button className="round-btn secondary-btn" onClick={onClose}>Cancel</button>
+              <button className="round-btn tertiary-btn">Cancel visit</button>
             )}
             <div className="ep-footer__btn-group">
               {showWarning && (
-                <button className="round-btn secondary-btn" onClick={onClose}>Cancel</button>
+                <button className="round-btn tertiary-btn">Cancel visit</button>
               )}
               {showWarning ? (
                 <button className="round-btn primary-btn" onClick={handleAssignAnyway}>Accept assignment</button>

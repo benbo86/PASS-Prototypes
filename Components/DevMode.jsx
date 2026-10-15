@@ -177,7 +177,7 @@ export default function DevMode({ containerRef }) {
     // simple "block real navigation, clear selection" treatment.
     const isRecognized = (target) =>
       container.contains(target) ||
-      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap, .row-actions-panel, .ios-cal-popover, .ios-cal-backdrop, .ios-time-popover, .ss-dropdown, .ds-bulk-menu'))
+      (target.closest && target.closest('.react-datepicker-popper, .fd-wrap, .row-actions-panel, .ios-cal-popover, .ios-cal-backdrop, .ios-time-popover, .ss-dropdown'))
 
     // A trigger that opens a portaled popup (react-datepicker's own
     // `.react-datepicker-wrapper` around its customInput — a stable,
