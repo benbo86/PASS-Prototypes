@@ -562,3 +562,24 @@
 .opn-restart-btn:hover {
   background: #2c4886;
 }
+
+/* Day with no bookings keeps its slot (so the week row doesn't shift)
+   but hides the dot. */
+.opn-calendar-day-dot--empty {
+  visibility: hidden;
+}
+
+/* The booking a notification is about (added or changed). */
+.opn-booking-card--highlight {
+  box-shadow: inset 0 0 0 2px var(--opn-blue);
+}
+
+.opn-booking-tag {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: var(--opn-blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}

@@ -115,15 +115,51 @@ const QuestionIcon = () => (
 const CUSTOMER_NAME = 'Margaret Collins'
 const CUSTOMER_NICKNAME = 'Maggie'
 
-const BOOKINGS = [
-  { time: '08:00', duration: '1 hour', carer: 'Sarah Johnson' },
-  { time: '12:00', duration: '30 min', carer: 'David Patel' },
-  { time: '17:00', duration: '1 hour', carer: 'Sarah Johnson' },
-]
+// The family member using openPASS (the push recipient), not the carer.
+const FAMILY_FIRST_NAME = 'Jane'
+
+// Lock screen "today" is Tue 16 Jun, so the {Day} rule from the carer
+// notifications (AIOP-23558) gives "today", "tomorrow" or "on 19 June".
+const BOOKINGS_BY_DATE = {
+  16: [
+    { time: '08:00', duration: '1 hour', carer: 'Sarah Johnson' },
+    // Reassigned from Sarah Johnson: the "changed" scenario.
+    { time: '17:00', duration: '1 hour', carer: 'David Patel' },
+  ],
+  17: [
+    { time: '08:00', duration: '1 hour', carer: 'Sarah Johnson' },
+    // Newly created: the "added" scenario.
+    { time: '12:00', duration: '30 min', carer: 'David Patel' },
+    { time: '17:00', duration: '1 hour', carer: 'Sarah Johnson' },
+  ],
+  18: [
+    { time: '08:00', duration: '1 hour', carer: 'Sarah Johnson' },
+    { time: '17:00', duration: '1 hour', carer: 'Sarah Johnson' },
+  ],
+  // The 08:00 bookings on the 19th (cancelled) and 20th (removed) are gone.
+  19: [{ time: '17:00', duration: '1 hour', carer: 'Sarah Johnson' }],
+  20: [{ time: '17:00', duration: '1 hour', carer: 'David Patel' }],
+  21: [{ time: '10:00', duration: '1 hour', carer: 'Sarah Johnson' }],
+  22: [],
+}
 
 const WEEK_DAYS = [
   { label: 'M', date: 16 }, { label: 'T', date: 17 }, { label: 'W', date: 18 },
   { label: 'T', date: 19 }, { label: 'F', date: 20 }, { label: 'S', date: 21 }, { label: 'S', date: 22 },
+]
+
+// One notification per category, matching the carer copy (AIOP-23558)
+// with two family-member changes agreed with Ben (2026-10-15):
+// {FirstName} is the family member's, and "…your schedule" is dropped
+// because the booking isn't theirs. No service user name, same as carers.
+// v1 (single notification): "Booking updated" / "Margaret Collins' 07:00
+// booking has been updated to 08:00". v2: "Booking changed" / "Sarah
+// Johnson, a booking on the 17th June, 5pm has been changed on your schedule".
+const BOOKING_NOTIFICATIONS = [
+  { key: 'changed', time: 'now', title: 'Booking changed', body: `${FAMILY_FIRST_NAME}, a booking at 5pm today has been changed.`, date: 16, highlight: '17:00', tag: 'Changed' },
+  { key: 'added', time: '5m ago', title: 'Booking added', body: `${FAMILY_FIRST_NAME}, a booking at 12pm tomorrow has been added.`, date: 17, highlight: '12:00', tag: 'New' },
+  { key: 'cancelled', time: '12m ago', title: 'Booking cancelled', body: `${FAMILY_FIRST_NAME}, a booking at 8am on 19 June has been cancelled.`, date: 19 },
+  { key: 'removed', time: '20m ago', title: 'Booking removed', body: `${FAMILY_FIRST_NAME}, a booking at 8am on 20 June has been removed.`, date: 20 },
 ]
 
 const CARE_NOTE_TASKS = [
@@ -168,30 +204,32 @@ function LockScreen({ onOpenBooking, onOpenMessage }) {
       <div className="opn-lock-time">9:41</div>
 
       <div className="opn-lock-notifications">
-        <button type="button" className="opn-notification" onClick={onOpenBooking}>
-          <div className="opn-app-icon"><OpenPassAppIcon size={28} /></div>
-          <div className="opn-notification-body">
-            <div className="opn-notification-top">
-              {/* v2 (2026-10-15). v1 title: "Booking updated" */}
-              <span className="opn-notification-title">Booking changed</span>
-              <span className="opn-notification-time">now</span>
+        {BOOKING_NOTIFICATIONS.map(n => (
+          <button type="button" className="opn-notification" key={n.key} onClick={() => onOpenBooking(n)}>
+            <div className="opn-app-icon"><OpenPassAppIcon size={28} /></div>
+            <div className="opn-notification-body">
+              <div className="opn-notification-top">
+                <span className="opn-notification-title">{n.title}</span>
+                <span className="opn-notification-time">{n.time}</span>
+              </div>
+              <p className="opn-notification-text">{n.body}</p>
             </div>
-            {/* v1 body: "{CUSTOMER_NAME}'s 07:00 booking has been updated to 08:00" */}
-            <p className="opn-notification-text">Sarah Johnson, a booking on the 17th June, 5pm has been changed on your schedule</p>
-          </div>
-        </button>
+          </button>
+        ))}
 
         <button type="button" className="opn-notification" onClick={onOpenMessage}>
           <div className="opn-app-icon"><OpenPassAppIcon size={28} /></div>
           <div className="opn-notification-body">
             <div className="opn-notification-top">
               <span className="opn-notification-title">Office</span>
-              <span className="opn-notification-time">now</span>
+              <span className="opn-notification-time">25m ago</span>
             </div>
-            {/* v2 (2026-10-15): generic body, no message content on the lock screen.
-                v1 showed the message itself as the body:
+            {/* v3 (2026-10-15): matches the carer message push after AIOP-24458 —
+                one notification per thread, replaced by each new message, always
+                "You have new messages" with no count and no message content.
+                v2 body: "You have a new message". v1 showed the message itself:
                 "Yes that's no problem, we look forwards to seeing Margaret for her evening visit." */}
-            <p className="opn-notification-text">You have a new message</p>
+            <p className="opn-notification-text">You have new messages</p>
           </div>
         </button>
       </div>
@@ -250,8 +288,11 @@ function BottomNav() {
   )
 }
 
-// ─── Bookings screen — destination for the "booking updated" tap ──────
-function BookingsScreen() {
+// ─── Bookings screen — destination for every booking notification ──────
+// Opens on the notification's date. An added or changed booking is
+// highlighted; a cancelled or removed one is simply no longer listed.
+function BookingsScreen({ notification }) {
+  const bookings = BOOKINGS_BY_DATE[notification.date] || []
   return (
     <div className="opn-screen">
       <OpenPassHeader title="Bookings" />
@@ -263,22 +304,26 @@ function BookingsScreen() {
             {WEEK_DAYS.map(d => (
               <div key={d.date} className="opn-calendar-day">
                 <span className="opn-calendar-day-label">{d.label}</span>
-                <span className={`opn-calendar-day-date${d.date === 17 ? ' opn-calendar-day-date--selected' : ''}`}>{d.date}</span>
-                <span className="opn-calendar-day-dot" />
+                <span className={`opn-calendar-day-date${d.date === notification.date ? ' opn-calendar-day-date--selected' : ''}`}>{d.date}</span>
+                <span className={`opn-calendar-day-dot${BOOKINGS_BY_DATE[d.date]?.length ? '' : ' opn-calendar-day-dot--empty'}`} />
               </div>
             ))}
           </div>
         </div>
 
-        {BOOKINGS.map(b => (
-          <div className="opn-booking-card" key={b.time}>
-            <span className="opn-booking-accent" />
-            <div className="opn-booking-card-text">
-              <div className="opn-booking-time">{b.time} - {b.duration}</div>
-              <div className="opn-booking-carer">{b.carer}</div>
+        {bookings.map(b => {
+          const highlighted = b.time === notification.highlight
+          return (
+            <div className={`opn-booking-card${highlighted ? ' opn-booking-card--highlight' : ''}`} key={b.time}>
+              <span className="opn-booking-accent" />
+              <div className="opn-booking-card-text">
+                <div className="opn-booking-time">{b.time} - {b.duration}</div>
+                <div className="opn-booking-carer">{b.carer}</div>
+              </div>
+              {highlighted && <span className="opn-booking-tag">{notification.tag}</span>}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <BottomNav />
     </div>
@@ -341,6 +386,7 @@ function CareNoteScreen() {
 // ─── App ────────────────────────────────────────────────────────────
 export default function App() {
   const [screen, setScreen] = useState('lock')
+  const [openedNotification, setOpenedNotification] = useState(null)
   const pageRef = useRef(null)
 
   return (
@@ -367,11 +413,11 @@ export default function App() {
         <div className="phone-frame opn-phone-frame" ref={pageRef}>
           {screen === 'lock' && (
             <LockScreen
-              onOpenBooking={() => setScreen('bookings')}
+              onOpenBooking={n => { setOpenedNotification(n); setScreen('bookings') }}
               onOpenMessage={() => setScreen('careNote')}
             />
           )}
-          {screen === 'bookings' && <BookingsScreen />}
+          {screen === 'bookings' && <BookingsScreen notification={openedNotification} />}
           {screen === 'careNote' && <CareNoteScreen />}
         </div>
       </div>
