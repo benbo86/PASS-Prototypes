@@ -172,10 +172,12 @@ function LockScreen({ onOpenBooking, onOpenMessage }) {
           <div className="opn-app-icon"><OpenPassAppIcon size={28} /></div>
           <div className="opn-notification-body">
             <div className="opn-notification-top">
-              <span className="opn-notification-title">Booking updated</span>
+              {/* v2 (2026-10-15). v1 title: "Booking updated" */}
+              <span className="opn-notification-title">Booking changed</span>
               <span className="opn-notification-time">now</span>
             </div>
-            <p className="opn-notification-text">{CUSTOMER_NAME}'s 07:00 booking has been updated to 08:00</p>
+            {/* v1 body: "{CUSTOMER_NAME}'s 07:00 booking has been updated to 08:00" */}
+            <p className="opn-notification-text">Sarah Johnson, a booking on the 17th June, 5pm has been changed on your schedule</p>
           </div>
         </button>
 
