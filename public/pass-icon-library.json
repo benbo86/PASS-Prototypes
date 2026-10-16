@@ -1941,6 +1941,60 @@
       "usageCount": 23
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/SplitViewToggle.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/care-management/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/communications/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/funders/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "openpass/push-notifications/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
+          "name": "BackIcon"
+        }
+      ],
+      "usageCount": 9
+    },
+    {
       "hash": "d0cc47c8",
       "name": "Settings",
       "group": "Inline",
@@ -2034,55 +2088,6 @@
           "kind": "inline",
           "ref": "timesheets/filters/src/Timesheets.jsx#CloseIcon",
           "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 8
-    },
-    {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/care-management/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "customer-profile/communications/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "customer-profile/funders/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "customer-profile/service-agreement/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "invoices/recurring-expense-document/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "openpass/push-notifications/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
-          "name": "BackIcon"
         }
       ],
       "usageCount": 8
@@ -3345,6 +3350,48 @@
         {
           "kind": "inline",
           "ref": "Components/SlidePanel.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "e4c11dab",
+      "name": "Split",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linejoin=\"round\">\n    <rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\" />\n    <path d=\"M12 4v16\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/SplitViewToggle.jsx#SplitIcon",
+          "name": "SplitIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "2c93a4c6",
+      "name": "Swap",
+      "group": "Inline",
+      "svg": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M7 7h12l-3-3M17 17H5l3 3\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/SplitViewToggle.jsx#SwapIcon",
+          "name": "SwapIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "2fe0d877",
+      "name": "Close",
+      "group": "Inline",
+      "svg": "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <polygon points=\"18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/SplitViewToggle.jsx#CloseIcon",
           "name": "CloseIcon"
         }
       ],
@@ -5003,5 +5050,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-10-15T10:49:10.435Z"
+  "generatedAt": "2026-10-16T13:16:24.559Z"
 }

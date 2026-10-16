@@ -25,13 +25,13 @@ export const LEAVE_TYPES = ['Full Day', 'Half Day (AM)', 'Half Day (PM)'];
 // 'Declined' and 'Cancelled' are deliberately distinct terminal states, not
 // one status doing double duty — see AIOP-21555/21563 comparison, 2026-08-21
 // (memory: project_leave_requests_prototype). 'Declined' is the office's own
-// initial decision on a still-Pending request (mirrors AIOP-21563's own
+// initial decision on a request still Awaiting Approval (mirrors AIOP-21563's own
 // status vocabulary); 'Cancelled' only ever finalizes an already-Approved
-// holiday being called off (reached via 'Awaiting Cancellation'). A Pending
-// request being withdrawn by the care worker themselves, before any office
+// holiday being called off (reached via 'Awaiting Cancellation'). A request
+// still Awaiting Approval being withdrawn by the care worker themselves, before any office
 // decision, is modelled as happening entirely on the app side (never
 // reaches this table at all) — see the same memory entry for why.
-export const STATUSES = ['Pending', 'Approved', 'Declined', 'Awaiting Cancellation', 'Cancelled'];
+export const STATUSES = ['Awaiting Approval', 'Approved', 'Declined', 'Awaiting Cancellation', 'Cancelled'];
 
 // Exact counts, not weighted-random luck — a weighted-pool approach still
 // leaves the actual outcome up to how this file's single shared
@@ -40,13 +40,13 @@ export const STATUSES = ['Pending', 'Approved', 'Declined', 'Awaiting Cancellati
 // rows) every time an unrelated bit of generation logic changed. This
 // guarantees "only a couple of Awaiting Cancellation" holds regardless of
 // what else in this generator changes later. Must sum to REQUEST_COUNT
-// below (Pending/Approved make up the bulk — an earlier version picked
+// below (Awaiting Approval/Approved make up the bulk — an earlier version picked
 // uniformly across all statuses, producing an unrealistically large
 // Awaiting Cancellation count, 19 of 42, for what's meant to be a rare
 // in-flight state).
 const REQUEST_COUNT = 18;
 const STATUS_COUNTS = {
-  Pending: 5,
+  'Awaiting Approval': 5,
   Approved: 7,
   Declined: 2,
   'Awaiting Cancellation': 2,
@@ -165,14 +165,14 @@ function buildRequests() {
     if (status === 'Declined') reason = pick(DECLINE_REASONS);
     else if (status === 'Cancelled') reason = pick(CANCELLATION_REASONS);
 
-    // Audit trail — who actioned this request, and when. Pending has no
+    // Audit trail — who actioned this request, and when. Awaiting Approval has no
     // entry (never decided on yet). 'Awaiting Cancellation' keeps the
     // original *approval's* stamp — nobody has actually decided on the
     // cancellation itself yet, so there's nothing newer to attribute; the
     // tooltip in LeaveRequests.jsx reads this as "Approved by ... on ..."
     // for that status specifically, not "Awaiting Cancellation by ...".
     let actionedBy = null, actionedAt = null;
-    if (status !== 'Pending') {
+    if (status !== 'Awaiting Approval') {
       actionedBy = pick(OFFICE_USERS);
       actionedAt = new Date(submitted.getTime() + btw(1, 4) * 86400000);
       actionedAt.setHours(btw(8, 17), pick([0, 15, 30, 45]), 0, 0);

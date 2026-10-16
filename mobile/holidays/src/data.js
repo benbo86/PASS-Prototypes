@@ -1,9 +1,6 @@
 // Status wording matches AIOP-21563 ("Holiday in the app: App behaviour")
-// and the Figma screens built from it — "Awaiting approval", not
-// "Pending". This is the CARE WORKER's own view of the request; the
-// office/web side (schedule/leave-requests/) uses "Pending" for the same
-// underlying state — deliberately different vocabulary for two different
-// audiences of the same record, not an inconsistency to reconcile.
+// and the Figma screens built from it. The office's Leave Requests table
+// (schedule/leave-requests/) uses the same words in title case.
 export const STATUSES = ['Awaiting approval', 'Awaiting cancellation', 'Approved', 'Declined']
 
 // Two entirely different request experiences depending on the employee's
@@ -14,6 +11,30 @@ export const STATUSES = ['Awaiting approval', 'Awaiting cancellation', 'Approved
 // mobile/holidays/ prototype's own toggle switches between these two full
 // experiences for demo purposes; a real employee would only ever see one.
 export const CONTRACT_TYPES = ['days', 'hours']
+
+// Requests are stored in Components/leaveRequestsStore.js (shared with the
+// office's schedule/leave-requests table) using the office's wording, so
+// they're translated to this app's wording when read.
+const STATUS_FROM_OFFICE = {
+  'Awaiting Approval': 'Awaiting approval',
+  'Awaiting Cancellation': 'Awaiting cancellation',
+  'Approved': 'Approved',
+  'Declined': 'Declined',
+  'Cancelled': 'Cancelled',
+}
+
+// Shared record -> the shape the request cards read.
+export function toAppRequest(r) {
+  return {
+    id: r.id,
+    status: STATUS_FROM_OFFICE[r.status] ?? r.status,
+    fromDate: r.fromDate,
+    toDate: r.toDate,
+    amount: r.amount,
+    requestedOn: r.submitted.slice(0, 10),
+    reason: r.reason,
+  }
+}
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export function fmtDate(isoDate) {
@@ -40,14 +61,6 @@ export const HALF_DAY_OPTIONS = ['AM', 'PM']
 
 export const DAYS_ENTITLEMENT = { total: 28, booked: 5.5, taken: 0 }
 
-export const DAYS_INITIAL_REQUESTS = [
-  { id: 1, status: 'Awaiting approval', fromDate: '2026-02-02', toDate: '2026-02-02', amount: 1, requestedOn: '2025-12-18' },
-  { id: 2, status: 'Awaiting cancellation', fromDate: '2026-01-15', toDate: '2026-01-15', amount: 0.5, requestedOn: '2025-12-01' },
-  { id: 3, status: 'Approved', fromDate: '2025-12-23', toDate: '2025-12-27', amount: 5, requestedOn: '2025-12-15' },
-  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 1, requestedOn: '2025-12-10', declinedReason: 'Insufficient staff cover for the requested date' },
-  { id: 5, status: 'Cancelled', fromDate: '2025-12-30', toDate: '2025-12-30', amount: 1, requestedOn: '2025-11-28' },
-]
-
 export function fmtDays(n) {
   return `${n} ${n === 1 ? 'day' : 'days'}`
 }
@@ -58,11 +71,13 @@ export function fmtDays(n) {
 // since the same start/end time is worked on every day in the range.
 export const HOURS_ENTITLEMENT = { total: 224, booked: 44, taken: 0 }
 
+// Hours-scheme requests aren't linked to the office's Leave Requests table
+// (only the days scheme is), so they stay local example data.
 export const HOURS_INITIAL_REQUESTS = [
   { id: 1, status: 'Awaiting approval', fromDate: '2026-02-02', toDate: '2026-02-02', amount: 4, requestedOn: '2025-12-18' },
   { id: 2, status: 'Awaiting cancellation', fromDate: '2026-01-15', toDate: '2026-01-15', amount: 4, requestedOn: '2025-12-01' },
   { id: 3, status: 'Approved', fromDate: '2025-12-23', toDate: '2025-12-27', amount: 40, requestedOn: '2025-12-15' },
-  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 8, requestedOn: '2025-12-10', declinedReason: 'Insufficient staff cover for the requested date' },
+  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 8, requestedOn: '2025-12-10', reason: 'Insufficient staff cover for the requested date' },
   { id: 5, status: 'Cancelled', fromDate: '2025-12-30', toDate: '2025-12-30', amount: 8, requestedOn: '2025-11-28' },
 ]
 

@@ -10,6 +10,7 @@ import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
 import '../../../Styles/dev-edit.css'
 import '../../../Styles/wireframe-access.css'
+import '../../../Styles/split-view.css'
 import '../../../Styles/ios-picker.css'
 import './holidays.css'
 

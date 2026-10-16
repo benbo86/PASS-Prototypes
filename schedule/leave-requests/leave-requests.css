@@ -47,10 +47,13 @@ body { background: #fff; min-height: 100vh; }
 .lr-sub-row .col-widths-save { margin-right: auto; }
 
 /* ── Status pills ────────────────────────────────────────────── */
-.lr-status-pending   { background: var(--ui-purple-6-lavendar-grey);   color: var(--greyscale-2-grey-20); }
+/* Awaiting approval = amber, awaiting cancellation = lavender, approved =
+   green: the same colour meanings as the mobile Holidays app
+   (AIOP-21563), in this table's lighter tinted style. */
+.lr-status-awaiting-approval     { background: var(--rag-amber-amber-lightest);    color: #7b3306; }
+.lr-status-awaiting-cancellation { background: var(--ui-purple-5-languid-lavendar); color: var(--ui-purple-1-cyber-grape); }
 .lr-status-approved  { background: var(--rag-green-green-lightest);   color: var(--rag-green-green-3-aa); }
 .lr-status-declined  { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue-text); }
-.lr-status-awaiting  { background: var(--rag-amber-amber-lightest);   color: var(--greyscale-2-grey-20); }
 .lr-status-cancelled { background: var(--greyscale-13-grey-90);        color: var(--greyscale-4-grey-40); }
 
 /* ── Actions column ───────────────────────────────────────────── */

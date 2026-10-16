@@ -1,0 +1,113 @@
+/* Split view — Components/SplitViewToggle.jsx. Two linked prototypes side
+   by side in one tab, each in its own iframe. */
+
+/* Sits below the full-width dev toolbar (standing rule: full-viewport
+   overlays leave the bar visible), just under its z-index. */
+.split-view {
+  position: fixed;
+  top: var(--dev-toolbar-height, 0px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10690;
+  display: flex;
+  flex-direction: column;
+  background: var(--ui-purple-6-lavendar-grey);
+}
+/* Mobile prototypes' toolbar is a floating pill with no bar to sit under,
+   so the split covers the whole window, pill included. */
+.split-view--floating {
+  top: 0;
+  z-index: 10710;
+}
+
+.split-view-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--ui-purple-5-languid-lavendar);
+  flex-shrink: 0;
+}
+.split-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  font: 500 14px Barlow, sans-serif;
+  color: var(--brand-purple-6-purple-4);
+  cursor: pointer;
+}
+.split-view-btn:hover { background: var(--ui-purple-7-lightest-lavendar); }
+/* Same pill as main.css's .back-link (which is position: fixed, so can't
+   be reused here), pushing the bar's buttons to the right. */
+.split-view-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  padding: 8px 16px;
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  border-radius: 20px;
+  font: 600 13px Barlow, sans-serif;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.split-view-back:hover { background: var(--brand-purple-5-purple-3); color: #fff; }
+
+.split-view-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.split-view-pane {
+  flex-grow: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  border: none;
+  background: #fff;
+}
+
+.split-view-divider {
+  flex: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-purple-5-languid-lavendar);
+  cursor: col-resize;
+  touch-action: none;
+}
+.split-view-divider:hover,
+.split-view-divider:focus-visible,
+.split-view--dragging .split-view-divider {
+  background: var(--brand-purple-4-purple-2-tint);
+  outline: none;
+}
+.split-view-grip {
+  width: 2px;
+  height: 32px;
+  border-radius: 1px;
+  background: #fff;
+}
+/* An iframe swallows pointer events, which would stall a drag the moment
+   the cursor crosses into a pane. */
+.split-view--dragging .split-view-pane { pointer-events: none; }
+.split-view--dragging { cursor: col-resize; user-select: none; }
+
+/* ── Inside a pane (?splitpane=1) ─────────────────────────────── */
+/* The split's own bar replaces each pane's toolbar and back-link. The
+   toolbar is hidden rather than removed so Dev Edit's saved style versions
+   still apply inside the pane. */
+html.split-pane { --dev-toolbar-height: 0px; }
+html.split-pane .dev-toolbar,
+html.split-pane .back-link { display: none; }
+
+/* Shrink the phone mockup to fit the pane (scale set in SplitViewToggle.jsx). */
+html.split-pane .phone-frame { zoom: var(--split-pane-scale, 1); }

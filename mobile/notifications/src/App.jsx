@@ -9,6 +9,9 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
+import {
+  useHolidayNotifications, markNotificationsSeen, markNotificationRead, markAllNotificationsRead, removeNotification,
+} from '../../../Components/leaveRequestsStore'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -200,9 +203,8 @@ const renderDetail = (notif) => {
     case 'holiday_approved':
       return notif.amount
     case 'holiday_declined':
-      return `${notif.amount} — ${notif.declinedReason}`
     case 'holiday_cancelled':
-      return notif.amount
+      return notif.reason ? `${notif.amount} — ${notif.reason}` : notif.amount
     default:
       return ''
   }
@@ -615,20 +617,46 @@ function BookingDetailScreen({ notif, onBack }) {
 
 // ─── Root ──────────────────────────────────────────────────────
 
+// Holiday-request responses come from the shared store (sent when the
+// office decides on a request in schedule/leave-requests), so they carry a
+// real timestamp — turned into the same section + "N mins ago" labels the
+// mock notifications use.
+function holidayNotifView(n, now) {
+  const at = new Date(n.at)
+  const mins = Math.max(0, Math.round((now - at) / 60000))
+  const dayDiff = Math.round((new Date(now).setHours(0, 0, 0, 0) - new Date(at).setHours(0, 0, 0, 0)) / 86400000)
+  let section, receivedAt
+  if (dayDiff <= 0) {
+    section = 'Today'
+    receivedAt = mins < 1 ? 'Just now' : mins < 60 ? `${mins} min${mins === 1 ? '' : 's'} ago` : `${Math.floor(mins / 60)} hour${mins < 120 ? '' : 's'} ago`
+  } else if (dayDiff === 1) {
+    section = 'Yesterday'; receivedAt = 'Yesterday'
+  } else {
+    section = 'Earlier'; receivedAt = `${dayDiff} days ago`
+  }
+  return { ...n, isHoliday: true, linked: true, section, receivedAt }
+}
+
 export default function App() {
   const [view, setView] = useState('list')
   const [selectedNotif, setSelectedNotif] = useState(null)
-  const [notifications, setNotifications] = useState(NOTIFICATIONS)
-  const [badgeCount, setBadgeCount] = useState(() => NOTIFICATIONS.filter(n => !n.read).length)
+  const [mockNotifications, setMockNotifications] = useState(NOTIFICATIONS)
   const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
   const phoneFrameRef = useRef(null)
 
-  useEffect(() => {
-    setBadgeCount(0)
-  }, [])
+  // Being on this screen clears the bell, including for responses that
+  // arrive while she's here.
+  const holidayNotifications = useHolidayNotifications()
+  useEffect(() => { markNotificationsSeen() }, [holidayNotifications])
+
+  // Newest holiday responses first within each section, ahead of the mock
+  // notifications (which are all older than "now" in the demo).
+  const now = Date.now()
+  const notifications = [...holidayNotifications.map(n => holidayNotifView(n, now)), ...mockNotifications]
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    setMockNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    markAllNotificationsRead()
   }
 
   const viewBooking = (notif) => {
@@ -637,16 +665,18 @@ export default function App() {
     // matching the same ?screen=holidays&transition=1 convention every
     // other cross-prototype "go to Holidays" link already uses.
     if (HOLIDAY_TYPES.includes(notif.type)) {
+      if (notif.linked) markNotificationRead(notif.id)
       window.location.href = '../holidays/?screen=holidays&transition=1'
       return
     }
-    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))
+    setMockNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n))
     setSelectedNotif(notif)
     setView('detail')
   }
 
   const deleteNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id))
+    if (typeof id === 'string') removeNotification(id)
+    else setMockNotifications(prev => prev.filter(n => n.id !== id))
   }
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -689,7 +719,7 @@ export default function App() {
         </div>
         <AppNav
           activeTab="notifications"
-          notifCount={badgeCount}
+          notifCount={0}
           messagesUnread={messagesUnread}
           links={{ bookings: '../tag-in-out/', account: '../account/' }}
         />

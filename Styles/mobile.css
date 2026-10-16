@@ -408,3 +408,11 @@ html, body {
   .bottom-sheet-overlay,
   .bottom-sheet-panel { transition-duration: 0.01s; }
 }
+
+/* Inside a split-view pane (Components/splitPane.js): the split's own bar
+   replaces the toolbar and back-link, and the phone shrinks to fit. Here as
+   well as Styles/split-view.css because a pane can navigate on to any
+   mobile prototype, which won't load that stylesheet. */
+html.split-pane .dev-toolbar,
+html.split-pane .back-link { display: none; }
+html.split-pane .phone-frame { zoom: var(--split-pane-scale, 1); }

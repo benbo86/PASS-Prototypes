@@ -9,7 +9,6 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
-import { UNREAD_NOTIFICATIONS_COUNT } from '../../../Components/notificationsData'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
@@ -1346,7 +1345,6 @@ export default function App() {
           <AppNav
             activeTab={null}
             messagesUnread={messageBadge}
-            notifCount={UNREAD_NOTIFICATIONS_COUNT}
             links={{ bookings: '../tag-in-out/', notifications: '../notifications/', account: '../account/' }}
           />
         ) : null}

@@ -91,6 +91,23 @@
      natural width instead, bypassing that calculation entirely. */
   width: max-content;
 }
+.hol-demo-link-note {
+  margin: 0;
+  max-width: 160px;
+  font: 12px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+  text-align: center;
+}
+.hol-demo-link-note a { color: var(--brand-purple-6-purple-4); }
+.hol-demo-reset {
+  border: none;
+  background: none;
+  padding: 0;
+  font: 12px Barlow, sans-serif;
+  color: var(--brand-purple-6-purple-4);
+  text-decoration: underline;
+  cursor: pointer;
+}
 .hol-demo-toggle-label {
   font: 12px Barlow, sans-serif;
   font-weight: 500;
@@ -499,3 +516,8 @@
 }
 .hol-range-day--in-range { background: #EBE1EE; color: var(--brand-purple-3-purple-2); }
 .hol-range-day--edge { background: var(--brand-purple-6-purple-4); color: #fff; font-weight: 600; }
+
+/* Inside split view (Components/SplitViewToggle.jsx) the pane is too
+   narrow for this side panel, and only the days scheme is linked anyway;
+   the split's own bar carries "Reset demo data". */
+html.split-pane .hol-demo-toggle-wrap { display: none; }

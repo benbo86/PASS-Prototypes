@@ -19,8 +19,10 @@ import DevComments from '../../../Components/DevComments';
 import DevEdit from '../../../Components/DevEdit';
 import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
+import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, leaveTypeTimes } from './data';
+import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
 // `userName` ("Alex Morgan"), declared explicitly here (rather than left
@@ -74,9 +76,9 @@ const CloseIcon = () => (
 const statusClass = s => {
   if (s === 'Approved') return 'lr-status-approved';
   if (s === 'Declined') return 'lr-status-declined';
-  if (s === 'Awaiting Cancellation') return 'lr-status-awaiting';
+  if (s === 'Awaiting Cancellation') return 'lr-status-awaiting-cancellation';
   if (s === 'Cancelled') return 'lr-status-cancelled';
-  return 'lr-status-pending';
+  return 'lr-status-awaiting-approval';
 };
 
 // Employee/Leave Type/Status filters + sort — see FilterDropdown itself for
@@ -95,25 +97,66 @@ const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
 // hourly/zero-hours contract (see data.js's own EMPLOYEE_CONTRACTS) —
 // each request already carries its own `unit`, so formatting is a plain
 // per-row lookup, no separate employee/contract check needed here.
+// Adrianna Janowski is the employee signed in to the mobile Holidays app;
+// her requests come from the shared store (Components/leaveRequestsStore.js)
+// rather than this page's generated data. She's added to the filter list
+// only — adding her to EMPLOYEE_NAMES itself would reshuffle the generated
+// rows.
+const FILTER_EMPLOYEES = [...EMPLOYEE_NAMES, DEMO_EMPLOYEE];
+
+const isoToDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+
+// Shared store record -> this table's row shape.
+function toLinkedRow(r) {
+  return {
+    ...r,
+    linked: true,
+    fromDate: isoToDate(r.fromDate),
+    toDate: isoToDate(r.toDate),
+    unit: 'days',
+    submitted: new Date(r.submitted),
+    actionedAt: r.actionedAt ? new Date(r.actionedAt) : null,
+  };
+}
+
 function fmtAmount(row) {
   return row.unit === 'hours' ? `${row.amount} hrs` : `${row.amount} ${row.amount === 1 ? 'day' : 'days'}`;
 }
 
+function confirmResetLeaveRequests() {
+  if (window.confirm('Reset all leave requests (here and on the mobile app) to the starting examples?')) resetLeaveRequests();
+}
+
 export default function LeaveRequests() {
   const pageRef = useRef(null);
-  const [rows, setRows] = useState(LEAVE_REQUESTS);
+  const [localRows, setLocalRows] = useState(LEAVE_REQUESTS);
+  // Requests from the mobile Holidays prototype — submitted, withdrawn and
+  // decided on in either place, updating the other live.
+  const linkedRecords = useLeaveRequests();
+  const rows = useMemo(() => [...localRows, ...linkedRecords.map(toLinkedRow)], [localRows, linkedRecords]);
+
+  // A decision on a linked row is written to the shared store, which also
+  // sends Adrianna a notification in the mobile app; anything else is just
+  // this page's own state.
+  const updateRow = (row, patch) => {
+    if (row.linked) {
+      recordOfficeDecision(row.id, { ...patch, actionedAt: patch.actionedAt.toISOString() });
+    } else {
+      setLocalRows(prev => prev.map(r => r.id === row.id ? { ...r, ...patch } : r));
+    }
+  };
 
   // Leave Requests tab badge — a live queue-depth count, not a "new since
   // last visit" notification (an earlier version tracked that via
   // localStorage; see [[project_leave_requests_prototype]] memory for why
   // that was the wrong model). A leave request doesn't become less urgent
   // just because someone opened the tab without deciding on it, so this
-  // counts everything still awaiting a decision — Pending *and* Awaiting
+  // counts everything still awaiting a decision — Awaiting Approval *and* Awaiting
   // Cancellation, both of which need someone to actually act — and reads
   // off the live `rows` state (not the static LEAVE_REQUESTS import) so
   // it decrements the moment a request is approved/cancelled, the same
   // way a real approvals-queue badge would.
-  const actionRequiredCount = rows.filter((r) => r.status === 'Pending' || r.status === 'Awaiting Cancellation').length;
+  const actionRequiredCount = rows.filter((r) => r.status === 'Awaiting Approval' || r.status === 'Awaiting Cancellation').length;
 
   // Decorative date-range header — same non-filtering convention already
   // established for Invoices/Timesheets/GPA (doesn't actually filter the
@@ -133,7 +176,7 @@ export default function LeaveRequests() {
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const [approveRow, setApproveRow] = useState(null);
-  // Decline (Pending -> Declined, an initial office decision) and Cancel
+  // Decline (Awaiting Approval -> Declined, an initial office decision) and Cancel
   // (Approved/Awaiting Cancellation -> Cancelled, calling off something
   // already agreed) share one dialog — same reason-required shape, just a
   // different resulting status/copy — rather than duplicating the whole
@@ -224,16 +267,14 @@ export default function LeaveRequests() {
   // Clicking Approve does NOT change status immediately — it opens the
   // existing Add-Holiday dialog, pre-populated. The status only becomes
   // Approved once the office user actually completes that dialog's own
-  // step-2 Confirm; closing/backing out leaves the request Pending.
+  // step-2 Confirm; closing/backing out leaves the request Awaiting Approval.
   const handleApproveConfirm = () => {
-    setRows(prev => prev.map(r => r.id === approveRow.id
-      ? { ...r, status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() }
-      : r));
+    updateRow(approveRow, { status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
     setApproveRow(null);
   };
 
   // ── Decline / Cancel flow ───────────────────────────────────────────────────
-  // Decline is the office's own initial rejection of a still-Pending
+  // Decline is the office's own initial rejection of a still-undecided
   // request; Cancel calls off something already Approved (reached via
   // Awaiting Cancellation, the care-worker-initiated withdrawal of an
   // already-approved holiday). Both require a reason.
@@ -243,9 +284,7 @@ export default function LeaveRequests() {
     const reason = actionReason.trim();
     if (!reason) return;
     const nextStatus = actionMode === 'decline' ? 'Declined' : 'Cancelled';
-    setRows(prev => prev.map(r => r.id === actionRow.id
-      ? { ...r, status: nextStatus, reason, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() }
-      : r));
+    updateRow(actionRow, { status: nextStatus, reason, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
     closeActionDialog();
   };
 
@@ -257,6 +296,13 @@ export default function LeaveRequests() {
         <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
+        <SplitViewToggle
+          otherUrl="../../mobile/holidays/?screen=holidays"
+          selfLabel="Leave Requests (web)"
+          otherLabel="Holidays (mobile app)"
+          defaultSelfShare={0.65}
+          actions={[{ label: 'Reset demo data', onClick: confirmResetLeaveRequests }]}
+        />
       </DevToolbar>
       <div className="schedule-page" ref={pageRef}>
       <a href="../../" className="back-link"><BackIcon /> Prototypes</a>
@@ -320,7 +366,7 @@ export default function LeaveRequests() {
                     onClick={() => openDropdown('employee')}>
                     <FilterIcon active={employeeFilter.selected.size > 0} />
                   </button>
-                  <FilterDropdown items={EMPLOYEE_NAMES} selected={employeeFilter.selected}
+                  <FilterDropdown items={FILTER_EMPLOYEES} selected={employeeFilter.selected}
                     onApply={(sel, sortDir, nameField) => { setEmployeeFilter({ selected: sel, sortDir, nameField }); setPage(1); }}
                     onClear={() => { setEmployeeFilter(emptyCheckboxFilter()); setPage(1); }}
                     hasNameSort
@@ -413,9 +459,9 @@ export default function LeaveRequests() {
                   <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
                   <td className="nowrap">{fmtD(row.submitted)}</td>
                   <td>
-                    {row.status === 'Pending' && (
+                    {row.status === 'Awaiting Approval' && (
                       <span className="lr-actions">
-                        {/* All three Pending outcomes live in one kebab menu —
+                        {/* All three Awaiting Approval outcomes live in one kebab menu —
                             a lone visible "Approve" text link next to the "⋮"
                             read oddly as two different action styles sitting
                             side by side, so it moved in alongside Decline/
