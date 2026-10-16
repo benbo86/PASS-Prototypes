@@ -1503,14 +1503,18 @@ h6 {
    just its own classes since the panel is portaled to document.body (needed
    to escape a table's own scroll/overflow clipping) rather than living
    inside a position:relative wrapper the way .actions-menu-wrap does. ── */
+/* A filled circle so the menu reads as a button, matching the Daily
+   Schedule's round "View as list" button (.ds-view-switch-btn). */
 .row-actions-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; border: none; background: none; cursor: pointer;
-  border-radius: 4px; padding: 0; vertical-align: middle;
-  color: var(--greyscale-6-grey-50);
-  transition: background 0.12s, color 0.12s;
+  width: 32px; height: 32px; border: none; cursor: pointer;
+  border-radius: 999px; padding: 0; vertical-align: middle;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--greyscale-2-grey-20);
+  transition: background 0.12s;
 }
-.row-actions-btn:hover { background: var(--ui-purple-7-lightest-lavendar); color: #000; }
+.row-actions-btn:hover,
+.row-actions-btn.open { background: var(--ui-purple-5-languid-lavendar); }
 
 .row-actions-panel {
   min-width: 160px;

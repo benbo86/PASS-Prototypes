@@ -46,8 +46,9 @@ export default function RowActionsMenu({ items }) {
       <button
         type="button"
         ref={btnRef}
-        className="row-actions-btn"
+        className={`row-actions-btn${open ? ' open' : ''}`}
         aria-label="More actions"
+        aria-expanded={open}
         data-devmode-passthrough="true"
         onClick={() => setOpen((v) => !v)}
       >

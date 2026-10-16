@@ -55,6 +55,7 @@ body { background: #fff; min-height: 100vh; }
 .lr-status-approved  { background: var(--rag-green-green-lightest);   color: var(--rag-green-green-3-aa); }
 .lr-status-declined  { background: var(--rag-red-red-pastel-lighter); color: var(--rag-red-red-overdue-text); }
 .lr-status-cancelled { background: var(--greyscale-13-grey-90);        color: var(--greyscale-4-grey-40); }
+.lr-status-withdrawn { background: #fff; border: 1px solid var(--greyscale-13-grey-90); color: var(--greyscale-4-grey-40); }
 
 /* ── Actions column ───────────────────────────────────────────── */
 .lr-actions { display: flex; gap: 12px; }

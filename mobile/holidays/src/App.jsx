@@ -17,12 +17,12 @@ import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 import BottomSheet from '../../../Components/BottomSheet'
 import {
-  DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, updateLeaveRequest, removeLeaveRequest, resetLeaveRequests,
-  isUnseenResponse, markResponsesSeen,
+  DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, updateLeaveRequest, withdrawLeaveRequest, resetLeaveRequests,
+  isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement,
 } from '../../../Components/leaveRequestsStore'
 import {
-  DAYS_LEAVE_TYPES, HALF_DAY_OPTIONS, DAYS_ENTITLEMENT, fmtDays,
-  HOURS_ENTITLEMENT, HOURS_INITIAL_REQUESTS, hoursBetween, fmtHours,
+  DAYS_LEAVE_TYPES, HALF_DAY_OPTIONS, DAYS_ENTITLEMENT_TOTAL, fmtDays,
+  HOURS_ENTITLEMENT_TOTAL, hoursBetween, fmtHours,
   spanDays, fmtDate, fmtDateShort, toAppRequest,
 } from './data'
 
@@ -77,9 +77,8 @@ const STATUS_CLASS = {
   'Approved': 'hol-request-status--approved',
   'Declined': 'hol-request-status--declined',
   // The resolved terminal state of 'Awaiting cancellation', once the office
-  // confirms it — reuses that same status's own purple/lavender tone
-  // (rather than Declined's red) since this is a care worker-initiated,
-  // neutral outcome, not a rejection.
+  // confirms it (or the office cancels it). Grey, per AIOP-21563, so it
+  // reads differently from Awaiting cancellation's lavender.
   'Cancelled': 'hol-request-status--cancelled',
 }
 
@@ -191,7 +190,7 @@ function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
 
 // ─── Holidays list screen ───────────────────────────────────────
 
-function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, onDeleteTap, dateSheetOpen, setDateSheetOpen }) {
+function HolidaysListScreen({ contractType, requests, entitlement, onBack, onRequestLeave, onDeleteTap, dateSheetOpen, setDateSheetOpen }) {
   const [statusFilters, setStatusFilters] = useState([])
   const [dateStart, setDateStart] = useState(null)
   const [dateEnd, setDateEnd] = useState(null)
@@ -215,10 +214,9 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
   const latestRequestDate = requests.reduce((max, r) => r.fromDate > max ? r.fromDate : max, requests[0]?.fromDate ?? '2026-01-01')
 
   const isDays = contractType === 'days'
-  const entitlement = isDays ? DAYS_ENTITLEMENT : HOURS_ENTITLEMENT
   const fmtAmount = isDays ? fmtDays : fmtHours
   const unitLabel = isDays ? 'days' : 'hrs'
-  const available = entitlement.total - entitlement.booked - entitlement.taken
+  const available = entitlement.available
 
   return (
     <div className="screen">
@@ -304,6 +302,14 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
               <div className="hol-request-duration">{fmtAmount(r.amount)}</div>
+              {r.status === 'Approved' && r.requestedFrom && (
+                <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
+              )}
+              {r.status === 'Approved' && r.cancellationKept && (
+                <div className="hol-request-note">
+                  Cancellation not approved{r.keptReason ? `. Reason: ${r.keptReason}` : ''}
+                </div>
+              )}
               {(r.status === 'Declined' || r.status === 'Cancelled') && r.reason && (
                 <div className="hol-request-declined-reason">Reason: {r.reason}</div>
               )}
@@ -330,7 +336,7 @@ function HolidaysListScreen({ contractType, requests, onBack, onRequestLeave, on
 // ─── Request leave screen — days-scheme employee ─────────────────
 // Full day / Half day (AM/PM) only, no time-of-day capture at all.
 
-function DaysRequestLeaveScreen({ onBack, onSubmit }) {
+function DaysRequestLeaveScreen({ available, onBack, onSubmit }) {
   const [leaveType, setLeaveType] = useState('Full day')
   const [halfDayPeriod, setHalfDayPeriod] = useState('AM')
   const [fromDate, setFromDate] = useState('2026-11-16')
@@ -433,7 +439,7 @@ function DaysRequestLeaveScreen({ onBack, onSubmit }) {
           <span className="hol-summary-value">{fmtDays(amount)}</span>
         </div>
         <div className="hol-remaining-text">
-          {DAYS_ENTITLEMENT.total - DAYS_ENTITLEMENT.booked - DAYS_ENTITLEMENT.taken - amount} days remaining
+          {available - amount} days remaining
         </div>
 
         <button
@@ -454,7 +460,15 @@ function DaysRequestLeaveScreen({ onBack, onSubmit }) {
 // No Full day/Half day concept at all — a "day" isn't a meaningful unit
 // for this employee's leave, so they just state real start/end date+time.
 
-function HoursRequestLeaveScreen({ onBack, onSubmit }) {
+// The office table groups requests as Full/Half day as well as showing an
+// hours request's times: 4 hours or fewer is a half day (AM if it starts
+// before midday), anything longer a full day.
+function hoursLeaveType(startTime, endTime) {
+  if (hoursBetween(startTime, endTime) > 4) return 'Full Day'
+  return startTime < '12:00' ? 'Half Day (AM)' : 'Half Day (PM)'
+}
+
+function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
   const [fromDate, setFromDate] = useState('2026-11-16')
   const [toDate, setToDate] = useState('2026-11-16')
   const [startTime, setStartTime] = useState('09:00')
@@ -536,12 +550,12 @@ function HoursRequestLeaveScreen({ onBack, onSubmit }) {
           <span className="hol-summary-value">{fmtHours(amount)}</span>
         </div>
         <div className="hol-remaining-text">
-          {HOURS_ENTITLEMENT.total - HOURS_ENTITLEMENT.booked - HOURS_ENTITLEMENT.taken - amount} hrs remaining
+          {available - amount} hrs remaining
         </div>
 
         <button
           className="fab-square primary-btn hol-submit-btn"
-          onClick={() => onSubmit({ fromDate, toDate, amount })}
+          onClick={() => onSubmit({ fromDate, toDate, amount, startTime, endTime, leaveType: hoursLeaveType(startTime, endTime) })}
         >
           Submit request
         </button>
@@ -581,13 +595,19 @@ function DeleteSheet({ request, onClose, onConfirm }) {
 }
 
 // ─── Holidays feature (list + request-leave, internal slide) ────
-// Days-scheme requests live in Components/leaveRequestsStore.js, shared
-// with the office's Leave Requests table as Adrianna Janowski: anything
-// submitted here appears there, and the office's decisions show up here
-// live. The hours-scheme example isn't linked and keeps its own local list.
+// Her requests live in Components/leaveRequestsStore.js, shared with the
+// office's Holiday Requests table as Adrianna Janowski: anything submitted
+// here appears there, and the office's decisions show up here live. The
+// demo toggle switches which of her two holiday schemes is shown, on both
+// sides.
 
 function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteTarget, dateSheetOpen, setDateSheetOpen, onBack, listVisible }) {
   const linkedRequests = useLeaveRequests()
+  const isDays = contractType === 'days'
+  const entitlement = useEntitlement(contractType, isDays ? DAYS_ENTITLEMENT_TOTAL : HOURS_ENTITLEMENT_TOTAL)
+  // A withdrawn request stays on the office's record but leaves her list.
+  const schemeRequests = linkedRequests.filter(r => r.contract === contractType && r.status !== 'Withdrawn')
+  const requests = schemeRequests.map(toAppRequest)
 
   // Opening her Holidays list counts as having seen any office responses
   // there: the notifications about them are marked read and drop off the
@@ -598,40 +618,21 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
     const opened = listVisible && !wasVisibleRef.current
     wasVisibleRef.current = listVisible
     if (!opened) return
-    const ids = linkedRequests.filter(isUnseenResponse).map(r => r.id)
+    const ids = schemeRequests.filter(isUnseenResponse).map(r => r.id)
     if (ids.length) markResponsesSeen(ids)
   }, [listVisible, linkedRequests])
-  const [hoursRequests, setHoursRequests] = useState(HOURS_INITIAL_REQUESTS)
-
-  const isDays = contractType === 'days'
-  const requests = isDays ? linkedRequests.map(toAppRequest) : hoursRequests
 
   function handleSubmit(request) {
-    const now = new Date()
-    if (isDays) {
-      addLeaveRequest({ ...request, contract: 'days', employee: DEMO_EMPLOYEE, status: 'Awaiting Approval', submitted: now.toISOString() })
-    } else {
-      const requestedOn = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-      setHoursRequests(prev => [
-        { id: (prev.at(-1)?.id ?? 0) + 1, status: 'Awaiting approval', ...request, requestedOn },
-        ...prev,
-      ])
-    }
+    addLeaveRequest({ ...request, contract: contractType, employee: DEMO_EMPLOYEE, status: 'Awaiting Approval', submitted: new Date().toISOString() })
     setView('list')
   }
 
-  // Withdrawing a request that's still awaiting approval deletes it outright
-  // (for a linked request it disappears from the office table too); an
-  // approved one becomes a cancellation request for the office to confirm.
+  // Withdrawing a request that's still awaiting approval takes it off her
+  // list (the office sees it as Withdrawn); an approved one becomes a
+  // cancellation request for the office to confirm.
   function handleDeleteConfirm(request, isApproved) {
-    if (isDays) {
-      if (isApproved) updateLeaveRequest(request.id, { status: 'Awaiting Cancellation' })
-      else removeLeaveRequest(request.id)
-    } else {
-      setHoursRequests(prev => isApproved
-        ? prev.map(r => r.id === request.id ? { ...r, status: 'Awaiting cancellation' } : r)
-        : prev.filter(r => r.id !== request.id))
-    }
+    if (isApproved) updateLeaveRequest(request.id, { status: 'Awaiting Cancellation' })
+    else withdrawLeaveRequest(request.id)
     setDeleteTarget(null)
   }
 
@@ -643,6 +644,7 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
           <HolidaysListScreen
             contractType={contractType}
             requests={requests}
+            entitlement={entitlement}
             onBack={onBack}
             onRequestLeave={() => setView('form')}
             onDeleteTap={setDeleteTarget}
@@ -652,8 +654,8 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
         }
         secondary={
           isDays
-            ? <DaysRequestLeaveScreen onBack={() => setView('list')} onSubmit={handleSubmit} />
-            : <HoursRequestLeaveScreen onBack={() => setView('list')} onSubmit={handleSubmit} />
+            ? <DaysRequestLeaveScreen available={entitlement.available} onBack={() => setView('list')} onSubmit={handleSubmit} />
+            : <HoursRequestLeaveScreen available={entitlement.available} onBack={() => setView('list')} onSubmit={handleSubmit} />
         }
       />
       <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
@@ -670,7 +672,7 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
 // ?screen=holidays (a tap from a sibling mobile prototype's own Account).
 
 function confirmResetLeaveRequests() {
-  if (window.confirm('Reset all leave requests (here and on the web) to the starting examples?')) resetLeaveRequests()
+  if (window.confirm('Reset all holiday requests (here and on the web) to the starting examples?')) resetLeaveRequests()
 }
 
 export default function App() {
@@ -686,7 +688,10 @@ export default function App() {
   // switch themselves, so it's rendered entirely outside the phone mockup
   // (not inside any screen) to read unambiguously as a prototype control,
   // not part of the app's own UI.
-  const [contractType, setContractType] = useState('days')
+  // Shared with the web table (Components/leaveRequestsStore.js), which
+  // shows her requests for the same scheme.
+  const contractType = useDemoScheme()
+  const setContractType = setDemoScheme
   // Lifted up from HolidaysFeature (rather than kept local to it) so the
   // root can hide AppNav while the Request Leave form is open — same
   // "focused task, no footer nav" treatment just applied to mobile/messaging's
@@ -712,9 +717,12 @@ export default function App() {
           floating
           otherUrl="../../schedule/leave-requests/"
           selfLabel="Holidays (mobile app)"
-          otherLabel="Leave Requests (web)"
+          otherLabel="Holiday Requests (web)"
           defaultSelfShare={0.35}
-          actions={[{ label: 'Reset demo data', onClick: confirmResetLeaveRequests }]}
+          actions={[
+            { label: contractType === 'days' ? 'Switch to hours scheme' : 'Switch to days scheme', onClick: () => setDemoScheme(contractType === 'days' ? 'hours' : 'days') },
+            { label: 'Reset demo data', onClick: confirmResetLeaveRequests },
+          ]}
         />
       </DevToolbar>
       <div className="phone-wrap">
@@ -724,18 +732,12 @@ export default function App() {
             <div className="hol-demo-toggle-wrap">
               <span className="hol-demo-toggle-label">Employee holiday scheme</span>
               <SegmentedToggle options={CONTRACT_TOGGLE_OPTIONS} value={contractType} onChange={setContractType} />
-              {contractType === 'days' ? (
-                <>
-                  <p className="hol-demo-link-note">
-                    Linked to <a href="../../schedule/leave-requests/" target="_blank" rel="noreferrer">Leave Requests</a> as {DEMO_EMPLOYEE}
-                  </p>
-                  <button type="button" className="hol-demo-reset" onClick={confirmResetLeaveRequests}>
-                    Reset demo data
-                  </button>
-                </>
-              ) : (
-                <p className="hol-demo-link-note">Not linked to Leave Requests</p>
-              )}
+              <p className="hol-demo-link-note">
+                Linked to <a href="../../schedule/leave-requests/" target="_blank" rel="noreferrer">Holiday Requests</a> as {DEMO_EMPLOYEE}
+              </p>
+              <button type="button" className="hol-demo-reset" onClick={confirmResetLeaveRequests}>
+                Reset demo data
+              </button>
             </div>
           )}
           <div className="phone-frame" ref={phoneFrameRef}>
@@ -761,7 +763,7 @@ export default function App() {
                     dateSheetOpen={dateSheetOpen}
                     setDateSheetOpen={setDateSheetOpen}
                     onBack={() => setOuterView('account')}
-                    listVisible={outerView === 'holidays' && view === 'list' && contractType === 'days'}
+                    listVisible={outerView === 'holidays' && view === 'list'}
                   />
                 }
               />

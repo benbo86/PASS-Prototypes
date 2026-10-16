@@ -33,6 +33,12 @@ export function toAppRequest(r) {
     amount: r.amount,
     requestedOn: r.submitted.slice(0, 10),
     reason: r.reason,
+    // Approved for different dates from those she asked for.
+    requestedFrom: r.requestedFrom || null,
+    requestedTo: r.requestedTo || null,
+    // She asked to cancel and the office kept the holiday.
+    cancellationKept: !!r.cancellationKept,
+    keptReason: r.keptReason || null,
   }
 }
 
@@ -59,7 +65,9 @@ export function spanDays(fromDate, toDate) {
 export const DAYS_LEAVE_TYPES = ['Full day', 'Half day']
 export const HALF_DAY_OPTIONS = ['AM', 'PM']
 
-export const DAYS_ENTITLEMENT = { total: 28, booked: 5.5, taken: 0 }
+// Booked/taken/available are worked out from her requests
+// (useEntitlement in Components/leaveRequestsStore.js).
+export const DAYS_ENTITLEMENT_TOTAL = 28
 
 export function fmtDays(n) {
   return `${n} ${n === 1 ? 'day' : 'days'}`
@@ -69,17 +77,7 @@ export function fmtDays(n) {
 // No Full day/Half day concept at all — just real Start/End date + real
 // Start/End time. Total hours = the date span x the daily time window,
 // since the same start/end time is worked on every day in the range.
-export const HOURS_ENTITLEMENT = { total: 224, booked: 44, taken: 0 }
-
-// Hours-scheme requests aren't linked to the office's Leave Requests table
-// (only the days scheme is), so they stay local example data.
-export const HOURS_INITIAL_REQUESTS = [
-  { id: 1, status: 'Awaiting approval', fromDate: '2026-02-02', toDate: '2026-02-02', amount: 4, requestedOn: '2025-12-18' },
-  { id: 2, status: 'Awaiting cancellation', fromDate: '2026-01-15', toDate: '2026-01-15', amount: 4, requestedOn: '2025-12-01' },
-  { id: 3, status: 'Approved', fromDate: '2025-12-23', toDate: '2025-12-27', amount: 40, requestedOn: '2025-12-15' },
-  { id: 4, status: 'Declined', fromDate: '2026-01-05', toDate: '2026-01-05', amount: 8, requestedOn: '2025-12-10', reason: 'Insufficient staff cover for the requested date' },
-  { id: 5, status: 'Cancelled', fromDate: '2025-12-30', toDate: '2025-12-30', amount: 8, requestedOn: '2025-11-28' },
-]
+export const HOURS_ENTITLEMENT_TOTAL = 224
 
 export function hoursBetween(start, end) {
   if (!start || !end) return 0

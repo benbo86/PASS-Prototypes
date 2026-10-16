@@ -31,7 +31,9 @@ export const LEAVE_TYPES = ['Full Day', 'Half Day (AM)', 'Half Day (PM)'];
 // still Awaiting Approval being withdrawn by the care worker themselves, before any office
 // decision, is modelled as happening entirely on the app side (never
 // reaches this table at all) — see the same memory entry for why.
-export const STATUSES = ['Awaiting Approval', 'Approved', 'Declined', 'Awaiting Cancellation', 'Cancelled'];
+// 'Withdrawn': she withdrew it in the app before the office decided. Only
+// reached by requests from the mobile app (the generated rows never use it).
+export const STATUSES = ['Awaiting Approval', 'Approved', 'Declined', 'Awaiting Cancellation', 'Cancelled', 'Withdrawn'];
 
 // Exact counts, not weighted-random luck — a weighted-pool approach still
 // leaves the actual outcome up to how this file's single shared

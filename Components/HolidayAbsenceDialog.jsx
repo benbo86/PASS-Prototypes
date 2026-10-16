@@ -197,11 +197,11 @@ function eachDateInRange(start, end) {
   return days
 }
 
-function buildDayPlan(startDate, endDate) {
+function buildDayPlan(startDate, endDate, dayDefault = DEFAULT_DAY_DEDUCTION) {
   return eachDateInRange(startDate, endDate).map((date) => ({
     date,
     weekday: WEEKDAYS[date.getDay()],
-    deduction: DEFAULT_DAY_DEDUCTION,
+    deduction: dayDefault,
   }))
 }
 
@@ -227,6 +227,20 @@ export default function HolidayAbsenceDialog({
   // entitlement and pay disagree. The standalone add flow leaves both open.
   employeeLocked = false,
   absenceTypeLocked = false,
+  // Day-breakdown options, used when approving a holiday request:
+  //   unit: 'days' or 'hours' — the employee's holiday scheme; relabels the
+  //     breakdown and entitlement summary.
+  //   dayDeductionDefault: what each day starts at — a number, or
+  //     ({ startTime, endTime }) => number so an hours-scheme day follows the
+  //     time window (e.g. 0.5 for a half-day request, 4 for 09:00–13:00).
+  //   entitlement: { total, alreadyBooked } for the summary lines; this
+  //     holiday is added on top of alreadyBooked.
+  // Button wording, e.g. "Approve holiday" when approving a request.
+  primaryLabel = 'Add absence',
+  confirmLabel = 'Confirm',
+  unit = 'days',
+  dayDeductionDefault = DEFAULT_DAY_DEDUCTION,
+  entitlement = { total: 28, alreadyBooked: 0 },
   onClose,
   onConfirm,
 }) {
@@ -247,13 +261,16 @@ export default function HolidayAbsenceDialog({
   // whatever's currently in the table, not a sticky setting, so a new range
   // shouldn't silently claim to still be "excluding weekends" against days
   // it's never actually been applied to.
-  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate) : []))
+  const dayDefault = typeof dayDeductionDefault === 'function'
+    ? dayDeductionDefault({ startTime, endTime })
+    : dayDeductionDefault
+  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate, dayDefault) : []))
   const [excludeWeekends, setExcludeWeekends] = useState(false)
   useEffect(() => {
     if (!showDayBreakdown) return
-    setDayPlan(buildDayPlan(startDate, endDate))
+    setDayPlan(buildDayPlan(startDate, endDate, dayDefault))
     setExcludeWeekends(false)
-  }, [showDayBreakdown, startDate, endDate])
+  }, [showDayBreakdown, startDate, endDate, dayDefault])
 
   const updateDayDeduction = (idx, rawValue) => {
     const value = roundDeduction(parseFloat(rawValue))
@@ -270,13 +287,16 @@ export default function HolidayAbsenceDialog({
     setExcludeWeekends(next)
     setDayPlan((prev) => prev.map((d) => (
       d.weekday === 'Sat' || d.weekday === 'Sun'
-        ? { ...d, deduction: next ? 0 : DEFAULT_DAY_DEDUCTION }
+        ? { ...d, deduction: next ? 0 : dayDefault }
         : d
     )))
   }
 
   const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + d.deduction, 0)
   const effectiveDaysDeducted = showDayBreakdown ? computedDaysDeducted : daysDeducted
+  const unitWord = unit === 'hours' ? 'Hours' : 'Days'
+  const unitShort = unit === 'hours' ? 'hrs' : 'days'
+  const bookedAndTaken = entitlement.alreadyBooked + (showDayBreakdown ? computedDaysDeducted : 0)
 
   // Skips straight to confirming when the visits-affected warning/choice
   // (step 2) doesn't apply to the calling flow — e.g. a leave request being
@@ -326,10 +346,10 @@ export default function HolidayAbsenceDialog({
           <div className="entitlement PASSBodyBody-Std">
             <div>Holiday entitlement year: 2026 – 2027</div>
             <div>Scheme name: Everylife</div>
-            <div>Entitlement: 28 days</div>
-            <div>Adjustment: 0 days</div>
-            <div>Booked &amp; taken: {showDayBreakdown ? computedDaysDeducted : 0} days</div>
-            <div>Remaining: {showDayBreakdown ? Math.max(0, 28 - computedDaysDeducted) : 28} days</div>
+            <div>Entitlement: {entitlement.total} {unitShort}</div>
+            <div>Adjustment: 0 {unitShort}</div>
+            <div>Booked &amp; taken: {bookedAndTaken} {unitShort}</div>
+            <div>Remaining: {Math.max(0, entitlement.total - bookedAndTaken)} {unitShort}</div>
           </div>
 
           <div className="date-row field">
@@ -406,7 +426,7 @@ export default function HolidayAbsenceDialog({
                       Exclude weekends
                     </label>
                   </span>
-                  <span>Days deducted</span>
+                  <span>{unitWord} deducted</span>
                 </div>
                 {dayPlan.map((d, i) => (
                   <div key={i} className="day-plan-row">
@@ -421,17 +441,17 @@ export default function HolidayAbsenceDialog({
                       onChange={(e) => updateDayDeduction(i, e.target.value)}
                       onFocus={(e) => e.target.select()}
                       onMouseUp={(e) => e.preventDefault()}
-                      aria-label={`Days deducted for ${fmtDay(d.date)}`}
+                      aria-label={`${unitWord} deducted for ${fmtDay(d.date)}`}
                     />
                   </div>
                 ))}
               </div>
-              <div className="day-plan-total">Total days deducted: <strong>{computedDaysDeducted}</strong></div>
+              <div className="day-plan-total">Total {unitWord.toLowerCase()} deducted: <strong>{computedDaysDeducted}</strong></div>
             </div>
           )}
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={handlePrimary}>Add absence</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary}>{primaryLabel}</button>
           </div>
         </div>
       )}
@@ -478,7 +498,7 @@ export default function HolidayAbsenceDialog({
               className="round-btn primary-btn"
               onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted })}
             >
-              Confirm
+              {confirmLabel}
             </button>
           </div>
         </div>

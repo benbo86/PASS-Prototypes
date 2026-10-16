@@ -153,6 +153,8 @@ const TYPE_CONFIG = {
   holiday_approved:       { label: 'Holiday request approved',   tone: 'green', Icon: CalendarIcon },
   holiday_declined:       { label: 'Holiday request declined',   tone: 'red', Icon: CalendarIcon },
   holiday_cancelled:      { label: 'Holiday request cancelled',  tone: 'grey', Icon: CalendarIcon },
+  // She asked to cancel an approved holiday and the office kept it.
+  holiday_cancellation_declined: { label: 'Holiday cancellation declined', tone: 'red', Icon: CalendarIcon },
 }
 
 const SHIFT_TYPES = ['shift_visit_changed', 'shift_duration_changed', 'shift_summary', 'shift_new']
@@ -161,7 +163,7 @@ const EVENT_TYPES = ['event_date_changed', 'event_time_changed', 'event_duration
 // prototype (mobile/holidays/) entirely rather than opening this
 // prototype's own in-app booking/shift/event detail screen — see the root
 // App()'s own viewBooking for where that's intercepted.
-const HOLIDAY_TYPES = ['holiday_approved', 'holiday_declined', 'holiday_cancelled']
+const HOLIDAY_TYPES = ['holiday_approved', 'holiday_declined', 'holiday_cancelled', 'holiday_cancellation_declined']
 
 const renderDetail = (notif) => {
   switch (notif.type) {
@@ -201,9 +203,11 @@ const renderDetail = (notif) => {
     case 'event_duration_changed':
       return <><s>{notif.originalDuration}</s>{` ${notif.newDuration}, ${notif.eventDate}, ${notif.eventTime}`}</>
     case 'holiday_approved':
-      return notif.amount
+      // Approved for different dates from those she asked for.
+      return notif.requestedRange ? `${notif.amount} — changed from ${notif.requestedRange}` : notif.amount
     case 'holiday_declined':
     case 'holiday_cancelled':
+    case 'holiday_cancellation_declined':
       return notif.reason ? `${notif.amount} — ${notif.reason}` : notif.amount
     default:
       return ''

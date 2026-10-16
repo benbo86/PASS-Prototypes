@@ -22,7 +22,7 @@ import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, leaveTypeTimes } from './data';
-import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests } from '../../../Components/leaveRequestsStore';
+import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
 // `userName` ("Alex Morgan"), declared explicitly here (rather than left
@@ -78,6 +78,7 @@ const statusClass = s => {
   if (s === 'Declined') return 'lr-status-declined';
   if (s === 'Awaiting Cancellation') return 'lr-status-awaiting-cancellation';
   if (s === 'Cancelled') return 'lr-status-cancelled';
+  if (s === 'Withdrawn') return 'lr-status-withdrawn';
   return 'lr-status-awaiting-approval';
 };
 
@@ -85,7 +86,7 @@ const statusClass = s => {
 // the pending/selected/sortDir/nameField shape.
 const emptyCheckboxFilter = () => ({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
 
-const STRING_SORT_COLS = ['leaveType', 'status'];
+const STRING_SORT_COLS = ['leaveTypeLabel', 'status'];
 const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
 const NUM_SORT_COLS = ['amount'];
 
@@ -105,35 +106,73 @@ const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
 const FILTER_EMPLOYEES = [...EMPLOYEE_NAMES, DEMO_EMPLOYEE];
 
 const isoToDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+const dateToIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const hhmmToDate = hhmm => { const [h, m] = hhmm.split(':').map(Number); return new Date(2026, 0, 1, h, m); };
+const dateToHhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+const hoursBetweenDates = (a, b) => Math.max(0, Math.round(((b - a) / 3600000) * 10) / 10);
+
+// An hours-scheme employee doesn't pick Full/Half day — they give start and
+// end times — so their Leave Type shows those times. They filter together
+// under "Hours".
+function leaveTypeLabel(row) {
+  if (row.unit !== 'hours') return row.leaveType;
+  const [start, end] = row.startTime ? [row.startTime, row.endTime] : leaveTypeTimes(row.leaveType).map(dateToHhmm);
+  return `${start} – ${end}`;
+}
+const withLeaveTypeLabel = row => ({
+  ...row,
+  leaveTypeLabel: leaveTypeLabel(row),
+  leaveCategory: row.unit === 'hours' ? 'Hours' : row.leaveType,
+});
+const LEAVE_TYPE_FILTER_ITEMS = [...LEAVE_TYPES, 'Hours'];
 
 // Shared store record -> this table's row shape.
 function toLinkedRow(r) {
-  return {
+  return withLeaveTypeLabel({
     ...r,
     linked: true,
     fromDate: isoToDate(r.fromDate),
     toDate: isoToDate(r.toDate),
-    unit: 'days',
+    unit: r.contract === 'hours' ? 'hours' : 'days',
     submitted: new Date(r.submitted),
     actionedAt: r.actionedAt ? new Date(r.actionedAt) : null,
-  };
+    withdrawnAt: r.withdrawnAt ? new Date(r.withdrawnAt) : null,
+  });
 }
+const GENERATED_ROWS = LEAVE_REQUESTS.map(withLeaveTypeLabel);
+
 
 function fmtAmount(row) {
   return row.unit === 'hours' ? `${row.amount} hrs` : `${row.amount} ${row.amount === 1 ? 'day' : 'days'}`;
 }
 
+// Copy for the shared reason dialog. Decline and Cancel need a reason; Keep
+// holiday's is optional (the holiday simply stands).
+const ACTION_COPY = {
+  decline: { title: 'Decline holiday request', label: 'Decline reason', placeholder: 'Explain why this holiday request is being declined', confirm: 'Confirm decline' },
+  cancel: { title: 'Cancel holiday request', label: 'Cancellation reason', placeholder: 'Explain why this holiday request is being cancelled', confirm: 'Confirm cancellation' },
+  keep: { title: 'Keep holiday', label: 'Reason (optional)', placeholder: 'Explain why the cancellation isn\'t being approved', confirm: 'Keep holiday' },
+};
+
 function confirmResetLeaveRequests() {
-  if (window.confirm('Reset all leave requests (here and on the mobile app) to the starting examples?')) resetLeaveRequests();
+  if (window.confirm('Reset all holiday requests (here and on the mobile app) to the starting examples?')) resetLeaveRequests();
 }
 
 export default function LeaveRequests() {
   const pageRef = useRef(null);
-  const [localRows, setLocalRows] = useState(LEAVE_REQUESTS);
+  const [localRows, setLocalRows] = useState(GENERATED_ROWS);
   // Requests from the mobile Holidays prototype — submitted, withdrawn and
-  // decided on in either place, updating the other live.
+  // decided on in either place, updating the other live. Only her requests
+  // for the holiday scheme currently selected in the app are shown.
   const linkedRecords = useLeaveRequests();
-  const rows = useMemo(() => [...localRows, ...linkedRecords.map(toLinkedRow)], [localRows, linkedRecords]);
+  const scheme = useDemoScheme();
+  // Adrianna's figures, for the approve dialog's entitlement summary
+  // (matching what her app shows).
+  const entitlement = useEntitlement(scheme, scheme === 'hours' ? 224 : 28);
+  const rows = useMemo(
+    () => [...localRows, ...linkedRecords.filter(r => r.contract === scheme).map(toLinkedRow)],
+    [localRows, linkedRecords, scheme],
+  );
 
   // A decision on a linked row is written to the shared store, which also
   // sends Adrianna a notification in the mobile app; anything else is just
@@ -142,7 +181,16 @@ export default function LeaveRequests() {
     if (row.linked) {
       recordOfficeDecision(row.id, { ...patch, actionedAt: patch.actionedAt.toISOString() });
     } else {
-      setLocalRows(prev => prev.map(r => r.id === row.id ? { ...r, ...patch } : r));
+      const { approved, kept, ...rest } = patch;
+      setLocalRows(prev => prev.map(r => r.id === row.id ? withLeaveTypeLabel({
+        ...r,
+        ...rest,
+        ...(kept ? { reason: r.reason } : {}),
+        ...(approved ? {
+          fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
+          amount: approved.amount, startTime: approved.startTime, endTime: approved.endTime,
+        } : {}),
+      }) : r));
     }
   };
 
@@ -158,10 +206,10 @@ export default function LeaveRequests() {
   // way a real approvals-queue badge would.
   const actionRequiredCount = rows.filter((r) => r.status === 'Awaiting Approval' || r.status === 'Awaiting Cancellation').length;
 
-  // Decorative date-range header — same non-filtering convention already
-  // established for Invoices/Timesheets/GPA (doesn't actually filter the
-  // table below).
-  const [dateRange, setDateRange] = useState([new Date(2026, 3, 1), new Date(2026, 8, 30)]);
+  // Lists requests whose dates overlap the range. Defaults to the holiday
+  // entitlement year (1 Apr – 31 Mar, matching the Add Holiday dialog's
+  // "2026 – 2027"); the arrows move by the range's own length.
+  const [dateRange, setDateRange] = useState([new Date(2026, 3, 1), new Date(2027, 2, 31)]);
   const [hoverDate, setHoverDate] = useState(null);
   const [startDate, endDate] = dateRange;
 
@@ -214,6 +262,15 @@ export default function LeaveRequests() {
 
   const navigateRange = dir => {
     if (!startDate || !endDate) return;
+    // A range of whole months (like the default holiday year) moves by that
+    // many months, so it stays 1 Apr – 31 Mar rather than drifting by a day.
+    const endIsMonthEnd = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 1).getDate() === 1;
+    if (startDate.getDate() === 1 && endIsMonthEnd) {
+      const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth() + 1;
+      const ns = new Date(startDate.getFullYear(), startDate.getMonth() + dir * months, 1);
+      setDateRange([ns, new Date(ns.getFullYear(), ns.getMonth() + months, 0)]);
+      return;
+    }
     const ms = endDate.getTime() - startDate.getTime() + 86400000;
     setDateRange([new Date(startDate.getTime() + dir * ms), new Date(endDate.getTime() + dir * ms)]);
   };
@@ -228,11 +285,15 @@ export default function LeaveRequests() {
 
   const filtered = useMemo(() => {
     let r = rows;
+    if (startDate) {
+      const rangeEnd = endDate || startDate;
+      r = r.filter(rec => rec.fromDate <= rangeEnd && rec.toDate >= startDate);
+    }
     if (employeeFilter.selected.size) r = r.filter(rec => employeeFilter.selected.has(rec.employee));
-    if (leaveTypeFilter.selected.size) r = r.filter(rec => leaveTypeFilter.selected.has(rec.leaveType));
+    if (leaveTypeFilter.selected.size) r = r.filter(rec => leaveTypeFilter.selected.has(rec.leaveCategory));
     if (statusFilter.selected.size) r = r.filter(rec => statusFilter.selected.has(rec.status));
     return r;
-  }, [rows, employeeFilter, leaveTypeFilter, statusFilter]);
+  }, [rows, startDate, endDate, employeeFilter, leaveTypeFilter, statusFilter]);
 
   const sorted = useMemo(() => {
     const r = [...filtered];
@@ -268,8 +329,13 @@ export default function LeaveRequests() {
   // existing Add-Holiday dialog, pre-populated. The status only becomes
   // Approved once the office user actually completes that dialog's own
   // step-2 Confirm; closing/backing out leaves the request Awaiting Approval.
-  const handleApproveConfirm = () => {
-    updateRow(approveRow, { status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
+  // The office may change the dates/times; whatever they confirm is what's
+  // booked, and her app shows that it differs from what she asked for.
+  const handleApproveConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted }) => {
+    updateRow(approveRow, {
+      status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date(),
+      approved: { fromDate: dateToIso(s), toDate: dateToIso(e), startTime: dateToHhmm(st), endTime: dateToHhmm(et), amount: daysDeducted },
+    });
     setApproveRow(null);
   };
 
@@ -277,11 +343,18 @@ export default function LeaveRequests() {
   // Decline is the office's own initial rejection of a still-undecided
   // request; Cancel calls off something already Approved (reached via
   // Awaiting Cancellation, the care-worker-initiated withdrawal of an
-  // already-approved holiday). Both require a reason.
+  // already-approved holiday). Both require a reason. "Keep holiday" turns
+  // down her cancellation request: the holiday stands and goes back to
+  // Approved, with an optional reason.
   const openActionDialog = (row, mode) => { setActionRow(row); setActionMode(mode); setActionReason(''); };
   const closeActionDialog = () => { setActionRow(null); setActionReason(''); };
   const handleActionConfirm = () => {
     const reason = actionReason.trim();
+    if (actionMode === 'keep') {
+      updateRow(actionRow, { status: 'Approved', reason: reason || null, kept: true, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
+      closeActionDialog();
+      return;
+    }
     if (!reason) return;
     const nextStatus = actionMode === 'decline' ? 'Declined' : 'Cancelled';
     updateRow(actionRow, { status: nextStatus, reason, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
@@ -298,10 +371,13 @@ export default function LeaveRequests() {
         <AuditCapture containerRef={pageRef} />
         <SplitViewToggle
           otherUrl="../../mobile/holidays/?screen=holidays"
-          selfLabel="Leave Requests (web)"
+          selfLabel="Holiday Requests (web)"
           otherLabel="Holidays (mobile app)"
           defaultSelfShare={0.65}
-          actions={[{ label: 'Reset demo data', onClick: confirmResetLeaveRequests }]}
+          actions={[
+            { label: scheme === 'days' ? 'Switch to hours scheme' : 'Switch to days scheme', onClick: () => setDemoScheme(scheme === 'days' ? 'hours' : 'days') },
+            { label: 'Reset demo data', onClick: confirmResetLeaveRequests },
+          ]}
         />
       </DevToolbar>
       <div className="schedule-page" ref={pageRef}>
@@ -313,7 +389,7 @@ export default function LeaveRequests() {
       <main className="lr-content">
 
         <div className="lr-page-header">
-          <h1>Leave Requests</h1>
+          <h1>Holiday Requests</h1>
           <div className="lr-date-nav">
             <button className="lr-nav-arrow" onClick={() => navigateRange(-1)}><ChevronLeft /></button>
             <DatePicker
@@ -376,7 +452,7 @@ export default function LeaveRequests() {
                 </th>
 
                 {/* Leave Type — checkbox filter AND a real sort icon */}
-                <th className={sort.col === 'leaveType' ? 'sorted' : ''}>
+                <th className={sort.col === 'leaveTypeLabel' ? 'sorted' : ''}>
                   <ColLabel>Leave Type</ColLabel>
                   <button ref={el => anchorRefs.current['leaveType'] = el}
                     className={`col-icon-btn ${leaveTypeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
@@ -384,10 +460,10 @@ export default function LeaveRequests() {
                     onClick={() => openDropdown('leaveType')}>
                     <FilterIcon active={leaveTypeFilter.selected.size > 0} />
                   </button>
-                  <button className="col-icon-btn" onClick={() => toggleSort('leaveType')}>
-                    <SortIcon dir={sort.col === 'leaveType' ? sort.dir : null} />
+                  <button className="col-icon-btn" onClick={() => toggleSort('leaveTypeLabel')}>
+                    <SortIcon dir={sort.col === 'leaveTypeLabel' ? sort.dir : null} />
                   </button>
-                  <FilterDropdown items={LEAVE_TYPES} selected={leaveTypeFilter.selected}
+                  <FilterDropdown items={LEAVE_TYPE_FILTER_ITEMS} selected={leaveTypeFilter.selected}
                     onApply={(sel, sortDir, nameField) => { setLeaveTypeFilter({ selected: sel, sortDir, nameField }); setPage(1); }}
                     onClear={() => { setLeaveTypeFilter(emptyCheckboxFilter()); setPage(1); }}
                     isOpen={openDD === 'leaveType'} onClose={closeDropdown} anchorEl={anchorRefs.current['leaveType']}
@@ -452,7 +528,7 @@ export default function LeaveRequests() {
               {pageRows.map(row => (
                 <tr key={row.id}>
                   <td className="td-name">{row.employee}</td>
-                  <td>{row.leaveType}</td>
+                  <td>{row.leaveTypeLabel}</td>
                   <td className="nowrap">{fmtD(row.fromDate)}</td>
                   <td className="nowrap">{fmtD(row.toDate)}</td>
                   <td className="td-num">{fmtAmount(row)}</td>
@@ -475,9 +551,24 @@ export default function LeaveRequests() {
                         />
                       </span>
                     )}
-                    {(row.status === 'Approved' || row.status === 'Awaiting Cancellation') && (
+                    {row.status === 'Approved' && (
                       <span className="lr-actions">
                         <button className="lr-action-btn" onClick={() => openActionDialog(row, 'cancel')}>Cancel</button>
+                      </span>
+                    )}
+                    {row.status === 'Awaiting Cancellation' && (
+                      <span className="lr-actions">
+                        <RowActionsMenu
+                          items={[
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel') },
+                            { label: 'Keep holiday', onClick: () => openActionDialog(row, 'keep') },
+                          ]}
+                        />
+                      </span>
+                    )}
+                    {row.status === 'Withdrawn' && (
+                      <span className="lr-cancelled-note">
+                        Withdrawn by employee{row.withdrawnAt ? ` on ${fmtD(row.withdrawnAt)}` : ''}
                       </span>
                     )}
                     {(row.status === 'Declined' || row.status === 'Cancelled') && (
@@ -499,7 +590,7 @@ export default function LeaveRequests() {
                 </tr>
               ))}
               {totalRows === 0 && (
-                <tr><td colSpan={8} className="table-empty">No leave requests match the current filters</td></tr>
+                <tr><td colSpan={8} className="table-empty">No holiday requests match the current filters</td></tr>
               )}
             </tbody>
           </table>
@@ -516,7 +607,10 @@ export default function LeaveRequests() {
       </div>
 
       {approveRow && (() => {
-        const [startTime, endTime] = leaveTypeTimes(approveRow.leaveType);
+        // An hours request from the app carries its real times.
+        const [startTime, endTime] = approveRow.startTime
+          ? [hhmmToDate(approveRow.startTime), hhmmToDate(approveRow.endTime)]
+          : leaveTypeTimes(approveRow.leaveType);
         return (
           <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproveRow(null) }}>
             <HolidayAbsenceDialog
@@ -528,8 +622,18 @@ export default function LeaveRequests() {
               endDate={approveRow.toDate}
               startTime={startTime}
               endTime={endTime}
-              daysDeducted={approveRow.amount}
-              deductedLabel={approveRow.unit === 'hours' ? 'Hours deducted' : 'Days deducted'}
+              showDayBreakdown
+              primaryLabel="Approve holiday"
+              confirmLabel="Approve holiday"
+              unit={approveRow.unit}
+              // Each day starts at what she asked for: a half day's 0.5, or
+              // an hours request's time window; the office adjusts any day.
+              dayDeductionDefault={approveRow.unit === 'hours'
+                ? ({ startTime: st, endTime: et }) => hoursBetweenDates(st, et)
+                : (approveRow.leaveType.startsWith('Half Day') ? 0.5 : 1)}
+              entitlement={approveRow.linked
+                ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }
+                : { total: approveRow.unit === 'hours' ? 224 : 28, alreadyBooked: 0 }}
               onClose={() => setApproveRow(null)}
               onConfirm={handleApproveConfirm}
             />
@@ -538,27 +642,27 @@ export default function LeaveRequests() {
       })()}
 
       {actionRow && (
-        <Modal title={actionMode === 'decline' ? 'Decline leave request' : 'Cancel leave request'} onClose={closeActionDialog}>
+        <Modal title={ACTION_COPY[actionMode].title} onClose={closeActionDialog}>
           <div className="lr-cancel-summary">
-            <div><span className="lr-cancel-label">Leave type</span><span>{actionRow.leaveType}</span></div>
+            <div><span className="lr-cancel-label">Leave type</span><span>{actionRow.leaveTypeLabel}</span></div>
             <div><span className="lr-cancel-label">Date from</span><span>{fmtD(actionRow.fromDate)}</span></div>
             <div><span className="lr-cancel-label">Date to</span><span>{fmtD(actionRow.toDate)}</span></div>
             <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours requested' : 'Days requested'}</span><span>{actionRow.amount}</span></div>
           </div>
           <div className="field">
-            <label htmlFor="action-reason">{actionMode === 'decline' ? 'Decline reason' : 'Cancellation reason'}</label>
+            <label htmlFor="action-reason">{ACTION_COPY[actionMode].label}</label>
             <textarea
               id="action-reason"
               value={actionReason}
               onChange={e => setActionReason(e.target.value)}
               rows={3}
-              placeholder={actionMode === 'decline' ? 'Explain why this leave request is being declined' : 'Explain why this leave request is being cancelled'}
+              placeholder={ACTION_COPY[actionMode].placeholder}
             />
           </div>
           <div className="btn-row">
             <button className="round-btn tertiary-btn" onClick={closeActionDialog}>Cancel</button>
-            <button className="round-btn primary-btn" disabled={!actionReason.trim()} onClick={handleActionConfirm}>
-              {actionMode === 'decline' ? 'Confirm decline' : 'Confirm cancellation'}
+            <button className="round-btn primary-btn" disabled={actionMode !== 'keep' && !actionReason.trim()} onClick={handleActionConfirm}>
+              {ACTION_COPY[actionMode].confirm}
             </button>
           </div>
         </Modal>

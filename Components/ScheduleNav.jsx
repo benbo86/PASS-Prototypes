@@ -14,7 +14,7 @@ const TABS = [
   { key: 'schedule',              label: 'Schedule',              href: '../../schedule/daily-schedule/' },
   { key: 'shifts',                label: 'Shifts',                href: null },
   { key: 'holidays-absences',     label: 'Holidays & Absences',   href: null },
-  { key: 'leave-requests',        label: 'Leave Requests',        href: '../../schedule/leave-requests/' },
+  { key: 'leave-requests',        label: 'Holiday Requests',        href: '../../schedule/leave-requests/' },
   { key: 'timesheets',            label: 'Timesheets',            href: '../../timesheets/filters/' },
 ]
 

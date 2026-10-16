@@ -200,7 +200,7 @@
 /* Same tone as Awaiting cancellation, deliberately — Cancelled is that
    status's own resolved terminal state, not a rejection, so it doesn't
    borrow Declined's red. */
-.hol-request-status--cancelled { background: var(--ui-purple-5-languid-lavendar); color: var(--ui-purple-1-cyber-grape); }
+.hol-request-status--cancelled { background: var(--greyscale-13-grey-90); color: var(--greyscale-4-grey-40); }
 
 .hol-request-date {
   display: flex;
@@ -218,6 +218,7 @@
    the negative-outcome detail" read, rather than the neutral grey used by
    .hol-request-meta below it. */
 .hol-request-declined-reason { font: 13px Barlow, sans-serif; color: var(--rag-red-red-overdue-text); margin-bottom: 4px; }
+.hol-request-note { font: 13px Barlow, sans-serif; color: var(--greyscale-2-grey-20); margin-bottom: 4px; }
 .hol-request-meta { font: 12px Barlow, sans-serif; color: var(--greyscale-6-grey-50); }
 
 .hol-request-delete {
