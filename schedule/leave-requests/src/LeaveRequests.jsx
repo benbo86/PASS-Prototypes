@@ -522,6 +522,8 @@ export default function LeaveRequests() {
             <HolidayAbsenceDialog
               employee={{ value: approveRow.employee, label: approveRow.employee }}
               absenceType={{ value: 'holiday', label: 'Holiday' }}
+              employeeLocked
+              absenceTypeLocked
               startDate={approveRow.fromDate}
               endDate={approveRow.toDate}
               startTime={startTime}

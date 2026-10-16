@@ -104,15 +104,18 @@ const TimeInput = forwardRef(({ value, onClick }, ref) => (
 TimeInput.displayName = 'TimeInput'
 
 const SELECT_STYLES = {
-  control: (base, { isFocused }) => ({
+  control: (base, { isFocused, isDisabled }) => ({
     ...base,
     border: `1.5px solid ${isFocused ? '#9a26d6' : '#cac6d7'}`,
+    // A locked field (see employeeLocked/absenceTypeLocked) reads as fixed,
+    // not broken: same text, lavender fill, no chevron, no pointer.
+    backgroundColor: isDisabled ? 'var(--ui-purple-7-lightest-lavendar)' : base.backgroundColor,
     borderRadius: 8,
     boxShadow: 'none',
     fontFamily: 'inherit',
     fontSize: 16,
     fontWeight: 500,
-    cursor: 'pointer',
+    cursor: isDisabled ? 'default' : 'pointer',
     '&:hover': { borderColor: isFocused ? '#9a26d6' : '#cac6d7' },
   }),
   valueContainer: (base) => ({ ...base, padding: '10px 14px' }),
@@ -217,6 +220,13 @@ export default function HolidayAbsenceDialog({
   deductedLabel = 'Days deducted',
   showVisitsStep = true,
   showDayBreakdown = false,
+  // Fix the field to its passed-in value. Used when approving an employee's
+  // leave request (schedule/leave-requests): the request is that employee's
+  // and is always a holiday, so approving it as someone else, or as
+  // sickness/other, would leave her app saying "Approved" while her
+  // entitlement and pay disagree. The standalone add flow leaves both open.
+  employeeLocked = false,
+  absenceTypeLocked = false,
   onClose,
   onConfirm,
 }) {
@@ -294,8 +304,9 @@ export default function HolidayAbsenceDialog({
               options={EMPLOYEES}
               value={employee}
               onChange={setEmployee}
+              isDisabled={employeeLocked}
               styles={SELECT_STYLES}
-              components={{ DropdownIndicator }}
+              components={{ DropdownIndicator: employeeLocked ? null : DropdownIndicator }}
             />
           </div>
 
@@ -306,8 +317,9 @@ export default function HolidayAbsenceDialog({
               options={ABSENCE_TYPES}
               value={absenceType}
               onChange={setAbsenceType}
+              isDisabled={absenceTypeLocked}
               styles={SELECT_STYLES}
-              components={{ DropdownIndicator }}
+              components={{ DropdownIndicator: absenceTypeLocked ? null : DropdownIndicator }}
             />
           </div>
 
