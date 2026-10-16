@@ -73,6 +73,11 @@ const CloseIcon = () => (
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
+// Requests still waiting on an office decision, each status with its own
+// quick filter above the table (styled like its status pill). Same set the
+// tab badge counts.
+const NEEDS_ACTION = new Set(['Awaiting Approval', 'Awaiting Cancellation']);
+
 const statusClass = s => {
   if (s === 'Approved') return 'lr-status-approved';
   if (s === 'Declined') return 'lr-status-declined';
@@ -204,7 +209,16 @@ export default function LeaveRequests() {
   // off the live `rows` state (not the static LEAVE_REQUESTS import) so
   // it decrements the moment a request is approved/cancelled, the same
   // way a real approvals-queue badge would.
-  const actionRequiredCount = rows.filter((r) => r.status === 'Awaiting Approval' || r.status === 'Awaiting Cancellation').length;
+  const actionRequiredCount = rows.filter((r) => NEEDS_ACTION.has(r.status)).length;
+  const awaitingApprovalCount = rows.filter((r) => r.status === 'Awaiting Approval').length;
+  const awaitingCancellationCount = actionRequiredCount - awaitingApprovalCount;
+  // Quick filters: 'Awaiting Approval' and/or 'Awaiting Cancellation'. Both
+  // on shows either kind.
+  const [quickStatuses, setQuickStatuses] = useState(() => new Set());
+  const toggleQuickStatus = status => {
+    setQuickStatuses(prev => { const next = new Set(prev); next.has(status) ? next.delete(status) : next.add(status); return next; });
+    setPage(1);
+  };
 
   // Lists requests whose dates overlap the range. Defaults to the holiday
   // entitlement year (1 Apr – 31 Mar, matching the Add Holiday dialog's
@@ -279,6 +293,7 @@ export default function LeaveRequests() {
     setEmployeeFilter(emptyCheckboxFilter());
     setLeaveTypeFilter(emptyCheckboxFilter());
     setStatusFilter(emptyCheckboxFilter());
+    setQuickStatuses(new Set());
     setSort({ col: null, dir: 'asc' });
     setPage(1);
   };
@@ -292,8 +307,9 @@ export default function LeaveRequests() {
     if (employeeFilter.selected.size) r = r.filter(rec => employeeFilter.selected.has(rec.employee));
     if (leaveTypeFilter.selected.size) r = r.filter(rec => leaveTypeFilter.selected.has(rec.leaveCategory));
     if (statusFilter.selected.size) r = r.filter(rec => statusFilter.selected.has(rec.status));
+    if (quickStatuses.size) r = r.filter(rec => quickStatuses.has(rec.status));
     return r;
-  }, [rows, startDate, endDate, employeeFilter, leaveTypeFilter, statusFilter]);
+  }, [rows, startDate, endDate, employeeFilter, leaveTypeFilter, statusFilter, quickStatuses]);
 
   const sorted = useMemo(() => {
     const r = [...filtered];
@@ -322,7 +338,7 @@ export default function LeaveRequests() {
   const pageRows   = sorted.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
   const showStart  = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
   const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
-  const anyFilter  = !!(employeeFilter.selected.size || leaveTypeFilter.selected.size || statusFilter.selected.size);
+  const anyFilter  = !!(employeeFilter.selected.size || leaveTypeFilter.selected.size || statusFilter.selected.size || quickStatuses.size);
 
   // ── Approve flow ──────────────────────────────────────────────────────────
   // Clicking Approve does NOT change status immediately — it opens the
@@ -412,14 +428,32 @@ export default function LeaveRequests() {
         </div>
 
         <div className="lr-sub-row">
-          {(widthsDirty || justSavedWidths) && (
-            <div className="col-widths-save">
-              <button className="col-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
-                {savingWidths ? 'Saving…' : (justSavedWidths && !widthsDirty) ? 'Saved ✓' : 'Save column widths'}
+          <div className="lr-sub-row-left">
+            {/* Each looks like its status pill in the table, with a count. */}
+            {[
+              { status: 'Awaiting Approval', count: awaitingApprovalCount },
+              { status: 'Awaiting Cancellation', count: awaitingCancellationCount },
+            ].map(({ status, count }) => (
+              <button
+                key={status}
+                type="button"
+                className={`status-pill ${statusClass(status)} lr-quick-filter${quickStatuses.has(status) ? ' active' : ''}`}
+                aria-pressed={quickStatuses.has(status)}
+                onClick={() => toggleQuickStatus(status)}
+              >
+                {status}
+                <span className="lr-quick-count">{count}</span>
               </button>
-              {saveWidthsError && <span className="col-widths-save-error">{saveWidthsError}</span>}
-            </div>
-          )}
+            ))}
+            {(widthsDirty || justSavedWidths) && (
+              <div className="col-widths-save">
+                <button className="col-widths-save-btn" disabled={savingWidths || !widthsDirty} onClick={requestSaveWidths}>
+                  {savingWidths ? 'Saving…' : (justSavedWidths && !widthsDirty) ? 'Saved ✓' : 'Save column widths'}
+                </button>
+                {saveWidthsError && <span className="col-widths-save-error">{saveWidthsError}</span>}
+              </div>
+            )}
+          </div>
           {anyFilter && <button className="clear-btn" onClick={clearAllFilters}><CloseIcon /> Clear</button>}
           <span className="count-label">Showing: {showStart} – {showEnd} of {totalRows}</span>
           <button className="lr-nav-arrow pag-inline" disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}><ChevronLeft /></button>

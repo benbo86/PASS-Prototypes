@@ -44,7 +44,33 @@ body { background: #fff; min-height: 100vh; }
   display: flex; align-items: center; justify-content: flex-end;
   gap: 16px; padding: 10px 0; margin-bottom: 2px;
 }
-.lr-sub-row .col-widths-save { margin-right: auto; }
+.lr-sub-row-left { display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.lr-sub-row-left .col-widths-save { margin-left: 8px; }
+
+/* Quick filters: the status pills themselves (colours from .lr-status-*
+   below), as toggles with a count in the pill's own text colour (white on it). */
+.lr-quick-filter {
+  gap: 8px;
+  border: none;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.lr-quick-filter:hover { filter: brightness(0.97); }
+/* A thin border so they stand out against the grey page (the amber tint
+   is very close to it); selected swaps it for the standard purple. */
+.lr-quick-filter.lr-status-awaiting-approval { box-shadow: inset 0 0 0 1px var(--rag-amber-amber-7); }
+.lr-quick-filter.lr-status-awaiting-cancellation { box-shadow: inset 0 0 0 1px var(--ui-purple-3-grape-grey); }
+.lr-quick-filter.active { box-shadow: inset 0 0 0 2px var(--brand-purple-6-purple-4); }
+.lr-quick-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  color: #fff;
+  font-size: 12px; font-weight: 600;
+}
+.lr-status-awaiting-approval .lr-quick-count { background: #7b3306; }
+.lr-status-awaiting-cancellation .lr-quick-count { background: var(--ui-purple-1-cyber-grape); }
+
 
 /* ── Status pills ────────────────────────────────────────────── */
 /* Awaiting approval = amber, awaiting cancellation = lavender, approved =
