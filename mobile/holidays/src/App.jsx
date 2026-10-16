@@ -16,6 +16,7 @@ import IOSCalendarPopover from '../../../Components/IOSCalendarPopover'
 import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 import BottomSheet from '../../../Components/BottomSheet'
+import HolidayNotificationBanner from '../../../Components/HolidayNotificationBanner'
 import {
   DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, updateLeaveRequest, withdrawLeaveRequest, resetLeaveRequests,
   isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement,
@@ -609,15 +610,12 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
   const schemeRequests = linkedRequests.filter(r => r.contract === contractType && r.status !== 'Withdrawn')
   const requests = schemeRequests.map(toAppRequest)
 
-  // Opening her Holidays list counts as having seen any office responses
-  // there: the notifications about them are marked read and drop off the
-  // footer bell. (A response arriving while she's already on the list
-  // still notifies her, until she next opens it.)
-  const wasVisibleRef = useRef(false)
+  // While her Holidays list is on screen, office responses there count as
+  // seen: the notifications about them are marked read and never reach the
+  // footer bell. One arriving while she's here still shows the in-app
+  // banner (HolidayNotificationBanner), so the change is noticed.
   useEffect(() => {
-    const opened = listVisible && !wasVisibleRef.current
-    wasVisibleRef.current = listVisible
-    if (!opened) return
+    if (!listVisible) return
     const ids = schemeRequests.filter(isUnseenResponse).map(r => r.id)
     if (ids.length) markResponsesSeen(ids)
   }, [listVisible, linkedRequests])
@@ -741,6 +739,9 @@ export default function App() {
             </div>
           )}
           <div className="phone-frame" ref={phoneFrameRef}>
+            {/* Rendered here rather than by AppNav, which is hidden on the
+                request form and sheets. Tapping it opens the Holidays list. */}
+            <HolidayNotificationBanner onOpen={() => { setOuterView('holidays'); setView('list'); setDeleteTarget(null); setDateSheetOpen(false) }} />
             <div className={`screen-area page-slide ${entering ? 'slide-entering' : ''}`}>
               <ScreenSlider
                 secondaryActive={outerView === 'holidays'}
@@ -769,7 +770,7 @@ export default function App() {
               />
             </div>
             {!(outerView === 'holidays' && (view === 'form' || deleteTarget || dateSheetOpen)) && (
-              <AppNav activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
+              <AppNav notificationBanner={false} activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
             )}
           </div>
         </div>

@@ -235,6 +235,9 @@ export default function HolidayAbsenceDialog({
   //     time window (e.g. 0.5 for a half-day request, 4 for 09:00–13:00).
   //   entitlement: { total, alreadyBooked } for the summary lines; this
   //     holiday is added on top of alreadyBooked.
+  // Which visits option ('unassign' or 'keep') starts selected on the
+  // visits step.
+  defaultVisitsOption = 'keep',
   // Button wording, e.g. "Approve holiday" when approving a request.
   primaryLabel = 'Add absence',
   confirmLabel = 'Confirm',
@@ -251,7 +254,7 @@ export default function HolidayAbsenceDialog({
   const [endDate,     setEndDate]     = useState(endDateProp || new Date(2026, 4, 1))
   const [startTime,   setStartTime]   = useState(startTimeProp || new Date(2026, 0, 1, 0, 0))
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
-  const [option,      setOption]      = useState('keep')
+  const [option,      setOption]      = useState(defaultVisitsOption)
 
   // Recomputed whenever the date range changes — every day starts ticked,
   // with no per-employee difference (see the module comment above for why).
@@ -470,7 +473,7 @@ export default function HolidayAbsenceDialog({
             </div>
           </div>
 
-          {['keep', 'unassign'].map((key) => (
+          {['unassign', 'keep'].map((key) => (
             <div
               key={key}
               className={`option-card${option === key ? ' selected' : ''}`}

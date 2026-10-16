@@ -722,6 +722,7 @@ export default function App() {
           />
         </div>
         <AppNav
+          notificationBanner={false}
           activeTab="notifications"
           notifCount={0}
           messagesUnread={messagesUnread}

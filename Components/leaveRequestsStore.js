@@ -202,11 +202,15 @@ export function recordOfficeDecision(id, { status, reason = null, actionedBy, ac
       requestedTo: datesChanged ? request.toDate : null,
     }
   }
-  write(REQUESTS_KEY, readRequests().map(r => (r.id === id ? updated : r)))
+  // The notification is saved before the request: another tab (the app)
+  // reacts to the request changing by marking its notifications seen, so
+  // the notification has to be there already or that tab could save its
+  // older list over it.
   const outcome = kept ? 'Kept' : status
   if (NOTIFICATION_TYPES[outcome]) {
     write(NOTIFICATIONS_KEY, [notificationFor(updated, outcome, actionedAt, { seen: false, read: false }), ...readNotifications()])
   }
+  write(REQUESTS_KEY, readRequests().map(r => (r.id === id ? updated : r)))
 }
 
 // Records without the field (the seed) count as seen.
@@ -216,10 +220,15 @@ export function isUnseenResponse(r) {
 
 // She's opened her Holidays list: these requests' responses are seen, and
 // so are (and read) the notifications about them.
+// Only rewrites the notifications when one actually changes, so a tab
+// working from a slightly stale list never saves it over a newer one.
 export function markResponsesSeen(ids) {
   const set = new Set(ids)
   write(REQUESTS_KEY, readRequests().map(r => (set.has(r.id) ? { ...r, responseSeen: true } : r)))
-  write(NOTIFICATIONS_KEY, readNotifications().map(n => (set.has(n.requestId) ? { ...n, seen: true, read: true } : n)))
+  const notifications = readNotifications()
+  if (notifications.some(n => set.has(n.requestId) && (!n.seen || !n.read))) {
+    write(NOTIFICATIONS_KEY, notifications.map(n => (set.has(n.requestId) ? { ...n, seen: true, read: true } : n)))
+  }
 }
 
 // Entitlement figures for one scheme, from her requests: an approved
@@ -239,9 +248,14 @@ export function useEntitlement(contract, total) {
 }
 
 // ── Notifications ──────────────────────────────────────────────────
+// Every scheme's notifications.
+export function useAllHolidayNotifications() {
+  return useSyncExternalStore(subscribe, readNotifications, () => SEED_NOTIFICATIONS)
+}
+
 // For the scheme currently selected in the app's demo toggle.
 export function useHolidayNotifications() {
-  const all = useSyncExternalStore(subscribe, readNotifications, () => SEED_NOTIFICATIONS)
+  const all = useAllHolidayNotifications()
   const scheme = useDemoScheme()
   return all.filter(n => n.contract === scheme)
 }

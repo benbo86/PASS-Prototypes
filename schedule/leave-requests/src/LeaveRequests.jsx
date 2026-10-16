@@ -623,6 +623,7 @@ export default function LeaveRequests() {
               startTime={startTime}
               endTime={endTime}
               showDayBreakdown
+              defaultVisitsOption="unassign"
               primaryLabel="Approve holiday"
               confirmLabel="Approve holiday"
               unit={approveRow.unit}

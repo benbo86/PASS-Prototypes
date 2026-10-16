@@ -1,5 +1,6 @@
 import { useUnseenNotificationCount } from './leaveRequestsStore'
 import './splitPane'
+import HolidayNotificationBanner from './HolidayNotificationBanner'
 
 const BookingsNavIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -28,7 +29,10 @@ function NavItem({ id, activeTab, href, children }) {
   return <button className={className}>{children}</button>
 }
 
-export default function AppNav({ activeTab = null, messagesUnread = 0, notifCount, links = {} }) {
+// notificationBanner: show the in-app banner for holiday responses (see
+// HolidayNotificationBanner). Off where a page shows its own, or where the
+// notification itself is already on screen (the Notification Centre).
+export default function AppNav({ activeTab = null, messagesUnread = 0, notifCount, links = {}, notificationBanner = true }) {
   // Unless a page passes its own count, the bell shows new holiday-request
   // responses she hasn't looked at yet — shared across every mobile
   // prototype via Components/leaveRequestsStore.js.
@@ -36,6 +40,7 @@ export default function AppNav({ activeTab = null, messagesUnread = 0, notifCoun
   if (notifCount === undefined) notifCount = sharedCount
   return (
     <div className="app-nav">
+      {notificationBanner && <HolidayNotificationBanner />}
       <NavItem id="bookings" activeTab={activeTab} href={links.bookings}>
         <BookingsNavIcon />
         <span className="nav-label">Bookings</span>
