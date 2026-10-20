@@ -1,0 +1,22 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import '../../../Styles/colors.css'
+import '../../../Styles/main.css'
+import '../../../Styles/mobile.css'
+import '../../../Styles/mobile-account.css'
+import '../../../Styles/dev-toolbar.css'
+import '../../../Styles/dev-mode.css'
+import '../../../Styles/dev-comments.css'
+import '../../../Styles/dev-edit.css'
+import '../../../Styles/wireframe-access.css'
+// Booking card styles only (targeted .booking-*/.day-strip-* classes) —
+// read-only reuse, tag-in-out itself is untouched.
+import '../../tag-in-out/src/tag-in-out.css'
+import './messages-tab.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)

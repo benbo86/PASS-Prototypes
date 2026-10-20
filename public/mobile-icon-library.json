@@ -154,6 +154,35 @@
       ]
     },
     {
+      "hash": "83e17a13",
+      "name": "Chevron Left",
+      "group": "Handover Notes",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/handover-notes/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/holidays/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/tag-in-out/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        }
+      ],
+      "usageCount": 4
+    },
+    {
       "hash": "d74b6ffa",
       "name": "Arrow Left",
       "group": "Used across multiple mobile screens",
@@ -182,28 +211,51 @@
       ]
     },
     {
-      "hash": "83e17a13",
-      "name": "Chevron Left",
-      "group": "Handover Notes",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\" />\n  </svg>",
+      "hash": "a5beeb02",
+      "name": "Person",
+      "group": "Used across multiple mobile screens",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/>\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "mobile/handover-notes/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
+          "ref": "mobile/messages-tab/src/icons.jsx#PersonIcon",
+          "name": "PersonIcon"
         },
         {
           "kind": "inline",
-          "ref": "mobile/holidays/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
+          "ref": "mobile/messaging/src/App.jsx#PersonIcon",
+          "name": "PersonIcon"
         },
         {
           "kind": "inline",
-          "ref": "mobile/tag-in-out/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
+          "ref": "mobile/notifications/src/App.jsx#PersonDetailIcon",
+          "name": "PersonDetailIcon"
         }
       ],
-      "usageCount": 3
+      "usageCount": 3,
+      "sharedAcross": [
+        "mobile/messaging/src/App.jsx",
+        "mobile/notifications/src/App.jsx"
+      ]
+    },
+    {
+      "hash": "4b042174",
+      "name": "Messages Menu",
+      "group": "Account",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AccountScreen.jsx#MessagesMenuIcon",
+          "name": "MessagesMenuIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#MessagesIcon",
+          "name": "MessagesIcon"
+        }
+      ],
+      "usageCount": 2
     },
     {
       "hash": "6f642ef5",
@@ -239,6 +291,63 @@
           "kind": "inline",
           "ref": "mobile/customer-documents/src/App.jsx#GridMenuIcon",
           "name": "GridMenuIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "f2576cd1",
+      "name": "Bookings Nav",
+      "group": "Shared mobile shell",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M15.4946 10C18.5352 10 21 12.4631 21 15.5C21 18.5369 18.5352 21 15.4946 21C12.4596 21 10 18.537 10 15.5C10 12.463 12.4596 10 15.4946 10ZM15.4946 11.4395C13.2551 11.4395 11.4395 13.2575 11.4395 15.5C11.4395 17.7425 13.2551 19.5605 15.4946 19.5605C17.74 19.5605 19.5605 17.742 19.5605 15.5C19.5605 13.258 17.74 11.4395 15.4946 11.4395ZM15 2C15.5523 2 16 2.44772 16 3V4H17C18.1046 4 19 4.89543 19 6V7.999L5.5 8C5.22386 8 5 8.22386 5 8.5V16.5C5 16.7761 5.22386 17 5.5 17L8.37533 17.0009C8.47788 17.7018 8.673 18.3726 8.94787 19.0005L5 19C3.89543 19 3 18.1046 3 17V6C3 4.89543 3.89543 4 5 4H6V3C6 2.44772 6.44772 2 7 2C7.55228 2 8 2.44772 8 3V4H14V3C14 2.44772 14.4477 2 15 2ZM15.5 12.3901C15.8663 12.3901 16.173 12.6651 16.2155 13.0332L16.2198 13.1099L16.2187 15.7562L17.4815 16.5032C17.7653 16.6709 17.8942 17.0058 17.8073 17.3179L17.7703 17.4208L17.7349 17.489C17.5485 17.8044 17.1558 17.9285 16.8172 17.7778L16.7491 17.7424L15.1338 16.7878C14.9431 16.6751 14.8153 16.4812 14.7857 16.2546L14.7802 16.1682V13.1099C14.7802 12.7124 15.1025 12.3901 15.5 12.3901Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AppNav.jsx#BookingsNavIcon",
+          "name": "BookingsNavIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#BookingsIcon",
+          "name": "BookingsIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "b16ecfd9",
+      "name": "Customers Nav",
+      "group": "Shared mobile shell",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M13.3318 13.0337C13.9829 13.3315 14.7011 13.5008 15.4602 13.5008C16.1244 13.5008 16.7595 13.3711 17.3421 13.1392L17.5885 13.0337H18.0761C20.1787 13.0337 21.8963 15.1612 21.9955 17.2671L22 17.4584V18.1721C22 18.9003 21.444 19.4991 20.7335 19.5671L20.5986 19.5735H10.3218C9.5936 19.5735 8.99474 19.0174 8.9268 18.307L8.92038 18.1721V17.4584C8.92038 15.3558 10.5761 13.1664 12.6542 13.0395L12.8443 13.0337H13.3318ZM6.41145 13.0326C7.06251 13.3304 7.78072 13.4997 8.53981 13.4997L8.67088 13.4967C8.23978 13.9639 7.88262 14.5386 7.62719 15.1655C7.23536 15.1151 6.84965 15.0279 6.47353 14.908L6.06261 14.7616L5.92388 14.7625C4.92452 14.7625 3.86284 15.9422 3.7414 17.2174L3.72989 17.4573L3.72899 17.8408L7.19 17.8404L7.1905 18.1475C7.1905 18.7704 7.50505 19.3102 7.96326 19.5723L3.40139 19.5724C2.68722 19.5724 2.09743 19.0376 2.01092 18.3468L2 18.171V17.4573C2 15.3777 3.61978 13.2131 5.66598 13.0433L5.92388 13.0326H6.41145ZM12.9858 14.7738L12.8443 14.7738C11.8308 14.7738 10.7507 15.9967 10.6659 17.2957L10.6606 17.4584L10.6598 17.8326H20.2598V17.4584C20.2598 16.155 19.2203 14.88 18.2031 14.7801L18.0761 14.7738L17.9357 14.7738L17.7099 14.8591C16.9917 15.11 16.2333 15.241 15.4602 15.241C14.6881 15.241 13.9325 15.1104 13.2141 14.8599L12.9858 14.7738ZM15.4602 4.00448C17.5243 4.00448 19.1972 5.67738 19.1972 7.74151C19.1972 9.74113 17.6272 11.3736 15.6525 11.4737L15.4602 11.4785C13.3961 11.4785 11.7232 9.80564 11.7232 7.74151C11.7232 5.74189 13.2931 4.10941 15.2679 4.00934L15.4602 4.00448ZM8.53981 4.00342C9.41333 4.00342 10.2168 4.30302 10.853 4.80508C10.5195 5.29862 10.2694 5.87906 10.1272 6.51462C9.7619 6.03909 9.18665 5.73331 8.53981 5.73331C7.43107 5.73331 6.53266 6.63172 6.53266 7.74045C6.53266 8.84919 7.43107 9.7476 8.53981 9.7476C9.18657 9.7476 9.76176 9.44189 10.1288 8.96705C10.2701 9.60298 10.5206 10.1834 10.8532 10.6769C10.2824 11.1262 9.57681 11.4138 8.80672 11.4681L8.53981 11.4775C6.47568 11.4775 4.80277 9.80458 4.80277 7.74045C4.80277 5.76607 6.33337 4.14963 8.2729 4.0128L8.53981 4.00342ZM15.4602 5.74466C14.3571 5.74466 13.4633 6.63846 13.4633 7.74151C13.4633 8.84456 14.3571 9.73836 15.4602 9.73836C16.5632 9.73836 17.457 8.84456 17.457 7.74151C17.457 6.63846 16.5632 5.74466 15.4602 5.74466Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AppNav.jsx#CustomersNavIcon",
+          "name": "CustomersNavIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#CustomersIcon",
+          "name": "CustomersIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "806eb7bd",
+      "name": "Bell Nav",
+      "group": "Shared mobile shell",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/AppNav.jsx#BellNavIcon",
+          "name": "BellNavIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#BellIcon",
+          "name": "BellIcon"
         }
       ],
       "usageCount": 2
@@ -377,27 +486,61 @@
       "usageCount": 2
     },
     {
-      "hash": "a5beeb02",
-      "name": "Person",
-      "group": "Used across multiple mobile screens",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/>\n  </svg>",
+      "hash": "8145193b",
+      "name": "Person Add",
+      "group": "Messages Tab",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/>\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#PersonIcon",
-          "name": "PersonIcon"
+          "ref": "mobile/messages-tab/src/icons.jsx#PersonAddIcon",
+          "name": "PersonAddIcon"
         },
         {
           "kind": "inline",
-          "ref": "mobile/notifications/src/App.jsx#PersonDetailIcon",
-          "name": "PersonDetailIcon"
+          "ref": "mobile/notifications/src/App.jsx#PersonAddIcon",
+          "name": "PersonAddIcon"
         }
       ],
-      "usageCount": 2,
-      "sharedAcross": [
-        "mobile/messaging/src/App.jsx",
-        "mobile/notifications/src/App.jsx"
-      ]
+      "usageCount": 2
+    },
+    {
+      "hash": "580704b2",
+      "name": "Add Circle",
+      "group": "Messages Tab",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#AddCircleIcon",
+          "name": "AddCircleIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#AddCircleIcon",
+          "name": "AddCircleIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "07a4fe85",
+      "name": "Broadcast",
+      "group": "Messages Tab",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM19.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#BroadcastIcon",
+          "name": "BroadcastIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#BroadcastIcon",
+          "name": "BroadcastIcon"
+        }
+      ],
+      "usageCount": 2
     },
     {
       "hash": "07024c5f",
@@ -485,20 +628,6 @@
           "kind": "inline",
           "ref": "Components/AccountScreen.jsx#ChevronRightIcon",
           "name": "ChevronRightIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "4b042174",
-      "name": "Messages Menu",
-      "group": "Account",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AccountScreen.jsx#MessagesMenuIcon",
-          "name": "MessagesMenuIcon"
         }
       ],
       "usageCount": 1
@@ -681,48 +810,6 @@
           "kind": "inline",
           "ref": "Components/AppHeader.jsx#ArrowLeftIcon",
           "name": "ArrowLeftIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "f2576cd1",
-      "name": "Bookings Nav",
-      "group": "Shared mobile shell",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M15.4946 10C18.5352 10 21 12.4631 21 15.5C21 18.5369 18.5352 21 15.4946 21C12.4596 21 10 18.537 10 15.5C10 12.463 12.4596 10 15.4946 10ZM15.4946 11.4395C13.2551 11.4395 11.4395 13.2575 11.4395 15.5C11.4395 17.7425 13.2551 19.5605 15.4946 19.5605C17.74 19.5605 19.5605 17.742 19.5605 15.5C19.5605 13.258 17.74 11.4395 15.4946 11.4395ZM15 2C15.5523 2 16 2.44772 16 3V4H17C18.1046 4 19 4.89543 19 6V7.999L5.5 8C5.22386 8 5 8.22386 5 8.5V16.5C5 16.7761 5.22386 17 5.5 17L8.37533 17.0009C8.47788 17.7018 8.673 18.3726 8.94787 19.0005L5 19C3.89543 19 3 18.1046 3 17V6C3 4.89543 3.89543 4 5 4H6V3C6 2.44772 6.44772 2 7 2C7.55228 2 8 2.44772 8 3V4H14V3C14 2.44772 14.4477 2 15 2ZM15.5 12.3901C15.8663 12.3901 16.173 12.6651 16.2155 13.0332L16.2198 13.1099L16.2187 15.7562L17.4815 16.5032C17.7653 16.6709 17.8942 17.0058 17.8073 17.3179L17.7703 17.4208L17.7349 17.489C17.5485 17.8044 17.1558 17.9285 16.8172 17.7778L16.7491 17.7424L15.1338 16.7878C14.9431 16.6751 14.8153 16.4812 14.7857 16.2546L14.7802 16.1682V13.1099C14.7802 12.7124 15.1025 12.3901 15.5 12.3901Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AppNav.jsx#BookingsNavIcon",
-          "name": "BookingsNavIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "b16ecfd9",
-      "name": "Customers Nav",
-      "group": "Shared mobile shell",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M13.3318 13.0337C13.9829 13.3315 14.7011 13.5008 15.4602 13.5008C16.1244 13.5008 16.7595 13.3711 17.3421 13.1392L17.5885 13.0337H18.0761C20.1787 13.0337 21.8963 15.1612 21.9955 17.2671L22 17.4584V18.1721C22 18.9003 21.444 19.4991 20.7335 19.5671L20.5986 19.5735H10.3218C9.5936 19.5735 8.99474 19.0174 8.9268 18.307L8.92038 18.1721V17.4584C8.92038 15.3558 10.5761 13.1664 12.6542 13.0395L12.8443 13.0337H13.3318ZM6.41145 13.0326C7.06251 13.3304 7.78072 13.4997 8.53981 13.4997L8.67088 13.4967C8.23978 13.9639 7.88262 14.5386 7.62719 15.1655C7.23536 15.1151 6.84965 15.0279 6.47353 14.908L6.06261 14.7616L5.92388 14.7625C4.92452 14.7625 3.86284 15.9422 3.7414 17.2174L3.72989 17.4573L3.72899 17.8408L7.19 17.8404L7.1905 18.1475C7.1905 18.7704 7.50505 19.3102 7.96326 19.5723L3.40139 19.5724C2.68722 19.5724 2.09743 19.0376 2.01092 18.3468L2 18.171V17.4573C2 15.3777 3.61978 13.2131 5.66598 13.0433L5.92388 13.0326H6.41145ZM12.9858 14.7738L12.8443 14.7738C11.8308 14.7738 10.7507 15.9967 10.6659 17.2957L10.6606 17.4584L10.6598 17.8326H20.2598V17.4584C20.2598 16.155 19.2203 14.88 18.2031 14.7801L18.0761 14.7738L17.9357 14.7738L17.7099 14.8591C16.9917 15.11 16.2333 15.241 15.4602 15.241C14.6881 15.241 13.9325 15.1104 13.2141 14.8599L12.9858 14.7738ZM15.4602 4.00448C17.5243 4.00448 19.1972 5.67738 19.1972 7.74151C19.1972 9.74113 17.6272 11.3736 15.6525 11.4737L15.4602 11.4785C13.3961 11.4785 11.7232 9.80564 11.7232 7.74151C11.7232 5.74189 13.2931 4.10941 15.2679 4.00934L15.4602 4.00448ZM8.53981 4.00342C9.41333 4.00342 10.2168 4.30302 10.853 4.80508C10.5195 5.29862 10.2694 5.87906 10.1272 6.51462C9.7619 6.03909 9.18665 5.73331 8.53981 5.73331C7.43107 5.73331 6.53266 6.63172 6.53266 7.74045C6.53266 8.84919 7.43107 9.7476 8.53981 9.7476C9.18657 9.7476 9.76176 9.44189 10.1288 8.96705C10.2701 9.60298 10.5206 10.1834 10.8532 10.6769C10.2824 11.1262 9.57681 11.4138 8.80672 11.4681L8.53981 11.4775C6.47568 11.4775 4.80277 9.80458 4.80277 7.74045C4.80277 5.76607 6.33337 4.14963 8.2729 4.0128L8.53981 4.00342ZM15.4602 5.74466C14.3571 5.74466 13.4633 6.63846 13.4633 7.74151C13.4633 8.84456 14.3571 9.73836 15.4602 9.73836C16.5632 9.73836 17.457 8.84456 17.457 7.74151C17.457 6.63846 16.5632 5.74466 15.4602 5.74466Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AppNav.jsx#CustomersNavIcon",
-          "name": "CustomersNavIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "806eb7bd",
-      "name": "Bell Nav",
-      "group": "Shared mobile shell",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "Components/AppNav.jsx#BellNavIcon",
-          "name": "BellNavIcon"
         }
       ],
       "usageCount": 1
@@ -952,6 +1039,48 @@
       "usageCount": 1
     },
     {
+      "hash": "bd1aaecb",
+      "name": "Employees",
+      "group": "Messages Tab",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M6.34529323,13.6992001 C6.98659064,13.9861115 7.69403084,14.1492572 8.44173186,14.1492572 C8.83563565,14.1492572 9.21916363,14.1039779 9.58727007,14.0191771 C8.13951251,14.6947293 7.11265435,16.3547899 7.11265435,17.9622169 L7.11265435,18.6498286 C7.11265435,19.3952357 7.73094558,20 8.49302546,20 L3.38037111,20 C2.61829123,20 2,19.3952357 2,18.6498286 L2,17.9622169 C2,15.8750769 3.73121544,13.6992001 5.86503911,13.6992001 L6.34529323,13.6992001 Z M13.3845982,13.6992001 C14.0316964,13.9861115 14.7455357,14.1492572 15.5,14.1492572 C16.2544643,14.1492572 16.9712054,13.9861115 17.6154018,13.6992001 L18.1,13.6992001 C20.253125,13.6992001 22,15.8750769 22,17.9622169 L22,18.6498286 C22,19.3952357 21.3761161,20 20.6071429,20 L10.3928571,20 C9.62388393,20 9,19.3952357 9,18.6498286 L9,17.9622169 C9,15.8750769 10.746875,13.6992001 12.9,13.6992001 Z M19.6758297,16.8496 L17.2371129,16.8496 C16.9609705,16.8496 16.7371129,17.0734577 16.7371129,17.3496 L16.7371129,18.2311353 C16.7371129,18.5072776 16.9609705,18.7311353 17.2371129,18.7311353 L19.6758297,18.7311353 C19.9519721,18.7311353 20.1758297,18.5072776 20.1758297,18.2311353 L20.1758297,17.3496 C20.1758297,17.0734577 19.9519721,16.8496 19.6758297,16.8496 Z M8.44173186,5 C9.43518456,5 10.3366335,5.384812 10.9988003,6.01037989 C10.3047346,6.66418301 9.87339658,7.5829878 9.87339658,8.60045709 C9.87339658,9.61792638 10.3047346,10.5367312 10.9983346,11.1914945 C10.3366335,11.8161022 9.43518456,12.2009142 8.44173186,12.2009142 C6.40856024,12.2009142 4.76074222,10.5891471 4.76074222,8.60045709 C4.76074222,6.61176712 6.40856024,5 8.44173186,5 Z M15.5,5 C17.5515625,5 19.2142857,6.61176712 19.2142857,8.60045709 C19.2142857,10.5891471 17.5515625,12.2009142 15.5,12.2009142 C13.4484375,12.2009142 11.7857143,10.5891471 11.7857143,8.60045709 C11.7857143,6.61176712 13.4484375,5 15.5,5 Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#EmployeesIcon",
+          "name": "EmployeesIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "9ee41eb4",
+      "name": "Filters",
+      "group": "Messages Tab",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15,17 C15,16.4477153 14.5522847,16 14,16 L10,16 C9.44771525,16 9,16.4477153 9,17 C9,17.5522847 9.44771525,18 10,18 L14,18 C14.5522847,18 15,17.5522847 15,17 Z M18,12 C18,11.4477153 17.5522847,11 17,11 L7,11 C6.44771525,11 6,11.4477153 6,12 C6,12.5522847 6.44771525,13 7,13 L17,13 C17.5522847,13 18,12.5522847 18,12 Z M4,8 L20,8 C20.5522847,8 21,7.55228475 21,7 C21,6.44771525 20.5522847,6 20,6 L4,6 C3.44771525,6 3,6.44771525 3,7 C3,7.55228475 3.44771525,8 4,8 Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#FiltersIcon",
+          "name": "FiltersIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "4aed9ee9",
+      "name": "Search",
+      "group": "Messages Tab",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10.8488372,18.6872093 C12.627907,18.6872093 14.2813953,18.0802326 15.6,17.0755814 L19.2209302,20.6965116 C19.4302326,20.905814 19.7023256,21.0104651 19.9534884,21.0104651 C20.2046512,21.0104651 20.4976744,20.905814 20.6860465,20.6965116 C21.1046512,20.277907 21.1046512,19.6290698 20.6860465,19.2104651 L17.0860465,15.5895349 C18.0906977,14.2709302 18.6976744,12.6174419 18.6976744,10.8383721 C18.6976744,6.50581395 15.1813953,2.98953488 10.8488372,2.98953488 C6.51627907,2.98953488 3,6.50581395 3,10.8383721 C3,15.1709302 6.51627907,18.6872093 10.8488372,18.6872093 Z M10.8488372,5.08255814 C14.0093023,5.08255814 16.6046512,7.65697674 16.6046512,10.8383721 C16.6046512,14.0197674 14.0093023,16.594186 10.8488372,16.594186 C7.68837209,16.594186 5.09302326,13.9988372 5.09302326,10.8383721 C5.09302326,7.67790698 7.66744186,5.08255814 10.8488372,5.08255814 Z\" fill-rule=\"nonzero\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messages-tab/src/icons.jsx#SearchIcon",
+          "name": "SearchIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "b66f6e6b",
       "name": "Archive",
       "group": "Staff Messaging",
@@ -1092,20 +1221,6 @@
       "usageCount": 1
     },
     {
-      "hash": "07a4fe85",
-      "name": "Broadcast",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM19.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#BroadcastIcon",
-          "name": "BroadcastIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "236a0c55",
       "name": "Reply",
       "group": "Staff Messaging",
@@ -1157,20 +1272,6 @@
           "kind": "inline",
           "ref": "mobile/messaging/src/App.jsx#AddIcon",
           "name": "AddIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "580704b2",
-      "name": "Add Circle",
-      "group": "Staff Messaging",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/messaging/src/App.jsx#AddCircleIcon",
-          "name": "AddCircleIcon"
         }
       ],
       "usageCount": 1
@@ -1283,20 +1384,6 @@
           "kind": "inline",
           "ref": "mobile/notifications/src/App.jsx#CancelIcon",
           "name": "CancelIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "8145193b",
-      "name": "Person Add",
-      "group": "Notification Centre",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "mobile/notifications/src/App.jsx#PersonAddIcon",
-          "name": "PersonAddIcon"
         }
       ],
       "usageCount": 1
@@ -1526,5 +1613,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-10-16T11:29:19.740Z"
+  "generatedAt": "2026-10-20T16:01:49.103Z"
 }

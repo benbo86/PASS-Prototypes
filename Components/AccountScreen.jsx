@@ -10,6 +10,9 @@ import AppNav from './AppNav'
 // hideNav: messaging renders its own single AppNav outside the ScreenSlider
 // (needed for its Inbox/Thread flow too) and toggles its props by view, so
 // it suppresses this component's own nav to avoid two bottom bars at once.
+// showMessagesRow/headerRight: used by mobile/messages-tab (Messages moved
+// to its own footer tab, notifications bell in the header). Both default to
+// the original behaviour, so every other host is unchanged.
 
 const ChevronRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -129,11 +132,11 @@ function Toggle({ on }) {
   )
 }
 
-export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHolidays, messagesUnread, hideNav = false }) {
+export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHolidays, messagesUnread, hideNav = false, showMessagesRow = true, headerRight }) {
   return (
     <>
       <StatusBar />
-      <AppHeader title="Account" />
+      <AppHeader title="Account" right={headerRight} />
       <div className="account-body">
         <div className="account-profile">
           <div className="profile-av">AJ</div>
@@ -146,7 +149,7 @@ export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHol
 
         <div className="menu-section-label">Details</div>
         <div className="menu-rows-card">
-          <MenuRow
+          {showMessagesRow && <MenuRow
             icon={<MessagesMenuIcon />}
             label="Messages"
             onClick={onGoToMessages}
@@ -156,7 +159,7 @@ export default function AccountScreen({ onGoToMessages, onGoToMileage, onGoToHol
                 <ChevronRightIcon />
               </>
             }
-          />
+          />}
           <MenuRow icon={<DocumentIcon />}     label="My Documents" />
           <MenuRow icon={<CalendarMenuIcon />} label="Holidays" onClick={onGoToHolidays} />
           <MenuRow icon={<CarMenuIcon />}      label="Mileage Pay" onClick={onGoToMileage} />
