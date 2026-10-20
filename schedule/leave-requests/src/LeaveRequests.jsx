@@ -390,6 +390,7 @@ export default function LeaveRequests() {
           selfLabel="Holiday Requests (web)"
           otherLabel="Holidays (mobile app)"
           defaultSelfShare={0.65}
+          defaultOpen
           actions={[
             { label: scheme === 'days' ? 'Switch to hours scheme' : 'Switch to days scheme', onClick: () => setDemoScheme(scheme === 'days' ? 'hours' : 'days') },
             { label: 'Reset demo data', onClick: confirmResetLeaveRequests },

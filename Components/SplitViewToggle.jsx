@@ -21,6 +21,10 @@ import { IS_SPLIT_PANE, SPLIT_PANE_NAME } from './splitPane'
 //     actions={[{ label: 'Reset demo data', onClick: ... }]}
 //   />
 //
+// defaultOpen: open the split on every page load, whatever the viewer last
+// chose. Close still hides it for the rest of that visit; divider position
+// and sides are still remembered.
+//
 // floating: for mobile prototypes, whose toolbar is a floating pill — the
 // split then covers the whole window (pill included) rather than sitting
 // below a full-width bar, and is closed from its own Close button.
@@ -65,9 +69,12 @@ function savePrefs(key, prefs) {
   try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(prefs)) } catch { /* ignore */ }
 }
 
-export default function SplitViewToggle({ otherUrl, selfLabel, otherLabel, defaultSelfShare = 0.5, actions = [], floating = false }) {
+export default function SplitViewToggle({ otherUrl, selfLabel, otherLabel, defaultSelfShare = 0.5, actions = [], floating = false, defaultOpen = false }) {
   const prefsKey = window.location.pathname
-  const [prefs, setPrefs] = useState(() => loadPrefs(prefsKey, { open: false, selfShare: defaultSelfShare, selfOnLeft: true }))
+  const [prefs, setPrefs] = useState(() => {
+    const saved = loadPrefs(prefsKey, { open: false, selfShare: defaultSelfShare, selfOnLeft: true })
+    return defaultOpen ? { ...saved, open: true } : saved
+  })
   const [dragging, setDragging] = useState(false)
   const bodyRef = useRef(null)
 
