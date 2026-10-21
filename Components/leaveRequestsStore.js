@@ -33,11 +33,11 @@ export const SCHEMES = ['days', 'hours']
 // rows and sit at the top of the web table, which sorts newest first.
 const at = (iso, time = '10:30') => `${iso}T${time}:00`
 const SEED_SHAPES = [
-  { n: 1, fromDate: '2026-11-02', toDate: '2026-11-02', status: 'Awaiting Approval', submitted: at('2026-10-12') },
-  { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15') },
-  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00') },
-  { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
-  { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30') },
+  { n: 1, fromDate: '2026-11-02', toDate: '2026-11-02', status: 'Awaiting Approval', submitted: at('2026-10-12', '08:47') },
+  { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28', '19:22'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15') },
+  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00') },
+  { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
+  { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30') },
 ]
 // Request 2 is a half day (AM); the rest are full days.
 const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1 }
@@ -237,14 +237,17 @@ export function markResponsesSeen(ids) {
 export function useEntitlement(contract, total) {
   const requests = useLeaveRequests()
   const today = new Date().toISOString().slice(0, 10)
-  let booked = 0, taken = 0
+  let booked = 0, taken = 0, pending = 0
   for (const r of requests) {
     if (r.contract !== contract) continue
+    if (r.status === 'Awaiting Approval') { pending += r.amount; continue }
     if (r.status !== 'Approved' && r.status !== 'Awaiting Cancellation') continue
     if (r.toDate < today) taken += r.amount
     else booked += r.amount
   }
-  return { total, booked, taken, available: total - booked - taken }
+  // pending: requests awaiting approval. Not in available (the summary
+  // cards), but a new request is checked against available minus pending.
+  return { total, booked, taken, pending, available: total - booked - taken }
 }
 
 // ── Notifications ──────────────────────────────────────────────────

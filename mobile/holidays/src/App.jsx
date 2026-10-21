@@ -12,7 +12,6 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import SplitViewToggle from '../../../Components/SplitViewToggle'
-import IOSCalendarPopover from '../../../Components/IOSCalendarPopover'
 import IOSTimeKeypadPopover from '../../../Components/IOSTimeKeypadPopover'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 import BottomSheet from '../../../Components/BottomSheet'
@@ -128,7 +127,9 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 
 // Content for the shared BottomSheet. Tap a start day, then an end day;
 // tapping before the start swaps them. Nothing applies until Apply.
-function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
+// Used by both the date filter and the Request leave form, so the feature
+// has one calendar on both platforms. `single` (a half day) allows one date.
+function DateRangeSheet({ title = 'Filter by date', single = false, start, end, initialMonth, onApply, secondaryLabel = 'Clear', onSecondary }) {
   const [draftStart, setDraftStart] = useState(start)
   const [draftEnd, setDraftEnd] = useState(end)
   const [[viewYear, viewMonth], setView] = useState(() => {
@@ -141,7 +142,12 @@ function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
     setView([d.getFullYear(), d.getMonth()])
   }
 
+  // The sheet opens showing the current selection, but the first tap always
+  // starts a new one: otherwise it would extend the old range.
+  const [fresh, setFresh] = useState(true)
+
   function pick(iso) {
+    if (single || fresh) { setDraftStart(iso); setDraftEnd(null); setFresh(false); return }
     if (!draftStart || draftEnd) { setDraftStart(iso); setDraftEnd(null) }
     else if (iso < draftStart) { setDraftEnd(draftStart); setDraftStart(iso) }
     else setDraftEnd(iso)
@@ -170,9 +176,9 @@ function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
 
   return (
     <>
-      <div className="hol-sheet-title">Filter by date</div>
+      <div className="hol-sheet-title">{title}</div>
       <div className="hol-range-hint">
-        {draftStart ? fmtDateRangeLabel(draftStart, draftEnd) : 'Choose a date or a range'}
+        {draftStart ? fmtDateRangeLabel(draftStart, draftEnd) : single ? 'Choose a date' : 'Choose a date or a range'}
       </div>
       <div className="hol-range-header">
         <button type="button" className="hol-range-nav" onClick={() => shiftMonth(-1)} aria-label="Previous month"><ChevronLeftIcon size={24} /></button>
@@ -184,7 +190,7 @@ function DateRangeSheet({ start, end, initialMonth, onApply, onClear }) {
         {cells}
       </div>
       <button className="fab-square primary-btn" disabled={!draftStart} onClick={() => onApply(draftStart, draftEnd)}>Apply</button>
-      <button className="fab-square tertiary-btn" onClick={onClear}>Clear</button>
+      <button className="fab-square tertiary-btn" onClick={onSecondary}>{secondaryLabel}</button>
     </>
   )
 }
@@ -326,11 +332,59 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
             end={dateEnd}
             initialMonth={latestRequestDate}
             onApply={(start, end) => { setDateStart(start); setDateEnd(end); setDateSheetOpen(false) }}
-            onClear={() => { setDateStart(null); setDateEnd(null); setDateSheetOpen(false) }}
+            onSecondary={() => { setDateStart(null); setDateEnd(null); setDateSheetOpen(false) }}
           />
         )}
       </BottomSheet>
     </div>
+  )
+}
+
+// ─── Remaining balance under the Requested bar ──────────────────
+// available here is net of requests already awaiting approval, so several
+// requests can't add up to more than the entitlement. Going over blocks
+// Submit; the office can still book beyond the balance on the web.
+function RemainingBalance({ remaining, unit }) {
+  if (remaining >= 0) return <div className="hol-remaining-text">{remaining} {unit} remaining</div>
+  return (
+    <>
+      <div className="hol-remaining-text hol-remaining-text--over">{-remaining} {unit} over your balance</div>
+      <p className="hol-over-balance-msg">You don't have enough holiday left for this request. Speak to the office if you need more.</p>
+    </>
+  )
+}
+
+// ─── Dates field on the Request leave form ───────────────────────
+// One field for the whole holiday: it opens the same range calendar as the
+// date filter, where the first and last day are tapped. A half day picks a
+// single date.
+function LeaveDateFields({ fromDate, toDate, single, onChange }) {
+  const [open, setOpen] = useState(false)
+  const value = fromDate === toDate ? fmtDateShort(fromDate) : `${fmtDateShort(fromDate)} - ${fmtDateShort(toDate)}`
+  return (
+    <>
+      <div className="hol-field">
+        <label className="hol-field-label" htmlFor="hol-dates">{single ? 'Date' : 'Dates'}</label>
+        <div className="hol-field-input-wrap" onClick={() => setOpen(true)}>
+          <input id="hol-dates" type="text" className="hol-field-input" readOnly value={value} />
+          <span className="hol-field-icon"><CalendarIcon size={24} /></span>
+        </div>
+      </div>
+      <BottomSheet open={open} onClose={() => setOpen(false)}>
+        {open && (
+          <DateRangeSheet
+            title="Holiday dates"
+            single={single}
+            start={fromDate}
+            end={single || toDate === fromDate ? null : toDate}
+            initialMonth={fromDate}
+            onApply={(start, end) => { onChange(start, single ? start : (end || start)); setOpen(false) }}
+            secondaryLabel="Cancel"
+            onSecondary={() => setOpen(false)}
+          />
+        )}
+      </BottomSheet>
+    </>
   )
 }
 
@@ -342,23 +396,8 @@ function DaysRequestLeaveScreen({ available, onBack, onSubmit }) {
   const [halfDayPeriod, setHalfDayPeriod] = useState('AM')
   const [fromDate, setFromDate] = useState('2026-11-16')
   const [toDate, setToDate] = useState('2026-11-16')
-  // Which date field's iOS wheel sheet is currently open — 'from' | 'to' | null.
-  const [activeField, setActiveField] = useState(null)
-  // Anchor DOM nodes for IOSCalendarPopover's own getBoundingClientRect()
-  // positioning — see Components/IOSCalendarPopover.jsx's header comment.
-  const fromWrapRef = useRef(null)
-  const toWrapRef = useRef(null)
 
   const isHalfDay = leaveType === 'Half day'
-
-  function handleFromDateChange(value) {
-    setFromDate(value)
-    // Keep the range valid from this side too — End date's own calendar
-    // already refuses to select a day before Start (minDate), but moving
-    // Start itself past the existing End needs its own correction, or the
-    // range would silently become inverted the other way.
-    if (isHalfDay || value > toDate) setToDate(value)
-  }
 
   function selectLeaveType(type) {
     setLeaveType(type)
@@ -402,49 +441,18 @@ function DaysRequestLeaveScreen({ available, onBack, onSubmit }) {
         )}
 
         <div className="hol-field-group">
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-from-date">Start date</label>
-            <div className="hol-field-input-wrap" ref={fromWrapRef} onClick={() => setActiveField('from')}>
-              <input id="hol-from-date" type="text" className="hol-field-input" readOnly value={fmtDateShort(fromDate)} />
-              <span className="hol-field-icon"><CalendarIcon size={24} /></span>
-              {activeField === 'from' && (
-                <IOSCalendarPopover
-                  value={fromDate}
-                  anchorEl={fromWrapRef.current}
-                  onClose={() => setActiveField(null)}
-                  onSelect={iso => { handleFromDateChange(iso); setActiveField(null) }}
-                />
-              )}
-            </div>
-          </div>
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-to-date">End date</label>
-            <div className="hol-field-input-wrap" ref={toWrapRef} onClick={() => { if (!isHalfDay) setActiveField('to') }}>
-              <input id="hol-to-date" type="text" className="hol-field-input" readOnly disabled={isHalfDay} value={fmtDateShort(toDate)} />
-              <span className="hol-field-icon"><CalendarIcon size={24} /></span>
-              {activeField === 'to' && (
-                <IOSCalendarPopover
-                  value={toDate}
-                  minDate={fromDate}
-                  anchorEl={toWrapRef.current}
-                  onClose={() => setActiveField(null)}
-                  onSelect={iso => { setToDate(iso); setActiveField(null) }}
-                />
-              )}
-            </div>
-          </div>
+          <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isHalfDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
         </div>
 
         <div className="hol-summary-bar">
           <span className="hol-summary-label">Requested</span>
           <span className="hol-summary-value">{fmtDays(amount)}</span>
         </div>
-        <div className="hol-remaining-text">
-          {available - amount} days remaining
-        </div>
+        <RemainingBalance remaining={available - amount} unit="days" />
 
         <button
           className="fab-square primary-btn hol-submit-btn"
+          disabled={amount > available}
           onClick={() => onSubmit({
             fromDate, toDate, amount,
             leaveType: isHalfDay ? `Half Day (${halfDayPeriod})` : 'Full Day',
@@ -474,13 +482,9 @@ function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
   const [toDate, setToDate] = useState('2026-11-16')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('17:00')
-  // Which field's picker is open — 'from'|'to'|'start'|'end'|null.
+  // Which time field's keypad is open — 'start'|'end'|null.
   const [activeField, setActiveField] = useState(null)
-  // Anchor DOM nodes for IOSCalendarPopover/IOSTimeKeypadPopover's own
-  // getBoundingClientRect() positioning — see IOSCalendarPopover.jsx's
-  // header comment.
-  const fromWrapRef = useRef(null)
-  const toWrapRef = useRef(null)
+  // Anchor DOM nodes for IOSTimeKeypadPopover's own positioning.
   const startWrapRef = useRef(null)
   const endWrapRef = useRef(null)
 
@@ -492,38 +496,7 @@ function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
       <AppHeader title="Request leave" onBack={onBack} />
       <div className="hol-form-body">
         <div className="hol-field-group">
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-from-date">Start date</label>
-            <div className="hol-field-input-wrap" ref={fromWrapRef} onClick={() => setActiveField('from')}>
-              <input id="hol-from-date" type="text" className="hol-field-input" readOnly value={fmtDateShort(fromDate)} />
-              <span className="hol-field-icon"><CalendarIcon size={24} /></span>
-              {activeField === 'from' && (
-                <IOSCalendarPopover
-                  value={fromDate}
-                  anchorEl={fromWrapRef.current}
-                  onClose={() => setActiveField(null)}
-                  onSelect={iso => {
-                    setFromDate(iso)
-                    // Moving Start past the existing End would otherwise
-                    // silently invert the range — End's own calendar
-                    // already refuses to go the other way via minDate.
-                    if (iso > toDate) setToDate(iso)
-                    setActiveField(null)
-                  }}
-                />
-              )}
-            </div>
-          </div>
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-to-date">End date</label>
-            <div className="hol-field-input-wrap" ref={toWrapRef} onClick={() => setActiveField('to')}>
-              <input id="hol-to-date" type="text" className="hol-field-input" readOnly value={fmtDateShort(toDate)} />
-              <span className="hol-field-icon"><CalendarIcon size={24} /></span>
-              {activeField === 'to' && (
-                <IOSCalendarPopover value={toDate} minDate={fromDate} anchorEl={toWrapRef.current} onClose={() => setActiveField(null)} onSelect={iso => { setToDate(iso); setActiveField(null) }} />
-              )}
-            </div>
-          </div>
+          <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
           <div className="hol-field">
             <label className="hol-field-label" htmlFor="hol-start-time">Start time</label>
             <div className="hol-field-input-wrap" ref={startWrapRef} onClick={() => setActiveField('start')}>
@@ -550,12 +523,11 @@ function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
           <span className="hol-summary-label">Requested</span>
           <span className="hol-summary-value">{fmtHours(amount)}</span>
         </div>
-        <div className="hol-remaining-text">
-          {available - amount} hrs remaining
-        </div>
+        <RemainingBalance remaining={available - amount} unit="hrs" />
 
         <button
           className="fab-square primary-btn hol-submit-btn"
+          disabled={amount > available}
           onClick={() => onSubmit({ fromDate, toDate, amount, startTime, endTime, leaveType: hoursLeaveType(startTime, endTime) })}
         >
           Submit request
@@ -652,8 +624,8 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
         }
         secondary={
           isDays
-            ? <DaysRequestLeaveScreen available={entitlement.available} onBack={() => setView('list')} onSubmit={handleSubmit} />
-            : <HoursRequestLeaveScreen available={entitlement.available} onBack={() => setView('list')} onSubmit={handleSubmit} />
+            ? <DaysRequestLeaveScreen available={entitlement.available - entitlement.pending} onBack={() => setView('list')} onSubmit={handleSubmit} />
+            : <HoursRequestLeaveScreen available={entitlement.available - entitlement.pending} onBack={() => setView('list')} onSubmit={handleSubmit} />
         }
       />
       <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
