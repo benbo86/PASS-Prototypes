@@ -21,7 +21,7 @@ import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, leaveTypeTimes } from './data';
+import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, fmtDTShort, leaveTypeTimes } from './data';
 import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
@@ -568,7 +568,7 @@ export default function LeaveRequests() {
                   <td className="nowrap">{fmtD(row.toDate)}</td>
                   <td className="td-num">{fmtAmount(row)}</td>
                   <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
-                  <td className="nowrap">{fmtD(row.submitted)}</td>
+                  <td className="nowrap">{fmtDTShort(row.submitted)}</td>
                   <td>
                     {row.status === 'Awaiting Approval' && (
                       <span className="lr-actions">

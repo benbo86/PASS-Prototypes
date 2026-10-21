@@ -74,6 +74,12 @@ export function fmtD(date) {
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
 }
 
+// Submitted column — date + time, so same-day requests can be told apart
+// (offices approve first come, first served).
+export function fmtDTShort(date) {
+  return `${fmtD(date)}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 // Audit-trail stamp — date + time, for the "who actioned this and when"
 // tooltip on the status pill (LeaveRequests.jsx).
 export function fmtDT(date) {
@@ -162,6 +168,9 @@ function buildRequests() {
     }
 
     const submitted = new Date(fromDate.getTime() - btw(1, 30) * 86400000);
+    // Derived from i, not rnd(), so adding a time doesn't reshuffle the rest
+    // of the seeded data.
+    submitted.setHours(7 + (i * 7) % 12, ((i * 13) % 60), 0, 0);
     const status = statuses[i];
     let reason = null;
     if (status === 'Declined') reason = pick(DECLINE_REASONS);
