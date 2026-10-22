@@ -609,11 +609,6 @@ fieldset.cm-detail-card { margin: 0; min-width: 0; }
 .cm-contrib-table th:nth-child(3) { width: 24%; }
 .cm-pending-chip--muted { background: var(--ui-purple-6-lavendar-grey); color: var(--greyscale-4-grey-40); }
 .cm-pending-chip--muted svg { color: var(--ui-purple-3-grape-grey); }
-.cm-decision-staged { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 6px; background: #fff; border: 1px solid; font-size: 14px; }
-.cm-decision-staged p { flex: 1; color: var(--greyscale-2-grey-20); }
-.cm-decision-staged strong { color: #000; }
-.cm-decision-staged--approve { border-color: var(--availability-3-green); }
-.cm-decision-staged--reject, .cm-decision-staged--cancel { border-color: var(--rag-red-action-med-pastel); }
 .cm-footer-pair { display: flex; gap: 16px; }
 
 /* ── Read-only task (locked, or a decision staged but not saved) ──
@@ -665,3 +660,10 @@ fieldset.cm-detail-card:disabled .cm-bodymap-clear { display: none; }
    the plain border; Ben, 2026-10-22). */
 .cm-task-card--pending,
 .cm-task-card--pending:hover { box-shadow: 0 0 0 1px #b8e6fe, 0 0 16px rgba(0, 132, 209, 0.3); }
+.cm-decision-banner { align-items: center; margin: 0; }
+.cm-decision-banner-text { flex: 1; }
+.cm-decision-banner-text h4 { margin: 0; }
+.warning-banner.red.cm-decision-banner h4 { color: var(--rag-red-red-overdue-dark); }
+.warning-banner.neutral { background: var(--ui-purple-7-lightest-lavendar); border-color: var(--ui-purple-5-languid-lavendar); }
+.warning-banner.neutral h4 { color: #000; }
+.warning-banner.neutral p { color: var(--greyscale-2-grey-20); font-size: 15px; line-height: 1.5; }

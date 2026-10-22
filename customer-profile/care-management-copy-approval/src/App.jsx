@@ -393,7 +393,6 @@ export default function App() {
   // task's removal for approval (it stays live until then).
   const deleteTask = () => {
     if (openId === 'new') { setDraftNew(null); navigate(null); return }
-    if (openCopy) { cancelChange(); return }
     setWorking(prev => prev.filter(t => t.id !== openId))
     navigate(null)
   }
@@ -502,9 +501,10 @@ export default function App() {
                   {inDetail ? (
                     <>
                       <button className="round-btn secondary-btn" onClick={backToList}>Back to list</button>
-                      <button className="round-btn cm-danger-btn" onClick={deleteTask} disabled={!!lock}>
-                        {openCopy ? 'Cancel change' : 'Delete task'}
-                      </button>
+                      {/* A copy is cancelled from its banner, not here. */}
+                      {!openCopy && (
+                        <button className="round-btn cm-danger-btn" onClick={deleteTask} disabled={!!lock}>Delete task</button>
+                      )}
                     </>
                   ) : (
                     <>

@@ -88,27 +88,33 @@ export function ContributorTable({ contributors }) {
 // Approve / Reject don't save anything: like any other edit they're staged
 // as unsaved changes and go live with the next care plan save (the Care plan
 // review dialog lists them, and a rejection needs its reason in Notes).
-// `decision` = the staged 'approve' | 'reject', if any.
-const STAGED = {
-  approve: 'You’ve approved this.',
-  reject: 'You’ve rejected this.',
-  cancel: 'You’ve cancelled this removal.',
+// `decision` = the staged 'approve' | 'reject' | 'cancel', if any; it shows
+// as a short coloured banner ("Change approved") with Undo.
+const DECISION_TONE = { approve: 'green', reject: 'red', cancel: 'neutral' }
+const DECISION_WORD = { approve: 'approved', reject: 'rejected', cancel: 'cancelled' }
+
+function DecisionBanner({ decision, subject, text, onUndo }) {
+  return (
+    <div className={`warning-banner ${DECISION_TONE[decision]} cm-decision-banner`}>
+      <div className="cm-decision-banner-text">
+        <h4>{subject} {DECISION_WORD[decision]}</h4>
+        {text && <p>{text}</p>}
+      </div>
+      <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
+    </div>
+  )
 }
 
-function DecisionActions({ contributors, persona, decision, onApprove, onReject, onUndo, onCancel, cancelLabel }) {
+// `subject` = what the decision is about: 'Change', 'New task' or 'Removal'.
+function DecisionActions({ contributors, persona, decision, subject, onApprove, onReject, onUndo, onCancel, cancelLabel }) {
   // Only the person who raised it can't approve; an approver who edited it
   // can still sign it off (Ben, 2026-10-22).
   const isRequester = contributors[0].name === persona.name
   const canDecide = !isRequester
   if (decision) {
-    return (
-      <div className={`cm-decision-staged cm-decision-staged--${decision}`}>
-        {/* No "save the care plan" reminder: the leave prompt covers it, and
-            the save dialog asks for a rejection's reason. */}
-        <p><strong>{STAGED[decision]}</strong></p>
-        <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
-      </div>
-    )
+    // No "save the care plan" reminder: the leave prompt covers it, and the
+    // save dialog asks for a rejection's reason.
+    return <DecisionBanner decision={decision} subject={subject} onUndo={onUndo} />
   }
   return (
     <div className="cm-approval-actions">
@@ -165,6 +171,7 @@ export function CopyBanner({ copy, original, persona, decision, onOpenOriginal, 
         onReject={onReject}
         onUndo={onUndo}
         onCancel={onCancel}
+        subject={isNew ? 'New task' : 'Change'}
         cancelLabel="Cancel change"
       />
     </section>
@@ -176,14 +183,7 @@ export function CopyBanner({ copy, original, persona, decision, onOpenOriginal, 
 // `cancelled` = the copy was cancelled but not saved yet (Undo restores it).
 export function LockedBanner({ reason, task, cancelled, onUndo, onOpen }) {
   if (reason === 'copy' && cancelled) {
-    return (
-      <section className="cm-approval-banner cm-approval-banner--pending">
-        <div className="cm-decision-staged cm-decision-staged--reject">
-          <p><strong>You’ve cancelled the change to this task.</strong> The current version stays active.</p>
-          <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
-        </div>
-      </section>
-    )
+    return <DecisionBanner decision="cancel" subject="Change" text="The current version stays active." onUndo={onUndo} />
   }
   return (
     <section className="cm-approval-banner cm-approval-banner--pending">
@@ -229,6 +229,7 @@ export function RemovalBanner({ task, persona, decision, onApprove, onReject, on
         onReject={onReject}
         onUndo={onUndo}
         onCancel={onCancel}
+        subject="Removal"
         cancelLabel="Cancel removal"
       />
     </section>
