@@ -103,11 +103,9 @@ function DecisionActions({ contributors, persona, decision, onApprove, onReject,
   if (decision) {
     return (
       <div className={`cm-decision-staged cm-decision-staged--${decision}`}>
-        <p>
-          <strong>{STAGED[decision]}</strong>
-          {' '}Save the care plan to {decision === 'approve' ? 'make it live' : 'confirm'}
-          {decision === 'reject' && ', and add your reason in the Notes'}.
-        </p>
+        {/* No "save the care plan" reminder: the leave prompt covers it, and
+            the save dialog asks for a rejection's reason. */}
+        <p><strong>{STAGED[decision]}</strong></p>
         <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
       </div>
     )
@@ -181,7 +179,7 @@ export function LockedBanner({ reason, task, cancelled, onUndo, onOpen }) {
     return (
       <section className="cm-approval-banner cm-approval-banner--pending">
         <div className="cm-decision-staged cm-decision-staged--reject">
-          <p><strong>You’ve cancelled the change to this task.</strong> Save the care plan to confirm. The current version stays active.</p>
+          <p><strong>You’ve cancelled the change to this task.</strong> The current version stays active.</p>
           <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
         </div>
       </section>
