@@ -663,3 +663,7 @@ fieldset.cm-detail-card:disabled .cm-bodymap-clear { display: none; }
 .cm-status-toggle.locked { background: var(--ui-purple-7-lightest-lavendar); }
 .cm-status-toggle.locked .cm-status-option { cursor: default; }
 .cm-status-toggle.locked .cm-status-option.selected { background: var(--ui-purple-6-lavendar-grey); color: var(--greyscale-2-grey-20); }
+/* Awaiting approval: a soft blue glow around the card (trying it out against
+   the plain border; Ben, 2026-10-22). */
+.cm-task-card--pending,
+.cm-task-card--pending:hover { box-shadow: 0 0 0 1px #b8e6fe, 0 0 16px rgba(0, 132, 209, 0.3); }
