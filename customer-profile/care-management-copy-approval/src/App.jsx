@@ -109,7 +109,7 @@ const NOTE = {
 
 // A decision staged on the task page but not saved yet (`staged`) shows as
 // an ordinary unsaved change: no awaiting-approval chip or blue outline.
-function TaskCard({ task, onOpen, note, unsaved, staged = false, standalone = false }) {
+function TaskCard({ task, onOpen, note, unsaved, staged = false }) {
   const tone = task.type === 'Medication' ? 'medication' : 'general'
   const visits = VISITS.filter(v => task.visitIds.includes(v.id))
   const n = note && !staged ? NOTE[note] : null
@@ -130,13 +130,6 @@ function TaskCard({ task, onOpen, note, unsaved, staged = false, standalone = fa
           {task.status === 'active' ? 'Active' : 'Inactive'}
         </span>
       </div>
-      {note === 'copy' && (
-        <p className="cm-task-replaces">
-          {standalone
-            ? 'Inactive copy holding edits to the current version. Becomes active when approved.'
-            : 'Inactive copy holding the edits to the task above. Becomes active when approved.'}
-        </p>
-      )}
 
       <div className="cm-task-body">
         <div className="cm-task-desc-col">
@@ -370,7 +363,6 @@ export default function App() {
   const openCopy = isCopy(openLive) ? openLive : null
   // A staged (unsaved) Approve/Reject on the open copy or removal.
   const decision = workingTask?.approval?.decision || workingTask?.pendingRemoval?.decision || null
-  const copyUnsaved = openCopy && !decision && !same(openCopy, workingTask)
   // Latest rejection for this task (or, on a copy's original), unless dismissed
   // or a newer change is already awaiting approval.
   const rejection = (() => {
@@ -404,11 +396,6 @@ export default function App() {
     if (openCopy) { cancelChange(); return }
     setWorking(prev => prev.filter(t => t.id !== openId))
     navigate(null)
-    if (openLive) {
-      showToast(isMedication(openLive)
-        ? 'Task removed. Save the care plan to send the removal for approval'
-        : 'Task removed. Save the care plan to confirm')
-    }
   }
 
   // Approve / Reject / Cancel are staged as unsaved edits, then go live with
@@ -419,19 +406,19 @@ export default function App() {
     const { decision: _old, ...rest } = t[key]
     return { ...t, [key]: value ? { ...rest, decision: value } : rest }
   })
-  const approve = () => { setDecision('approve'); showToast('Approved. Save the care plan to make it live') }
-  const reject = () => { setDecision('reject'); showToast('Rejected. Save the care plan, adding your reason in the Notes') }
+  // No "save the care plan" toasts: like any other unsaved edit, the leave
+  // prompt covers forgetting to save (the live product has no such toasts).
+  const approve = () => setDecision('approve')
+  const reject = () => setDecision('reject')
   const undoDecision = () => setDecision(null)
 
   const cancelChange = () => {
     if (openCopy) {
       const original = openCopy.approval.replaces
       setWorking(prev => prev.filter(t => t.id !== openId))
-      showToast('Change cancelled. Save the care plan to confirm')
       navigate(original)
     } else {
       stage(t => { const { pendingRemoval, ...rest } = t; return rest })
-      showToast('Removal cancelled. Save the care plan to confirm')
     }
   }
 
@@ -554,7 +541,6 @@ export default function App() {
                     copy={openCopy}
                     original={openCopy.approval.replaces ? liveById[openCopy.approval.replaces] : null}
                     persona={persona}
-                    unsaved={copyUnsaved}
                     decision={decision}
                     onOpenOriginal={() => navigate(openCopy.approval.replaces)}
                     onApprove={approve}
@@ -625,7 +611,6 @@ export default function App() {
                       task={task}
                       note={noteFor(task)}
                       staged={!!stagedFor(task)}
-                      standalone={pendingOnly}
                       unsaved={!same(task, liveById[task.id])}
                       onOpen={() => navigate(task.id)}
                     />

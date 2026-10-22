@@ -122,12 +122,13 @@ export function applyChanges(tasks, changes) {
   return next
 }
 
-// Short summary for a history row: "Metformin 500mg tablets — Dosage".
+// Short summary for a history row: "SHOE COVERS — updated". No field names,
+// as everywhere in History (View shows the version's detail).
 export function summariseChange({ before, after }) {
   const task = after || before
   if (!before) return `${task.name} — added`
   if (!after) return `${task.name} — removed`
-  return `${task.name} — ${diffTask(before, after).map(c => c.label).join(', ')}`
+  return `${task.name} — updated`
 }
 
 export function fmtDateTime(d) {
@@ -176,7 +177,13 @@ export function planSave({ live, target }) {
   const items = []
   diffTaskLists(live, target).forEach(({ before, after }) => {
     if (before && after && isCopy(before) && after.approval?.decision) {
-      items.push({ kind: after.approval.decision, copy: before, contributors: before.approval.contributors })
+      // An approver can edit the copy and approve it in the same save: the
+      // edits are applied (and recorded) first, then approved. A rejected
+      // copy is deleted, so any edits to it don't matter.
+      const { decision, ...approval } = after.approval
+      const edited = { ...after, approval }
+      const fields = labels(asProposed(before), asProposed(edited))
+      items.push({ kind: decision, copy: decision === 'approve' && fields.length ? edited : before, fields, contributors: before.approval.contributors })
       return
     }
     if (before?.pendingRemoval && after) {
@@ -218,6 +225,11 @@ export const isDecision = item => ['approve', 'reject', 'approveRemoval', 'rejec
 // and removal it raises or updates, and as the approver of any decision.
 // Returns the new care plan, one history summary line per item, and the
 // rejections made (their reason is the save's Notes).
+// History says what happened to the change, not which fields (View opens
+// that version's care plan) and never "copy", which is just how V2 stores it:
+// "— change awaiting approval" (raised, or edited while pending), then
+// "— change approved / rejected / cancelled". Same for new tasks and removals.
+
 export function applyPlan(live, items, who) {
   let next = [...live]
   const summary = []
@@ -238,34 +250,34 @@ export function applyPlan(live, items, who) {
       }
       const i = next.findIndex(t => t.id === it.original.id)
       next = [...next.slice(0, i + 1), copy, ...next.slice(i + 1)]
-      summary.push(`${copy.name} — inactive copy created for approval (${it.fields.join(', ')})`)
+      summary.push(`${copy.name} — change awaiting approval`)
     } else if (it.kind === 'create') {
       next = [...next, {
         ...it.task, status: 'inactive',
         approval: { kind: 'create', replaces: null, intendedStatus: it.task.status, contributors: [contributor(['New task'])] },
       }]
-      summary.push(`${it.task.name} — added as inactive, awaiting approval`)
+      summary.push(`${it.task.name} — new task awaiting approval`)
     } else if (it.kind === 'updateCopy') {
       replace(it.after.id, {
         ...it.after,
         approval: { ...it.after.approval, contributors: [...it.before.approval.contributors, contributor(it.fields)] },
       })
-      summary.push(`${it.after.name} (copy awaiting approval) — ${it.fields.join(', ')}`)
+      summary.push(`${it.after.name} — ${it.after.approval.kind === 'create' ? 'new task' : 'change'} awaiting approval`)
     } else if (it.kind === 'removal') {
       replace(it.task.id, { ...it.task, pendingRemoval: { contributors: [contributor(['Removal'])] } })
       summary.push(`${it.task.name} — removal awaiting approval`)
     } else if (it.kind === 'withdrawCopy') {
       next = next.filter(t => t.id !== it.copy.id)
-      summary.push(`${it.copy.name} — copy awaiting approval cancelled`)
+      summary.push(`${it.copy.name} — ${it.copy.approval.kind === 'create' ? 'new task' : 'change'} cancelled`)
     } else if (it.kind === 'approve') {
       next = approveCopy(next, it.copy, who.at)
       summary.push(it.copy.approval.replaces
-        ? `${it.copy.name} — change approved: copy made active, previous version made inactive`
-        : `${it.copy.name} — new task approved and made active`)
+        ? `${it.copy.name} — change approved`
+        : `${it.copy.name} — new task approved`)
     } else if (it.kind === 'reject') {
       next = removeTask(next, it.copy.id)
       reject(it.copy.approval.replaces, 'Change', it.contributors)
-      summary.push(`${it.copy.name} — change rejected, copy deleted`)
+      summary.push(`${it.copy.name} — ${it.copy.approval.kind === 'create' ? 'new task' : 'change'} rejected`)
     } else if (it.kind === 'approveRemoval') {
       next = removeTask(next, it.task.id)
       summary.push(`${it.task.name} — removal approved`)
@@ -275,7 +287,7 @@ export function applyPlan(live, items, who) {
       summary.push(`${it.task.name} — removal rejected`)
     } else if (it.kind === 'cancelRemoval') {
       next = clearRemoval(next, it.task.id)
-      summary.push(`${it.task.name} — removal awaiting approval cancelled`)
+      summary.push(`${it.task.name} — removal cancelled`)
     }
   })
   return { nextLive: next, summary, rejections }

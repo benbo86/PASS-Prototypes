@@ -7,13 +7,13 @@ import { needsApproval } from './approval'
 // version: creating a copy, editing it, approving it (Approved by filled
 // in), rejecting or cancelling it. No separate request rows are needed.
 // View opens the read-only care plan document for that version.
+//
+// Kept as close to the live modal as possible (Ben, 2026-10-22): its own
+// columns plus just Approved by, the second-signature record. No Status
+// (the current version is the top row, the only one without Revert) and no
+// Change column (View shows what each version holds).
 
 const PAGE_SIZE = 10
-
-const STATUS = {
-  live: { label: 'Live', tone: 'live' },
-  superseded: { label: 'Inactive', tone: 'muted' },
-}
 
 function buildRows(versions) {
   const latest = Math.max(...versions.map(v => v.version))
@@ -24,9 +24,8 @@ function buildRows(versions) {
     employee: v.employee,
     source: v.source,
     version: v.version,
-    status: v.version === latest ? 'live' : 'superseded',
+    isLatest: v.version === latest,
     approvedBy: v.approval ? v.approval.by : '—',
-    summary: v.summary,
     data: v,
   }))
 }
@@ -57,34 +56,27 @@ export default function HistoryModal({ open, onClose, versions, onRevert, onView
               <th>Employee</th>
               <th>Source</th>
               <th>Version</th>
-              <th>Change</th>
-              <th>Status</th>
               <th>Approved by</th>
               <th aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
-            {pageRows.map(row => {
-              const s = STATUS[row.status]
-              return (
+            {pageRows.map(row => (
                 <tr key={row.key}>
                   <td>{row.modifiedAt}</td>
                   <td>{row.receivedAt}</td>
                   <td className="cm-history-name" title={row.employee}>{row.employee}</td>
                   <td>{row.source}</td>
                   <td>{row.version}</td>
-                  <td className="cm-history-summary">{row.summary.join('; ')}</td>
-                  <td><span className={`cm-history-status cm-history-status--${s.tone}`}>{s.label}</span></td>
                   <td className="cm-history-name" title={row.approvedBy}>{row.approvedBy}</td>
                   <td className="cm-history-actions">
                     <button className="cm-outline-btn" onClick={() => onView(row.data)}>View</button>
-                    {row.status !== 'live'
+                    {!row.isLatest
                       ? <button className="cm-outline-btn cm-outline-btn--danger" onClick={() => onRevert(row.data)}>Revert</button>
                       : <span className="cm-outline-btn-spacer" />}
                   </td>
                 </tr>
-              )
-            })}
+            ))}
           </tbody>
         </table>
 

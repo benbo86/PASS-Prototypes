@@ -100,11 +100,12 @@ export function StepTable({ request }) {
 
 // Shown at the top of a task with a pending change. Nothing is locked (except
 // a pending removal): the form below shows the proposed version and anyone
-// can keep editing it. An eligible approver gets Approve/Reject — unless they
-// contributed to it; contributors can withdraw.
+// can keep editing it. Anyone but the person who raised it gets Approve/Reject
+// (an approver who edits it can still sign it off); contributors can withdraw.
 export function PendingBanner({ request, persona, onApprove, onReject, onWithdraw }) {
   const isContributor = request.contributors.some(c => c.name === persona.name)
-  const canDecide = !isContributor
+  const isRequester = request.contributors[0].name === persona.name
+  const canDecide = !isRequester
   const what = request.kind === 'create' ? 'New medication task' : request.kind === 'delete' ? 'Removal of this medication task' : 'Medication change'
 
   return (
@@ -134,8 +135,8 @@ export function PendingBanner({ request, persona, onApprove, onReject, onWithdra
         {isContributor && (
           <button className="round-btn secondary-btn" onClick={onWithdraw}>Withdraw request</button>
         )}
-        {isContributor && (
-          <span className="cm-approval-hint">You contributed to this change, so another Care Manager needs to approve it.</span>
+        {isRequester && (
+          <span className="cm-approval-hint">You raised this change, so another Care Manager needs to approve it.</span>
         )}
       </div>
     </section>
@@ -320,23 +321,23 @@ function PersonaRules() {
       <ul>
         <li>Medication changes need approval from a Care Manager who didn't make them. The current version stays live until then.</li>
         <li>Anyone can edit a pending change, and approval starts again.</li>
-        <li>You can't approve a change you contributed to, which is why you can switch between two Care Managers.</li>
+        <li>The person who raised a change can't approve it, which is why you can switch between two Care Managers. Someone who only edited it can still approve it.</li>
       </ul>
     </>
   )
 }
 
 // `contributors` = names of whoever made the change awaiting approval on the
-// open task (null elsewhere). The hint says whether you can approve it, or
-// who to switch to, so it's clear who to view as while demoing.
+// open task (null elsewhere); the first raised it. Only that person can't
+// approve, so the hint says whether you can, or who to switch to.
 function personaHint(personas, persona, contributors, onChange) {
   if (!contributors) return null
-  if (!contributors.includes(persona.name)) return <>You can approve this change.</>
-  const other = personas.find(p => !contributors.includes(p.name))
-  if (!other) return <>You both made this change, so neither of you can approve it.</>
+  const requester = contributors[0]
+  if (persona.name !== requester) return <>You can approve this change.</>
+  const other = personas.find(p => p.name !== requester)
   return (
     <>
-      You made this change.{' '}
+      You raised this change.{' '}
       <button type="button" className="cm-link-btn cm-persona-switch" onClick={() => onChange(other)}>
         Switch to {other.name}
       </button>{' '}

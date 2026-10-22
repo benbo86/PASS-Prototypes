@@ -95,9 +95,11 @@ const STAGED = {
   cancel: 'You’ve cancelled this removal.',
 }
 
-function DecisionActions({ contributors, persona, unsaved, decision, onApprove, onReject, onUndo, onCancel, cancelLabel }) {
-  const isContributor = contributors.some(c => c.name === persona.name)
-  const canDecide = !isContributor
+function DecisionActions({ contributors, persona, decision, onApprove, onReject, onUndo, onCancel, cancelLabel }) {
+  // Only the person who raised it can't approve; an approver who edited it
+  // can still sign it off (Ben, 2026-10-22).
+  const isRequester = contributors[0].name === persona.name
+  const canDecide = !isRequester
   if (decision) {
     return (
       <div className={`cm-decision-staged cm-decision-staged--${decision}`}>
@@ -114,14 +116,13 @@ function DecisionActions({ contributors, persona, unsaved, decision, onApprove, 
     <div className="cm-approval-actions">
       {canDecide && (
         <>
-          <button className="round-btn primary-btn" onClick={onApprove} disabled={unsaved}>Approve</button>
-          <button className="round-btn cm-danger-btn" onClick={onReject} disabled={unsaved}>Reject</button>
+          <button className="round-btn primary-btn" onClick={onApprove}>Approve</button>
+          <button className="round-btn cm-danger-btn" onClick={onReject}>Reject</button>
         </>
       )}
       <button className="round-btn secondary-btn" onClick={onCancel}>{cancelLabel}</button>
-      {canDecide && unsaved && <span className="cm-approval-hint">Save your edits first. Another Care Manager will then need to approve.</span>}
-      {isContributor && (
-        <span className="cm-approval-hint">You edited this change, so another Care Manager needs to approve it.</span>
+      {isRequester && (
+        <span className="cm-approval-hint">You raised this change, so another Care Manager needs to approve it.</span>
       )}
     </div>
   )
@@ -131,7 +132,7 @@ function DecisionActions({ contributors, persona, unsaved, decision, onApprove, 
 // The copy itself is editable by anyone: each save is recorded and restarts
 // approval. Approving is part of a care plan save: this copy becomes active
 // and the current version inactive.
-export function CopyBanner({ copy, original, persona, unsaved, decision, onOpenOriginal, onApprove, onReject, onUndo, onCancel }) {
+export function CopyBanner({ copy, original, persona, decision, onOpenOriginal, onApprove, onReject, onUndo, onCancel }) {
   const { approval } = copy
   const isNew = approval.kind === 'create'
   const proposed = { ...copy, status: approval.intendedStatus }
@@ -155,13 +156,12 @@ export function CopyBanner({ copy, original, persona, unsaved, decision, onOpenO
         {isNew
           ? 'Approving makes this task active.'
           : 'Approving makes this copy active and the current version inactive.'}
-        {' '}Anyone can keep editing this copy. Everyone who edits it is recorded and can’t approve it.
+        {' '}Anyone can keep editing this copy, and every edit is recorded. Only the person who raised it can’t approve it.
       </p>
 
       <DecisionActions
         contributors={approval.contributors}
         persona={persona}
-        unsaved={unsaved}
         decision={decision}
         onApprove={onApprove}
         onReject={onReject}
@@ -226,7 +226,6 @@ export function RemovalBanner({ task, persona, decision, onApprove, onReject, on
       <DecisionActions
         contributors={task.pendingRemoval.contributors}
         persona={persona}
-        unsaved={false}
         decision={decision}
         onApprove={onApprove}
         onReject={onReject}
@@ -275,7 +274,8 @@ const changedBy = it => [...new Set(it.contributors.map(c => c.name))].join(' an
 const describeDecision = it => {
   const verb = it.kind === 'approve' || it.kind === 'approveRemoval' ? 'Approving' : 'Rejecting'
   const what = it.kind === 'approveRemoval' || it.kind === 'rejectRemoval' ? ' (removal)' : ''
-  return `${verb}: ${(it.copy || it.task).name}${what}, changed by ${changedBy(it)}`
+  const edits = it.kind === 'approve' && it.fields?.length ? `, with your edits (${it.fields.join(', ')})` : ''
+  return `${verb}: ${(it.copy || it.task).name}${what}, changed by ${changedBy(it)}${edits}`
 }
 const beforeAfter = it => {
   if (it.kind === 'copy') return [it.original, it.edited]
@@ -423,23 +423,23 @@ function PersonaRules() {
       <ul>
         <li>A medication change is saved as an inactive copy of the task. The current version stays live until a Care Manager approves it.</li>
         <li>Approve and Reject are unsaved changes: they go live when you save the care plan. Approving makes the copy active and the current version inactive.</li>
-        <li>Anyone can edit the copy. You can't approve a change you edited, which is why you can switch between two Care Managers.</li>
+        <li>Anyone can edit the copy. The person who raised a change can't approve it, which is why you can switch between two Care Managers. Someone who only edited it can still approve it.</li>
       </ul>
     </>
   )
 }
 
 // `contributors` = names of whoever made the change awaiting approval on the
-// open task (null elsewhere). The hint says whether you can approve it, or
-// who to switch to, so it's clear who to view as while demoing.
+// open task (null elsewhere); the first raised it. Only that person can't
+// approve, so the hint says whether you can, or who to switch to.
 function personaHint(personas, persona, contributors, onChange) {
   if (!contributors) return null
-  if (!contributors.includes(persona.name)) return <>You can approve this change.</>
-  const other = personas.find(p => !contributors.includes(p.name))
-  if (!other) return <>You both made this change, so neither of you can approve it.</>
+  const requester = contributors[0]
+  if (persona.name !== requester) return <>You can approve this change.</>
+  const other = personas.find(p => p.name !== requester)
   return (
     <>
-      You made this change.{' '}
+      You raised this change.{' '}
       <button type="button" className="cm-link-btn cm-persona-switch" onClick={() => onChange(other)}>
         Switch to {other.name}
       </button>{' '}
