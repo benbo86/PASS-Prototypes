@@ -181,7 +181,7 @@ export function LockedBanner({ reason, task, cancelled, onUndo, onOpen }) {
     return (
       <section className="cm-approval-banner cm-approval-banner--pending">
         <div className="cm-decision-staged cm-decision-staged--reject">
-          <p><strong>You’ve cancelled the change to this task.</strong> Save the care plan to confirm. This version stays as it is.</p>
+          <p><strong>You’ve cancelled the change to this task.</strong> Save the care plan to confirm. The current version stays active.</p>
           <button className="round-btn secondary-btn" onClick={onUndo}>Undo</button>
         </div>
       </section>
