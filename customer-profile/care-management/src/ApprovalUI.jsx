@@ -104,7 +104,7 @@ export function StepTable({ request }) {
 // contributed to it; contributors can withdraw.
 export function PendingBanner({ request, persona, onApprove, onReject, onWithdraw }) {
   const isContributor = request.contributors.some(c => c.name === persona.name)
-  const canDecide = persona.canApprove && !isContributor
+  const canDecide = !isContributor
   const what = request.kind === 'create' ? 'New medication task' : request.kind === 'delete' ? 'Removal of this medication task' : 'Medication change'
 
   return (
@@ -134,11 +134,8 @@ export function PendingBanner({ request, persona, onApprove, onReject, onWithdra
         {isContributor && (
           <button className="round-btn secondary-btn" onClick={onWithdraw}>Withdraw request</button>
         )}
-        {isContributor && persona.canApprove && (
+        {isContributor && (
           <span className="cm-approval-hint">You contributed to this change, so another Care Manager needs to approve it.</span>
-        )}
-        {!persona.canApprove && !isContributor && (
-          <span className="cm-approval-hint">Only a Care Manager can approve medication changes.</span>
         )}
       </div>
     </section>
@@ -321,16 +318,35 @@ function PersonaRules() {
     <>
       <strong>Switch who you're viewing as</strong> to try the medication approval workflow.
       <ul>
-        <li>Medication changes need a Care Manager's approval. The current version stays live until then.</li>
-        <li>A Supervisor can make changes but can't approve them.</li>
+        <li>Medication changes need approval from a Care Manager who didn't make them. The current version stays live until then.</li>
         <li>Anyone can edit a pending change, and approval starts again.</li>
-        <li>You can't approve a change you contributed to, which is why there are two Care Managers.</li>
+        <li>You can't approve a change you contributed to, which is why you can switch between two Care Managers.</li>
       </ul>
     </>
   )
 }
 
-export function PersonaSwitcher({ personas, persona, onChange }) {
+// `contributors` = names of whoever made the change awaiting approval on the
+// open task (null elsewhere). The hint says whether you can approve it, or
+// who to switch to, so it's clear who to view as while demoing.
+function personaHint(personas, persona, contributors, onChange) {
+  if (!contributors) return null
+  if (!contributors.includes(persona.name)) return <>You can approve this change.</>
+  const other = personas.find(p => !contributors.includes(p.name))
+  if (!other) return <>You both made this change, so neither of you can approve it.</>
+  return (
+    <>
+      You made this change.{' '}
+      <button type="button" className="cm-link-btn cm-persona-switch" onClick={() => onChange(other)}>
+        Switch to {other.name}
+      </button>{' '}
+      to approve it.
+    </>
+  )
+}
+
+export function PersonaSwitcher({ personas, persona, onChange, contributors = null }) {
+  const hint = personaHint(personas, persona, contributors, onChange)
   return (
     <div className="cm-persona" data-devmode-passthrough="true">
       <span className="cm-persona-tag">Prototype</span>
@@ -346,6 +362,7 @@ export function PersonaSwitcher({ personas, persona, onChange }) {
       <Tooltip text={<PersonaRules />} wrapClassName="cm-persona-help">
         <InfoIcon />
       </Tooltip>
+      {hint && <p className="cm-persona-hint">{hint}</p>}
     </div>
   )
 }

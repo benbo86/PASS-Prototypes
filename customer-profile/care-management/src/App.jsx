@@ -184,7 +184,7 @@ let requestCounter = 100
 const INITIAL_PENDING = INITIAL_REQUESTS.filter(r => r.status === 'pending')
 export default function App() {
   const pageRef = useRef(null)
-  const [persona, setPersona] = useState(PERSONAS[0])
+  const [persona, setPersona] = useState(() => PERSONAS.find(p => p.id === 'sam'))
   const [live, setLive] = useState(INITIAL_TASKS)
   const [working, setWorking] = useState(() => overlayPending(INITIAL_TASKS, INITIAL_PENDING))
   const [requests, setRequests] = useState(INITIAL_REQUESTS)
@@ -603,7 +603,12 @@ export default function App() {
         </div>
       </div>
 
-      <PersonaSwitcher personas={PERSONAS} persona={persona} onChange={setPersona} />
+      <PersonaSwitcher
+        personas={PERSONAS}
+        persona={persona}
+        onChange={setPersona}
+        contributors={inDetail && openPending ? openPending.contributors.map(c => c.name) : null}
+      />
 
       <CarePlanReviewModal
         open={!!saveModal}

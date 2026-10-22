@@ -518,6 +518,9 @@ fieldset.cm-detail-card { margin: 0; min-width: 0; }
   color: #fff; background: var(--brand-purple-6-purple-4); padding: 2px 6px; border-radius: 4px;
 }
 .cm-persona-label { color: var(--greyscale-4-grey-40); }
+.cm-persona { flex-wrap: wrap; max-width: 440px; }
+.cm-persona-hint { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--greyscale-2-grey-20); }
+.cm-persona-switch { font-size: 13px; padding: 0; text-decoration: underline; }
 .tooltip.cm-persona-help { max-width: 320px; }
 .tooltip.cm-persona-help ul { margin: 8px 0 0; padding-left: 16px; }
 .tooltip.cm-persona-help li + li { margin-top: 4px; }

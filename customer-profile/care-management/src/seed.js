@@ -8,10 +8,11 @@
 import { INITIAL_TASKS } from './data'
 
 // Prototype-only "viewing as" personas (see PersonaSwitcher).
+// Only Care Managers and above can use the web app (supervisors and care
+// workers can't), and any of them can approve a change they didn't make.
 export const PERSONAS = [
-  { id: 'priya', name: 'Priya Shah', role: 'Care Manager', canApprove: true },
-  { id: 'sam', name: 'Sam Patel', role: 'Care Manager', canApprove: true },
-  { id: 'jane', name: 'Jane Smith', role: 'Supervisor', canApprove: false },
+  { id: 'priya', name: 'Priya Shah', role: 'Care Manager' },
+  { id: 'sam', name: 'Sam Patel', role: 'Care Manager' },
 ]
 
 export const SOURCE_WEB = 'Web 1.206.1'
@@ -78,7 +79,7 @@ export const INITIAL_REQUESTS = [
       description: metformin.description
         .replace('with food or just after - AM only.', 'with food or just after - twice daily, with breakfast and my evening meal.'),
     },
-    requestedBy: 'Jane Smith', requestedAt: '30/09/2026 15:12', source: SOURCE_WEB,
+    requestedBy: 'Priya Shah', requestedAt: '30/09/2026 15:12', source: SOURCE_WEB,
     status: 'pending',
     review: { saveType: 'Unscheduled review', reviewDate: '2026-08-26', notes: 'GP letter 29/09: Metformin increased to twice daily following a high HbA1c result. Added the evening visit for the second dose.' },
   },
@@ -101,7 +102,7 @@ const INITIAL_REQUESTS_DECIDED = [
     id: 'r0', taskId: 't2', origin: 'Edit', kind: 'edit', keys: ['dosage'],
     before: rivaroxaban,
     after: { ...clone(rivaroxaban), medication: { ...rivaroxaban.medication, dosage: 'TWO 15mg tablets' } },
-    requestedBy: 'Jane Smith', requestedAt: '15/05/2026 10:04', source: SOURCE_WEB,
+    requestedBy: 'Sam Patel', requestedAt: '15/05/2026 10:04', source: SOURCE_WEB,
     review: { saveType: 'Minor corrections / typos', reviewDate: '2026-08-26', notes: 'Dosage was wrong.' },
     status: 'rejected', decidedBy: 'Priya Shah', decidedAt: '15/05/2026 11:30',
     reason: "This doesn't match the latest GP letter (ONE 15mg tablet daily). Please check with the pharmacy before resubmitting.",
