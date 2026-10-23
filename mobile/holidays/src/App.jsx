@@ -80,6 +80,9 @@ const STATUS_CLASS = {
   // confirms it (or the office cancels it). Grey, per AIOP-21563, so it
   // reads differently from Awaiting cancellation's lavender.
   'Cancelled': 'hol-request-status--cancelled',
+  // She withdrew it before the office decided. Outlined grey, matching the
+  // office table's Withdrawn pill.
+  'Withdrawn': 'hol-request-status--withdrawn',
 }
 
 // Delete/cancel icon only appears where the care worker can actually still
@@ -88,6 +91,14 @@ const STATUS_CLASS = {
 // AIOP-21563's own field list. Declined/Awaiting cancellation/Cancelled are
 // already terminal-or-in-progress from the care worker's side.
 const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
+
+// A Cancelled card's note, keyed by the office's status when it was
+// cancelled. Records cancelled before this was tracked show no note.
+const CANCELLED_NOTE = {
+  'Awaiting Cancellation': 'Cancelled at your request after approval',
+  'Approved': 'Cancelled by the office after approval',
+  'Awaiting Approval': 'Cancelled by the office before approval',
+}
 
 const CONTRACT_TOGGLE_OPTIONS = [
   { value: 'days', label: 'Days scheme' },
@@ -101,7 +112,7 @@ const CONTRACT_TOGGLE_OPTIONS = [
 // file started on Pending only, which hid approved holidays until tapped —
 // agreed to start with everything showing instead). One chip per status,
 // labelled exactly as the request cards show it.
-const FILTER_STATUSES = ['Awaiting approval', 'Approved', 'Awaiting cancellation', 'Declined', 'Cancelled']
+const FILTER_STATUSES = ['Awaiting approval', 'Approved', 'Awaiting cancellation', 'Declined', 'Cancelled', 'Withdrawn']
 
 // Overlap, not containment: a 23–27 Dec holiday shows for a 25 Dec–2 Jan
 // filter. A single date (no end) means that day only — the Make file
@@ -299,7 +310,7 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 <button
                   className={`hol-request-delete${r.status === 'Approved' ? ' hol-request-delete--cancel' : ''}`}
                   onClick={() => onDeleteTap(r)}
-                  aria-label={r.status === 'Approved' ? 'Request cancellation' : 'Delete request'}
+                  aria-label={r.status === 'Approved' ? 'Request cancellation' : 'Withdraw request'}
                 >
                   {r.status === 'Approved' ? <CloseIcon size={20} /> : <DeleteOutlineIcon size={20} />}
                 </button>
@@ -317,10 +328,18 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   Cancellation not approved{r.keptReason ? `. Reason: ${r.keptReason}` : ''}
                 </div>
               )}
+              {/* "Cancelled" alone doesn't say whether it had been approved,
+                  or who cancelled it. */}
+              {r.status === 'Cancelled' && CANCELLED_NOTE[r.cancelledFrom] && (
+                <div className="hol-request-note">{CANCELLED_NOTE[r.cancelledFrom]}</div>
+              )}
               {(r.status === 'Declined' || r.status === 'Cancelled') && r.reason && (
                 <div className="hol-request-declined-reason">Reason: {r.reason}</div>
               )}
-              <div className="hol-request-meta">Requested on {fmtDate(r.requestedOn)}</div>
+              <div className="hol-request-meta">
+                Requested on {fmtDate(r.requestedOn)}
+                {r.status === 'Withdrawn' && r.withdrawnOn && ` · Withdrawn on ${fmtDate(r.withdrawnOn)}`}
+              </div>
             </div>
           ))}
         </div>
@@ -555,12 +574,12 @@ function DeleteSheet({ request, onClose, onConfirm }) {
         </div>
       ) : (
         <>
-          <div className="hol-sheet-title">Delete leave request?</div>
-          <div className="hol-sheet-subtitle">This action cannot be undone</div>
+          <div className="hol-sheet-title">Withdraw leave request?</div>
+          <div className="hol-sheet-subtitle">It will show as Withdrawn. This can't be undone.</div>
         </>
       )}
       <button className="fab-square primary-btn" onClick={() => onConfirm(request, isApproved)}>
-        {isApproved ? 'Submit cancellation' : 'Delete request'}
+        {isApproved ? 'Submit cancellation' : 'Withdraw request'}
       </button>
       <button className="fab-square tertiary-btn" onClick={onClose}>Cancel</button>
     </>
@@ -578,8 +597,7 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
   const linkedRequests = useLeaveRequests()
   const isDays = contractType === 'days'
   const entitlement = useEntitlement(contractType, isDays ? DAYS_ENTITLEMENT_TOTAL : HOURS_ENTITLEMENT_TOTAL)
-  // A withdrawn request stays on the office's record but leaves her list.
-  const schemeRequests = linkedRequests.filter(r => r.contract === contractType && r.status !== 'Withdrawn')
+  const schemeRequests = linkedRequests.filter(r => r.contract === contractType)
   const requests = schemeRequests.map(toAppRequest)
 
   // While her Holidays list is on screen, office responses there count as
@@ -597,9 +615,9 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
     setView('list')
   }
 
-  // Withdrawing a request that's still awaiting approval takes it off her
-  // list (the office sees it as Withdrawn); an approved one becomes a
-  // cancellation request for the office to confirm.
+  // Withdrawing a request that's still awaiting approval marks it Withdrawn
+  // on both sides; an approved one becomes a cancellation request for the
+  // office to confirm.
   function handleDeleteConfirm(request, isApproved) {
     if (isApproved) updateLeaveRequest(request.id, { status: 'Awaiting Cancellation' })
     else withdrawLeaveRequest(request.id)

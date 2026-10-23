@@ -1,7 +1,7 @@
 // Status wording matches AIOP-21563 ("Holiday in the app: App behaviour")
 // and the Figma screens built from it. The office's Leave Requests table
 // (schedule/leave-requests/) uses the same words in title case.
-export const STATUSES = ['Awaiting approval', 'Awaiting cancellation', 'Approved', 'Declined']
+export const STATUSES = ['Awaiting approval', 'Awaiting cancellation', 'Approved', 'Declined', 'Cancelled', 'Withdrawn']
 
 // Two entirely different request experiences depending on the employee's
 // own contract — not a single form that adapts a few fields. A days-scheme
@@ -21,6 +21,7 @@ const STATUS_FROM_OFFICE = {
   'Approved': 'Approved',
   'Declined': 'Declined',
   'Cancelled': 'Cancelled',
+  'Withdrawn': 'Withdrawn',
 }
 
 // Shared record -> the shape the request cards read.
@@ -39,6 +40,10 @@ export function toAppRequest(r) {
     // She asked to cancel and the office kept the holiday.
     cancellationKept: !!r.cancellationKept,
     keptReason: r.keptReason || null,
+    // The office's status when it was cancelled (see recordOfficeDecision).
+    cancelledFrom: r.cancelledFrom || null,
+    // She withdrew it before the office decided.
+    withdrawnOn: r.withdrawnAt ? r.withdrawnAt.slice(0, 10) : null,
   }
 }
 

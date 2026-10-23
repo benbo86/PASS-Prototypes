@@ -201,6 +201,8 @@
    status's own resolved terminal state, not a rejection, so it doesn't
    borrow Declined's red. */
 .hol-request-status--cancelled { background: var(--greyscale-13-grey-90); color: var(--greyscale-4-grey-40); }
+/* Outlined, matching the office table's .lr-status-withdrawn. */
+.hol-request-status--withdrawn { background: #fff; border: 1px solid var(--greyscale-13-grey-90); color: var(--greyscale-4-grey-40); }
 
 .hol-request-date {
   display: flex;

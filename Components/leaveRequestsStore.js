@@ -15,7 +15,7 @@
 // wording (Awaiting approval…) when it reads them — see mobile/holidays/src/data.js.
 import { useSyncExternalStore } from 'react'
 
-const REQUESTS_KEY = 'pass-demo-leave-requests-v5'
+const REQUESTS_KEY = 'pass-demo-leave-requests-v7'
 const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v2'
 const SCHEME_KEY = 'pass-demo-holiday-scheme'
 const CHANGE_EVENT = 'pass-demo-leave-requests-change'
@@ -37,10 +37,11 @@ const SEED_SHAPES = [
   { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28', '19:22'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15') },
   { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00') },
   { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
-  { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30') },
+  { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation' },
+  { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
 ]
 // Request 2 is a half day (AM); the rest are full days.
-const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1 }
+const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1 }
 const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, ...s }) => {
   const halfDay = n === 2
   return [
@@ -193,6 +194,10 @@ export function recordOfficeDecision(id, { status, reason = null, actionedBy, ac
   } else {
     updated.reason = reason
   }
+  // What it was when cancelled: Awaiting Cancellation (she asked), Approved
+  // (the office cancelled her holiday), or Awaiting Approval (the office
+  // cancelled it before deciding). Her app words the card from this.
+  if (status === 'Cancelled') updated.cancelledFrom = request.status
   if (approved) {
     const datesChanged = approved.fromDate !== request.fromDate || approved.toDate !== request.toDate
     updated = {
