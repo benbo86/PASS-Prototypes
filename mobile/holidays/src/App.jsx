@@ -95,7 +95,7 @@ const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
 // The app can't work out what a request costs: PASS doesn't know which days
 // she works, so counting every day in the range overcharges part-timers.
 // The office sets the amount when approving; until then her card shows
-// what she asked for (leave type, or times) instead of a figure.
+// only what she asked for (leave type, or times), with no figure.
 function hasConfirmedAmount(r) {
   if (r.status === 'Approved' || r.status === 'Awaiting cancellation') return true
   return r.status === 'Cancelled' && r.cancelledFrom !== 'Awaiting Approval'
@@ -329,7 +329,10 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
               <div className="hol-request-duration">
-                {hasConfirmedAmount(r) ? fmtAmount(r.amount) : isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
+                {/* What she's off (leave type, or times), plus the amount
+                    once the office has confirmed it. */}
+                {isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
+                {hasConfirmedAmount(r) && ` · ${fmtAmount(r.amount)}`}
               </div>
               {r.status === 'Awaiting approval' && (
                 <div className="hol-request-note">The office will confirm how much is taken from your entitlement</div>
@@ -338,7 +341,7 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
               )}
               {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
-                <div className="hol-request-note">Note from the office: {r.approvalNote}</div>
+                <div className="hol-request-note">Note: {r.approvalNote}</div>
               )}
               {r.status === 'Approved' && r.cancellationKept && (
                 <div className="hol-request-note">
