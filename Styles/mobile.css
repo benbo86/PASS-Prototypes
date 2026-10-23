@@ -415,7 +415,11 @@ html, body {
    mobile prototype, which won't load that stylesheet. */
 html.split-pane .dev-toolbar,
 html.split-pane .back-link { display: none; }
-html.split-pane .phone-frame { zoom: var(--split-pane-scale, 1); }
+/* transform, not zoom: in older Chromium (e.g. VS Code's built-in browser)
+   a zoomed phone stopped scrolling. .phone-wrap centres it and clips, so
+   the unscaled layout size doesn't matter; the transform also keeps the
+   frame the containing block for popovers pinned inside it. */
+html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
 
 /* ── In-app push banner (Components/HolidayNotificationBanner.jsx) ──
    A push notification arriving while the app is open: slides down over the
