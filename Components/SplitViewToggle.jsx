@@ -91,6 +91,21 @@ export default function SplitViewToggle({ otherUrl, selfLabel, otherLabel, defau
     return () => { document.body.style.overflow = prev }
   }, [prefs.open])
 
+  // A drag blocks pointer input to both panes (split-view.css), so if its
+  // end is missed the panes stop scrolling. Embedded browsers such as VS
+  // Code's can drop the pointerup, so also end it when the window loses
+  // focus or any pointerup reaches the page.
+  useEffect(() => {
+    if (!dragging) return
+    const stop = () => setDragging(false)
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('blur', stop)
+    return () => {
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('blur', stop)
+    }
+  }, [dragging])
+
   if (IS_SPLIT_PANE) return null
 
   const update = patch => setPrefs(p => ({ ...p, ...patch }))
@@ -110,6 +125,8 @@ export default function SplitViewToggle({ otherUrl, selfLabel, otherLabel, defau
   }
   function onDividerPointerMove(e) {
     if (!dragging) return
+    // No button held: the release was missed (see the effect below).
+    if (e.pointerType === 'mouse' && e.buttons === 0) { setDragging(false); return }
     const rect = bodyRef.current.getBoundingClientRect()
     setLeftShare((e.clientX - rect.left) / rect.width)
   }
@@ -172,6 +189,7 @@ export default function SplitViewToggle({ otherUrl, selfLabel, otherLabel, defau
               onPointerMove={onDividerPointerMove}
               onPointerUp={() => setDragging(false)}
               onPointerCancel={() => setDragging(false)}
+              onLostPointerCapture={() => setDragging(false)}
               onKeyDown={onDividerKeyDown}
             >
               <span className="split-view-grip" />
