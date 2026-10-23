@@ -530,3 +530,12 @@
    narrow for this side panel, and only the days scheme is linked anyway;
    the split's own bar carries "Reset demo data". */
 html.split-pane .hol-demo-toggle-wrap { display: none; }
+
+.hol-office-confirm--none-left { color: var(--rag-red-red-overdue-text); }
+/* The shared disabled style's lavender fill disappears against this
+   screen's grey background, so the disabled button stays purple, faded. */
+.hol-submit-btn.primary-btn:disabled {
+  background: var(--brand-purple-6-purple-4);
+  color: #fff;
+  opacity: 0.4;
+}

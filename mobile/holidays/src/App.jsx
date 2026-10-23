@@ -385,9 +385,10 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
 }
 
 // ─── Balance on the Request leave form ───────────────────────────
-// No cost is shown and nothing is blocked: the app can't know which days in
-// the range she'd have worked (see hasConfirmedAmount). Her balance is
-// shown so she can judge for herself; the office confirms the amount.
+// No cost is shown: the app can't know which days in the range she'd have
+// worked (see hasConfirmedAmount). Her balance is shown so she can judge for
+// herself; the office confirms the amount. The one safe block is a balance
+// of 0 or less, since any request is then too much whatever days she works.
 // pending: requests still awaiting approval, which have no amount yet.
 function AvailableBalance({ available, pendingCount, unit, unitWord }) {
   return (
@@ -401,9 +402,15 @@ function AvailableBalance({ available, pendingCount, unit, unitWord }) {
           {pendingCount} {pendingCount === 1 ? 'request' : 'requests'} awaiting approval
         </div>
       )}
-      <p className="hol-office-confirm">
-        The office will confirm how many {unitWord} are taken from your entitlement when they approve your request.
-      </p>
+      {available > 0 ? (
+        <p className="hol-office-confirm">
+          The office will confirm how many {unitWord} are taken from your entitlement when they approve your request.
+        </p>
+      ) : (
+        <p className="hol-office-confirm hol-office-confirm--none-left">
+          You have no holiday left to request. Speak to the office if you need more.
+        </p>
+      )}
     </>
   )
 }
@@ -502,6 +509,7 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
 
         <button
           className="fab-square primary-btn hol-submit-btn"
+          disabled={available <= 0}
           onClick={() => onSubmit({
             fromDate, toDate, amount,
             leaveType: isHalfDay ? `Half Day (${halfDayPeriod})` : 'Full Day',
@@ -572,6 +580,7 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
 
         <button
           className="fab-square primary-btn hol-submit-btn"
+          disabled={available <= 0}
           onClick={() => onSubmit({ fromDate, toDate, amount, startTime, endTime, leaveType: hoursLeaveType(startTime, endTime) })}
         >
           Submit request
