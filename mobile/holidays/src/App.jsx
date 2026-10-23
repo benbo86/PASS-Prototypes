@@ -334,9 +334,6 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 {isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
                 {hasConfirmedAmount(r) && ` · ${fmtAmount(r.amount)}`}
               </div>
-              {r.status === 'Awaiting approval' && (
-                <div className="hol-request-note">The office will confirm how much is taken from your entitlement</div>
-              )}
               {r.status === 'Approved' && r.requestedFrom && (
                 <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
               )}
