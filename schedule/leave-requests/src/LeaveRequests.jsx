@@ -237,7 +237,9 @@ export default function LeaveRequests() {
   const [hoverDate, setHoverDate] = useState(null);
   const [startDate, endDate] = dateRange;
 
-  const [employeeFilter, setEmployeeFilter] = useState(emptyCheckboxFilter());
+  // Prototype only: starts filtered to Adrianna, the employee linked to the
+  // mobile Holidays app, so a demo opens on her requests. Clear shows everyone.
+  const [employeeFilter, setEmployeeFilter] = useState(() => ({ ...emptyCheckboxFilter(), selected: new Set([DEMO_EMPLOYEE]) }));
   const [leaveTypeFilter, setLeaveTypeFilter] = useState(emptyCheckboxFilter());
   const [statusFilter, setStatusFilter] = useState(emptyCheckboxFilter());
 
