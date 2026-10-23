@@ -19,11 +19,9 @@ import { createPortal } from 'react-dom'
 // against the bottom edge of the phone mockup (Ben's own correction after
 // the first version docked it under the field like the calendar: "the
 // numeric keyboard should be the native iOS one, where its displayed at
-// the bottom of the device"). Portaled to document.body, positioned via
-// the `.phone-frame` ancestor's own getBoundingClientRect() rather than
-// the field's — same portal technique as IOSCalendarPopover.jsx (escapes
-// .hol-form-body's overflow-y:auto / .phone-frame's own overflow:hidden),
-// just anchored to the frame's bottom edge instead of the field. There is
+// the bottom of the device"). Portaled into the enclosing `.phone-frame`
+// (escaping .hol-form-body's overflow-y:auto) and pinned to its bottom
+// edge — see the effect below for why inside the frame, not <body>. There is
 // deliberately no separate value-display readout any more (the first
 // version had one, styled like Ben's reference image's own floating "3:43"
 // card) — the field being edited is already a live, visible, controlled
@@ -88,20 +86,16 @@ export default function IOSTimeKeypadPopover({ onChange, onClose, anchorEl }) {
   const [minuteState, setMinuteState] = useState('empty')
   const [segment, setSegment] = useState('hour')
 
+  // Rendered inside the phone frame itself, not measured against it from
+  // <body>: the frame's `transform` makes it the containing block for this
+  // popover's position:fixed, so bottom:0 pins it to the bottom of the
+  // screen, the frame's rounded corners and overflow clip it, and it
+  // scales with the frame's zoom in split view. Measuring from <body> left
+  // square corners poking out past the rounded screen, and misplaced the
+  // keypad when the frame was zoomed. Falls back to <body> without a frame.
   useEffect(() => {
     if (!anchorEl) return
-    const frame = anchorEl.closest('.phone-frame')
-    const frameRect = frame
-      ? frame.getBoundingClientRect()
-      : { left: 0, right: window.innerWidth, bottom: window.innerHeight, width: window.innerWidth }
-    // A fixed estimate, not a live measurement — this component's content
-    // (a 4-row keypad, nothing else now that the display readout is gone)
-    // never actually varies between opens. No top-vs-bottom branching is
-    // needed here the way IOSCalendarPopover.jsx has — a real keyboard is
-    // always bottom-anchored regardless of how far down the screen the
-    // field being edited sits.
-    const height = 352 // matches .ios-time-popover's own computed height exactly (the toolbar + keypad sections' combined padding/keys/gaps) so it sits flush against the frame's bottom edge, not a few px short
-    setPos({ top: frameRect.bottom - height, left: frameRect.left, width: frameRect.width })
+    setPos({ container: anchorEl.closest('.phone-frame') || document.body })
   }, [anchorEl])
 
   function commit(nextHourDigits, nextMinuteDigits) {
@@ -175,7 +169,7 @@ export default function IOSTimeKeypadPopover({ onChange, onClose, anchorEl }) {
     // would otherwise re-fire on bubble the instant a key is pressed.
     <span onClick={e => e.stopPropagation()}>
       <div className="ios-cal-backdrop" onClick={onClose} />
-      <div className="ios-time-popover" style={{ top: pos.top, left: pos.left, width: pos.width }}>
+      <div className="ios-time-popover" style={{ left: 0, right: 0, bottom: 0 }}>
         <div className="ios-time-toolbar">
           <button type="button" className="ios-time-toolbar-btn" onClick={onClose}>Done</button>
         </div>
@@ -196,6 +190,6 @@ export default function IOSTimeKeypadPopover({ onChange, onClose, anchorEl }) {
         </div>
       </div>
     </span>,
-    document.body
+    pos.container
   )
 }
