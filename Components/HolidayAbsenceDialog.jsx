@@ -244,6 +244,9 @@ export default function HolidayAbsenceDialog({
   unit = 'days',
   dayDeductionDefault = DEFAULT_DAY_DEDUCTION,
   entitlement = { total: 28, alreadyBooked: 0 },
+  // Optional free-text note, e.g. approving a request with a message for
+  // the employee: { label, placeholder }. Returned as `note` on confirm.
+  noteField = null,
   onClose,
   onConfirm,
 }) {
@@ -255,6 +258,7 @@ export default function HolidayAbsenceDialog({
   const [startTime,   setStartTime]   = useState(startTimeProp || new Date(2026, 0, 1, 0, 0))
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState(defaultVisitsOption)
+  const [note,        setNote]        = useState('')
 
   // Recomputed whenever the date range changes — every day starts ticked,
   // with no per-employee difference (see the module comment above for why).
@@ -308,7 +312,7 @@ export default function HolidayAbsenceDialog({
     if (showVisitsStep) {
       setStep(2)
     } else {
-      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null, daysDeducted: effectiveDaysDeducted })
+      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null, daysDeducted: effectiveDaysDeducted, note: note.trim() || null })
     }
   }
 
@@ -453,6 +457,19 @@ export default function HolidayAbsenceDialog({
             </div>
           )}
 
+          {noteField && (
+            <div className="field">
+              <label htmlFor="absence-note">{noteField.label}</label>
+              <textarea
+                id="absence-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={3}
+                placeholder={noteField.placeholder}
+              />
+            </div>
+          )}
+
           <div className="btn-row">
             <button className="round-btn primary-btn" onClick={handlePrimary}>{primaryLabel}</button>
           </div>
@@ -499,7 +516,7 @@ export default function HolidayAbsenceDialog({
             <button className="round-btn secondary-btn" onClick={() => setStep(1)}>Back</button>
             <button
               className="round-btn primary-btn"
-              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted })}
+              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted, note: note.trim() || null })}
             >
               {confirmLabel}
             </button>

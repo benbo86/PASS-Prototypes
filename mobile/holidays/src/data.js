@@ -32,6 +32,11 @@ export function toAppRequest(r) {
     fromDate: r.fromDate,
     toDate: r.toDate,
     amount: r.amount,
+    // What she asked for, shown until the office confirms the amount.
+    // Stored in the office's wording ('Half Day (AM)').
+    leaveType: r.leaveType ? r.leaveType.replace(' Day', ' day') : null,
+    startTime: r.startTime || null,
+    endTime: r.endTime || null,
     requestedOn: r.submitted.slice(0, 10),
     reason: r.reason,
     // Approved for different dates from those she asked for.
@@ -40,6 +45,8 @@ export function toAppRequest(r) {
     // She asked to cancel and the office kept the holiday.
     cancellationKept: !!r.cancellationKept,
     keptReason: r.keptReason || null,
+    // Optional message from the office when it approved.
+    approvalNote: r.approvalNote || null,
     // The office's status when it was cancelled (see recordOfficeDecision).
     cancelledFrom: r.cancelledFrom || null,
     // She withdrew it before the office decided.

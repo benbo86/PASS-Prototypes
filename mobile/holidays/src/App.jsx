@@ -92,6 +92,15 @@ const STATUS_CLASS = {
 // already terminal-or-in-progress from the care worker's side.
 const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
 
+// The app can't work out what a request costs: PASS doesn't know which days
+// she works, so counting every day in the range overcharges part-timers.
+// The office sets the amount when approving; until then her card shows
+// what she asked for (leave type, or times) instead of a figure.
+function hasConfirmedAmount(r) {
+  if (r.status === 'Approved' || r.status === 'Awaiting cancellation') return true
+  return r.status === 'Cancelled' && r.cancelledFrom !== 'Awaiting Approval'
+}
+
 // A Cancelled card's note, keyed by the office's status when it was
 // cancelled. Records cancelled before this was tracked show no note.
 const CANCELLED_NOTE = {
@@ -319,9 +328,17 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 <CalendarIcon size={15} />
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
-              <div className="hol-request-duration">{fmtAmount(r.amount)}</div>
+              <div className="hol-request-duration">
+                {hasConfirmedAmount(r) ? fmtAmount(r.amount) : isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
+              </div>
+              {r.status === 'Awaiting approval' && (
+                <div className="hol-request-note">The office will confirm how much is taken from your entitlement</div>
+              )}
               {r.status === 'Approved' && r.requestedFrom && (
                 <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
+              )}
+              {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
+                <div className="hol-request-note">Note from the office: {r.approvalNote}</div>
               )}
               {r.status === 'Approved' && r.cancellationKept && (
                 <div className="hol-request-note">
@@ -359,16 +376,26 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
   )
 }
 
-// ─── Remaining balance under the Requested bar ──────────────────
-// available here is net of requests already awaiting approval, so several
-// requests can't add up to more than the entitlement. Going over blocks
-// Submit; the office can still book beyond the balance on the web.
-function RemainingBalance({ remaining, unit }) {
-  if (remaining >= 0) return <div className="hol-remaining-text">{remaining} {unit} remaining</div>
+// ─── Balance on the Request leave form ───────────────────────────
+// No cost is shown and nothing is blocked: the app can't know which days in
+// the range she'd have worked (see hasConfirmedAmount). Her balance is
+// shown so she can judge for herself; the office confirms the amount.
+// pending: requests still awaiting approval, which have no amount yet.
+function AvailableBalance({ available, pendingCount, unit, unitWord }) {
   return (
     <>
-      <div className="hol-remaining-text hol-remaining-text--over">{-remaining} {unit} over your balance</div>
-      <p className="hol-over-balance-msg">You don't have enough holiday left for this request. Speak to the office if you need more.</p>
+      <div className="hol-summary-bar">
+        <span className="hol-summary-label">Available</span>
+        <span className="hol-summary-value">{available} {unit}</span>
+      </div>
+      {pendingCount > 0 && (
+        <div className="hol-remaining-text">
+          {pendingCount} {pendingCount === 1 ? 'request' : 'requests'} awaiting approval
+        </div>
+      )}
+      <p className="hol-office-confirm">
+        The office will confirm how many {unitWord} are taken from your entitlement when they approve your request.
+      </p>
     </>
   )
 }
@@ -410,7 +437,7 @@ function LeaveDateFields({ fromDate, toDate, single, onChange }) {
 // ─── Request leave screen — days-scheme employee ─────────────────
 // Full day / Half day (AM/PM) only, no time-of-day capture at all.
 
-function DaysRequestLeaveScreen({ available, onBack, onSubmit }) {
+function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
   const [leaveType, setLeaveType] = useState('Full day')
   const [halfDayPeriod, setHalfDayPeriod] = useState('AM')
   const [fromDate, setFromDate] = useState('2026-11-16')
@@ -463,15 +490,10 @@ function DaysRequestLeaveScreen({ available, onBack, onSubmit }) {
           <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isHalfDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
         </div>
 
-        <div className="hol-summary-bar">
-          <span className="hol-summary-label">Requested</span>
-          <span className="hol-summary-value">{fmtDays(amount)}</span>
-        </div>
-        <RemainingBalance remaining={available - amount} unit="days" />
+        <AvailableBalance available={available} pendingCount={pendingCount} unit="days" unitWord="days" />
 
         <button
           className="fab-square primary-btn hol-submit-btn"
-          disabled={amount > available}
           onClick={() => onSubmit({
             fromDate, toDate, amount,
             leaveType: isHalfDay ? `Half Day (${halfDayPeriod})` : 'Full Day',
@@ -496,7 +518,7 @@ function hoursLeaveType(startTime, endTime) {
   return startTime < '12:00' ? 'Half Day (AM)' : 'Half Day (PM)'
 }
 
-function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
+function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
   const [fromDate, setFromDate] = useState('2026-11-16')
   const [toDate, setToDate] = useState('2026-11-16')
   const [startTime, setStartTime] = useState('09:00')
@@ -538,15 +560,10 @@ function HoursRequestLeaveScreen({ available, onBack, onSubmit }) {
           </div>
         </div>
 
-        <div className="hol-summary-bar">
-          <span className="hol-summary-label">Requested</span>
-          <span className="hol-summary-value">{fmtHours(amount)}</span>
-        </div>
-        <RemainingBalance remaining={available - amount} unit="hrs" />
+        <AvailableBalance available={available} pendingCount={pendingCount} unit="hrs" unitWord="hours" />
 
         <button
           className="fab-square primary-btn hol-submit-btn"
-          disabled={amount > available}
           onClick={() => onSubmit({ fromDate, toDate, amount, startTime, endTime, leaveType: hoursLeaveType(startTime, endTime) })}
         >
           Submit request
@@ -599,6 +616,7 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
   const entitlement = useEntitlement(contractType, isDays ? DAYS_ENTITLEMENT_TOTAL : HOURS_ENTITLEMENT_TOTAL)
   const schemeRequests = linkedRequests.filter(r => r.contract === contractType)
   const requests = schemeRequests.map(toAppRequest)
+  const pendingCount = schemeRequests.filter(r => r.status === 'Awaiting Approval').length
 
   // While her Holidays list is on screen, office responses there count as
   // seen: the notifications about them are marked read and never reach the
@@ -642,8 +660,8 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
         }
         secondary={
           isDays
-            ? <DaysRequestLeaveScreen available={entitlement.available - entitlement.pending} onBack={() => setView('list')} onSubmit={handleSubmit} />
-            : <HoursRequestLeaveScreen available={entitlement.available - entitlement.pending} onBack={() => setView('list')} onSubmit={handleSubmit} />
+            ? <DaysRequestLeaveScreen available={entitlement.available} pendingCount={pendingCount} onBack={() => setView('list')} onSubmit={handleSubmit} />
+            : <HoursRequestLeaveScreen available={entitlement.available} pendingCount={pendingCount} onBack={() => setView('list')} onSubmit={handleSubmit} />
         }
       />
       <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>

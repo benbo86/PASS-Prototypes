@@ -95,7 +95,7 @@ const STRING_SORT_COLS = ['leaveTypeLabel', 'status'];
 const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
 const NUM_SORT_COLS = ['amount'];
 
-// 8 columns: Employee, Leave Type, From Date, To Date, Amount Requested,
+// 8 columns: Employee, Leave Type, From Date, To Date, Amount,
 // Status, Submitted, Actions.
 const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
 
@@ -147,7 +147,17 @@ function toLinkedRow(r) {
 const GENERATED_ROWS = LEAVE_REQUESTS.map(withLeaveTypeLabel);
 
 
+// A request's amount only means something once the office has approved
+// it: before that it's just every day in the range, which overcounts
+// anyone who doesn't work all of them (PASS doesn't know which days she
+// works). The office sets the real figure in the Approve dialog.
+function hasConfirmedAmount(row) {
+  if (row.status === 'Approved' || row.status === 'Awaiting Cancellation') return true;
+  return row.status === 'Cancelled' && row.cancelledFrom !== 'Awaiting Approval';
+}
+
 function fmtAmount(row) {
+  if (!hasConfirmedAmount(row)) return '—';
   return row.unit === 'hours' ? `${row.amount} hrs` : `${row.amount} ${row.amount === 1 ? 'day' : 'days'}`;
 }
 
@@ -323,7 +333,10 @@ export default function LeaveRequests() {
         return sort.dir === 'asc' ? av - bv : bv - av;
       }
       if (NUM_SORT_COLS.includes(sort.col)) {
-        return sort.dir === 'asc' ? a[sort.col] - b[sort.col] : b[sort.col] - a[sort.col];
+        // Rows with no confirmed amount (shown as a dash) sort last.
+        const av = hasConfirmedAmount(a) ? a[sort.col] : null, bv = hasConfirmedAmount(b) ? b[sort.col] : null;
+        if (av === null || bv === null) return (av === null) - (bv === null);
+        return sort.dir === 'asc' ? av - bv : bv - av;
       }
       if (STRING_SORT_COLS.includes(sort.col)) {
         return sort.dir === 'asc' ? a[sort.col].localeCompare(b[sort.col]) : b[sort.col].localeCompare(a[sort.col]);
@@ -347,9 +360,9 @@ export default function LeaveRequests() {
   // step-2 Confirm; closing/backing out leaves the request Awaiting Approval.
   // The office may change the dates/times; whatever they confirm is what's
   // booked, and her app shows that it differs from what she asked for.
-  const handleApproveConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted }) => {
+  const handleApproveConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted, note }) => {
     updateRow(approveRow, {
-      status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date(),
+      status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date(), note,
       approved: { fromDate: dateToIso(s), toDate: dateToIso(e), startTime: dateToHhmm(st), endTime: dateToHhmm(et), amount: daysDeducted },
     });
     setApproveRow(null);
@@ -520,11 +533,11 @@ export default function LeaveRequests() {
                   <ColResizeHandle onDrag={dx => resizeColumn(3, dx)} />
                 </th>
 
-                {/* Amount Requested — sort only, numeric. Mixed units (days vs
+                {/* Amount — sort only, numeric. Mixed units (days vs
                     hours, see fmtAmount) sort on the raw number regardless —
                     same as any table sorting mixed units, not a bug to fix. */}
                 <th className={`th-num ${sort.col === 'amount' ? 'sorted' : ''}`}>
-                  <ColLabel>Amount Requested</ColLabel>
+                  <ColLabel>Amount</ColLabel>
                   <button className="col-icon-btn" onClick={() => toggleSort('amount')}><SortIcon dir={sort.col === 'amount' ? sort.dir : null} /></button>
                   <ColResizeHandle onDrag={dx => resizeColumn(4, dx)} />
                 </th>
@@ -667,6 +680,7 @@ export default function LeaveRequests() {
               dayDeductionDefault={approveRow.unit === 'hours'
                 ? ({ startTime: st, endTime: et }) => hoursBetweenDates(st, et)
                 : (approveRow.leaveType.startsWith('Half Day') ? 0.5 : 1)}
+              noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount differ from the request' }}
               entitlement={approveRow.linked
                 ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }
                 : { total: approveRow.unit === 'hours' ? 224 : 28, alreadyBooked: 0 }}
@@ -683,7 +697,9 @@ export default function LeaveRequests() {
             <div><span className="lr-cancel-label">Leave type</span><span>{actionRow.leaveTypeLabel}</span></div>
             <div><span className="lr-cancel-label">Date from</span><span>{fmtD(actionRow.fromDate)}</span></div>
             <div><span className="lr-cancel-label">Date to</span><span>{fmtD(actionRow.toDate)}</span></div>
-            <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours requested' : 'Days requested'}</span><span>{actionRow.amount}</span></div>
+            {hasConfirmedAmount(actionRow) && (
+              <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours booked' : 'Days booked'}</span><span>{actionRow.amount}</span></div>
+            )}
           </div>
           <div className="field">
             <label htmlFor="action-reason">{ACTION_COPY[actionMode].label}</label>

@@ -370,21 +370,13 @@
   margin-bottom: 24px;
 }
 
-.hol-remaining-text--over { color: var(--rag-red-red-overdue-text); font-weight: 600; margin-bottom: 8px; }
-.hol-over-balance-msg {
+.hol-office-confirm {
   font: 14px/1.5 Barlow, sans-serif;
-  color: var(--rag-red-red-overdue-text);
+  color: var(--greyscale-2-grey-20);
   margin: 0 0 24px;
 }
 
 .hol-submit-btn { width: 100%; justify-content: center; }
-/* The shared disabled style's lavender fill disappears against this
-   screen's grey background, so the disabled button stays purple, faded. */
-.hol-submit-btn.primary-btn:disabled {
-  background: var(--brand-purple-6-purple-4);
-  color: #fff;
-  opacity: 0.4;
-}
 
 /* ── Delete/cancel confirmation bottom sheet ────────────────────────
    The scrim/panel/slide animation come from Components/BottomSheet.jsx

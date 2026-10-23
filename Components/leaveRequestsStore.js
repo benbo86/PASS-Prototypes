@@ -96,7 +96,7 @@ function notificationFor(request, outcome, atIso, flags) {
     amount: fmtAmount(request.amount, request.contract),
     // Approved with different dates from those she asked for.
     requestedRange: outcome === 'Approved' && request.requestedFrom ? fmtIsoRange(request.requestedFrom, request.requestedTo) : null,
-    reason: outcome === 'Approved' ? null : outcome === 'Kept' ? request.keptReason : request.reason,
+    reason: outcome === 'Approved' ? request.approvalNote || null : outcome === 'Kept' ? request.keptReason : request.reason,
     ...flags,
   }
 }
@@ -184,10 +184,12 @@ export function withdrawLeaveRequest(id) {
 // Approve may come with different dates/times/amount from the request
 // (`approved`); the request then takes the approved values and remembers
 // what she asked for, so her app can show the change.
-export function recordOfficeDecision(id, { status, reason = null, actionedBy, actionedAt, approved = null, kept = false }) {
+export function recordOfficeDecision(id, { status, reason = null, note = null, actionedBy, actionedAt, approved = null, kept = false }) {
   const request = readRequests().find(r => r.id === id)
   if (!request) return
   let updated = { ...request, status, actionedBy, actionedAt, responseSeen: false }
+  // Optional message to her when approving (e.g. why fewer days).
+  if (status === 'Approved' && !kept) updated.approvalNote = note
   if (kept) {
     updated.keptReason = reason
     updated.cancellationKept = true

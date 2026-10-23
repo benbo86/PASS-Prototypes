@@ -203,8 +203,9 @@ const renderDetail = (notif) => {
     case 'event_duration_changed':
       return <><s>{notif.originalDuration}</s>{` ${notif.newDuration}, ${notif.eventDate}, ${notif.eventTime}`}</>
     case 'holiday_approved':
-      // Approved for different dates from those she asked for.
-      return notif.requestedRange ? `${notif.amount} — changed from ${notif.requestedRange}` : notif.amount
+      // Approved for different dates from those she asked for, and/or
+      // with a note from the office (stored as `reason`).
+      return [notif.amount, notif.requestedRange && `changed from ${notif.requestedRange}`, notif.reason].filter(Boolean).join(' — ')
     case 'holiday_declined':
     case 'holiday_cancelled':
     case 'holiday_cancellation_declined':

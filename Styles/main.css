@@ -1006,7 +1006,13 @@ h6 {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  /* A modal taller than the window (e.g. the holiday approve dialog with
+     its day breakdown) scrolls instead of being cut off. */
+  overflow-y: auto;
 }
+/* Auto margins centre the modal like the align/justify above, but unlike
+   them fall back to the top when it overflows, so its top stays reachable. */
+.modal-overlay > * { margin: auto; }
 .modal-box {
   background: #fff;
   border-radius: 8px;
