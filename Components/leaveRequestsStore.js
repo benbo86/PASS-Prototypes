@@ -15,8 +15,8 @@
 // wording (Awaiting approval…) when it reads them — see mobile/holidays/src/data.js.
 import { useSyncExternalStore } from 'react'
 
-const REQUESTS_KEY = 'pass-demo-leave-requests-v7'
-const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v2'
+const REQUESTS_KEY = 'pass-demo-leave-requests-v8'
+const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v3'
 const SCHEME_KEY = 'pass-demo-holiday-scheme'
 const CHANGE_EVENT = 'pass-demo-leave-requests-change'
 
@@ -28,28 +28,33 @@ export const DEMO_EMPLOYEE = 'Adrianna Janowski'
 // for whichever scheme is selected, so both sides always tell one story.
 export const SCHEMES = ['days', 'hours']
 
-// Seed = one request in each status, per scheme. Dated just before "today"
-// in the prototypes (mid-Oct 2026) so they're the most recently submitted
-// rows and sit at the top of the web table, which sorts newest first.
+// Seed = one request in each status, per scheme, plus a second Approved one.
+// Dated just before "today" in the prototypes (mid-Oct 2026) so they're the
+// most recently submitted rows and sit at the top of the web table, which
+// sorts newest first.
+// The two Approved ones show the office approving less than she asked for,
+// with a note: 3 keeps her dates but only takes the days she works
+// (workedDays); 7 shortens the dates (requestedFrom/To is what she asked for).
 const at = (iso, time = '10:30') => `${iso}T${time}:00`
 const SEED_SHAPES = [
   { n: 1, fromDate: '2026-11-02', toDate: '2026-11-02', status: 'Awaiting Approval', submitted: at('2026-10-12', '08:47') },
   { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28', '19:22'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15') },
-  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00') },
+  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00'), workedDays: 3, approvalNote: "You don't work Wednesdays or Thursdays, so those days aren't taken from your entitlement." },
+  { n: 7, fromDate: '2026-11-30', toDate: '2026-12-02', requestedFrom: '2026-11-30', requestedTo: '2026-12-04', status: 'Approved', submitted: at('2026-10-09', '11:20'), actionedBy: 'Priya Shah', actionedAt: at('2026-10-10', '10:05'), workedDays: 3, approvalNote: 'We can only cover your visits Monday to Wednesday that week.' },
   { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation' },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
 ]
 // Request 2 is a half day (AM); the rest are full days.
 const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1 }
-const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, ...s }) => {
+const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
   const halfDay = n === 2
   return [
-    { ...s, id: `days-${n}`, contract: 'days', leaveType: halfDay ? 'Half Day (AM)' : 'Full Day', amount: DAYS_AMOUNTS[n] },
+    { ...s, id: `days-${n}`, contract: 'days', leaveType: halfDay ? 'Half Day (AM)' : 'Full Day', amount: workedDays ?? DAYS_AMOUNTS[n] },
     {
       ...s, id: `hours-${n}`, contract: 'hours', leaveType: halfDay ? 'Half Day (AM)' : 'Full Day',
       startTime: '09:00', endTime: halfDay ? '13:00' : '17:00',
-      amount: spanDays(s.fromDate, s.toDate) * (halfDay ? 4 : 8),
+      amount: (workedDays ?? spanDays(s.fromDate, s.toDate)) * (halfDay ? 4 : 8),
     },
   ]
 }).map(r => ({ reason: null, actionedBy: null, actionedAt: null, ...r, employee: DEMO_EMPLOYEE }))
