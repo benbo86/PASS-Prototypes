@@ -87,7 +87,7 @@ const statusClass = s => {
   return 'lr-status-awaiting-approval';
 };
 
-// Employee/Leave Type/Status filters + sort — see FilterDropdown itself for
+// Employee/Time/Status filters + sort — see FilterDropdown itself for
 // the pending/selected/sortDir/nameField shape.
 const emptyCheckboxFilter = () => ({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
 
@@ -95,7 +95,7 @@ const STRING_SORT_COLS = ['leaveTypeLabel', 'status'];
 const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
 const NUM_SORT_COLS = ['amount'];
 
-// 8 columns: Employee, Leave Type, From Date, To Date, Amount,
+// 8 columns: Employee, Time, From Date, To Date, Amount,
 // Status, Submitted, Actions.
 const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
 
@@ -117,7 +117,7 @@ const dateToHhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.get
 const hoursBetweenDates = (a, b) => Math.max(0, Math.round(((b - a) / 3600000) * 10) / 10);
 
 // An hours-scheme employee doesn't pick Full/Half day — they give start and
-// end times — so their Leave Type shows those times. They filter together
+// end times — so their Time column shows those times. They filter together
 // under "Hours".
 function leaveTypeLabel(row) {
   if (row.unit !== 'hours') return row.leaveType;
@@ -499,9 +499,9 @@ export default function LeaveRequests() {
                   <ColResizeHandle onDrag={dx => resizeColumn(0, dx)} />
                 </th>
 
-                {/* Leave Type — checkbox filter AND a real sort icon */}
+                {/* Time — checkbox filter AND a real sort icon */}
                 <th className={sort.col === 'leaveTypeLabel' ? 'sorted' : ''}>
-                  <ColLabel>Leave Type</ColLabel>
+                  <ColLabel>Time</ColLabel>
                   <button ref={el => anchorRefs.current['leaveType'] = el}
                     className={`col-icon-btn ${leaveTypeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
                     data-devmode-passthrough="true"
@@ -694,7 +694,7 @@ export default function LeaveRequests() {
       {actionRow && (
         <Modal title={ACTION_COPY[actionMode].title} onClose={closeActionDialog}>
           <div className="lr-cancel-summary">
-            <div><span className="lr-cancel-label">Leave type</span><span>{actionRow.leaveTypeLabel}</span></div>
+            <div><span className="lr-cancel-label">Time</span><span>{actionRow.leaveTypeLabel}</span></div>
             <div><span className="lr-cancel-label">Date from</span><span>{fmtD(actionRow.fromDate)}</span></div>
             <div><span className="lr-cancel-label">Date to</span><span>{fmtD(actionRow.toDate)}</span></div>
             {hasConfirmedAmount(actionRow) && (
