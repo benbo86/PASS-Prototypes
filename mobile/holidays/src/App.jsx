@@ -329,11 +329,14 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
               <div className="hol-request-duration">
-                {/* What she's off (leave type, or times), plus the amount
-                    once the office has confirmed it. */}
                 {isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
-                {hasConfirmedAmount(r) && ` · ${fmtAmount(r.amount)}`}
               </div>
+              {/* The confirmed amount, on its own labelled line: the office
+                  may leave out days she doesn't work, so next to the times
+                  it would look like a sum that doesn't add up. */}
+              {hasConfirmedAmount(r) && r.status !== 'Cancelled' && (
+                <div className="hol-request-note">From entitlement: {fmtAmount(r.amount)}</div>
+              )}
               {r.status === 'Approved' && r.requestedFrom && (
                 <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
               )}
@@ -349,6 +352,11 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   or who cancelled it. */}
               {r.status === 'Cancelled' && CANCELLED_NOTE[r.cancelledFrom] && (
                 <div className="hol-request-note">{CANCELLED_NOTE[r.cancelledFrom]}</div>
+              )}
+              {/* After the cancelled note: what happened, then what it
+                  meant for her balance. */}
+              {r.status === 'Cancelled' && hasConfirmedAmount(r) && (
+                <div className="hol-request-note">Returned to entitlement: {fmtAmount(r.amount)}</div>
               )}
               {(r.status === 'Declined' || r.status === 'Cancelled') && r.reason && (
                 <div className="hol-request-declined-reason">Reason: {r.reason}</div>
