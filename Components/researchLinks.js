@@ -1,6 +1,8 @@
 // Research pages linked to each prototype. DevToolbar shows a Research
 // button on any prototype listed here, and the root index shows a matching
-// "Research" badge on its row (added by hand in index.html).
+// "Research" badge on its row (added by hand in index.html). One page per
+// feature, with a section per type of research (Customer discovery,
+// Competitor research…); see research/holiday-requests/.
 //
 // Keys are the prototype's folder, relative to the site root
 // ('location/prototype-name/'). Hrefs are relative to the site root too.
@@ -11,10 +13,10 @@ export const RESEARCH_LINKS = {
     { title: 'Messaging discovery — requirement coverage', href: 'research/messaging-coverage/' },
   ],
   'mobile/holidays/': [
-    { title: 'How competitors work out leave cost', href: 'research/holiday-leave-cost/' },
+    { title: 'Holiday requests research', href: 'research/holiday-requests/' },
   ],
   'schedule/leave-requests/': [
-    { title: 'How competitors work out leave cost', href: 'research/holiday-leave-cost/' },
+    { title: 'Holiday requests research', href: 'research/holiday-requests/' },
   ],
 }
 

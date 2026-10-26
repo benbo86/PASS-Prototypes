@@ -191,9 +191,13 @@ employee-contract/
    ```
    No new style import needed — its CSS lives in `Styles/dev-toolbar.css`, already imported everywhere. See the Audit tool section below for what actually gets captured and why.
 
-9. **Research** — when research is done for a prototype (competitor comparisons, discovery findings, requirement coverage), save it as a self-contained page under `research/<topic>/index.html` (see `research/holiday-leave-cost/` or `research/messaging-coverage/`: own palette, light/dark, hand-styled back-link, sources listed), then link it in two places:
+9. **Research** — each feature gets **one** research page, `research/<feature>/index.html`, with a section per type of research, e.g. **Customer discovery** (one card per session, newest first, plus a short "What we've heard so far" of themes, marking where customers disagree) and **Competitor research**. Add other sections (requirement coverage, analytics…) as they come up, and a pill for each in the sticky section nav at the top. Copy `research/holiday-requests/` as the template: self-contained palette, light/dark, hand-styled back-link, sources listed. Then link it in two places:
    - an entry in `Components/researchLinks.js`'s `RESEARCH_LINKS` for each prototype it relates to (adds the toolbar's Research button automatically);
-   - a `<a class="jira-link" href="./research/<topic>/">Research</a>` badge on that prototype's row in root `index.html`, before its Jira badge.
+   - a `<a class="jira-link" href="./research/<feature>/">Research</a>` badge on that prototype's row in root `index.html`, before its Jira badge.
+
+   **The site is public**, so customer sessions name the company and the person's role only, never people's names (including staff they mention), and skip anything said in confidence. Requests unrelated to the feature stay out of the page (Ben raises those as Salesforce cases).
+
+   When a section moves into a feature page, leave a redirect at the old URL (see `research/holiday-leave-cost/`) so links already shared keep working. `research/messaging-coverage/` predates this convention.
 
    Do this by default whenever research for a prototype is done in conversation, not only when asked.
 
