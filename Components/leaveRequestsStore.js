@@ -15,7 +15,7 @@
 // wording (Awaiting approval…) when it reads them — see mobile/holidays/src/data.js.
 import { useSyncExternalStore } from 'react'
 
-const REQUESTS_KEY = 'pass-demo-leave-requests-v8'
+const REQUESTS_KEY = 'pass-demo-leave-requests-v9'
 const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v3'
 const SCHEME_KEY = 'pass-demo-holiday-scheme'
 const CHANGE_EVENT = 'pass-demo-leave-requests-change'
@@ -45,14 +45,18 @@ const SEED_SHAPES = [
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation' },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
 ]
-// Request 2 is a half day (AM); the rest are full days.
+// Request 2 is part of a day (09:00–13:00); the rest are full days.
 const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1 }
 const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
   const halfDay = n === 2
   return [
-    { ...s, id: `days-${n}`, contract: 'days', leaveType: halfDay ? 'Half Day (AM)' : 'Full Day', amount: workedDays ?? DAYS_AMOUNTS[n] },
     {
-      ...s, id: `hours-${n}`, contract: 'hours', leaveType: halfDay ? 'Half Day (AM)' : 'Full Day',
+      ...s, id: `days-${n}`, contract: 'days', leaveType: halfDay ? 'Part Day' : 'Full Day',
+      ...(halfDay ? { startTime: '09:00', endTime: '13:00' } : {}),
+      amount: workedDays ?? DAYS_AMOUNTS[n],
+    },
+    {
+      ...s, id: `hours-${n}`, contract: 'hours', leaveType: halfDay ? 'Part Day' : 'Full Day',
       startTime: '09:00', endTime: halfDay ? '13:00' : '17:00',
       amount: (workedDays ?? spanDays(s.fromDate, s.toDate)) * (halfDay ? 4 : 8),
     },

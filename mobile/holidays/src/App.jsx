@@ -21,9 +21,9 @@ import {
   isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement,
 } from '../../../Components/leaveRequestsStore'
 import {
-  DAYS_LEAVE_TYPES, HALF_DAY_OPTIONS, DAYS_ENTITLEMENT_TOTAL, fmtDays,
+  DAYS_LEAVE_TYPES, DAYS_ENTITLEMENT_TOTAL, fmtDays,
   HOURS_ENTITLEMENT_TOTAL, hoursBetween, fmtHours,
-  spanDays, fmtDate, fmtDateShort, toAppRequest,
+  spanDays, fmtDate, fmtDateShort, toAppRequest, daysLeaveTypeText,
 } from './data'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 // Content for the shared BottomSheet. Tap a start day, then an end day;
 // tapping before the start swaps them. Nothing applies until Apply.
 // Used by both the date filter and the Request leave form, so the feature
-// has one calendar on both platforms. `single` (a half day) allows one date.
+// has one calendar on both platforms. `single` (part of the day) allows one date.
 function DateRangeSheet({ title = 'Filter by date', single = false, start, end, initialMonth, onApply, secondaryLabel = 'Clear', onSecondary }) {
   const [draftStart, setDraftStart] = useState(start)
   const [draftEnd, setDraftEnd] = useState(end)
@@ -413,7 +413,7 @@ function BalanceNote({ available, pendingCount, unitWord }) {
 
 // ─── Dates field on the Request leave form ───────────────────────
 // One field for the whole holiday: it opens the same range calendar as the
-// date filter, where the first and last day are tapped. A half day picks a
+// date filter, where the first and last day are tapped. Part of the day picks a
 // single date.
 function LeaveDateFields({ fromDate, toDate, single, onChange }) {
   const [open, setOpen] = useState(false)
@@ -445,23 +445,45 @@ function LeaveDateFields({ fromDate, toDate, single, onChange }) {
   )
 }
 
+// ─── Time field on the Request leave form ────────────────────────
+// Opens the iOS-style keypad (the live app uses the platform's own picker).
+function TimeField({ id, label, value, onChange }) {
+  const [open, setOpen] = useState(false)
+  // Anchor for IOSTimeKeypadPopover's own positioning.
+  const wrapRef = useRef(null)
+  return (
+    <div className="hol-field">
+      <label className="hol-field-label" htmlFor={id}>{label}</label>
+      <div className="hol-field-input-wrap" ref={wrapRef} onClick={() => setOpen(true)}>
+        <input id={id} type="text" className="hol-field-input" readOnly value={value} />
+        <span className="hol-field-icon"><ClockIcon size={24} /></span>
+        {open && (
+          <IOSTimeKeypadPopover anchorEl={wrapRef.current} onChange={onChange} onClose={() => setOpen(false)} />
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Request leave screen — days-scheme employee ─────────────────
-// Full day / Half day (AM/PM) only, no time-of-day capture at all.
+// All day, or part of one day with real times. Part of the day replaced
+// Half day AM/PM: carers rarely work 9–5, so "AM" didn't say which visits
+// she wants off, and the holiday record the office creates needs times.
+// The office still decides the amount (a part day starts at 0.5).
 
 function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
-  const [leaveType, setLeaveType] = useState('Full day')
-  const [halfDayPeriod, setHalfDayPeriod] = useState('AM')
+  const [leaveType, setLeaveType] = useState(DAYS_LEAVE_TYPES[0])
   const [fromDate, setFromDate] = useState('2026-11-16')
   const [toDate, setToDate] = useState('2026-11-16')
+  const [startTime, setStartTime] = useState('09:00')
+  const [endTime, setEndTime] = useState('13:00')
 
-  const isHalfDay = leaveType === 'Half day'
+  const isPartDay = leaveType === 'Part of the day'
 
   function selectLeaveType(type) {
     setLeaveType(type)
-    if (type === 'Half day') setToDate(fromDate)
+    if (type === 'Part of the day') setToDate(fromDate)
   }
-
-  const amount = isHalfDay ? 0.5 : spanDays(fromDate, toDate)
 
   return (
     <div className="screen">
@@ -484,32 +506,22 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
           ))}
         </div>
 
-        {isHalfDay && (
-          <div className="hol-pill-row">
-            {HALF_DAY_OPTIONS.map(period => (
-              <button
-                key={period}
-                type="button"
-                className={`hol-pill${halfDayPeriod === period ? ' active' : ''}`}
-                onClick={() => setHalfDayPeriod(period)}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className="hol-field-group">
-          <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isHalfDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
+          <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isPartDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
+          {isPartDay && (
+            <>
+              <TimeField id="hol-start-time" label="From" value={startTime} onChange={setStartTime} />
+              <TimeField id="hol-end-time" label="To" value={endTime} onChange={setEndTime} />
+            </>
+          )}
         </div>
 
         <button
           className="fab-square primary-btn hol-submit-btn"
           disabled={available <= 0}
-          onClick={() => onSubmit({
-            fromDate, toDate, amount,
-            leaveType: isHalfDay ? `Half Day (${halfDayPeriod})` : 'Full Day',
-          })}
+          onClick={() => onSubmit(isPartDay
+            ? { fromDate, toDate: fromDate, amount: 0.5, startTime, endTime, leaveType: 'Part Day' }
+            : { fromDate, toDate, amount: spanDays(fromDate, toDate), leaveType: 'Full Day' })}
         >
           Submit request
         </button>
@@ -519,15 +531,13 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
 }
 
 // ─── Request leave screen — hours-scheme employee ────────────────
-// No Full day/Half day concept at all — a "day" isn't a meaningful unit
-// for this employee's leave, so they just state real start/end date+time.
+// No Full day/Part day choice — a "day" isn't a meaningful unit for this
+// employee's leave, so they just state real start/end date+time.
 
-// The office table groups requests as Full/Half day as well as showing an
-// hours request's times: 4 hours or fewer is a half day (AM if it starts
-// before midday), anything longer a full day.
+// The office table groups requests as Full/Part day as well as showing an
+// hours request's times: more than 4 hours is a full day.
 function hoursLeaveType(startTime, endTime) {
-  if (hoursBetween(startTime, endTime) > 4) return 'Full Day'
-  return startTime < '12:00' ? 'Half Day (AM)' : 'Half Day (PM)'
+  return hoursBetween(startTime, endTime) > 4 ? 'Full Day' : 'Part Day'
 }
 
 function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
@@ -535,11 +545,6 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
   const [toDate, setToDate] = useState('2026-11-16')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('17:00')
-  // Which time field's keypad is open — 'start'|'end'|null.
-  const [activeField, setActiveField] = useState(null)
-  // Anchor DOM nodes for IOSTimeKeypadPopover's own positioning.
-  const startWrapRef = useRef(null)
-  const endWrapRef = useRef(null)
 
   const amount = spanDays(fromDate, toDate) * hoursBetween(startTime, endTime)
 
@@ -552,26 +557,8 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
 
         <div className="hol-field-group">
           <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-start-time">Start time</label>
-            <div className="hol-field-input-wrap" ref={startWrapRef} onClick={() => setActiveField('start')}>
-              <input id="hol-start-time" type="text" className="hol-field-input" readOnly value={startTime} />
-              <span className="hol-field-icon"><ClockIcon size={24} /></span>
-              {activeField === 'start' && (
-                <IOSTimeKeypadPopover anchorEl={startWrapRef.current} onChange={setStartTime} onClose={() => setActiveField(null)} />
-              )}
-            </div>
-          </div>
-          <div className="hol-field">
-            <label className="hol-field-label" htmlFor="hol-end-time">End time</label>
-            <div className="hol-field-input-wrap" ref={endWrapRef} onClick={() => setActiveField('end')}>
-              <input id="hol-end-time" type="text" className="hol-field-input" readOnly value={endTime} />
-              <span className="hol-field-icon"><ClockIcon size={24} /></span>
-              {activeField === 'end' && (
-                <IOSTimeKeypadPopover anchorEl={endWrapRef.current} onChange={setEndTime} onClose={() => setActiveField(null)} />
-              )}
-            </div>
-          </div>
+          <TimeField id="hol-start-time" label="Start time" value={startTime} onChange={setStartTime} />
+          <TimeField id="hol-end-time" label="End time" value={endTime} onChange={setEndTime} />
         </div>
 
         <button
@@ -595,11 +582,13 @@ function RequestSentSheet({ request, onClose }) {
   const dates = request.fromDate === request.toDate
     ? fmtDateShort(request.fromDate)
     : `${fmtDateShort(request.fromDate)} - ${fmtDateShort(request.toDate)}`
-  const detail = isHours ? `${request.startTime} - ${request.endTime}` : request.leaveType.replace('Day', 'day')
+  const hasTimes = isHours || request.leaveType === 'Part Day'
   return (
     <>
       <div className="hol-sheet-title">Request sent</div>
-      <div className="hol-sheet-subtitle">{detail}, {dates}</div>
+      <div className="hol-sheet-subtitle">
+        {hasTimes ? `${dates}, ${request.startTime} - ${request.endTime}` : `${daysLeaveTypeText(request)}, ${dates}`}
+      </div>
       <div className="hol-sheet-body">
         The office will confirm how many {isHours ? 'hours' : 'days'} are taken from your entitlement when they approve your request.
       </div>

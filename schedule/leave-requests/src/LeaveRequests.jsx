@@ -116,11 +116,13 @@ const hhmmToDate = hhmm => { const [h, m] = hhmm.split(':').map(Number); return 
 const dateToHhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 const hoursBetweenDates = (a, b) => Math.max(0, Math.round(((b - a) / 3600000) * 10) / 10);
 
-// An hours-scheme employee doesn't pick Full/Half day — they give start and
+// An hours-scheme employee doesn't pick Full/Part day — they give start and
 // end times — so their Time column shows those times. They filter together
-// under "Hours".
+// under "Hours". A days-scheme part day shows its times too.
 function leaveTypeLabel(row) {
-  if (row.unit !== 'hours') return row.leaveType;
+  if (row.unit !== 'hours') {
+    return row.leaveType === 'Part Day' ? `Part Day (${row.startTime} – ${row.endTime})` : row.leaveType;
+  }
   const [start, end] = row.startTime ? [row.startTime, row.endTime] : leaveTypeTimes(row.leaveType).map(dateToHhmm);
   return `${start} – ${end}`;
 }
@@ -677,11 +679,11 @@ export default function LeaveRequests() {
               primaryLabel="Approve holiday"
               confirmLabel="Approve holiday"
               unit={approveRow.unit}
-              // Each day starts at what she asked for: a half day's 0.5, or
+              // Each day starts at what she asked for: a part day's 0.5, or
               // an hours request's time window; the office adjusts any day.
               dayDeductionDefault={approveRow.unit === 'hours'
                 ? ({ startTime: st, endTime: et }) => hoursBetweenDates(st, et)
-                : (approveRow.leaveType.startsWith('Half Day') ? 0.5 : 1)}
+                : (approveRow.leaveType === 'Part Day' ? 0.5 : 1)}
               noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount differ from the request' }}
               entitlement={approveRow.linked
                 ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }

@@ -21,7 +21,7 @@ export const EMPLOYEE_NAMES = [
 // state.
 const OFFICE_USERS = ['Alex Morgan', 'Priya Shah', 'Grace Okafor'];
 
-export const LEAVE_TYPES = ['Full Day', 'Half Day (AM)', 'Half Day (PM)'];
+export const LEAVE_TYPES = ['Full Day', 'Part Day'];
 // 'Declined' and 'Cancelled' are deliberately distinct terminal states, not
 // one status doing double duty — see AIOP-21555/21563 comparison, 2026-08-21
 // (memory: project_leave_requests_prototype). 'Declined' is the office's own
@@ -103,20 +103,16 @@ const DECLINE_REASONS = [
   'Dates clash with existing scheduled visits',
 ];
 
-// Full Day / Half Day (AM) / Half Day (PM) mapped onto an actual start/end
-// time — feeds HolidayAbsenceDialog's own time-picker fields when a request
-// is approved (see LeaveRequests.jsx). A standard 9–5 working day, split
-// evenly for a half day, matching this file's own standard-8-hour-day
-// assumption for hourly-contract amounts above. For a day-scheme employee
-// this is only ever a sensible starting point the coordinator can freely
-// edit in the dialog — per Ben, it's their call what a half/full day
-// actually looks like on the schedule; it matters more for an hourly-scheme
-// employee, whose leave is genuinely booked against real clock hours.
+// A days-scheme "all day" request mapped onto start/end times — feeds
+// HolidayAbsenceDialog's own time-picker fields when a request is approved
+// (see LeaveRequests.jsx). Midnight to midnight: PASS doesn't reliably know
+// her working hours, and the whole day catches every visit on it. The
+// office can still change the times in the dialog. Hours-scheme requests
+// always carry their own times.
 export function leaveTypeTimes(leaveType) {
   const t = (h, m = 0) => new Date(2026, 0, 1, h, m);
-  if (leaveType === 'Half Day (AM)') return [t(9), t(13)];
-  if (leaveType === 'Half Day (PM)') return [t(13), t(17)];
-  return [t(9), t(17)]; // Full Day
+  // A part day always carries its own times, so only a full day gets here.
+  return [t(0), t(23, 59)];
 }
 
 // Deterministic pseudo-random generator, matching the established pattern in
@@ -145,7 +141,14 @@ function buildRequests() {
   for (let i = 0; i < REQUEST_COUNT; i++) {
     const employee = pick(EMPLOYEE_NAMES);
     const contract = EMPLOYEE_CONTRACTS[employee];
-    const leaveType = pick(LEAVE_TYPES);
+    // Picked from three so the seeded data doesn't reshuffle; a part day
+    // keeps the morning/afternoon times it used to have as a half day.
+    const period = pick(['Full Day', 'AM', 'PM']);
+    const leaveType = period === 'Full Day' ? 'Full Day' : 'Part Day';
+    // An hours-scheme full day is a standard 09:00–17:00 (matching its 8 hrs).
+    const [startTime, endTime] = period === 'AM' ? ['09:00', '13:00']
+      : period === 'PM' ? ['13:00', '17:00']
+      : contract.unit === 'hours' ? ['09:00', '17:00'] : [null, null];
     const month = btw(3, 8); // Apr–Sep 2026 (0-indexed)
     const startDay = btw(1, 25);
     const fromDate = new Date(2026, month, startDay);
@@ -153,7 +156,7 @@ function buildRequests() {
     let toDate, amount;
     if (leaveType === 'Full Day') {
       // Hourly employees get a narrower, smaller span pool — the point
-      // was more examples reading as "obviously a half day or a day"
+      // was more examples reading as "obviously part of a day or a day"
       // (4/8 hours), not large multi-week hour totals that are technically
       // correct but don't read as clearly at a glance.
       const span = contract.unit === 'hours' ? pick([1, 1, 1, 2]) : pick([1, 1, 1, 2, 3, 5]); // calendar days, inclusive
@@ -163,7 +166,7 @@ function buildRequests() {
       // rather than an arbitrary per-employee hourly rate.
       amount = contract.unit === 'hours' ? span * 8 : span;
     } else {
-      toDate = fromDate; // half-day requests are always a single date
+      toDate = fromDate; // part-day requests are always a single date
       amount = contract.unit === 'hours' ? 4 : 0.5;
     }
 
@@ -193,6 +196,8 @@ function buildRequests() {
       id: i + 1,
       employee,
       leaveType,
+      startTime,
+      endTime,
       fromDate,
       toDate,
       amount,
