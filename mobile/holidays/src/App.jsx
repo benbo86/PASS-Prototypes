@@ -390,28 +390,24 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
 // herself; the office confirms the amount. The one safe block is a balance
 // of 0 or less, since any request is then too much whatever days she works.
 // pending: requests still awaiting approval, which have no amount yet.
-function AvailableBalance({ available, pendingCount, unit, unitWord }) {
+// It sits above the form as a sentence, not a stat bar under the dates, so
+// it doesn't read as a total that should change with the dates picked.
+function BalanceNote({ available, pendingCount, unitWord }) {
+  if (available <= 0) {
+    return (
+      <p className="hol-balance-note hol-office-confirm--none-left">
+        You have no holiday left to request. Speak to the office if you need more.
+      </p>
+    )
+  }
+  const unit = available === 1 ? unitWord.replace(/s$/, '') : unitWord
   return (
-    <>
-      <div className="hol-summary-bar">
-        <span className="hol-summary-label">Available</span>
-        <span className="hol-summary-value">{available} {unit}</span>
-      </div>
+    <p className="hol-balance-note">
+      You have <strong>{available} {unit}</strong> available.
       {pendingCount > 0 && (
-        <div className="hol-remaining-text">
-          {pendingCount} {pendingCount === 1 ? 'request' : 'requests'} awaiting approval
-        </div>
+        <> {pendingCount} {pendingCount === 1 ? 'request is' : 'requests are'} still waiting for approval.</>
       )}
-      {available > 0 ? (
-        <p className="hol-office-confirm">
-          The office will confirm how many {unitWord} are taken from your entitlement when they approve your request.
-        </p>
-      ) : (
-        <p className="hol-office-confirm hol-office-confirm--none-left">
-          You have no holiday left to request. Speak to the office if you need more.
-        </p>
-      )}
-    </>
+    </p>
   )
 }
 
@@ -472,6 +468,8 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
       <StatusBar />
       <AppHeader title="Request leave" onBack={onBack} />
       <div className="hol-form-body">
+        <BalanceNote available={available} pendingCount={pendingCount} unitWord="days" />
+
         <div className="hol-form-label">Leave type</div>
         <div className="hol-pill-row">
           {DAYS_LEAVE_TYPES.map(type => (
@@ -504,8 +502,6 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
         <div className="hol-field-group">
           <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isHalfDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
         </div>
-
-        <AvailableBalance available={available} pendingCount={pendingCount} unit="days" unitWord="days" />
 
         <button
           className="fab-square primary-btn hol-submit-btn"
@@ -552,6 +548,8 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
       <StatusBar />
       <AppHeader title="Request leave" onBack={onBack} />
       <div className="hol-form-body">
+        <BalanceNote available={available} pendingCount={pendingCount} unitWord="hours" />
+
         <div className="hol-field-group">
           <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
           <div className="hol-field">
@@ -576,8 +574,6 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
           </div>
         </div>
 
-        <AvailableBalance available={available} pendingCount={pendingCount} unit="hrs" unitWord="hours" />
-
         <button
           className="fab-square primary-btn hol-submit-btn"
           disabled={available <= 0}
@@ -587,6 +583,28 @@ function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) 
         </button>
       </div>
     </div>
+  )
+}
+
+// ─── Request sent bottom sheet ───────────────────────────────────
+// Shown after Submit, on top of the list. It confirms the request went and
+// says the office decides the amount: that's about what happens next, so it
+// lives here rather than on the form.
+function RequestSentSheet({ request, onClose }) {
+  const isHours = request.contract === 'hours'
+  const dates = request.fromDate === request.toDate
+    ? fmtDateShort(request.fromDate)
+    : `${fmtDateShort(request.fromDate)} - ${fmtDateShort(request.toDate)}`
+  const detail = isHours ? `${request.startTime} - ${request.endTime}` : request.leaveType.replace('Day', 'day')
+  return (
+    <>
+      <div className="hol-sheet-title">Request sent</div>
+      <div className="hol-sheet-subtitle">{detail}, {dates}</div>
+      <div className="hol-sheet-body">
+        The office will confirm how many {isHours ? 'hours' : 'days'} are taken from your entitlement when they approve your request.
+      </div>
+      <button className="fab-square primary-btn" onClick={onClose}>Done</button>
+    </>
   )
 }
 
@@ -627,7 +645,7 @@ function DeleteSheet({ request, onClose, onConfirm }) {
 // demo toggle switches which of her two holiday schemes is shown, on both
 // sides.
 
-function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteTarget, dateSheetOpen, setDateSheetOpen, onBack, listVisible }) {
+function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteTarget, sentRequest, setSentRequest, dateSheetOpen, setDateSheetOpen, onBack, listVisible }) {
   const linkedRequests = useLeaveRequests()
   const isDays = contractType === 'days'
   const entitlement = useEntitlement(contractType, isDays ? DAYS_ENTITLEMENT_TOTAL : HOURS_ENTITLEMENT_TOTAL)
@@ -646,8 +664,10 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
   }, [listVisible, linkedRequests])
 
   function handleSubmit(request) {
-    addLeaveRequest({ ...request, contract: contractType, employee: DEMO_EMPLOYEE, status: 'Awaiting Approval', submitted: new Date().toISOString() })
+    const full = { ...request, contract: contractType, employee: DEMO_EMPLOYEE, status: 'Awaiting Approval', submitted: new Date().toISOString() }
+    addLeaveRequest(full)
     setView('list')
+    setSentRequest(full)
   }
 
   // Withdrawing a request that's still awaiting approval marks it Withdrawn
@@ -683,6 +703,9 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
       />
       <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         {deleteTarget && <DeleteSheet request={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDeleteConfirm} />}
+      </BottomSheet>
+      <BottomSheet open={!!sentRequest} onClose={() => setSentRequest(null)}>
+        {sentRequest && <RequestSentSheet request={sentRequest} onClose={() => setSentRequest(null)} />}
       </BottomSheet>
     </>
   )
@@ -724,6 +747,8 @@ export default function App() {
   // it's a modal overlay on top of the list, not a distinct `view`, so it
   // needed its own state rather than folding into the check above.
   const [deleteTarget, setDeleteTarget] = useState(null)
+  // Same again for the "Request sent" sheet shown after Submit.
+  const [sentRequest, setSentRequest] = useState(null)
   // Same again for the date-filter sheet on the list screen.
   const [dateSheetOpen, setDateSheetOpen] = useState(false)
   const phoneFrameRef = useRef(null)
@@ -785,6 +810,8 @@ export default function App() {
                     view={view}
                     setView={setView}
                     deleteTarget={deleteTarget}
+                    sentRequest={sentRequest}
+                    setSentRequest={setSentRequest}
                     setDeleteTarget={setDeleteTarget}
                     dateSheetOpen={dateSheetOpen}
                     setDateSheetOpen={setDateSheetOpen}
@@ -794,7 +821,7 @@ export default function App() {
                 }
               />
             </div>
-            {!(outerView === 'holidays' && (view === 'form' || deleteTarget || dateSheetOpen)) && (
+            {!(outerView === 'holidays' && (view === 'form' || deleteTarget || sentRequest || dateSheetOpen)) && (
               <AppNav notificationBanner={false} activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
             )}
           </div>
