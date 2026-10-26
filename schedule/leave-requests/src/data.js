@@ -166,7 +166,7 @@ function buildRequests() {
       // rather than an arbitrary per-employee hourly rate.
       amount = contract.unit === 'hours' ? span * 8 : span;
     } else {
-      toDate = fromDate; // part-day requests are always a single date
+      toDate = fromDate; // the demo's part-day requests are single dates
       amount = contract.unit === 'hours' ? 4 : 0.5;
     }
 

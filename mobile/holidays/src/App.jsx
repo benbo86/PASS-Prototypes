@@ -148,8 +148,8 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 // Content for the shared BottomSheet. Tap a start day, then an end day;
 // tapping before the start swaps them. Nothing applies until Apply.
 // Used by both the date filter and the Request leave form, so the feature
-// has one calendar on both platforms. `single` (part of the day) allows one date.
-function DateRangeSheet({ title = 'Filter by date', single = false, start, end, initialMonth, onApply, secondaryLabel = 'Clear', onSecondary }) {
+// has one calendar on both platforms.
+function DateRangeSheet({ title = 'Filter by date', start, end, initialMonth, onApply, secondaryLabel = 'Clear', onSecondary }) {
   const [draftStart, setDraftStart] = useState(start)
   const [draftEnd, setDraftEnd] = useState(end)
   const [[viewYear, viewMonth], setView] = useState(() => {
@@ -167,7 +167,7 @@ function DateRangeSheet({ title = 'Filter by date', single = false, start, end, 
   const [fresh, setFresh] = useState(true)
 
   function pick(iso) {
-    if (single || fresh) { setDraftStart(iso); setDraftEnd(null); setFresh(false); return }
+    if (fresh) { setDraftStart(iso); setDraftEnd(null); setFresh(false); return }
     if (!draftStart || draftEnd) { setDraftStart(iso); setDraftEnd(null) }
     else if (iso < draftStart) { setDraftEnd(draftStart); setDraftStart(iso) }
     else setDraftEnd(iso)
@@ -198,7 +198,7 @@ function DateRangeSheet({ title = 'Filter by date', single = false, start, end, 
     <>
       <div className="hol-sheet-title">{title}</div>
       <div className="hol-range-hint">
-        {draftStart ? fmtDateRangeLabel(draftStart, draftEnd) : single ? 'Choose a date' : 'Choose a date or a range'}
+        {draftStart ? fmtDateRangeLabel(draftStart, draftEnd) : 'Choose a date or a range'}
       </div>
       <div className="hol-range-header">
         <button type="button" className="hol-range-nav" onClick={() => shiftMonth(-1)} aria-label="Previous month"><ChevronLeftIcon size={24} /></button>
@@ -413,15 +413,14 @@ function BalanceNote({ available, pendingCount, unitWord }) {
 
 // ─── Dates field on the Request leave form ───────────────────────
 // One field for the whole holiday: it opens the same range calendar as the
-// date filter, where the first and last day are tapped. Part of the day picks a
-// single date.
-function LeaveDateFields({ fromDate, toDate, single, onChange }) {
+// date filter, where the first and last day are tapped.
+function LeaveDateFields({ fromDate, toDate, onChange }) {
   const [open, setOpen] = useState(false)
   const value = fromDate === toDate ? fmtDateShort(fromDate) : `${fmtDateShort(fromDate)} - ${fmtDateShort(toDate)}`
   return (
     <>
       <div className="hol-field">
-        <label className="hol-field-label" htmlFor="hol-dates">{single ? 'Date' : 'Dates'}</label>
+        <label className="hol-field-label" htmlFor="hol-dates">Dates</label>
         <div className="hol-field-input-wrap" onClick={() => setOpen(true)}>
           <input id="hol-dates" type="text" className="hol-field-input" readOnly value={value} />
           <span className="hol-field-icon"><CalendarIcon size={24} /></span>
@@ -431,11 +430,10 @@ function LeaveDateFields({ fromDate, toDate, single, onChange }) {
         {open && (
           <DateRangeSheet
             title="Holiday dates"
-            single={single}
             start={fromDate}
-            end={single || toDate === fromDate ? null : toDate}
+            end={toDate === fromDate ? null : toDate}
             initialMonth={fromDate}
-            onApply={(start, end) => { onChange(start, single ? start : (end || start)); setOpen(false) }}
+            onApply={(start, end) => { onChange(start, end || start); setOpen(false) }}
             secondaryLabel="Cancel"
             onSecondary={() => setOpen(false)}
           />
@@ -466,10 +464,11 @@ function TimeField({ id, label, value, onChange }) {
 }
 
 // ─── Request leave screen — days-scheme employee ─────────────────
-// All day, or part of one day with real times. Part of the day replaced
+// All day, or part of the day with real times (the same times on each day
+// of the range). Part of the day replaced
 // Half day AM/PM: carers rarely work 9–5, so "AM" didn't say which visits
 // she wants off, and the holiday record the office creates needs times.
-// The office still decides the amount (a part day starts at 0.5).
+// The office still decides the amount (each part day starts at 0.5).
 
 function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
   const [leaveType, setLeaveType] = useState(DAYS_LEAVE_TYPES[0])
@@ -479,11 +478,6 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
   const [endTime, setEndTime] = useState('13:00')
 
   const isPartDay = leaveType === 'Part of the day'
-
-  function selectLeaveType(type) {
-    setLeaveType(type)
-    if (type === 'Part of the day') setToDate(fromDate)
-  }
 
   return (
     <div className="screen">
@@ -499,7 +493,7 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
               key={type}
               type="button"
               className={`hol-pill${leaveType === type ? ' active' : ''}`}
-              onClick={() => selectLeaveType(type)}
+              onClick={() => setLeaveType(type)}
             >
               {type}
             </button>
@@ -507,11 +501,11 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
         </div>
 
         <div className="hol-field-group">
-          <LeaveDateFields fromDate={fromDate} toDate={toDate} single={isPartDay} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
+          <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
           {isPartDay && (
             <>
-              <TimeField id="hol-start-time" label="From" value={startTime} onChange={setStartTime} />
-              <TimeField id="hol-end-time" label="To" value={endTime} onChange={setEndTime} />
+              <TimeField id="hol-start-time" label="Start time" value={startTime} onChange={setStartTime} />
+              <TimeField id="hol-end-time" label="End time" value={endTime} onChange={setEndTime} />
             </>
           )}
         </div>
@@ -520,7 +514,7 @@ function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
           className="fab-square primary-btn hol-submit-btn"
           disabled={available <= 0}
           onClick={() => onSubmit(isPartDay
-            ? { fromDate, toDate: fromDate, amount: 0.5, startTime, endTime, leaveType: 'Part Day' }
+            ? { fromDate, toDate, amount: 0.5 * spanDays(fromDate, toDate), startTime, endTime, leaveType: 'Part Day' }
             : { fromDate, toDate, amount: spanDays(fromDate, toDate), leaveType: 'Full Day' })}
         >
           Submit request
