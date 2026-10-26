@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './firebase'
 import { announceSignOutRequest } from './devToolbarBus'
+import ResearchLink from './ResearchLink'
 
 const SignOutIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -63,7 +64,12 @@ export default function DevToolbar({ children, floating = false }) {
 
   return (
     <div className={`dev-toolbar${floating ? ' dev-toolbar-floating' : ''}`} data-devtoolbar-ui="true">
-      <div className="dev-toolbar-items">{children}</div>
+      <div className="dev-toolbar-items">
+        {children}
+        {/* Not wired per prototype: shows itself only where
+            researchLinks.js lists research for this page. */}
+        <ResearchLink />
+      </div>
       {authUser && (
         <button className="dev-toolbar-signout" onClick={() => announceSignOutRequest()}>
           <SignOutIcon />

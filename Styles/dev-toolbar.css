@@ -143,3 +143,34 @@
 .anc-crumb:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 .anc-crumb.active { background: rgba(176, 44, 247, 0.35); color: #fff; }
 .anc-crumb-more { color: rgba(255, 255, 255, 0.5); }
+
+/* Research (Components/ResearchLink.jsx) — links this prototype's research
+   pages (Components/researchLinks.js). A link, not a mode, so no .active
+   state except while its menu is open. */
+.dev-toolbar-icon-btn.research-link { text-decoration: none; }
+.research-link-wrap {
+  position: relative;
+  display: flex;
+}
+.research-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 240px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+.research-menu-item {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  text-decoration: none;
+}
+.research-menu-item:hover { background: rgba(255, 255, 255, 0.12); }

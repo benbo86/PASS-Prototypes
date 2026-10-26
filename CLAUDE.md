@@ -83,6 +83,7 @@ employee-contract/
 | `Components/splitPane.js` | Detects that a page is inside a split-view pane: the iframe is named `pass-split-pane`, and the name survives navigation within the pane. Adds `html.split-pane`, which hides the toolbar/back-link and scales the phone. Imported by `SplitViewToggle` and `AppNav`, so every mobile prototype handles it; the pane CSS is in both `Styles/split-view.css` and `Styles/mobile.css` |
 | `Components/HolidayNotificationBanner.jsx` | In-app push banner for holiday responses arriving while a mobile prototype is open. Slides down at the top of the phone for 5s; tapping it opens Holidays. Rendered by `AppNav` (turn it off with `notificationBanner={false}`). Rendered directly by `mobile/holidays`, and turned off in `mobile/notifications`. Styles in `Styles/mobile.css` (`.push-banner*`) |
 | `Components/BottomSheet.jsx` | Mobile-only slide-up bottom sheet (`open`/`onClose`, slides back down on close, tap scrim to close; keeps its last content during the exit animation) — promoted out of `mobile/holidays`' delete sheet; also used by `mobile/tag-in-out`'s reason sheet and `mobile/handover-notes`' two sheets. No drag handle (the live app's sheets don't have one). Actions inside are full-width stacked `.fab-square` buttons; styles in `Styles/mobile.css` (`.bottom-sheet-*`) |
+| `Components/researchLinks.js` + `Components/ResearchLink.jsx` | Links research pages to prototypes. `RESEARCH_LINKS` maps a prototype folder (`'mobile/holidays/'`) to `[{ title, href }]`; `DevToolbar` renders a Research button (book icon, opens in a new tab; a menu if there are several) on any listed prototype, with no per-prototype wiring. Styles in `Styles/dev-toolbar.css` (`.research-*`). See Prototype conventions §9 |
 
 **Always read `Styles/main.css` before adding local CSS.**
 
@@ -189,6 +190,12 @@ employee-contract/
    </DevToolbar>
    ```
    No new style import needed — its CSS lives in `Styles/dev-toolbar.css`, already imported everywhere. See the Audit tool section below for what actually gets captured and why.
+
+9. **Research** — when research is done for a prototype (competitor comparisons, discovery findings, requirement coverage), save it as a self-contained page under `research/<topic>/index.html` (see `research/holiday-leave-cost/` or `research/messaging-coverage/`: own palette, light/dark, hand-styled back-link, sources listed), then link it in two places:
+   - an entry in `Components/researchLinks.js`'s `RESEARCH_LINKS` for each prototype it relates to (adds the toolbar's Research button automatically);
+   - a `<a class="jira-link" href="./research/<topic>/">Research</a>` badge on that prototype's row in root `index.html`, before its Jira badge.
+
+   Do this by default whenever research for a prototype is done in conversation, not only when asked.
 
 ---
 
