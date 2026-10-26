@@ -303,7 +303,10 @@ export default function HolidayAbsenceDialog({
   const effectiveDaysDeducted = showDayBreakdown ? computedDaysDeducted : daysDeducted
   const unitWord = unit === 'hours' ? 'Hours' : 'Days'
   const unitShort = unit === 'hours' ? 'hrs' : 'days'
-  const bookedAndTaken = entitlement.alreadyBooked + (showDayBreakdown ? computedDaysDeducted : 0)
+  // The summary shows the balance before this booking, so it doesn't move
+  // as the days deducted are edited. Going over is caught separately below.
+  const remaining = Math.max(0, entitlement.total - entitlement.alreadyBooked)
+  const isOverEntitlement = showDayBreakdown && computedDaysDeducted > remaining + 1e-9
 
   // Skips straight to confirming when the visits-affected warning/choice
   // (step 2) doesn't apply to the calling flow — e.g. a leave request being
@@ -355,8 +358,8 @@ export default function HolidayAbsenceDialog({
             <div>Scheme name: Everylife</div>
             <div>Entitlement: {entitlement.total} {unitShort}</div>
             <div>Adjustment: 0 {unitShort}</div>
-            <div>Booked &amp; taken: {bookedAndTaken} {unitShort}</div>
-            <div>Remaining: {Math.max(0, entitlement.total - bookedAndTaken)} {unitShort}</div>
+            <div>Booked &amp; taken: {entitlement.alreadyBooked} {unitShort}</div>
+            <div>Remaining: {remaining} {unitShort}</div>
           </div>
 
           <div className="date-row field">
@@ -457,6 +460,18 @@ export default function HolidayAbsenceDialog({
             </div>
           )}
 
+          {/* Holiday can't go beyond what's remaining, so the primary
+              button is disabled too. Wording matches the live product. */}
+          {isOverEntitlement && (
+            <div className="warning-banner orange">
+              <WarningIcon />
+              <div>
+                <h4>Warning</h4>
+                <p>The employee does not have enough holiday remaining for this booking.</p>
+              </div>
+            </div>
+          )}
+
           {noteField && (
             <div className="field">
               <label htmlFor="absence-note">{noteField.label}</label>
@@ -471,7 +486,7 @@ export default function HolidayAbsenceDialog({
           )}
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={handlePrimary}>{primaryLabel}</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={isOverEntitlement}>{primaryLabel}</button>
           </div>
         </div>
       )}
