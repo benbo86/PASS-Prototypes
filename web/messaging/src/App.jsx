@@ -26,6 +26,16 @@ const SendIcon = () => (
     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
   </svg>
 )
+const InfoIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12,2 C17.52,2 22,6.48 22,12 C22,17.52 17.52,22 12,22 C6.48,22 2,17.52 2,12 C2,6.48 6.48,2 12,2 Z M10.6662105,9.93690394 L10.581437,9.93690394 C10.1076337,9.93690394 9.72611507,10.3209137 9.72611507,10.7922258 C9.72611507,11.2660291 10.1101248,11.6475478 10.581437,11.6475478 L10.6662105,11.6475478 L10.6662105,16.6348056 L10.5826825,16.6348056 C10.1096134,16.6348056 9.72611507,17.0183039 9.72611507,17.491373 C9.72611507,17.9644422 10.1096134,18.3479405 10.5826825,18.3479405 L13.4173175,18.3479405 C13.8903866,18.3479405 14.2738849,17.9644422 14.2738849,17.491373 C14.2738849,17.0183039 13.8903866,16.6348056 13.4173175,16.6348056 L13.3387717,16.6348056 L13.3362805,10.936904 C13.3360752,10.3847645 12.8884201,9.93727594 12.3362806,9.93727594 L10.6662105,9.93690394 Z M11.8678197,5.65205952 C11.0006244,5.65205952 10.2992557,6.35342819 10.2992557,7.22062354 C10.2992557,8.08781889 11.0006244,8.78918756 11.8678197,8.78918756 C12.7350151,8.78918756 13.4363837,8.08781889 13.4363837,7.22062354 C13.4363837,6.35342819 12.7350151,5.65205952 11.8678197,5.65205952 Z"/>
+  </svg>
+)
+const WarningIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z"/>
+  </svg>
+)
 const CloseIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -136,7 +146,8 @@ const CARERS = [
   { id: 11, name: 'Nathan Wells',    initials: 'NW', area: 'South Sheffield',    careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
   { id: 12, name: 'Chloe Barker',    initials: 'CB', area: 'Rotherham Central',  careHome: 'Sunrise Rotherham',   shiftPattern: 'Weekend'     },
   { id: 13, name: 'Ryan Sutton',     initials: 'RS', area: 'North Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
-  { id: 14, name: 'Fiona Marsh',     initials: 'FM', area: 'South Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift' },
+  // Also has PASS web access (a care manager who still picks up shifts) — triggers the compose warning below
+  { id: 14, name: 'Fiona Marsh',     initials: 'FM', area: 'South Sheffield',    careHome: 'Meadow View Leeds',   shiftPattern: 'Early Shift', isOfficeUser: true },
   { id: 15, name: 'Callum Reid',     initials: 'CR', area: 'Rotherham Central',  careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
 ]
 
@@ -1163,7 +1174,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           <input
             ref={inputRef}
             className="msg-compose-input"
-            placeholder={thread.isBroadcast ? '' : 'Reply to this thread...'}
+            placeholder={thread.isBroadcast ? '' : 'Reply to this thread (everyone in your office can see it)...'}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
@@ -1349,6 +1360,7 @@ function ComposeView({ mode, onSend, onCancel }) {
   }, [])
 
   const showPicker = !isBroadcast || broadcastType !== 'all'
+  const officeUserWarning = !isBroadcast && selectedCarer?.isOfficeUser
 
   return (
     <div className="msg-compose-view">
@@ -1512,6 +1524,18 @@ function ComposeView({ mode, onSend, onCancel }) {
               )}
             </div>
           )}
+        </div>
+
+        {/* Who can see this — the inbox is shared by every web user in the office */}
+        <div className={`msg-compose-visibility${officeUserWarning ? ' warning' : ''}`}>
+          {officeUserWarning ? <WarningIcon /> : <InfoIcon />}
+          <p>
+            {isBroadcast
+              ? <>Everyone in your office with PASS web access will see this broadcast and who's read it. Each employee receives it from "Office" and can't see who else it went to.</>
+              : officeUserWarning
+                ? <><strong>{selectedCarer.name}</strong> is also an office user. Everyone in your office with PASS web access will see this conversation, so it isn't suitable for private messages between office staff.</>
+                : <>Everyone in your office with PASS web access will see this conversation and any replies.</>}
+          </p>
         </div>
 
         {/* Title */}

@@ -1767,3 +1767,24 @@ body { overflow: hidden; }
   border-top: 1px solid var(--ui-purple-5-languid-lavendar);
   color: var(--greyscale-6-grey-50);
 }
+
+/* Who can see this message — under the To field in New Message / New Broadcast */
+.msg-compose-visibility {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 50%;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  color: var(--ui-purple-3-grape-grey);
+}
+.msg-compose-visibility svg { flex-shrink: 0; }
+.msg-compose-visibility p {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--greyscale-4-grey-40);
+}
+.msg-compose-visibility.warning { color: var(--rag-amber-amber-7); }
+.msg-compose-visibility.warning p { color: var(--greyscale-2-grey-20); }
