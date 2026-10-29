@@ -3,13 +3,10 @@
 // (schedule/leave-requests/) uses the same words in title case.
 export const STATUSES = ['Awaiting approval', 'Awaiting cancellation', 'Approved', 'Declined', 'Cancelled', 'Withdrawn']
 
-// Two entirely different request experiences depending on the employee's
-// own contract — not a single form that adapts a few fields. A days-scheme
-// employee only ever thinks in All day / Part of the day; there's no "day" concept
-// at all for an hourly-scheme employee, so those choices genuinely
-// don't apply to them — they just state real start/end date+time. The
-// mobile/holidays/ prototype's own toggle switches between these two full
-// experiences for demo purposes; a real employee would only ever see one.
+// Both schemes request holiday the same way: dates, each with an optional
+// time (AIOP-21555, 28/10/2026). The scheme only sets the unit her balance
+// and the office's confirmed amount are in. The prototype's toggle switches
+// between the two for the demo; a real employee only has one.
 export const CONTRACT_TYPES = ['days', 'hours']
 
 // Requests are stored in Components/leaveRequestsStore.js (shared with the
@@ -32,8 +29,6 @@ export function toAppRequest(r) {
     fromDate: r.fromDate,
     toDate: r.toDate,
     amount: r.amount,
-    // What she asked for (days scheme), shown on the card.
-    leaveType: r.leaveType ? daysLeaveTypeText(r) : null,
     startTime: r.startTime || null,
     endTime: r.endTime || null,
     requestedOn: r.submitted.slice(0, 10),
@@ -72,17 +67,6 @@ export function spanDays(fromDate, toDate) {
 }
 
 // ── Days-scheme employee ─────────────────────────────────────────
-// All day, or part of one day with its times (stored as the office's
-// 'Full Day' / 'Part Day').
-export const DAYS_LEAVE_TYPES = ['All day', 'Part of the day']
-
-// A days-scheme request in the app's words, from a shared store record.
-export function daysLeaveTypeText(r) {
-  if (r.leaveType === 'Part Day') return `Part of the day, ${r.startTime} - ${r.endTime}`
-  if (r.leaveType === 'Full Day') return 'All day'
-  return r.leaveType
-}
-
 // Booked/taken/available are worked out from her requests
 // (useEntitlement in Components/leaveRequestsStore.js).
 export const DAYS_ENTITLEMENT_TOTAL = 28
@@ -92,18 +76,7 @@ export function fmtDays(n) {
 }
 
 // ── Hours-scheme employee ────────────────────────────────────────
-// No All day/Part of the day choice at all — just real Start/End date + real
-// Start/End time. Total hours = the date span x the daily time window,
-// since the same start/end time is worked on every day in the range.
 export const HOURS_ENTITLEMENT_TOTAL = 224
-
-export function hoursBetween(start, end) {
-  if (!start || !end) return 0
-  const [sh, sm] = start.split(':').map(Number)
-  const [eh, em] = end.split(':').map(Number)
-  const mins = (eh * 60 + em) - (sh * 60 + sm)
-  return Math.max(0, Math.round((mins / 60) * 10) / 10)
-}
 
 export function fmtHours(h) {
   return `${h} hr${h === 1 ? '' : 's'}`

@@ -21,8 +21,8 @@ import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { LEAVE_REQUESTS, EMPLOYEE_NAMES, LEAVE_TYPES, STATUSES, fmtD, fmtDT, fmtDTShort, leaveTypeTimes } from './data';
-import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement } from '../../../Components/leaveRequestsStore';
+import { LEAVE_REQUESTS, EMPLOYEE_NAMES, STATUSES, fmtD, fmtDT, fmtDTShort } from './data';
+import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
 // `userName` ("Alex Morgan"), declared explicitly here (rather than left
@@ -114,24 +114,15 @@ const isoToDate = iso => { const [y, m, d] = iso.split('-').map(Number); return 
 const dateToIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const hhmmToDate = hhmm => { const [h, m] = hhmm.split(':').map(Number); return new Date(2026, 0, 1, h, m); };
 const dateToHhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-const hoursBetweenDates = (a, b) => Math.max(0, Math.round(((b - a) / 3600000) * 10) / 10);
 
-// An hours-scheme employee doesn't pick Full/Part day — they give start and
-// end times — so their Time column shows those times. They filter together
-// under "Hours". A days-scheme part day shows its times too.
-function leaveTypeLabel(row) {
-  if (row.unit !== 'hours') {
-    return row.leaveType === 'Part Day' ? `Part Day (${row.startTime} – ${row.endTime})` : row.leaveType;
-  }
-  const [start, end] = row.startTime ? [row.startTime, row.endTime] : leaveTypeTimes(row.leaveType).map(dateToHhmm);
-  return `${start} – ${end}`;
-}
-const withLeaveTypeLabel = row => ({
-  ...row,
-  leaveTypeLabel: leaveTypeLabel(row),
-  leaveCategory: row.unit === 'hours' ? 'Hours' : row.leaveType,
-});
-const LEAVE_TYPE_FILTER_ITEMS = [...LEAVE_TYPES, 'Hours'];
+// A request is dates with optional times, the same for both schemes
+// (AIOP-21555, 28/10/2026). The Time column shows "All day" or the times,
+// and filters on that.
+const withLeaveTypeLabel = row => {
+  const leaveTypeLabel = requestTimesText({ ...row, fromDate: dateToIso(row.fromDate), toDate: dateToIso(row.toDate) });
+  return { ...row, leaveTypeLabel, leaveCategory: leaveTypeLabel === 'All day' ? 'All day' : 'Set times' };
+};
+const LEAVE_TYPE_FILTER_ITEMS = ['All day', 'Set times'];
 
 // Shared store record -> this table's row shape.
 function toLinkedRow(r) {
@@ -198,10 +189,11 @@ export default function LeaveRequests() {
     if (row.linked) {
       recordOfficeDecision(row.id, { ...patch, actionedAt: patch.actionedAt.toISOString() });
     } else {
-      const { approved, kept, ...rest } = patch;
+      const { approved, kept, note, ...rest } = patch;
       setLocalRows(prev => prev.map(r => r.id === row.id ? withLeaveTypeLabel({
         ...r,
         ...rest,
+        ...(approved ? { approvalNote: note || null } : {}),
         ...(kept ? { reason: r.reason } : {}),
         ...(approved ? {
           fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
@@ -618,6 +610,25 @@ export default function LeaveRequests() {
                         />
                       </span>
                     )}
+                    {/* The note sent to her when approving, kept as the
+                        office's record of why (OakShed, 29/10/2026). An
+                        Awaiting Cancellation row is still the approved
+                        holiday, so it keeps the note too. */}
+                    {(row.status === 'Approved' || row.status === 'Awaiting Cancellation') && row.approvalNote && (
+                      <div className="lr-approval-note">
+                        <Tooltip
+                          wrapClassName="lr-cancelled-tooltip-wrap lr-audit-popover"
+                          text={
+                            <>
+                              <div className="lr-popover-reason">{row.approvalNote}</div>
+                              <div className="lr-popover-meta">Approved by {row.actionedBy} on {fmtDT(row.actionedAt)}</div>
+                            </>
+                          }
+                        >
+                          <span className="lr-cancelled-note">Note — {row.approvalNote}</span>
+                        </Tooltip>
+                      </div>
+                    )}
                     {row.status === 'Withdrawn' && (
                       <span className="lr-cancelled-note">
                         Withdrawn by employee{row.withdrawnAt ? ` on ${fmtD(row.withdrawnAt)}` : ''}
@@ -659,10 +670,10 @@ export default function LeaveRequests() {
       </div>
 
       {approveRow && (() => {
-        // An hours request from the app carries its real times.
-        const [startTime, endTime] = approveRow.startTime
-          ? [hhmmToDate(approveRow.startTime), hhmmToDate(approveRow.endTime)]
-          : leaveTypeTimes(approveRow.leaveType);
+        // A missing time is the start or end of that day (00:00 / 23:59),
+        // so an all-day request covers every visit on those days.
+        const startTime = hhmmToDate(approveRow.startTime || '00:00');
+        const endTime = hhmmToDate(approveRow.endTime || '23:59');
         return (
           <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setApproveRow(null) }}>
             <HolidayAbsenceDialog
@@ -679,11 +690,6 @@ export default function LeaveRequests() {
               primaryLabel="Approve holiday"
               confirmLabel="Approve holiday"
               unit={approveRow.unit}
-              // Each day starts at what she asked for: a part day's 0.5, or
-              // an hours request's time window; the office adjusts any day.
-              dayDeductionDefault={approveRow.unit === 'hours'
-                ? ({ startTime: st, endTime: et }) => hoursBetweenDates(st, et)
-                : (approveRow.leaveType === 'Part Day' ? 0.5 : 1)}
               noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount differ from the request' }}
               entitlement={approveRow.linked
                 ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }

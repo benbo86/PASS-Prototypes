@@ -117,6 +117,9 @@ body { background: #fff; min-height: 100vh; }
   vertical-align: middle;
 }
 
+/* An approved row's note sits under its Cancel action. */
+.lr-approval-note { margin-top: 4px; }
+
 /* "Popover" variant of the shared Tooltip — this one now carries two
    distinct pieces of info (the reason, and who/when actioned it), not just
    a single line, so it reads better as a small structured card than the

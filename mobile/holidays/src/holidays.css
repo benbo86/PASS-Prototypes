@@ -352,6 +352,25 @@
   align-items: center;
 }
 
+.hol-field-input::placeholder { color: var(--greyscale-6-grey-50); font-weight: 400; }
+/* A set time's clear button sits where the clock icon was. */
+.hol-field-clear {
+  pointer-events: auto;
+  border: none;
+  background: none;
+  padding: 0;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Under the date and time fields: the span in words, or why it's invalid. */
+.hol-span-summary {
+  font: 14px/1.5 Barlow, sans-serif;
+  color: var(--greyscale-2-grey-20);
+  margin: 16px 0 0;
+}
+.hol-span-summary--error { color: var(--rag-red-red-overdue-dark); }
+
 .hol-balance-note {
   font: 16px/1.5 Barlow, sans-serif;
   color: var(--greyscale-2-grey-20);

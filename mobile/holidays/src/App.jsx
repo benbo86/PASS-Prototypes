@@ -18,12 +18,12 @@ import BottomSheet from '../../../Components/BottomSheet'
 import HolidayNotificationBanner from '../../../Components/HolidayNotificationBanner'
 import {
   DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, updateLeaveRequest, withdrawLeaveRequest, resetLeaveRequests,
-  isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement,
+  isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText,
 } from '../../../Components/leaveRequestsStore'
 import {
-  DAYS_LEAVE_TYPES, DAYS_ENTITLEMENT_TOTAL, fmtDays,
-  HOURS_ENTITLEMENT_TOTAL, hoursBetween, fmtHours,
-  spanDays, fmtDate, fmtDateShort, toAppRequest, daysLeaveTypeText,
+  DAYS_ENTITLEMENT_TOTAL, fmtDays,
+  HOURS_ENTITLEMENT_TOTAL, fmtHours,
+  fmtDate, fmtDateShort, toAppRequest,
 } from './data'
 
 // ─── Icons ────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
 // The app can't work out what a request costs: PASS doesn't know which days
 // she works, so counting every day in the range overcharges part-timers.
 // The office sets the amount when approving; until then her card shows
-// only what she asked for (leave type, or times), with no figure.
+// only what she asked for (dates and times), with no figure.
 function hasConfirmedAmount(r) {
   if (r.status === 'Approved' || r.status === 'Awaiting cancellation') return true
   return r.status === 'Cancelled' && r.cancelledFrom !== 'Awaiting Approval'
@@ -329,7 +329,7 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
               <div className="hol-request-duration">
-                {isDays ? r.leaveType : `${r.startTime} - ${r.endTime}`}
+                {requestTimesText(r, ' - ')}
               </div>
               {/* The confirmed amount, on its own labelled line: the office
                   may leave out days she doesn't work, so next to the times
@@ -445,7 +445,9 @@ function LeaveDateFields({ fromDate, toDate, onChange }) {
 
 // ─── Time field on the Request leave form ────────────────────────
 // Opens the iOS-style keypad (the live app uses the platform's own picker).
-function TimeField({ id, label, value, onChange }) {
+// Optional: empty shows the placeholder (start or end of the day), and a
+// set time gets a clear button in place of the clock.
+function TimeField({ id, label, placeholder, value, onChange }) {
   const [open, setOpen] = useState(false)
   // Anchor for IOSTimeKeypadPopover's own positioning.
   const wrapRef = useRef(null)
@@ -453,8 +455,19 @@ function TimeField({ id, label, value, onChange }) {
     <div className="hol-field">
       <label className="hol-field-label" htmlFor={id}>{label}</label>
       <div className="hol-field-input-wrap" ref={wrapRef} onClick={() => setOpen(true)}>
-        <input id={id} type="text" className="hol-field-input" readOnly value={value} />
-        <span className="hol-field-icon"><ClockIcon size={24} /></span>
+        <input id={id} type="text" className="hol-field-input" readOnly value={value} placeholder={placeholder} />
+        {value ? (
+          <button
+            type="button"
+            className="hol-field-icon hol-field-clear"
+            aria-label={`Clear ${label.replace(' (optional)', '').toLowerCase()}`}
+            onClick={e => { e.stopPropagation(); setOpen(false); onChange('') }}
+          >
+            <CloseIcon size={20} />
+          </button>
+        ) : (
+          <span className="hol-field-icon"><ClockIcon size={24} /></span>
+        )}
         {open && (
           <IOSTimeKeypadPopover anchorEl={wrapRef.current} onChange={onChange} onClose={() => setOpen(false)} />
         )}
@@ -463,102 +476,63 @@ function TimeField({ id, label, value, onChange }) {
   )
 }
 
-// ─── Request leave screen — days-scheme employee ─────────────────
-// All day, or part of the day with real times (the same times on each day
-// of the range). Part of the day replaced
-// Half day AM/PM: carers rarely work 9–5, so "AM" didn't say which visits
-// she wants off, and the holiday record the office creates needs times.
-// The office still decides the amount (each part day starts at 0.5).
+// ─── Request leave screen ────────────────────────────────────────
+// The same for both schemes, and the same as the web's add-holiday form:
+// dates, each with an optional time. It's one continuous span (the start
+// time goes with the first date, the end time with the last), so a shift
+// past midnight is just two dates. No times is the whole of each day.
+// Part of the day with the same times on every date was dropped for the
+// first build (AIOP-21555, 28/10/2026): it needed one absence per day.
+// No amount is sent; the office sets it on approval.
 
-function DaysRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
-  const [leaveType, setLeaveType] = useState(DAYS_LEAVE_TYPES[0])
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function fmtWeekday(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${WEEKDAYS[new Date(y, m - 1, d).getDay()]} ${d} ${MONTHS_SHORT[m - 1]}`
+}
+
+// Spells out the span the times make, since "start time" next to a date
+// range could otherwise read as a daily time.
+function spanSummary(fromDate, toDate, startTime, endTime) {
+  if (fromDate === toDate) {
+    if (!startTime && !endTime) return `You'll be off all day on ${fmtWeekday(fromDate)}.`
+    return `You'll be off on ${fmtWeekday(fromDate)} from ${startTime || 'the start of the day'} until ${endTime || 'the end of the day'}.`
+  }
+  const from = startTime ? `${startTime} on ${fmtWeekday(fromDate)}` : `the start of ${fmtWeekday(fromDate)}`
+  const until = endTime ? `${endTime} on ${fmtWeekday(toDate)}` : `the end of ${fmtWeekday(toDate)}`
+  return `You'll be off from ${from} until ${until}.`
+}
+
+function RequestLeaveScreen({ unitWord, available, pendingCount, onBack, onSubmit }) {
   const [fromDate, setFromDate] = useState('2026-11-16')
   const [toDate, setToDate] = useState('2026-11-16')
-  const [startTime, setStartTime] = useState('09:00')
-  const [endTime, setEndTime] = useState('13:00')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
 
-  const isPartDay = leaveType === 'Part of the day'
+  // ISO date + HH:MM strings compare correctly as plain strings.
+  const endsBeforeStart = `${toDate}T${endTime || '23:59'}` <= `${fromDate}T${startTime || '00:00'}`
 
   return (
     <div className="screen">
       <StatusBar />
       <AppHeader title="Request leave" onBack={onBack} />
       <div className="hol-form-body">
-        <BalanceNote available={available} pendingCount={pendingCount} unitWord="days" />
-
-        <div className="hol-form-label">Leave type</div>
-        <div className="hol-pill-row">
-          {DAYS_LEAVE_TYPES.map(type => (
-            <button
-              key={type}
-              type="button"
-              className={`hol-pill${leaveType === type ? ' active' : ''}`}
-              onClick={() => setLeaveType(type)}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
+        <BalanceNote available={available} pendingCount={pendingCount} unitWord={unitWord} />
 
         <div className="hol-field-group">
           <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
-          {isPartDay && (
-            <>
-              <TimeField id="hol-start-time" label="Start time" value={startTime} onChange={setStartTime} />
-              <TimeField id="hol-end-time" label="End time" value={endTime} onChange={setEndTime} />
-            </>
-          )}
+          <TimeField id="hol-start-time" label="Start time (optional)" placeholder="Start of the day" value={startTime} onChange={setStartTime} />
+          <TimeField id="hol-end-time" label="End time (optional)" placeholder="End of the day" value={endTime} onChange={setEndTime} />
+          {endsBeforeStart
+            ? <p className="hol-span-summary hol-span-summary--error">The end must be after the start.</p>
+            : <p className="hol-span-summary">{spanSummary(fromDate, toDate, startTime, endTime)}</p>}
         </div>
 
         <button
           className="fab-square primary-btn hol-submit-btn"
-          disabled={available <= 0}
-          onClick={() => onSubmit(isPartDay
-            ? { fromDate, toDate, amount: 0.5 * spanDays(fromDate, toDate), startTime, endTime, leaveType: 'Part Day' }
-            : { fromDate, toDate, amount: spanDays(fromDate, toDate), leaveType: 'Full Day' })}
-        >
-          Submit request
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ─── Request leave screen — hours-scheme employee ────────────────
-// No Full day/Part day choice — a "day" isn't a meaningful unit for this
-// employee's leave, so they just state real start/end date+time.
-
-// The office table groups requests as Full/Part day as well as showing an
-// hours request's times: more than 4 hours is a full day.
-function hoursLeaveType(startTime, endTime) {
-  return hoursBetween(startTime, endTime) > 4 ? 'Full Day' : 'Part Day'
-}
-
-function HoursRequestLeaveScreen({ available, pendingCount, onBack, onSubmit }) {
-  const [fromDate, setFromDate] = useState('2026-11-16')
-  const [toDate, setToDate] = useState('2026-11-16')
-  const [startTime, setStartTime] = useState('09:00')
-  const [endTime, setEndTime] = useState('17:00')
-
-  const amount = spanDays(fromDate, toDate) * hoursBetween(startTime, endTime)
-
-  return (
-    <div className="screen">
-      <StatusBar />
-      <AppHeader title="Request leave" onBack={onBack} />
-      <div className="hol-form-body">
-        <BalanceNote available={available} pendingCount={pendingCount} unitWord="hours" />
-
-        <div className="hol-field-group">
-          <LeaveDateFields fromDate={fromDate} toDate={toDate} onChange={(from, to) => { setFromDate(from); setToDate(to) }} />
-          <TimeField id="hol-start-time" label="Start time" value={startTime} onChange={setStartTime} />
-          <TimeField id="hol-end-time" label="End time" value={endTime} onChange={setEndTime} />
-        </div>
-
-        <button
-          className="fab-square primary-btn hol-submit-btn"
-          disabled={available <= 0}
-          onClick={() => onSubmit({ fromDate, toDate, amount, startTime, endTime, leaveType: hoursLeaveType(startTime, endTime) })}
+          disabled={available <= 0 || endsBeforeStart}
+          onClick={() => onSubmit({ fromDate, toDate, startTime: startTime || null, endTime: endTime || null, amount: null })}
         >
           Submit request
         </button>
@@ -576,13 +550,10 @@ function RequestSentSheet({ request, onClose }) {
   const dates = request.fromDate === request.toDate
     ? fmtDateShort(request.fromDate)
     : `${fmtDateShort(request.fromDate)} - ${fmtDateShort(request.toDate)}`
-  const hasTimes = isHours || request.leaveType === 'Part Day'
   return (
     <>
       <div className="hol-sheet-title">Request sent</div>
-      <div className="hol-sheet-subtitle">
-        {hasTimes ? `${dates}, ${request.startTime} - ${request.endTime}` : `${daysLeaveTypeText(request)}, ${dates}`}
-      </div>
+      <div className="hol-sheet-subtitle">{dates}, {requestTimesText(request, ' - ')}</div>
       <div className="hol-sheet-body">
         The office will confirm how many {isHours ? 'hours' : 'days'} are taken from your entitlement when they approve your request.
       </div>
@@ -679,9 +650,7 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
           />
         }
         secondary={
-          isDays
-            ? <DaysRequestLeaveScreen available={entitlement.available} pendingCount={pendingCount} onBack={() => setView('list')} onSubmit={handleSubmit} />
-            : <HoursRequestLeaveScreen available={entitlement.available} pendingCount={pendingCount} onBack={() => setView('list')} onSubmit={handleSubmit} />
+          <RequestLeaveScreen unitWord={isDays ? 'days' : 'hours'} available={entitlement.available} pendingCount={pendingCount} onBack={() => setView('list')} onSubmit={handleSubmit} />
         }
       />
       <BottomSheet open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>

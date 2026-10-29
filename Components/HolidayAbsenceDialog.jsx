@@ -168,15 +168,15 @@ export const ABSENCE_TYPES = [
 // visibility aid (not enforced, not necessarily accurate, never something
 // anyone's been asked to maintain for pay purposes), so basing a pay default
 // on it risks implying a link between the two that doesn't really exist.
-// Every day in the range simply starts at a full day; the person adding the
-// holiday adjusts whichever days this employee wouldn't have worked a full
-// day (down to a half day, or 0 for a day not worked at all). A per-day
+// Every day in the range starts blank, as the live dialog's single total
+// field does: the person adding the holiday enters each day's amount (a half
+// day, or 0 for a day not worked at all), and can't continue until every day
+// has one. A per-day
 // number — rather than a plain tick — is what lets a half day still produce
 // its own dated record at the correct fractional amount, instead of forcing
 // a manual override of the total that would have nowhere to say which date
 // it applies to (the whole reason this is per-day in the first place).
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const DEFAULT_DAY_DEDUCTION = 1
 
 function roundDeduction(value) {
   if (Number.isNaN(value)) return 0
@@ -197,11 +197,12 @@ function eachDateInRange(start, end) {
   return days
 }
 
-function buildDayPlan(startDate, endDate, dayDefault = DEFAULT_DAY_DEDUCTION) {
+// deduction is null until entered.
+function buildDayPlan(startDate, endDate) {
   return eachDateInRange(startDate, endDate).map((date) => ({
     date,
     weekday: WEEKDAYS[date.getDay()],
-    deduction: dayDefault,
+    deduction: null,
   }))
 }
 
@@ -230,9 +231,6 @@ export default function HolidayAbsenceDialog({
   // Day-breakdown options, used when approving a holiday request:
   //   unit: 'days' or 'hours' — the employee's holiday scheme; relabels the
   //     breakdown and entitlement summary.
-  //   dayDeductionDefault: what each day starts at — a number, or
-  //     ({ startTime, endTime }) => number so an hours-scheme day follows the
-  //     time window (e.g. 0.5 for a half-day request, 4 for 09:00–13:00).
   //   entitlement: { total, alreadyBooked } for the summary lines; this
   //     holiday is added on top of alreadyBooked.
   // Which visits option ('unassign' or 'keep') starts selected on the
@@ -242,7 +240,6 @@ export default function HolidayAbsenceDialog({
   primaryLabel = 'Add absence',
   confirmLabel = 'Confirm',
   unit = 'days',
-  dayDeductionDefault = DEFAULT_DAY_DEDUCTION,
   entitlement = { total: 28, alreadyBooked: 0 },
   // Optional free-text note, e.g. approving a request with a message for
   // the employee: { label, placeholder }. Returned as `note` on confirm.
@@ -260,7 +257,7 @@ export default function HolidayAbsenceDialog({
   const [option,      setOption]      = useState(defaultVisitsOption)
   const [note,        setNote]        = useState('')
 
-  // Recomputed whenever the date range changes — every day starts ticked,
+  // Recomputed whenever the date range changes — every day starts blank,
   // with no per-employee difference (see the module comment above for why).
   // A fresh date range always starts from that default rather than carrying
   // forward manual adjustments made against a different range. Exclude
@@ -268,24 +265,21 @@ export default function HolidayAbsenceDialog({
   // whatever's currently in the table, not a sticky setting, so a new range
   // shouldn't silently claim to still be "excluding weekends" against days
   // it's never actually been applied to.
-  const dayDefault = typeof dayDeductionDefault === 'function'
-    ? dayDeductionDefault({ startTime, endTime })
-    : dayDeductionDefault
-  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate, dayDefault) : []))
+  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate) : []))
   const [excludeWeekends, setExcludeWeekends] = useState(false)
   useEffect(() => {
     if (!showDayBreakdown) return
-    setDayPlan(buildDayPlan(startDate, endDate, dayDefault))
+    setDayPlan(buildDayPlan(startDate, endDate))
     setExcludeWeekends(false)
-  }, [showDayBreakdown, startDate, endDate, dayDefault])
+  }, [showDayBreakdown, startDate, endDate])
 
   const updateDayDeduction = (idx, rawValue) => {
-    const value = roundDeduction(parseFloat(rawValue))
+    const value = rawValue === '' ? null : roundDeduction(parseFloat(rawValue))
     setDayPlan((prev) => prev.map((d, i) => (i === idx ? { ...d, deduction: value } : d)))
   }
 
-  // A bulk action, not a persistent filter — toggling it off restores every
-  // weekend row to a full day regardless of what it held before, same as
+  // A bulk action, not a persistent filter — toggling it off clears every
+  // weekend row back to blank regardless of what it held before, same as
   // toggling it on zeroes every weekend row regardless of any prior manual
   // edit. Simpler and more predictable than trying to remember/protect
   // hand-edited weekend values across the toggle.
@@ -294,12 +288,13 @@ export default function HolidayAbsenceDialog({
     setExcludeWeekends(next)
     setDayPlan((prev) => prev.map((d) => (
       d.weekday === 'Sat' || d.weekday === 'Sun'
-        ? { ...d, deduction: next ? 0 : dayDefault }
+        ? { ...d, deduction: next ? 0 : null }
         : d
     )))
   }
 
-  const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + d.deduction, 0)
+  const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + (d.deduction ?? 0), 0)
+  const hasBlankDay = showDayBreakdown && dayPlan.some((d) => d.deduction === null)
   const effectiveDaysDeducted = showDayBreakdown ? computedDaysDeducted : daysDeducted
   const unitWord = unit === 'hours' ? 'Hours' : 'Days'
   const unitShort = unit === 'hours' ? 'hrs' : 'days'
@@ -423,7 +418,7 @@ export default function HolidayAbsenceDialog({
           {showDayBreakdown && (
             <div className="field">
               <label>Which days will be paid?</label>
-              <div className="day-plan-hint">Every day is included by default</div>
+              <div className="day-plan-hint">Enter the amount for each day, or 0 for a day not worked</div>
               <div className="day-plan-list">
                 <div className="day-plan-row day-plan-header">
                   <span className="day-plan-header-date-cell">
@@ -447,7 +442,7 @@ export default function HolidayAbsenceDialog({
                       type="number"
                       className="day-plan-deduction-input"
                       step={0.01}
-                      value={d.deduction}
+                      value={d.deduction ?? ''}
                       onChange={(e) => updateDayDeduction(i, e.target.value)}
                       onFocus={(e) => e.target.select()}
                       onMouseUp={(e) => e.preventDefault()}
@@ -486,7 +481,7 @@ export default function HolidayAbsenceDialog({
           )}
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={isOverEntitlement}>{primaryLabel}</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={isOverEntitlement || hasBlankDay}>{primaryLabel}</button>
           </div>
         </div>
       )}

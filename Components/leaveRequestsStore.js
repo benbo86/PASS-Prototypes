@@ -15,7 +15,7 @@
 // wording (Awaiting approval…) when it reads them — see mobile/holidays/src/data.js.
 import { useSyncExternalStore } from 'react'
 
-const REQUESTS_KEY = 'pass-demo-leave-requests-v9'
+const REQUESTS_KEY = 'pass-demo-leave-requests-v10'
 const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v3'
 const SCHEME_KEY = 'pass-demo-holiday-scheme'
 const CHANGE_EVENT = 'pass-demo-leave-requests-change'
@@ -45,26 +45,49 @@ const SEED_SHAPES = [
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: 'Employee requested different dates', actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation' },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
 ]
-// Request 2 is part of a day (09:00–13:00); the rest are full days.
+// A request is one continuous span, as on the web's add-holiday form: the
+// start time goes with the first date and the end time with the last, and
+// either can be left out (the start or end of that day). Request 2 is
+// 09:00–13:00 on one day; the rest are whole days, except the hours
+// scheme's request 1, an overnight shift (20:00 to 08:00 the next day).
 const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1 }
 const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
   const halfDay = n === 2
   return [
     {
-      ...s, id: `days-${n}`, contract: 'days', leaveType: halfDay ? 'Part Day' : 'Full Day',
+      ...s, id: `days-${n}`, contract: 'days',
       ...(halfDay ? { startTime: '09:00', endTime: '13:00' } : {}),
       amount: workedDays ?? DAYS_AMOUNTS[n],
     },
-    {
-      ...s, id: `hours-${n}`, contract: 'hours', leaveType: halfDay ? 'Part Day' : 'Full Day',
-      startTime: '09:00', endTime: halfDay ? '13:00' : '17:00',
-      amount: (workedDays ?? spanDays(s.fromDate, s.toDate)) * (halfDay ? 4 : 8),
-    },
+    n === 1
+      ? { ...s, id: 'hours-1', contract: 'hours', toDate: '2026-11-03', startTime: '20:00', endTime: '08:00', amount: 12 }
+      : {
+        ...s, id: `hours-${n}`, contract: 'hours',
+        ...(halfDay ? { startTime: '09:00', endTime: '13:00' } : {}),
+        amount: (workedDays ?? spanDays(s.fromDate, s.toDate)) * (halfDay ? 4 : 8),
+      },
   ]
-}).map(r => ({ reason: null, actionedBy: null, actionedAt: null, ...r, employee: DEMO_EMPLOYEE }))
+}).map(r => ({ startTime: null, endTime: null, reason: null, actionedBy: null, actionedAt: null, ...r, employee: DEMO_EMPLOYEE }))
 
 export function spanDays(fromIso, toIso) {
   return Math.max(1, Math.round((new Date(toIso) - new Date(fromIso)) / 86400000) + 1)
+}
+
+// A request's times in words, for the line under its dates (web table, app
+// card). No times is "All day". Approving fills in 00:00 / 23:59 for a
+// missing time, which reads the same as no time, so it's never shown.
+// A request spanning several days names the day each time goes with.
+export function requestTimesText(r, sep = ' – ') {
+  const start = r.startTime && r.startTime !== '00:00' ? r.startTime : null
+  const end = r.endTime && r.endTime !== '23:59' ? r.endTime : null
+  if (!start && !end) return 'All day'
+  if (r.fromDate === r.toDate) {
+    if (start && end) return `${start}${sep}${end}`
+    return start ? `From ${start}` : `Until ${end}`
+  }
+  const day = iso => { const [, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]}` }
+  if (start && end) return `${start} on ${day(r.fromDate)}${sep}${end} on ${day(r.toDate)}`
+  return start ? `From ${start} on ${day(r.fromDate)}` : `Until ${end} on ${day(r.toDate)}`
 }
 
 // ── Notifications ──────────────────────────────────────────────────
@@ -256,7 +279,7 @@ export function useEntitlement(contract, total) {
   let booked = 0, taken = 0, pending = 0
   for (const r of requests) {
     if (r.contract !== contract) continue
-    if (r.status === 'Awaiting Approval') { pending += r.amount; continue }
+    if (r.status === 'Awaiting Approval') { pending += r.amount ?? 0; continue }
     if (r.status !== 'Approved' && r.status !== 'Awaiting Cancellation') continue
     if (r.toDate < today) taken += r.amount
     else booked += r.amount

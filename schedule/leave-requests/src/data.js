@@ -21,7 +21,6 @@ export const EMPLOYEE_NAMES = [
 // state.
 const OFFICE_USERS = ['Alex Morgan', 'Priya Shah', 'Grace Okafor'];
 
-export const LEAVE_TYPES = ['Full Day', 'Part Day'];
 // 'Declined' and 'Cancelled' are deliberately distinct terminal states, not
 // one status doing double duty — see AIOP-21555/21563 comparison, 2026-08-21
 // (memory: project_leave_requests_prototype). 'Declined' is the office's own
@@ -103,18 +102,6 @@ const DECLINE_REASONS = [
   'Dates clash with existing scheduled visits',
 ];
 
-// A days-scheme "all day" request mapped onto start/end times — feeds
-// HolidayAbsenceDialog's own time-picker fields when a request is approved
-// (see LeaveRequests.jsx). Midnight to midnight: PASS doesn't reliably know
-// her working hours, and the whole day catches every visit on it. The
-// office can still change the times in the dialog. Hours-scheme requests
-// always carry their own times.
-export function leaveTypeTimes(leaveType) {
-  const t = (h, m = 0) => new Date(2026, 0, 1, h, m);
-  // A part day always carries its own times, so only a full day gets here.
-  return [t(0), t(23, 59)];
-}
-
 // Deterministic pseudo-random generator, matching the established pattern in
 // gross-pay-advice/holiday-deduction/src/data.js and invoices/list/src/data.js.
 let _s = 4471;
@@ -141,11 +128,11 @@ function buildRequests() {
   for (let i = 0; i < REQUEST_COUNT; i++) {
     const employee = pick(EMPLOYEE_NAMES);
     const contract = EMPLOYEE_CONTRACTS[employee];
-    // Picked from three so the seeded data doesn't reshuffle; a part day
-    // keeps the morning/afternoon times it used to have as a half day.
+    // Picked from three so the seeded data doesn't reshuffle. A request is
+    // dates with optional times (one continuous span); a morning or
+    // afternoon off is a single date with times. An hours-scheme full day
+    // is a standard 09:00–17:00 (matching its 8 hrs).
     const period = pick(['Full Day', 'AM', 'PM']);
-    const leaveType = period === 'Full Day' ? 'Full Day' : 'Part Day';
-    // An hours-scheme full day is a standard 09:00–17:00 (matching its 8 hrs).
     const [startTime, endTime] = period === 'AM' ? ['09:00', '13:00']
       : period === 'PM' ? ['13:00', '17:00']
       : contract.unit === 'hours' ? ['09:00', '17:00'] : [null, null];
@@ -154,7 +141,7 @@ function buildRequests() {
     const fromDate = new Date(2026, month, startDay);
 
     let toDate, amount;
-    if (leaveType === 'Full Day') {
+    if (period === 'Full Day') {
       // Hourly employees get a narrower, smaller span pool — the point
       // was more examples reading as "obviously part of a day or a day"
       // (4/8 hours), not large multi-week hour totals that are technically
@@ -166,7 +153,7 @@ function buildRequests() {
       // rather than an arbitrary per-employee hourly rate.
       amount = contract.unit === 'hours' ? span * 8 : span;
     } else {
-      toDate = fromDate; // the demo's part-day requests are single dates
+      toDate = fromDate;
       amount = contract.unit === 'hours' ? 4 : 0.5;
     }
 
@@ -195,7 +182,6 @@ function buildRequests() {
     requests.push({
       id: i + 1,
       employee,
-      leaveType,
       startTime,
       endTime,
       fromDate,
