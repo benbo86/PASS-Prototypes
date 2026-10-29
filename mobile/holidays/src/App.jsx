@@ -252,7 +252,9 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
       <div className="hol-list-scroll">
         <div className="hol-stats-grid">
           <div className="hol-stat-card">
-            <div className="hol-stat-label">Total entitlement</div>
+            {/* "Entitlement", as on the employee contract: on a pro-rata
+                scheme it's what's accrued so far, so "Total" would mislead. */}
+            <div className="hol-stat-label">Entitlement</div>
             <div className="hol-stat-value">{entitlement.total} {unitLabel}</div>
           </div>
           <div className="hol-stat-card">
