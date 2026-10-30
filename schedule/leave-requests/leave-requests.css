@@ -107,9 +107,8 @@ body { background: #fff; min-height: 100vh; }
   overflow: hidden;
 }
 
-/* Shared by both terminal-with-a-reason statuses (Declined, Cancelled) —
-   same truncate-with-tooltip treatment either way, just a different
-   leading word (see LeaveRequests.jsx). */
+/* The one-line note in the Notes column, truncated, with the full
+   history in a popover (see LeaveRequests.jsx). */
 .lr-cancelled-note {
   display: inline-block; max-width: 100%;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

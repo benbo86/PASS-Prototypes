@@ -160,8 +160,9 @@ function fmtAmount(row) {
 // ─── Notes ──────────────────────────────────────────────────────────────────
 // A request can collect several notes: the office's note when approving,
 // her reason for asking to cancel (AIOP-25140), then the office's reason
-// for keeping or cancelling it. The Actions cell shows only the one that
-// matters now; the popover lists them all, newest first.
+// for keeping or cancelling it. The Notes cell shows only the one that
+// matters now; the popover lists them all, newest first. Declined and
+// Cancelled reasons have no prefix, as the Status pill already says it.
 
 // [{ text, meta, at }] newest first. `text` may be null (no note given).
 function requestHistory(row) {
@@ -190,9 +191,9 @@ function noteLine(row) {
       if (row.cancellationKept) return row.keptReason ? `Kept — ${row.keptReason}` : 'Cancellation not approved';
       return row.approvalNote || null;
     case 'Declined':
-      return `Declined — ${row.reason}`;
+      return row.reason;
     case 'Cancelled':
-      if (row.reason) return `Cancelled — ${row.reason}`;
+      if (row.reason) return row.reason;
       return row.cancelledFrom === 'Awaiting Cancellation' ? "Cancelled at employee's request" : 'Cancelled';
     default:
       return null;
