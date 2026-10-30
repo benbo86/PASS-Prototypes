@@ -214,6 +214,23 @@
   margin-bottom: 4px;
 }
 .hol-request-date svg { color: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
+/* The dates she asked for, when the office approved different ones.
+   Indented to line up with the date text (15px icon + 6px gap). */
+.hol-request-date-was {
+  display: block;
+  padding-left: 21px;
+  margin-bottom: 4px;
+  font: 13px Barlow, sans-serif;
+  color: var(--greyscale-6-grey-50);
+  text-decoration: line-through;
+}
+.hol-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .hol-request-duration { font: 14px Barlow, sans-serif; color: #333; margin-bottom: 4px; }
 /* Only ever rendered on a Declined card — reuses the same red text colour
    as .hol-request-status--declined's own pill for a consistent "this is

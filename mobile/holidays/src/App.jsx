@@ -339,6 +339,16 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 <CalendarIcon size={15} />
                 {fmtDateRangeLabel(r.fromDate, r.toDate)}
               </div>
+              {/* Approved for different dates: what she asked for, struck
+                  through under the approved dates. The hidden label keeps
+                  the meaning for screen readers, which don't read
+                  strikethrough. */}
+              {r.status === 'Approved' && r.requestedFrom && (
+                <del className="hol-request-date-was">
+                  <span className="hol-visually-hidden">Requested dates: </span>
+                  {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}
+                </del>
+              )}
               <div className="hol-request-duration">
                 {requestTimesText(r, ' - ')}
               </div>
@@ -347,9 +357,6 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   it would look like a sum that doesn't add up. */}
               {hasConfirmedAmount(r) && r.status !== 'Cancelled' && (
                 <div className="hol-request-note"><span className="hol-request-label">From entitlement:</span> {fmtAmount(r.amount)}</div>
-              )}
-              {r.status === 'Approved' && r.requestedFrom && (
-                <div className="hol-request-note"><span className="hol-request-label">Requested dates:</span> {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}</div>
               )}
               {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
                 <div className="hol-request-note"><span className="hol-request-label">Office note:</span> {r.approvalNote}</div>
