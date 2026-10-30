@@ -3461,6 +3461,20 @@
       "usageCount": 1
     },
     {
+      "hash": "998dd08e",
+      "name": "Chevron Down",
+      "group": "Inline",
+      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M6 9l6 6 6-6\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/ResearchLink.jsx#ChevronDownIcon",
+          "name": "ChevronDownIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "d653ae83",
       "name": "Funder",
       "group": "Inline",
@@ -5169,5 +5183,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-10-29T15:03:29.873Z"
+  "generatedAt": "2026-10-30T12:44:13.818Z"
 }

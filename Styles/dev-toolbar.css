@@ -145,9 +145,61 @@
 .anc-crumb-more { color: rgba(255, 255, 255, 0.5); }
 
 /* Research (Components/ResearchLink.jsx) — links this prototype's research
-   pages (Components/researchLinks.js). A link, not a mode, so no .active
-   state except while its menu is open. */
-.dev-toolbar-icon-btn.research-link { text-decoration: none; }
+   pages (Components/researchLinks.js). A link to read, not a tool: at the
+   far left of the web bar (margin-right:auto pushes the tools right), and
+   first in the mobile pill with a divider after it. Labelled, unlike the
+   tool icons. No .active state except while its menu is open. */
+.dev-toolbar-start {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+}
+.dev-toolbar-text-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.dev-toolbar-text-btn:hover,
+.dev-toolbar-text-btn.active { background: rgba(255, 255, 255, 0.12); }
+/* Mobile: its own pill at the top left, mirroring the tools' pill at the
+   top right (.dev-toolbar-floating). Still inside the toolbar's element, so
+   the tools' [data-devtoolbar-ui] click exemption covers it. Empty (no
+   research) → hidden, so no stray black pill. */
+.dev-toolbar-floating .dev-toolbar-start {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  height: var(--dev-toolbar-height);
+  padding: 0 8px;
+  border-radius: 8px;
+  background: #000;
+  margin-right: 0;
+}
+.dev-toolbar-floating .dev-toolbar-start:empty { display: none; }
+.research-link-wrap {
+  position: relative;
+  margin-right: 8px;
+}
+.dev-toolbar-floating .dev-toolbar-items > .research-link::after,
+.dev-toolbar-floating .research-link-wrap::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: -6px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
 .research-link-wrap {
   position: relative;
   display: flex;
@@ -155,7 +207,7 @@
 .research-menu {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   margin-top: 8px;
   min-width: 240px;
   padding: 4px;

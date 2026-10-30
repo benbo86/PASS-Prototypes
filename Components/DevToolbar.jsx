@@ -64,11 +64,12 @@ export default function DevToolbar({ children, floating = false }) {
 
   return (
     <div className={`dev-toolbar${floating ? ' dev-toolbar-floating' : ''}`} data-devtoolbar-ui="true">
+      {/* Not wired per prototype: shows itself only where researchLinks.js
+          lists research for this page. Kept apart from the tools: far left
+          of the web bar, or its own pill at the top left on mobile. */}
+      <div className="dev-toolbar-start"><ResearchLink /></div>
       <div className="dev-toolbar-items">
         {children}
-        {/* Not wired per prototype: shows itself only where
-            researchLinks.js lists research for this page. */}
-        <ResearchLink />
       </div>
       {authUser && (
         <button className="dev-toolbar-signout" onClick={() => announceSignOutRequest()}>

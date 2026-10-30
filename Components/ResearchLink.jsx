@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import Tooltip from './Tooltip'
 import { researchForCurrentPage, researchHref } from './researchLinks'
 
 const ResearchIcon = () => (
@@ -11,10 +10,18 @@ const ResearchIcon = () => (
   </svg>
 )
 
-// Dev toolbar button linking to this prototype's research pages (see
+const ChevronDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+)
+
+// Dev toolbar link to this prototype's research pages (see
 // researchLinks.js). Rendered by DevToolbar itself, so prototypes don't
-// wire it. Hidden when the page has no research. One page opens directly
-// in a new tab; several open a small menu.
+// wire it: at the far left of the web bar, kept apart from the tools as
+// it's something to read rather than a mode, and labelled, since an icon
+// alone was easy to miss. Hidden when the page has no research. One page
+// opens directly in a new tab; several open a small menu.
 export default function ResearchLink() {
   const links = researchForCurrentPage()
   const [open, setOpen] = useState(false)
@@ -36,21 +43,20 @@ export default function ResearchLink() {
 
   if (links.length === 1) {
     return (
-      <Tooltip text={`Research — ${links[0].title}`} placement="bottom">
-        <a className="dev-toolbar-icon-btn research-link" href={researchHref(links[0])} target="_blank" rel="noreferrer" aria-label="Research">
-          <ResearchIcon />
-        </a>
-      </Tooltip>
+      <a className="dev-toolbar-text-btn research-link" href={researchHref(links[0])} target="_blank" rel="noreferrer">
+        <ResearchIcon />
+        Research
+      </a>
     )
   }
 
   return (
     <div className="research-link-wrap" ref={wrapRef}>
-      <Tooltip text="Research" placement="bottom">
-        <button type="button" className={`dev-toolbar-icon-btn research-link${open ? ' active' : ''}`} onClick={() => setOpen(o => !o)} aria-label="Research">
-          <ResearchIcon />
-        </button>
-      </Tooltip>
+      <button type="button" className={`dev-toolbar-text-btn research-link${open ? ' active' : ''}`} onClick={() => setOpen(o => !o)} aria-expanded={open}>
+        <ResearchIcon />
+        Research
+        <ChevronDownIcon />
+      </button>
       {open && (
         <div className="research-menu">
           {links.map(link => (
