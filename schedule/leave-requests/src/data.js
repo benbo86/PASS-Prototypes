@@ -92,6 +92,16 @@ const CANCELLATION_REASONS = [
   'Submitted in error',
 ];
 
+// The employee's own (optional) reason when asking the office to cancel an
+// approved holiday (AIOP-25140). Indexed by row, not rnd(), so adding these
+// doesn't reshuffle the rest of the generated data. A null shows a request
+// with no reason given.
+const CANCELLATION_REQUEST_REASONS = [
+  "Family emergency, I need to be at home that week.",
+  null,
+  "My partner's leave was refused, so we can't go away now.",
+];
+
 // Distinct pool from CANCELLATION_REASONS above — a decline is the office's
 // own initial rejection of a request (worded from that perspective), not a
 // withdrawal of something already agreed.
@@ -179,6 +189,16 @@ function buildRequests() {
       actionedAt.setHours(btw(8, 17), pick([0, 15, 30, 45]), 0, 0);
     }
 
+    // Awaiting Cancellation: when she asked, and why (optional). actionedBy/At
+    // above is still the approval, so it's also the approval stamp.
+    let cancellationRequestedAt = null, cancellationReason = null;
+    if (status === 'Awaiting Cancellation') {
+      cancellationRequestedAt = new Date(actionedAt.getTime() + (2 + i % 5) * 86400000);
+      cancellationRequestedAt.setHours(18, 30, 0, 0);
+      cancellationReason = CANCELLATION_REQUEST_REASONS[i % CANCELLATION_REQUEST_REASONS.length];
+    }
+    const approved = status === 'Approved' || status === 'Awaiting Cancellation';
+
     requests.push({
       id: i + 1,
       employee,
@@ -193,6 +213,10 @@ function buildRequests() {
       reason,
       actionedBy,
       actionedAt,
+      approvedBy: approved ? actionedBy : null,
+      approvedAt: approved ? actionedAt : null,
+      cancellationRequestedAt,
+      cancellationReason,
     });
   }
   return requests;

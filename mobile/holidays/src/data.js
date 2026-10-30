@@ -39,6 +39,8 @@ export function toAppRequest(r) {
     // She asked to cancel and the office kept the holiday.
     cancellationKept: !!r.cancellationKept,
     keptReason: r.keptReason || null,
+    // Her own reason for asking to cancel, if she gave one.
+    cancellationReason: r.cancellationReason || null,
     // Optional message from the office when it approved.
     approvalNote: r.approvalNote || null,
     // The office's status when it was cancelled (see recordOfficeDecision).

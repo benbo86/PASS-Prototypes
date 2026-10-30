@@ -95,9 +95,10 @@ const STRING_SORT_COLS = ['leaveTypeLabel', 'status'];
 const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
 const NUM_SORT_COLS = ['amount'];
 
-// 8 columns: Employee, Time, From Date, To Date, Amount,
-// Status, Submitted, Actions.
-const RAW_COL_WIDTHS = [150, 150, 100, 100, 120, 150, 110, 150];
+// 9 columns: Employee, Time, From Date, To Date, Amount,
+// Status, Submitted, Notes, Actions. Notes holds the reasons and notes on a
+// request, so Actions is just the menu.
+const RAW_COL_WIDTHS = [150, 120, 95, 95, 105, 175, 125, 215, 80];
 
 // Amount is in days for most employees, but hours for an employee on an
 // hourly/zero-hours contract (see data.js's own EMPLOYEE_CONTRACTS) —
@@ -134,6 +135,8 @@ function toLinkedRow(r) {
     unit: r.contract === 'hours' ? 'hours' : 'days',
     submitted: new Date(r.submitted),
     actionedAt: r.actionedAt ? new Date(r.actionedAt) : null,
+    approvedAt: r.approvedAt ? new Date(r.approvedAt) : null,
+    cancellationRequestedAt: r.cancellationRequestedAt ? new Date(r.cancellationRequestedAt) : null,
     withdrawnAt: r.withdrawnAt ? new Date(r.withdrawnAt) : null,
   });
 }
@@ -154,13 +157,80 @@ function fmtAmount(row) {
   return row.unit === 'hours' ? `${row.amount} hrs` : `${row.amount} ${row.amount === 1 ? 'day' : 'days'}`;
 }
 
+// ─── Notes ──────────────────────────────────────────────────────────────────
+// A request can collect several notes: the office's note when approving,
+// her reason for asking to cancel (AIOP-25140), then the office's reason
+// for keeping or cancelling it. The Actions cell shows only the one that
+// matters now; the popover lists them all, newest first.
+
+// [{ text, meta, at }] newest first. `text` may be null (no note given).
+function requestHistory(row) {
+  const entries = [];
+  if (row.approvedBy && row.approvedAt) {
+    entries.push({ text: row.approvalNote || null, meta: `Approved by ${row.approvedBy} on ${fmtDT(row.approvedAt)}`, at: row.approvedAt });
+  }
+  if (row.cancellationRequestedAt) {
+    entries.push({ text: row.cancellationReason || null, meta: `Cancellation requested by employee on ${fmtDT(row.cancellationRequestedAt)}`, at: row.cancellationRequestedAt });
+  }
+  if (row.cancellationKept && row.status === 'Approved' && row.actionedAt) {
+    entries.push({ text: row.keptReason || null, meta: `Holiday kept by ${row.actionedBy} on ${fmtDT(row.actionedAt)}`, at: row.actionedAt });
+  }
+  if ((row.status === 'Declined' || row.status === 'Cancelled') && row.actionedAt) {
+    entries.push({ text: row.reason || null, meta: `${row.status} by ${row.actionedBy} on ${fmtDT(row.actionedAt)}`, at: row.actionedAt });
+  }
+  return entries.sort((a, b) => b.at.getTime() - a.at.getTime());
+}
+
+// The single line shown in the Actions cell, or null for none.
+function noteLine(row) {
+  switch (row.status) {
+    case 'Awaiting Cancellation':
+      return row.cancellationReason ? `Employee — ${row.cancellationReason}` : 'Cancellation requested by employee';
+    case 'Approved':
+      if (row.cancellationKept) return row.keptReason ? `Kept — ${row.keptReason}` : 'Cancellation not approved';
+      return row.approvalNote || null;
+    case 'Declined':
+      return `Declined — ${row.reason}`;
+    case 'Cancelled':
+      if (row.reason) return `Cancelled — ${row.reason}`;
+      return row.cancelledFrom === 'Awaiting Cancellation' ? "Cancelled at employee's request" : 'Cancelled';
+    default:
+      return null;
+  }
+}
+
+function RequestNote({ row }) {
+  const line = noteLine(row);
+  if (!line) return null;
+  const history = requestHistory(row);
+  const note = <span className="lr-cancelled-note">{line}</span>;
+  if (!history.length) return note;
+  return (
+    <Tooltip
+      wrapClassName="lr-cancelled-tooltip-wrap lr-audit-popover"
+      text={history.map((e, i) => (
+        <div key={i} className="lr-popover-entry">
+          {e.text && <div className="lr-popover-reason">{e.text}</div>}
+          <div className="lr-popover-meta">{e.meta}</div>
+        </div>
+      ))}
+    >
+      {note}
+    </Tooltip>
+  );
+}
+
 // Copy for the shared reason dialog. Decline and Cancel need a reason; Keep
 // holiday's is optional (the holiday simply stands).
 const ACTION_COPY = {
   decline: { title: 'Decline holiday request', label: 'Decline reason', placeholder: 'Explain why this holiday request is being declined', confirm: 'Confirm decline' },
   cancel: { title: 'Cancel holiday request', label: 'Cancellation reason', placeholder: 'Explain why this holiday request is being cancelled', confirm: 'Confirm cancellation' },
   keep: { title: 'Keep holiday', label: 'Reason (optional)', placeholder: 'Explain why the cancellation isn\'t being approved', confirm: 'Keep holiday' },
+  // Cancelling a holiday she asked to cancel: she may already have said
+  // why, so the office's reason is optional.
+  cancelRequested: { title: 'Cancel holiday request', label: 'Note for the employee (optional)', placeholder: 'Add a note for the employee', confirm: 'Confirm cancellation' },
 };
+const OPTIONAL_REASON_MODES = new Set(['keep', 'cancelRequested']);
 
 function confirmResetLeaveRequests() {
   if (window.confirm('Reset all holiday requests (here and on the mobile app) to the starting examples?')) resetLeaveRequests();
@@ -193,8 +263,9 @@ export default function LeaveRequests() {
       setLocalRows(prev => prev.map(r => r.id === row.id ? withLeaveTypeLabel({
         ...r,
         ...rest,
-        ...(approved ? { approvalNote: note || null } : {}),
-        ...(kept ? { reason: r.reason } : {}),
+        ...(approved ? { approvalNote: note || null, approvedBy: rest.actionedBy, approvedAt: rest.actionedAt } : {}),
+        ...(kept ? { reason: r.reason, keptReason: rest.reason, cancellationKept: true } : {}),
+        ...(rest.status === 'Cancelled' ? { cancelledFrom: r.status } : {}),
         ...(approved ? {
           fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
           amount: approved.amount, startTime: approved.startTime, endTime: approved.endTime,
@@ -251,7 +322,7 @@ export default function LeaveRequests() {
   // block. See STATUSES' own comment in data.js for why these are two
   // distinct terminal states, not one.
   const [actionRow, setActionRow] = useState(null);
-  const [actionMode, setActionMode] = useState('cancel'); // 'decline' | 'cancel'
+  const [actionMode, setActionMode] = useState('cancel'); // 'decline' | 'cancel' | 'cancelRequested' | 'keep'
   const [actionReason, setActionReason] = useState('');
 
   const {
@@ -380,9 +451,9 @@ export default function LeaveRequests() {
       closeActionDialog();
       return;
     }
-    if (!reason) return;
+    if (!reason && !OPTIONAL_REASON_MODES.has(actionMode)) return;
     const nextStatus = actionMode === 'decline' ? 'Declined' : 'Cancelled';
-    updateRow(actionRow, { status: nextStatus, reason, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
+    updateRow(actionRow, { status: nextStatus, reason: reason || null, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date() });
     closeActionDialog();
   };
 
@@ -565,6 +636,11 @@ export default function LeaveRequests() {
                   <ColResizeHandle onDrag={dx => resizeColumn(6, dx)} />
                 </th>
 
+                <th>
+                  <ColLabel>Notes</ColLabel>
+                  <ColResizeHandle onDrag={dx => resizeColumn(7, dx)} />
+                </th>
+
                 <th><span>Actions</span></th>
               </tr>
             </thead>
@@ -578,6 +654,16 @@ export default function LeaveRequests() {
                   <td className="td-num">{fmtAmount(row)}</td>
                   <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
                   <td className="nowrap">{fmtDTShort(row.submitted)}</td>
+                  {/* One line: the note that matters for the row's status
+                      now. Hover for every note on the request (approval,
+                      her cancellation reason, the office's decision). */}
+                  <td>
+                    {row.status === 'Withdrawn' ? (
+                      <span className="lr-cancelled-note">
+                        Withdrawn by employee{row.withdrawnAt ? ` on ${fmtD(row.withdrawnAt)}` : ''}
+                      </span>
+                    ) : <RequestNote row={row} />}
+                  </td>
                   <td>
                     {row.status === 'Awaiting Approval' && (
                       <span className="lr-actions">
@@ -604,56 +690,17 @@ export default function LeaveRequests() {
                       <span className="lr-actions">
                         <RowActionsMenu
                           items={[
-                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel') },
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancelRequested') },
                             { label: 'Keep holiday', onClick: () => openActionDialog(row, 'keep') },
                           ]}
                         />
                       </span>
                     )}
-                    {/* The note sent to her when approving, kept as the
-                        office's record of why (OakShed, 29/10/2026). An
-                        Awaiting Cancellation row is still the approved
-                        holiday, so it keeps the note too. */}
-                    {(row.status === 'Approved' || row.status === 'Awaiting Cancellation') && row.approvalNote && (
-                      <div className="lr-approval-note">
-                        <Tooltip
-                          wrapClassName="lr-cancelled-tooltip-wrap lr-audit-popover"
-                          text={
-                            <>
-                              <div className="lr-popover-reason">{row.approvalNote}</div>
-                              <div className="lr-popover-meta">Approved by {row.actionedBy} on {fmtDT(row.actionedAt)}</div>
-                            </>
-                          }
-                        >
-                          <span className="lr-cancelled-note">Note — {row.approvalNote}</span>
-                        </Tooltip>
-                      </div>
-                    )}
-                    {row.status === 'Withdrawn' && (
-                      <span className="lr-cancelled-note">
-                        Withdrawn by employee{row.withdrawnAt ? ` on ${fmtD(row.withdrawnAt)}` : ''}
-                      </span>
-                    )}
-                    {(row.status === 'Declined' || row.status === 'Cancelled') && (
-                      <Tooltip
-                        wrapClassName="lr-cancelled-tooltip-wrap lr-audit-popover"
-                        text={
-                          <>
-                            <div className="lr-popover-reason">{row.reason}</div>
-                            <div className="lr-popover-meta">{row.status} by {row.actionedBy} on {fmtDT(row.actionedAt)}</div>
-                          </>
-                        }
-                      >
-                        <span className="lr-cancelled-note">
-                          {row.status} — {row.reason}
-                        </span>
-                      </Tooltip>
-                    )}
                   </td>
                 </tr>
               ))}
               {totalRows === 0 && (
-                <tr><td colSpan={8} className="table-empty">No holiday requests match the current filters</td></tr>
+                <tr><td colSpan={9} className="table-empty">No holiday requests match the current filters</td></tr>
               )}
             </tbody>
           </table>
@@ -710,6 +757,9 @@ export default function LeaveRequests() {
             {hasConfirmedAmount(actionRow) && (
               <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours booked' : 'Days booked'}</span><span>{actionRow.amount}</span></div>
             )}
+            {actionRow.status === 'Awaiting Cancellation' && (
+              <div><span className="lr-cancel-label">Employee's reason</span><span>{actionRow.cancellationReason || 'None given'}</span></div>
+            )}
           </div>
           <div className="field">
             <label htmlFor="action-reason">{ACTION_COPY[actionMode].label}</label>
@@ -723,7 +773,7 @@ export default function LeaveRequests() {
           </div>
           <div className="btn-row">
             <button className="round-btn tertiary-btn" onClick={closeActionDialog}>Cancel</button>
-            <button className="round-btn primary-btn" disabled={actionMode !== 'keep' && !actionReason.trim()} onClick={handleActionConfirm}>
+            <button className="round-btn primary-btn" disabled={!OPTIONAL_REASON_MODES.has(actionMode) && !actionReason.trim()} onClick={handleActionConfirm}>
               {ACTION_COPY[actionMode].confirm}
             </button>
           </div>

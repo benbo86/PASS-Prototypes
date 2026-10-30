@@ -17,7 +17,7 @@ import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/mess
 import BottomSheet from '../../../Components/BottomSheet'
 import HolidayNotificationBanner from '../../../Components/HolidayNotificationBanner'
 import {
-  DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, updateLeaveRequest, withdrawLeaveRequest, resetLeaveRequests,
+  DEMO_EMPLOYEE, useLeaveRequests, addLeaveRequest, requestCancellation, withdrawLeaveRequest, resetLeaveRequests,
   isUnseenResponse, markResponsesSeen, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText,
 } from '../../../Components/leaveRequestsStore'
 import {
@@ -343,7 +343,10 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                 <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
               )}
               {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
-                <div className="hol-request-note">Note: {r.approvalNote}</div>
+                <div className="hol-request-note">Office note: {r.approvalNote}</div>
+              )}
+              {r.status === 'Awaiting cancellation' && r.cancellationReason && (
+                <div className="hol-request-note">Your reason: {r.cancellationReason}</div>
               )}
               {r.status === 'Approved' && r.cancellationKept && (
                 <div className="hol-request-note">
@@ -574,19 +577,32 @@ function RequestSentSheet({ request, onClose }) {
 // slide up/down.
 function DeleteSheet({ request, onClose, onConfirm }) {
   const isApproved = request.status === 'Approved'
+  // Optional, so the office knows why without having to ask (AIOP-25140).
+  const [reason, setReason] = useState('')
   return (
     <>
       {isApproved ? (
-        <div className="hol-sheet-body">
-          Your line manager will be notified of the cancellation. Once approved, you will receive confirmation and your balance will be updated.
-        </div>
+        <>
+          <div className="hol-sheet-body">
+            Your line manager will be notified of the cancellation. Once approved, you will receive confirmation and your balance will be updated.
+          </div>
+          <label className="hol-sheet-label" htmlFor="cancel-reason">Reason (optional)</label>
+          <textarea
+            id="cancel-reason"
+            className="hol-sheet-textarea"
+            rows={3}
+            value={reason}
+            onChange={e => setReason(e.target.value)}
+            placeholder="Let the office know why"
+          />
+        </>
       ) : (
         <>
           <div className="hol-sheet-title">Withdraw leave request?</div>
           <div className="hol-sheet-subtitle">It will show as Withdrawn. This can't be undone.</div>
         </>
       )}
-      <button className="fab-square primary-btn" onClick={() => onConfirm(request, isApproved)}>
+      <button className="fab-square primary-btn" onClick={() => onConfirm(request, isApproved, reason)}>
         {isApproved ? 'Submit cancellation' : 'Withdraw request'}
       </button>
       <button className="fab-square tertiary-btn" onClick={onClose}>Cancel</button>
@@ -629,8 +645,8 @@ function HolidaysFeature({ contractType, view, setView, deleteTarget, setDeleteT
   // Withdrawing a request that's still awaiting approval marks it Withdrawn
   // on both sides; an approved one becomes a cancellation request for the
   // office to confirm.
-  function handleDeleteConfirm(request, isApproved) {
-    if (isApproved) updateLeaveRequest(request.id, { status: 'Awaiting Cancellation' })
+  function handleDeleteConfirm(request, isApproved, reason) {
+    if (isApproved) requestCancellation(request.id, reason)
     else withdrawLeaveRequest(request.id)
     setDeleteTarget(null)
   }

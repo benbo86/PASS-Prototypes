@@ -117,8 +117,6 @@ body { background: #fff; min-height: 100vh; }
   vertical-align: middle;
 }
 
-/* An approved row's note sits under its Cancel action. */
-.lr-approval-note { margin-top: 4px; }
 
 /* "Popover" variant of the shared Tooltip — this one now carries two
    distinct pieces of info (the reason, and who/when actioned it), not just
@@ -137,11 +135,17 @@ body { background: #fff; min-height: 100vh; }
 }
 .lr-popover-reason { color: var(--greyscale-2-grey-20); }
 .lr-popover-meta {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--ui-purple-6-lavendar-grey);
+  margin-top: 4px;
   color: var(--greyscale-6-grey-50);
   font-size: 12px;
+}
+/* A note-less entry (e.g. approved with no note) is just its meta line. */
+.lr-popover-meta:first-child { margin-top: 0; }
+/* Several entries (newest first): each separated by a stronger rule. */
+.lr-popover-entry + .lr-popover-entry {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-purple-5-languid-lavendar);
 }
 
 /* ── Cancel dialog ────────────────────────────────────────────── */
@@ -170,3 +174,6 @@ textarea {
   outline: none;
 }
 textarea:focus { border-color: var(--brand-purple-6-purple-4); }
+
+/* The employee's reason can run long: keep it to the right, wrapping. */
+.lr-cancel-summary > div > span:last-child { text-align: right; }

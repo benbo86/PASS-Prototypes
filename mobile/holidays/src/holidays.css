@@ -394,6 +394,24 @@
 .hol-sheet-title { font: 16px Barlow, sans-serif; font-weight: 600; color: #333; margin-bottom: 4px; }
 .hol-sheet-subtitle { font: 13px Barlow, sans-serif; color: var(--greyscale-6-grey-50); margin-bottom: 20px; }
 
+/* Optional reason on the cancellation sheet (AIOP-25140). Same field look
+   as mobile/handover-notes' note box. */
+.hol-sheet-label { display: block; font: 600 14px Barlow, sans-serif; color: #333; margin-bottom: 8px; }
+.hol-sheet-textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border: 2px solid var(--ui-purple-5-languid-lavendar);
+  border-radius: 5px;
+  font: 16px/1.5 Barlow, sans-serif;
+  color: #000;
+  resize: none;
+}
+.hol-sheet-textarea:focus { outline: none; border-color: var(--brand-purple-6-purple-4); }
+.hol-sheet-textarea::placeholder { color: var(--greyscale-11-grey-80); }
+
 /* ── Request filters (status chips + date range) ────────────────────
    From Ben's Figma Make prototype. Chips are smaller than the leave-type
    .hol-pill buttons (5 of them have to fit a phone width, scrolling
