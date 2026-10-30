@@ -1174,7 +1174,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           <input
             ref={inputRef}
             className="msg-compose-input"
-            placeholder={thread.isBroadcast ? '' : 'Reply to this thread (everyone in your office can see it)...'}
+            placeholder={thread.isBroadcast ? '' : 'Reply here (all office staff will see this)...'}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
