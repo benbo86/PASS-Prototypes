@@ -222,6 +222,9 @@
 .hol-request-declined-reason { font: 13px Barlow, sans-serif; color: var(--rag-red-red-overdue-text); margin-bottom: 4px; }
 .hol-request-note { font: 13px Barlow, sans-serif; color: var(--greyscale-2-grey-20); margin-bottom: 4px; }
 .hol-request-meta { font: 12px Barlow, sans-serif; color: var(--greyscale-6-grey-50); }
+/* The label before a colon on a card note ("Office note:"), so each
+   note is easy to pick out when a card has several. */
+.hol-request-label { font-weight: 600; }
 
 .hol-request-delete {
   position: absolute;

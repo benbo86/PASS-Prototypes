@@ -15,7 +15,7 @@
 // wording (Awaiting approval…) when it reads them — see mobile/holidays/src/data.js.
 import { useSyncExternalStore } from 'react'
 
-const REQUESTS_KEY = 'pass-demo-leave-requests-v11'
+const REQUESTS_KEY = 'pass-demo-leave-requests-v12'
 const NOTIFICATIONS_KEY = 'pass-demo-holiday-notifications-v3'
 const SCHEME_KEY = 'pass-demo-holiday-scheme'
 const CHANGE_EVENT = 'pass-demo-leave-requests-change'
@@ -28,7 +28,8 @@ export const DEMO_EMPLOYEE = 'Adrianna Janowski'
 // for whichever scheme is selected, so both sides always tell one story.
 export const SCHEMES = ['days', 'hours']
 
-// Seed = one request in each status, per scheme, plus a second Approved one.
+// Seed = one request in each status, per scheme, plus two more Approved
+// ones (one already started).
 // Dated just before "today" in the prototypes (mid-Oct 2026) so they're the
 // most recently submitted rows and sit at the top of the web table, which
 // sorts newest first.
@@ -41,6 +42,8 @@ const SEED_SHAPES = [
   { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28', '19:22'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15'), cancellationRequestedAt: at('2026-10-14', '18:40'), cancellationReason: "My son's school inset day has moved, so I don't need the morning off now." },
   { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00'), workedDays: 3, approvalNote: "You don't work Wednesdays or Thursdays, so those days aren't taken from your entitlement." },
   { n: 7, fromDate: '2026-11-30', toDate: '2026-12-02', requestedFrom: '2026-11-30', requestedTo: '2026-12-04', status: 'Approved', submitted: at('2026-10-09', '11:20'), actionedBy: 'Priya Shah', actionedAt: at('2026-10-10', '10:05'), workedDays: 3, approvalNote: 'We can only cover your visits Monday to Wednesday that week.' },
+  // Already started, so her app no longer offers to cancel it.
+  { n: 8, fromDate: '2026-10-19', toDate: '2026-10-20', status: 'Approved', submitted: at('2026-09-20', '17:30'), actionedBy: 'Grace Okafor', actionedAt: at('2026-09-21', '09:40') },
   { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: null, actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation', approvedBy: 'Grace Okafor', approvedAt: at('2026-09-25', '11:10'), cancellationRequestedAt: at('2026-09-29', '20:05'), cancellationReason: "I'd like to move this to the following Friday instead." },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
@@ -50,7 +53,7 @@ const SEED_SHAPES = [
 // either can be left out (the start or end of that day). Request 2 is
 // 09:00–13:00 on one day; the rest are whole days, except the hours
 // scheme's request 1, an overnight shift (20:00 to 08:00 the next day).
-const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1 }
+const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1, 8: 2 }
 const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
   const halfDay = n === 2
   return [

@@ -64,7 +64,7 @@ const DeleteOutlineIcon = ({ size = 18 }) => (
 // theming) — used for the Approved-request "request cancellation" action
 // in place of the bin icon above, so the row-level trigger doesn't read as
 // destructive for something that isn't a deletion at all (see the
-// CAN_DELETE_STATUSES comment below for why the two cases differ).
+// canActOn comment below for why the two cases differ).
 const CloseIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" />
@@ -90,7 +90,16 @@ const STATUS_CLASS = {
 // approval (withdraws it outright, no office involvement) — matching
 // AIOP-21563's own field list. Declined/Awaiting cancellation/Cancelled are
 // already terminal-or-in-progress from the care worker's side.
-const CAN_DELETE_STATUSES = ['Awaiting approval', 'Approved']
+// She can only ask to cancel an approved holiday before it starts (for a
+// part-day holiday, before its start time): once it's started she speaks to
+// the office instead (AIOP-25140). Withdrawing has no such limit.
+function canActOn(r) {
+  if (r.status === 'Awaiting approval') return true
+  if (r.status !== 'Approved') return false
+  const [y, m, d] = r.fromDate.split('-').map(Number)
+  const [hh, mm] = (r.startTime || '00:00').split(':').map(Number)
+  return new Date(y, m - 1, d, hh, mm) > new Date()
+}
 
 // The app can't work out what a request costs: PASS doesn't know which days
 // she works, so counting every day in the range overcharges part-timers.
@@ -317,7 +326,7 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
               className={`hol-request-card${r.status === 'Awaiting cancellation' ? ' hol-request-card--awaiting-cancellation' : ''}`}
             >
               <span className={`hol-request-status ${STATUS_CLASS[r.status]}`}>{r.status}</span>
-              {CAN_DELETE_STATUSES.includes(r.status) && (
+              {canActOn(r) && (
                 <button
                   className={`hol-request-delete${r.status === 'Approved' ? ' hol-request-delete--cancel' : ''}`}
                   onClick={() => onDeleteTap(r)}
@@ -337,20 +346,20 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   may leave out days she doesn't work, so next to the times
                   it would look like a sum that doesn't add up. */}
               {hasConfirmedAmount(r) && r.status !== 'Cancelled' && (
-                <div className="hol-request-note">From entitlement: {fmtAmount(r.amount)}</div>
+                <div className="hol-request-note"><span className="hol-request-label">From entitlement:</span> {fmtAmount(r.amount)}</div>
               )}
               {r.status === 'Approved' && r.requestedFrom && (
-                <div className="hol-request-note">Dates changed by the office. You asked for {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}.</div>
+                <div className="hol-request-note"><span className="hol-request-label">Requested dates:</span> {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}</div>
               )}
               {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
-                <div className="hol-request-note">Office note: {r.approvalNote}</div>
+                <div className="hol-request-note"><span className="hol-request-label">Office note:</span> {r.approvalNote}</div>
               )}
               {r.status === 'Awaiting cancellation' && r.cancellationReason && (
-                <div className="hol-request-note">Your reason: {r.cancellationReason}</div>
+                <div className="hol-request-note"><span className="hol-request-label">Your reason:</span> {r.cancellationReason}</div>
               )}
               {r.status === 'Approved' && r.cancellationKept && (
                 <div className="hol-request-note">
-                  Cancellation not approved{r.keptReason ? `. Reason: ${r.keptReason}` : ''}
+                  Cancellation not approved{r.keptReason && <>. <span className="hol-request-label">Reason:</span> {r.keptReason}</>}
                 </div>
               )}
               {/* "Cancelled" alone doesn't say whether it had been approved,
@@ -361,10 +370,10 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
               {/* After the cancelled note: what happened, then what it
                   meant for her balance. */}
               {r.status === 'Cancelled' && hasConfirmedAmount(r) && (
-                <div className="hol-request-note">Returned to entitlement: {fmtAmount(r.amount)}</div>
+                <div className="hol-request-note"><span className="hol-request-label">Returned to entitlement:</span> {fmtAmount(r.amount)}</div>
               )}
               {(r.status === 'Declined' || r.status === 'Cancelled') && r.reason && (
-                <div className="hol-request-declined-reason">Reason: {r.reason}</div>
+                <div className="hol-request-declined-reason"><span className="hol-request-label">Reason:</span> {r.reason}</div>
               )}
               <div className="hol-request-meta">
                 Requested on {fmtDate(r.requestedOn)}
