@@ -567,3 +567,68 @@ html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
   color: var(--ui-purple-3-grape-grey);
   font-size: 14px;
 }
+
+/* ── Employees list (Components/EmployeeList.jsx) ──────────────────────
+   No Figma yet; taken from a screenshot of the live app. Same A–Z idea
+   as the Customers list, different row. Parent must be a flex column. */
+.employees-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.employees-divider {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  background: var(--ui-purple-6-lavendar-grey);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--greyscale-3-grey-30);
+}
+/* The signed-in employee's own section */
+.employees-divider--you {
+  background: var(--ui-purple-2-glossy-grape);
+  color: #fff;
+}
+
+.employee-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 16px;
+}
+.employee-avatar {
+  flex-shrink: 0;
+  color: var(--greyscale-3-grey-30);
+}
+/* Divider runs under the text only, from the text's left edge */
+.employee-row-text {
+  flex: 1;
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding-right: 16px;
+  border-bottom: 1px solid var(--greyscale-11-grey-80);
+}
+.employee-row-name {
+  font-size: 18px;
+  color: var(--greyscale-3-grey-30);
+}
+.employee-row-role {
+  font-size: 14px;
+  color: var(--greyscale-4-grey-40);
+}
+.employee-row--you .employee-row-name,
+.employee-row--you .employee-row-role {
+  font-weight: 700;
+  color: #000;
+}

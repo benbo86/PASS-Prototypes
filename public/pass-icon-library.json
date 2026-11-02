@@ -277,6 +277,20 @@
       "usageCount": 1
     },
     {
+      "hash": "7b5eaf08",
+      "name": "Avatar Placeholder",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"12\" cy=\"12\" r=\"12\" fill=\"#BDBDBD\"/><circle cx=\"12\" cy=\"8.4\" r=\"3.8\" fill=\"#000000\"/><ellipse cx=\"12\" cy=\"17.4\" rx=\"6.6\" ry=\"3.8\" fill=\"#000000\"/></svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Avatar Placeholder.svg",
+          "name": "Avatar Placeholder"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "be468784",
       "name": "Battery",
       "group": "Icons",
@@ -3209,6 +3223,20 @@
       "usageCount": 1
     },
     {
+      "hash": "c3e41a24",
+      "name": "Avatar Placeholder",
+      "group": "Inline",
+      "svg": "<svg width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n    <circle cx=\"12\" cy=\"12\" r=\"12\" fill=\"#BDBDBD\" />\n    <circle cx=\"12\" cy=\"8.4\" r=\"3.8\" fill=\"currentColor\" />\n    <ellipse cx=\"12\" cy=\"17.4\" rx=\"6.6\" ry=\"3.8\" fill=\"currentColor\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeList.jsx#AvatarPlaceholder",
+          "name": "AvatarPlaceholder"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "8d31815f",
       "name": "Edit",
       "group": "Inline",
@@ -5197,5 +5225,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-02T09:28:29.374Z"
+  "generatedAt": "2026-11-02T12:15:19.725Z"
 }

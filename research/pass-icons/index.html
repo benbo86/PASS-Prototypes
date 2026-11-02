@@ -209,7 +209,7 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 320 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 322 icons (.zip)</button>
     
   </div>
   <div class="icon-search">
@@ -264,7 +264,7 @@
   </section>
 
   <section data-section-slug="icons">
-    <div class="section-head"><h2>Icons</h2><span class="count">98 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Icons</h2><span class="count">99 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="Medication" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -546,6 +546,17 @@
 &lt;/clipPath&gt;
 &lt;/defs&gt;
 &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Avatar Placeholder" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Avatar Placeholder.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#BDBDBD"/><circle cx="12" cy="8.4" r="3.8" fill="#000000"/><ellipse cx="12" cy="17.4" rx="6.6" ry="3.8" fill="#000000"/></svg></span>
+        <span class="label">Avatar Placeholder</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="12" cy="12" r="12" fill="#BDBDBD"/&gt;&lt;circle cx="12" cy="8.4" r="3.8" fill="#000000"/&gt;&lt;ellipse cx="12" cy="17.4" rx="6.6" ry="3.8" fill="#000000"/&gt;&lt;/svg&gt;</template>
       </div>
 
       <div class="card" tabindex="0" role="button" data-name="Battery" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -2424,7 +2435,7 @@
   </section>
 
   <section data-section-slug="inline">
-    <div class="section-head"><h2>Inline</h2><span class="count">194 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Inline</h2><span class="count">195 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -3284,6 +3295,25 @@
         <span class="native-size">12×12</span>
         <template class="svg-src">&lt;svg viewBox="0 0 512 512" width="12" height="12" fill="currentColor" aria-hidden="true"&gt;
     &lt;path d="M228.3 469.1L47.6 300.4c-4.2-3.9-8.2-8.1-11.9-12.4l87 0c22.6 0 43-13.6 51.7-34.5l10.5-25.2 49.3 109.5c3.8 8.5 12.1 14 21.4 14.1s17.8-5 22-13.3L320 253.7l1.7 3.4c9.5 19 28.9 31 50.1 31l104.5 0c-3.7 4.3-7.7 8.5-11.9 12.4L283.7 469.1c-7.5 7-17.4 10.9-27.7 10.9s-20.2-3.9-27.7-10.9zM503.7 240l-132 0c-3 0-5.8-1.7-7.2-4.4l-23.2-46.3c-4.1-8.1-12.4-13.3-21.5-13.3s-17.4 5.1-21.5 13.3l-41.4 82.8L205.9 158.2c-3.9-8.7-12.7-14.3-22.2-14.1s-18.1 5.9-21.8 14.8l-31.8 76.3c-1.2 3-4.2 4.9-7.4 4.9L16 240c-2.6 0-5 .4-7.3 1.1C3 225.2 0 208.2 0 190.9l0-5.8c0-69.9 50.5-129.5 119.4-141C165 36.5 211.4 51.4 244 84l12 12 12-12c32.6-32.6 79-47.5 124.6-39.9C461.5 55.6 512 115.2 512 185.1l0 5.8c0 16.9-2.8 33.5-8.3 49.1z" /&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="AvatarPlaceholder" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download AvatarPlaceholder.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="12" fill="#BDBDBD" />
+    <circle cx="12" cy="8.4" r="3.8" fill="currentColor" />
+    <ellipse cx="12" cy="17.4" rx="6.6" ry="3.8" fill="currentColor" />
+  </svg></span>
+        <span class="label">AvatarPlaceholder</span>
+        <span class="native-size">40×40</span>
+        <template class="svg-src">&lt;svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"&gt;
+    &lt;circle cx="12" cy="12" r="12" fill="#BDBDBD" /&gt;
+    &lt;circle cx="12" cy="8.4" r="3.8" fill="currentColor" /&gt;
+    &lt;ellipse cx="12" cy="17.4" rx="6.6" ry="3.8" fill="currentColor" /&gt;
   &lt;/svg&gt;</template>
       </div>
 

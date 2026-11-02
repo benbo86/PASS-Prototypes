@@ -4,6 +4,7 @@ import AccountScreen from '../../../Components/AccountScreen'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
 import CustomerList from '../../../Components/CustomerList'
+import EmployeeList from '../../../Components/EmployeeList'
 import { THREADS, UNREAD_MESSAGES_COUNT } from '../../../Components/messagesData'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -183,17 +184,25 @@ function CustomersTab() {
   )
 }
 
-// ─── Employees — left blank, header only ────────────────────────
+// ─── Employees — shared list, Care Manager and above only ───────
+// Same treatment as the Customers tab: search always visible, so the bell
+// sits alone in the header. No add button (the live app has none).
 function EmployeesTab() {
+  const [query, setQuery] = useState('')
   return (
     <>
       <StatusBar />
       <TabHeader
         title="Employees"
         left={<HeaderAction label="Filter employees"><FiltersIcon /></HeaderAction>}
-        actions={<HeaderAction label="Search employees"><SearchIcon /></HeaderAction>}
       />
-      <div className="mt-blank" />
+      <div className="mt-inbox-search">
+        <div className="search-bar">
+          <SearchIcon size={18} />
+          <input type="text" placeholder="Search employees..." value={query} onChange={e => setQuery(e.target.value)} />
+        </div>
+      </div>
+      <EmployeeList query={query} />
     </>
   )
 }

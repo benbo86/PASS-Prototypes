@@ -75,12 +75,6 @@ html.split-pane .mt-demo-controls { display: none; }
 
 .mt-nav .nav-item { width: 56px; }
 
-/* ── Blank tab bodies (Customers / Employees) ─────────────────── */
-.mt-blank {
-  flex: 1;
-  background: var(--ui-purple-7-lightest-lavendar);
-}
-
 /* ── Customers tab: floating Add customer button ───────────────── */
 .mt-customers {
   position: relative;
