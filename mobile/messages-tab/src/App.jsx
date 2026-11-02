@@ -3,6 +3,7 @@ import StatusBar from '../../../Components/StatusBar'
 import AccountScreen from '../../../Components/AccountScreen'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
+import CustomerList from '../../../Components/CustomerList'
 import { THREADS, UNREAD_MESSAGES_COUNT } from '../../../Components/messagesData'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -14,7 +15,7 @@ import { ClockIcon, KeyIcon, TaskStateIcon } from '../../tag-in-out/src/icons'
 import { BOOKINGS } from '../../tag-in-out/src/data'
 import {
   BookingsIcon, CustomersIcon, EmployeesIcon, MessagesIcon, BellIcon,
-  FiltersIcon, PersonAddIcon, SearchIcon, AddCircleIcon, BroadcastIcon,
+  FiltersIcon, SearchIcon, AddIcon, AddCircleIcon, BroadcastIcon,
   PersonIcon, ChevronLeftIcon,
 } from './icons'
 
@@ -60,9 +61,9 @@ function writeParam(name, value) {
 // ─── Header ─────────────────────────────────────────────────────
 // The bell is always the last (right-most) action, so it stays pinned to
 // the same spot on every tab however many other actions sit beside it.
-function HeaderAction({ label, children }) {
+function HeaderAction({ label, onClick, children }) {
   return (
-    <button type="button" className="app-header-action" aria-label={label}>{children}</button>
+    <button type="button" className="app-header-action" aria-label={label} onClick={onClick}>{children}</button>
   )
 }
 
@@ -155,26 +156,34 @@ function BookingsTab() {
   )
 }
 
-// ─── Customers / Employees — left blank, header only ────────────
+// ─── Customers ──────────────────────────────────────────────────
+// Same list as mobile/customers (shared Components/CustomerList).
+// Exploring: search always visible and Add customer as a floating "+"
+// button, so the bell is the only action on the right of the header.
 function CustomersTab() {
+  const [query, setQuery] = useState('')
   return (
     <>
       <StatusBar />
       <TabHeader
         title="Customers"
         left={<HeaderAction label="Filter customers"><FiltersIcon /></HeaderAction>}
-        actions={(
-          <>
-            <HeaderAction label="Add customer"><PersonAddIcon /></HeaderAction>
-            <HeaderAction label="Search customers"><SearchIcon /></HeaderAction>
-          </>
-        )}
       />
-      <div className="mt-blank" />
+      <div className="mt-inbox-search">
+        <div className="search-bar">
+          <SearchIcon size={18} />
+          <input type="text" placeholder="Search customers..." value={query} onChange={e => setQuery(e.target.value)} />
+        </div>
+      </div>
+      <div className="mt-customers">
+        <CustomerList query={query} />
+        <button type="button" className="mt-fab" aria-label="Add customer"><AddIcon size={28} /></button>
+      </div>
     </>
   )
 }
 
+// ─── Employees — left blank, header only ────────────────────────
 function EmployeesTab() {
   return (
     <>

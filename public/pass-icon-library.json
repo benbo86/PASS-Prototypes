@@ -837,6 +837,20 @@
       "usageCount": 1
     },
     {
+      "hash": "1c8e200c",
+      "name": "High Risk Ring",
+      "group": "Icons",
+      "svg": "<svg width=\"35\" height=\"35\" viewBox=\"0 0 35 35\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M34 17.5C34 26.6127 26.6127 34 17.5 34C8.3873 34 1 26.6127 1 17.5C1 8.3873 8.3873 1 17.5 1C26.6127 1 34 8.3873 34 17.5Z\" stroke-width=\"2\" stroke=\"#E31C4A\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/High Risk Ring.svg",
+          "name": "High Risk Ring"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "b8dcbe8d",
       "name": "Info",
       "group": "Icons",
@@ -5183,5 +5197,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-10-30T12:44:13.818Z"
+  "generatedAt": "2026-11-02T09:28:29.374Z"
 }

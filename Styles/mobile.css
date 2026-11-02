@@ -468,3 +468,102 @@ html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
   text-overflow: ellipsis;
 }
 .push-banner-time { align-self: flex-start; font-size: 12px; color: var(--greyscale-6-grey-50); }
+
+/* ── Customers list (Components/CustomerList.jsx) ──────────────────────
+   Figma Mobile App node 18:2592. Used by mobile/customers and
+   mobile/messages-tab. The parent must be a flex column so the list can
+   fill and scroll. */
+.customers-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+/* "List order divider" in Figma */
+.customers-letter {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 24px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  background: var(--ui-purple-6-lavendar-grey);
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  letter-spacing: -0.24px;
+  color: #000;
+}
+
+/* "Customer and employee list item" — shared with the Employees list later */
+/* 16px between rows and around each letter group, as in Figma */
+.customers-group { padding-bottom: 16px; }
+.customer-row {
+  display: flex;
+  gap: 12px;
+  padding: 16px 16px 0;
+}
+
+.customer-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 35px;
+  height: 35px;
+}
+.customer-avatar img {
+  display: block;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* Icons/High Risk Ring.svg — a 2px red ring over the photo */
+.customer-avatar-risk-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--rag-red-red-overdue);
+  border-radius: 50%;
+}
+
+.customer-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Figma's text column is a fixed 281px, so addresses wrap before the
+   edge; the flags row underneath isn't limited and can run wider. */
+.customer-row-text {
+  max-width: 281px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #000;
+}
+.customer-row-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.32px;
+}
+.customer-row-address {
+  font-size: 14px;
+  letter-spacing: -0.28px;
+}
+
+.customer-row-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.customer-row-flags .legal-flags-row { gap: 4px; }
+
+.customers-empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--ui-purple-3-grape-grey);
+  font-size: 14px;
+}

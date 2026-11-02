@@ -727,7 +727,7 @@ export default function App() {
           activeTab="notifications"
           notifCount={0}
           messagesUnread={messagesUnread}
-          links={{ bookings: '../tag-in-out/', account: '../account/' }}
+          links={{ customers: '../customers/', bookings: '../tag-in-out/', account: '../account/' }}
         />
       </div>
       </div>

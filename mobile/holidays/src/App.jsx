@@ -808,7 +808,7 @@ export default function App() {
               />
             </div>
             {!(outerView === 'holidays' && (view === 'form' || deleteTarget || sentRequest || dateSheetOpen)) && (
-              <AppNav notificationBanner={false} activeTab="account" messagesUnread={messagesUnread} links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }} />
+              <AppNav notificationBanner={false} activeTab="account" messagesUnread={messagesUnread} links={{ customers: '../customers/', bookings: '../tag-in-out/', notifications: '../notifications/' }} />
             )}
           </div>
         </div>

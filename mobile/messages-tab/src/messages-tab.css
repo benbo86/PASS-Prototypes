@@ -81,6 +81,36 @@ html.split-pane .mt-demo-controls { display: none; }
   background: var(--ui-purple-7-lightest-lavendar);
 }
 
+/* ── Customers tab: floating Add customer button ───────────────── */
+.mt-customers {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Room under the last row so the button never covers it */
+.mt-customers .customers-list { padding-bottom: 88px; }
+.mt-fab {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-purple-3-purple-2);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  /* Above the sticky letter dividers (.customers-letter, z-index 1) */
+  z-index: 2;
+}
+.mt-fab:hover { background: var(--brand-purple-6-purple-4); }
+
 /* ── Messages inbox (rules copied from mobile/messaging) ──────── */
 .mt-inbox-search {
   background: #fff;

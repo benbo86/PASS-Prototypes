@@ -1339,13 +1339,13 @@ export default function App() {
           <AppNav
             activeTab="account"
             messagesUnread={messageBadge}
-            links={{ bookings: '../tag-in-out/', notifications: '../notifications/' }}
+            links={{ customers: '../customers/', bookings: '../tag-in-out/', notifications: '../notifications/' }}
           />
         ) : view === 'inbox' ? (
           <AppNav
             activeTab={null}
             messagesUnread={messageBadge}
-            links={{ bookings: '../tag-in-out/', notifications: '../notifications/', account: '../account/' }}
+            links={{ customers: '../customers/', bookings: '../tag-in-out/', notifications: '../notifications/', account: '../account/' }}
           />
         ) : null}
         {actionTarget && (
