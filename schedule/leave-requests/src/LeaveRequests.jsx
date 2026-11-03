@@ -738,6 +738,7 @@ export default function LeaveRequests() {
               primaryLabel="Approve holiday"
               confirmLabel="Approve holiday"
               unit={approveRow.unit}
+              proRata={approveRow.unit === 'hours'}
               noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount differ from the request' }}
               entitlement={approveRow.linked
                 ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }

@@ -241,6 +241,9 @@ export default function HolidayAbsenceDialog({
   confirmLabel = 'Confirm',
   unit = 'days',
   entitlement = { total: 28, alreadyBooked: 0 },
+  // Accrual (pro-rata) schemes: entitlement is what's accrued so far, and
+  // the office may book ahead of it, so going over is a flag, not a block.
+  proRata = false,
   // Optional free-text note, e.g. approving a request with a message for
   // the employee: { label, placeholder }. Returned as `note` on confirm.
   noteField = null,
@@ -300,8 +303,12 @@ export default function HolidayAbsenceDialog({
   const unitShort = unit === 'hours' ? 'hrs' : 'days'
   // The summary shows the balance before this booking, so it doesn't move
   // as the days deducted are edited. Going over is caught separately below.
-  const remaining = Math.max(0, entitlement.total - entitlement.alreadyBooked)
+  const balance = entitlement.total - entitlement.alreadyBooked
+  const remaining = Math.max(0, balance)
   const isOverEntitlement = showDayBreakdown && computedDaysDeducted > remaining + 1e-9
+  // Pro-rata: the same check only warns, and Remaining may show negative.
+  const blocksApproval = isOverEntitlement && !proRata
+  const overBy = Math.round((computedDaysDeducted - Math.max(0, balance)) * 100) / 100
 
   // Skips straight to confirming when the visits-affected warning/choice
   // (step 2) doesn't apply to the calling flow — e.g. a leave request being
@@ -354,7 +361,7 @@ export default function HolidayAbsenceDialog({
             <div>Entitlement: {entitlement.total} {unitShort}</div>
             <div>Adjustment: 0 {unitShort}</div>
             <div>Booked &amp; taken: {entitlement.alreadyBooked} {unitShort}</div>
-            <div>Remaining: {remaining} {unitShort}</div>
+            <div>Remaining: {proRata ? balance : remaining} {unitShort}</div>
           </div>
 
           <div className="date-row field">
@@ -456,13 +463,17 @@ export default function HolidayAbsenceDialog({
           )}
 
           {/* Holiday can't go beyond what's remaining, so the primary
-              button is disabled too. Wording matches the live product. */}
+              button is disabled too. Wording matches the live product.
+              On a pro-rata scheme it only warns (customers approve ahead of
+              what's accrued, e.g. emergency leave early in the year). */}
           {isOverEntitlement && (
             <div className="warning-banner orange">
               <WarningIcon />
               <div>
                 <h4>Warning</h4>
-                <p>The employee does not have enough holiday remaining for this booking.</p>
+                <p>{proRata
+                  ? `This is ${overBy} ${unitShort} more than the employee has accrued so far. You can still approve it.`
+                  : 'The employee does not have enough holiday remaining for this booking.'}</p>
               </div>
             </div>
           )}
@@ -481,7 +492,7 @@ export default function HolidayAbsenceDialog({
           )}
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={isOverEntitlement || hasBlankDay}>{primaryLabel}</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={blocksApproval || hasBlankDay}>{primaryLabel}</button>
           </div>
         </div>
       )}
