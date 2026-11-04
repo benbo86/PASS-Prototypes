@@ -15,10 +15,11 @@ import AuditCapture from '../../../Components/AuditCapture'
 //
 // showDayBreakdown + a date range spanning Aug/Sep 2026 turns this into the
 // working prototype for the holiday-pay-across-pay-periods discussion —
-// every day in the range defaults to payable, deliberately not derived from
-// employee availability (see HolidayAbsenceDialog.jsx's own module comment
-// for why), with Days deducted and the entitlement summary both updating
-// live as days are ticked/unticked.
+// every day in the range starts empty, because PASS doesn't know which days
+// an employee works (see HolidayAbsenceDialog.jsx's own module comment). The
+// coordinator enters an amount, or 0, for each day; Add absence stays
+// disabled until every day has one, and Days deducted and the entitlement
+// summary update live.
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

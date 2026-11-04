@@ -226,6 +226,12 @@ function DateRangeSheet({ title = 'Filter by date', start, end, initialMonth, on
 
 // ─── Holidays list screen ───────────────────────────────────────
 
+// Dates, then the times when they're set ("All day" is left off).
+function whenLabel(from, to, startTime, endTime) {
+  const times = requestTimesText({ fromDate: from, toDate: to, startTime, endTime }, ' - ')
+  return times === 'All day' ? fmtDateRangeLabel(from, to) : `${fmtDateRangeLabel(from, to)}, ${times}`
+}
+
 function HolidaysListScreen({ contractType, requests, entitlement, onBack, onRequestLeave, onDeleteTap, dateSheetOpen, setDateSheetOpen }) {
   const [statusFilters, setStatusFilters] = useState([])
   const [dateStart, setDateStart] = useState(null)
@@ -343,10 +349,12 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   through under the approved dates. The hidden label keeps
                   the meaning for screen readers, which don't read
                   strikethrough. */}
-              {r.status === 'Approved' && r.requestedFrom && (
+              {r.status === 'Approved' && (r.previousFrom || r.requestedFrom) && (
                 <del className="hol-request-date-was">
-                  <span className="hol-visually-hidden">Requested dates: </span>
-                  {fmtDateRangeLabel(r.requestedFrom, r.requestedTo)}
+                  <span className="hol-visually-hidden">{r.previousFrom ? 'Previously approved dates: ' : 'Requested dates: '}</span>
+                  {r.previousFrom
+                    ? whenLabel(r.previousFrom, r.previousTo, r.previousStartTime, r.previousEndTime)
+                    : whenLabel(r.requestedFrom, r.requestedTo, r.requestedStartTime, r.requestedEndTime)}
                 </del>
               )}
               <div className="hol-request-duration">
@@ -356,7 +364,7 @@ function HolidaysListScreen({ contractType, requests, entitlement, onBack, onReq
                   may leave out days she doesn't work, so next to the times
                   it would look like a sum that doesn't add up. */}
               {hasConfirmedAmount(r) && r.status !== 'Cancelled' && (
-                <div className="hol-request-note"><span className="hol-request-label">From entitlement:</span> {fmtAmount(r.amount)}</div>
+                <div className="hol-request-note"><span className="hol-request-label">From entitlement:</span>{r.status === 'Approved' && r.previousAmount != null && <> <del><span className="hol-visually-hidden">Previously </span>{fmtAmount(r.previousAmount)}</del></>} {fmtAmount(r.amount)}</div>
               )}
               {(r.status === 'Approved' || r.status === 'Awaiting cancellation') && r.approvalNote && (
                 <div className="hol-request-note"><span className="hol-request-label">Office note:</span> {r.approvalNote}</div>

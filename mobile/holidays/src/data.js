@@ -36,6 +36,15 @@ export function toAppRequest(r) {
     // Approved for different dates from those she asked for.
     requestedFrom: r.requestedFrom || null,
     requestedTo: r.requestedTo || null,
+    requestedStartTime: r.requestedStartTime || null,
+    requestedEndTime: r.requestedEndTime || null,
+    // The office edited the holiday after approving it: what it was before
+    // (null for whichever didn't change), struck through on the card.
+    previousFrom: r.previousFrom || null,
+    previousTo: r.previousTo || null,
+    previousStartTime: r.previousStartTime || null,
+    previousEndTime: r.previousEndTime || null,
+    previousAmount: r.previousAmount ?? null,
     // She asked to cancel and the office kept the holiday.
     cancellationKept: !!r.cancellationKept,
     keptReason: r.keptReason || null,

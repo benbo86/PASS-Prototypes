@@ -10,7 +10,7 @@ import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { NOTIFICATIONS } from '../../../Components/notificationsData'
 import {
-  useHolidayNotifications, markNotificationsSeen, markNotificationRead, markAllNotificationsRead, removeNotification,
+  useHolidayNotifications, markNotificationRead, markAllNotificationsRead, removeNotification,
 } from '../../../Components/leaveRequestsStore'
 import { UNREAD_MESSAGES_COUNT, hasReadMessages } from '../../../Components/messagesData'
 
@@ -155,6 +155,8 @@ const TYPE_CONFIG = {
   holiday_cancelled:      { label: 'Holiday request cancelled',  tone: 'grey', Icon: CalendarIcon },
   // She asked to cancel an approved holiday and the office kept it.
   holiday_cancellation_declined: { label: 'Holiday cancellation declined', tone: 'red', Icon: CalendarIcon },
+  // The office edited a holiday that was already approved.
+  holiday_changed: { label: 'Approved holiday changed', tone: 'amber', Icon: CalendarIcon },
 }
 
 const SHIFT_TYPES = ['shift_visit_changed', 'shift_duration_changed', 'shift_summary', 'shift_new']
@@ -163,7 +165,13 @@ const EVENT_TYPES = ['event_date_changed', 'event_time_changed', 'event_duration
 // prototype (mobile/holidays/) entirely rather than opening this
 // prototype's own in-app booking/shift/event detail screen — see the root
 // App()'s own viewBooking for where that's intercepted.
-const HOLIDAY_TYPES = ['holiday_approved', 'holiday_declined', 'holiday_cancelled', 'holiday_cancellation_declined']
+const HOLIDAY_TYPES = ['holiday_approved', 'holiday_declined', 'holiday_cancelled', 'holiday_cancellation_declined', 'holiday_changed']
+
+// Detail pieces joined with " — ", skipping any that are empty.
+const joinDetail = (parts) => {
+  const shown = parts.filter(Boolean)
+  return <>{shown.flatMap((part, i) => (i ? [' — ', part] : [part]))}</>
+}
 
 const renderDetail = (notif) => {
   switch (notif.type) {
@@ -205,7 +213,19 @@ const renderDetail = (notif) => {
     case 'holiday_approved':
       // Approved for different dates from those she asked for, and/or
       // with a note from the office (stored as `reason`).
-      return [notif.amount, notif.requestedRange && `changed from ${notif.requestedRange}`, notif.reason].filter(Boolean).join(' — ')
+      return joinDetail([
+        notif.requestedRange && <s key="was">{notif.requestedRange}</s>,
+        notif.amount,
+        notif.reason,
+      ])
+    case 'holiday_changed':
+      // The old dates/times and/or amount struck through, the new alongside.
+      // Only what changed is struck; an unchanged amount is plain.
+      return joinDetail([
+        notif.whenWas && <s key="was">{notif.whenWas}</s>,
+        notif.amountWas ? <span key="amt"><s>{notif.amountWas}</s>{` ${notif.amount}`}</span> : notif.amount,
+        notif.reason,
+      ])
     case 'holiday_declined':
     case 'holiday_cancelled':
     case 'holiday_cancellation_declined':
@@ -649,10 +669,9 @@ export default function App() {
   const [messagesUnread] = useState(() => hasReadMessages() ? 0 : UNREAD_MESSAGES_COUNT)
   const phoneFrameRef = useRef(null)
 
-  // Being on this screen clears the bell, including for responses that
-  // arrive while she's here.
+  // The bell counts unread notifications, so being on this screen doesn't
+  // clear it: each notification is read by tapping it, or all at once.
   const holidayNotifications = useHolidayNotifications()
-  useEffect(() => { markNotificationsSeen() }, [holidayNotifications])
 
   // Newest holiday responses first within each section, ahead of the mock
   // notifications (which are all older than "now" in the demo).

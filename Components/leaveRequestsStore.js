@@ -40,10 +40,12 @@ const at = (iso, time = '10:30') => `${iso}T${time}:00`
 const SEED_SHAPES = [
   { n: 1, fromDate: '2026-11-02', toDate: '2026-11-02', status: 'Awaiting Approval', submitted: at('2026-10-12', '08:47') },
   { n: 2, fromDate: '2026-10-23', toDate: '2026-10-23', status: 'Awaiting Cancellation', submitted: at('2026-09-28', '19:22'), actionedBy: 'Priya Shah', actionedAt: at('2026-09-29', '09:15'), cancellationRequestedAt: at('2026-10-14', '18:40'), cancellationReason: "My son's school inset day has moved, so I don't need the morning off now." },
-  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00'), workedDays: 3, approvalNote: "You don't work Wednesdays or Thursdays, so those days aren't taken from your entitlement." },
-  { n: 7, fromDate: '2026-11-30', toDate: '2026-12-02', requestedFrom: '2026-11-30', requestedTo: '2026-12-04', status: 'Approved', submitted: at('2026-10-09', '11:20'), actionedBy: 'Priya Shah', actionedAt: at('2026-10-10', '10:05'), workedDays: 3, approvalNote: 'We can only cover your visits Monday to Wednesday that week.' },
+  { n: 3, fromDate: '2026-12-21', toDate: '2026-12-25', status: 'Approved', submitted: at('2026-10-05', '13:05'), actionedBy: 'Grace Okafor', actionedAt: at('2026-10-06', '14:00'), workedDays: 3, dayAmounts: { '2026-12-21': 1, '2026-12-22': 1, '2026-12-23': 0, '2026-12-24': 0, '2026-12-25': 1 }, approvalNote: "You don't work Wednesdays or Thursdays, so those days aren't taken from your entitlement.",
+    // The office later moved the start a day earlier, which added a day she works.
+    previousFrom: '2026-12-22', previousTo: '2026-12-25', previousWorkedDays: 2, changedAt: at('2026-11-02', '10:30'), changedBy: 'Grace Okafor' },
+  { n: 7, fromDate: '2026-11-30', toDate: '2026-12-02', requestedFrom: '2026-11-30', requestedTo: '2026-12-04', status: 'Approved', submitted: at('2026-10-09', '11:20'), actionedBy: 'Priya Shah', actionedAt: at('2026-10-10', '10:05'), workedDays: 3, dayAmounts: { '2026-11-30': 1, '2026-12-01': 1, '2026-12-02': 1 }, approvalNote: 'We can only cover your visits Monday to Wednesday that week.' },
   // Already started, so her app no longer offers to cancel it.
-  { n: 8, fromDate: '2026-10-19', toDate: '2026-10-20', status: 'Approved', submitted: at('2026-09-20', '17:30'), actionedBy: 'Grace Okafor', actionedAt: at('2026-09-21', '09:40') },
+  { n: 8, fromDate: '2026-10-19', toDate: '2026-10-20', status: 'Approved', dayAmounts: { '2026-10-19': 1, '2026-10-20': 1 }, submitted: at('2026-09-20', '17:30'), actionedBy: 'Grace Okafor', actionedAt: at('2026-09-21', '09:40') },
   { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: null, actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation', approvedBy: 'Grace Okafor', approvedAt: at('2026-09-25', '11:10'), cancellationRequestedAt: at('2026-09-29', '20:05'), cancellationReason: "I'd like to move this to the following Friday instead." },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },
@@ -54,13 +56,15 @@ const SEED_SHAPES = [
 // 09:00–13:00 on one day; the rest are whole days, except the hours
 // scheme's request 1, an overnight shift (20:00 to 08:00 the next day).
 const DAYS_AMOUNTS = { 1: 1, 2: 0.5, 3: 5, 4: 1, 5: 1, 6: 1, 8: 2 }
-const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
+const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, previousWorkedDays, dayAmounts, ...s }) => {
   const halfDay = n === 2
   return [
     {
       ...s, id: `days-${n}`, contract: 'days',
       ...(halfDay ? { startTime: '09:00', endTime: '13:00' } : {}),
       amount: workedDays ?? DAYS_AMOUNTS[n],
+      ...(previousWorkedDays != null ? { previousAmount: previousWorkedDays } : {}),
+      ...(dayAmounts ? { dayDeductions: dayAmounts } : {}),
     },
     n === 1
       ? { ...s, id: 'hours-1', contract: 'hours', toDate: '2026-11-03', startTime: '20:00', endTime: '08:00', amount: 12 }
@@ -68,6 +72,8 @@ const SEED_REQUESTS = SEED_SHAPES.flatMap(({ n, workedDays, ...s }) => {
         ...s, id: `hours-${n}`, contract: 'hours',
         ...(halfDay ? { startTime: '09:00', endTime: '13:00' } : {}),
         amount: (workedDays ?? spanDays(s.fromDate, s.toDate)) * (halfDay ? 4 : 8),
+        ...(previousWorkedDays != null ? { previousAmount: previousWorkedDays * 8 } : {}),
+        ...(dayAmounts ? { dayDeductions: Object.fromEntries(Object.entries(dayAmounts).map(([k, v]) => [k, v * 8])) } : {}),
       },
   ]
 }).map(r => ({
@@ -103,14 +109,19 @@ export function requestTimesText(r, sep = ' – ') {
 // ── Notifications ──────────────────────────────────────────────────
 // One per office decision, snapshotting the request as it was then (a
 // request can be approved and later cancelled — two notifications).
-//   seen: counted on the bell until she opens the Notification Centre.
-//   read: the centre's unread dot, cleared by tapping it / Mark all as read.
-// Opening her Holidays list does both for that request's notifications.
+//   read: the centre's unread dot, and what the footer bell counts (as for
+//     the live app's other notifications). Cleared by tapping the
+//     notification or Mark all as read; opening the Notification Centre
+//     doesn't clear it.
+//   seen: no longer counted on the bell; kept alongside `read`.
+// Opening her Holidays list reads that request's notifications.
 const NOTIFICATION_TYPES = {
   Approved: 'holiday_approved',
   Declined: 'holiday_declined',
   Cancelled: 'holiday_cancelled',
   Kept: 'holiday_cancellation_declined',
+  // An approved holiday edited afterwards (dates, times or the amount taken).
+  Changed: 'holiday_changed',
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -134,20 +145,58 @@ function notificationFor(request, outcome, atIso, flags) {
     contract: request.contract,
     type: NOTIFICATION_TYPES[outcome],
     at: atIso,
-    dateRange: fmtIsoRange(request.fromDate, request.toDate),
+    // Dates, with the times when it has set times ("All day" is left off).
+    dateRange: whenText(request),
     amount: fmtAmount(request.amount, request.contract),
-    // Approved with different dates from those she asked for.
-    requestedRange: outcome === 'Approved' && request.requestedFrom ? fmtIsoRange(request.requestedFrom, request.requestedTo) : null,
+    // Approved with different dates or times from those she asked for.
+    requestedRange: outcome === 'Approved' && request.requestedFrom
+      ? whenText({ fromDate: request.requestedFrom, toDate: request.requestedTo, startTime: request.requestedStartTime, endTime: request.requestedEndTime })
+      : null,
     reason: outcome === 'Approved' ? request.approvalNote || null : outcome === 'Kept' ? request.keptReason : request.reason,
     ...flags,
   }
 }
 
+// "21 Dec 2026 – 25 Dec 2026" or, with set times, "...,  09:00 – 13:00".
+// All day is left off, as it says nothing the dates don't.
+function whenText(r) {
+  const times = requestTimesText(r)
+  const range = fmtIsoRange(r.fromDate, r.toDate)
+  return times === 'All day' ? range : `${range}, ${times}`
+}
+
+// An approved holiday edited after approval. One notification per edit,
+// showing the old value struck through for whichever of the dates/times
+// and amount changed. When the dates or times change, the whole old
+// "dates, times" is struck through, not just the part that moved.
+function changeNotification(updated, previous, atIso, flags) {
+  const whenChanged = whenText(previous) !== whenText(updated)
+  const amountChanged = previous.amount !== updated.amount
+  return {
+    id: `n-${updated.id}-Changed-${Date.parse(atIso)}`,
+    requestId: updated.id,
+    contract: updated.contract,
+    type: NOTIFICATION_TYPES.Changed,
+    at: atIso,
+    dateRange: whenText(updated),
+    whenWas: whenChanged ? whenText(previous) : null,
+    amount: fmtAmount(updated.amount, updated.contract),
+    amountWas: amountChanged ? fmtAmount(previous.amount, previous.contract) : null,
+    reason: updated.changeNote || null,
+    ...flags,
+  }
+}
+
 // The seed requests' own past decisions, already read.
-const SEED_NOTIFICATIONS = SEED_REQUESTS
-  .filter(r => NOTIFICATION_TYPES[r.status])
-  .map(r => notificationFor(r, r.status, r.actionedAt, { seen: true, read: true }))
-  .sort((a, b) => b.at.localeCompare(a.at))
+const SEED_NOTIFICATIONS = [
+  ...SEED_REQUESTS
+    .filter(r => NOTIFICATION_TYPES[r.status])
+    .map(r => notificationFor(r, r.status, r.actionedAt, { seen: true, read: true })),
+  // Seed requests that were edited after approval.
+  ...SEED_REQUESTS
+    .filter(r => r.previousFrom)
+    .map(r => changeNotification(r, { ...r, fromDate: r.previousFrom, toDate: r.previousTo, amount: r.previousAmount ?? r.amount }, r.changedAt, { seen: true, read: true })),
+].sort((a, b) => b.at.localeCompare(a.at))
 
 // ── Storage ────────────────────────────────────────────────────────
 // useSyncExternalStore needs the same value back until the data actually
@@ -257,12 +306,16 @@ export function recordOfficeDecision(id, { status, reason = null, note = null, a
   // cancelled it before deciding). Her app words the card from this.
   if (status === 'Cancelled') updated.cancelledFrom = request.status
   if (approved) {
-    const datesChanged = approved.fromDate !== request.fromDate || approved.toDate !== request.toDate
+    // Different dates or times from those she asked for: remember what she
+    // asked for, so her app can show it struck through.
+    const whenChanged = whenText(request) !== whenText({ ...request, ...approved })
     updated = {
       ...updated,
       ...approved,
-      requestedFrom: datesChanged ? request.fromDate : null,
-      requestedTo: datesChanged ? request.toDate : null,
+      requestedFrom: whenChanged ? request.fromDate : null,
+      requestedTo: whenChanged ? request.toDate : null,
+      requestedStartTime: whenChanged ? request.startTime : null,
+      requestedEndTime: whenChanged ? request.endTime : null,
     }
   }
   // The notification is saved before the request: another tab (the app)
@@ -274,6 +327,54 @@ export function recordOfficeDecision(id, { status, reason = null, note = null, a
     write(NOTIFICATIONS_KEY, [notificationFor(updated, outcome, actionedAt, { seen: false, read: false }), ...readNotifications()])
   }
   write(REQUESTS_KEY, readRequests().map(r => (r.id === id ? updated : r)))
+}
+
+// The office editing an approved holiday (the Edit action on the web's
+// Leave Requests, standing in for the Absences page / timesheet edits of
+// AIOP-25143). The request takes the new values and remembers the old ones
+// for her app to show struck through. She's only told if the dates, times
+// or amount taken actually changed; returns whether she was.
+export function recordApprovedChange(id, { approved, note = null, actionedBy, actionedAt }) {
+  const request = readRequests().find(r => r.id === id)
+  if (!request) return false
+  // `note` is the holiday's note as the office left it (the dialog starts
+  // from the current one), so it replaces the old one. The notification only
+  // repeats it if it was actually edited.
+  const newNote = note || null
+  const noteChanged = newNote !== (request.approvalNote || null)
+  const withNote = {
+    approvalNote: newNote,
+    // The note from when it was approved, kept for the web's history.
+    originalApprovalNote: request.originalApprovalNote !== undefined ? request.originalApprovalNote : request.approvalNote ?? null,
+    changeNote: noteChanged ? newNote : null,
+    changedBy: actionedBy,
+    changedAt: actionedAt,
+  }
+  const updated = { ...request, ...approved, ...withNote }
+  const whenChanged = whenText(request) !== whenText(updated)
+  const amountChanged = request.amount !== updated.amount
+  if (!whenChanged && !amountChanged) {
+    // Only the note changed: her card shows the new note, but there's
+    // nothing for a notification to say. (Nothing changed at all: no-op.)
+    if (!noteChanged) return false
+    write(REQUESTS_KEY, readRequests().map(r => (r.id === id ? { ...r, ...withNote } : r)))
+    return false
+  }
+  // What it was before this edit, for the strikethrough in her app.
+  Object.assign(updated, { previousFrom: null, previousTo: null, previousStartTime: null, previousEndTime: null, previousAmount: null })
+  if (whenChanged) {
+    updated.previousFrom = request.fromDate
+    updated.previousTo = request.toDate
+    updated.previousStartTime = request.startTime
+    updated.previousEndTime = request.endTime
+  }
+  if (amountChanged) updated.previousAmount = request.amount
+  updated.responseSeen = false
+  // Notification first, then the request, for the same reason as in
+  // recordOfficeDecision.
+  write(NOTIFICATIONS_KEY, [changeNotification(updated, request, actionedAt, { seen: false, read: false }), ...readNotifications()])
+  write(REQUESTS_KEY, readRequests().map(r => (r.id === id ? updated : r)))
+  return true
 }
 
 // Records without the field (the seed) count as seen.
@@ -326,14 +427,10 @@ export function useHolidayNotifications() {
   return all.filter(n => n.contract === scheme)
 }
 
-// The bell count on every mobile prototype's footer (Components/AppNav.jsx).
-export function useUnseenNotificationCount() {
-  return useHolidayNotifications().filter(n => !n.seen).length
-}
-
-export function markNotificationsSeen() {
-  const list = readNotifications()
-  if (list.some(n => !n.seen)) write(NOTIFICATIONS_KEY, list.map(n => ({ ...n, seen: true })))
+// The bell count on every mobile prototype's footer (Components/AppNav.jsx):
+// unread holiday notifications, like the live app's other notifications.
+export function useUnreadNotificationCount() {
+  return useHolidayNotifications().filter(n => !n.read).length
 }
 
 export function markNotificationRead(id) {

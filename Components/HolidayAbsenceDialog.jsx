@@ -197,12 +197,19 @@ function eachDateInRange(start, end) {
   return days
 }
 
-// deduction is null until entered.
-function buildDayPlan(startDate, endDate) {
+// 'YYYY-MM-DD' for a local date, the key of the `dayDeductions` map.
+function dateKey(date) {
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+// deduction is null until entered, unless `known` (a { 'YYYY-MM-DD': amount }
+// map, as when editing an approved holiday) already has the day.
+function buildDayPlan(startDate, endDate, known = null) {
   return eachDateInRange(startDate, endDate).map((date) => ({
     date,
     weekday: WEEKDAYS[date.getDay()],
-    deduction: null,
+    deduction: known?.[dateKey(date)] ?? null,
   }))
 }
 
@@ -221,6 +228,10 @@ export default function HolidayAbsenceDialog({
   deductedLabel = 'Days deducted',
   showVisitsStep = true,
   showDayBreakdown = false,
+  // Each day's amount, { 'YYYY-MM-DD': amount }, to start from when editing
+  // a holiday that's already been approved. Days in it keep their amount
+  // when the dates change; new days start blank.
+  dayDeductions = null,
   // Fix the field to its passed-in value. Used when approving an employee's
   // leave request (schedule/leave-requests): the request is that employee's
   // and is always a holiday, so approving it as someone else, or as
@@ -245,7 +256,8 @@ export default function HolidayAbsenceDialog({
   // the office may book ahead of it, so going over is a flag, not a block.
   proRata = false,
   // Optional free-text note, e.g. approving a request with a message for
-  // the employee: { label, placeholder }. Returned as `note` on confirm.
+  // the employee: { label, placeholder, initial? }. `initial` starts the box
+  // with the existing note when editing. Returned as `note` on confirm.
   noteField = null,
   onClose,
   onConfirm,
@@ -258,7 +270,7 @@ export default function HolidayAbsenceDialog({
   const [startTime,   setStartTime]   = useState(startTimeProp || new Date(2026, 0, 1, 0, 0))
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState(defaultVisitsOption)
-  const [note,        setNote]        = useState('')
+  const [note,        setNote]        = useState(noteField?.initial || '')
 
   // Recomputed whenever the date range changes — every day starts blank,
   // with no per-employee difference (see the module comment above for why).
@@ -268,12 +280,13 @@ export default function HolidayAbsenceDialog({
   // whatever's currently in the table, not a sticky setting, so a new range
   // shouldn't silently claim to still be "excluding weekends" against days
   // it's never actually been applied to.
-  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate) : []))
+  const [dayPlan, setDayPlan] = useState(() => (showDayBreakdown ? buildDayPlan(startDate, endDate, dayDeductions) : []))
   const [excludeWeekends, setExcludeWeekends] = useState(false)
   useEffect(() => {
     if (!showDayBreakdown) return
-    setDayPlan(buildDayPlan(startDate, endDate))
+    setDayPlan(buildDayPlan(startDate, endDate, dayDeductions))
     setExcludeWeekends(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDayBreakdown, startDate, endDate])
 
   const updateDayDeduction = (idx, rawValue) => {
@@ -299,6 +312,8 @@ export default function HolidayAbsenceDialog({
   const computedDaysDeducted = dayPlan.reduce((sum, d) => sum + (d.deduction ?? 0), 0)
   const hasBlankDay = showDayBreakdown && dayPlan.some((d) => d.deduction === null)
   const effectiveDaysDeducted = showDayBreakdown ? computedDaysDeducted : daysDeducted
+  // Each day's amount, handed back on confirm so it can be edited later.
+  const dayAmounts = showDayBreakdown ? Object.fromEntries(dayPlan.map((d) => [dateKey(d.date), d.deduction ?? 0])) : null
   const unitWord = unit === 'hours' ? 'Hours' : 'Days'
   const unitShort = unit === 'hours' ? 'hrs' : 'days'
   // The summary shows the balance before this booking, so it doesn't move
@@ -317,7 +332,7 @@ export default function HolidayAbsenceDialog({
     if (showVisitsStep) {
       setStep(2)
     } else {
-      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null, daysDeducted: effectiveDaysDeducted, note: note.trim() || null })
+      onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option: null, daysDeducted: effectiveDaysDeducted, dayDeductions: dayAmounts, note: note.trim() || null })
     }
   }
 
@@ -537,7 +552,7 @@ export default function HolidayAbsenceDialog({
             <button className="round-btn secondary-btn" onClick={() => setStep(1)}>Back</button>
             <button
               className="round-btn primary-btn"
-              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted, note: note.trim() || null })}
+              onClick={() => onConfirm?.({ employee, absenceType, startDate, endDate, startTime, endTime, option, daysDeducted: effectiveDaysDeducted, dayDeductions: dayAmounts, note: note.trim() || null })}
             >
               {confirmLabel}
             </button>

@@ -457,6 +457,7 @@ html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
 }
 .push-banner-icon--green { background: #e6f4ec; color: #27ae60; }
 .push-banner-icon--red   { background: #fdeaea; color: #c0392b; }
+.push-banner-icon--amber { background: #fef3dc; color: #e09600; }
 .push-banner-icon--grey  { background: #f0f0f0; color: #4d4d4d; }
 .push-banner-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .push-banner-title { font-size: 15px; font-weight: 600; color: var(--greyscale-2-grey-20); }

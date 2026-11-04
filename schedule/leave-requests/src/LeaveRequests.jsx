@@ -22,7 +22,7 @@ import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { LEAVE_REQUESTS, EMPLOYEE_NAMES, STATUSES, fmtD, fmtDT, fmtDTShort } from './data';
-import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText } from '../../../Components/leaveRequestsStore';
+import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, recordApprovedChange, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
 // `userName` ("Alex Morgan"), declared explicitly here (rather than left
@@ -136,6 +136,7 @@ function toLinkedRow(r) {
     submitted: new Date(r.submitted),
     actionedAt: r.actionedAt ? new Date(r.actionedAt) : null,
     approvedAt: r.approvedAt ? new Date(r.approvedAt) : null,
+    changedAt: r.changedAt ? new Date(r.changedAt) : null,
     cancellationRequestedAt: r.cancellationRequestedAt ? new Date(r.cancellationRequestedAt) : null,
     withdrawnAt: r.withdrawnAt ? new Date(r.withdrawnAt) : null,
   });
@@ -168,7 +169,10 @@ function fmtAmount(row) {
 function requestHistory(row) {
   const entries = [];
   if (row.approvedBy && row.approvedAt) {
-    entries.push({ text: row.approvalNote || null, meta: `Approved by ${row.approvedBy} on ${fmtDT(row.approvedAt)}`, at: row.approvedAt });
+    entries.push({ text: (row.originalApprovalNote !== undefined ? row.originalApprovalNote : row.approvalNote) || null, meta: `Approved by ${row.approvedBy} on ${fmtDT(row.approvedAt)}`, at: row.approvedAt });
+  }
+  if (row.changedAt && row.changedBy) {
+    entries.push({ text: row.changeNote || null, meta: `Changed by ${row.changedBy} on ${fmtDT(row.changedAt)}`, at: row.changedAt });
   }
   if (row.cancellationRequestedAt) {
     entries.push({ text: row.cancellationReason || null, meta: `Cancellation requested by employee on ${fmtDT(row.cancellationRequestedAt)}`, at: row.cancellationRequestedAt });
@@ -269,7 +273,7 @@ export default function LeaveRequests() {
         ...(rest.status === 'Cancelled' ? { cancelledFrom: r.status } : {}),
         ...(approved ? {
           fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
-          amount: approved.amount, startTime: approved.startTime, endTime: approved.endTime,
+          amount: approved.amount, startTime: approved.startTime, endTime: approved.endTime, dayDeductions: approved.dayDeductions,
         } : {}),
       }) : r));
     }
@@ -316,6 +320,8 @@ export default function LeaveRequests() {
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const [approveRow, setApproveRow] = useState(null);
+  // An approved holiday being edited (opens the same dialog as Approve).
+  const [editRow, setEditRow] = useState(null);
   // Decline (Awaiting Approval -> Declined, an initial office decision) and Cancel
   // (Approved/Awaiting Cancellation -> Cancelled, calling off something
   // already agreed) share one dialog — same reason-required shape, just a
@@ -428,12 +434,34 @@ export default function LeaveRequests() {
   // step-2 Confirm; closing/backing out leaves the request Awaiting Approval.
   // The office may change the dates/times; whatever they confirm is what's
   // booked, and her app shows that it differs from what she asked for.
-  const handleApproveConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted, note }) => {
+  const handleApproveConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted, dayDeductions, note }) => {
     updateRow(approveRow, {
       status: 'Approved', actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date(), note,
-      approved: { fromDate: dateToIso(s), toDate: dateToIso(e), startTime: dateToHhmm(st), endTime: dateToHhmm(et), amount: daysDeducted },
+      approved: { fromDate: dateToIso(s), toDate: dateToIso(e), startTime: dateToHhmm(st), endTime: dateToHhmm(et), amount: daysDeducted, dayDeductions },
     });
     setApproveRow(null);
+  };
+
+  // ── Edit flow ─────────────────────────────────────────────────────────────
+  // Editing an approved holiday stands in for changing its absence from the
+  // Absences page or a timesheet (AIOP-25143). Her app is only told when the
+  // dates, times or amount taken actually change.
+  const handleEditConfirm = ({ startDate: s, endDate: e, startTime: st, endTime: et, daysDeducted, dayDeductions, note }) => {
+    const approved = { fromDate: dateToIso(s), toDate: dateToIso(e), startTime: dateToHhmm(st), endTime: dateToHhmm(et), amount: daysDeducted, dayDeductions };
+    if (editRow.linked) {
+      recordApprovedChange(editRow.id, { approved, note, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date().toISOString() });
+    } else {
+      setLocalRows(prev => prev.map(r => r.id === editRow.id ? withLeaveTypeLabel({
+        ...r,
+        fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
+        startTime: approved.startTime, endTime: approved.endTime, amount: approved.amount, dayDeductions: approved.dayDeductions,
+        approvalNote: note || null,
+        originalApprovalNote: r.originalApprovalNote !== undefined ? r.originalApprovalNote : r.approvalNote ?? null,
+        changeNote: (note || null) !== (r.approvalNote || null) ? (note || null) : null,
+        changedBy: CURRENT_OFFICE_USER, changedAt: new Date(),
+      }) : r));
+    }
+    setEditRow(null);
   };
 
   // ── Decline / Cancel flow ───────────────────────────────────────────────────
@@ -684,7 +712,12 @@ export default function LeaveRequests() {
                     )}
                     {row.status === 'Approved' && (
                       <span className="lr-actions">
-                        <button className="lr-action-btn" onClick={() => openActionDialog(row, 'cancel')}>Cancel</button>
+                        <RowActionsMenu
+                          items={[
+                            { label: 'Edit', onClick: () => setEditRow(row) },
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel') },
+                          ]}
+                        />
                       </span>
                     )}
                     {row.status === 'Awaiting Cancellation' && (
@@ -745,6 +778,38 @@ export default function LeaveRequests() {
                 : { total: approveRow.unit === 'hours' ? 224 : 28, alreadyBooked: 0 }}
               onClose={() => setApproveRow(null)}
               onConfirm={handleApproveConfirm}
+            />
+          </div>
+        );
+      })()}
+
+      {editRow && (() => {
+        const startTime = hhmmToDate(editRow.startTime || '00:00');
+        const endTime = hhmmToDate(editRow.endTime || '23:59');
+        return (
+          <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setEditRow(null) }}>
+            <HolidayAbsenceDialog
+              employee={{ value: editRow.employee, label: editRow.employee }}
+              absenceType={{ value: 'holiday', label: 'Holiday' }}
+              employeeLocked
+              absenceTypeLocked
+              startDate={editRow.fromDate}
+              endDate={editRow.toDate}
+              startTime={startTime}
+              endTime={endTime}
+              showDayBreakdown
+              dayDeductions={editRow.dayDeductions}
+              defaultVisitsOption="unassign"
+              primaryLabel="Save changes"
+              confirmLabel="Save changes"
+              unit={editRow.unit}
+              proRata={editRow.unit === 'hours'}
+              noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount have changed', initial: editRow.approvalNote || '' }}
+              entitlement={editRow.linked
+                ? { total: entitlement.total, alreadyBooked: Math.max(0, entitlement.booked + entitlement.taken - editRow.amount) }
+                : { total: editRow.unit === 'hours' ? 224 : 28, alreadyBooked: 0 }}
+              onClose={() => setEditRow(null)}
+              onConfirm={handleEditConfirm}
             />
           </div>
         );

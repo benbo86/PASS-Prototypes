@@ -11,7 +11,7 @@ import { useAllHolidayNotifications, useDemoScheme, markNotificationRead } from 
 // which hides AppNav on some screens). Only notifications that arrive while
 // the page is open trigger it, not ones already there on load. Whether the
 // bell counts it is decided elsewhere: if she's looking at her Holidays
-// list the response is marked seen there, otherwise it waits in the bell.
+// list the response is marked read there, otherwise it waits in the bell.
 
 const SHOW_MS = 5000
 
@@ -20,6 +20,7 @@ const TYPES = {
   holiday_declined: { label: 'Holiday request declined', tone: 'red' },
   holiday_cancelled: { label: 'Holiday request cancelled', tone: 'grey' },
   holiday_cancellation_declined: { label: 'Holiday cancellation declined', tone: 'red' },
+  holiday_changed: { label: 'Approved holiday changed', tone: 'amber' },
 }
 
 const CalendarIcon = () => (
