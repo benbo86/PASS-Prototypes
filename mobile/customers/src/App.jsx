@@ -2,6 +2,9 @@ import { useRef, useState } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import AppNav from '../../../Components/AppNav'
 import CustomerList from '../../../Components/CustomerList'
+import CustomerMenu from '../../../Components/CustomerMenu'
+import ScreenSlider from '../../../Components/ScreenSlider'
+import { CUSTOMERS } from '../../../Components/customersData'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -40,15 +43,23 @@ export default function App() {
   const pageRef = useRef(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
+  // The Customer menu slides in over the list (right to left); its back arrow
+  // slides it away again. ?customer=<id> keeps it open on reload and lets other
+  // prototypes (e.g. Documents' Menu button) come back to it.
+  const [customerId, setCustomerId] = useState(() => new URLSearchParams(window.location.search).get('customer'))
+  const [shownId, setShownId] = useState(customerId)   // kept while sliding away
+  const openCustomer = (c) => { history.pushState(null, '', `?customer=${c.id}`); setShownId(c.id); setCustomerId(c.id) }
+  const closeCustomer = () => { history.pushState(null, '', window.location.pathname); setCustomerId(null) }
+  const menuCustomer = CUSTOMERS.find(c => c.id === shownId) || null
 
   const closeSearch = () => { setSearchOpen(false); setQuery('') }
 
   return (
     <>
       <DevToolbar floating>
-        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevEdit containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <DevMode containerRef={pageRef} />
-        <DevComments containerRef={pageRef} prototypeId={window.location.pathname} />
+        <DevComments containerRef={pageRef} prototypeId={window.location.pathname + window.location.search} />
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
@@ -56,6 +67,10 @@ export default function App() {
         <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
         <div className="phone-frame" ref={pageRef}>
           <div className="screen-area">
+            <ScreenSlider
+              secondaryActive={!!customerId}
+              secondary={<CustomerMenu customer={menuCustomer} onBack={closeCustomer} links={{ documents: '../customer-documents/' }} />}
+              primary={
             <div className="screen">
               <StatusBar />
               <div className="app-header customers-header">
@@ -80,12 +95,14 @@ export default function App() {
                   </>
                 )}
               </div>
-              <CustomerList query={query} />
+              <CustomerList query={query} onSelect={openCustomer} />
               <AppNav
                 activeTab="customers"
                 links={{ bookings: '../tag-in-out/', notifications: '../notifications/', account: '../account/' }}
               />
             </div>
+              }
+            />
           </div>
         </div>
       </div>

@@ -8,9 +8,13 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import { CustomerHeader } from '../../../Components/CustomerMenu'
+import { CUSTOMERS } from '../../../Components/customersData'
+
+const ARTHUR = CUSTOMERS.find(c => c.id === 'arthur-barrington')
 import {
   CUSTOMER, ASSESSMENTS, ASSESSMENT_FOLDERS, OPTIONAL_ASSESSMENT_TEMPLATES,
-  OTHER_DOCUMENTS, OTHER_DOCUMENT_FOLDERS, DOCUMENT_TEMPLATES,
+  OTHER_DOCUMENTS, OTHER_DOCUMENT_FOLDERS, DOCUMENT_TEMPLATES, FILES, FILE_FOLDERS,
   nextAssessmentId, nextOtherDocId, nextFolderId,
 } from './customerDocumentsData'
 
@@ -54,6 +58,25 @@ const DeleteActionIcon = ({ size = 18 }) => (
 const FolderIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+  </svg>
+)
+// Copied from Icons/Cloud Offline.svg (fill="currentColor" for theming).
+const CloudOfflineIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="currentColor"/>
+    <line x1="2" y1="3" x2="22" y2="21" stroke="currentColor" strokeWidth="2"/>
+  </svg>
+)
+// File-type icons: an image icon for pictures, a document icon for everything
+// else (Material set, saved to Icons/Mobile Uploads/File types/).
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'heic', 'webp']
+const FILE_TYPE_PATHS = {
+  image: "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2M8.5 13.5l2.5 3.01L14.5 12l4.5 6H5z",
+  document: "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8zm2 16H8v-2h8zm0-4H8v-2h8zm-3-5V3.5L18.5 9z",
+}
+const FileTypeIcon = ({ extension, size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d={FILE_TYPE_PATHS[IMAGE_EXTENSIONS.includes(extension?.toLowerCase()) ? 'image' : 'document']} />
   </svg>
 )
 const FolderMinusIcon = ({ size = 24 }) => (
@@ -293,7 +316,7 @@ function useDocumentSearchFilter() {
 
 // ─── Shared: SearchFilterBar ─────────────────────────────────────────
 
-function SearchFilterBar({ searchText, onSearchChange, onFilterClick, filterActive }) {
+function SearchFilterBar({ searchText, onSearchChange, onFilterClick, filterActive, showFilter = true }) {
   return (
     <div className="docs-search-filter-bar">
       <div className="docs-search-input-wrap">
@@ -305,9 +328,11 @@ function SearchFilterBar({ searchText, onSearchChange, onFilterClick, filterActi
           onChange={e => onSearchChange(e.target.value)}
         />
       </div>
-      <button className={`docs-filter-btn${filterActive ? ' docs-filter-btn--active' : ''}`} onClick={onFilterClick} aria-label="Filter">
-        {filterActive ? <FilterActiveIcon /> : <FiltersIcon />}
-      </button>
+      {showFilter && (
+        <button className={`docs-filter-btn${filterActive ? ' docs-filter-btn--active' : ''}`} onClick={onFilterClick} aria-label="Filter">
+          {filterActive ? <FilterActiveIcon /> : <FiltersIcon />}
+        </button>
+      )}
     </div>
   )
 }
@@ -528,7 +553,7 @@ function useFolderSelection({ items, setItems, folders }) {
 
 // ─── Shared: FolderCard ──────────────────────────────────────
 
-function FolderCard({ folder, count, disabled, onOpen, onRename, onDelete }) {
+function FolderCard({ folder, count, disabled, onOpen, onRename, onDelete, readOnly = false, unit = 'document' }) {
   return (
     <div
       className={`docs-folder-card${disabled ? ' docs-folder-card--disabled' : ''}`}
@@ -539,9 +564,9 @@ function FolderCard({ folder, count, disabled, onOpen, onRename, onDelete }) {
       <span className="docs-folder-card-icon"><FolderIcon /></span>
       <span className="docs-folder-card-body">
         <span className="docs-folder-card-name">{folder.name}</span>
-        <div className="docs-folder-card-count">{count} document{count === 1 ? '' : 's'}</div>
+        <div className="docs-folder-card-count">{count} {unit}{count === 1 ? '' : 's'}</div>
       </span>
-      {!disabled && (
+      {!disabled && !readOnly && (
         <span className="docs-folder-card-actions" onClick={e => e.stopPropagation()}>
           <button className="docs-folder-icon-btn" onClick={onRename} aria-label={`Rename ${folder.name}`}>
             <EditActionIcon size={16} />
@@ -797,7 +822,7 @@ function AddAssessmentScreen({ templates, onAdd, onClose }) {
 
 // ─── Shared: FolderDetailScreen (Level 3) ───────────────────────────
 
-function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount, onBack, onToggleSelecting, onMoveSelected, onAdd, addLabel }) {
+function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount, onBack, onToggleSelecting, onMoveSelected, onAdd, addLabel, readOnly = false, emptyText = 'This folder is empty.' }) {
   if (!folder) return <div className="screen" />
   return (
     <div className="screen">
@@ -806,7 +831,7 @@ function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount
         <div className="app-header">
           <button className="app-header-back" onClick={onBack}><ChevronLeftIcon /></button>
           <span className="app-header-title">{selecting ? `${selectedCount} selected` : folder.name}</span>
-          {selecting || items.length > 0 ? (
+          {!readOnly && (selecting || items.length > 0) ? (
             <button className="app-header-action-text" onClick={onToggleSelecting}>{selecting ? 'Cancel' : 'Select'}</button>
           ) : (
             <div style={{ width: 36 }} />
@@ -814,10 +839,10 @@ function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount
         </div>
         <div className="docs-screen-body">
           {items.length === 0 ? (
-            <div className="docs-empty-state">This folder is empty.</div>
+            <div className="docs-empty-state">{emptyText}</div>
           ) : items.map(renderRow)}
         </div>
-        {selecting ? (
+        {readOnly ? null : selecting ? (
           <SelectionBar count={selectedCount} onMove={onMoveSelected} />
         ) : (
           <div className="docs-fab-wrap">
@@ -836,40 +861,11 @@ function FolderDetailScreen({ folder, items, renderRow, selecting, selectedCount
 function DocumentsRootScreen({ onOpenSection }) {
   return (
     <div className="screen">
-      <StatusBar />
-      <div className="app-header">
-        <a className="app-header-back" href="../../"><ArrowLeftIcon /></a>
-        <span className="app-header-title">All customers</span>
-        <div style={{ width: 36 }} />
-      </div>
-
-      <div className="docs-customer-card">
-        <h2 className="docs-customer-name">{CUSTOMER.name}</h2>
-        <div className="docs-customer-meta">
-          <div className="docs-customer-meta-item">
-            <span className="docs-customer-meta-label">Address</span>
-            <span>{CUSTOMER.addressLine1}, {CUSTOMER.addressLine2}</span>
-          </div>
-        </div>
-        <div className="docs-customer-meta">
-          <div className="docs-customer-meta-item">
-            <span className="docs-customer-meta-label">Date of Birth</span>
-            <span>{CUSTOMER.dob}</span>
-          </div>
-        </div>
-        <div className="docs-customer-chips">
-          {CUSTOMER.legalChips.map(chip => (
-            <span key={chip.id} className="docs-legal-chip">{chip.label}</span>
-          ))}
-        </div>
-        <div className="docs-customer-avatar">{initials(CUSTOMER.name)}</div>
-        {CUSTOMER.highRisk && <span className="docs-high-risk-badge">HIGH RISK</span>}
-        <span className="docs-key-icon"><KeyIcon size={20} /></span>
-      </div>
+      <CustomerHeader customer={ARTHUR} backHref="../customers/" />
 
       <div className="docs-menu-bar">
         <h1>Documents</h1>
-        <button className="docs-menu-action" type="button"><GridMenuIcon size={18} /> Menu</button>
+        <a className="docs-menu-action" href="../customers/?customer=arthur-barrington"><GridMenuIcon size={18} /> Menu</a>
       </div>
 
       <div className="docs-section-list">
@@ -893,6 +889,12 @@ function DocumentsRootScreen({ onOpenSection }) {
           <span className="docs-section-row-body"><span className="docs-section-row-title">Incidents</span></span>
           <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
         </div>
+        {/* AIOP-25397: Files uploaded on the web, read-only, online only. */}
+        <button className="docs-section-row" onClick={() => onOpenSection('files')}>
+          <span className="docs-section-row-icon"><DocumentIcon /></span>
+          <span className="docs-section-row-body"><span className="docs-section-row-title">Files</span></span>
+          <span className="docs-section-row-chevron"><ChevronRightIcon size={20} /></span>
+        </button>
       </div>
     </div>
   )
@@ -1500,6 +1502,153 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
   )
 }
 
+// ─── Level 2: FilesScreen ────────────────────────────────────────────
+// AIOP-25397. Files uploaded on the web to this customer, viewed read-only
+// and only while online. Folders mirror the web (one level), but nothing here
+// edits them: no New folder / Upload / rename / delete / select-and-move.
+
+const fmtFileDate = (iso) => new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+function FileRow({ file, folderName, onOpen }) {
+  return (
+    <button className="docs-doc-row docs-file-row" type="button" onClick={onOpen}>
+      <span className="docs-doc-row-icon"><FileTypeIcon extension={file.extension} size={22} /></span>
+      <span className="docs-doc-row-body">
+        <div className="docs-doc-row-title">{file.name}</div>
+        <div className="docs-doc-row-sub">{file.extension.toUpperCase()} · {file.size} · {fmtFileDate(file.uploaded)}</div>
+        <div className="docs-doc-row-sub">Uploaded by {file.uploadedBy}</div>
+        {folderName && <span className="docs-folder-tag"><FolderIcon size={12} />{folderName}</span>}
+      </span>
+    </button>
+  )
+}
+
+function OfflineNotice() {
+  return (
+    <div className="docs-offline">
+      <CloudOfflineIcon size={40} />
+      <h3>You're offline</h3>
+      <p>Files are only available when you're online. Connect to the internet to see this customer's files.</p>
+    </div>
+  )
+}
+
+// Stand-in for the real file: the app fetches it with the web's get-file API.
+function FilePreviewScreen({ file, offline, onClose }) {
+  return (
+    <div className="screen">
+      <StatusBar />
+      <div className="docs-screen">
+        <div className="app-header">
+          <button className="app-header-back" onClick={onClose}><CloseIcon /></button>
+          <span className="app-header-title">{file?.name}</span>
+          <div style={{ width: 36 }} />
+        </div>
+        <div className="docs-screen-body">
+          {offline ? <OfflineNotice /> : (
+            <div className="docs-file-preview">
+              <FileTypeIcon extension={file?.extension} size={56} />
+              <div>{file?.name}.{file?.extension}</div>
+              <div className="docs-doc-row-sub">{file?.size}</div>
+              <p>Preview placeholder. The app retrieves the file with the same get-file API the web app uses.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FilesScreen({ files: allFiles, folders, offline, onClose }) {
+  // Newest upload first, as on the web.
+  const files = [...allFiles].sort((a, b) => b.uploaded.localeCompare(a.uploaded))
+  const [folderId, setFolderId] = useState(() => {
+    const p = new URLSearchParams(window.location.search)
+    return p.get('section') === 'files' ? p.get('folder') : null
+  })
+  const [searchText, setSearchText] = useState('')
+  const preview = useSlideUpScreen()
+  const [previewFile, setPreviewFile] = useState(null)
+
+  const openFolder = (id) => { history.pushState(null, '', `?section=files&folder=${id}`); setFolderId(id) }
+  const closeFolder = () => { history.pushState(null, '', '?section=files'); setFolderId(null) }
+  const openFile = (file) => { setPreviewFile(file); preview.open() }
+
+  const openFolderObj = folders.find(f => f.id === folderId) || null
+  const q = searchText.trim().toLowerCase()
+  const searching = q !== ''
+  const matches = searching
+    ? files.filter(f => `${f.name}.${f.extension}`.toLowerCase().includes(q))
+        .map(f => ({ ...f, folderName: folders.find(fo => fo.id === f.folderId)?.name || null }))
+    : []
+  const looseFiles = files.filter(f => !f.folderId)
+
+  const row = (f) => <FileRow key={f.id} file={f} folderName={f.folderName} onOpen={() => openFile(f)} />
+
+  return (
+    <>
+      <ScreenSlider
+        secondaryActive={!!folderId}
+        primary={
+          <div className="screen">
+            <StatusBar />
+            <div className="docs-screen">
+              <div className="app-header">
+                <button className="app-header-back" onClick={onClose}><CloseIcon /></button>
+                <span className="app-header-title">Files</span>
+                <div style={{ width: 36 }} />
+              </div>
+              {offline ? (
+                <div className="docs-screen-body"><OfflineNotice /></div>
+              ) : (
+                <>
+                  <SearchFilterBar searchText={searchText} onSearchChange={setSearchText} showFilter={false} />
+                  <div className="docs-screen-body">
+                    {searching ? (
+                      matches.length === 0
+                        ? <div className="docs-empty-state">No files match your search.</div>
+                        : matches.map(row)
+                    ) : files.length === 0 ? (
+                      <div className="docs-empty-state">No files have been uploaded for this customer.</div>
+                    ) : (
+                      <>
+                        {folders.map(folder => (
+                          <FolderCard
+                            key={folder.id}
+                            folder={folder}
+                            count={files.filter(f => f.folderId === folder.id).length}
+                            unit="file"
+                            readOnly
+                            onOpen={() => openFolder(folder.id)}
+                          />
+                        ))}
+                        {looseFiles.map(row)}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        }
+        secondary={
+          <FolderDetailScreen
+            folder={openFolderObj}
+            items={openFolderObj ? files.filter(f => f.folderId === openFolderObj.id) : []}
+            renderRow={row}
+            readOnly
+            emptyText="This folder has no files."
+            onBack={closeFolder}
+          />
+        }
+      />
+      <div className={`docs-modal-slide${preview.active ? ' docs-modal-active' : ''}`}>
+        {preview.mounted && <FilePreviewScreen file={previewFile} offline={offline} onClose={preview.close} />}
+      </div>
+    </>
+  )
+}
+
 // ─── Level 2: IncidentsScreen ────────────────────────────────────────
 // Functionality deferred to a later round (folders/documents/etc. — see
 // Assessments/Other Documents for that pattern) — this is a placeholder
@@ -1541,6 +1690,8 @@ export default function App() {
   const [assessmentFolders, setAssessmentFolders] = useState(ASSESSMENT_FOLDERS)
   const [otherDocuments, setOtherDocuments] = useState(OTHER_DOCUMENTS)
   const [otherDocumentFolders, setOtherDocumentFolders] = useState(OTHER_DOCUMENT_FOLDERS)
+  // Prototype-only switch (outside the phone) to show the Files offline state.
+  const [offline, setOffline] = useState(() => new URLSearchParams(window.location.search).get('offline') === '1')
 
   const openSection = (sec) => {
     history.pushState(null, '', `?section=${sec}`)
@@ -1565,6 +1716,10 @@ export default function App() {
       </DevToolbar>
       <div className="phone-wrap">
         <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
+        <label className="docs-offline-toggle">
+          <input type="checkbox" checked={offline} onChange={e => setOffline(e.target.checked)} />
+          Simulate offline
+        </label>
         <div className="phone-frame" ref={pageRef}>
           <div className="screen-area">
             <DocumentsRootScreen onOpenSection={openSection} />
@@ -1589,6 +1744,8 @@ export default function App() {
                   setFolders={setOtherDocumentFolders}
                   onClose={closeSection}
                 />
+              ) : renderedSection === 'files' ? (
+                <FilesScreen files={FILES} folders={FILE_FOLDERS} offline={offline} onClose={closeSection} />
               ) : renderedSection === 'incidents' ? (
                 <IncidentsScreen onClose={closeSection} />
               ) : null}

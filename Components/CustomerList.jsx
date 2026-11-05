@@ -8,10 +8,16 @@ import { CUSTOMERS } from './customersData'
 // Styles/mobile.css. The row is Figma's "Customer and employee list item",
 // so the Employees list should reuse it.
 
-function CustomerRow({ customer }) {
+function CustomerRow({ customer, onSelect }) {
   const hasFlags = customer.highRisk || customer.legalFlags.length > 0
   return (
-    <div className="customer-row">
+    <div
+      className={`customer-row${onSelect ? ' customer-row--tappable' : ''}`}
+      onClick={onSelect ? () => onSelect(customer) : undefined}
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onKeyDown={onSelect ? (e) => { if (e.key === 'Enter') onSelect(customer) } : undefined}
+    >
       <div className="customer-avatar">
         <img src={customer.photo} alt="" width="35" height="35" />
         {customer.highRisk && <span className="customer-avatar-risk-ring" aria-label="High risk" />}
@@ -33,7 +39,8 @@ function CustomerRow({ customer }) {
 }
 
 // query: filters by name or address
-export default function CustomerList({ customers = CUSTOMERS, query = '' }) {
+// onSelect: optional; when given, rows are tappable (mobile/customers opens the Customer menu)
+export default function CustomerList({ customers = CUSTOMERS, query = '', onSelect }) {
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase()
     const matches = customers
@@ -54,7 +61,7 @@ export default function CustomerList({ customers = CUSTOMERS, query = '' }) {
       {groups.map(g => (
         <section key={g.letter} className="customers-group">
           <div className="customers-letter">{g.letter}</div>
-          {g.customers.map(c => <CustomerRow key={c.id} customer={c} />)}
+          {g.customers.map(c => <CustomerRow key={c.id} customer={c} onSelect={onSelect} />)}
         </section>
       ))}
       {groups.length === 0 && <div className="customers-empty">No customers found</div>}

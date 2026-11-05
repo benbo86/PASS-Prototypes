@@ -115,5 +115,28 @@ export function nextAssessmentId() { return _nextAssessmentId++ }
 let _nextOtherDocId = OTHER_DOCUMENTS.length + 1
 export function nextOtherDocId() { return _nextOtherDocId++ }
 
+// ─── Files (AIOP-25397) ─────────────────────────────────────────
+// Uploaded on the web, shown read-only in the app and only while online.
+// Same shape as the web's Files tab: folders (one level) plus loose files.
+// size is a display string; uploaded is ISO so it can be formatted.
+export const FILE_FOLDERS = [
+  { id: 'z1', name: "COI's" },
+  { id: 'z2', name: 'LPA Documents' },
+  { id: 'z3', name: 'Medical letters' },
+  { id: 'z4', name: 'Medication' },
+]
+
+export const FILES = [
+  { id: 1, name: 'Lasting Power of Attorney - Health and Welfare', extension: 'pdf', size: '1.2 MB', uploaded: '2026-10-28', uploadedBy: 'Admin admin', folderId: 'z2' },
+  { id: 2, name: 'Lasting Power of Attorney - Property and Finance', extension: 'pdf', size: '1.1 MB', uploaded: '2026-10-28', uploadedBy: 'Admin admin', folderId: 'z2' },
+  { id: 3, name: 'GP letter - blood pressure review', extension: 'pdf', size: '214 kB', uploaded: '2026-10-14', uploadedBy: 'Priya Shah', folderId: 'z3' },
+  { id: 4, name: 'Hospital discharge summary', extension: 'pdf', size: '486 kB', uploaded: '2026-09-30', uploadedBy: 'Priya Shah', folderId: 'z3' },
+  { id: 5, name: 'Medication changes - October', extension: 'docx', size: '38 kB', uploaded: '2026-10-19', uploadedBy: 'Admin admin', folderId: 'z4' },
+  { id: 6, name: 'Screenshot 2026-11-05 at 11.37.47', extension: 'png', size: '96.9 kB', uploaded: '2026-11-05', uploadedBy: 'Admin admin', folderId: null },
+  { id: 8, name: 'Weekly care rota', extension: 'xlsx', size: '24 kB', uploaded: '2026-10-05', uploadedBy: 'Priya Shah', folderId: null },
+  { id: 9, name: 'Garden access photo', extension: 'jpg', size: '1.8 MB', uploaded: '2026-09-18', uploadedBy: 'Admin admin', folderId: 'z1' },
+  { id: 7, name: 'Front door key safe instructions', extension: 'pdf', size: '72 kB', uploaded: '2026-08-12', uploadedBy: 'Admin admin', folderId: null },
+]
+
 let _nextFolderId = ASSESSMENT_FOLDERS.length + OTHER_DOCUMENT_FOLDERS.length + 1
 export function nextFolderId() { return `f${_nextFolderId++}` }

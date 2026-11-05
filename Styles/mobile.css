@@ -506,6 +506,7 @@ html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
   padding: 16px 16px 0;
 }
 
+.customer-row--tappable { cursor: pointer; }
 .customer-avatar {
   position: relative;
   flex-shrink: 0;
