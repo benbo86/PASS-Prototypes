@@ -62,7 +62,7 @@
 .opt-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px; }
 .opt-desc { color: var(--greyscale-3-grey-30); margin: 0; }
 
-/* "Which days will be paid?" breakdown — see HolidayAbsenceDialog.jsx's own
+/* "Days deducted from entitlement" breakdown — see HolidayAbsenceDialog.jsx's own
    showDayBreakdown comment for the reasoning. */
 .day-plan-hint {
   font-size: 13px;

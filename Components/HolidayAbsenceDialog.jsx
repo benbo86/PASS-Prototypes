@@ -161,7 +161,7 @@ export const ABSENCE_TYPES = [
   { value: 'other',     label: 'Other' },
 ]
 
-// ── "Which days are actually paid?" breakdown — opt-in via showDayBreakdown,
+// ── "Days deducted from entitlement" breakdown — opt-in via showDayBreakdown,
 // off by default so schedule/leave-requests' existing usage (no prop passed)
 // is completely unaffected. Deliberately has no defaulting logic tied to an
 // employee's contract availability — availability is only ever a scheduling
@@ -467,7 +467,7 @@ export default function HolidayAbsenceDialog({
 
           {showDayBreakdown && (
             <div className="field">
-              <label>Which days will be paid?</label>
+              <label>{unitWord} deducted from entitlement</label>
               <div className="day-plan-hint">Enter the amount for each day, or 0 for a day not worked</div>
               <div className="day-plan-list">
                 <div className="day-plan-row day-plan-header">
