@@ -44,8 +44,10 @@ const SEED_SHAPES = [
     // The office later moved the start a day earlier, which added a day she works.
     previousFrom: '2026-12-22', previousTo: '2026-12-25', previousWorkedDays: 2, changedAt: at('2026-11-02', '10:30'), changedBy: 'Grace Okafor' },
   { n: 7, fromDate: '2026-11-30', toDate: '2026-12-02', requestedFrom: '2026-11-30', requestedTo: '2026-12-04', status: 'Approved', submitted: at('2026-10-09', '11:20'), actionedBy: 'Priya Shah', actionedAt: at('2026-10-10', '10:05'), workedDays: 3, dayAmounts: { '2026-11-30': 1, '2026-12-01': 1, '2026-12-02': 1 }, approvalNote: 'We can only cover your visits Monday to Wednesday that week.' },
-  // Already started, so her app no longer offers to cancel it.
-  { n: 8, fromDate: '2026-10-19', toDate: '2026-10-20', status: 'Approved', dayAmounts: { '2026-10-19': 1, '2026-10-20': 1 }, submitted: at('2026-09-20', '17:30'), actionedBy: 'Grace Okafor', actionedAt: at('2026-09-21', '09:40') },
+  // Already started, so her app no longer offers to cancel it. Its timesheet
+  // record has been verified, so the web's Edit and Cancel are disabled
+  // (AIOP-25000).
+  { n: 8, fromDate: '2026-10-19', toDate: '2026-10-20', status: 'Approved', timesheetVerified: true, dayAmounts: { '2026-10-19': 1, '2026-10-20': 1 }, submitted: at('2026-09-20', '17:30'), actionedBy: 'Grace Okafor', actionedAt: at('2026-09-21', '09:40') },
   { n: 4, fromDate: '2026-10-30', toDate: '2026-10-30', status: 'Declined', submitted: at('2026-10-01', '07:58'), reason: 'Insufficient staff cover for the requested date', actionedBy: 'Priya Shah', actionedAt: at('2026-10-02', '11:45') },
   { n: 5, fromDate: '2026-11-06', toDate: '2026-11-06', status: 'Cancelled', submitted: at('2026-09-24', '16:41'), reason: null, actionedBy: 'Alex Morgan', actionedAt: at('2026-09-30', '16:30'), cancelledFrom: 'Awaiting Cancellation', approvedBy: 'Grace Okafor', approvedAt: at('2026-09-25', '11:10'), cancellationRequestedAt: at('2026-09-29', '20:05'), cancellationReason: "I'd like to move this to the following Friday instead." },
   { n: 6, fromDate: '2026-11-13', toDate: '2026-11-13', status: 'Withdrawn', submitted: at('2026-10-07', '18:12'), withdrawnAt: at('2026-10-08', '07:40') },

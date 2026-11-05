@@ -1548,6 +1548,10 @@ h6 {
 }
 .row-actions-item:hover:not(:disabled) { background: var(--ui-purple-7-lightest-lavendar); }
 .row-actions-item:disabled { color: var(--greyscale-11-grey-80); cursor: default; }
+/* A disabled item with a reason sits in a Tooltip wrap. The button ignores the
+   pointer so the wrap receives the hover (disabled buttons swallow it). */
+.row-actions-tip-wrap { display: block; }
+.row-actions-tip-wrap .row-actions-item:disabled { pointer-events: none; }
 
 /* ── Resizable columns (Components/useSharedColumnWidths.js) ─────
    Opt-in via an extra `resizable-table` class alongside `.data-table` —

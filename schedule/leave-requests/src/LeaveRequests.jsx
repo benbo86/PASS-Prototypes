@@ -76,6 +76,12 @@ const CloseIcon = () => (
 // Requests still waiting on an office decision, each status with its own
 // quick filter above the table (styled like its status pill). Same set the
 // tab badge counts.
+// Once a holiday's timesheet record has been verified it can't be edited or
+// cancelled (AIOP-25000). The action stays visible but disabled, with the
+// reason on hover. Keep holiday is unaffected.
+const VERIFIED_REASON = "This holiday can't be changed because its timesheet record has been verified";
+const verifiedLock = row => row.timesheetVerified ? { disabled: true, disabledReason: VERIFIED_REASON } : {};
+
 const NEEDS_ACTION = new Set(['Awaiting Approval', 'Awaiting Cancellation']);
 
 const statusClass = s => {
@@ -714,8 +720,8 @@ export default function LeaveRequests() {
                       <span className="lr-actions">
                         <RowActionsMenu
                           items={[
-                            { label: 'Edit', onClick: () => setEditRow(row) },
-                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel') },
+                            { label: 'Edit', onClick: () => setEditRow(row), ...verifiedLock(row) },
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancel'), ...verifiedLock(row) },
                           ]}
                         />
                       </span>
@@ -724,7 +730,7 @@ export default function LeaveRequests() {
                       <span className="lr-actions">
                         <RowActionsMenu
                           items={[
-                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancelRequested') },
+                            { label: 'Cancel', onClick: () => openActionDialog(row, 'cancelRequested'), ...verifiedLock(row) },
                             { label: 'Keep holiday', onClick: () => openActionDialog(row, 'keep') },
                           ]}
                         />

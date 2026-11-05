@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import Tooltip from './Tooltip'
 
 const EllipsisIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -12,7 +13,8 @@ const EllipsisIcon = () => (
 // A small "⋮" trigger that opens a portaled dropdown of secondary row
 // actions — e.g. a table row with one primary action shown inline (Approve)
 // plus a couple of rarer/destructive ones (Decline, Cancel) that don't need
-// their own permanent slot in the row. Components/ActionsMenu.jsx already
+// their own permanent slot in the row. An item can be disabled with a
+// `disabledReason`, shown as a tooltip when hovering it. Components/ActionsMenu.jsx already
 // covers a similar { label, onClick, disabled } dropdown, but it's
 // explicitly non-portaled — fine for a page-header trigger, not for a row
 // inside a scrolling/clipping table body. This reuses the anchor+portal
@@ -60,17 +62,25 @@ export default function RowActionsMenu({ items }) {
           ref={menuRef}
           style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999 }}
         >
-          {items.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              className="row-actions-item"
-              disabled={item.disabled}
-              onClick={() => { item.onClick(); setOpen(false) }}
-            >
-              {item.label}
-            </button>
-          ))}
+          {items.map((item, i) => {
+            const button = (
+              <button
+                type="button"
+                className="row-actions-item"
+                disabled={item.disabled}
+                onClick={() => { item.onClick(); setOpen(false) }}
+              >
+                {item.label}
+              </button>
+            )
+            return item.disabled && item.disabledReason ? (
+              <Tooltip key={i} text={item.disabledReason} wrapClassName="row-actions-tip-wrap" placement="top">
+                {button}
+              </Tooltip>
+            ) : (
+              <span key={i} style={{ display: 'contents' }}>{button}</span>
+            )
+          })}
         </div>,
         document.body
       )}
