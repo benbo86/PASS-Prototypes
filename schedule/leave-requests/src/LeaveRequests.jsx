@@ -21,7 +21,7 @@ import WireframeToggle from '../../../Components/WireframeToggle';
 import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
-import { LEAVE_REQUESTS, EMPLOYEE_NAMES, STATUSES, fmtD, fmtDT, fmtDTShort } from './data';
+import { LEAVE_REQUESTS, EMPLOYEE_NAMES, EMPLOYEE_AREAS, STATUSES, fmtD, fmtDT, fmtDTShort } from './data';
 import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, recordApprovedChange, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
@@ -433,6 +433,16 @@ export default function LeaveRequests() {
   const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
   const anyFilter  = !!(employeeFilter.selected.size || leaveTypeFilter.selected.size || statusFilter.selected.size || quickStatuses.size);
 
+  // Other employees' holidays that overlap a date range (approved or still
+  // pending), for the Approve dialog's clash warning. Skips the request being
+  // approved and anyone else with the same name.
+  const findClashes = (forRow, start, end) => rows
+    .filter(r => r.employee !== forRow.employee
+      && (r.status === 'Approved' || r.status === 'Awaiting Approval' || r.status === 'Awaiting Cancellation')
+      && r.fromDate <= end && r.toDate >= start)
+    .map(r => ({ id: r.id, employee: r.employee, fromDate: r.fromDate, toDate: r.toDate, status: r.status === 'Awaiting Approval' ? 'Pending' : 'Approved', areas: EMPLOYEE_AREAS[r.employee] || [] }))
+    .sort((a, b) => a.fromDate - b.fromDate || a.employee.localeCompare(b.employee));
+
   // ── Approve flow ──────────────────────────────────────────────────────────
   // Clicking Approve does NOT change status immediately — it opens the
   // existing Add-Holiday dialog, pre-populated. The status only becomes
@@ -778,6 +788,8 @@ export default function LeaveRequests() {
               confirmLabel="Approve holiday"
               unit={approveRow.unit}
               proRata={approveRow.unit === 'hours'}
+              findClashes={(start, end) => findClashes(approveRow, start, end)}
+              areas={EMPLOYEE_AREAS[approveRow.employee] || []}
               noteField={{ label: 'Note for the employee (optional)', placeholder: 'e.g. why the dates or amount differ from the request' }}
               entitlement={approveRow.linked
                 ? { total: entitlement.total, alreadyBooked: entitlement.booked + entitlement.taken }

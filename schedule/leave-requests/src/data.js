@@ -66,6 +66,35 @@ const EMPLOYEE_CONTRACTS = Object.fromEntries(
   EMPLOYEE_NAMES.map(name => [name, { unit: HOURLY_EMPLOYEES.has(name) ? 'hours' : 'days' }])
 );
 
+// Area tags (an employee can have several, or none). The Approve dialog's
+// clash warning defaults to employees who share an area with the person
+// requesting. Adrianna Janowski isn't in EMPLOYEE_NAMES (see LeaveRequests.jsx),
+// so she's listed here directly. Mixed on purpose: single, multiple, none.
+export const EMPLOYEE_AREAS = {
+  'Adrianna Janowski': ['North Yorkshire', 'York'],
+  'Stephen Nicholls': ['North Yorkshire'],
+  'David Bukowski': ['Leeds'],
+  'Justin Keller': ['North Yorkshire', 'Leeds'],
+  'Jeffrey Henry': [],
+  'Anita Bradley': ['York'],
+  'Kira Oswell': ['Leeds'],
+  'Amirah Marsden': ['North Yorkshire'],
+  'Mike Fenwick': [],
+  'Alex Jones': ['York'],
+  'John Smith': ['Leeds', 'York'],
+};
+
+// A crunch week for the clash warning's long-list case: Stephen Nicholls asks
+// for 14-18 Dec and 20 colleagues who share his area are already off (18 extra
+// employees who only appear here), plus three elsewhere.
+const CRUNCH_EXTRA = [
+  'Priya Nair', 'Tom Ashworth', 'Hannah Brooks', 'Marcus Webb', 'Sophie Clarke', 'Daniel Okoro',
+  'Leah Fraser', 'Callum Reid', 'Nadia Hussain', 'Owen Parry', 'Grace Tanner', 'Ibrahim Sheikh',
+  'Chloe Barnett', 'Ravi Patel', 'Ellie Marsh', 'Jamal Ford', 'Beth Hollis', 'Sam Ibbotson',
+];
+const CRUNCH_AREA_SETS = [['North Yorkshire'], ['North Yorkshire', 'York'], ['Leeds', 'North Yorkshire']];
+CRUNCH_EXTRA.forEach((name, i) => { EMPLOYEE_AREAS[name] = CRUNCH_AREA_SETS[i % 3]; });
+
 const pad = n => String(n).padStart(2, '0');
 // DD/MM/YY per this prototype's own explicit spec — deliberately different
 // from every other prototype's DD/MM/YYYY.
@@ -222,4 +251,67 @@ function buildRequests() {
   return requests;
 }
 
-export const LEAVE_REQUESTS = buildRequests();
+// Hand-written requests around Adrianna's Awaiting Approval request (2 Nov) and
+// her Approved ones, so approving them shows the clash warning. Fixed values,
+// no rnd(), so the generated rows above don't reshuffle. Six share an area
+// with her (enough to show the "+ more" cap), two are elsewhere, two have no
+// area tag.
+const clash = (id, employee, from, to, status, submittedDay) => {
+  const contract = EMPLOYEE_CONTRACTS[employee] || { unit: 'days' };
+  const fromDate = new Date(2026, from[0] - 1, from[1]);
+  const toDate = new Date(2026, to[0] - 1, to[1]);
+  const days = Math.round((toDate - fromDate) / 86400000) + 1;
+  const submitted = new Date(2026, 9, submittedDay, 9 + (id % 6), (id * 7) % 60);
+  const decided = status === 'Approved';
+  const actionedAt = decided ? new Date(submitted.getTime() + 86400000) : null;
+  return {
+    id, employee, startTime: contract.unit === 'hours' ? '09:00' : null, endTime: contract.unit === 'hours' ? '17:00' : null,
+    fromDate, toDate, amount: contract.unit === 'hours' ? days * 8 : days, unit: contract.unit,
+    status, submitted, reason: null,
+    actionedBy: decided ? 'Priya Shah' : null, actionedAt,
+    approvedBy: decided ? 'Priya Shah' : null, approvedAt: actionedAt,
+    cancellationRequestedAt: null, cancellationReason: null,
+  };
+};
+const CLASH_REQUESTS = [
+  clash(101, 'Stephen Nicholls', [11, 2], [11, 6], 'Approved', 2),
+  clash(102, 'Justin Keller', [11, 2], [11, 2], 'Awaiting Approval', 20),
+  clash(103, 'Amirah Marsden', [11, 1], [11, 4], 'Awaiting Approval', 18),
+  clash(104, 'Anita Bradley', [11, 2], [11, 3], 'Approved', 6),
+  clash(105, 'Alex Jones', [10, 30], [11, 3], 'Approved', 1),
+  clash(106, 'John Smith', [11, 2], [11, 2], 'Approved', 8),
+  clash(107, 'David Bukowski', [11, 2], [11, 5], 'Approved', 4),
+  clash(108, 'Kira Oswell', [11, 2], [11, 3], 'Awaiting Approval', 22),
+  clash(109, 'Jeffrey Henry', [11, 2], [11, 2], 'Approved', 12),
+  clash(110, 'Mike Fenwick', [11, 3], [11, 4], 'Approved', 14),
+  // Around her approved 30 Nov – 2 Dec and 21–25 Dec holidays, for when those
+  // are edited or a new request is made for similar dates.
+  clash(111, 'Stephen Nicholls', [11, 30], [12, 1], 'Approved', 9),
+  clash(112, 'Justin Keller', [12, 22], [12, 24], 'Awaiting Approval', 25),
+];
+
+const CRUNCH_DATES = [[[12, 14], [12, 18]], [[12, 14], [12, 15]], [[12, 16], [12, 18]], [[12, 17], [12, 17]], [[12, 15], [12, 16]], [[12, 14], [12, 14]]];
+const CRUNCH_REQUESTS = [
+  clash(120, 'Stephen Nicholls', [12, 14], [12, 18], 'Awaiting Approval', 29),
+  ...['Justin Keller', 'Amirah Marsden', ...CRUNCH_EXTRA, 'David Bukowski', 'Kira Oswell', 'Jeffrey Henry'].map((name, i) => {
+    const [from, to] = CRUNCH_DATES[i % CRUNCH_DATES.length];
+    return clash(121 + i, name, from, to, i % 3 === 2 ? 'Awaiting Approval' : 'Approved', 5 + (i % 20));
+  }),
+];
+
+// Every request still Awaiting Approval should show a busy clash warning in the
+// demo, so the generated ones are moved into the mid-December crunch window
+// (keeping their length), and Adrianna's 2 Nov request gets the same crowd.
+const CRUNCH_START = new Date(2026, 11, 14);
+const GENERATED_REQUESTS = buildRequests().map((r) => {
+  if (r.status !== 'Awaiting Approval') return r;
+  const span = r.toDate - r.fromDate;
+  return { ...r, fromDate: CRUNCH_START, toDate: new Date(CRUNCH_START.getTime() + span) };
+});
+const NOV_CRUNCH_REQUESTS = CRUNCH_EXTRA.slice(0, 14).map((name, i) =>
+  clash(140 + i, name, [11, 2], [11, i % 2 ? 3 : 2], i % 3 === 2 ? 'Awaiting Approval' : 'Approved', 3 + i));
+
+const XMAS_CRUNCH_REQUESTS = CRUNCH_EXTRA.map((name, i) =>
+  clash(160 + i, name, [12, 22], [12, i % 2 ? 24 : 23], i % 4 === 3 ? 'Awaiting Approval' : 'Approved', 4 + i));
+
+export const LEAVE_REQUESTS = [...GENERATED_REQUESTS, ...CLASH_REQUESTS, ...NOV_CRUNCH_REQUESTS, ...XMAS_CRUNCH_REQUESTS, ...CRUNCH_REQUESTS];

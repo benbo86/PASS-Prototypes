@@ -217,6 +217,11 @@ function fmtDay(date) {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
 }
 
+// "02 Nov" or "02 Nov – 06 Nov"
+function fmtClashDates(from, to) {
+  return from.getTime() === to.getTime() ? fmtDay(from) : `${fmtDay(from)} – ${fmtDay(to)}`
+}
+
 export default function HolidayAbsenceDialog({
   employee: employeeProp,
   absenceType: absenceTypeProp,
@@ -259,6 +264,16 @@ export default function HolidayAbsenceDialog({
   // the employee: { label, placeholder, initial? }. `initial` starts the box
   // with the existing note when editing. Returned as `note` on confirm.
   noteField = null,
+  // Clash check, run when Approve is clicked (AIOP-25143 thread, 3 Nov):
+  //   findClashes(startDate, endDate) -> other employees' requests that
+  //     overlap, each { employee, fromDate, toDate, status, areas }.
+  //   areas: the person's own area tags. Relevant clashes are those sharing
+  //     any area; with no tags it's everyone.
+  // If anyone relevant is off, nothing is saved: a warning shows in this
+  // dialog, the dates stay editable, and the button becomes "Approve anyway".
+  // Changing the dates clears it and the next click checks again.
+  findClashes = null,
+  areas = [],
   onClose,
   onConfirm,
 }) {
@@ -271,6 +286,8 @@ export default function HolidayAbsenceDialog({
   const [endTime,     setEndTime]     = useState(endTimeProp || new Date(2026, 0, 1, 0, 0))
   const [option,      setOption]      = useState(defaultVisitsOption)
   const [note,        setNote]        = useState(noteField?.initial || '')
+  const [clashShown,  setClashShown]  = useState(false)
+  useEffect(() => { setClashShown(false) }, [startDate, endDate])
 
   // Recomputed whenever the date range changes — every day starts blank,
   // with no per-employee difference (see the module comment above for why).
@@ -328,7 +345,18 @@ export default function HolidayAbsenceDialog({
   // Skips straight to confirming when the visits-affected warning/choice
   // (step 2) doesn't apply to the calling flow — e.g. a leave request being
   // approved has no "visits already assigned" context to weigh in on.
+  const allClashes = findClashes ? findClashes(startDate, endDate) : []
+  const shareArea = (c) => areas.length === 0 || c.areas.some((a) => areas.includes(a))
+  const relevantClashes = allClashes.filter(shareArea)
+  // Everyone is listed, colleagues who share an area first.
+  const shownClashes = [...relevantClashes, ...allClashes.filter((c) => !shareArea(c))]
+  const areaText = areas.join(' or ')
+
   const handlePrimary = () => {
+    if (findClashes && !clashShown && relevantClashes.length > 0) {
+      setClashShown(true)
+      return
+    }
     if (showVisitsStep) {
       setStep(2)
     } else {
@@ -493,6 +521,35 @@ export default function HolidayAbsenceDialog({
             </div>
           )}
 
+          {clashShown && (
+            <div className="warning-banner orange clash-warning">
+              <WarningIcon />
+              <div>
+                <h4>Warning</h4>
+                <p>
+                  <strong>{`${shownClashes.length} ${shownClashes.length === 1 ? 'employee' : 'employees'}`}</strong>
+                  {` ${shownClashes.length === 1 ? 'is' : 'are'} off during these dates`}
+                  {areas.length > 0 && <>{' '}<strong>{`(${relevantClashes.length} in ${areaText})`}</strong></>}
+                  {'. '}You can still approve it, or change the dates.
+                </p>
+                <ul className="clash-list">
+                  {shownClashes.map((c) => (
+                    <li key={c.id}>
+                      <span className="clash-name">{c.employee}</span>
+                      <span className="clash-dates">{fmtClashDates(c.fromDate, c.toDate)}</span>
+                      <span className={`clash-status${c.status === 'Approved' ? '' : ' pending'}`}>{c.status === 'Approved' ? 'Approved' : 'Pending'}</span>
+                      <span className="clash-areas">
+                        {c.areas.length === 0
+                          ? <span className="clash-tag none">No area</span>
+                          : c.areas.map((a) => <span key={a} className={`clash-tag${areas.includes(a) ? ' shared' : ''}`}>{a}</span>)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           {noteField && (
             <div className="field">
               <label htmlFor="absence-note">{noteField.label}</label>
@@ -507,7 +564,7 @@ export default function HolidayAbsenceDialog({
           )}
 
           <div className="btn-row">
-            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={blocksApproval || hasBlankDay}>{primaryLabel}</button>
+            <button className="round-btn primary-btn" onClick={handlePrimary} disabled={blocksApproval || hasBlankDay}>{clashShown ? 'Approve anyway' : primaryLabel}</button>
           </div>
         </div>
       )}

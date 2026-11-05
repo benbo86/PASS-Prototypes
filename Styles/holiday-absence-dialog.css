@@ -156,3 +156,19 @@
   margin-bottom: 12px;
 }
 .day-plan-total strong { font-weight: 600; }
+
+/* Clash warning on Approve — everyone who's off, inside .warning-banner.orange.
+   Tags in the requester's own area are highlighted. */
+.warning-banner .clash-list { list-style: none; margin: 12px 0 0; padding: 0 8px 0 0; max-height: 296px; overflow-y: auto; }
+.warning-banner .clash-list li { display: flex; align-items: baseline; gap: 16px; padding: 4px 0; margin: 0; }
+.clash-name { flex: 0 0 152px; font-weight: 500; }
+.clash-dates { flex: 0 0 136px; }
+.clash-status { flex: 0 0 64px; }
+.clash-status.pending { color: #7b3306; font-weight: 600; }
+.clash-areas { flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px; }
+.clash-tag {
+  font-size: 12px; line-height: 16px; padding: 0 8px; border-radius: 8px;
+  background: var(--ui-purple-6-lavendar-grey); color: var(--greyscale-4-grey-40);
+}
+.clash-tag.shared { background: var(--brand-purple-6-purple-4); color: #fff; }
+.clash-tag.none { background: transparent; padding: 0; }
