@@ -5,6 +5,9 @@ import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
 import CustomerList from '../../../Components/CustomerList'
 import EmployeeList from '../../../Components/EmployeeList'
+import EmployeeProfile from '../../../Components/EmployeeProfile'
+import ScreenSlider from '../../../Components/ScreenSlider'
+import { OfflineToggle } from '../../../Components/FilesScreen'
 import { THREADS, UNREAD_MESSAGES_COUNT } from '../../../Components/messagesData'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -187,7 +190,7 @@ function CustomersTab() {
 // ─── Employees — shared list, Care Manager and above only ───────
 // Same treatment as the Customers tab: search always visible, so the bell
 // sits alone in the header. No add button (the live app has none).
-function EmployeesTab() {
+function EmployeesTab({ onSelectEmployee }) {
   const [query, setQuery] = useState('')
   return (
     <>
@@ -202,7 +205,7 @@ function EmployeesTab() {
           <input type="text" placeholder="Search employees..." value={query} onChange={e => setQuery(e.target.value)} />
         </div>
       </div>
-      <EmployeeList query={query} />
+      <EmployeeList query={query} onSelect={onSelectEmployee} />
     </>
   )
 }
@@ -277,7 +280,14 @@ export default function App() {
   const pageRef = useRef(null)
   const [role, setRoleState] = useState(() => readParam('role', ['carer', 'manager'], 'manager'))
   const [device, setDeviceState] = useState(() => readParam('device', ['standard', 'se'], 'standard'))
-  const [activeTab, setActiveTab] = useState('bookings')
+  const [activeTab, setActiveTabState] = useState('bookings')
+  // Employee profile (Employees tab): slides in over the list; Files opens over it.
+  const [employee, setEmployee] = useState(null)
+  const [shownEmployee, setShownEmployee] = useState(null)   // kept while sliding away
+  const [filesOpen, setFilesOpen] = useState(false)
+  const [offline, setOffline] = useState(false)
+  const setActiveTab = (t) => { setActiveTabState(t); setEmployee(null); setFilesOpen(false) }
+  const openEmployee = (e) => { setShownEmployee(e); setEmployee(e) }
 
   const setRole = r => {
     setRoleState(r)
@@ -305,6 +315,7 @@ export default function App() {
       </DevToolbar>
       <div className="phone-wrap">
         <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
+        <OfflineToggle offline={offline} onChange={setOffline} />
         <div className="mt-stack">
           <div className="mt-demo-controls">
             <span className="mt-demo-label">Role</span>
@@ -314,13 +325,31 @@ export default function App() {
           </div>
           <div className={`phone-frame${device === 'se' ? ' mt-phone-se' : ''}`} ref={pageRef}>
             <div className="screen-area">
+              {activeTab === 'employees' ? (
+                <ScreenSlider
+                  secondaryActive={!!employee}
+                  primary={<div className="screen"><EmployeesTab onSelectEmployee={openEmployee} /></div>}
+                  secondary={
+                    <div className="screen">
+                      <EmployeeProfile
+                        employee={shownEmployee}
+                        onBack={() => { setEmployee(null); setFilesOpen(false) }}
+                        filesOpen={filesOpen}
+                        onOpenFiles={() => setFilesOpen(true)}
+                        onCloseFiles={() => setFilesOpen(false)}
+                        offline={offline}
+                      />
+                    </div>
+                  }
+                />
+              ) : (
               <div className="screen">
                 {activeTab === 'bookings' && <BookingsTab />}
                 {activeTab === 'customers' && <CustomersTab />}
-                {activeTab === 'employees' && <EmployeesTab />}
                 {activeTab === 'messages' && <MessagesTab />}
                 {activeTab === 'account' && <AccountTab />}
               </div>
+              )}
             </div>
             <TabBar tabs={tabs} activeTab={activeTab} onSelect={setActiveTab} />
           </div>

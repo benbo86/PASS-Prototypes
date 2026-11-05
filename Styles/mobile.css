@@ -599,6 +599,7 @@ html.split-pane .phone-frame { transform: scale(var(--split-pane-scale, 1)); }
   color: #fff;
 }
 
+.employee-row--tappable { cursor: pointer; }
 .employee-row {
   display: flex;
   align-items: center;

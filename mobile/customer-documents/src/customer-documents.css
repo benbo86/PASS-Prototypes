@@ -643,25 +643,3 @@
   font-family: Barlow, sans-serif;
   font-size: 15px;
 }
-
-/* ─── Files (AIOP-25397) ───────────────────────────────────────── */
-.docs-file-row { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; font: inherit; }
-.docs-offline {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: 8px; padding: 48px 32px; color: var(--greyscale-6-grey-50);
-}
-.docs-offline h3 { margin: 8px 0 0; font-size: 18px; color: var(--greyscale-2-grey-20); }
-.docs-offline p { margin: 0; font-size: 14px; line-height: 1.5; }
-.docs-file-preview {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: 8px; padding: 48px 32px; color: var(--ui-purple-3-grape-grey);
-}
-.docs-file-preview > div:first-of-type { color: var(--greyscale-2-grey-20); font-weight: 600; }
-.docs-file-preview p { margin: 16px 0 0; font-size: 13px; color: var(--greyscale-6-grey-50); }
-/* Prototype control, outside the phone frame. */
-.docs-offline-toggle {
-  position: fixed; bottom: 24px; right: 24px; z-index: 5;
-  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
-  background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 24px;
-  font-family: Barlow, sans-serif; font-size: 14px; color: var(--greyscale-2-grey-20); cursor: pointer;
-}

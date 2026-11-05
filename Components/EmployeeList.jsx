@@ -17,9 +17,15 @@ const AvatarPlaceholder = () => (
   </svg>
 )
 
-function EmployeeRow({ employee, isYou }) {
+function EmployeeRow({ employee, isYou, onSelect }) {
   return (
-    <div className={`employee-row${isYou ? ' employee-row--you' : ''}`}>
+    <div
+      className={`employee-row${isYou ? ' employee-row--you' : ''}${onSelect ? ' employee-row--tappable' : ''}`}
+      onClick={onSelect ? () => onSelect(employee) : undefined}
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onKeyDown={onSelect ? (e) => { if (e.key === 'Enter') onSelect(employee) } : undefined}
+    >
       <AvatarPlaceholder />
       <div className="employee-row-text">
         <span className="employee-row-name">{employee.firstName} {employee.lastName}</span>
@@ -29,8 +35,9 @@ function EmployeeRow({ employee, isYou }) {
   )
 }
 
-// query: filters by name or role
-export default function EmployeeList({ employees = EMPLOYEES, currentId = CURRENT_EMPLOYEE_ID, query = '' }) {
+// query: filters by name or role. onSelect: optional; when given, rows are tappable
+// (the Messages tab opens the employee's profile).
+export default function EmployeeList({ employees = EMPLOYEES, currentId = CURRENT_EMPLOYEE_ID, query = '', onSelect }) {
   const q = query.trim().toLowerCase()
   const me = employees.find(e => e.id === currentId)
   const showMe = me && !q
@@ -54,13 +61,13 @@ export default function EmployeeList({ employees = EMPLOYEES, currentId = CURREN
       {showMe && (
         <section>
           <div className="employees-divider employees-divider--you">You</div>
-          <EmployeeRow employee={me} isYou />
+          <EmployeeRow employee={me} isYou onSelect={onSelect} />
         </section>
       )}
       {groups.map(g => (
         <section key={g.letter}>
           <div className="employees-divider">{g.letter}</div>
-          {g.employees.map(e => <EmployeeRow key={e.id} employee={e} isYou={e.id === currentId} />)}
+          {g.employees.map(e => <EmployeeRow key={e.id} employee={e} isYou={e.id === currentId} onSelect={onSelect} />)}
         </section>
       ))}
       {groups.length === 0 && <div className="customers-empty">No employees found</div>}
