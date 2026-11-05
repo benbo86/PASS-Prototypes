@@ -353,7 +353,7 @@ export default function HolidayAbsenceDialog({
   const areaText = areas.join(' or ')
 
   const handlePrimary = () => {
-    if (findClashes && !clashShown && relevantClashes.length > 0) {
+    if (findClashes && !clashShown && allClashes.length > 0) {
       setClashShown(true)
       return
     }
