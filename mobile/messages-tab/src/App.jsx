@@ -5,6 +5,7 @@ import SegmentedToggle from '../../../Components/SegmentedToggle'
 import { LegalFlags, HighRiskBadge } from '../../../Components/LegalFlags'
 import CustomerList from '../../../Components/CustomerList'
 import EmployeeList from '../../../Components/EmployeeList'
+import { EMPLOYEES } from '../../../Components/employeesData'
 import EmployeeProfile from '../../../Components/EmployeeProfile'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import { OfflineToggle, FoldersToggle } from '../../../Components/FilesScreen'
@@ -280,11 +281,20 @@ export default function App() {
   const pageRef = useRef(null)
   const [role, setRoleState] = useState(() => readParam('role', ['carer', 'manager'], 'manager'))
   const [device, setDeviceState] = useState(() => readParam('device', ['standard', 'se'], 'standard'))
-  const [activeTab, setActiveTabState] = useState('bookings')
+  // Deep link: ?tab=employees&employee=<id>&files=1 opens straight onto an
+  // employee's Files (managers only; the Employees tab doesn't exist for carers).
+  const linkParams = new URLSearchParams(window.location.search)
+  const linkedEmployee = role === 'manager' && linkParams.get('tab') === 'employees'
+    ? EMPLOYEES.find(e => String(e.id) === linkParams.get('employee')) || null
+    : null
+  const [activeTab, setActiveTabState] = useState(() => {
+    const t = readParam('tab', ['bookings', 'customers', 'employees', 'messages', 'account'], 'bookings')
+    return t === 'employees' && role !== 'manager' ? 'bookings' : t
+  })
   // Employee profile (Employees tab): slides in over the list; Files opens over it.
-  const [employee, setEmployee] = useState(null)
-  const [shownEmployee, setShownEmployee] = useState(null)   // kept while sliding away
-  const [filesOpen, setFilesOpen] = useState(false)
+  const [employee, setEmployee] = useState(linkedEmployee)
+  const [shownEmployee, setShownEmployee] = useState(linkedEmployee)   // kept while sliding away
+  const [filesOpen, setFilesOpen] = useState(!!linkedEmployee && linkParams.get('files') === '1')
   const [offline, setOffline] = useState(false)
   // Prototype-only switch: employee Files as one flat list (?folders=off) or with folders.
   const [showFolders, setShowFolders] = useState(() => new URLSearchParams(window.location.search).get('folders') !== 'off')
