@@ -33,7 +33,7 @@
 .employee-profile-chevron { flex-shrink: 0; display: flex; color: var(--greyscale-6-grey-50); }
 
 .employee-profile-fab {
-  position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
   display: flex; align-items: center; gap: 12px; padding: 14px 24px; border: 0; border-radius: 32px;
   background: var(--brand-purple-7-purple-5); color: #fff; font-family: Barlow, sans-serif;
   font-size: 16px; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap;
