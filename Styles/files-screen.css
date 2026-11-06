@@ -87,3 +87,4 @@
   background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 24px;
   font-family: Barlow, sans-serif; font-size: 14px; color: var(--greyscale-2-grey-20); cursor: pointer;
 }
+.files-folders-toggle { bottom: 72px; }

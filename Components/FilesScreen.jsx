@@ -7,12 +7,14 @@ import ScreenSlider from './ScreenSlider'
 // only while online. Shared by Customer Documents (a customer's files) and
 // My Documents (the signed-in employee's own files).
 //
-//   <FilesSheet open files folders offline urlPrefix onClose />
+//   <FilesSheet open files folders showFolders offline urlPrefix onClose />
 //
 // Slides up over whatever is behind it (closed with the X), keeps its content
 // while sliding away. Folders mirror the web (one level) but nothing here edits
 // them. Tapping a file opens a preview.
 //   urlPrefix  optional, e.g. '?section=files', so an open folder survives a reload
+//   showFolders  default true. False shows every file in one flat list, newest first
+//                (no folder cards, no folder tags): files ahead of the folders work.
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'heic', 'webp']
 const FILE_TYPE_PATHS = {
@@ -141,7 +143,8 @@ function useSlideUp() {
   }
 }
 
-function FilesScreen({ files: allFiles, folders, offline, urlPrefix, onClose }) {
+function FilesScreen({ files: allFiles, folders: allFolders, showFolders = true, offline, urlPrefix, onClose }) {
+  const folders = showFolders ? allFolders : []
   // Newest upload first, as on the web.
   const files = [...allFiles].sort((a, b) => b.uploaded.localeCompare(a.uploaded))
   const [folderId, setFolderId] = useState(() => {
@@ -163,13 +166,13 @@ function FilesScreen({ files: allFiles, folders, offline, urlPrefix, onClose }) 
     ? files.filter(f => `${f.name}.${f.extension}`.toLowerCase().includes(q))
         .map(f => ({ ...f, folderName: folders.find(fo => fo.id === f.folderId)?.name || null }))
     : []
-  const looseFiles = files.filter(f => !f.folderId)
+  const looseFiles = showFolders ? files.filter(f => !f.folderId) : files
   const row = (f) => <FileRow key={f.id} file={f} folderName={f.folderName} onOpen={() => openFile(f)} />
 
   return (
     <>
       <ScreenSlider
-        secondaryActive={!!folderId}
+        secondaryActive={!!openFolderObj}
         primary={
           <div className="files-root">
             <StatusBar />
@@ -258,6 +261,16 @@ export function OfflineToggle({ offline, onChange }) {
     <label className="files-offline-toggle">
       <input type="checkbox" checked={offline} onChange={e => onChange(e.target.checked)} />
       Simulate offline
+    </label>
+  )
+}
+
+// Prototype control, outside the phone: show files in folders or one flat list.
+export function FoldersToggle({ showFolders, onChange }) {
+  return (
+    <label className="files-offline-toggle files-folders-toggle">
+      <input type="checkbox" checked={showFolders} onChange={e => onChange(e.target.checked)} />
+      Show folders
     </label>
   )
 }

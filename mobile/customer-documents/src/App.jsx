@@ -9,7 +9,7 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import { CustomerHeader } from '../../../Components/CustomerMenu'
-import { FilesSheet, OfflineToggle } from '../../../Components/FilesScreen'
+import { FilesSheet, OfflineToggle, FoldersToggle } from '../../../Components/FilesScreen'
 import { CUSTOMERS } from '../../../Components/customersData'
 
 const ARTHUR = CUSTOMERS.find(c => c.id === 'arthur-barrington')
@@ -1527,6 +1527,8 @@ export default function App() {
   const [otherDocumentFolders, setOtherDocumentFolders] = useState(OTHER_DOCUMENT_FOLDERS)
   // Prototype-only switch (outside the phone) to show the Files offline state.
   const [offline, setOffline] = useState(() => new URLSearchParams(window.location.search).get('offline') === '1')
+  // Prototype-only switch: Files as one flat list (?folders=off) or with folders.
+  const [showFolders, setShowFolders] = useState(() => new URLSearchParams(window.location.search).get('folders') !== 'off')
 
   const openSection = (sec) => {
     history.pushState(null, '', `?section=${sec}`)
@@ -1552,6 +1554,7 @@ export default function App() {
       <div className="phone-wrap">
         <a href="../../" className="back-link"><ChevronLeftIcon size={16} /> Prototypes</a>
         <OfflineToggle offline={offline} onChange={setOffline} />
+        <FoldersToggle showFolders={showFolders} onChange={setShowFolders} />
         <div className="phone-frame" ref={pageRef}>
           <div className="screen-area">
             <DocumentsRootScreen onOpenSection={openSection} />
@@ -1580,7 +1583,7 @@ export default function App() {
                 <IncidentsScreen onClose={closeSection} />
               ) : null}
             </div>
-            <FilesSheet open={section === 'files'} files={FILES} folders={FILE_FOLDERS} offline={offline} urlPrefix="?section=files" onClose={closeSection} />
+            <FilesSheet open={section === 'files'} files={FILES} folders={FILE_FOLDERS} showFolders={showFolders} offline={offline} urlPrefix="?section=files" onClose={closeSection} />
           </div>
         </div>
       </div>

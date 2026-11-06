@@ -7,7 +7,7 @@ import CustomerList from '../../../Components/CustomerList'
 import EmployeeList from '../../../Components/EmployeeList'
 import EmployeeProfile from '../../../Components/EmployeeProfile'
 import ScreenSlider from '../../../Components/ScreenSlider'
-import { OfflineToggle } from '../../../Components/FilesScreen'
+import { OfflineToggle, FoldersToggle } from '../../../Components/FilesScreen'
 import { THREADS, UNREAD_MESSAGES_COUNT } from '../../../Components/messagesData'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
@@ -286,6 +286,8 @@ export default function App() {
   const [shownEmployee, setShownEmployee] = useState(null)   // kept while sliding away
   const [filesOpen, setFilesOpen] = useState(false)
   const [offline, setOffline] = useState(false)
+  // Prototype-only switch: employee Files as one flat list (?folders=off) or with folders.
+  const [showFolders, setShowFolders] = useState(() => new URLSearchParams(window.location.search).get('folders') !== 'off')
   const setActiveTab = (t) => { setActiveTabState(t); setEmployee(null); setFilesOpen(false) }
   const openEmployee = (e) => { setShownEmployee(e); setEmployee(e) }
 
@@ -316,6 +318,7 @@ export default function App() {
       <div className="phone-wrap">
         <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
         <OfflineToggle offline={offline} onChange={setOffline} />
+        <FoldersToggle showFolders={showFolders} onChange={setShowFolders} />
         <div className="mt-stack">
           <div className="mt-demo-controls">
             <span className="mt-demo-label">Role</span>
@@ -338,6 +341,7 @@ export default function App() {
                         onOpenFiles={() => setFilesOpen(true)}
                         onCloseFiles={() => setFilesOpen(false)}
                         offline={offline}
+                        showFolders={showFolders}
                       />
                     </div>
                   }

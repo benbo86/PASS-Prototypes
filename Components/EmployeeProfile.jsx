@@ -12,6 +12,7 @@ import { EMPLOYEE_DOCUMENTS, EMPLOYEE_FILES, EMPLOYEE_FILE_FOLDERS } from './emp
 //   onBack       back arrow
 //   filesOpen / onOpenFiles / onCloseFiles   Files sheet state, owned by the page
 //   offline      show the Files offline state
+//   showFolders  false = Files as one flat list (no folders)
 
 // Icons/Arrow Left.svg
 const ArrowLeftIcon = () => (
@@ -73,7 +74,7 @@ const AvatarPlaceholder = () => (
   </svg>
 )
 
-export default function EmployeeProfile({ employee, onBack, filesOpen, onOpenFiles, onCloseFiles, offline = false }) {
+export default function EmployeeProfile({ employee, onBack, filesOpen, onOpenFiles, onCloseFiles, offline = false, showFolders = true }) {
   if (!employee) return <div className="employee-profile" />
   return (
     <div className="employee-profile">
@@ -123,7 +124,7 @@ export default function EmployeeProfile({ employee, onBack, filesOpen, onOpenFil
 
       <button type="button" className="employee-profile-fab"><AddDocumentIcon /> ADD DOCUMENT</button>
 
-      <FilesSheet open={filesOpen} files={EMPLOYEE_FILES} folders={EMPLOYEE_FILE_FOLDERS} offline={offline} onClose={onCloseFiles} />
+      <FilesSheet open={filesOpen} files={EMPLOYEE_FILES} folders={EMPLOYEE_FILE_FOLDERS} showFolders={showFolders} offline={offline} onClose={onCloseFiles} />
     </div>
   )
 }
