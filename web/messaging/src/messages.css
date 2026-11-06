@@ -955,10 +955,6 @@ body { overflow: hidden; }
   color: var(--greyscale-8-grey-65);
 }
 
-.receipt-icon { display: block; }
-.receipt-read { color: var(--brand-purple-3-purple-2); }
-.receipt-delivered { color: var(--greyscale-10-grey-75); }
-.receipt-sent { color: var(--greyscale-10-grey-75); }
 
 /* ── Message action menu ─────────────────────────────────────── */
 .msg-action-menu {

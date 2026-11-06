@@ -127,6 +127,25 @@
       "usageCount": 2
     },
     {
+      "hash": "1360261d",
+      "name": "Cloud Offline",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z\" fill=\"#000000\"/>\n<line x1=\"2\" y1=\"3\" x2=\"22\" y2=\"21\" stroke=\"#000000\" stroke-width=\"2\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Cloud Offline.svg",
+          "name": "Cloud Offline"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#CloudOfflineIcon",
+          "name": "CloudOfflineIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
       "hash": "01a11259",
       "name": "Duplicate",
       "group": "Icons",
@@ -552,20 +571,6 @@
           "kind": "repo-file",
           "ref": "Icons/Close.svg",
           "name": "Close"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "1360261d",
-      "name": "Cloud Offline",
-      "group": "Icons",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z\" fill=\"#000000\"/>\n<line x1=\"2\" y1=\"3\" x2=\"22\" y2=\"21\" stroke=\"#000000\" stroke-width=\"2\"/>\n</svg>",
-      "sources": [
-        {
-          "kind": "repo-file",
-          "ref": "Icons/Cloud Offline.svg",
-          "name": "Cloud Offline"
         }
       ],
       "usageCount": 1
@@ -1397,6 +1402,20 @@
       "usageCount": 1
     },
     {
+      "hash": "9a049ac0",
+      "name": "Phone",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z\" fill=\"#000000\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Phone.svg",
+          "name": "Phone"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "c333be0a",
       "name": "Print",
       "group": "Icons",
@@ -1848,8 +1867,13 @@
       "hash": "977df25d",
       "name": "Chevron Left",
       "group": "Inline",
-      "svg": "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\"/>\n  </svg>",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z\"/>\n  </svg>",
       "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
         {
           "kind": "inline",
           "ref": "component-demos/customer-profile-nav/src/App.jsx#ChevronLeftIcon",
@@ -1966,7 +1990,7 @@
           "name": "ChevronLeftIcon"
         }
       ],
-      "usageCount": 23
+      "usageCount": 24
     },
     {
       "hash": "83e17a13",
@@ -2375,6 +2399,40 @@
       "usageCount": 5
     },
     {
+      "hash": "d9048ac6",
+      "name": "Close",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "customer-profile/assessments/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "office/customer-assessments/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "roster-settings/settings/src/App.jsx#RemoveIcon",
+          "name": "RemoveIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "web/messaging/src/App.jsx#CloseIcon",
+          "name": "CloseIcon"
+        }
+      ],
+      "usageCount": 5
+    },
+    {
       "hash": "fa7449ac",
       "name": "Calendar",
       "group": "Inline",
@@ -2432,35 +2490,6 @@
         {
           "kind": "inline",
           "ref": "customer-profile/communications/src/App.jsx#CloseIcon",
-          "name": "CloseIcon"
-        }
-      ],
-      "usageCount": 4
-    },
-    {
-      "hash": "d9048ac6",
-      "name": "Close",
-      "group": "Inline",
-      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/assessments/src/App.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "office/customer-assessments/src/App.jsx#CloseIcon",
-          "name": "CloseIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "roster-settings/settings/src/App.jsx#RemoveIcon",
-          "name": "RemoveIcon"
-        },
-        {
-          "kind": "inline",
-          "ref": "web/messaging/src/App.jsx#CloseIcon",
           "name": "CloseIcon"
         }
       ],
@@ -2587,6 +2616,25 @@
       "usageCount": 3
     },
     {
+      "hash": "6cc1c398",
+      "name": "Arrow Left",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M4.71969 12.6255L4.73999 12.6499C4.74414 12.6548 4.74834 12.6596 4.75259 12.6644L9.75259 18.2894C10.1195 18.7022 10.7516 18.7393 11.1644 18.3724C11.5771 18.0055 11.6143 17.3734 11.2474 16.9606L7.727 13L18.5 13C19.0523 13 19.5 12.5523 19.5 12C19.5 11.4477 19.0523 11 18.5 11L7.727 11L11.2474 7.03937C11.5861 6.65834 11.5805 6.09046 11.2529 5.71676L11.1644 5.6276C10.7516 5.26068 10.1195 5.29786 9.75259 5.71065L4.75259 11.3356L4.7402 11.3498C4.73323 11.358 4.72639 11.366 4.71969 11.3746L4.75259 11.3356C4.72265 11.3693 4.69538 11.4045 4.67076 11.441C4.65284 11.4675 4.63629 11.4947 4.62104 11.5227C4.61696 11.5303 4.61304 11.5377 4.60922 11.5452C4.59534 11.5722 4.58258 11.6003 4.5711 11.629C4.56781 11.6375 4.5647 11.6456 4.56169 11.6537C4.52179 11.7614 4.5 11.8782 4.5 12C4.5 12.1218 4.52179 12.2386 4.56167 12.3465C4.5647 12.3544 4.56781 12.3625 4.57103 12.3706C4.58258 12.3998 4.59534 12.4278 4.60932 12.4551C4.61304 12.4623 4.61696 12.4697 4.62098 12.4771C4.63629 12.5053 4.65284 12.5325 4.67061 12.5589L4.71969 12.6255Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/CustomerMenu.jsx#ArrowLeftIcon",
+          "name": "ArrowLeftIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#ArrowLeftIcon",
+          "name": "ArrowLeftIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
       "hash": "b4de1f7e",
       "name": "Calendar",
       "group": "Inline",
@@ -2601,6 +2649,25 @@
           "kind": "inline",
           "ref": "Components/HolidayAbsenceDialog.jsx#CalendarIcon",
           "name": "CalendarIcon"
+        }
+      ],
+      "usageCount": 2
+    },
+    {
+      "hash": "c3e41a24",
+      "name": "Avatar Placeholder",
+      "group": "Inline",
+      "svg": "<svg width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n    <circle cx=\"12\" cy=\"12\" r=\"12\" fill=\"#BDBDBD\" />\n    <circle cx=\"12\" cy=\"8.4\" r=\"3.8\" fill=\"currentColor\" />\n    <ellipse cx=\"12\" cy=\"17.4\" rx=\"6.6\" ry=\"3.8\" fill=\"currentColor\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeList.jsx#AvatarPlaceholder",
+          "name": "AvatarPlaceholder"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#AvatarPlaceholder",
+          "name": "AvatarPlaceholder"
         }
       ],
       "usageCount": 2
@@ -3209,6 +3276,20 @@
       "usageCount": 1
     },
     {
+      "hash": "58194fa5",
+      "name": "Key",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/CustomerMenu.jsx#KeyIcon",
+          "name": "KeyIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "63185bc5",
       "name": "Heartbeat",
       "group": "Inline",
@@ -3223,15 +3304,113 @@
       "usageCount": 1
     },
     {
-      "hash": "c3e41a24",
-      "name": "Avatar Placeholder",
+      "hash": "937f6fdd",
+      "name": "Phone",
       "group": "Inline",
-      "svg": "<svg width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">\n    <circle cx=\"12\" cy=\"12\" r=\"12\" fill=\"#BDBDBD\" />\n    <circle cx=\"12\" cy=\"8.4\" r=\"3.8\" fill=\"currentColor\" />\n    <ellipse cx=\"12\" cy=\"17.4\" rx=\"6.6\" ry=\"3.8\" fill=\"currentColor\" />\n  </svg>",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.03.74-.25 1.02z\" />\n  </svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "Components/EmployeeList.jsx#AvatarPlaceholder",
-          "name": "AvatarPlaceholder"
+          "ref": "Components/EmployeeProfile.jsx#PhoneIcon",
+          "name": "PhoneIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "6330721c",
+      "name": "Message",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#MessageIcon",
+          "name": "MessageIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "eedae0f4",
+      "name": "Email",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM19 18H5C4.45 18 4 17.55 4 17V8L10.94 12.34C11.59 12.75 12.41 12.75 13.06 12.34L20 8V17C20 17.55 19.55 18 19 18ZM12 11L4 6H20L12 11Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#EmailIcon",
+          "name": "EmailIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "8ef1b037",
+      "name": "Document Stack",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#DocumentStackIcon",
+          "name": "DocumentStackIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "dd5bf700",
+      "name": "Folder",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#FolderIcon",
+          "name": "FolderIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "8db7754c",
+      "name": "Chevron Right",
+      "group": "Inline",
+      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#ChevronRightIcon",
+          "name": "ChevronRightIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "409e77d6",
+      "name": "Complete Tick",
+      "group": "Inline",
+      "svg": "<svg width=\"28\" height=\"28\" viewBox=\"0 0 28 28\" aria-label=\"Complete\">\n    <circle cx=\"14\" cy=\"14\" r=\"14\" fill=\"#2f9e2f\" />\n    <path d=\"M8 14.5l4 4 8-8.5\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#CompleteTick",
+          "name": "CompleteTick"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "96cc981b",
+      "name": "Add Document",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"-5.07 -3 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/EmployeeProfile.jsx#AddDocumentIcon",
+          "name": "AddDocumentIcon"
         }
       ],
       "usageCount": 1
@@ -3358,6 +3537,48 @@
           "kind": "inline",
           "ref": "Components/EventPanel.jsx#PhoneIcon",
           "name": "PhoneIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "8d2d1de4",
+      "name": "File Type",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\">\n    <path />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#FileTypeIcon",
+          "name": "FileTypeIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "08660f9e",
+      "name": "Search",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"none\">\n    <path d=\"M10.8488372,18.6872093 C12.627907,18.6872093 14.2813953,18.0802326 15.6,17.0755814 L19.2209302,20.6965116 C19.4302326,20.905814 19.7023256,21.0104651 19.9534884,21.0104651 C20.2046512,21.0104651 20.4976744,20.905814 20.6860465,20.6965116 C21.1046512,20.277907 21.1046512,19.6290698 20.6860465,19.2104651 L17.0860465,15.5895349 C18.0906977,14.2709302 18.6976744,12.6174419 18.6976744,10.8383721 C18.6976744,6.50581395 15.1813953,2.98953488 10.8488372,2.98953488 C6.51627907,2.98953488 3,6.50581395 3,10.8383721 C3,15.1709302 6.51627907,18.6872093 10.8488372,18.6872093 Z M10.8488372,5.08255814 C14.0093023,5.08255814 16.6046512,7.65697674 16.6046512,10.8383721 C16.6046512,14.0197674 14.0093023,16.594186 10.8488372,16.594186 C7.68837209,16.594186 5.09302326,13.9988372 5.09302326,10.8383721 C5.09302326,7.67790698 7.66744186,5.08255814 10.8488372,5.08255814 Z\" fill=\"currentColor\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#SearchIcon",
+          "name": "SearchIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "e17de180",
+      "name": "Folder",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/FilesScreen.jsx#FolderIcon",
+          "name": "FolderIcon"
         }
       ],
       "usageCount": 1
@@ -5141,20 +5362,6 @@
       "usageCount": 1
     },
     {
-      "hash": "07024c5f",
-      "name": "Check Sent",
-      "group": "Inline",
-      "svg": "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "web/messaging/src/App.jsx#CheckSentIcon",
-          "name": "CheckSentIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "1764f46e",
       "name": "Eye",
       "group": "Inline",
@@ -5225,5 +5432,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-02T12:15:19.725Z"
+  "generatedAt": "2026-11-05T17:02:03.166Z"
 }

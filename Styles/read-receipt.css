@@ -1,0 +1,6 @@
+/* Message receipt icon — see Components/ReadReceipt.jsx.
+   Shared by web and mobile messaging so the colours always match. */
+.receipt-icon { display: block; flex-shrink: 0; }
+.receipt-sending { color: var(--greyscale-10-grey-75); }
+.receipt-sent { color: var(--greyscale-10-grey-75); }
+.receipt-read { color: var(--brand-purple-3-purple-2); }

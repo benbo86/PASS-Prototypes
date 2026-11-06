@@ -63,7 +63,7 @@ export const THREADS = [
     time: 'Mon',
     unread: false,
     sentByMe: true,
-    deliveredNotRead: true,
+    sentNotRead: true,
     archivedByCarer: false,
   },
 ]

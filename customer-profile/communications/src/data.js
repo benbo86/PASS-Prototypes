@@ -108,7 +108,7 @@ export const THREAD_MESSAGES = {
   2: [
     { id: 1, isMe: true, sender: 'Office', audience: 'all-care-staff', text: "Pat's family have asked that we keep a slightly closer eye on her medication timings going forward — nothing urgent, just flagging for awareness.", time: '11:10', date: '2026-07-29', receipt: 'read' },
     { id: 2, isMe: false, sender: 'Adrianna Yates', text: 'Thanks for the heads up, will do.', time: '11:40', date: '2026-07-29' },
-    { id: 3, isMe: true, sender: 'Office', audience: 'care-managers', text: "Quick note for managers — Pat's had a couple of slightly later medication rounds this month. Nothing serious, but worth keeping on file.", time: '09:30', date: '2026-08-13', receipt: 'delivered' },
+    { id: 3, isMe: true, sender: 'Office', audience: 'care-managers', text: "Quick note for managers — Pat's had a couple of slightly later medication rounds this month. Nothing serious, but worth keeping on file.", time: '09:30', date: '2026-08-13', receipt: 'sent' },
     { id: 4, isMe: false, sender: 'Grace Okafor', text: "Noted, thanks — I'll keep it in mind for her next review.", time: '09:52', date: '2026-08-13' },
     { id: 5, isMe: true, sender: 'Office', audience: 'all-care-staff', text: "Reminder to log Pat's medication times promptly during visits this week please.", time: '08:15', date: '2026-08-18', receipt: 'read' },
     { id: 6, isMe: false, sender: 'Priya Shah', text: 'Will do, thanks.', time: '08:22', date: '2026-08-18' },
@@ -124,7 +124,7 @@ export const THREAD_MESSAGES = {
   ],
   3: [
     { id: 1, isMe: false, sender: 'Mark Allin', text: "Hi, I wanted to raise something — Pat seemed a bit more forgetful than usual when I called her yesterday. Is this something you've noticed too?", time: '10:02', date: '2026-08-19' },
-    { id: 2, isMe: true, sender: 'Office', text: "Thanks for letting us know, Mark. We'll ask the care team to keep a closer eye on this during visits.", time: '14:30', date: '2026-08-19', receipt: 'delivered' },
+    { id: 2, isMe: true, sender: 'Office', text: "Thanks for letting us know, Mark. We'll ask the care team to keep a closer eye on this during visits.", time: '14:30', date: '2026-08-19', receipt: 'sent' },
     { id: 3, isMe: false, sender: 'Mark Allin', text: 'Did anything come up today?', time: '19:00', date: '2026-08-19' },
     { id: 4, isMe: true, sender: 'Office', text: "Yes, she was a bit confused about the time but nothing outside of what we'd expect — we'll keep a close eye on her.", time: '19:32', date: '2026-08-19' },
   ],

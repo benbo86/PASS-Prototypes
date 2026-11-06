@@ -9,6 +9,7 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import ReadReceipt from '../../../Components/ReadReceipt'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
@@ -137,16 +138,6 @@ const AddCircleIcon = ({ size = 32 }) => (
     <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12 6.75C12.552 6.75 13 7.198 13 7.75V11H16.25C16.802 11 17.25 11.448 17.25 12C17.25 12.552 16.802 13 16.25 13H13V16.25C13 16.802 12.552 17.25 12 17.25C11.448 17.25 11 16.802 11 16.25V13H7.75C7.198 13 6.75 12.552 6.75 12C6.75 11.448 7.198 11 7.75 11H11V7.75C11 7.198 11.448 6.75 12 6.75Z"/>
   </svg>
 )
-const CheckDoubleIcon = ({ read, size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={`receipt-icon ${read ? 'receipt-read' : 'receipt-delivered'}`}>
-    <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
-  </svg>
-)
-const CheckSentIcon = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className="receipt-icon receipt-sent">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-  </svg>
-)
 const TickIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -229,12 +220,12 @@ const THREAD_MESSAGES = {
     { id: 3, isMe: false, sender: 'Karen Ashworth', text: "No problem at all Adrianna, we'll sort it. Tom will cover your Friday 6th visit.", time: '4:02 PM', day: 'Yesterday' },
   ],
   4: [
-    { id: 1, isMe: true, text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'delivered' },
+    { id: 1, isMe: true, text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'sent' },
   ],
   5: [
     { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Photo from our CQC inspection, Well done everyone.", time: '10:01 AM', day: 'Today', attachments: [{ type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg }] },
     { id: 3, isMe: true, time: '10:12 AM', day: 'Today', receipt: 'read', attachments: [{ type: 'file', name: 'Timesheet_May_Week3.pdf', size: '56 KB' }] },
-    { id: 4, isMe: true, text: "Please find this week's timesheet attached.", time: '10:13 AM', day: 'Today', receipt: 'delivered', attachments: [{ type: 'file', name: 'Timesheet_May_Week4.pdf', size: '62 KB' }] },
+    { id: 4, isMe: true, text: "Please find this week's timesheet attached.", time: '10:13 AM', day: 'Today', receipt: 'sent', attachments: [{ type: 'file', name: 'Timesheet_May_Week4.pdf', size: '62 KB' }] },
     { id: 5, isMe: false, sender: 'Karen Ashworth', text: 'Please make sure everyone watches the Moving and Handling Guide for Carers.', time: '10:30 AM', day: 'Today', attachments: [{ type: 'video', name: 'Manual_Handling_Training.mp4', duration: '4:12', poster: handlingImg }] },
     { id: 6, isMe: false, sender: 'Karen Ashworth', text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
   ],
@@ -369,9 +360,7 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
               {isUnread
                 ? <span className="unread-badge" aria-label="Unread" />
                 : thread.sentByMe && (
-                    thread.deliveredNotRead
-                      ? <CheckSentIcon />
-                      : <CheckDoubleIcon read={true} />
+                    <ReadReceipt status={thread.sentNotRead ? 'sent' : 'read'} />
                   )
               }
             </div>
@@ -669,7 +658,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     } else {
       setLocalMsgs(prev => [...prev, {
         id: prev.length + 1, isMe: true, text,
-        time: 'Just now', day: 'Today', receipt: 'delivered',
+        time: 'Just now', day: 'Today', receipt: 'sent',
         ...(replyTo ? { replyTo } : {}),
       }])
       onMessageSent?.(text)
@@ -783,9 +772,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                   </div>
                   <div className="msg-meta">
                     <span className="msg-time">{msg.time}</span>
-                    {msg.isMe && msg.receipt === 'read' && <CheckDoubleIcon read={true} />}
-                    {msg.isMe && msg.receipt === 'delivered' && <CheckDoubleIcon read={false} />}
-                    {msg.isMe && !msg.receipt && <CheckSentIcon />}
+                    {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} />}
                   </div>
                 </div>
               )
@@ -1197,7 +1184,7 @@ export default function App() {
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, deliveredNotRead: true, unread: false, ...(wasArchived ? { archivedByCarer: false } : {}) },
+        { ...updated, lastSender: 'You', lastMessage: text, time: 'Just now', sentByMe: true, sentNotRead: true, unread: false, ...(wasArchived ? { archivedByCarer: false } : {}) },
         ...rest,
       ]
     })
@@ -1205,7 +1192,7 @@ export default function App() {
       ...prev,
       [activeThreadId]: [
         ...(prev[activeThreadId] || []),
-        { id: now, isMe: true, text, time: 'Just now', day: 'Today', receipt: 'delivered' },
+        { id: now, isMe: true, text, time: 'Just now', day: 'Today', receipt: 'sent' },
       ],
     }))
   }
@@ -1236,12 +1223,12 @@ export default function App() {
       time: 'Just now',
       unread: false,
       sentByMe: true,
-      deliveredNotRead: true,
+      sentNotRead: true,
     }
     setThreads(prev => [newThread, ...prev])
     setThreadMessages(prev => ({
       ...prev,
-      [newId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', receipt: 'delivered' }],
+      [newId]: [{ id: 1, isMe: true, text: message, time: 'Just now', day: 'Today', receipt: 'sent' }],
     }))
     history.pushState(null, '', `?thread=${slugifyThreadTitle(newThreadTitle)}`)
     setActiveThreadId(newId)

@@ -9,6 +9,7 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import ReadReceipt from '../../../Components/ReadReceipt'
 // ─── Icons ────────────────────────────────────────────────────
 
 const SearchIcon = () => (
@@ -76,16 +77,6 @@ const BroadcastIcon = ({ size = 20 }) => (
 const AttachIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 015 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 005 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
-  </svg>
-)
-const CheckDoubleIcon = ({ read }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className={`receipt-icon ${read ? 'receipt-read' : 'receipt-delivered'}`}>
-    <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
-  </svg>
-)
-const CheckSentIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="receipt-icon receipt-sent">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
   </svg>
 )
 const EyeIcon = () => (
@@ -362,7 +353,7 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Hi Adrianna, I wanted to check in about Margaret Thompson's care visit yesterday. Did she take her evening medication? She mentioned to her son that she thought she might have missed it.", time: '2:34 PM', day: 'Yesterday', receipt: 'read', editWindowExpired: true },
     { id: 2, isMe: false, sender: 'Adrianna Jackson', text: "Hi Karen, yes I was there until 5pm and she did take all her medication. I've attached my signed visit notes for reference.", time: '2:47 PM', day: 'Yesterday' },
     { id: 3, isMe: true, senderName: 'Karen Ashworth', text: "That's great, thank you! Her son has been a bit worried. Could you also let me know if she mentions any pain during your next visit? She has a GP appointment on Thursday.", time: '2:52 PM', day: 'Yesterday', receipt: 'read', editWindowExpired: true },
-    { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'delivered' },
+    { id: 4, isMe: true, senderName: 'Priya Shah', text: "Morning Adrianna, just a follow up on Margaret. Did you manage to speak with her son at the visit? We received a call from him this morning.", time: '9:15 AM', day: 'Today', receipt: 'sent' },
   ],
   5: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Please be aware of road closures on the A57 this week due to utility works near Hillsborough. Affected roads include A57 Penistone Road, Herries Road, and parts of Middlewood Road — works are expected to run until Friday. Please allow extra travel time on visits in that area.", time: '9:10 AM', day: 'Yesterday', recipients: generateRecipients(40, 47, 1500) },
@@ -1051,9 +1042,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                   </div>
                   <div className="msg-meta">
                     <span className="msg-time">{msg.time}</span>
-                    {msg.isMe && msg.receipt === 'read' && <CheckDoubleIcon read={true} />}
-                    {msg.isMe && msg.receipt === 'delivered' && <CheckDoubleIcon read={false} />}
-                    {msg.isMe && !msg.receipt && <CheckSentIcon />}
+                    {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} size={14} />}
                     {msg.isMe && thread.isBroadcast && msg.recipients && (
                       <button className="msg-read-count-inline" onClick={() => setReadStatusMsgId(msg.id)}>
                         {msg.recipients.filter(r => r.read).length}/{msg.recipients.length} <EyeIcon />
