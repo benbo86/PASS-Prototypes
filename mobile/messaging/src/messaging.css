@@ -899,6 +899,24 @@
   font-weight: 500;
 }
 
+/* ── Who can see this ────────────────────────────────────────── */
+.visibility-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  background: #fff;
+  color: var(--ui-purple-3-grape-grey);
+}
+.visibility-note svg { flex-shrink: 0; margin-top: 2px; }
+.visibility-note p {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--greyscale-4-grey-40);
+}
+
 /* ── Compose bar ─────────────────────────────────────────────── */
 .compose-bar {
   background: #fff;

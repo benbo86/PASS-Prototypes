@@ -833,7 +833,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
             <input
               ref={inputRef}
               className="compose-input"
-              placeholder="Message..."
+              placeholder="Message (All office staff will see this)"
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend() } }}
@@ -991,6 +991,12 @@ function ComposeScreen({ onBack, onSend, customers, totalUnread }) {
             <span className="compose-to-label">To:</span>
             <span>Office</span>
           </div>
+        </div>
+
+        {/* Who can see this — "Office" is more than one person */}
+        <div className="visibility-note">
+          <InfoIcon size={16} />
+          <p>Please note: Messages to the office can be seen by all office staff.</p>
         </div>
 
         <div className="compose-divider" />

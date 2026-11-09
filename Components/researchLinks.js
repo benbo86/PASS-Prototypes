@@ -12,9 +12,11 @@ export const RESEARCH_LINKS = {
   'web/messaging/': [
     { title: 'Messaging discovery — requirement coverage', href: 'research/messaging-coverage/' },
     { title: 'Message attachments research', href: 'research/message-attachments/' },
+    { title: 'Message privacy research', href: 'research/message-privacy/' },
   ],
   'mobile/messaging/': [
     { title: 'Message attachments research', href: 'research/message-attachments/' },
+    { title: 'Message privacy research', href: 'research/message-privacy/' },
     { title: 'Messaging discovery — requirement coverage', href: 'research/messaging-coverage/' },
   ],
   'mobile/holidays/': [

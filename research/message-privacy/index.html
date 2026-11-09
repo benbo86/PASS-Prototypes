@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Message privacy research</title>
+<style>
+  :root {
+    --bg: #f6f4f9;
+    --surface: #ffffff;
+    --surface-soft: #fbfafd;
+    --ink: #221e2e;
+    --ink-soft: #5b5568;
+    --ink-faint: #948d9f;
+    --accent: #6b3fa0;
+    --accent-soft: #efe9f7;
+    --line: #e3dfea;
+    --good: #2f7a57;
+    --good-bg: #e5f3ec;
+    --warn: #9c6b1f;
+    --warn-bg: #fbf1de;
+    --serif: Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17141f;
+      --surface: #1e1a29;
+      --surface-soft: #221e2e;
+      --ink: #ece8f2;
+      --ink-soft: #b3aac2;
+      --ink-faint: #7c7390;
+      --accent: #b58ee0;
+      --accent-soft: #2c2440;
+      --line: #322b41;
+      --good: #6fcf9c;
+      --good-bg: #1c2f26;
+      --warn: #e0b76a;
+      --warn-bg: #332a17;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17141f;
+    --surface: #1e1a29;
+    --surface-soft: #221e2e;
+    --ink: #ece8f2;
+    --ink-soft: #b3aac2;
+    --ink-faint: #7c7390;
+    --accent: #b58ee0;
+    --accent-soft: #2c2440;
+    --line: #322b41;
+    --good: #6fcf9c;
+    --good-bg: #1c2f26;
+    --warn: #e0b76a;
+    --warn-bg: #332a17;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    margin: 0;
+    padding: 56px 16px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* Hand-styled to match the shared .back-link (this page doesn't load main.css). */
+  .back-link {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #9a26d6;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .back-link:hover { background: #8421b8; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+  .dek { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 16px; }
+  .meta { font-size: 13px; color: var(--ink-faint); margin: 0 0 24px; }
+  .meta a { color: var(--accent); }
+
+  /* Section nav — one pill per research type on this page. */
+  .section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 8px;
+    background: var(--bg);
+  }
+  .section-nav a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 16px;
+    padding: 6px 14px;
+    text-decoration: none;
+  }
+  .section-nav a span { font-weight: 400; color: var(--ink-soft); margin-left: 4px; }
+
+  .research-section { scroll-margin-top: 64px; }
+  .research-section + .research-section { border-top: 1px solid var(--line); margin-top: 56px; }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 40px 0 8px;
+  }
+  .section-lede { color: var(--ink-soft); margin: 0 0 16px; max-width: 64ch; }
+
+  h3.sub {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 32px 0 8px;
+  }
+  h3.sub .num { color: var(--accent); margin-right: 8px; }
+
+  .cards { display: grid; gap: 12px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .card h4 { font-size: 15px; margin: 0 0 4px; }
+  .card h4 .tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: 2px;
+  }
+  .card p { margin: 4px 0 0; font-size: 14px; color: var(--ink-soft); }
+  .card p b, .card li b { color: var(--ink); font-weight: 600; }
+  .card blockquote, .session blockquote {
+    margin: 8px 0 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--line);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* Customer sessions */
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .session-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 4px; }
+  .session-head h4 { font-size: 18px; margin: 0; }
+  .session-date { font-size: 13px; color: var(--ink-faint); }
+  .session-context { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+  .session h5 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 16px 0 6px;
+  }
+  .session ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .session li { margin: 4px 0; }
+
+  .themes { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .themes li { border-radius: 10px; padding: 14px 18px; font-size: 14px; background: var(--good-bg); }
+  .themes li.differ { background: var(--warn-bg); }
+  .themes b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+  .takeaways { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .takeaways li { background: var(--good-bg); border-radius: 10px; padding: 16px 20px; font-size: 14px; }
+  .takeaways b { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--surface-soft); font-weight: 600; font-size: 13px; color: var(--ink-soft); }
+  tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; }
+
+  .sources { font-size: 13px; color: var(--ink-soft); padding-left: 20px; }
+  .sources a { color: var(--accent); word-break: break-word; }
+  .caveat { font-size: 13px; color: var(--ink-faint); margin-top: 8px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 10px; padding: 2px 8px; }
+  .pill.for { background: var(--good-bg); color: var(--good); }
+  .pill.against { background: var(--warn-bg); color: var(--warn); }
+  .pill.none { background: var(--accent-soft); color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<a href="../../" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  Prototypes
+</a>
+<div class="page">
+  <div class="eyebrow">Research · Staff messaging</div>
+  <h1>Message privacy research</h1>
+  <p class="dek">What customers have said about who can see a message sent to the office, and the gap between who a carer thinks they're writing to and who can actually read it.</p>
+  <p class="meta">Last updated 9 November 2026. Part of the wider <a href="../messaging-coverage/">messaging discovery and requirement coverage</a>. Linked from <a href="../../web/messaging/">Staff Messaging (web)</a> and <a href="../../mobile/messaging/">Staff Messaging (mobile app)</a>.</p>
+
+  <nav class="section-nav" aria-label="Research sections">
+    <a href="#customer-discovery">Customer discovery <span>1 customer</span></a>
+    <a href="#support-cases">Support cases <span>1 case</span></a>
+  </nav>
+
+  <!-- ─── Customer discovery ─────────────────────────────────────── -->
+  <section class="research-section" id="customer-discovery">
+    <h2 class="section-title">Customer discovery</h2>
+    <p class="section-lede">Feedback received in November 2026 from one customer, also logged as the support case below. Treat the themes as a starting point, not a pattern.</p>
+
+    <h3 class="sub">What we've heard so far</h3>
+    <ul class="themes">
+      <li class="differ"><b>A carer can believe they're messaging a manager directly</b>A message to the office can be seen by more than one office user. That matches how permissions work today, but it isn't what a carer may expect.</li>
+      <li class="differ"><b>Some conversations need to stay private</b>The examples given were welfare or wellbeing concerns, personal issues affecting work, grievances or complaints, and sensitive HR conversations.</li>
+    </ul>
+
+    <h3 class="sub">Sessions</h3>
+
+    <article class="session">
+      <div class="session-head">
+        <h4>ISSAC, Care Co-ordinator</h4>
+        <span class="session-date">November 2026</span>
+      </div>
+      <p class="session-context">Written feedback on the new two-way messaging, not a prototype session. They support the feature overall.</p>
+      <h5>Concern</h5>
+      <ul>
+        <li>When a carer sends a message to the office, several office users can potentially see it.</li>
+        <li>This works as designed and follows the current permissions model, but the customer sees a gap between what a carer expects and what happens.</li>
+        <li>A carer may want to speak privately to a specific manager or supervisor about a sensitive matter, and may think "Office" is that person.</li>
+      </ul>
+      <h5>Examples they gave</h5>
+      <ul>
+        <li>Welfare or wellbeing concerns.</li>
+        <li>Personal issues affecting work.</li>
+        <li>Grievances or complaints.</li>
+        <li>Sensitive HR-related conversations.</li>
+      </ul>
+    </article>
+
+    <h3 class="sub">What this means for the prototypes</h3>
+    <ul class="takeaways">
+      <li><b>Say who can see a message.</b>The web prototype already tells the sender when they compose or reply. The app now does the same: a note under "To: Office" on a new message, and a reminder above the reply box in a conversation.</li>
+      <li><b>The customer is asking for a private route, not just a notice.</b>The case asks for one-to-one messages between a carer and a named office user, kept private from the wider office. A notice stops people expecting privacy, but it doesn't give them somewhere private to go. A private route would change who can see a conversation and how replies are routed, so it isn't in the prototypes yet.</li>
+      <li><b>Not yet known.</b>Whether other customers want this, and whether they'd rather have a private route in messaging or handle these conversations elsewhere.</li>
+    </ul>
+    <p class="caveat">Feedback is summarised from a written note, not a transcript.</p>
+  </section>
+  <!-- ─── Support cases ──────────────────────────────────────────── -->
+  <section class="research-section" id="support-cases">
+    <h2 class="section-title">Support cases</h2>
+    <p class="section-lede">The Salesforce case logged for the feedback above. A wider search for other cases hasn't been done yet.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h4>ISSAC <span class="tag">Case 00224696 · November 2026 · MRR £600.60</span></h4>
+        <p>Asks for private one-to-one messaging between carers and specific office users, so a sensitive conversation isn't visible to the wider office. Named recipients included care managers, registered managers, supervisors, designated office contacts and super users.</p>
+        <p>The customer wants conversations to stay private between the sender and the person they chose, for sensitive personal matters, welfare concerns, employment issues and confidential conversations, while keeping audit controls and safeguarding requirements in place.</p>
+      </div>
+    </div>
+    <p class="caveat">Source: <a href="https://everylife.lightning.force.com/lightning/r/Case/500Sf00000i4sV8IAI/view">Salesforce case 00224696</a>.</p>
+  </section>
+</div>
+</body>
+</html>
