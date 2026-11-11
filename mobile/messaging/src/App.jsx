@@ -236,11 +236,12 @@ const THREAD_MESSAGES = {
     { id: 1, isMe: true, text: "Hi, I'd like to request annual leave from 14th July to 18th July if possible. Happy to discuss if needed.", time: 'Mon 9:20 AM', day: 'Monday', receipt: 'sent' },
   ],
   5: [
-    { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Photo from our CQC inspection, Well done everyone.", time: '10:01 AM', day: 'Today', attachments: [{ type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg }] },
-    { id: 3, isMe: true, time: '10:12 AM', day: 'Today', receipt: 'read', attachments: [{ type: 'file', name: 'Timesheet_May_Week3.pdf', size: '56 KB' }] },
-    { id: 4, isMe: true, text: "Please find this week's timesheet attached.", time: '10:13 AM', day: 'Today', receipt: 'sent', attachments: [{ type: 'file', name: 'Timesheet_May_Week4.pdf', size: '62 KB' }] },
-    { id: 5, isMe: false, sender: 'Karen Ashworth', text: 'Please make sure everyone watches the Moving and Handling Guide for Carers.', time: '10:30 AM', day: 'Today', attachments: [{ type: 'video', name: 'Manual_Handling_Training.mp4', duration: '4:12', poster: handlingImg }] },
-    { id: 6, isMe: false, sender: 'Karen Ashworth', text: 'Please see the training video above.', time: '10:35 AM', day: 'Today' },
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: 'Morning! How did the CQC visit go?', time: '9:58 AM', day: 'Today' },
+    { id: 2, isMe: true, text: 'Really well, the inspector rated us Good. Here are a couple of photos from this morning.', time: '10:01 AM', day: 'Today', receipt: 'read', attachments: [
+      { type: 'image', name: 'CQC_Inspection.jpg', src: cqcImg },
+      { type: 'image', name: 'Moving_and_handling.jpg', src: handlingImg },
+    ] },
+    { id: 3, isMe: false, sender: 'Karen Ashworth', text: 'Brilliant, well done everyone! Could you send a clearer team photo for the noticeboard when you can?', time: '10:05 AM', day: 'Today' },
   ],
 }
 
