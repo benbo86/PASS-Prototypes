@@ -198,6 +198,12 @@ export default function App() {
   // there's no "navigate back," closing means asking the parent page to
   // remove the iframe, via postMessage.
   const isEmbedded = new URLSearchParams(window.location.search).get('embedded') === '1'
+  // ?view=<id> opens one shared wireframe read-only (the public share link).
+  const viewId = new URLSearchParams(window.location.search).get('view')
+  const viewOnly = !!viewId
+  const [viewStatus, setViewStatus] = useState(viewOnly ? 'loading' : null) // 'loading' | 'missing' | null
+  const viewLoadedRef = useRef(0)
+  const viewTokenRef = useRef(0)
 
   // The one place "leaving this tool" actually happens, however it was
   // reached — every exit call-site (Discard, a save the exit flow
@@ -592,6 +598,34 @@ export default function App() {
     return unsub
   }, [])
 
+  // View-only link: once the shared list arrives, load the one wireframe.
+  // performLoad is defined further down, so call it through a ref-free
+  // inline version here (no dirty-check needed — nothing can be unsaved).
+  useEffect(() => {
+    if (!viewOnly) return
+    const match = firestoreFiles.find((f) => f.id === viewId)
+    if (!match) {
+      // The first snapshot can be empty/partial; only give up once the list has content.
+      if (firestoreFiles.length > 0) setViewStatus('missing')
+      return
+    }
+    // Reload whenever the shared copy's save time changes, so an open view
+    // link follows edits live. Ignore results that arrive out of order.
+    const ms = match.updatedAt?.toMillis?.() ?? 0
+    if (viewLoadedRef.current && ms === viewLoadedRef.current) return
+    viewLoadedRef.current = ms || 1
+    const token = ++viewTokenRef.current
+    ;(async () => {
+      const { elements: loadedElements } = await hydrateImages(match.elements || [])
+      if (token !== viewTokenRef.current) return
+      setElements(loadedElements)
+      savedSnapshotRef.current = loadedElements
+      setWireframeName(match.name || 'Untitled')
+      setCurrentFirestoreId(match.id)
+      setViewStatus(null)
+    })()
+  }, [viewOnly, viewId, firestoreFiles])
+
   // Best-effort secondary safety net for an actual tab close/refresh/typed-
   // URL navigation — browsers always show their own generic wording here
   // regardless of any custom string, so this is not the primary UX; the
@@ -653,6 +687,7 @@ export default function App() {
   // icon, see Toolbar.jsx).
   useEffect(() => {
     function handleKeyDown(e) {
+      if (viewOnly) return
       // A non-text control (the font panel's colour-picker/number inputs,
       // a <select>) staying focused after use must NOT count as "typing" —
       // otherwise, e.g., picking a custom text colour leaves the colour
@@ -1229,7 +1264,8 @@ export default function App() {
   // changes → autosave pauses and the banner asks. Deleted elsewhere →
   // autosave pauses rather than quietly recreating it.
   useEffect(() => {
-    if (!currentFirestoreId) return
+    // The view-only link has its own reload (above) and nothing to conflict with.
+    if (!currentFirestoreId || viewOnly) return
     const remote = firestoreFiles.find((f) => f.id === currentFirestoreId)
     if (!remote) {
       if (seenInListRef.current && deletingIdRef.current !== currentFirestoreId) setRemoteConflict({ kind: 'deleted' })
@@ -1307,16 +1343,24 @@ export default function App() {
   const commentsKey = currentFirestoreId ? `wireframe:${currentFirestoreId}` : null
 
   return (
-    <div className="wf-page">
+    <div className={`wf-page${viewOnly ? ' wf-viewonly' : ''}`}>
+      {viewOnly && (
+        <div className="wf-view-bar">
+          <span className="wf-view-name">{wireframeName || 'Wireframe'}</span>
+          <span className="wf-view-tag">View only</span>
+        </div>
+      )}
+      {viewOnly && viewStatus === 'loading' && <div className="wf-view-message">Loading wireframe…</div>}
+      {viewOnly && viewStatus === 'missing' && <div className="wf-view-message">This wireframe isn’t available. It may have been deleted.</div>}
       {/* No back-link at all when embedded in a prototype's modal (see
           Components/WireframeToggle.jsx) — the modal's own close button is
           the affordance there; a "← Prototypes" link inside an iframe that
           isn't really the prototype index would be confusing. */}
-      {!isEmbedded && (
+      {!isEmbedded && !viewOnly && (
         <a href="../../" className="wf-back-link" onClick={handleBackLinkClick}>← Prototypes</a>
       )}
 
-      <WireframeMenu
+      {!viewOnly && <WireframeMenu
         wireframeName={wireframeName}
         setWireframeName={setWireframeName}
         menuOpen={menuOpen}
@@ -1332,7 +1376,8 @@ export default function App() {
         saveLabel={saveLabel}
         saveHint={saveHint}
         error={saveError}
-      />
+        shareUrl={currentFirestoreId ? `${window.location.origin}${window.location.pathname}?view=${currentFirestoreId}` : null}
+      />}
 
       <Canvas
         canvasRef={canvasRef}
@@ -1374,7 +1419,7 @@ export default function App() {
         onDropFiles={handleDropFiles}
       />
 
-      {remoteConflict && (
+      {remoteConflict && !viewOnly && (
         <div className="wf-remote-banner" role="status">
           {remoteConflict.kind === 'changed' ? (
             <>
@@ -1392,7 +1437,7 @@ export default function App() {
         </div>
       )}
 
-      <div className="wf-comments-dock">
+      {!viewOnly && <div className="wf-comments-dock">
         {commentsKey ? (
           <DevComments
             key={commentsKey}
@@ -1408,12 +1453,12 @@ export default function App() {
             </svg>
           </button>
         )}
-      </div>
+      </div>}
 
-      <Toolbar
+      {!viewOnly && <Toolbar
         activeTool={activeTool}
         setActiveTool={setActiveTool}
-      />
+      />}
 
       {showExitPrompt && (
         <div className="wf-context-backdrop" onMouseDown={() => setShowExitPrompt(false)}>

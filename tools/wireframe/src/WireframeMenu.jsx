@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Replaces the old top-right FileControls bar (Save/Load dropdown/New) per
 // Ben's own wireframe (wireframes/wireframe-nav.json): a hamburger toggle +
@@ -84,7 +84,18 @@ export default function WireframeMenu({
   saveLabel,
   saveHint,
   error,
+  shareUrl,
 }) {
+  const [copied, setCopied] = useState(false)
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      window.prompt('Copy this link', shareUrl)
+    }
+  }
   const toggleRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -131,6 +142,14 @@ export default function WireframeMenu({
           onClick={onSave}
         >
           {saveLabel === 'saving' ? 'Saving…' : saveLabel === 'saved' || justSaved ? (<><CheckIcon /> Saved</>) : 'Save'}
+        </button>
+        <button
+          className="wf-tool-btn"
+          disabled={!shareUrl}
+          onClick={copyShare}
+          title={shareUrl ? 'Copy a public view-only link' : 'Save this wireframe first to get a link'}
+        >
+          {copied ? 'Link copied' : 'Share'}
         </button>
         {saveHint && <span className="wf-save-hint">{saveHint}</span>}
         {error && <span className="wf-toolbar-error">{error}</span>}

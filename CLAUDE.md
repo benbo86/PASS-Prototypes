@@ -1458,3 +1458,9 @@ Ben: "Is it possible to have an auto save function?" then "Sounds good, please g
   A wireframe deleted elsewhere (it disappears from the live list after having been seen there) pauses autosave and offers **Close it / Save as a new copy**. An autosave that hits `not-found` does the same instead of recreating it. Last write still wins if two people save within the same couple of seconds; this isn't real-time co-editing.
 - **The local backup only sends images it hasn't already written** (`localImagesWrittenRef`), so autosave doesn't resend image data every time.
 - **Verified signed out only:** a new wireframe doesn't autosave or prompt, manual Save opens the gate, there are no console errors, and the build is clean. Every signed-in path (the autosave timing, the remote change/delete banners) needs the shared password and was **not** exercised.
+
+### v26 — public view-only share link
+
+A **Share** button in the top bar (enabled once a wireframe has been saved) copies `tools/wireframe/?view=<firestoreId>`. That URL opens the one wireframe read-only: no menu, toolbar, comments, back-link or keyboard shortcuts, and the canvas ignores clicks (`.wf-viewonly .wf-canvas { pointer-events: none }`), so viewers can only scroll and Ctrl/⌘-scroll to zoom. It needs no sign-in, because `wireframe_saves` and `wireframe_images` already allow open reads. **Caveat:** the link isn't a secret. The editor page lists every shared wireframe, so anyone on the public site can already open any of them. Verified via Playwright: link copied, view page shows the elements with no editing chrome, an unknown id shows "isn't available", no console errors, build clean.
+
+**View link follows edits.** The `?view=` page reloads the wireframe whenever its shared copy's `updatedAt` changes (live Firestore snapshot), so an open link updates when someone saves. Not verified end to end, since a real save needs the shared password.
