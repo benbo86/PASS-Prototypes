@@ -1422,6 +1422,34 @@
       "usageCount": 1
     },
     {
+      "hash": "e6e8db4e",
+      "name": "Camera",
+      "group": "Staff Messaging",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#CameraIcon",
+          "name": "CameraIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "c4704386",
+      "name": "Warning",
+      "group": "Staff Messaging",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "mobile/messaging/src/App.jsx#WarningIcon",
+          "name": "WarningIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "236a0c55",
       "name": "Reply",
       "group": "Staff Messaging",
@@ -1800,5 +1828,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-05T17:01:24.480Z"
+  "generatedAt": "2026-11-11T11:37:58.131Z"
 }

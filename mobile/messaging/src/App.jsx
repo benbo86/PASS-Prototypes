@@ -10,6 +10,8 @@ import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import ReadReceipt from '../../../Components/ReadReceipt'
+import SegmentedToggle from '../../../Components/SegmentedToggle'
+import AlertDialog from '../../../Components/AlertDialog'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
@@ -94,6 +96,17 @@ const PersonIcon = ({ size = 20 }) => (
 const EditActionIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+  </svg>
+)
+const CameraIcon = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+  </svg>
+)
+// Path copied from Icons/Warning.svg
+const WarningIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z"/>
   </svg>
 )
 const DeleteActionIcon = ({ size = 20 }) => (
@@ -438,10 +451,17 @@ function InboxScreen({ threads, onOpenThread, onToggleArchive, onCompose, onBack
 
 // ─── Attachment ──────────────────────────────────────────────
 
-const Attachment = ({ attachment, isMe, onPreview }) => {
+const Attachment = ({ attachment, isMe, onPreview, uploadState }) => {
   if (attachment.type === 'image') {
     return (
-      <div className="msg-attachment-image" onClick={onPreview}>
+      <div className={`msg-attachment-image${uploadState ? ` msg-attachment-image--${uploadState}` : ''}`} onClick={uploadState ? undefined : onPreview}>
+        {uploadState && (
+          <div className="msg-upload-overlay">
+            {uploadState === 'uploading' && <span className="msg-upload-spinner" aria-label="Uploading" />}
+            {uploadState === 'queued' && <ReadReceipt status="sending" size={24} />}
+            {uploadState === 'failed' && <WarningIcon size={24} />}
+          </div>
+        )}
         {attachment.src
           ? <img src={attachment.src} alt={attachment.name} className="msg-attachment-real-img" />
           : <><PhotoIcon size={34} /><span className="msg-attachment-image-name">{attachment.name}</span></>
@@ -595,7 +615,30 @@ function AttachmentPreview({ attachment, onClose }) {
 
 // ─── Thread Screen ───────────────────────────────────────────
 
-const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onToggleArchive, onMessageDeleted, totalUnread, onOpenActions, onCloseActions }, ref) {
+// Stand-ins for what a carer would pick or shoot. Photo Library adds two (to show
+// several in one message), Take Photo adds one.
+const SAMPLE_PHOTOS = [
+  { src: cqcImg, name: 'Photo.jpg' },
+  { src: handlingImg, name: 'Photo.jpg' },
+]
+const UPLOAD_MS = 1800
+
+const UPLOAD_OUTCOME_OPTIONS = [
+  { value: 'online', label: 'Sends' },
+  { value: 'offline', label: 'Offline' },
+  { value: 'error', label: 'Fails' },
+]
+
+// Only photos are shown for now. File and video attachments are kept in the
+// data and the components, just hidden. Turn this on to bring them back.
+const SHOW_FILE_AND_VIDEO_ATTACHMENTS = false
+
+const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack, onMessageSent, onMarkUnread, onToggleArchive, onMessageDeleted, totalUnread, onOpenActions, onCloseActions, connection }, ref) {
+  const [staged, setStaged] = useState([])
+  const [cameraWarningSeen, setCameraWarningSeen] = useState(false)
+  const [showCameraWarning, setShowCameraWarning] = useState(false)
+  const connectionRef = useRef(connection)
+  const timersRef = useRef([])
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -608,6 +651,9 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
   const endRef = useRef(null)
   const inputRef = useRef(null)
   const screenRef = useRef(null)
+
+  connectionRef.current = connection
+  useEffect(() => () => timersRef.current.forEach(clearTimeout), [])
 
   // Sync derived state: reset localMsgs immediately when thread changes (no stale-render flash)
   if (prevThreadId !== thread?.id) {
@@ -627,6 +673,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     setShowAttach(false)
     setInfoMenuOpen(false)
     setPreviewAttachment(null)
+    setStaged([])
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'auto' }), 0)
   }, [thread?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -636,6 +683,33 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     deleteMessage:  (msg) => { setLocalMsgs(prev => prev.filter(m => m.id !== msg.id)); onMessageDeleted?.(msg.id) },
     dismissAll:     ()    => { setShowAttach(false); setInfoMenuOpen(false); setPreviewAttachment(null) },
   }))
+
+  // Photo sending: a message with photos goes "uploading" -> sent. Offline holds it as
+  // "queued" until the connection is back; an upload error leaves it "failed" with
+  // Retry / Delete. Text-only messages send instantly, as before.
+  const patchMsg = (id, patch) => setLocalMsgs(prev => prev.map(m => m.id === id ? { ...m, ...patch } : m))
+
+  const runUpload = (id, text, count) => {
+    patchMsg(id, { upload: 'uploading', receipt: 'sending' })
+    const t = setTimeout(() => {
+      const mode = connectionRef.current
+      if (mode === 'online') {
+        patchMsg(id, { upload: undefined, receipt: 'sent', time: 'Just now' })
+        onMessageSent?.(text || (count > 1 ? `${count} photos` : 'Photo'))
+      } else if (mode === 'offline') {
+        patchMsg(id, { upload: 'queued', receipt: 'sending' })
+      } else {
+        patchMsg(id, { upload: 'failed', receipt: 'sending' })
+      }
+    }, UPLOAD_MS)
+    timersRef.current.push(t)
+  }
+
+  // Back online: anything held while offline goes out
+  useEffect(() => {
+    if (connection !== 'online') return
+    localMsgs.filter(m => m.upload === 'queued').forEach(m => runUpload(m.id, m.text, m.attachments?.length || 0))
+  }, [connection]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!thread) return <div className="screen" />
 
@@ -651,10 +725,22 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
 
   const handleSend = () => {
     const text = inputText.trim()
-    if (!text) return
+    if (!text && staged.length === 0) return
     if (editing) {
       setLocalMsgs(prev => prev.map(m => m.id === editing.id ? { ...m, text, edited: true } : m))
       setEditing(null)
+    } else if (staged.length > 0) {
+      const id = Date.now()
+      const photos = staged
+      setLocalMsgs(prev => [...prev, {
+        id, isMe: true, text,
+        time: 'Just now', day: 'Today', receipt: 'sending',
+        upload: connectionRef.current === 'offline' ? 'queued' : 'uploading',
+        attachments: photos.map(p => ({ type: 'image', name: p.name, src: p.src })),
+        ...(replyTo ? { replyTo } : {}),
+      }])
+      setStaged([])
+      if (connectionRef.current !== 'offline') runUpload(id, text, photos.length)
     } else {
       setLocalMsgs(prev => [...prev, {
         id: prev.length + 1, isMe: true, text,
@@ -666,6 +752,18 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     setInputText('')
     setReplyTo(null)
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+  }
+
+  const stagePhotos = (n) => {
+    setStaged(prev => [...prev, ...Array.from({ length: n }, (_, i) => ({ ...SAMPLE_PHOTOS[(prev.length + i) % SAMPLE_PHOTOS.length], id: `${Date.now()}-${i}` }))])
+    setShowAttach(false)
+  }
+
+  // Same warning, and wording, as the Slips/trips & falls incident form. Shown once per session.
+  const handleTakePhoto = () => {
+    if (cameraWarningSeen) { stagePhotos(1); return }
+    setShowAttach(false)
+    setShowCameraWarning(true)
   }
 
   const openActions = (e, msg) => {
@@ -746,6 +844,8 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                   </div>
                 )
               }
+              const visibleAttachments = (msg.attachments || []).filter(a => a.type === 'image' || SHOW_FILE_AND_VIDEO_ATTACHMENTS)
+              if (!msg.text && msg.attachments?.length && visibleAttachments.length === 0) return null
               const prev = group.msgs[i - 1]
               const showSender = !msg.isMe && (!prev || prev.sender !== msg.sender || prev.isMe)
               return (
@@ -756,7 +856,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                   {showSender && <div className="msg-sender-name">{msg.sender}</div>}
                   <div
                     className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}
-                    onClick={e => { if (!isReadOnly || msg.isMe) openActions(e, msg) }}
+                    onClick={e => { if (msg.upload) return; if (!isReadOnly || msg.isMe) openActions(e, msg) }}
                   >
                   {msg.replyTo && (
                     <div className={`reply-quote ${msg.isMe ? 'reply-quote-me' : ''}`}>
@@ -764,16 +864,26 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                       <span className="reply-quote-text">{msg.replyTo.text.slice(0, 70)}{msg.replyTo.text.length > 70 ? '…' : ''}</span>
                     </div>
                   )}
-                    {msg.attachments?.map((att, i) => (
-                      <Attachment key={i} attachment={att} isMe={msg.isMe} onPreview={(e) => { e.stopPropagation(); setPreviewAttachment(att) }} />
+                    {visibleAttachments.map((att, i) => (
+                      <Attachment key={i} attachment={att} isMe={msg.isMe} uploadState={msg.upload} onPreview={(e) => { e.stopPropagation(); setPreviewAttachment(att) }} />
                     ))}
                     {msg.text}
                     {msg.edited && <span className="edited-label">(edited)</span>}
                   </div>
-                  <div className="msg-meta">
-                    <span className="msg-time">{msg.time}</span>
-                    {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} />}
-                  </div>
+                  {msg.upload === 'failed' ? (
+                    <div className="msg-meta msg-meta--failed">
+                      <span className="msg-failed-label"><WarningIcon size={16} /> Not sent</span>
+                      <button className="msg-failed-action" onClick={() => runUpload(msg.id, msg.text, msg.attachments?.length || 0)}>Retry</button>
+                      <button className="msg-failed-action msg-failed-action--delete" onClick={() => setLocalMsgs(prev => prev.filter(m => m.id !== msg.id))}>Delete</button>
+                    </div>
+                  ) : (
+                    <div className="msg-meta">
+                      <span className="msg-time">
+                        {msg.upload === 'uploading' ? 'Sending…' : msg.upload === 'queued' ? 'Waiting for connection' : msg.time}
+                      </span>
+                      {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} />}
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -809,11 +919,28 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
       {/* Attach picker */}
       {showAttach && (
         <div className="attach-picker" onClick={e => e.stopPropagation()}>
-          {[{ icon: <PhotoIcon />, label: 'Photo' }, { icon: <FileIcon />, label: 'File' }].map(({ icon, label }) => (
-            <button key={label} className="attach-option" onClick={() => setShowAttach(false)}>
+          {[
+            { icon: <PhotoIcon />, label: 'Photo Library', onPick: () => stagePhotos(2) },
+            { icon: <CameraIcon />, label: 'Take Photo', onPick: handleTakePhoto },
+          ].map(({ icon, label, onPick }) => (
+            <button key={label} className="attach-option" onClick={onPick}>
               {icon}
               <span>{label}</span>
             </button>
+          ))}
+        </div>
+      )}
+
+      {/* Photos waiting to be sent */}
+      {staged.length > 0 && !isReadOnly && (
+        <div className="staged-strip" onClick={e => e.stopPropagation()}>
+          {staged.map(p => (
+            <div key={p.id} className="staged-photo">
+              <img src={p.src} alt="" />
+              <button className="staged-photo-remove" onClick={() => setStaged(prev => prev.filter(x => x.id !== p.id))} aria-label="Remove photo">
+                <CloseIcon size={14} />
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -840,12 +967,20 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
               onClick={e => e.stopPropagation()}
             />
           </div>
-          <button className={`send-btn${inputText.trim() ? '' : ' send-btn--hidden'}`} onClick={handleSend}>
+          <button className={`send-btn${inputText.trim() || staged.length ? '' : ' send-btn--hidden'}`} onClick={handleSend}>
             <SendIcon />
           </button>
         </div>
       )}
 
+
+      {showCameraWarning && (
+        <AlertDialog
+          title="Warning"
+          message="Using the camera to take images poses a data security risk to care receivers, as some camera apps will save images on the device. It is recommended that any images taken are deleted permanently from the device gallery."
+          actions={[{ label: 'OK', onClick: () => { setShowCameraWarning(false); setCameraWarningSeen(true); stagePhotos(1) } }]}
+        />
+      )}
 
       {/* Attachment preview */}
       {previewAttachment && (
@@ -1113,6 +1248,7 @@ export default function App() {
     return initial ? THREADS.map(t => t.id === initial.id ? { ...t, unread: false } : t) : THREADS
   })
   const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
+  const [connection, setConnection] = useState('online')
   const [composeVisible, setComposeVisible] = useState(false)
   const [composeExiting, setComposeExiting] = useState(false)
   const [actionTarget, setActionTarget] = useState(null)
@@ -1271,6 +1407,13 @@ export default function App() {
       <a href="../../" className="back-link">
         <ChevronLeftIcon size={16} /> Prototypes
       </a>
+      <div className="msg-demo-stack">
+      {outerView === 'messaging' && view === 'thread' && (
+        <div className="msg-demo-controls">
+          <span className="msg-demo-label">Sending photos</span>
+          <SegmentedToggle options={UPLOAD_OUTCOME_OPTIONS} value={connection} onChange={setConnection} />
+        </div>
+      )}
       <div className="phone-frame" ref={phoneFrameRef}>
         <div className={`screen-area page-slide ${entering ? 'slide-entering' : ''}`}>
           <ScreenSlider
@@ -1311,6 +1454,7 @@ export default function App() {
                       totalUnread={totalUnread}
                       onOpenActions={handleOpenActions}
                       onCloseActions={handleCloseActions}
+                      connection={connection}
                     />
                   }
                 />
@@ -1366,6 +1510,7 @@ export default function App() {
             </div>
           </div>
         )}
+      </div>
       </div>
       </div>
     </>

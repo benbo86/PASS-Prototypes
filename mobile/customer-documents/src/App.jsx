@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useId } from 'react'
 import StatusBar from '../../../Components/StatusBar'
 import ScreenSlider from '../../../Components/ScreenSlider'
 import Tooltip from '../../../Components/Tooltip'
+import AlertDialog from '../../../Components/AlertDialog'
 import DevToolbar from '../../../Components/DevToolbar'
 import DevMode from '../../../Components/DevMode'
 import DevComments from '../../../Components/DevComments'
@@ -710,39 +711,6 @@ function ConfirmSheet({ title, message, confirmLabel, onConfirm, onClose }) {
   )
 }
 
-// ─── Shared: AlertPrompt ─────────────────────────────────────────────
-// Mimics the native iOS text-input alert (title, single field, Cancel/OK
-// split by a vertical divider) rather than using the real window.prompt() —
-// a real one can't be styled to match this app at all (it'd show the
-// browser's own unstyled dialog), so a look-alike is the only way to get
-// the requested visual. Recolored to this app's own brand purple rather
-// than iOS system blue, matching the reference screenshot.
-
-function AlertPrompt({ title, placeholder, submitLabel = 'OK', onSubmit, onCancel }) {
-  const [value, setValue] = useState('')
-  const canSubmit = value.trim().length > 0
-  return (
-    <div className="docs-alert-overlay">
-      <div className="docs-alert-box">
-        <div className="docs-alert-title">{title}</div>
-        <input
-          className="docs-alert-input"
-          type="text"
-          placeholder={placeholder}
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && canSubmit) onSubmit(value.trim()) }}
-          autoFocus
-        />
-        <div className="docs-alert-actions">
-          <button className="docs-alert-btn" onClick={onCancel}>Cancel</button>
-          <button className="docs-alert-btn" disabled={!canSubmit} onClick={() => onSubmit(value.trim())}>{submitLabel}</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ─── Shared: AddAssessmentScreen ─────────────────────────────────────
 // A full screen (slides up over Assessments, see docs-modal-slide) rather
 // than a bottom sheet — same row style as the Assessments list itself
@@ -1167,7 +1135,7 @@ function OtherDocumentRow({ item, selecting, selected, onToggle, folderName }) {
 // "Add document" is a 3-step flow rather than a single name-entry sheet:
 // pick a template here (single-select, no checkboxes — tapping a row
 // commits immediately, matching the reference screenshot's plain chevron
-// rows) → AlertPrompt asks for a name → DocumentPreviewScreen (a stand-in
+// rows) → AlertDialog asks for a name → DocumentPreviewScreen (a stand-in
 // for the real template content, out of scope for this prototype) is
 // where Save actually creates the document.
 
@@ -1252,7 +1220,7 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
   }
   // "Add document" is a 3-step flow (see DocumentTemplatePicker/
   // DocumentPreviewScreen above): pick a template, name it via the native-
-  // style AlertPrompt, then Save on the placeholder preview screen actually
+  // style AlertDialog, then Save on the placeholder preview screen actually
   // creates it — using whichever folder is currently open, same as "Add
   // assessment".
   const templatePicker = useSlideUpScreen()
@@ -1427,10 +1395,14 @@ function OtherDocumentsScreen({ documents, setDocuments, folders, setFolders, on
         )}
       </div>
       {namePromptOpen && (
-        <AlertPrompt
+        <AlertDialog
           title="Please enter your new document name"
-          onSubmit={handleConfirmDocName}
-          onCancel={handleCancelDocName}
+          input={{ placeholder: 'Document name' }}
+          onDismiss={handleCancelDocName}
+          actions={[
+            { label: 'OK', submit: true, onClick: handleConfirmDocName },
+            { label: 'Cancel', onClick: handleCancelDocName },
+          ]}
         />
       )}
       {sheet && sheet.type === 'create' && (
