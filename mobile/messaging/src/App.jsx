@@ -968,7 +968,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
               onClick={e => e.stopPropagation()}
             />
           </div>
-          <button className={`send-btn${inputText.trim() || staged.length ? '' : ' send-btn--hidden'}`} onClick={handleSend}>
+          <button className="send-btn" onClick={handleSend} disabled={!inputText.trim() && staged.length === 0} aria-label="Send">
             <SendIcon />
           </button>
         </div>

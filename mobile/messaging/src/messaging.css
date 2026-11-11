@@ -983,7 +983,7 @@
   border-radius: 50%;
   background: var(--brand-purple-3-purple-2);
   border: none;
-  color: #fff;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -991,8 +991,14 @@
   flex-shrink: 0;
   transition: background 0.15s;
 }
-.send-btn:hover { background: var(--brand-purple-1-purple-0); }
-.send-btn--hidden { visibility: hidden; }
+.send-btn:hover:not(:disabled) { background: var(--brand-purple-1-purple-0); }
+/* Always visible, inactive until there is text or a photo (as in the live app). Same
+   grey as the disabled send button on the new-message screen. */
+.send-btn:disabled {
+  background: #F2F2F2;
+  cursor: default;
+  color:#C5C5C5;
+}
 
 /* ── Message actions overlay ─────────────────────────────────── */
 .phone-frame-overlay {
