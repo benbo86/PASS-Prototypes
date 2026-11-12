@@ -10,12 +10,19 @@ import { createPortal } from 'react-dom'
 // portaled panels (AuthGate/SaveVersionDialog). A full-screen transparent
 // backdrop closes it on any outside click, matching that same family's
 // overlay-click-to-close convention.
-export default function ContextMenu({ x, y, onSendToBack, onBringToFront, onDelete, onClose }) {
+export default function ContextMenu({ x, y, onSendToBack, onBringToFront, onDelete, onCopyLink, copyLinkDisabled, onClose }) {
   return createPortal(
     <div className="wf-context-backdrop" onMouseDown={onClose} onContextMenu={(e) => { e.preventDefault(); onClose() }}>
       <div className="wf-context-menu" style={{ left: x, top: y }} onMouseDown={(e) => e.stopPropagation()}>
         <button onClick={() => { onSendToBack(); onClose() }}>Send to back</button>
         <button onClick={() => { onBringToFront(); onClose() }}>Bring to front</button>
+        {onCopyLink && (
+          <button
+            disabled={copyLinkDisabled}
+            title={copyLinkDisabled ? 'Save this wireframe first to get a link' : 'Copy a link that opens the wireframe at this element'}
+            onClick={() => { onCopyLink(); onClose() }}
+          >Copy link to this</button>
+        )}
         <button className="wf-danger" onClick={() => { onDelete(); onClose() }}>Delete</button>
       </div>
     </div>,

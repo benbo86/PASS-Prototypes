@@ -1417,6 +1417,8 @@ export default function App() {
         currentStrokeWidth={currentStrokeWidth}
         onStrokeWidthChange={handleStrokeWidthChange}
         onDropFiles={handleDropFiles}
+        elementLinkBase={currentFirestoreId ? `${window.location.origin}${window.location.pathname}?view=${currentFirestoreId}` : null}
+        focusElementId={viewOnly && viewStatus === null ? new URLSearchParams(window.location.search).get('el') : null}
       />
 
       {remoteConflict && !viewOnly && (

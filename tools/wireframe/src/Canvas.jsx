@@ -1,11 +1,11 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import ElementRenderer from './ElementRenderer'
 import ArrowLayer from './ArrowLayer'
 import SelectionOverlay from './SelectionOverlay'
 import ContextMenu from './ContextMenu'
 import FontToolbar from './FontToolbar'
 import { useCanvasInteraction } from './useCanvasInteraction'
-import { computeBoundingBox, groupMembersOf, clampZoom, ZOOM_STEP } from './geometry'
+import { computeBoundingBox, groupMembersOf, clampZoom, getElementBox, ZOOM_STEP } from './geometry'
 
 // A genuinely large fixed workspace (true infinite canvas is a much bigger
 // architectural change, not warranted here) — combined with zoom below,
@@ -52,8 +52,16 @@ export default function Canvas({
   currentStrokeWidth,
   onStrokeWidthChange,
   onDropFiles,
+  elementLinkBase,
+  focusElementId,
 }) {
   const scrollRef = useRef(null)
+  // "Copy link to this": elementLinkBase is the wireframe's view link (null
+  // until it's been saved); the element id is appended as &el=<id>.
+  const [linkNotice, setLinkNotice] = useState(false)
+  // Box (canvas-space) of the element a ?el= link points at, outlined briefly.
+  const [highlightBox, setHighlightBox] = useState(null)
+  const focusedRef = useRef(null)
   // Set by the wheel-zoom handler right before setZoom — applied in the
   // useLayoutEffect below once the DOM has actually re-rendered at the new
   // scale (setting scrollLeft/Top synchronously in the wheel handler itself
@@ -115,6 +123,42 @@ export default function Canvas({
     return () => scrollEl.removeEventListener('wheel', handleWheel)
   }, [zoom, setZoom])
 
+  // Deep link (?view=<id>&el=<elementId>): centre on that element (zooming out
+  // if it's big, never in past 100%) and outline it for a few seconds.
+  useEffect(() => {
+    if (!focusElementId || focusedRef.current === focusElementId) return
+    const target = elements.find((e) => e.id === focusElementId)
+    const scrollEl = scrollRef.current
+    if (!target || !scrollEl) return
+    focusedRef.current = focusElementId
+    const box = getElementBox(target)
+    const cw = scrollEl.clientWidth
+    const ch = scrollEl.clientHeight
+    const newZoom = clampZoom(Math.min(1, (cw * 0.6) / Math.max(box.w, 1), (ch * 0.6) / Math.max(box.h, 1)))
+    const left = (box.x + box.w / 2) * newZoom - cw / 2
+    const top = (box.y + box.h / 2) * newZoom - ch / 2
+    if (newZoom === zoom) {
+      scrollEl.scrollLeft = left
+      scrollEl.scrollTop = top
+    } else {
+      pendingScrollRef.current = { left, top }
+      setZoom(newZoom)
+    }
+    setHighlightBox(box)
+    setTimeout(() => setHighlightBox(null), 5000)
+  }, [focusElementId, elements, zoom, setZoom])
+
+  const copyElementLink = async (id) => {
+    const url = `${elementLinkBase}&el=${encodeURIComponent(id)}`
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      window.prompt('Copy this link', url)
+    }
+    setLinkNotice(true)
+    setTimeout(() => setLinkNotice(false), 2000)
+  }
+
   // An *autoSize* text element (click-placed, no fixed box) committed
   // empty is deleted rather than left as an invisible ghost — covers both
   // "placed it, typed nothing, clicked away" and "cleared existing text
@@ -143,12 +187,12 @@ export default function Canvas({
     const group = groupMembersOf(el, elements)
     const fullyContained = group.every((id) => selectedIds.includes(id))
     if (!fullyContained) setSelectedIds(group)
-    setContextMenu({ x: e.clientX, y: e.clientY })
+    setContextMenu({ x: e.clientX, y: e.clientY, targetId: el.id })
   }
 
   const handleOverlayContextMenu = (e) => {
     e.preventDefault()
-    setContextMenu({ x: e.clientX, y: e.clientY })
+    setContextMenu({ x: e.clientX, y: e.clientY, targetId: null })
   }
 
   // Double-click (label edit) narrows the selection down to just the one
@@ -177,6 +221,8 @@ export default function Canvas({
   // their two independent endpoints, and rotating a whole multi-select's
   // bounding box isn't supported (would need to rotate each member about
   // the group's own center, real added complexity with no stated need yet).
+  // The element a "Copy link" acts on: the right-clicked one, or the sole selection.
+  const linkTargetId = contextMenu ? (contextMenu.targetId || (selectedIds.length === 1 ? selectedIds[0] : null)) : null
   const isSoleRotatableSelected = !!soleSelectedEl && soleSelectedEl.type !== 'arrow' && !isLoneEmptyTextSelected
 
   return (
@@ -301,6 +347,10 @@ export default function Canvas({
         />
       )}
 
+      {highlightBox && (
+        <div className="wf-link-highlight" style={{ left: highlightBox.x - 8, top: highlightBox.y - 8, width: highlightBox.w + 16, height: highlightBox.h + 16 }} />
+      )}
+
       {marqueeRect && (
         <div className="wf-marquee" style={{ left: marqueeRect.x, top: marqueeRect.y, width: marqueeRect.w, height: marqueeRect.h }} />
       )}
@@ -312,6 +362,8 @@ export default function Canvas({
           onSendToBack={onSendToBack}
           onBringToFront={onBringToFront}
           onDelete={onDelete}
+          onCopyLink={linkTargetId ? () => copyElementLink(linkTargetId) : null}
+          copyLinkDisabled={!elementLinkBase}
           onClose={closeContextMenu}
         />
       )}
@@ -320,6 +372,7 @@ export default function Canvas({
       {/* Fixed to the viewport (not the scrolled/scaled canvas), bottom-
           right — clear of the bottom-center Toolbar and top-left
           WireframeMenu. Clicking the percentage resets to 100%. */}
+      {linkNotice && <div className="wf-link-notice" role="status">Link copied</div>}
       <div className="wf-zoom-control">
         <button className="wf-zoom-btn" onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))} aria-label="Zoom out">−</button>
         <button className="wf-zoom-percent" onClick={() => setZoom(1)} title="Reset to 100%">{Math.round(zoom * 100)}%</button>

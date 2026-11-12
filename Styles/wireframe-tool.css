@@ -1320,3 +1320,17 @@ textarea.wf-label-input {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
   z-index: 40; color: #726694; pointer-events: none;
 }
+
+/* Outline around the element a shared link points at (see Canvas.jsx). */
+.wf-link-highlight {
+  position: absolute; pointer-events: none; z-index: 5;
+  border: 3px solid #9a26d6; border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(154, 38, 214, 0.2);
+  animation: wf-link-pulse 1.2s ease-in-out infinite;
+}
+@keyframes wf-link-pulse { 50% { box-shadow: 0 0 0 10px rgba(154, 38, 214, 0.08); } }
+.wf-link-notice {
+  position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 11000;
+  background: #1a1a1a; color: #fff; font-size: 14px; padding: 8px 16px; border-radius: 6px;
+}
+.wf-context-menu button:disabled { opacity: 0.45; cursor: not-allowed; }
