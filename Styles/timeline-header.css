@@ -1,0 +1,50 @@
+/* Timeline header (Components/TimelineHeader.jsx): tabs + filter bar + actions. */
+
+/* ── Header: tabs + filter bar (sticky) ───────────────────────── */
+
+.tlh-header {
+  position: sticky;
+  top: calc(44px + var(--ctx-bar-height, 156px) + var(--dev-toolbar-height, 0px));
+  z-index: 20;
+  font-family: Barlow, sans-serif;
+}
+
+/* Tabs are the UI kit's .ep-tabs/.ep-tab (Styles/event-panel.css); this just
+   left-aligns them (the kit's default spreads them across a 48px-padded bar)
+   and lines the first label up with the page content. */
+.tlh-tabs.ep-tabs {
+  justify-content: flex-start;
+  padding: 0 0 0 0;
+  background: #fff;
+}
+.tlh-tabs .ep-tab:first-child { padding-left: 24px; }
+
+.tlh-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 7.5px;
+  padding: 7.5px 15px 30px 15px;
+  background: var(--ui-purple-7-lightest-lavendar);
+}
+.tlh-field { display: flex; flex-direction: column; gap: 4px; }
+.tlh-field-label { font-size: 14px; font-weight: 400; color: #a7a599; line-height: 1.2; }
+.tlh-show { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--greyscale-3-grey-30); }
+.tlh-show .select-input { width: 168px; font-size:14px; padding:5px 15px; height:auto; line-height:24.5px; }
+.tlh-name-filter { position: relative; }
+.tlh-name-filter .form-input { width: 168px; font-size:14px; padding:5px 15px; height:auto; line-height:24.5px; font-weight:400; }
+.tlh-name-filter svg {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; color: var(--greyscale-4-grey-40); pointer-events: none;
+}
+.tlh-name-filter.has-value svg { color: var(--brand-purple-6-purple-4); }
+
+.tlh-date {
+  display: flex; align-items: center; gap: 8px; padding-bottom: 10px;
+  background: none; border: none; font-family: inherit; cursor: pointer;
+  font-size: 18px; font-weight: 500; color: var(--greyscale-2-grey-20); white-space: nowrap; flex-shrink: 0;
+}
+.tlh-date svg { width: 24px; height: 24px; color: var(--ui-purple-3-grape-grey); }
+
+.tlh-actions { margin-left: auto; display: flex; gap: 12px; flex-shrink: 0; }
+.tlh-actions .round-btn { white-space: nowrap; height:36px; font-size:14px; padding: 0px 20px; gap:6px; }
+

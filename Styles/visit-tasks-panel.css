@@ -1,0 +1,69 @@
+/* Components/VisitTasksPanel.jsx — slide-out list of a visit's tasks.
+   Header reuses ep-* classes from event-panel.css; table is main.css's
+   .data-table. Only what is specific to this panel lives here. */
+
+.vtp-overlay {
+  position: fixed;
+  top: var(--dev-toolbar-height, 0px); left: 0; right: 0; bottom: 0;
+  background: var(--web-skrim);
+  z-index: 10800;
+  display: flex; justify-content: flex-end;
+}
+.vtp-panel {
+  width: 80vw; height: 100%;
+  background: #fff;
+  display: flex; flex-direction: column;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Status badge — same shape as .ep-booked-badge, stripe colour by status */
+.vtp-status {
+  display: inline-flex; align-items: stretch; height: 28px; flex-shrink: 0;
+  border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 4px; overflow: hidden;
+}
+.vtp-status__stripe { width: 8px; background: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
+.vtp-status span:last-child { font-size: 14px; font-weight: 500; color: #333; padding: 0 10px 0 6px; display: flex; align-items: center; }
+.vtp-status--complete .vtp-status__stripe  { background: var(--legacy-status-complete); }
+.vtp-status--missed .vtp-status__stripe    { background: var(--legacy-status-overdue); }
+.vtp-status--overdue .vtp-status__stripe   { background: var(--legacy-status-overdue); }
+
+/* Visit details under the title */
+.vtp-details { display: flex; flex-wrap: wrap; gap: 8px 48px; margin: 0; padding: 0 48px 24px; }
+.vtp-details__item { display: flex; flex-direction: column; gap: 4px; }
+.vtp-details dt { font-size: 14px; font-weight: 400; color: var(--greyscale-6-grey-50); }
+.vtp-details dd { margin: 0; font-size: 16px; font-weight: 500; color: #000; }
+
+.vtp-body { flex: 1; overflow-y: auto; padding: 0 48px 48px; background: var(--ui-purple-7-lightest-lavendar); }
+.vtp-section-title { margin: 32px 0 16px; }
+.vtp-section-count { color: #4d4d4d; font-weight: 400; }
+
+.vtp-footer { flex-shrink: 0; display: flex; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--ui-purple-5-languid-lavendar); }
+
+/* Table */
+.vtp-table { table-layout: fixed; }
+.vtp-table td { height: auto; padding: 12px; vertical-align: top; line-height: 20px; }
+.vtp-col-task { width: 36%; }
+.vtp-col-note { width: 32%; }
+.vtp-task { display: flex; align-items: flex-start; gap: 12px; }
+.vtp-task-icon { flex-shrink: 0; }
+.vtp-task-icon .tli-icon-circle { width: 32px; height: 32px; }
+.vtp-task-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vtp-table th { white-space: nowrap; }
+.vtp-instructions {
+  font-size: 12px; color: var(--greyscale-6-grey-50); line-height: 16px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.vtp-note { white-space: normal; overflow-wrap: anywhere; }
+.vtp-status-cell { display: inline-flex; align-items: center; gap: 8px; }
+.vtp-pill--partial { background: var(--rag-amber-amber-lightest); }
+.vtp-alert { display: inline-flex; width: 24px; height: 24px; color: var(--legacy-status-overdue); }
+.vtp-alert--resolved { color: var(--legacy-status-complete); }
+.vtp-alert svg { width: 24px; height: 24px; }
+
+/* Care note / alert / review note blocks above the table */
+.vtp-cards { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+.vtp-card { background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar); padding: 16px 24px; }
+.vtp-card h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; }
+.vtp-card p { margin: 0 0 8px; font-size: 14px; line-height: 20px; color: #333; }
+.vtp-card p:last-child { margin-bottom: 0; }
+.vtp-card-meta { color: var(--greyscale-6-grey-50); }

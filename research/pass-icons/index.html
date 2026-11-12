@@ -209,7 +209,7 @@
   <p class="sub">Every distinct icon from the <code>Icons/</code> folder plus every inline SVG icon defined outside the mobile app prototypes (see <code>PASS Mobile Icons</code> for those). Each preview renders inside a fixed 24&times;24 box regardless of the icon's native size, so everything sits consistently in the grid. Click a card to copy its SVG source, use the download icon for a single .svg file, or check any icons and use the tray at the bottom-right to grab several as a .zip. Generated automatically — see iconLibraryPlugin.js.</p>
 
   <div class="top-actions">
-    <button class="download-all-btn" onclick="downloadAll()">Download all 335 icons (.zip)</button>
+    <button class="download-all-btn" onclick="downloadAll()">Download all 354 icons (.zip)</button>
     
   </div>
   <div class="icon-search">
@@ -264,7 +264,7 @@
   </section>
 
   <section data-section-slug="icons">
-    <div class="section-head"><h2>Icons</h2><span class="count">100 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Icons</h2><span class="count">105 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="Medication" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -316,6 +316,21 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="Cancelled" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Cancelled.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/>
+</svg></span>
+        <span class="label">Cancelled</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="Messages" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -331,18 +346,18 @@
 &lt;/svg&gt;</template>
       </div>
 
-      <div class="card" tabindex="0" role="button" data-name="Cancelled" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+      <div class="card" tabindex="0" role="button" data-name="Alert Circle" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
         </label>
-        <button class="card-dl" title="Download Cancelled.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <button class="card-dl" title="Download Alert Circle.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
         <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/>
+  <path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/>
 </svg></span>
-        <span class="label">Cancelled</span>
+        <span class="label">Alert Circle</span>
         <span class="native-size">24×24</span>
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg"&gt;
-  &lt;path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/&gt;
+  &lt;path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/&gt;
 &lt;/svg&gt;</template>
       </div>
 
@@ -376,6 +391,32 @@
         <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg"&gt;
   &lt;path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/&gt;
 &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="Filter Outline" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download Filter Outline.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M4.2 4h15.6a.9.9 0 0 1 .69 1.48L14.5 12.6v6.1a.9.9 0 0 1-1.28.82l-3.2-1.5a.9.9 0 0 1-.52-.82V12.6L3.51 5.48A.9.9 0 0 1 4.2 4zm2.3 2 4.9 6v4.9l1.1.5V12l4.9-6H6.5z"/>
+</svg></span>
+        <span class="label">Filter Outline</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="#000000" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;path fill-rule="evenodd" d="M4.2 4h15.6a.9.9 0 0 1 .69 1.48L14.5 12.6v6.1a.9.9 0 0 1-1.28.82l-3.2-1.5a.9.9 0 0 1-.52-.82V12.6L3.51 5.48A.9.9 0 0 1 4.2 4zm2.3 2 4.9 6v4.9l1.1.5V12l4.9-6H6.5z"/&gt;
+&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="General Task" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download General Task.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 24 24" width="20" height="20" fill="#894B00" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z" fill="#894B00"></path></svg></span>
+        <span class="label">General Task</span>
+        <span class="native-size">20×20</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 24 24" width="20" height="20" fill="#894B00" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z" fill="#894B00"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
       </div>
 
       <div class="card" tabindex="0" role="button" data-name="Suggested Assignments" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -1465,17 +1506,6 @@
 &lt;/svg&gt;</template>
       </div>
 
-      <div class="card" tabindex="0" role="button" data-name="General Task" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download General Task.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg viewBox="0 0 24 24" width="20" height="20" fill="#894B00" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z" fill="#894B00"></path></svg></span>
-        <span class="label">General Task</span>
-        <span class="native-size">20×20</span>
-        <template class="svg-src">&lt;svg viewBox="0 0 24 24" width="20" height="20" fill="#894B00" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z" fill="#894B00"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
-      </div>
-
       <div class="card" tabindex="0" role="button" data-name="High Risk Ring" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -2304,6 +2334,28 @@
 &lt;/svg&gt;</template>
       </div>
 
+      <div class="card" tabindex="0" role="button" data-name="clock-button-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download clock-button-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"><circle cx="12" cy="12" r="10" stroke="#FFFFFF" fill="none" stroke-width="2px"></circle><path d="M12 6v6l4 2" stroke="#FFFFFF" fill="none" stroke-width="2px"></path></svg></span>
+        <span class="label">clock-button-icon</span>
+        <span class="native-size">16×16</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;circle cx="12" cy="12" r="10" stroke="#FFFFFF" fill="none" stroke-width="2px"&gt;&lt;/circle&gt;&lt;path d="M12 6v6l4 2" stroke="#FFFFFF" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="collapse" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download collapse.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4D4D4D" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-down-up" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m7 20 5-5 5 5" stroke="#4D4D4D" fill="none" stroke-width="2px"></path><path d="m7 4 5 5 5-5" stroke="#4D4D4D" fill="none" stroke-width="2px"></path></svg></span>
+        <span class="label">collapse</span>
+        <span class="native-size">16×16</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4D4D4D" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-down-up" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="m7 20 5-5 5 5" stroke="#4D4D4D" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="m7 4 5 5 5-5" stroke="#4D4D4D" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
       <div class="card" tabindex="0" role="button" data-name="controls" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -2360,6 +2412,17 @@
         &lt;/g&gt;
     &lt;/g&gt;
 &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="expand" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download expand.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4D4D4D" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m7 15 5 5 5-5" stroke="#4D4D4D" fill="none" stroke-width="2px"></path><path d="m7 9 5-5 5 5" stroke="#4D4D4D" fill="none" stroke-width="2px"></path></svg></span>
+        <span class="label">expand</span>
+        <span class="native-size">16×16</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4D4D4D" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="m7 15 5 5 5-5" stroke="#4D4D4D" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="m7 9 5-5 5 5" stroke="#4D4D4D" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
       </div>
 
       <div class="card" tabindex="0" role="button" data-name="full-screen" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -2450,7 +2513,7 @@
   </section>
 
   <section data-section-slug="inline">
-    <div class="section-head"><h2>Inline</h2><span class="count">207 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="section-head"><h2>Inline</h2><span class="count">214 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
     <div class="grid">
 
       <div class="card" tabindex="0" role="button" data-name="ChevronLeftIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -2903,6 +2966,21 @@
         <span class="native-size">12×12</span>
         <template class="svg-src">&lt;svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/&gt;
+  &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="CloseIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download CloseIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" stroke-linejoin="round" />
+  </svg></span>
+        <span class="label">CloseIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none"&gt;
+    &lt;polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" stroke-linejoin="round" /&gt;
   &lt;/svg&gt;</template>
       </div>
 
@@ -3764,21 +3842,6 @@
   &lt;/svg&gt;</template>
       </div>
 
-      <div class="card" tabindex="0" role="button" data-name="CloseIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
-        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
-          <input type="checkbox" onchange="updateSelectionBar()">
-        </label>
-        <button class="card-dl" title="Download CloseIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
-        <span class="icon-preview"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" stroke-linejoin="round" />
-  </svg></span>
-        <span class="label">CloseIcon</span>
-        <span class="native-size">24×24</span>
-        <template class="svg-src">&lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none"&gt;
-    &lt;polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" fill="currentColor" stroke="currentColor" stroke-linejoin="round" /&gt;
-  &lt;/svg&gt;</template>
-      </div>
-
       <div class="card" tabindex="0" role="button" data-name="MinusIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
         <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
           <input type="checkbox" onchange="updateSelectionBar()">
@@ -4238,6 +4301,83 @@
         <template class="svg-src">&lt;svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"&gt;
     &lt;polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" /&gt;
   &lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="GeneralListIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download GeneralListIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z"/></svg></span>
+        <span class="label">GeneralListIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;&lt;path d="M21.68,9.5l-8.81,8.43c-.13.13-.29.22-.45.28-.47.18-1.03.08-1.4-.31l-5.03-5.23c-.49-.51-.48-1.33.04-1.83l.36-.35c.51-.49,1.33-.48,1.83.04l3.79,3.95,8.34-7.98c-1.79-2.71-4.86-4.5-8.35-4.5C6.48,2,2,6.48,2,12s4.48,10,10,10,10-4.48,10-10c0-.87-.11-1.7-.32-2.5Z"/&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="MedListIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download MedListIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12,22c5.52,0,10-4.48,10-10S17.52,2,12,2,2,6.48,2,12s4.48,10,10,10h0ZM11.57,17.52c-.3,0-.55-.25-.55-.55h0v-3.99h-3.99c-.3,0-.55-.25-.55-.55h0v-.86c0-.3.25-.55.55-.55h3.99v-3.99c0-.3.25-.55.55-.55h.86c.3,0,.55.25.55.55h0v3.99h3.99c.3,0,.55.25.55.55h0v.86c0,.3-.25.55-.55.55h-3.99v3.99c0,.3-.25.55-.55.55h-.86Z"/></svg></span>
+        <span class="label">MedListIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;&lt;path fill-rule="evenodd" d="M12,22c5.52,0,10-4.48,10-10S17.52,2,12,2,2,6.48,2,12s4.48,10,10,10h0ZM11.57,17.52c-.3,0-.55-.25-.55-.55h0v-3.99h-3.99c-.3,0-.55-.25-.55-.55h0v-.86c0-.3.25-.55.55-.55h3.99v-3.99c0-.3.25-.55.55-.55h.86c.3,0,.55.25.55.55h0v3.99h3.99c.3,0,.55.25.55.55h0v.86c0,.3-.25.55-.55.55h-3.99v3.99c0,.3-.25.55-.55.55h-.86Z"/&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="NutritionListIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download NutritionListIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 640 640" fill="currentColor"><path d="M127.9 78.4C127.1 70.2 120.2 64 112 64C103.8 64 96.9 70.2 96 78.3L81.9 213.7C80.6 219.7 80 225.8 80 231.9C80 277.8 115.1 315.5 160 319.6L160 544C160 561.7 174.3 576 192 576C209.7 576 224 561.7 224 544L224 319.6C268.9 315.5 304 277.8 304 231.9C304 225.8 303.4 219.7 302.1 213.7L287.9 78.3C287.1 70.2 280.2 64 272 64C263.8 64 256.9 70.2 256.1 78.4L242.5 213.9C241.9 219.6 237.1 224 231.4 224C225.6 224 220.8 219.6 220.2 213.8L207.9 78.6C207.2 70.3 200.3 64 192 64C183.7 64 176.8 70.3 176.1 78.6L163.8 213.8C163.3 219.6 158.4 224 152.6 224C146.8 224 142 219.6 141.5 213.9L127.9 78.4zM512 64C496 64 384 96 384 240L384 352C384 387.3 412.7 416 448 416L480 416L480 544C480 561.7 494.3 576 512 576C529.7 576 544 561.7 544 544L544 96C544 78.3 529.7 64 512 64z"/></svg></span>
+        <span class="label">NutritionListIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 640 640" fill="currentColor"&gt;&lt;path d="M127.9 78.4C127.1 70.2 120.2 64 112 64C103.8 64 96.9 70.2 96 78.3L81.9 213.7C80.6 219.7 80 225.8 80 231.9C80 277.8 115.1 315.5 160 319.6L160 544C160 561.7 174.3 576 192 576C209.7 576 224 561.7 224 544L224 319.6C268.9 315.5 304 277.8 304 231.9C304 225.8 303.4 219.7 302.1 213.7L287.9 78.3C287.1 70.2 280.2 64 272 64C263.8 64 256.9 70.2 256.1 78.4L242.5 213.9C241.9 219.6 237.1 224 231.4 224C225.6 224 220.8 219.6 220.2 213.8L207.9 78.6C207.2 70.3 200.3 64 192 64C183.7 64 176.8 70.3 176.1 78.6L163.8 213.8C163.3 219.6 158.4 224 152.6 224C146.8 224 142 219.6 141.5 213.9L127.9 78.4zM512 64C496 64 384 96 384 240L384 352C384 387.3 412.7 416 448 416L480 416L480 544C480 561.7 494.3 576 512 576C529.7 576 544 561.7 544 544L544 96C544 78.3 529.7 64 512 64z"/&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="VisitListIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download VisitListIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9.75,14.62c.31,0,.55.25.55.55,0,0,0,0,0,0v1.94c0,.31-.25.55-.55.55h-1.94c-.31,0-.55-.25-.55-.55h0v-1.94c0-.31.25-.55.55-.55h1.94Z"/><path fill-rule="evenodd" d="M17.34,2.55c0-.31-.25-.55-.55-.55,0,0,0,0,0,0h-.87c-.31,0-.55.25-.55.55,0,0,0,0,0,0v1.52h-6.8v-1.52c0-.31-.25-.55-.55-.55h-.87c-.31,0-.55.25-.55.55v1.53c-2,.13-3.56,1.78-3.56,3.79v10.33c0,2.1,1.7,3.79,3.79,3.79h10.33c2.1,0,3.79-1.7,3.79-3.79V7.87c0-2.03-1.59-3.7-3.62-3.79v-1.53ZM15.92,9.44h3.06v8.77c0,1-.81,1.82-1.82,1.82H6.83c-1,0-1.82-.81-1.82-1.82v-8.77h10.91Z"/></svg></span>
+        <span class="label">VisitListIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;&lt;path d="M9.75,14.62c.31,0,.55.25.55.55,0,0,0,0,0,0v1.94c0,.31-.25.55-.55.55h-1.94c-.31,0-.55-.25-.55-.55h0v-1.94c0-.31.25-.55.55-.55h1.94Z"/&gt;&lt;path fill-rule="evenodd" d="M17.34,2.55c0-.31-.25-.55-.55-.55,0,0,0,0,0,0h-.87c-.31,0-.55.25-.55.55,0,0,0,0,0,0v1.52h-6.8v-1.52c0-.31-.25-.55-.55-.55h-.87c-.31,0-.55.25-.55.55v1.53c-2,.13-3.56,1.78-3.56,3.79v10.33c0,2.1,1.7,3.79,3.79,3.79h10.33c2.1,0,3.79-1.7,3.79-3.79V7.87c0-2.03-1.59-3.7-3.62-3.79v-1.53ZM15.92,9.44h3.06v8.77c0,1-.81,1.82-1.82,1.82H6.83c-1,0-1.82-.81-1.82-1.82v-8.77h10.91Z"/&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="StatusCheckIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download StatusCheckIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="9.29 15.79 5.47 12.03 4.2 13.29 9.29 18.3 20.2 7.55 18.93 6.3"/></svg></span>
+        <span class="label">StatusCheckIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 24 24" fill="currentColor"&gt;&lt;polygon points="9.29 15.79 5.47 12.03 4.2 13.29 9.29 18.3 20.2 7.55 18.93 6.3"/&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="CalendarHeaderIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download CalendarHeaderIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 25 25" width="24" height="24" fill="currentColor"><g transform="translate(0.9024, 0.7143)" fill-rule="nonzero"><path d="M8.4375,13.5 L6.5625,13.5 C6.253125,13.5 6,13.246875 6,12.9375 L6,11.0625 C6,10.753125 6.253125,10.5 6.5625,10.5 L8.4375,10.5 C8.746875,10.5 9,10.753125 9,11.0625 L9,12.9375 C9,13.246875 8.746875,13.5 8.4375,13.5 Z M13.5,12.9375 L13.5,11.0625 C13.5,10.753125 13.246875,10.5 12.9375,10.5 L11.0625,10.5 C10.753125,10.5 10.5,10.753125 10.5,11.0625 L10.5,12.9375 C10.5,13.246875 10.753125,13.5 11.0625,13.5 L12.9375,13.5 C13.246875,13.5 13.5,13.246875 13.5,12.9375 Z M18,12.9375 L18,11.0625 C18,10.753125 17.746875,10.5 17.4375,10.5 L15.5625,10.5 C15.253125,10.5 15,10.753125 15,11.0625 L15,12.9375 C15,13.246875 15.253125,13.5 15.5625,13.5 L17.4375,13.5 C17.746875,13.5 18,13.246875 18,12.9375 Z M13.5,17.4375 L13.5,15.5625 C13.5,15.253125 13.246875,15 12.9375,15 L11.0625,15 C10.753125,15 10.5,15.253125 10.5,15.5625 L10.5,17.4375 C10.5,17.746875 10.753125,18 11.0625,18 L12.9375,18 C13.246875,18 13.5,17.746875 13.5,17.4375 Z M9,17.4375 L9,15.5625 C9,15.253125 8.746875,15 8.4375,15 L6.5625,15 C6.253125,15 6,15.253125 6,15.5625 L6,17.4375 C6,17.746875 6.253125,18 6.5625,18 L8.4375,18 C8.746875,18 9,17.746875 9,17.4375 Z M18,17.4375 L18,15.5625 C18,15.253125 17.746875,15 17.4375,15 L15.5625,15 C15.253125,15 15,15.253125 15,15.5625 L15,17.4375 C15,17.746875 15.253125,18 15.5625,18 L17.4375,18 C17.746875,18 18,17.746875 18,17.4375 Z M22.5,5.25 L22.5,21.75 C22.5,22.9921875 21.4921875,24 20.25,24 L3.75,24 C2.5078125,24 1.5,22.9921875 1.5,21.75 L1.5,5.25 C1.5,4.0078125 2.5078125,3 3.75,3 L6,3 L6,0.5625 C6,0.253125 6.253125,0 6.5625,0 L8.4375,0 C8.746875,0 9,0.253125 9,0.5625 L9,3 L15,3 L15,0.5625 C15,0.253125 15.253125,0 15.5625,0 L17.4375,0 C17.746875,0 18,0.253125 18,0.5625 L18,3 L20.25,3 C21.4921875,3 22.5,4.0078125 22.5,5.25 Z M20.25,21.46875 L20.25,7.5 L3.75,7.5 L3.75,21.46875 C3.75,21.6234375 3.8765625,21.75 4.03125,21.75 L19.96875,21.75 C20.1234375,21.75 20.25,21.6234375 20.25,21.46875 Z"/></g></svg></span>
+        <span class="label">CalendarHeaderIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 25 25" width="24" height="24" fill="currentColor"&gt;&lt;g transform="translate(0.9024, 0.7143)" fill-rule="nonzero"&gt;&lt;path d="M8.4375,13.5 L6.5625,13.5 C6.253125,13.5 6,13.246875 6,12.9375 L6,11.0625 C6,10.753125 6.253125,10.5 6.5625,10.5 L8.4375,10.5 C8.746875,10.5 9,10.753125 9,11.0625 L9,12.9375 C9,13.246875 8.746875,13.5 8.4375,13.5 Z M13.5,12.9375 L13.5,11.0625 C13.5,10.753125 13.246875,10.5 12.9375,10.5 L11.0625,10.5 C10.753125,10.5 10.5,10.753125 10.5,11.0625 L10.5,12.9375 C10.5,13.246875 10.753125,13.5 11.0625,13.5 L12.9375,13.5 C13.246875,13.5 13.5,13.246875 13.5,12.9375 Z M18,12.9375 L18,11.0625 C18,10.753125 17.746875,10.5 17.4375,10.5 L15.5625,10.5 C15.253125,10.5 15,10.753125 15,11.0625 L15,12.9375 C15,13.246875 15.253125,13.5 15.5625,13.5 L17.4375,13.5 C17.746875,13.5 18,13.246875 18,12.9375 Z M13.5,17.4375 L13.5,15.5625 C13.5,15.253125 13.246875,15 12.9375,15 L11.0625,15 C10.753125,15 10.5,15.253125 10.5,15.5625 L10.5,17.4375 C10.5,17.746875 10.753125,18 11.0625,18 L12.9375,18 C13.246875,18 13.5,17.746875 13.5,17.4375 Z M9,17.4375 L9,15.5625 C9,15.253125 8.746875,15 8.4375,15 L6.5625,15 C6.253125,15 6,15.253125 6,15.5625 L6,17.4375 C6,17.746875 6.253125,18 6.5625,18 L8.4375,18 C8.746875,18 9,17.746875 9,17.4375 Z M18,17.4375 L18,15.5625 C18,15.253125 17.746875,15 17.4375,15 L15.5625,15 C15.253125,15 15,15.253125 15,15.5625 L15,17.4375 C15,17.746875 15.253125,18 15.5625,18 L17.4375,18 C17.746875,18 18,17.746875 18,17.4375 Z M22.5,5.25 L22.5,21.75 C22.5,22.9921875 21.4921875,24 20.25,24 L3.75,24 C2.5078125,24 1.5,22.9921875 1.5,21.75 L1.5,5.25 C1.5,4.0078125 2.5078125,3 3.75,3 L6,3 L6,0.5625 C6,0.253125 6.253125,0 6.5625,0 L8.4375,0 C8.746875,0 9,0.253125 9,0.5625 L9,3 L15,3 L15,0.5625 C15,0.253125 15.253125,0 15.5625,0 L17.4375,0 C17.746875,0 18,0.253125 18,0.5625 L18,3 L20.25,3 C21.4921875,3 22.5,4.0078125 22.5,5.25 Z M20.25,21.46875 L20.25,7.5 L3.75,7.5 L3.75,21.46875 C3.75,21.6234375 3.8765625,21.75 4.03125,21.75 L19.96875,21.75 C20.1234375,21.75 20.25,21.6234375 20.25,21.46875 Z"/&gt;&lt;/g&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="HydrationListIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download HydrationListIcon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg height="24" width="24" viewBox="0 0 640 640" fill="currentColor"><path d="M160 64C151.1 64 142.6 67.7 136.6 74.2C130.6 80.7 127.4 89.4 128.1 98.3L156.9 501.7C159.9 543.6 194.7 576 236.7 576L403.3 576C445.3 576 480.1 543.6 483.1 501.7L511.9 98.3C512.5 89.4 509.5 80.7 503.4 74.2C497.3 67.7 488.9 64 480 64L160 64zM201 220.5L194.4 128L445.7 128L439.1 220.5L414.9 232.6C395.5 242.3 372.7 242.3 353.3 232.6C332.4 222.2 307.8 222.2 286.9 232.6C267.5 242.3 244.7 242.3 225.3 232.6L201 220.5z"/></svg></span>
+        <span class="label">HydrationListIcon</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg height="24" width="24" viewBox="0 0 640 640" fill="currentColor"&gt;&lt;path d="M160 64C151.1 64 142.6 67.7 136.6 74.2C130.6 80.7 127.4 89.4 128.1 98.3L156.9 501.7C159.9 543.6 194.7 576 236.7 576L403.3 576C445.3 576 480.1 543.6 483.1 501.7L511.9 98.3C512.5 89.4 509.5 80.7 503.4 74.2C497.3 67.7 488.9 64 480 64L160 64zM201 220.5L194.4 128L445.7 128L439.1 220.5L414.9 232.6C395.5 242.3 372.7 242.3 353.3 232.6C332.4 222.2 307.8 222.2 286.9 232.6C267.5 242.3 244.7 242.3 225.3 232.6L201 220.5z"/&gt;&lt;/svg&gt;</template>
       </div>
 
       <div class="card" tabindex="0" role="button" data-name="JournalIcon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
@@ -6223,6 +6363,89 @@
         <span class="label">timeline</span>
         <span class="native-size">1×1</span>
         <template class="svg-src">&lt;svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hourglass" aria-hidden="true" style="vertical-align: bottom;" width="1"  height="1" &gt;&lt;path d="M5 22h14" stroke="#9CA3AF" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M5 2h14" stroke="#9CA3AF" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" stroke="#9CA3AF" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" stroke="#9CA3AF" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+    </div>
+  </section>
+
+  <section data-section-slug="timeline-items">
+    <div class="section-head"><h2>Timeline Items</h2><span class="count">7 icons</span><button class="section-dl-btn" onclick="downloadSection(this)">Download section (.zip)</button></div>
+    <div class="grid">
+
+      <div class="card" tabindex="0" role="button" data-name="due-timeline" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download due-timeline.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"><path d="M8 2v4" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M16 2v4" stroke="#5A5967" fill="none" stroke-width="2px"></path><rect width="18" height="18" x="3" y="4" rx="2" stroke="#5A5967" fill="none" stroke-width="2px"></rect><path d="M3 10h18" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M8 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M12 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M16 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M8 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M12 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M16 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path></svg></span>
+        <span class="label">due-timeline</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"&gt;&lt;path d="M8 2v4" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M16 2v4" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;rect width="18" height="18" x="3" y="4" rx="2" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/rect&gt;&lt;path d="M3 10h18" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M8 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M12 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M16 14h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M8 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M12 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M16 18h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="employee-timeline" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download employee-timeline.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"><path d="M16 10h2" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M16 14h2" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M6.17 15a3 3 0 0 1 5.66 0" stroke="#5A5967" fill="none" stroke-width="2px"></path><circle cx="9" cy="11" r="2" stroke="#5A5967" fill="none" stroke-width="2px"></circle><rect x="2" y="5" width="20" height="14" rx="2" stroke="#5A5967" fill="none" stroke-width="2px"></rect></svg></span>
+        <span class="label">employee-timeline</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-id-card" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"&gt;&lt;path d="M16 10h2" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M16 14h2" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M6.17 15a3 3 0 0 1 5.66 0" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;circle cx="9" cy="11" r="2" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/circle&gt;&lt;rect x="2" y="5" width="20" height="14" rx="2" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/rect&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="hydration-task-list-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download hydration-task-list-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 640 640" width="18" height="18" fill="#005F78" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M160 64C151.1 64 142.6 67.7 136.6 74.2C130.6 80.7 127.4 89.4 128.1 98.3L156.9 501.7C159.9 543.6 194.7 576 236.7 576L403.3 576C445.3 576 480.1 543.6 483.1 501.7L511.9 98.3C512.5 89.4 509.5 80.7 503.4 74.2C497.3 67.7 488.9 64 480 64L160 64zM201 220.5L194.4 128L445.7 128L439.1 220.5L414.9 232.6C395.5 242.3 372.7 242.3 353.3 232.6C332.4 222.2 307.8 222.2 286.9 232.6C267.5 242.3 244.7 242.3 225.3 232.6L201 220.5z" fill="#005F78"></path></svg></span>
+        <span class="label">hydration-task-list-icon</span>
+        <span class="native-size">18×18</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 640 640" width="18" height="18" fill="#005F78" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M160 64C151.1 64 142.6 67.7 136.6 74.2C130.6 80.7 127.4 89.4 128.1 98.3L156.9 501.7C159.9 543.6 194.7 576 236.7 576L403.3 576C445.3 576 480.1 543.6 483.1 501.7L511.9 98.3C512.5 89.4 509.5 80.7 503.4 74.2C497.3 67.7 488.9 64 480 64L160 64zM201 220.5L194.4 128L445.7 128L439.1 220.5L414.9 232.6C395.5 242.3 372.7 242.3 353.3 232.6C332.4 222.2 307.8 222.2 286.9 232.6C267.5 242.3 244.7 242.3 225.3 232.6L201 220.5z" fill="#005F78"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="info-timeline" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download info-timeline.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"><circle cx="12" cy="12" r="10" stroke="#5A5967" fill="none" stroke-width="2px"></circle><path d="M12 16v-4" stroke="#5A5967" fill="none" stroke-width="2px"></path><path d="M12 8h.01" stroke="#5A5967" fill="none" stroke-width="2px"></path></svg></span>
+        <span class="label">info-timeline</span>
+        <span class="native-size">24×24</span>
+        <template class="svg-src">&lt;svg xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24" fill="none" stroke="#5A5967" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info" aria-hidden="true" style="vertical-align: -0.125em;" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"&gt;&lt;circle cx="12" cy="12" r="10" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/circle&gt;&lt;path d="M12 16v-4" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;path d="M12 8h.01" stroke="#5A5967" fill="none" stroke-width="2px"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="med-task-list-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download med-task-list-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 24 24" width="18" height="18" fill="#9F0712" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M12,22c5.52,0,10-4.48,10-10S17.52,2,12,2,2,6.48,2,12s4.48,10,10,10h0ZM11.57,17.52c-.3,0-.55-.25-.55-.55h0v-3.99h-3.99c-.3,0-.55-.25-.55-.55h0v-.86c0-.3.25-.55.55-.55h3.99v-3.99c0-.3.25-.55.55-.55h.86c.3,0,.55.25.55.55h0v3.99h3.99c.3,0,.55.25.55.55h0v.86c0,.3-.25.55-.55.55h-3.99v3.99c0,.3-.25.55-.55.55h-.86Z" fill-rule="evenodd" fill="#9F0712"></path></svg></span>
+        <span class="label">med-task-list-icon</span>
+        <span class="native-size">18×18</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 24 24" width="18" height="18" fill="#9F0712" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M12,22c5.52,0,10-4.48,10-10S17.52,2,12,2,2,6.48,2,12s4.48,10,10,10h0ZM11.57,17.52c-.3,0-.55-.25-.55-.55h0v-3.99h-3.99c-.3,0-.55-.25-.55-.55h0v-.86c0-.3.25-.55.55-.55h3.99v-3.99c0-.3.25-.55.55-.55h.86c.3,0,.55.25.55.55h0v3.99h3.99c.3,0,.55.25.55.55h0v.86c0,.3-.25.55-.55.55h-3.99v3.99c0,.3-.25.55-.55.55h-.86Z" fill-rule="evenodd" fill="#9F0712"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="nutrition-list-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download nutrition-list-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 640 640" width="18" height="18" fill="#2D5F1E" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M127.9 78.4C127.1 70.2 120.2 64 112 64C103.8 64 96.9 70.2 96 78.3L81.9 213.7C80.6 219.7 80 225.8 80 231.9C80 277.8 115.1 315.5 160 319.6L160 544C160 561.7 174.3 576 192 576C209.7 576 224 561.7 224 544L224 319.6C268.9 315.5 304 277.8 304 231.9C304 225.8 303.4 219.7 302.1 213.7L287.9 78.3C287.1 70.2 280.2 64 272 64C263.8 64 256.9 70.2 256.1 78.4L242.5 213.9C241.9 219.6 237.1 224 231.4 224C225.6 224 220.8 219.6 220.2 213.8L207.9 78.6C207.2 70.3 200.3 64 192 64C183.7 64 176.8 70.3 176.1 78.6L163.8 213.8C163.3 219.6 158.4 224 152.6 224C146.8 224 142 219.6 141.5 213.9L127.9 78.4zM512 64C496 64 384 96 384 240L384 352C384 387.3 412.7 416 448 416L480 416L480 544C480 561.7 494.3 576 512 576C529.7 576 544 561.7 544 544L544 96C544 78.3 529.7 64 512 64z" fill="#2D5F1E"></path></svg></span>
+        <span class="label">nutrition-list-icon</span>
+        <span class="native-size">18×18</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 640 640" width="18" height="18" fill="#2D5F1E" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M127.9 78.4C127.1 70.2 120.2 64 112 64C103.8 64 96.9 70.2 96 78.3L81.9 213.7C80.6 219.7 80 225.8 80 231.9C80 277.8 115.1 315.5 160 319.6L160 544C160 561.7 174.3 576 192 576C209.7 576 224 561.7 224 544L224 319.6C268.9 315.5 304 277.8 304 231.9C304 225.8 303.4 219.7 302.1 213.7L287.9 78.3C287.1 70.2 280.2 64 272 64C263.8 64 256.9 70.2 256.1 78.4L242.5 213.9C241.9 219.6 237.1 224 231.4 224C225.6 224 220.8 219.6 220.2 213.8L207.9 78.6C207.2 70.3 200.3 64 192 64C183.7 64 176.8 70.3 176.1 78.6L163.8 213.8C163.3 219.6 158.4 224 152.6 224C146.8 224 142 219.6 141.5 213.9L127.9 78.4zM512 64C496 64 384 96 384 240L384 352C384 387.3 412.7 416 448 416L480 416L480 544C480 561.7 494.3 576 512 576C529.7 576 544 561.7 544 544L544 96C544 78.3 529.7 64 512 64z" fill="#2D5F1E"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
+      </div>
+
+      <div class="card" tabindex="0" role="button" data-name="visit-list-icon" onclick="copySvg(this)" onkeydown="if(event.key==='Enter'){copySvg(this)}">
+        <label class="card-check" onclick="event.stopPropagation()" title="Select for group download">
+          <input type="checkbox" onchange="updateSelectionBar()">
+        </label>
+        <button class="card-dl" title="Download visit-list-icon.svg" onclick="event.stopPropagation(); downloadIcon(this)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></button>
+        <span class="icon-preview"><svg viewBox="0 0 24 24" width="18" height="18" fill="#0084D1" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M9.75,14.62c.31,0,.55.25.55.55,0,0,0,0,0,0v1.94c0,.31-.25.55-.55.55h-1.94c-.31,0-.55-.25-.55-.55h0v-1.94c0-.31.25-.55.55-.55h1.94Z" fill="#0084D1"></path><path d="M17.34,2.55c0-.31-.25-.55-.55-.55,0,0,0,0,0,0h-.87c-.31,0-.55.25-.55.55,0,0,0,0,0,0v1.52h-6.8v-1.52c0-.31-.25-.55-.55-.55h-.87c-.31,0-.55.25-.55.55v1.53c-2,.13-3.56,1.78-3.56,3.79v10.33c0,2.1,1.7,3.79,3.79,3.79h10.33c2.1,0,3.79-1.7,3.79-3.79V7.87c0-2.03-1.59-3.7-3.62-3.79v-1.53ZM15.92,9.44h3.06v8.77c0,1-.81,1.82-1.82,1.82H6.83c-1,0-1.82-.81-1.82-1.82v-8.77h10.91Z" fill-rule="evenodd" fill="#0084D1"></path></svg></span>
+        <span class="label">visit-list-icon</span>
+        <span class="native-size">18×18</span>
+        <template class="svg-src">&lt;svg viewBox="0 0 24 24" width="18" height="18" fill="#0084D1" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;path d="M9.75,14.62c.31,0,.55.25.55.55,0,0,0,0,0,0v1.94c0,.31-.25.55-.55.55h-1.94c-.31,0-.55-.25-.55-.55h0v-1.94c0-.31.25-.55.55-.55h1.94Z" fill="#0084D1"&gt;&lt;/path&gt;&lt;path d="M17.34,2.55c0-.31-.25-.55-.55-.55,0,0,0,0,0,0h-.87c-.31,0-.55.25-.55.55,0,0,0,0,0,0v1.52h-6.8v-1.52c0-.31-.25-.55-.55-.55h-.87c-.31,0-.55.25-.55.55v1.53c-2,.13-3.56,1.78-3.56,3.79v10.33c0,2.1,1.7,3.79,3.79,3.79h10.33c2.1,0,3.79-1.7,3.79-3.79V7.87c0-2.03-1.59-3.7-3.62-3.79v-1.53ZM15.92,9.44h3.06v8.77c0,1-.81,1.82-1.82,1.82H6.83c-1,0-1.82-.81-1.82-1.82v-8.77h10.91Z" fill-rule="evenodd" fill="#0084D1"&gt;&lt;/path&gt;&lt;/svg&gt;</template>
       </div>
     </div>
   </section>

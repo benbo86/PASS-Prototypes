@@ -1,0 +1,75 @@
+/* Timeline list item (Components/TimelineItem.jsx): refreshed collapsed row. */
+
+/* ── Item card: refreshed collapsed row ───────────────────────── */
+
+.tli-type-icon { --tl-circle: #e5e7eb; --tl-icon: #6b7281; } /* TimelineTypeIcon wrapper: neutral default, tone classes override */
+.tli-item {
+  --tl-bg: #f3f4f6; --tl-circle: #e5e7eb; --tl-text: #6b7281; --tl-icon: #6b7281;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: Barlow, sans-serif;
+}
+.tli-item--general   { --tl-bg: #fefcea; --tl-circle: #fcf193; --tl-text: #814e18; --tl-icon: #894b00; }
+.tli-item--medication{ --tl-bg: #fcf2f2; --tl-circle: #f7cbca; --tl-text: #921f1c; --tl-icon: #9f0712; }
+.tli-item--nutrition { --tl-bg: #eff7ea; --tl-circle: #d9ebcf; --tl-text: #3a5e27; --tl-icon: #2d5f1e; }
+.tli-item--hydration { --tl-bg: #effdff; --tl-circle: #b4f2fb; --tl-text: #275d75; --tl-icon: #005f78; }
+.tli-item--visit     { --tl-bg: #f2f9fe; --tl-circle: #c1e5fb; --tl-text: #2c67a3; --tl-icon: #0084d1; }
+/* observation, outcome, cancelled and upcoming have no refreshed design yet:
+   they use the neutral grey of the "future" item. */
+
+.tli-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  height: 56px;
+  padding: 0 12px;
+  background: var(--tl-bg);
+  color: var(--tl-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tli-time { font-size: 14px; font-weight: 600; }
+
+.tli-title-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tli-icon-circle {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--tl-circle); color: var(--tl-icon);
+}
+.tli-icon-circle svg { width: 18px; height: 18px; }
+.tli-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tli-title--caps { text-transform: uppercase; }
+
+.tli-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.tli-by { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #333; margin-right:70px; }
+/* Square avatar with a purple border, as on the old timeline, at 24px. */
+.tli-avatar { width: 24px; height: 24px; box-sizing: border-box; border-radius: 4px; border: 1.5px solid var(--legacy-purple); object-fit: cover; background: #eee; }
+.tli-due-in { font-size: 14px; font-weight: 600; }
+
+/* Right-hand status indicators: a 24px alert circle (red "!" on a white
+   ring) and a 26px status slot (empty grey circle until there's an outcome). */
+.tli-alert {
+  width: 28px; height: 28px; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center; color: var(--legacy-status-overdue);
+}
+.tli-alert svg { width: 24px; height: 24px; }
+.tli-alert--resolved { color: var(--legacy-status-complete); }
+.tli-status {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.tli-status svg { width: 18px; height: 18px; }
+.tli-status-glyph { flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1;
+  color: var(--legacy-status-complete);
+}
+.tli-status--partial   { background: var(--legacy-status-partial); }
+.tli-status--cancelled { background: var(--legacy-status-cancelled); }
+
+
+.tli-view-tasks { height: 32px; padding: 0 16px; font-size: 14px; background: #fff; }

@@ -25,6 +25,7 @@ export default function FilterDropdown({
   isOpen,
   onClose,
   anchorEl,
+  zIndex = 9999, // raise when opened from inside a slide-out panel (z-index 10800)
 }) {
   const [pending,   setPending]   = useState(() => new Set(selected));
   const [sortDir,   setSortDir]   = useState('asc');
@@ -90,7 +91,7 @@ export default function FilterDropdown({
     <div
       className="fd-wrap"
       ref={dropRef}
-      style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999 }}
+      style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex }}
     >
       {showSort && (
         <>
