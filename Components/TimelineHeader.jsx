@@ -51,18 +51,17 @@ export default function TimelineHeader({
   )
 }
 
-// "Show: [select]" with a small label above, e.g. Event type.
+// Select with a small label above it (e.g. Event type), left-aligned with the
+// select itself, and an optional prefix ("Show:") to the left of the field.
 export function TimelineFilterSelect({ label, prefix, value, onChange, options }) {
   return (
-    <div className="tlh-field">
+    <label className="tlh-field tlh-show">
       <span className="tlh-field-label">{label}</span>
-      <label className="tlh-show">
-        {prefix}
-        <select className="select-input" value={value} onChange={e => onChange(e.target.value)}>
-          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      </label>
-    </div>
+      {prefix && <span className="tlh-show-prefix">{prefix}</span>}
+      <select className="select-input" value={value} onChange={e => onChange(e.target.value)}>
+        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    </label>
   )
 }
 
