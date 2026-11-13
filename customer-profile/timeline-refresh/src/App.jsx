@@ -35,9 +35,9 @@ const PILL_FILTERS = FILTER_STYLE !== 'original'
 // label -> task type.
 // Status filter options: Visit status (the status on the row) and Task status.
 const VISIT_STATUS_OPTIONS = ['Completed', 'Missed', 'Cancelled']
-const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Not done', 'Cancelled']
+const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Partial', 'Cancelled']
 const VISIT_STATUS_PILL = { complete: 'Completed', missed: 'Missed', cancelled: 'Cancelled' }
-const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', notdone: 'Not done', cancelled: 'Cancelled' }
+const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', partial: 'Partial', cancelled: 'Cancelled' }
 
 const EVENT_TYPE_PILLS = ['Visits', 'Alerts', 'Updates', 'Documents']
 const TASK_TYPE_PILL_TYPES = { Tasks: 'general', Medication: 'medication', Nutrition: 'nutrition', Hydration: 'hydration', Observations: 'observation' }
@@ -97,7 +97,7 @@ const TODAY_VISITS = [
       task(311, 'general', 'INCONTINENCE PAD', ['Dispose of used pads in the bathroom bin, not the kitchen.'], 'complete', '10:04', 'Pad changed and disposed of in the bathroom bin.'),
       task(312, 'general', 'ENSURE BATHROOM & TOILET CLEANED AFTER USE', ['Cleaning products are under the sink.'], 'complete', '10:10', 'Cleaned the bathroom and toilet after use.'),
       task(313, 'general', 'COMPANIONSHIP', ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."], 'complete', '10:11', 'Chatted throughout the visit. Patricia responded with a few words and smiled.'),
-      task(314, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care. Do not over apply, this will not help me.'], 'notdone', null, 'Patricia declined the cream today and said her skin felt comfortable. Husband informed.'),
+      task(314, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care. Do not over apply, this will not help me.'], 'partial', null, 'Patricia declined the cream today and said her skin felt comfortable. Husband informed.'),
     ] },
   { id: 'v4', time: '08:00', type: 'visit', title: 'Morning Medication Visit', careType: 'Complex care', status: 'missed',
     due: { due: '08:00', completeBy: '08:15' },
@@ -161,7 +161,7 @@ const SAT_VISITS = [
     tasks: [
       task(1101, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:55', 'Assisted with washing and dressing.'),
       task(1102, 'observation', 'Body Map Observation', ['Record any marks or skin changes on the body map.'], 'complete', '10:00', 'No new marks.'),
-      task(1103, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care.'], 'notdone', null, 'Patricia declined the cream today. Husband informed.'),
+      task(1103, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care.'], 'partial', null, 'Patricia declined the cream today. Husband informed.'),
     ] },
 ]
 
@@ -222,7 +222,7 @@ const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS, ...SAT_VISITS, ...FRI_VISIT
 
 const VISIT_STATUS_LABELS = { complete: 'Complete', missed: 'Missed', cancelled: 'Cancelled' }
 const TASK_TYPE_LABELS = { general: 'Tasks', observation: 'Observations', medication: 'Medication', nutrition: 'Nutrition', hydration: 'Hydration' }
-const TASK_STATUS_LABELS = { complete: 'Completed', notdone: 'Not done', overdue: 'Overdue', cancelled: 'Cancelled' }
+const TASK_STATUS_LABELS = { complete: 'Completed', partial: 'Partial', overdue: 'Overdue', cancelled: 'Cancelled' }
 
 function timeToMinutes(time) {
   const [h, m] = time.split(':').map(Number)

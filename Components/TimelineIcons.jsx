@@ -31,6 +31,26 @@ export const AlertCircleIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/></svg>
 )
 
+export const BellIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+)
+
+// Medication detail icons (Icons/Timeline Items/medication-form, medication-dosage,
+// support-required-medication, task-reason): outline icons, stroke follows currentColor.
+const medStroke = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }
+export const MedFormIcon = () => (
+  <svg {...medStroke}><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+)
+export const MedDosageIcon = () => (
+  <svg {...medStroke}><circle cx="7" cy="7" r="5"/><circle cx="17" cy="17" r="5"/><path d="M12 17h10"/><path d="m3.46 10.54 7.08-7.08"/></svg>
+)
+export const MedSupportIcon = () => (
+  <svg {...medStroke}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+)
+export const ReasonIcon = () => (
+  <svg {...medStroke}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+)
+
 export const StatusCheckIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="9.29 15.79 5.47 12.03 4.2 13.29 9.29 18.3 20.2 7.55 18.93 6.3"/></svg>
 )

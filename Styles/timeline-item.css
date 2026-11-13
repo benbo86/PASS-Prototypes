@@ -70,6 +70,11 @@
   font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1;
   color: var(--legacy-status-complete);
 }
+.tli-bell {
+  width: 26px; height: 26px; border-radius: 50%; background: #fff; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--legacy-status-partial);
+}
+.tli-bell svg { width: 18px; height: 18px; }
 .tli-status--partial   { background: var(--legacy-status-partial); }
 .tli-status--cancelled { background: var(--legacy-status-cancelled); }
 
@@ -86,7 +91,7 @@
 .tli-task-group { display: inline-flex; align-items: center; gap: 4px; }
 .tli-task-dot { width: 8px; height: 8px; border-radius: 50%; background: #cfcfcf; }
 .tli-task-dot--complete  { background: var(--legacy-status-complete); }
-.tli-task-dot--notdone   { background: var(--legacy-status-partial); }
+.tli-task-dot--partial   { background: var(--legacy-status-partial); }
 .tli-task-dot--overdue,
 .tli-task-dot--missed    { background: var(--legacy-status-overdue); }
 .tli-task-dot--cancelled { background: var(--legacy-status-cancelled); }

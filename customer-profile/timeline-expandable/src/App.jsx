@@ -35,9 +35,9 @@ const PILL_FILTERS = FILTER_STYLE !== 'original'
 // label -> task type.
 // Status filter options: Visit status (the status on the row) and Task status.
 const VISIT_STATUS_OPTIONS = ['Completed', 'Missed', 'Cancelled']
-const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Not done', 'Cancelled']
+const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Partial', 'Cancelled']
 const VISIT_STATUS_PILL = { complete: 'Completed', missed: 'Missed', cancelled: 'Cancelled' }
-const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', notdone: 'Not done', cancelled: 'Cancelled' }
+const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', partial: 'Partial', cancelled: 'Cancelled' }
 
 const EVENT_TYPE_PILLS = ['Visits', 'Alerts', 'Updates', 'Documents']
 const TASK_TYPE_PILL_TYPES = { Tasks: 'general', Medication: 'medication', Nutrition: 'nutrition', Hydration: 'hydration', Observations: 'observation' }
@@ -57,8 +57,12 @@ const EVENT_TYPE_OPTIONS = [
 // that is a different day to the visit start). One carer (`by`) completes a
 // visit's tasks. Task: done = time (doneDate only if a different day).
 
-const task = (id, type, title, instructions, status, done, note, doneDate) =>
-  ({ id, type, title, instructions, status, done, doneDate, note })
+// extra (optional): medication details { form, dosage, support } and, for a partial task, the carer's { reason }.
+const task = (id, type, title, instructions, status, done, note, doneDate, extra = {}) =>
+  ({ id, type, title, instructions, status, done, doneDate, note, ...extra })
+
+const TABLETS = { form: 'Tablet', dosage: '2 tablets', support: 'Prompt' }
+const CREAM = { form: 'Cream', dosage: 'Pea-sized amount', support: 'Administer' }
 
 const TODAY_VISITS = [
   { id: 'v1', time: '17:00', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'cancelled',
@@ -76,7 +80,7 @@ const TODAY_VISITS = [
       task(202, 'general', 'MEET AND GREET', ['Introduce yourself if this is your first visit with me.'], 'complete', '12:32', 'Patricia was in good spirits.'),
       task(203, 'nutrition', 'LUNCH', ['Heat the meal in the fridge until piping hot, let it cool a little, and serve on a tray at the sofa.'], 'complete', '12:44', 'Chicken casserole heated and served. Ate most of it.'),
       task(204, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:48', 'Drank a full glass of squash.'),
-      task(205, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken with squash.'),
+      task(205, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken with squash.', undefined, TABLETS),
       task(206, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '12:54', 'Kitchen left tidy.'),
     ] },
   { id: 'v3', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
@@ -97,12 +101,12 @@ const TODAY_VISITS = [
       task(311, 'general', 'INCONTINENCE PAD', ['Dispose of used pads in the bathroom bin, not the kitchen.'], 'complete', '10:04', 'Pad changed and disposed of in the bathroom bin.'),
       task(312, 'general', 'ENSURE BATHROOM & TOILET CLEANED AFTER USE', ['Cleaning products are under the sink.'], 'complete', '10:10', 'Cleaned the bathroom and toilet after use.'),
       task(313, 'general', 'COMPANIONSHIP', ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."], 'complete', '10:11', 'Chatted throughout the visit. Patricia responded with a few words and smiled.'),
-      task(314, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care. Do not over apply, this will not help me.'], 'notdone', null, 'Patricia declined the cream today and said her skin felt comfortable. Husband informed.'),
+      task(314, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care. Do not over apply, this will not help me.'], 'partial', '10:01', 'Patricia declined the cream today and said her skin felt comfortable. Husband informed.', undefined, { ...CREAM, reason: 'Refused' }),
     ] },
   { id: 'v4', time: '08:00', type: 'visit', title: 'Morning Medication Visit', careType: 'Complex care', status: 'missed',
     due: { due: '08:00', completeBy: '08:15' },
     tasks: [
-      task(401, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null),
+      task(401, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null, undefined, TABLETS),
     ] },
 ]
 
@@ -139,7 +143,7 @@ const SAT_VISITS = [
     due: { due: '22:00', completeBy: '22:30' }, actual: '22:02 – 22:26',
     tasks: [
       task(801, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '22:03', 'Let in by Patricia.'),
-      task(802, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
+      task(802, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.', undefined, TABLETS),
       task(803, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:20', 'Settled in bed, lamp left on.'),
     ] },
   { id: 'v9', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
@@ -154,14 +158,14 @@ const SAT_VISITS = [
     tasks: [
       task(1001, 'nutrition', 'LUNCH', ['Heat the meal in the fridge until piping hot, let it cool a little, and serve on a tray at the sofa.'], 'complete', '12:42', 'Soup and a sandwich served.'),
       task(1002, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:47', 'Drank a full glass.'),
-      task(1003, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken.'),
+      task(1003, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken.', undefined, TABLETS),
     ] },
   { id: 'v11', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '09:30', completeBy: '10:30' }, actual: '09:30 – 10:15',
     tasks: [
       task(1101, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:55', 'Assisted with washing and dressing.'),
       task(1102, 'observation', 'Body Map Observation', ['Record any marks or skin changes on the body map.'], 'complete', '10:00', 'No new marks.'),
-      task(1103, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care.'], 'notdone', null, 'Patricia declined the cream today. Husband informed.'),
+      task(1103, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care.'], 'partial', '10:03', 'Patricia declined the cream today. Husband informed.', undefined, { ...CREAM, reason: 'Refused will retry' }),
     ] },
 ]
 
@@ -190,7 +194,7 @@ const FRI_VISITS = [
   { id: 'v15', time: '08:00', type: 'visit', title: 'Morning Medication Visit', careType: 'Complex care', status: 'complete', by: 'Karen Bailey',
     due: { due: '08:00', completeBy: '08:15' }, actual: '08:01 – 08:12',
     tasks: [
-      task(1501, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'complete', '08:06', 'Tablets taken with water.'),
+      task(1501, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'complete', '08:06', 'Tablets taken with water.', undefined, TABLETS),
     ] },
 ]
 
@@ -198,7 +202,7 @@ const THU_VISITS = [
   { id: 'v16', time: '22:00', type: 'visit', title: 'Night Visit', careType: 'Complex care', status: 'complete', by: 'Amara Okafor',
     due: { due: '22:00', completeBy: '22:30' }, actual: '22:05 – 22:28',
     tasks: [
-      task(1601, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
+      task(1601, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.', undefined, TABLETS),
       task(1602, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:22', 'Settled in bed.'),
     ] },
   { id: 'v17', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
@@ -212,7 +216,7 @@ const THU_VISITS = [
     due: { due: '09:30', completeBy: '10:30' },
     tasks: [
       task(1801, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'overdue', null, null),
-      task(1802, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null),
+      task(1802, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null, undefined, TABLETS),
     ] },
 ]
 
@@ -222,7 +226,7 @@ const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS, ...SAT_VISITS, ...FRI_VISIT
 
 const VISIT_STATUS_LABELS = { complete: 'Complete', missed: 'Missed', cancelled: 'Cancelled' }
 const TASK_TYPE_LABELS = { general: 'Tasks', observation: 'Observations', medication: 'Medication', nutrition: 'Nutrition', hydration: 'Hydration' }
-const TASK_STATUS_LABELS = { complete: 'Completed', notdone: 'Not done', overdue: 'Overdue', cancelled: 'Cancelled' }
+const TASK_STATUS_LABELS = { complete: 'Completed', partial: 'Partial', overdue: 'Overdue', cancelled: 'Cancelled' }
 
 function timeToMinutes(time) {
   const [h, m] = time.split(':').map(Number)
@@ -265,6 +269,11 @@ function buildVisitPanel(visit, dayLabel) {
       status: t.status,
       statusLabel: TASK_STATUS_LABELS[t.status],
       note: t.note,
+      form: t.form, dosage: t.dosage, support: t.support, reason: t.reason,
+      completedBy: t.done ? (t.by || visit.by) : null,
+      // A partial task raises an alert; it turns green once the office has added a review note.
+      reviewNote: t.status === 'partial' ? visit.reviewNote : undefined,
+      alert: t.status === 'partial' ? (visit.reviewNote ? 'resolved' : 'open') : undefined,
     })),
     cards,
   }
@@ -345,7 +354,7 @@ export default function App() {
             const isOpen = openIds.has(visit.id)
             const body = isOpen ? buildVisitPanel(visit, heading) : null
             return (
-              <TimelineItem key={visit.id} item={visit} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
+              <TimelineItem key={visit.id} item={{ ...visit, bell: visit.tasks.some(t => t.status === 'partial') }} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
                 {body && (
                   <div className="tl-nested">
                     <dl className="vtp-details">
@@ -354,7 +363,7 @@ export default function App() {
                       ))}
                     </dl>
                     <h2 className="vtp-section-title">Tasks <span className="vtp-section-count">({body.taskSummary})</span></h2>
-                    <VisitTasksList tasks={body.tasks} />
+                    <VisitTasksList tasks={body.tasks} onAddReviewNote={() => {}} />
                     {body.cards.length > 0 && <div className="vtp-cards">{body.cards}</div>}
                   </div>
                 )}

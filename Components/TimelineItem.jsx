@@ -2,7 +2,7 @@ import InitialsAvatar from './InitialsAvatar'
 import '../Styles/initials-avatar.css'
 import {
   GeneralListIcon, MedListIcon, NutritionListIcon, HydrationListIcon, VisitListIcon,
-  AlertCircleIcon, StatusCheckIcon, StatusBanIcon,
+  AlertCircleIcon, BellIcon, StatusCheckIcon, StatusBanIcon,
 } from './TimelineIcons'
 
 // Refreshed timeline list item (customer + employee timelines). Renders the
@@ -13,9 +13,10 @@ import {
 // expanded body as children.
 // onViewTasks (optional): shows a "View tasks" button on the row, e.g. for a
 // visit whose tasks open in Components/VisitTasksPanel.jsx.
-// item: { time, type, title, status, by?, noStatus?, alert?, dueIn?, tasks? }
+// item: { time, type, title, status, by?, noStatus?, alert?, bell?, dueIn?, tasks? }
+//   bell (optional): an orange bell in a white circle to the right of the status, for an item with an alert.
 //   tasks (optional, [{ status }]): adds a "Tasks ● 10 ● 3 ● 1" pill after the title:
-//   a coloured dot and count per status (complete | notdone | overdue | missed | cancelled).
+//   a coloured dot and count per status (complete | partial | overdue | missed | cancelled).
 //   type   general | observation | medication | visit | nutrition | hydration | outcome
 //   status overdue | missed | complete | partial | cancelled | upcoming
 //   Overdue shows a red "!" and an empty grey status slot; once there is an
@@ -46,7 +47,7 @@ function Avatar({ name }) {
 }
 
 // Statuses that share a colour are counted together (missed = overdue).
-const TASK_DOT_ORDER = ['complete', 'notdone', 'overdue', 'cancelled']
+const TASK_DOT_ORDER = ['complete', 'partial', 'overdue', 'cancelled']
 
 function TaskSummary({ tasks }) {
   if (!tasks?.length) return null
@@ -84,6 +85,7 @@ function RowRight({ item, onViewTasks }) {
         // (eltico icon-task-status-complete, loaded by Styles/legacy.css).
         ? <span className="tli-status-glyph" aria-hidden="true">{'\uE90B'}</span>
         : <span className={`tli-status${overdue ? '' : ` tli-status--${item.status}`}`}>{StatusGlyph && <StatusGlyph />}</span>}
+      {item.bell && <span className="tli-bell" title="Alert"><BellIcon /></span>}
     </div>
   )
 }

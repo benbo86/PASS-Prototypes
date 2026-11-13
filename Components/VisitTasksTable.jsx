@@ -34,7 +34,7 @@ const PILL_CLASS = {
   overdue: 'status-missed',
   cancelled: 'status-cancelled',
   missed: 'status-missed',
-  notdone: 'vtp-pill--partial',
+  partial: 'vtp-pill--partial',
 }
 
 export default function VisitTasksTable({ tasks = [], dropdownZIndex = 10900 }) {
