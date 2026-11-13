@@ -121,3 +121,11 @@
   border-color: var(--brand-purple-6-purple-4); color: var(--brand-purple-6-purple-4); cursor: pointer;
 }
 .fd-clear-btn:not(:disabled):hover { background: var(--ui-purple-7-lightest-lavendar); }
+
+/* Optional heading row (title + back arrow), used when the dropdown is drilled into from a menu. */
+.fd-title-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 16px 4px; box-sizing: border-box;
+  background: none; border: none; font-family: inherit; font-size: 14px; font-weight: 600; color: #333; text-align: left; cursor: pointer;
+}
+.fd-title-row:disabled { cursor: default; }
+.fd-title-row svg { color: var(--ui-purple-3-grape-grey); }

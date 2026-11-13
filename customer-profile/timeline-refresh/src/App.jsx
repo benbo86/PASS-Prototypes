@@ -10,7 +10,7 @@ import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
 import VisitTasksPanel from '../../../Components/VisitTasksPanel'
 import TimelineItem, { TimelineTypeIcon } from '../../../Components/TimelineItem'
-import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput } from '../../../Components/TimelineHeader'
+import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu } from '../../../Components/TimelineHeader'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -22,6 +22,25 @@ const ChevronLeftIcon = () => (
 // The timeline lists visits only. A visit matches a filter if it, or any of
 // its tasks, does — so "Medication" finds every visit that includes a
 // medication task.
+
+// How the timeline filters look:
+//   'menu'     one "Filters" pill; its menu lists each filter type, then drills in
+//   'pills'    a pill per filter type
+//   'original' the first select + text-field filters (state and matching kept below)
+const FILTER_STYLE = 'menu'
+const PILL_FILTERS = FILTER_STYLE !== 'original'
+
+// Pill dropdown options. Event type matches live (this timeline only holds
+// visits, so Alerts/Updates/Documents have nothing to show yet); Task type is
+// label -> task type.
+// Status filter options: Visit status (the status on the row) and Task status.
+const VISIT_STATUS_OPTIONS = ['Completed', 'Missed', 'Cancelled']
+const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Not done', 'Cancelled']
+const VISIT_STATUS_PILL = { complete: 'Completed', missed: 'Missed', cancelled: 'Cancelled' }
+const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', notdone: 'Not done', cancelled: 'Cancelled' }
+
+const EVENT_TYPE_PILLS = ['Visits', 'Alerts', 'Updates', 'Documents']
+const TASK_TYPE_PILL_TYPES = { Tasks: 'general', Medication: 'medication', Nutrition: 'nutrition', Hydration: 'hydration', Observations: 'observation' }
 
 const EVENT_TYPE_OPTIONS = [
   { value: 'all', label: 'All timeline events' },
@@ -114,7 +133,90 @@ const PAST_VISITS = [
     ] },
 ]
 
-const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS]
+// Earlier days (infinite scroll in the live product). Carers: Karen Bailey, Amara Okafor.
+const SAT_VISITS = [
+  { id: 'v8', time: '22:00', type: 'visit', title: 'Night Visit', status: 'complete', by: 'Amara Okafor',
+    due: { due: '22:00', completeBy: '22:30' }, actual: '22:02 – 22:26',
+    tasks: [
+      task(801, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '22:03', 'Let in by Patricia.'),
+      task(802, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
+      task(803, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:20', 'Settled in bed, lamp left on.'),
+    ] },
+  { id: 'v9', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'complete', by: 'Karen Bailey',
+    due: { due: '17:30', completeBy: '18:00' }, actual: '17:33 – 17:58',
+    tasks: [
+      task(901, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '17:34', 'Let in by Patricia.'),
+      task(902, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'complete', '17:44', 'Lasagne reheated and served. Ate most of it.'),
+      task(903, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water.'], 'complete', '17:50', 'Drank a glass of squash.'),
+    ] },
+  { id: 'v10', time: '12:30', type: 'visit', title: 'Lunch Visit', status: 'complete', by: 'Amara Okafor',
+    due: { due: '12:30', completeBy: '13:00' }, actual: '12:31 – 12:58',
+    tasks: [
+      task(1001, 'nutrition', 'LUNCH', ['Heat the meal in the fridge until piping hot, let it cool a little, and serve on a tray at the sofa.'], 'complete', '12:42', 'Soup and a sandwich served.'),
+      task(1002, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:47', 'Drank a full glass.'),
+      task(1003, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken.'),
+    ] },
+  { id: 'v11', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Karen Bailey',
+    due: { due: '09:30', completeBy: '10:30' }, actual: '09:30 – 10:15',
+    tasks: [
+      task(1101, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:55', 'Assisted with washing and dressing.'),
+      task(1102, 'observation', 'Body Map Observation', ['Record any marks or skin changes on the body map.'], 'complete', '10:00', 'No new marks.'),
+      task(1103, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care.'], 'notdone', null, 'Patricia declined the cream today. Husband informed.'),
+    ] },
+]
+
+const FRI_VISITS = [
+  { id: 'v12', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'cancelled',
+    due: { due: '17:30', completeBy: '18:00' },
+    cancellation: { reason: 'Customer cancelled', note: 'Patricia was out for dinner with her daughter, so no evening visit was needed.' },
+    tasks: [
+      task(1201, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'cancelled', null, 'Patricia was out for dinner.'),
+    ] },
+  { id: 'v13', time: '12:30', type: 'visit', title: 'Lunch Visit', status: 'complete', by: 'Karen Bailey',
+    due: { due: '12:30', completeBy: '13:00' }, actual: '12:28 – 12:55',
+    tasks: [
+      task(1301, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '12:30', 'Let in by Patricia.'),
+      task(1302, 'nutrition', 'LUNCH', ['Heat the meal in the fridge until piping hot, let it cool a little, and serve on a tray at the sofa.'], 'complete', '12:41', 'Fish pie heated and served.'),
+      task(1303, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:46', 'Drank a glass of squash.'),
+      task(1304, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '12:52', 'Kitchen left tidy.'),
+    ] },
+  { id: 'v14', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Amara Okafor',
+    due: { due: '09:30', completeBy: '10:30' }, actual: '09:32 – 10:20',
+    tasks: [
+      task(1401, 'general', 'PRESSURE SORES', ['Please be discreet and check my body for pressure sores, if you notice any please inform my husband and document on the body map.'], 'complete', '09:45', 'No pressure marks noted.'),
+      task(1402, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:58', 'Assisted with washing and dressing.'),
+      task(1403, 'observation', 'Body Map Observation', ['Record any marks or skin changes on the body map.'], 'complete', '10:02', 'Dressing on right buttock, scab on left.'),
+    ] },
+  { id: 'v15', time: '08:00', type: 'visit', title: 'Morning Medication Visit', status: 'complete', by: 'Karen Bailey',
+    due: { due: '08:00', completeBy: '08:15' }, actual: '08:01 – 08:12',
+    tasks: [
+      task(1501, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'complete', '08:06', 'Tablets taken with water.'),
+    ] },
+]
+
+const THU_VISITS = [
+  { id: 'v16', time: '22:00', type: 'visit', title: 'Night Visit', status: 'complete', by: 'Amara Okafor',
+    due: { due: '22:00', completeBy: '22:30' }, actual: '22:05 – 22:28',
+    tasks: [
+      task(1601, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
+      task(1602, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:22', 'Settled in bed.'),
+    ] },
+  { id: 'v17', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'complete', by: 'Karen Bailey',
+    due: { due: '17:30', completeBy: '18:00' }, actual: '17:29 – 17:55',
+    tasks: [
+      task(1701, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'complete', '17:40', 'Chicken curry reheated and served.'),
+      task(1702, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water.'], 'complete', '17:47', 'Drank a glass of squash.'),
+      task(1703, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '17:52', 'Kitchen left tidy.'),
+    ] },
+  { id: 'v18', time: '09:30', type: 'visit', title: 'Personal care', status: 'missed',
+    due: { due: '09:30', completeBy: '10:30' },
+    tasks: [
+      task(1801, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'overdue', null, null),
+      task(1802, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null),
+    ] },
+]
+
+const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS, ...SAT_VISITS, ...FRI_VISITS, ...THU_VISITS]
 
 // ─── Visit panel content ──────────────────────────────────────
 
@@ -175,14 +277,38 @@ export default function App() {
   const [eventName, setEventName] = useState('')
   const [doneBy, setDoneBy] = useState('')
   const [panel, setPanel] = useState(null) // { visit, dayLabel }
+  // Pill filters (multi-select).
+  const [typePills, setTypePills] = useState(() => new Set())
+  const [taskTypePills, setTaskTypePills] = useState(() => new Set())
+  const [visitStatusPills, setVisitStatusPills] = useState(() => new Set())
+  const [taskStatusPills, setTaskStatusPills] = useState(() => new Set())
+  const [namePills, setNamePills] = useState(() => new Set())
+  const [byPills, setByPills] = useState(() => new Set())
+  const nameItems = [...new Set(ALL_VISITS.flatMap(v => v.tasks.map(t => t.title)))].sort((a, b) => a.localeCompare(b))
+  const byItems = [...new Set(ALL_VISITS.map(v => v.by).filter(Boolean))].sort((a, b) => a.localeCompare(b))
 
   const has = (text, q) => text.toLowerCase().includes(q.trim().toLowerCase())
   const matches = (i) =>
     (eventType === 'all' || i.type === eventType) &&
     (!eventName.trim() || has(i.title, eventName)) &&
     (!doneBy.trim() || has(i.by || '', doneBy))
+  // Pill filters: a visit shows if its event type, carer and (task type / name)
+  // choices all fit. Task type and name must be met by the same task.
+  const pillMatches = (v) => {
+    if (typePills.size && !typePills.has('Visits')) return false
+    if (byPills.size && !byPills.has(v.by || '')) return false
+    const typeOk = (t) => taskTypePills.size === 0 || [...taskTypePills].some(l => TASK_TYPE_PILL_TYPES[l] === t.type)
+    const nameOkT = (t) => namePills.size === 0 || namePills.has(t.title)
+    const statusOkT = (t) => taskStatusPills.size === 0 || taskStatusPills.has(TASK_STATUS_PILL[t.status])
+    if (visitStatusPills.size && !visitStatusPills.has(VISIT_STATUS_PILL[v.status])) return false
+    // Task type, task name and task status have to be met by the same task.
+    if (taskTypePills.size + namePills.size + taskStatusPills.size === 0) return true
+    return v.tasks.some(t => typeOk(t) && nameOkT(t) && statusOkT(t))
+  }
+  const anyPillFilter = typePills.size + visitStatusPills.size + byPills.size + taskTypePills.size + namePills.size + taskStatusPills.size > 0
+  const clearAllPills = () => { setTypePills(new Set()); setTaskTypePills(new Set()); setVisitStatusPills(new Set()); setTaskStatusPills(new Set()); setNamePills(new Set()); setByPills(new Set()) }
   const applyFilters = (visits) => visits
-    .filter(v => matches(v) || v.tasks.some(matches))
+    .filter(v => PILL_FILTERS ? pillMatches(v) : (matches(v) || v.tasks.some(t => matches({ ...t, by: t.by || v.by }))))
     .sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
 
   const goToNow = () => {
@@ -239,9 +365,32 @@ export default function App() {
           dateLabel="6 July 2026"
           onGoToNow={goToNow}
         >
-          <TimelineFilterSelect label="Event type" prefix="Show:" value={eventType} onChange={setEventType} options={EVENT_TYPE_OPTIONS} />
-          <TimelineFilterInput label="Event name" value={eventName} onChange={setEventName} />
-          <TimelineFilterInput label="Done by" value={doneBy} onChange={setDoneBy} />
+          {FILTER_STYLE === 'menu' ? (
+            <TimelineFiltersMenu onClearAll={clearAllPills} filters={[
+              { key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
+              { key: 'visitStatus', label: 'Visit status', items: VISIT_STATUS_OPTIONS, selected: visitStatusPills, onChange: setVisitStatusPills },
+              { key: 'by', label: 'Done by', items: byItems, selected: byPills, onChange: setByPills },
+              { key: 'taskType', label: 'Task type', items: Object.keys(TASK_TYPE_PILL_TYPES), selected: taskTypePills, onChange: setTaskTypePills },
+              { key: 'name', label: 'Task name', items: nameItems, selected: namePills, onChange: setNamePills },
+              { key: 'taskStatus', label: 'Task status', items: TASK_STATUS_OPTIONS, selected: taskStatusPills, onChange: setTaskStatusPills },
+            ]} />
+          ) : FILTER_STYLE === 'pills' ? (
+            <>
+              <TimelineFilterPill label="Event type" items={EVENT_TYPE_PILLS} selected={typePills} onChange={setTypePills} />
+              <TimelineFilterPill label="Visit status" items={VISIT_STATUS_OPTIONS} selected={visitStatusPills} onChange={setVisitStatusPills} />
+              <TimelineFilterPill label="Done by" items={byItems} selected={byPills} onChange={setByPills} />
+              <TimelineFilterPill label="Task type" items={Object.keys(TASK_TYPE_PILL_TYPES)} selected={taskTypePills} onChange={setTaskTypePills} />
+              <TimelineFilterPill label="Task name" items={nameItems} selected={namePills} onChange={setNamePills} />
+              <TimelineFilterPill label="Task status" items={TASK_STATUS_OPTIONS} selected={taskStatusPills} onChange={setTaskStatusPills} />
+              {anyPillFilter && <button type="button" className="tlh-clear-all" onClick={clearAllPills}>Clear all</button>}
+            </>
+          ) : (
+            <>
+              <TimelineFilterSelect label="Event type" prefix="Show:" value={eventType} onChange={setEventType} options={EVENT_TYPE_OPTIONS} />
+              <TimelineFilterInput label="Event name" value={eventName} onChange={setEventName} />
+              <TimelineFilterInput label="Done by" value={doneBy} onChange={setDoneBy} />
+            </>
+          )}
         </TimelineHeader>
 
         <div className="tl2-body">
@@ -249,6 +398,9 @@ export default function App() {
             <>
               {renderDay('Monday 6 July 2026', TODAY_VISITS, latestDayRef)}
               {renderDay('Sunday 5 July 2026', PAST_VISITS, null)}
+              {renderDay('Saturday 4 July 2026', SAT_VISITS, null)}
+              {renderDay('Friday 3 July 2026', FRI_VISITS, null)}
+              {renderDay('Thursday 2 July 2026', THU_VISITS, null)}
             </>
           ) : (
             <div className="tl2-empty">Journal entries will appear here.</div>

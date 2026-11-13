@@ -26,6 +26,9 @@ export default function FilterDropdown({
   onClose,
   anchorEl,
   zIndex = 9999, // raise when opened from inside a slide-out panel (z-index 10800)
+  title,   // optional heading row; with onBack it shows a back arrow (drill-in from a menu)
+  onBack,
+  instant, // apply each tick straight away (calls onApply on every change) and hide the Apply/Clear footer
 }) {
   const [pending,   setPending]   = useState(() => new Set(selected));
   const [sortDir,   setSortDir]   = useState('asc');
@@ -82,6 +85,7 @@ export default function FilterDropdown({
     const next = new Set(pending);
     if (next.has(item)) next.delete(item); else next.add(item);
     setPending(next);
+    if (instant) onApply(next, sortDir, nameField, search);
   };
 
   const handleApply = () => { onApply(pending, sortDir, nameField, search); onClose(); };
@@ -93,6 +97,13 @@ export default function FilterDropdown({
       ref={dropRef}
       style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex }}
     >
+      {(title || onBack) && (
+        <button type="button" className="fd-title-row" onClick={onBack} disabled={!onBack}>
+          {onBack && <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>}
+          <span>{title}</span>
+        </button>
+      )}
+
       {showSort && (
         <>
           <div className="fd-sort-section">
@@ -167,14 +178,14 @@ export default function FilterDropdown({
             {visible.length === 0 && <span className="fd-empty">No results</span>}
           </div>
 
-          <div className="fd-footer">
+          {!instant && <div className="fd-footer">
             <button className="fd-apply-btn" onClick={handleApply} disabled={pending.size === 0}>
               Apply
             </button>
             <button className="fd-clear-btn" onClick={handleClear} disabled={pending.size === 0 && selected.size === 0}>
               Clear
             </button>
-          </div>
+          </div>}
         </>
       )}
 

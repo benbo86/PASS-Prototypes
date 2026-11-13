@@ -1,0 +1,40 @@
+/* Timeline (UI refresh) — forked from ../timeline/src/timeline-legacy.css.
+   The refreshed pieces are the sticky header (tabs + filters + actions) and
+   the list-item row (see Styles/timeline-header.css and Styles/timeline-item.css).
+   The timeline lists visits only; a visit expands in place to show its
+   details and task table (Components/VisitTasksTable.jsx). */
+
+.page { display: flex; flex-direction: row; min-height: 100vh; }
+
+.timeline-legacy {
+  font-family: var(--legacy-font-family);
+  color: var(--legacy-text-color);
+  background: #fff;
+  font-size: 14px;
+  line-height: 1.428571429;
+}
+
+/* ── Day groups ───────────────────────────────────────────────── */
+
+.tl2-body { padding: 0px 14px 60px; }
+
+.tl-day-header {
+  font-family: Barlow, sans-serif;
+  font-size: 14px;
+  font-weight:500;
+  color: #000000;
+  background: var(--ui-purple-5-languid-lavendar);
+  padding-left: 30px;
+  margin: 0 -14px 12px;
+  position: sticky;
+  top: calc(44px + var(--ctx-bar-height, 156px) + var(--dev-toolbar-height, 0px) + var(--tlh-height, 144px));
+  z-index: 10;
+}
+.tl-day-group { margin-bottom: 28px; }
+.tl-list { display: flex; flex-direction: column; gap: 20px; }
+/* Expanded visit body */
+.tl-nested { padding: 24px; border-top: 1px solid #e5e7eb; background: #fff; }
+.tl-nested .vtp-details { padding: 0 0 8px; }
+.tl-nested .vtp-section-title { margin: 24px 0 16px; font-size: 16px; Color: #000000; }
+.tl-nested .table-wrap { background: #fff; }
+.tl2-empty { padding: 48px 0; text-align: center; font-family: Barlow, sans-serif; font-size: 16px; color: var(--greyscale-5-grey-45); }

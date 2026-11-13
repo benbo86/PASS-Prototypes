@@ -129,6 +129,16 @@
   --bodymap-1-bodymap-zone-empty: #bfdfff;
   --bodymap-3-bodymap-zone-pressed: #246bb3;
 
+  /* Employee avatars (live app palette). Components/InitialsAvatar.jsx picks
+     one per name, so a person keeps the same colour everywhere. */
+  --avatar-1-teal: #a4d5d0;
+  --avatar-2-blue: #b1c8de;
+  --avatar-3-green: #b7dda8;
+  --avatar-4-taupe: #af9b91;
+  --avatar-5-rose: #de9f9e;
+  --avatar-6-lilac: #bfbacf;
+  --avatar-7-gold: #e9d189;
+
   /* Misc */
   --web-skrim: rgba(60, 57, 72, 0.7);
   --invisible: rgba(255, 255, 255, 0);

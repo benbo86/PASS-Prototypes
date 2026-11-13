@@ -35,7 +35,7 @@
 
 .vtp-body { flex: 1; overflow-y: auto; padding: 0 48px 48px; background: var(--ui-purple-7-lightest-lavendar); }
 .vtp-section-title { margin: 32px 0 16px; }
-.vtp-section-count { color: #4d4d4d; font-weight: 400; }
+.vtp-section-count { color:#000000; font-weight: 400; }
 
 .vtp-footer { flex-shrink: 0; display: flex; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--ui-purple-5-languid-lavendar); }
 
@@ -67,3 +67,27 @@
 .vtp-card p { margin: 0 0 8px; font-size: 14px; line-height: 20px; color: #333; }
 .vtp-card p:last-child { margin-bottom: 0; }
 .vtp-card-meta { color: var(--greyscale-6-grey-50); }
+
+/* Task list (Components/VisitTasksList.jsx): each task is a row, not a table row. */
+.vtl-list { list-style: none; margin: 0; padding: 0; }
+.vtl-item { display: flex; align-items: flex-start; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--ui-purple-4-lavendar); }
+.vtl-item:first-child { padding-top: 4px; }
+.vtl-item:last-child { border-bottom: none; padding-bottom: 4px; }
+.vtl-icon { flex-shrink: 0; }
+.vtl-icon .tli-icon-circle { width: 32px; height: 32px; }
+.vtl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.vtl-title { font-size: 14px; font-weight: 600; color: #101828; line-height: 20px; }
+.vtl-instructions {
+  font-size: 14px; color: var(--greyscale-6-grey-50); line-height: 16px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.vtl-note {
+  display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; padding: 8px 12px; box-sizing: border-box;
+  background: var(--ui-purple-7-lightest-lavendar); border: 1px solid var(--ui-purple-6-lavendar-grey); border-radius: 4px;
+  font-size: 14px; color: #333; line-height: 20px; overflow-wrap: anywhere;
+}
+.vtl-note svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--ui-purple-3-grape-grey); }
+.vtl-side { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 128px; }
+.vtl-status { display: inline-flex; align-items: center; gap: 8px; }
+.vtl-completed { font-size: 12px; color: var(--greyscale-6-grey-50); line-height: 16px; white-space: nowrap; }
+.vtl-empty { padding: 16px 0; font-size: 14px; color: var(--greyscale-6-grey-50); }

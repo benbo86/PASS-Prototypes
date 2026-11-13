@@ -16,6 +16,7 @@ import ElementEditPanel from './ElementEditPanel'
 import { getSuggestions, getCaretCoordinates } from './cssAutocomplete'
 import CssAutocompletePopup from './CssAutocompletePopup'
 import AncestorBreadcrumb from './AncestorBreadcrumb'
+import ColourVariables from './ColourVariables'
 import { ancestorTrail, selectableParent } from './ancestorTrail'
 
 const PenIcon = () => (
@@ -2787,7 +2788,8 @@ function EditPanel({
   const showIconTab = !!selection.svgEl
   const isSvgTab = activeTab === 'svg' && showIconTab
   const isElementTab = activeTab === 'element'
-  const panelWidth = isSvgTab ? SVG_PANEL_WIDTH : PANEL_WIDTH
+  const isColoursTab = activeTab === 'colours'
+  const panelWidth = isSvgTab || isColoursTab ? SVG_PANEL_WIDTH : PANEL_WIDTH
   const basePos = computeEditPanelPosition(selection.rect, panelWidth)
 
   // Manual drag override — null until the user actually drags the header,
@@ -2856,8 +2858,9 @@ function EditPanel({
     <div className="devedit-panel" data-devedit-ui="true" style={{ left: pos.left, top: pos.top, bottom: pos.bottom, width: panelWidth }}>
       <div className="devedit-panel-header" onMouseDown={handleHeaderMouseDown}>
         <div className="devedit-tabs">
-          <button className={`devedit-tab${!isSvgTab && !isElementTab ? ' active' : ''}`} onClick={() => onTabChange('styles')}>Edit styles</button>
+          <button className={`devedit-tab${!isSvgTab && !isElementTab && !isColoursTab ? ' active' : ''}`} onClick={() => onTabChange('styles')}>Edit styles</button>
           <button className={`devedit-tab${isElementTab ? ' active' : ''}`} onClick={() => onTabChange('element')}>Element</button>
+          <button className={`devedit-tab${isColoursTab ? ' active' : ''}`} onClick={() => onTabChange('colours')}>Colours</button>
           {showIconTab && (
             <button className={`devedit-tab${isSvgTab ? ' active' : ''}`} onClick={() => onTabChange('svg')}>Icon</button>
           )}
@@ -2877,6 +2880,8 @@ function EditPanel({
             onApply={onIconApply}
             onReset={onIconReset}
           />
+        ) : isColoursTab ? (
+          <ColourVariables />
         ) : isElementTab ? (
           <ElementEditPanel
             ref={elementPanelRef}
@@ -2944,7 +2949,7 @@ function EditPanel({
           </>
         )}
       </div>
-      {!isSvgTab && (
+      {!isSvgTab && !isColoursTab && (
         <div className="devedit-panel-footer">
           {error && <div className="devedit-error">{error}</div>}
           <div className="devedit-rule-actions">

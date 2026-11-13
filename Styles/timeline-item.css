@@ -29,7 +29,11 @@
   color: var(--tl-text);
   cursor: pointer;
   user-select: none;
+  transition: filter 0.15s;
 }
+.tli-item { transition: border-color .15s ease, box-shadow .15s ease; }
+.tli-item:hover { border-color: #d8b4fe; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1); }
+.tli-row:hover { filter: brightness(0.97); }
 
 .tli-time { font-size: 14px; font-weight: 600; }
 
@@ -40,13 +44,11 @@
   background: var(--tl-circle); color: var(--tl-icon);
 }
 .tli-icon-circle svg { width: 18px; height: 18px; }
-.tli-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tli-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tli-title--caps { text-transform: uppercase; }
 
 .tli-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .tli-by { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #333; margin-right:70px; }
-/* Square avatar with a purple border, as on the old timeline, at 24px. */
-.tli-avatar { width: 24px; height: 24px; box-sizing: border-box; border-radius: 4px; border: 1.5px solid var(--legacy-purple); object-fit: cover; background: #eee; }
 .tli-due-in { font-size: 14px; font-weight: 600; }
 
 /* Right-hand status indicators: a 24px alert circle (red "!" on a white
@@ -73,3 +75,18 @@
 
 
 .tli-view-tasks { height: 32px; padding: 0 16px; font-size: 14px; background: #fff; }
+
+.tli-chevron { display: flex; flex-shrink: 0; margin-left: 12px; color: var(--tl-icon); transition: transform 0.15s; }
+.tli-chevron svg { width: 24px; height: 24px; }
+.tli-chevron--open { transform: rotate(180deg); }
+.tli-row--expandable { grid-template-columns: 72px minmax(0, 1fr) auto 36px; }
+
+/* "Tasks ● 10 ● 3 ● 1" pill after the title: a dot and count per status. */
+.tli-tasks { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; height: 24px; padding: 0 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.06); font-size: 13px; font-weight: 500; color: #333; white-space: nowrap; }
+.tli-task-group { display: inline-flex; align-items: center; gap: 4px; }
+.tli-task-dot { width: 8px; height: 8px; border-radius: 50%; background: #cfcfcf; }
+.tli-task-dot--complete  { background: var(--legacy-status-complete); }
+.tli-task-dot--notdone   { background: var(--legacy-status-partial); }
+.tli-task-dot--overdue,
+.tli-task-dot--missed    { background: var(--legacy-status-overdue); }
+.tli-task-dot--cancelled { background: var(--legacy-status-cancelled); }

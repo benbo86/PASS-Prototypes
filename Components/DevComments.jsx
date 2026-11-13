@@ -95,6 +95,29 @@ function getPositioningRect(container) {
   return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
 }
 
+// A comment left on something that stays put while the page scrolls (a fixed
+// header, or a sticky one that has stuck) should stay put with it. Returns
+// true if `target` sits inside such an element. A sticky element that hasn't
+// reached its stuck position yet still scrolls with the page, so it doesn't count.
+function isOnFixedElement(target, container) {
+  for (let el = target; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+    if (el === container) return false
+    const cs = getComputedStyle(el)
+    if (cs.position === 'fixed') return true
+    if (cs.position === 'sticky' && cs.top !== 'auto') {
+      if (Math.abs(el.getBoundingClientRect().top - parseFloat(cs.top)) < 1.5) return true
+    }
+  }
+  return false
+}
+
+// Viewport-anchored pins (comment.fixed) store x as a % of the viewport width
+// and y in px from the top of the viewport; the rest are a % of the container.
+function pinPoint(c, rect) {
+  if (c.fixed) return { left: (c.xPercent / 100) * window.innerWidth, top: c.yPx }
+  return { left: rect.left + (c.xPercent / 100) * rect.width, top: rect.top + (c.yPercent / 100) * rect.height }
+}
+
 function fmtTime(value) {
   // Firestore Timestamp has .toDate(); a plain Date (used for reply
   // entries, since serverTimestamp() can't be used inside arrayUnion) is
@@ -298,7 +321,10 @@ export default function DevComments({ containerRef, prototypeId, scopeClicksToCo
       const xPercent = ((e.clientX - rect.left) / rect.width) * 100
       const yPercent = ((e.clientY - rect.top) / rect.height) * 100
       setOpenThreadId(null)
-      setComposerAt({ x: e.clientX, y: e.clientY, xPercent, yPercent })
+      const fixed = isOnFixedElement(e.target, container)
+      setComposerAt(fixed
+        ? { x: e.clientX, y: e.clientY, xPercent: (e.clientX / window.innerWidth) * 100, yPercent, fixed: true, yPx: e.clientY }
+        : { x: e.clientX, y: e.clientY, xPercent, yPercent })
     }
 
     const handleSuppress = (e) => {
@@ -337,6 +363,7 @@ export default function DevComments({ containerRef, prototypeId, scopeClicksToCo
       prototypeId,
       xPercent: composerAt.xPercent,
       yPercent: composerAt.yPercent,
+      ...(composerAt.fixed ? { fixed: true, yPx: composerAt.yPx } : {}),
       authorName: name,
       text,
       replies: [],
@@ -389,10 +416,8 @@ export default function DevComments({ containerRef, prototypeId, scopeClicksToCo
 
   let openThreadPos = null
   if (openThread && containerRect) {
-    openThreadPos = computePanelPosition(
-      containerRect.left + (openThread.xPercent / 100) * containerRect.width,
-      containerRect.top + (openThread.yPercent / 100) * containerRect.height
-    )
+    const pt = pinPoint(openThread, containerRect)
+    openThreadPos = computePanelPosition(pt.left, pt.top)
   }
 
   return (
@@ -411,8 +436,7 @@ export default function DevComments({ containerRef, prototypeId, scopeClicksToCo
       {containerRect && createPortal(
         <div data-devcomments-ui="true">
           {!devModeActive && comments.map(c => {
-            const left = containerRect.left + (c.xPercent / 100) * containerRect.width
-            const top = containerRect.top + (c.yPercent / 100) * containerRect.height
+            const { left, top } = pinPoint(c, containerRect)
             if (!isPinVisible(left, top)) return null
             return (
               <Pin

@@ -53,3 +53,50 @@
 .tlh-actions { margin-left: auto; display: flex; gap: 12px; flex-shrink: 0; }
 .tlh-actions .round-btn { white-space: nowrap; height:36px; font-size:14px; padding: 0px 20px; gap:6px; }
 
+
+/* ── Filter pills (TimelineFilterPill) ─────────────────────────── */
+.tlh-pill {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 4px; background: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 500; color: var(--greyscale-2-grey-20);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: border-color .15s ease, background .15s ease;
+}
+.tlh-pill:hover { border-color: var(--brand-purple-4-purple-2-tint); }
+.tlh-pill svg { width: 24px; height: 24px; color: var(--ui-purple-3-grape-grey); }
+.tlh-pill-chevron { transition: transform .15s ease; }
+.tlh-pill--open .tlh-pill-chevron { transform: rotate(180deg); }
+.tlh-pill--active { border-color: var(--brand-purple-6-purple-4); background: var(--ui-purple-6-lavendar-grey); color: var(--brand-purple-6-purple-4); }
+.tlh-pill--active svg { color: var(--brand-purple-6-purple-4); }
+.tlh-pill-count {
+  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; box-sizing: border-box;
+  border-radius: 50%; background: var(--brand-purple-6-purple-4); color: #fff; font-size: 12px; font-weight: 600; line-height: 1;
+}
+
+/* Pill layout: no labels above the fields, so centre everything on one row and
+   give the bar equal padding top and bottom. */
+.tlh-filters:has(.tlh-pill) { align-items: center; padding-top: 30px; }
+.tlh-filters:has(.tlh-pill) { position: relative; }
+.tlh-filters:has(.tlh-pill) .tlh-date { padding-bottom: 0; position: absolute; left: 50%; top: calc(50% - 0px); transform: translate(-50%, -50%); }
+.tlh-clear-all {
+  background: none; border: none; padding: 0 8px; height: 36px; font-family: inherit; font-size: 14px; font-weight: 500;
+  color: var(--brand-purple-6-purple-4); cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.tlh-clear-all:hover { text-decoration: underline; }
+
+/* "Filters" menu (TimelineFiltersMenu): list of filter types, then drill-in. */
+.tlh-menu { width: 240px; padding: 4px 0 0; }
+.tlh-menu-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 16px; box-sizing: border-box;
+  background: none; border: none; font-family: inherit; font-size: 14px; font-weight: 500; color: #333; text-align: left; cursor: pointer;
+}
+.tlh-menu-row:hover { background: var(--greyscale-14-grey-95); }
+.tlh-menu-row > span:first-child { flex: 1; }
+.tlh-menu-row svg { width: 20px; height: 20px; color: var(--ui-purple-3-grape-grey); }
+.tlh-menu-footer { border-top: 1px solid var(--greyscale-13-grey-90); margin-top: 4px; padding: 4px 8px; }
+.tlh-clear-all:disabled { color: var(--greyscale-11-grey-80); cursor: default; text-decoration: none; }
+
+.tlh-menu-tick { color: var(--brand-purple-6-purple-4); font-weight: 600; }
+
+/* Single Expand all / Collapse all toggle: fixed width so the buttons beside it don't shift when the label changes. */
+.tlh-toggle-all { min-width: 136px; justify-content: center; }

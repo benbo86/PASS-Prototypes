@@ -2154,6 +2154,11 @@
         },
         {
           "kind": "inline",
+          "ref": "customer-profile/timeline-expandable/src/App.jsx#ChevronLeftIcon",
+          "name": "ChevronLeftIcon"
+        },
+        {
+          "kind": "inline",
           "ref": "customer-profile/timeline-refresh/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
@@ -2183,7 +2188,7 @@
           "name": "ChevronLeftIcon"
         }
       ],
-      "usageCount": 25
+      "usageCount": 26
     },
     {
       "hash": "83e17a13",
@@ -2689,6 +2694,35 @@
       "usageCount": 4
     },
     {
+      "hash": "4e65a625",
+      "name": "Chevron Down",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <polygon points=\"16.6 8.6 12 13.2 7.4 8.6 6 10 12 16 18 10\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/SearchSelect.jsx#ChevronDownIcon",
+          "name": "ChevronDownIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/TimelineHeader.jsx#PillChevron",
+          "name": "PillChevron"
+        },
+        {
+          "kind": "inline",
+          "ref": "Components/TimelineItem.jsx#ChevronDownIcon",
+          "name": "ChevronDownIcon"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#ChevronDown",
+          "name": "ChevronDown"
+        }
+      ],
+      "usageCount": 4
+    },
+    {
       "hash": "e4e62cd8",
       "name": "Warning",
       "group": "Inline",
@@ -3018,20 +3052,20 @@
       "usageCount": 2
     },
     {
-      "hash": "4e65a625",
-      "name": "Chevron Down",
+      "hash": "6f642ef5",
+      "name": "Note",
       "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <polygon points=\"16.6 8.6 12 13.2 7.4 8.6 6 10 12 16 18 10\" />\n  </svg>",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"-5.07 -3 24 24\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z\"/></svg>",
       "sources": [
         {
           "kind": "inline",
-          "ref": "Components/SearchSelect.jsx#ChevronDownIcon",
-          "name": "ChevronDownIcon"
+          "ref": "Components/TimelineIcons.jsx#NoteIcon",
+          "name": "NoteIcon"
         },
         {
           "kind": "inline",
-          "ref": "schedule/daily-schedule/src/DailySchedule.jsx#ChevronDown",
-          "name": "ChevronDown"
+          "ref": "invoices/list/src/Invoices.jsx#DocumentIcon",
+          "name": "DocumentIcon"
         }
       ],
       "usageCount": 2
@@ -4230,6 +4264,20 @@
       "usageCount": 1
     },
     {
+      "hash": "143244c4",
+      "name": "Menu Chevron Right",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z\"/></svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/TimelineHeader.jsx#MenuChevronRight",
+          "name": "MenuChevronRight"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "551e1e92",
       "name": "General List",
       "group": "Inline",
@@ -4281,6 +4329,20 @@
           "kind": "inline",
           "ref": "Components/TimelineIcons.jsx#VisitListIcon",
           "name": "VisitListIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "1908f482",
+      "name": "Filter Lines",
+      "group": "Inline",
+      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M15 17c0-.552-.448-1-1-1h-4c-.552 0-1 .448-1 1s.448 1 1 1h4c.552 0 1-.448 1-1zm3-5c0-.552-.448-1-1-1H7c-.552 0-1 .448-1 1s.448 1 1 1h10c.552 0 1-.448 1-1zM4 8h16c.552 0 1-.448 1-1s-.448-1-1-1H4c-.552 0-1 .448-1 1s.448 1 1 1z\"/></svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "Components/TimelineIcons.jsx#FilterLinesIcon",
+          "name": "FilterLinesIcon"
         }
       ],
       "usageCount": 1
@@ -4813,20 +4875,6 @@
           "kind": "inline",
           "ref": "employee-contract/holiday-pay-deduction/src/HolidayEntitlement.jsx#InfoIcon",
           "name": "InfoIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "6f642ef5",
-      "name": "Document",
-      "group": "Inline",
-      "svg": "<svg width=\"20\" height=\"20\" viewBox=\"-5.07 -3 24 24\" fill=\"currentColor\">\n    <path fill-rule=\"evenodd\" d=\"M8.10373 0C8.60602 0 9.08992 0.189001 9.45925 0.529434L13.22 3.99599C13.6308 4.37464 13.8645 4.90786 13.8645 5.46655V14.6896C13.8645 16.5169 12.3773 17.9986 10.5417 18H3.32534C1.48881 18 0 16.5179 0 14.6896V3.31042C0 1.48212 1.48881 0 3.32534 0H8.10373ZM7.94685 1.98153H3.41796C2.58954 1.98153 1.91796 2.6531 1.91796 3.48153V14.5127C1.91796 15.3411 2.58954 16.0127 3.41796 16.0127H10.4075C11.2359 16.0127 11.9075 15.3411 11.9075 14.5127V6.06202H9.73742C8.74852 6.06202 7.94685 5.26395 7.94685 4.27948V1.98153ZM6.88131 10.5C7.43359 10.5 7.88131 10.9477 7.88131 11.5C7.88131 12.0523 7.43359 12.5 6.88131 12.5H3.88131C3.32902 12.5 2.88131 12.0523 2.88131 11.5C2.88131 10.9477 3.32902 10.5 3.88131 10.5H6.88131ZM9.88131 7.5C10.4336 7.5 10.8813 7.94772 10.8813 8.5C10.8813 9.05228 10.4336 9.5 9.88131 9.5H3.88131C3.32902 9.5 2.88131 9.05228 2.88131 8.5C2.88131 7.94772 3.32902 7.5 3.88131 7.5H9.88131Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "invoices/list/src/Invoices.jsx#DocumentIcon",
-          "name": "DocumentIcon"
         }
       ],
       "usageCount": 1
@@ -5728,5 +5776,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-12T14:57:52.143Z"
+  "generatedAt": "2026-11-13T11:55:44.654Z"
 }
