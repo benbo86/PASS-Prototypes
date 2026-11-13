@@ -61,7 +61,7 @@ const task = (id, type, title, instructions, status, done, note, doneDate) =>
   ({ id, type, title, instructions, status, done, doneDate, note })
 
 const TODAY_VISITS = [
-  { id: 'v1', time: '17:00', type: 'visit', title: 'Evening Visit', status: 'cancelled',
+  { id: 'v1', time: '17:00', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'cancelled',
     due: { due: '17:00', completeBy: '17:30' },
     cancellation: { reason: 'Customer cancelled', note: "Patricia's daughter called the office to say she'll be staying over this evening, so the visit isn't needed." },
     tasks: [
@@ -69,7 +69,7 @@ const TODAY_VISITS = [
         ['Please prepare my evening meal and serve this to me on a tray whilst I am seated comfortably on my sofa. My daughter usually prepares home-cooked meals for me in advance and leaves these in the fridge for reheating.'],
         'cancelled', null, "Part of the evening visit, which was cancelled — Patricia's daughter is preparing her meal instead."),
     ] },
-  { id: 'v2', time: '12:30', type: 'visit', title: 'Lunch Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v2', time: '12:30', type: 'visit', title: 'Lunch Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '12:30', completeBy: '13:00' }, actual: '12:29 – 12:56',
     tasks: [
       task(201, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '12:31', 'Knocked and waited. Patricia was in her chair and let me in.'),
@@ -79,7 +79,7 @@ const TODAY_VISITS = [
       task(205, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken with squash.'),
       task(206, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '12:54', 'Kitchen left tidy.'),
     ] },
-  { id: 'v3', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Karen Bailey',
+  { id: 'v3', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '09:30', completeBy: '10:30' }, actual: '09:29 – 10:12',
     careNote: ['Patricia was in bed on arrival. Supported her to the commode, personal care carried out, bowels opened.', 'Supported with dressing, tidied areas and disposed of rubbish. Dressing on right buttock, scab on left. Husband aware.', 'Left her well sat in her chair. Nothing else required.'],
     reviewNote: { by: 'Louise Carter', date: '6 Jul 2026 at 12:04', text: 'Cream not applied, Patricia declined. Husband aware, monitor skin at next visit.' },
@@ -99,7 +99,7 @@ const TODAY_VISITS = [
       task(313, 'general', 'COMPANIONSHIP', ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."], 'complete', '10:11', 'Chatted throughout the visit. Patricia responded with a few words and smiled.'),
       task(314, 'medication', 'Medi Derma cream *As agreed by the Registered Manager**', ['Please administer a small pea sized amount to my bottom after personal care. Do not over apply, this will not help me.'], 'notdone', null, 'Patricia declined the cream today and said her skin felt comfortable. Husband informed.'),
     ] },
-  { id: 'v4', time: '08:00', type: 'visit', title: 'Morning Medication Visit', status: 'missed',
+  { id: 'v4', time: '08:00', type: 'visit', title: 'Morning Medication Visit', careType: 'Complex care', status: 'missed',
     due: { due: '08:00', completeBy: '08:15' },
     tasks: [
       task(401, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'overdue', null, null),
@@ -107,7 +107,7 @@ const TODAY_VISITS = [
 ]
 
 const PAST_VISITS = [
-  { id: 'v5', time: '22:00', type: 'visit', title: 'Night Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v5', time: '22:00', type: 'visit', title: 'Night Visit', careType: 'Complex care', status: 'complete', by: 'Karen Bailey',
     due: { due: '22:00', completeBy: '07:00' }, actual: '22:04 – 6 Jul 2026 at 06:58',
     tasks: [
       task(501, 'general', 'SETTLE FOR THE NIGHT', ['Help me into my nightwear and into bed, with the bed rails up.'], 'complete', '22:12', 'Settled in bed with the rails up.'),
@@ -116,7 +116,7 @@ const PAST_VISITS = [
       task(504, 'hydration', 'OFFER FLUIDS', ['A small drink of squash from the bedside cup.'], 'complete', '06:20', 'Took a few sips of squash.', '6 Jul 2026'),
       task(505, 'general', 'MORNING WASH', ['Help me wash and dress ready for the day.'], 'complete', '06:50', 'Washed and dressed. Patricia chose her own clothes.', '6 Jul 2026'),
     ] },
-  { id: 'v6', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v6', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '17:30', completeBy: '18:00' }, actual: '17:28 – 17:54',
     tasks: [
       task(601, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '17:31', 'Let in by Patricia.'),
@@ -124,7 +124,7 @@ const PAST_VISITS = [
       task(603, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water.'], 'complete', '17:48', 'Drank a glass of squash.'),
       task(604, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '17:52', 'Kitchen left tidy.'),
     ] },
-  { id: 'v7', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Karen Bailey',
+  { id: 'v7', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '09:30', completeBy: '10:30' }, actual: '09:31 – 10:08',
     tasks: [
       task(701, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:52', 'Assisted with washing and dressing.'),
@@ -135,28 +135,28 @@ const PAST_VISITS = [
 
 // Earlier days (infinite scroll in the live product). Carers: Karen Bailey, Amara Okafor.
 const SAT_VISITS = [
-  { id: 'v8', time: '22:00', type: 'visit', title: 'Night Visit', status: 'complete', by: 'Amara Okafor',
+  { id: 'v8', time: '22:00', type: 'visit', title: 'Night Visit', careType: 'Complex care', status: 'complete', by: 'Amara Okafor',
     due: { due: '22:00', completeBy: '22:30' }, actual: '22:02 – 22:26',
     tasks: [
       task(801, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '22:03', 'Let in by Patricia.'),
       task(802, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
       task(803, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:20', 'Settled in bed, lamp left on.'),
     ] },
-  { id: 'v9', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v9', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '17:30', completeBy: '18:00' }, actual: '17:33 – 17:58',
     tasks: [
       task(901, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '17:34', 'Let in by Patricia.'),
       task(902, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'complete', '17:44', 'Lasagne reheated and served. Ate most of it.'),
       task(903, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water.'], 'complete', '17:50', 'Drank a glass of squash.'),
     ] },
-  { id: 'v10', time: '12:30', type: 'visit', title: 'Lunch Visit', status: 'complete', by: 'Amara Okafor',
+  { id: 'v10', time: '12:30', type: 'visit', title: 'Lunch Visit', careType: 'Personal care', status: 'complete', by: 'Amara Okafor',
     due: { due: '12:30', completeBy: '13:00' }, actual: '12:31 – 12:58',
     tasks: [
       task(1001, 'nutrition', 'LUNCH', ['Heat the meal in the fridge until piping hot, let it cool a little, and serve on a tray at the sofa.'], 'complete', '12:42', 'Soup and a sandwich served.'),
       task(1002, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:47', 'Drank a full glass.'),
       task(1003, 'medication', 'Lunchtime medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '12:50', 'Tablets taken.'),
     ] },
-  { id: 'v11', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Karen Bailey',
+  { id: 'v11', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '09:30', completeBy: '10:30' }, actual: '09:30 – 10:15',
     tasks: [
       task(1101, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:55', 'Assisted with washing and dressing.'),
@@ -166,13 +166,13 @@ const SAT_VISITS = [
 ]
 
 const FRI_VISITS = [
-  { id: 'v12', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'cancelled',
+  { id: 'v12', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'cancelled',
     due: { due: '17:30', completeBy: '18:00' },
     cancellation: { reason: 'Customer cancelled', note: 'Patricia was out for dinner with her daughter, so no evening visit was needed.' },
     tasks: [
       task(1201, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'cancelled', null, 'Patricia was out for dinner.'),
     ] },
-  { id: 'v13', time: '12:30', type: 'visit', title: 'Lunch Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v13', time: '12:30', type: 'visit', title: 'Lunch Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '12:30', completeBy: '13:00' }, actual: '12:28 – 12:55',
     tasks: [
       task(1301, 'general', 'ENTERING MY PROPERTY', ['Please knock and wait — I may take a moment to get to the door.'], 'complete', '12:30', 'Let in by Patricia.'),
@@ -180,14 +180,14 @@ const FRI_VISITS = [
       task(1303, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water — jug is in the fridge door.'], 'complete', '12:46', 'Drank a glass of squash.'),
       task(1304, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '12:52', 'Kitchen left tidy.'),
     ] },
-  { id: 'v14', time: '09:30', type: 'visit', title: 'Personal care', status: 'complete', by: 'Amara Okafor',
+  { id: 'v14', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'complete', by: 'Amara Okafor',
     due: { due: '09:30', completeBy: '10:30' }, actual: '09:32 – 10:20',
     tasks: [
       task(1401, 'general', 'PRESSURE SORES', ['Please be discreet and check my body for pressure sores, if you notice any please inform my husband and document on the body map.'], 'complete', '09:45', 'No pressure marks noted.'),
       task(1402, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'complete', '09:58', 'Assisted with washing and dressing.'),
       task(1403, 'observation', 'Body Map Observation', ['Record any marks or skin changes on the body map.'], 'complete', '10:02', 'Dressing on right buttock, scab on left.'),
     ] },
-  { id: 'v15', time: '08:00', type: 'visit', title: 'Morning Medication Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v15', time: '08:00', type: 'visit', title: 'Morning Medication Visit', careType: 'Complex care', status: 'complete', by: 'Karen Bailey',
     due: { due: '08:00', completeBy: '08:15' }, actual: '08:01 – 08:12',
     tasks: [
       task(1501, 'medication', 'Morning medication', ['Prompt Patricia to take her morning tablets from the dosette box.'], 'complete', '08:06', 'Tablets taken with water.'),
@@ -195,20 +195,20 @@ const FRI_VISITS = [
 ]
 
 const THU_VISITS = [
-  { id: 'v16', time: '22:00', type: 'visit', title: 'Night Visit', status: 'complete', by: 'Amara Okafor',
+  { id: 'v16', time: '22:00', type: 'visit', title: 'Night Visit', careType: 'Complex care', status: 'complete', by: 'Amara Okafor',
     due: { due: '22:00', completeBy: '22:30' }, actual: '22:05 – 22:28',
     tasks: [
       task(1601, 'medication', 'Night-time medication', ['Prompt Patricia to take her tablets from the dosette box.'], 'complete', '22:10', 'Tablets taken with water.'),
       task(1602, 'general', 'BED ROUTINE', ['Help me into my nightwear and settle me in bed with the bedside lamp on.'], 'complete', '22:22', 'Settled in bed.'),
     ] },
-  { id: 'v17', time: '17:30', type: 'visit', title: 'Evening Visit', status: 'complete', by: 'Karen Bailey',
+  { id: 'v17', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '17:30', completeBy: '18:00' }, actual: '17:29 – 17:55',
     tasks: [
       task(1701, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'complete', '17:40', 'Chicken curry reheated and served.'),
       task(1702, 'hydration', 'OFFER FLUIDS', ['Prefers a glass of squash rather than water.'], 'complete', '17:47', 'Drank a glass of squash.'),
       task(1703, 'general', 'ENSURE KITCHEN TIDY', ['Dishes washed and dried, surfaces wiped.'], 'complete', '17:52', 'Kitchen left tidy.'),
     ] },
-  { id: 'v18', time: '09:30', type: 'visit', title: 'Personal care', status: 'missed',
+  { id: 'v18', time: '09:30', type: 'visit', title: 'Morning Visit', careType: 'Personal care', status: 'missed',
     due: { due: '09:30', completeBy: '10:30' },
     tasks: [
       task(1801, 'general', 'MORNING PERSONAL CARE / DRESSING', ['I prefer to choose my own outfit — please lay a couple of options out for me to pick from.'], 'overdue', null, null),
@@ -236,6 +236,7 @@ function buildVisitPanel(visit, dayLabel) {
     { label: 'Planned time', value: `${visit.due.due} – ${visit.due.completeBy}` },
     visit.actual && { label: 'Actual time', value: visit.actual },
     visit.by && { label: 'Employee', value: visit.by },
+    visit.careType && { label: 'Care type', value: visit.careType },
     visit.cancellation && { label: 'Reason', value: visit.cancellation.reason },
   ].filter(Boolean)
   const cards = []
@@ -283,6 +284,10 @@ export default function App() {
   const [taskStatusPills, setTaskStatusPills] = useState(() => new Set())
   const [namePills, setNamePills] = useState(() => new Set())
   const [byPills, setByPills] = useState(() => new Set())
+  const [visitNamePills, setVisitNamePills] = useState(() => new Set())
+  const [careTypePills, setCareTypePills] = useState(() => new Set())
+  const careTypeItems = [...new Set(ALL_VISITS.map(v => v.careType))].sort((a, b) => a.localeCompare(b))
+  const visitNameItems = [...new Set(ALL_VISITS.map(v => v.title))].sort((a, b) => a.localeCompare(b))
   const nameItems = [...new Set(ALL_VISITS.flatMap(v => v.tasks.map(t => t.title)))].sort((a, b) => a.localeCompare(b))
   const byItems = [...new Set(ALL_VISITS.map(v => v.by).filter(Boolean))].sort((a, b) => a.localeCompare(b))
   const [openIds, setOpenIds] = useState(() => new Set())
@@ -305,6 +310,8 @@ export default function App() {
   const pillMatches = (v) => {
     if (typePills.size && !typePills.has('Visits')) return false
     if (byPills.size && !byPills.has(v.by || '')) return false
+    if (visitNamePills.size && !visitNamePills.has(v.title)) return false
+    if (careTypePills.size && !careTypePills.has(v.careType)) return false
     const typeOk = (t) => taskTypePills.size === 0 || [...taskTypePills].some(l => TASK_TYPE_PILL_TYPES[l] === t.type)
     const nameOkT = (t) => namePills.size === 0 || namePills.has(t.title)
     const statusOkT = (t) => taskStatusPills.size === 0 || taskStatusPills.has(TASK_STATUS_PILL[t.status])
@@ -313,8 +320,8 @@ export default function App() {
     if (taskTypePills.size + namePills.size + taskStatusPills.size === 0) return true
     return v.tasks.some(t => typeOk(t) && nameOkT(t) && statusOkT(t))
   }
-  const anyPillFilter = typePills.size + visitStatusPills.size + byPills.size + taskTypePills.size + namePills.size + taskStatusPills.size > 0
-  const clearAllPills = () => { setTypePills(new Set()); setTaskTypePills(new Set()); setVisitStatusPills(new Set()); setTaskStatusPills(new Set()); setNamePills(new Set()); setByPills(new Set()) }
+  const anyPillFilter = typePills.size + visitStatusPills.size + visitNamePills.size + careTypePills.size + byPills.size + taskTypePills.size + namePills.size + taskStatusPills.size > 0
+  const clearAllPills = () => { setTypePills(new Set()); setVisitNamePills(new Set()); setCareTypePills(new Set()); setTaskTypePills(new Set()); setVisitStatusPills(new Set()); setTaskStatusPills(new Set()); setNamePills(new Set()); setByPills(new Set()) }
   const applyFilters = (visits) => visits
     .filter(v => PILL_FILTERS ? pillMatches(v) : (matches(v) || v.tasks.some(t => matches({ ...t, by: t.by || v.by }))))
     .sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
@@ -389,18 +396,22 @@ export default function App() {
         >
           {FILTER_STYLE === 'menu' ? (
             <TimelineFiltersMenu onClearAll={clearAllPills} filters={[
-              { key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
-              { key: 'visitStatus', label: 'Visit status', items: VISIT_STATUS_OPTIONS, selected: visitStatusPills, onChange: setVisitStatusPills },
-              { key: 'by', label: 'Done by', items: byItems, selected: byPills, onChange: setByPills },
-              { key: 'taskType', label: 'Task type', items: Object.keys(TASK_TYPE_PILL_TYPES), selected: taskTypePills, onChange: setTaskTypePills },
-              { key: 'name', label: 'Task name', items: nameItems, selected: namePills, onChange: setNamePills },
-              { key: 'taskStatus', label: 'Task status', items: TASK_STATUS_OPTIONS, selected: taskStatusPills, onChange: setTaskStatusPills },
+              { group: 'Visit', key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
+              { group: 'Visit', key: 'visitName', label: 'Visit name', items: visitNameItems, selected: visitNamePills, onChange: setVisitNamePills },
+              { group: 'Visit', key: 'careType', label: 'Care type', items: careTypeItems, selected: careTypePills, onChange: setCareTypePills },
+              { group: 'Visit', key: 'by', label: 'Done by', items: byItems, selected: byPills, onChange: setByPills },
+              { group: 'Visit', key: 'visitStatus', label: 'Visit status', items: VISIT_STATUS_OPTIONS, selected: visitStatusPills, onChange: setVisitStatusPills },
+              { group: 'Task', key: 'taskType', label: 'Task type', items: Object.keys(TASK_TYPE_PILL_TYPES), selected: taskTypePills, onChange: setTaskTypePills },
+              { group: 'Task', key: 'name', label: 'Task name', items: nameItems, selected: namePills, onChange: setNamePills },
+              { group: 'Task', key: 'taskStatus', label: 'Task status', items: TASK_STATUS_OPTIONS, selected: taskStatusPills, onChange: setTaskStatusPills },
             ]} />
           ) : FILTER_STYLE === 'pills' ? (
             <>
               <TimelineFilterPill label="Event type" items={EVENT_TYPE_PILLS} selected={typePills} onChange={setTypePills} />
-              <TimelineFilterPill label="Visit status" items={VISIT_STATUS_OPTIONS} selected={visitStatusPills} onChange={setVisitStatusPills} />
+              <TimelineFilterPill label="Visit name" items={visitNameItems} selected={visitNamePills} onChange={setVisitNamePills} />
+              <TimelineFilterPill label="Care type" items={careTypeItems} selected={careTypePills} onChange={setCareTypePills} />
               <TimelineFilterPill label="Done by" items={byItems} selected={byPills} onChange={setByPills} />
+              <TimelineFilterPill label="Visit status" items={VISIT_STATUS_OPTIONS} selected={visitStatusPills} onChange={setVisitStatusPills} />
               <TimelineFilterPill label="Task type" items={Object.keys(TASK_TYPE_PILL_TYPES)} selected={taskTypePills} onChange={setTaskTypePills} />
               <TimelineFilterPill label="Task name" items={nameItems} selected={namePills} onChange={setNamePills} />
               <TimelineFilterPill label="Task status" items={TASK_STATUS_OPTIONS} selected={taskStatusPills} onChange={setTaskStatusPills} />

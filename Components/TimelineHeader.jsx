@@ -129,7 +129,9 @@ const MenuChevronRight = () => (
 // options are applied); picking one drills into Components/FilterDropdown for
 // that type (search + tick list, applied as you tick) with a back arrow. "Clear all"
 // sits at the bottom of the menu. The pill shows the total applied count.
-// filters: [{ key, label, items: string[], selected: Set<string>, onChange(Set) }]
+// filters: [{ key, label, group?, items: string[], selected: Set<string>, onChange(Set) }]
+// A filter's optional `group` (e.g. "Visit", "Task") adds a small heading in the menu
+// whenever it changes from the previous filter's.
 export function TimelineFiltersMenu({ filters, onClearAll }) {
   const [open, setOpen] = useState(false)
   const [view, setView] = useState(null) // null = menu, else a filter key
@@ -166,12 +168,15 @@ export function TimelineFiltersMenu({ filters, onClearAll }) {
 
       {open && !view && rect && createPortal(
         <div className="fd-wrap tlh-menu" ref={menuRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, zIndex: 9999 }}>
-          {filters.map(f => (
-            <button key={f.key} type="button" className="tlh-menu-row" onClick={() => setView(f.key)}>
-              <span>{f.label}</span>
-              {f.selected.size > 0 && <span className="tlh-pill-count">{f.selected.size}</span>}
-              <MenuChevronRight />
-            </button>
+          {filters.map((f, i) => (
+            <div key={f.key}>
+              {f.group && f.group !== filters[i - 1]?.group && <div className="tlh-menu-group">{f.group}</div>}
+              <button type="button" className="tlh-menu-row" onClick={() => setView(f.key)}>
+                <span>{f.label}</span>
+                {f.selected.size > 0 && <span className="tlh-pill-count">{f.selected.size}</span>}
+                <MenuChevronRight />
+              </button>
+            </div>
           ))}
           <div className="tlh-menu-footer">
             <button type="button" className="tlh-clear-all" disabled={total === 0} onClick={() => { onClearAll(); close() }}>Clear all</button>
