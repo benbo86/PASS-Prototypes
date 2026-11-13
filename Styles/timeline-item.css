@@ -45,6 +45,7 @@
 }
 .tli-icon-circle svg { width: 18px; height: 18px; }
 .tli-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tli-title--cancelled { text-decoration: line-through; }
 .tli-title--caps { text-transform: uppercase; }
 
 .tli-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }

@@ -36,8 +36,9 @@ export const TIMELINE_TYPE_META = {
 
 // The round type icon used in the row, for use elsewhere (e.g. the task
 // table in VisitTasksPanel). type: general | observation | medication | ...
-export function TimelineTypeIcon({ type }) {
-  const meta = TIMELINE_TYPE_META[type] || TIMELINE_TYPE_META.general
+// neutral: grey circle instead of the type's tone (e.g. tasks in a cancelled visit).
+export function TimelineTypeIcon({ type, neutral }) {
+  const meta = { ...(TIMELINE_TYPE_META[type] || TIMELINE_TYPE_META.general), ...(neutral && { tone: 'neutral' }) }
   const Icon = meta.icon
   return <span className={`tli-type-icon tli-item--${meta.tone}`}><span className="tli-icon-circle"><Icon /></span></span>
 }
@@ -100,7 +101,8 @@ export default function TimelineItem({ item, isOpen, onToggle, onViewTasks, expa
   const tone = upcoming || item.status === 'cancelled' ? 'neutral' : meta.tone
   const Icon = meta.icon
   // Care-plan titles are authored in capitals; medication names keep their case.
-  const caps = item.type !== 'medication' && !upcoming
+  const cancelled = item.status === 'cancelled'
+  const caps = item.type !== 'medication' && !upcoming && !cancelled
 
   return (
     <div className={`tli-item tli-item--${tone}`}>
@@ -108,8 +110,8 @@ export default function TimelineItem({ item, isOpen, onToggle, onViewTasks, expa
         <span className="tli-time">({item.time})</span>
         <span className="tli-title-wrap">
           <span className="tli-icon-circle"><Icon /></span>
-          <span className={`tli-title${caps ? ' tli-title--caps' : ''}`}>{item.title}</span>
-          <TaskSummary tasks={item.tasks} />
+          <span className={`tli-title${caps ? ' tli-title--caps' : ''}${cancelled ? ' tli-title--cancelled' : ''}`}>{item.title}</span>
+          {!cancelled && <TaskSummary tasks={item.tasks} />}
         </span>
         <RowRight item={item} onViewTasks={onViewTasks} />
         {expandable && <span className={`tli-chevron${isOpen ? ' tli-chevron--open' : ''}`}><ChevronDownIcon /></span>}

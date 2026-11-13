@@ -8,7 +8,7 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
-import VisitTasksList from '../../../Components/VisitTasksList'
+import VisitTasksList, { CancelledVisitDetails } from '../../../Components/VisitTasksList'
 import TimelineItem, { TimelineTypeIcon } from '../../../Components/TimelineItem'
 import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu } from '../../../Components/TimelineHeader'
 
@@ -67,11 +67,11 @@ const CREAM = { form: 'Cream', dosage: 'Pea-sized amount', support: 'Administer'
 const TODAY_VISITS = [
   { id: 'v1', time: '17:00', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'cancelled',
     due: { due: '17:00', completeBy: '17:30' },
-    cancellation: { reason: 'Customer cancelled', note: "Patricia's daughter called the office to say she'll be staying over this evening, so the visit isn't needed." },
+    cancellation: { at: '5 Jul 2026 at 16:20', reason: 'Customer cancelled', note: "Patricia's daughter called the office to say she'll be staying over this evening, so the visit isn't needed." },
     tasks: [
       task(101, 'nutrition', 'EVENING MEAL',
         ['Please prepare my evening meal and serve this to me on a tray whilst I am seated comfortably on my sofa. My daughter usually prepares home-cooked meals for me in advance and leaves these in the fridge for reheating.'],
-        'cancelled', null, "Part of the evening visit, which was cancelled — Patricia's daughter is preparing her meal instead."),
+        'cancelled', null, null),
     ] },
   { id: 'v2', time: '12:30', type: 'visit', title: 'Lunch Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '12:30', completeBy: '13:00' }, actual: '12:29 – 12:56',
@@ -172,9 +172,9 @@ const SAT_VISITS = [
 const FRI_VISITS = [
   { id: 'v12', time: '17:30', type: 'visit', title: 'Evening Visit', careType: 'Personal care', status: 'cancelled',
     due: { due: '17:30', completeBy: '18:00' },
-    cancellation: { reason: 'Customer cancelled', note: 'Patricia was out for dinner with her daughter, so no evening visit was needed.' },
+    cancellation: { at: '1 Jul 2026 at 11:27', reason: 'Customer cancelled', note: 'Patricia was out for dinner with her daughter, so no evening visit was needed.' },
     tasks: [
-      task(1201, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'cancelled', null, 'Patricia was out for dinner.'),
+      task(1201, 'nutrition', 'EVENING MEAL', ['Heat the meal left in the fridge by my daughter and serve on a tray at the sofa.'], 'cancelled', null, null),
     ] },
   { id: 'v13', time: '12:30', type: 'visit', title: 'Lunch Visit', careType: 'Personal care', status: 'complete', by: 'Karen Bailey',
     due: { due: '12:30', completeBy: '13:00' }, actual: '12:28 – 12:55',
@@ -241,11 +241,8 @@ function buildVisitPanel(visit, dayLabel) {
     visit.actual && { label: 'Actual time', value: visit.actual },
     visit.by && { label: 'Employee', value: visit.by },
     visit.careType && { label: 'Care type', value: visit.careType },
-    visit.cancellation && { label: 'Reason', value: visit.cancellation.reason },
   ].filter(Boolean)
   const cards = []
-  if (visit.cancellation?.note) cards.push(
-    <div className="vtp-card" key="cancel"><h3>Cancellation note</h3><p>{visit.cancellation.note}</p></div>)
   if (visit.careNote) cards.push(
     <div className="vtp-card" key="care"><h3>Care note</h3>{visit.careNote.map((l, i) => <p key={i}>{l}</p>)}</div>)
   if (visit.reviewNote) cards.push(
@@ -255,8 +252,13 @@ function buildVisitPanel(visit, dayLabel) {
     title: visit.title,
     status: visit.status,
     statusLabel: VISIT_STATUS_LABELS[visit.status],
-    details,
-    taskSummary: `${done} of ${visit.tasks.length} completed`,
+    details: visit.cancellation ? [] : details,
+    // A cancelled visit shows Care plan (due times) and Cancelled (when, why, note) columns, as on live.
+    cancelled: visit.cancellation && {
+      plan: `Due at ${visit.due.due} | Complete by ${visit.due.completeBy}`,
+      ...visit.cancellation,
+    },
+    taskSummary: visit.cancellation ? null : `${done} of ${visit.tasks.length} completed`,
     tasks: visit.tasks.map(t => ({
       id: t.id,
       title: t.title,
@@ -264,12 +266,12 @@ function buildVisitPanel(visit, dayLabel) {
       completed: t.done && (t.doneDate ? `${t.doneDate} at ${t.done}` : t.done),
       // Minutes from midnight of the visit's start day, for sorting the Completed column.
       completedSort: t.done ? timeToMinutes(t.done) + (t.doneDate ? 1440 : 0) : null,
-      icon: <TimelineTypeIcon type={t.type} />,
+      icon: <TimelineTypeIcon type={t.type} neutral={!!visit.cancellation} />,
       typeLabel: TASK_TYPE_LABELS[t.type],
       status: t.status,
       statusLabel: TASK_STATUS_LABELS[t.status],
       note: t.note,
-      form: t.form, dosage: t.dosage, support: t.support, reason: t.reason,
+      cancelledAt: t.cancelledAt, form: t.form, dosage: t.dosage, support: t.support, reason: t.reason,
       completedBy: t.done ? (t.by || visit.by) : null,
       // A partial task raises an alert; it turns green once the office has added a review note.
       reviewNote: t.status === 'partial' ? visit.reviewNote : undefined,
@@ -357,13 +359,14 @@ export default function App() {
               <TimelineItem key={visit.id} item={{ ...visit, bell: visit.tasks.some(t => t.status === 'partial') }} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
                 {body && (
                   <div className="tl-nested">
-                    <dl className="vtp-details">
+                    {body.cancelled && <CancelledVisitDetails {...body.cancelled} />}
+                    {body.details.length > 0 && <dl className="vtp-details">
                       {body.details.map(d => (
                         <div className="vtp-details__item" key={d.label}><dt>{d.label}</dt><dd>{d.value}</dd></div>
                       ))}
-                    </dl>
-                    <h2 className="vtp-section-title">Tasks <span className="vtp-section-count">({body.taskSummary})</span></h2>
-                    <VisitTasksList tasks={body.tasks} onAddReviewNote={() => {}} />
+                    </dl>}
+                    <h2 className="vtp-section-title">Tasks{body.taskSummary && <span className="vtp-section-count"> ({body.taskSummary})</span>}</h2>
+                    <VisitTasksList tasks={body.tasks} compact={!!body.cancelled} onAddReviewNote={() => {}} />
                     {body.cards.length > 0 && <div className="vtp-cards">{body.cards}</div>}
                   </div>
                 )}

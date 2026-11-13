@@ -85,11 +85,14 @@
 .vtl-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .vtl-col + .vtl-col { padding-left: 24px; border-left: 1px solid var(--ui-purple-6-lavendar-grey); }
 .vtl-col .vtl-section + .vtl-section { padding-top: 12px; border-top: 1px solid var(--ui-purple-6-lavendar-grey); }
+.vtl-cols--visit { margin: 0 0 24px; padding: 0; border-top: none; }
+.vtl-title--cancelled { text-decoration: line-through; color: var(--greyscale-6-grey-50); }
+.vtl-item--compact { align-items: center; }
 .vtl-section .vtl-instructions { display: block; -webkit-line-clamp: unset; overflow: visible; line-height: 20px; }
 .vtl-section { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .vtl-section-title { margin: 0 0 2px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ui-purple-3-grape-grey); line-height: 16px; }
 .vtl-note-meta { display: block; margin-top: 4px; font-size: 12px; color: var(--greyscale-6-grey-50); }
-.vtl-section .vtl-note { margin-top: 4px; align-self: stretch; }
+.vtl-section .vtl-note { margin: 4px 0 0 -13px; align-self: stretch; } /* hang the box 1px border + 12px padding to the left so its icon lines up with the icons above */
 .vtl-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 4px; }
 .vtl-meta-item { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: #333; line-height: 20px; }
 .vtl-meta-item svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--ui-purple-3-grape-grey); }
