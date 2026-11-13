@@ -374,7 +374,7 @@ export default function App() {
         >
           {FILTER_STYLE === 'menu' ? (
             <TimelineFiltersMenu onClearAll={clearAllPills} filters={[
-              { group: 'Visit', key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
+              { key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
               { group: 'Visit', key: 'visitName', label: 'Visit name', items: visitNameItems, selected: visitNamePills, onChange: setVisitNamePills },
               { group: 'Visit', key: 'careType', label: 'Care type', items: careTypeItems, selected: careTypePills, onChange: setCareTypePills },
               { group: 'Visit', key: 'by', label: 'Done by', items: byItems, selected: byPills, onChange: setByPills },
