@@ -39,14 +39,15 @@
 .tl-nested .table-wrap { background: #fff; }
 .tl2-empty { padding: 48px 0; text-align: center; font-family: Barlow, sans-serif; font-size: 16px; color: var(--greyscale-5-grey-45); }
 
-/* Updates and documents */
-.tl-event-body { display: flex; flex-direction: column; gap: 16px; font-family: Barlow, sans-serif; font-size: 16px; color: var(--greyscale-3-grey-30); padding-left: 96px; }
-.tl-event-date { display: inline-flex; align-items: center; gap: 8px; }
-.tl-event-date svg { width: 20px; height: 20px; color: var(--greyscale-5-grey-45); }
-.tl-event-fields { margin: 0; display: grid; gap: 4px; }
-.tl-event-fields dt { font-weight: 600; }
-.tl-event-fields dd { margin: 0 0 8px; }
-.tl-event-link { color: #2c4a8f; text-decoration: none; }
+/* Updates and documents: same text sizes as a task's body (Styles/visit-tasks-panel.css .vtl-*) */
+.tl-event-body { display: flex; flex-direction: column; gap: 12px; font-family: Barlow, sans-serif; font-size: 14px; line-height: 20px; color: #333; padding-left: 96px; }
+.tl-event-date { display: inline-flex; align-items: center; gap: 4px; }
+.tl-event-date svg { width: 20px; height: 20px; color: var(--ui-purple-3-grape-grey); }
+.tl-event-fields { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.tl-event-fields > div { display: flex; flex-direction: column; gap: 2px; }
+.tl-event-fields dt { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ui-purple-3-grape-grey); line-height: 16px; }
+.tl-event-fields dd { margin: 0; }
+.tl-event-link { align-self: flex-start; font-size: 14px; color: #3b5bdb; text-decoration: none; }
 .tl-event-link:hover { text-decoration: underline; }
 
 /* Review note slide-out */

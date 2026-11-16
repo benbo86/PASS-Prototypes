@@ -545,9 +545,9 @@ export default function App() {
         <div className="tl-nested tl-event-body">
           <span className="tl-event-date"><CalendarHeaderIcon />{e.at}</span>
           {e.saveType && <dl className="tl-event-fields">
-            <dt>Save type</dt><dd>{e.saveType}</dd>
-            {e.reason && <><dt>Review reason</dt><dd>{e.reason}</dd></>}
-            {e.nextReview && <><dt>Next review date</dt><dd>{e.nextReview}</dd></>}
+            <div><dt>Save type</dt><dd>{e.saveType}</dd></div>
+            {e.reason && <div><dt>Review reason</dt><dd>{e.reason}</dd></div>}
+            {e.nextReview && <div><dt>Next review date</dt><dd>{e.nextReview}</dd></div>}
           </dl>}
           <a className="tl-event-link" href="#" onClick={ev => ev.preventDefault()}>Open related page (in new tab)</a>
         </div>
