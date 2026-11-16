@@ -106,12 +106,12 @@
 .tlh-menu > div:not(:first-child) > .tlh-menu-group { margin-top: 4px; border-top: 1px solid var(--greyscale-13-grey-90); padding-top: 10px; }
 
 /* ── Live-style dropdown filters (TimelineFilterDropdown) ───────── */
-.tlh-dropdown-btn {
+.select-input.tlh-dropdown-btn { /* two classes: must beat main.css's .select-input regardless of stylesheet load order (it loads later in the production build) */
   width: 168px; font-size: 14px; padding: 5px 38px 5px 15px; height: auto; line-height: 24.5px;
   text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.tlh-dropdown-btn--active { border-color: var(--brand-purple-6-purple-4); }
-.tlh-show .tlh-dropdown-btn { grid-column: 2; grid-row: 2; }
+.select-input.tlh-dropdown-btn--active { border-color: var(--brand-purple-6-purple-4); }
+.tlh-show .select-input.tlh-dropdown-btn { grid-column: 2; grid-row: 2; }
 .tlh-dropdown-menu { width: 280px; padding: 8px 0; max-height: 360px; overflow-y: auto; }
 .tlh-dropdown-row {
   display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 24px;
