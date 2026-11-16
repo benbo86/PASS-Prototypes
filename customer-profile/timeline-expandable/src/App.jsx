@@ -754,7 +754,7 @@ export default function App() {
       </SlidePanel>
       {LIVE && (
         <div className="tl-layout-switch">
-          <span>Filter options:</span>
+          <span>Filter style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
             options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }]} />
         </div>
