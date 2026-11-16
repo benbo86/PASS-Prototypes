@@ -18,7 +18,7 @@ import { ViewSettingsIcon, FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon
 // (used instead of onExpandAll / onCollapseAll, which render two buttons).
 export default function TimelineHeader({
   tabs, activeTab, onTabChange, dateLabel, showFilters = true,
-  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, viewSettings, children,
+  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, viewSettings, filtersClassName, chips, children,
 }) {
   const ref = useRef(null)
 
@@ -43,7 +43,7 @@ export default function TimelineHeader({
       </div>
 
       {showFilters && (
-        <div className="tlh-filters">
+        <div className={`tlh-filters${filtersClassName ? ` ${filtersClassName}` : ''}`}>
           {children}
           <button className="tlh-date" type="button">{dateLabel} <CalendarHeaderIcon /></button>
           <div className="tlh-actions">
@@ -59,6 +59,7 @@ export default function TimelineHeader({
           </div>
         </div>
       )}
+      {showFilters && chips}
     </div>
   )
 }
@@ -78,12 +79,18 @@ export function TimelineFilterSelect({ label, prefix, value, onChange, options }
 }
 
 // Text filter with a funnel icon (turns purple once something is typed).
-export function TimelineFilterInput({ label, value, onChange, placeholder = 'Filter by name' }) {
+// commitOnEnter: as on live, the typed term is applied when Enter is pressed (the input then
+// clears; show the applied term with TimelineFilterChips). value is just the applied term here.
+export function TimelineFilterInput({ label, value, onChange, placeholder = 'Filter by name', commitOnEnter }) {
+  const [draft, setDraft] = useState('')
+  const shown = commitOnEnter ? draft : value
+  const change = commitOnEnter ? setDraft : onChange
+  const onKeyDown = commitOnEnter ? (e) => { if (e.key === 'Enter' && draft.trim()) { onChange(draft.trim()); setDraft('') } } : undefined
   return (
     <div className="tlh-field">
       <span className="tlh-field-label">{label}</span>
       <div className={`tlh-name-filter${value ? ' has-value' : ''}`}>
-        <input className="form-input" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
+        <input className="form-input" placeholder={placeholder} value={shown} onChange={e => change(e.target.value)} onKeyDown={onKeyDown} />
         <FunnelIcon />
       </div>
     </div>
@@ -132,14 +139,29 @@ const MenuChevronRight = () => (
 // that type (search + tick list, applied as you tick) with a back arrow. "Clear all"
 // sits at the bottom of the menu. The pill shows the total applied count.
 // filters: [{ key, label, group?, items: string[], selected: Set<string>, onChange(Set) }]
+// or, for a free-text filter, { key, label, text: true, value: string, onChange(string), placeholder? }: a search box row
+// in the menu (focused when the menu opens). As on live, the term is applied on Enter, the box clears and the term shows
+// as a chip (TimelineFilterChips); the menu stays open.
 // A filter's optional `group` (e.g. "Visit", "Task") adds a small heading in the menu
 // whenever it changes from the previous filter's.
+function MenuSearchRow({ filter }) {
+  const [draft, setDraft] = useState('')
+  const placeholder = filter.placeholder || 'Filter by name'
+  return (
+    <div className="tlh-menu-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><line x1="16" y1="16" x2="20" y2="20" /></svg>
+      <input className="form-input" autoFocus placeholder={placeholder} aria-label={placeholder} value={draft} onChange={e => setDraft(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { filter.onChange(draft.trim()); setDraft('') } }} />
+    </div>
+  )
+}
+
 export function TimelineFiltersMenu({ filters, onClearAll }) {
   const [open, setOpen] = useState(false)
   const [view, setView] = useState(null) // null = menu, else a filter key
   const anchor = useRef(null)
   const menuRef = useRef(null)
-  const total = filters.reduce((n, f) => n + f.selected.size, 0)
+  const total = filters.reduce((n, f) => n + (f.text ? (f.value.trim() ? 1 : 0) : f.selected.size), 0)
   const close = () => { setOpen(false); setView(null) }
 
   useEffect(() => {
@@ -173,11 +195,15 @@ export function TimelineFiltersMenu({ filters, onClearAll }) {
           {filters.map((f, i) => (
             <div key={f.key}>
               {f.group && f.group !== filters[i - 1]?.group && <div className="tlh-menu-group">{f.group}</div>}
-              <button type="button" className="tlh-menu-row" onClick={() => setView(f.key)}>
-                <span>{f.label}</span>
-                {f.selected.size > 0 && <span className="tlh-pill-count">{f.selected.size}</span>}
-                <MenuChevronRight />
-              </button>
+              {f.text ? (
+                <MenuSearchRow filter={f} />
+              ) : (
+                <button type="button" className="tlh-menu-row" onClick={() => setView(f.key)}>
+                  <span>{f.label}</span>
+                  {f.selected.size > 0 && <span className="tlh-pill-count">{f.selected.size}</span>}
+                  <MenuChevronRight />
+                </button>
+              )}
             </div>
           ))}
           <div className="tlh-menu-footer">
@@ -378,4 +404,45 @@ export function TimelineSwitch({ label, hint, checked, onChange }) {
     </label>
   )
   return hint ? <Tooltip text={hint} placement="bottom">{field}</Tooltip> : field
+}
+
+// Removable chips for every applied filter (one per ticked option, one per text filter),
+// shown under the filter bar so applied filters stay visible while the menu is closed.
+// Takes the same filters array as TimelineFiltersMenu. Pass as TimelineHeader's `chips`.
+export function TimelineFilterChips({ filters, onClearAll }) {
+  const chips = filters.flatMap(f => f.text
+    ? (f.value.trim() ? [{ key: f.key, label: `${f.label}: ${f.value.trim()}`, remove: () => f.onChange('') }] : [])
+    : [...f.selected].map(v => ({
+        key: `${f.key}:${v}`, label: `${f.label}: ${v}`,
+        remove: () => { const next = new Set(f.selected); next.delete(v); f.onChange(next) },
+      })))
+  if (!chips.length) return null
+  return (
+    <div className="tlh-chips">
+      {chips.map(c => (
+        <span className="tlh-chip" key={c.key}>
+          {c.label}
+          <button type="button" data-devmode-passthrough="true" aria-label={`Remove ${c.label}`} onClick={c.remove}>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="18 7.2 16.8 6 12 10.8 7.2 6 6 7.2 10.8 12 6 16.8 7.2 18 12 13.2 16.8 18 18 16.8 13.2 12" /></svg>
+          </button>
+        </span>
+      ))}
+      {onClearAll && <button type="button" className="tlh-clear-all" onClick={onClearAll}>Clear all</button>}
+    </div>
+  )
+}
+
+// Always-visible search box with a magnifier (e.g. "Search events"), for free-text filtering
+// next to the Filters menu. Turns purple once something is typed.
+// As on live, the term is applied when Enter is pressed; the box then clears and the term shows
+// as a chip (TimelineFilterChips). value is the applied term.
+export function TimelineSearch({ value, onChange, placeholder = 'Search events' }) {
+  const [draft, setDraft] = useState('')
+  return (
+    <div className={`tlh-search${value ? ' has-value' : ''}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><line x1="16" y1="16" x2="20" y2="20" /></svg>
+      <input className="form-input" placeholder={placeholder} aria-label={placeholder} value={draft} onChange={e => setDraft(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { onChange(draft.trim()); setDraft('') } }} />
+    </div>
+  )
 }

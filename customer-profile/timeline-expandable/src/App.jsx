@@ -8,10 +8,11 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import SegmentedToggle from '../../../Components/SegmentedToggle'
 import SlidePanel from '../../../Components/SlidePanel'
 import VisitTasksList, { CancelledVisitDetails } from '../../../Components/VisitTasksList'
 import TimelineItem, { TimelineTypeIcon } from '../../../Components/TimelineItem'
-import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu, TimelineFilterDropdown, TimelineViewSettings, TimelineSwitch } from '../../../Components/TimelineHeader'
+import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu, TimelineFilterDropdown, TimelineViewSettings, TimelineSwitch, TimelineFilterChips } from '../../../Components/TimelineHeader'
 import { CalendarHeaderIcon } from '../../../Components/TimelineIcons'
 
 const ChevronLeftIcon = () => (
@@ -375,12 +376,23 @@ export default function App() {
   const [updateTypeSel, setUpdateTypeSel] = useState(() => new Set())
   const [saveTypeSel, setSaveTypeSel] = useState(() => new Set())
   const [reasonSel, setReasonSel] = useState(() => new Set())
+  const [doneBySel, setDoneBySel] = useState(() => new Set())
+  // Everyone who did a visit, task, update or document, for the live Done by filter.
+  const doneByItems = [...new Set([
+    ...ALL_VISITS.flatMap(v => [v.by, ...v.tasks.map(t => t.by)]),
+    ...ALL_EVENTS.map(e => e.by),
+  ].filter(Boolean))].sort((a, b) => a.localeCompare(b))
   const changeLiveType = (t) => {
     setLiveType(t)
-    ;[setActionTypeSel, setActionStatusSel, setAlertTypeSel, setAlertStatusSel, setUpdateTypeSel, setSaveTypeSel, setReasonSel].forEach(f => f(new Set()))
+    ;[setActionTypeSel, setActionStatusSel, setAlertTypeSel, setAlertStatusSel, setUpdateTypeSel, setSaveTypeSel, setReasonSel, setDoneBySel].forEach(f => f(new Set()))
     setEventName(''); setDoneBy('')
   }
   const showsVisits = !LIVE || liveType === 'all' || liveType === 'actions'
+  // How the live filters are laid out (switchable so both can be compared; always starts on Current):
+  //   'dropdowns' (Current) one dropdown per filter on the bar, as on live
+  //   'menu' (Proposed)     Event type, then one Filters menu with the rest, applied filters shown as chips
+  const [filterLayout, setFilterLayout] = useState('dropdowns')
+  const changeFilterLayout = setFilterLayout
   // "+ Review note": opens the slide-out for one task; submitted notes are kept per task.
   const [reviewTask, setReviewTask] = useState(null) // { id, title }
   const [reviewDraft, setReviewDraft] = useState('')
@@ -439,20 +451,20 @@ export default function App() {
     (!actionTypeSel.size || actionTypeSel.has(u.kind)) &&
     (!actionStatusSel.size || actionStatusSel.has(ACTION_STATUS_LABEL[u.status])) &&
     (!eventName.trim() || has(u.name, eventName)) &&
-    (!doneBy.trim() || has(u.by || '', doneBy))
+    (!doneBySel.size || doneBySel.has(u.by))
   const liveVisitShows = (v) => liveUnitMatch(visitUnit(v)) || v.tasks.some(t => liveUnitMatch(taskUnit(v, t)))
   const liveEventMatch = (e) =>
     (!updateTypeSel.size || updateTypeSel.has(e.updateType)) &&
     (!saveTypeSel.size || saveTypeSel.has(e.saveType)) &&
     (!reasonSel.size || reasonSel.has(e.reason)) &&
     (!eventName.trim() || has(e.title, eventName)) &&
-    (!doneBy.trim() || has(e.by || '', doneBy))
+    (!doneBySel.size || doneBySel.has(e.by))
   const liveAlerts = (visits) => alertsOf(visits)
     .filter(a =>
       (!alertTypeSel.size || alertTypeSel.has(a.alertType)) &&
       (!alertStatusSel.size || alertStatusSel.has(a.resolved ? 'Resolved' : 'Unresolved')) &&
       (!eventName.trim() || has(a.title, eventName)) &&
-      (!doneBy.trim() || has(a.by || '', doneBy)))
+      (!doneBySel.size || doneBySel.has(a.by)))
     .sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
   const applyFilters = (visits) => visits
     .filter(v => LIVE ? liveVisitShows(v) : PILL_FILTERS ? pillMatches(v) : (matches(v) || v.tasks.some(t => matches({ ...t, by: t.by || v.by }))))
@@ -605,6 +617,42 @@ export default function App() {
     ))
   }
 
+  // The filters for the chosen event type, used by both layouts.
+  const liveFilterDefs = !LIVE ? [] : {
+    all: [
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+    ],
+    actions: [
+      { key: 'actionType', label: 'Action type', allLabel: 'All actions', items: ACTION_TYPE_ITEMS, selected: actionTypeSel, onChange: setActionTypeSel },
+      { key: 'actionStatus', label: 'Action status', allLabel: 'All statuses', items: ACTION_STATUS_ITEMS, selected: actionStatusSel, onChange: setActionStatusSel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+    ],
+    alerts: [
+      { key: 'alertType', label: 'Alert type', allLabel: 'All alerts', items: ALERT_TYPE_ITEMS, selected: alertTypeSel, onChange: setAlertTypeSel },
+      { key: 'alertStatus', label: 'Alert status', allLabel: 'All statuses', items: ALERT_STATUS_ITEMS, selected: alertStatusSel, onChange: setAlertStatusSel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+    ],
+    updates: [
+      { key: 'updateType', label: 'Update type', allLabel: 'All updates', items: UPDATE_TYPE_ITEMS, selected: updateTypeSel, onChange: setUpdateTypeSel },
+      { key: 'saveType', label: 'Save type', allLabel: 'All save types', items: SAVE_TYPE_ITEMS, selected: saveTypeSel, onChange: setSaveTypeSel },
+      { key: 'reason', label: 'Review reason', allLabel: 'All review reasons', items: REVIEW_REASON_ITEMS, selected: reasonSel, onChange: setReasonSel },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+    ],
+    documents: [
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+    ],
+  }[liveType]
+  const clearLiveFilters = () => changeLiveType(liveType)
+  const hybrid = LIVE && filterLayout === 'menu'
+  // In the menu layout the free-text Event name becomes a search box at the top of the Filters menu.
+  const searchableDefs = liveFilterDefs.map(f => f.text ? { ...f, label: 'Search', placeholder: 'Search events' } : f)
+  const chipDefs = hybrid ? searchableDefs : LIVE ? liveFilterDefs.filter(f => f.text) : []
+  const menuDefs = hybrid ? [...searchableDefs.filter(f => f.text), ...searchableDefs.filter(f => !f.text)] : []
+
   return (
     <>
       <DevToolbar>
@@ -632,6 +680,8 @@ export default function App() {
           onGoToNow={goToNow}
           onToggleAll={showsVisits ? (allExpanded ? collapseAll : expandAll) : undefined}
           allExpanded={allExpanded}
+          filtersClassName={LIVE ? 'tlh-filters--hybrid' : undefined}
+          chips={LIVE ? <TimelineFilterChips filters={chipDefs} onClearAll={hybrid ? clearLiveFilters : undefined} /> : undefined}
           viewSettings={LIVE && showsVisits ? (VIEW_STYLE === 'switch' ? (
             <TimelineSwitch label="Group tasks" hint={GROUP_HINT} checked={groupByVisit} onChange={setGroupByVisit} />
           ) : (
@@ -641,21 +691,11 @@ export default function App() {
           {LIVE ? (
             <>
               <TimelineFilterDropdown single prefix="Show:" label="Event type" items={LIVE_EVENT_TYPES} value={liveType} onChange={changeLiveType} />
-              {liveType === 'actions' && <>
-                <TimelineFilterDropdown label="Action type" allLabel="All actions" items={ACTION_TYPE_ITEMS} selected={actionTypeSel} onChange={setActionTypeSel} />
-                <TimelineFilterDropdown label="Action status" allLabel="All statuses" items={ACTION_STATUS_ITEMS} selected={actionStatusSel} onChange={setActionStatusSel} />
-              </>}
-              {liveType === 'alerts' && <>
-                <TimelineFilterDropdown label="Alert type" allLabel="All alerts" items={ALERT_TYPE_ITEMS} selected={alertTypeSel} onChange={setAlertTypeSel} />
-                <TimelineFilterDropdown label="Alert status" allLabel="All statuses" items={ALERT_STATUS_ITEMS} selected={alertStatusSel} onChange={setAlertStatusSel} />
-              </>}
-              {liveType === 'updates' && <>
-                <TimelineFilterDropdown label="Update type" allLabel="All updates" items={UPDATE_TYPE_ITEMS} selected={updateTypeSel} onChange={setUpdateTypeSel} />
-                <TimelineFilterDropdown label="Save type" allLabel="All save types" items={SAVE_TYPE_ITEMS} selected={saveTypeSel} onChange={setSaveTypeSel} />
-                <TimelineFilterDropdown label="Review reason" allLabel="All review reasons" items={REVIEW_REASON_ITEMS} selected={reasonSel} onChange={setReasonSel} />
-              </>}
-              {liveType !== 'updates' && <TimelineFilterInput label="Event name" value={eventName} onChange={setEventName} />}
-              <TimelineFilterInput label="Done by" value={doneBy} onChange={setDoneBy} />
+              {hybrid ? (
+                <TimelineFiltersMenu key={liveType} filters={menuDefs} onClearAll={clearLiveFilters} />
+              ) : liveFilterDefs.map(f => f.text
+                ? <TimelineFilterInput key={`${f.key}-${liveType}`} commitOnEnter label={f.label} value={f.value} onChange={f.onChange} />
+                : <TimelineFilterDropdown key={f.key} label={f.label} allLabel={f.allLabel} items={f.items} selected={f.selected} onChange={f.onChange} />)}
             </>
           ) : FILTER_STYLE === 'menu' ? (
             <TimelineFiltersMenu onClearAll={clearAllPills} filters={[
@@ -712,6 +752,13 @@ export default function App() {
         <label className="rn-label" htmlFor="review-note-text">Review notes</label>
         <textarea id="review-note-text" className="form-textarea" rows={12} autoFocus value={reviewDraft} onChange={e => setReviewDraft(e.target.value)} />
       </SlidePanel>
+      {LIVE && (
+        <div className="tl-layout-switch">
+          <span>Filter options:</span>
+          <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
+            options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }]} />
+        </div>
+      )}
     </>
   )
 }
