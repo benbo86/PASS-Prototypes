@@ -2,7 +2,7 @@ import InitialsAvatar from './InitialsAvatar'
 import '../Styles/initials-avatar.css'
 import {
   GeneralListIcon, MedListIcon, NutritionListIcon, HydrationListIcon, VisitListIcon,
-  AlertCircleIcon, BellIcon, StatusCheckIcon, StatusBanIcon,
+  AlertCircleIcon, BellIcon, StatusCheckIcon, StatusBanIcon, DocumentListIcon, UpdateListIcon,
 } from './TimelineIcons'
 
 // Refreshed timeline list item (customer + employee timelines). Renders the
@@ -17,7 +17,7 @@ import {
 //   bell (optional): an orange bell in a white circle to the right of the status, for an item with an alert.
 //   tasks (optional, [{ status }]): adds a "Tasks ● 10 ● 3 ● 1" pill after the title:
 //   a coloured dot and count per status (complete | partial | overdue | missed | cancelled).
-//   type   general | observation | medication | visit | nutrition | hydration | outcome
+//   type   general | observation | medication | visit | nutrition | hydration | outcome | document | update
 //   status overdue | missed | complete | partial | cancelled | upcoming
 //   Overdue shows a red "!" and an empty grey status slot; once there is an
 //   outcome the slot fills. Upcoming shows item.dueIn on the right.
@@ -32,6 +32,8 @@ export const TIMELINE_TYPE_META = {
   nutrition:   { icon: NutritionListIcon, tone: 'nutrition' },
   hydration:   { icon: HydrationListIcon, tone: 'hydration' },
   outcome:     { icon: GeneralListIcon,   tone: 'neutral' },
+  document:    { icon: DocumentListIcon,  tone: 'document' },
+  update:      { icon: UpdateListIcon,    tone: 'update' },
 }
 
 // The round type icon used in the row, for use elsewhere (e.g. the task
@@ -102,7 +104,7 @@ export default function TimelineItem({ item, isOpen, onToggle, onViewTasks, expa
   const Icon = meta.icon
   // Care-plan titles are authored in capitals; medication names keep their case.
   const cancelled = item.status === 'cancelled'
-  const caps = item.type !== 'medication' && !upcoming && !cancelled
+  const caps = !['medication', 'document', 'update'].includes(item.type) && !upcoming && !cancelled
 
   return (
     <div className={`tli-item tli-item--${tone}`}>

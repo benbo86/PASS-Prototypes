@@ -8,9 +8,11 @@ import DevComments from '../../../Components/DevComments'
 import DevEdit from '../../../Components/DevEdit'
 import WireframeToggle from '../../../Components/WireframeToggle'
 import AuditCapture from '../../../Components/AuditCapture'
+import SlidePanel from '../../../Components/SlidePanel'
 import VisitTasksList, { CancelledVisitDetails } from '../../../Components/VisitTasksList'
 import TimelineItem, { TimelineTypeIcon } from '../../../Components/TimelineItem'
-import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu } from '../../../Components/TimelineHeader'
+import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu, TimelineFilterDropdown, TimelineViewSettings, TimelineSwitch } from '../../../Components/TimelineHeader'
+import { CalendarHeaderIcon } from '../../../Components/TimelineIcons'
 
 const ChevronLeftIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -27,8 +29,32 @@ const ChevronLeftIcon = () => (
 //   'menu'     one "Filters" pill; its menu lists each filter type, then drills in
 //   'pills'    a pill per filter type
 //   'original' the first select + text-field filters (state and matching kept below)
-const FILTER_STYLE = 'menu'
+//   'live'     the live timeline's filters: Event type picker, then dropdowns that change with it
+const FILTER_STYLE = 'live'
+const LIVE = FILTER_STYLE === 'live'
+// How the "Group tasks by visit" setting is shown: 'switch' (a switch on the bar) or 'button' (a View settings button + popover).
+const VIEW_STYLE = 'button'
+const GROUP_HINT = 'Show each visit’s tasks inside the visit, instead of as separate items.'
 const PILL_FILTERS = FILTER_STYLE !== 'original'
+
+// Live filter options (copied from the live timeline).
+const LIVE_EVENT_TYPES = [
+  { value: 'all', label: 'All timeline events' },
+  { value: 'actions', label: 'Actions' },
+  { value: 'alerts', label: 'Alerts' },
+  { value: 'updates', label: 'Updates' },
+  { value: 'documents', label: 'Documents' },
+]
+const ACTION_TYPE_ITEMS = ['Medications', 'Hydration', 'Nutrition', 'Observations', 'General', 'Outcome Tracking', 'Visits']
+const TYPE_LABEL = { general: 'General', medication: 'Medications', nutrition: 'Nutrition', hydration: 'Hydration', observation: 'Observations' }
+const ACTION_STATUS_ITEMS = ['Planned/Due', 'Started', 'Completed', 'Partial', 'Missed']
+const ALERT_TYPE_ITEMS = ['Missed', 'Not done', 'Observation alert', 'Hydration alert']
+const ALERT_STATUS_ITEMS = ['Unresolved', 'Resolved']
+const UPDATE_TYPE_ITEMS = ['Care Package', 'Legal decisions']
+const SAVE_TYPE_ITEMS = ['Care Plan created', 'Minor corrections / typos', 'Scheduled review', 'Unscheduled review', 'Automatic update']
+const REVIEW_REASON_ITEMS = ["Change in residents needs or circumstances", 'Change in third party circumstances', 'Medical', 'Wishes', 'Other']
+// Live's action statuses. A cancelled action has no live status, so a status filter hides it.
+const ACTION_STATUS_LABEL = { complete: 'Completed', partial: 'Partial', overdue: 'Missed', missed: 'Missed' }
 
 // Pill dropdown options. Event type matches live (this timeline only holds
 // visits, so Alerts/Updates/Documents have nothing to show yet); Task type is
@@ -220,6 +246,28 @@ const THU_VISITS = [
     ] },
 ]
 
+// Updates and documents that sit in the timeline between visits (examples copied from live).
+const EVENTS = {
+  'Monday 6 July 2026': [
+    { id: 'e1', kind: 'update', time: '17:03', title: 'Care plan updated', by: 'Karin Venter', at: '6 Jul 2026 at 17:03',
+      updateType: 'Care Package', saveType: 'Minor corrections / typos', nextReview: 'Thu, 12/11/2026' },
+    { id: 'e2', kind: 'document', time: '16:33', title: 'Document updated - SD05(1) Generic Support Plan', by: 'Kelly Hockett', at: '6 Jul 2026 at 16:33' },
+  ],
+  'Sunday 5 July 2026': [
+    { id: 'e3', kind: 'update', time: '14:20', title: 'Care plan updated', by: 'Louise Carter', at: '5 Jul 2026 at 14:20',
+      updateType: 'Care Package', saveType: 'Scheduled review', reason: 'Medical', nextReview: 'Mon, 05/10/2026' },
+  ],
+  'Saturday 4 July 2026': [
+    // Title and details of this Legal decisions example are made up.
+    { id: 'e4', kind: 'update', time: '11:15', title: 'Legal decisions updated', by: 'Karin Venter', at: '4 Jul 2026 at 11:15',
+      updateType: 'Legal decisions', saveType: 'Unscheduled review', reason: 'Wishes', nextReview: 'Fri, 04/12/2026' },
+  ],
+  'Friday 3 July 2026': [
+    { id: 'e5', kind: 'document', time: '15:42', title: 'Document updated - Moving and Handling Assessment', by: 'Kelly Hockett', at: '3 Jul 2026 at 15:42' },
+  ],
+}
+const ALL_EVENTS = Object.values(EVENTS).flat()
+
 const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS, ...SAT_VISITS, ...FRI_VISITS, ...THU_VISITS]
 
 // ─── Visit panel content ──────────────────────────────────────
@@ -233,7 +281,23 @@ function timeToMinutes(time) {
   return h * 60 + m
 }
 
-function buildVisitPanel(visit, dayLabel) {
+// Alerts: a partial task raises one (Resolved once the office has added a review note),
+// an overdue task raises a Missed alert.
+function alertType(t) {
+  if (t.status === 'overdue') return 'Missed'
+  if (t.type === 'observation') return 'Observation alert'
+  if (t.type === 'hydration') return 'Hydration alert'
+  return 'Not done'
+}
+function alertsOf(visits) {
+  return visits.flatMap(v => v.tasks.filter(t => t.status === 'partial' || t.status === 'overdue').map(t => ({
+    id: t.id, time: t.done || v.time, type: t.type, title: t.title, by: t.done ? (t.by || v.by) : null,
+    status: t.status, alertType: alertType(t),
+    resolved: t.status === 'partial' && !!v.reviewNote,
+  })))
+}
+
+function buildVisitPanel(visit, dayLabel, reviewNotes = {}) {
   const done = visit.tasks.filter(t => t.status === 'complete').length
   const details = [
     { label: 'Date', value: dayLabel },
@@ -274,8 +338,8 @@ function buildVisitPanel(visit, dayLabel) {
       cancelledAt: t.cancelledAt, form: t.form, dosage: t.dosage, support: t.support, reason: t.reason,
       completedBy: t.done ? (t.by || visit.by) : null,
       // A partial task raises an alert; it turns green once the office has added a review note.
-      reviewNote: t.status === 'partial' ? visit.reviewNote : undefined,
-      alert: t.status === 'partial' ? (visit.reviewNote ? 'resolved' : 'open') : undefined,
+      reviewNote: reviewNotes[t.id] || (t.status === 'partial' ? visit.reviewNote : undefined),
+      alert: t.status === 'partial' ? ((reviewNotes[t.id] || visit.reviewNote) ? 'resolved' : 'open') : undefined,
     })),
     cards,
   }
@@ -301,15 +365,48 @@ export default function App() {
   const visitNameItems = [...new Set(ALL_VISITS.map(v => v.title))].sort((a, b) => a.localeCompare(b))
   const nameItems = [...new Set(ALL_VISITS.flatMap(v => v.tasks.map(t => t.title)))].sort((a, b) => a.localeCompare(b))
   const byItems = [...new Set(ALL_VISITS.map(v => v.by).filter(Boolean))].sort((a, b) => a.localeCompare(b))
+  // Live-style filters (FILTER_STYLE 'live'). Changing the event type clears them.
+  const [liveType, setLiveType] = useState('all')
+  const [actionTypeSel, setActionTypeSel] = useState(() => new Set())
+  const [actionStatusSel, setActionStatusSel] = useState(() => new Set())
+  const [groupByVisit, setGroupByVisit] = useState(false) // off by default, as in the ticket
+  const [alertTypeSel, setAlertTypeSel] = useState(() => new Set())
+  const [alertStatusSel, setAlertStatusSel] = useState(() => new Set())
+  const [updateTypeSel, setUpdateTypeSel] = useState(() => new Set())
+  const [saveTypeSel, setSaveTypeSel] = useState(() => new Set())
+  const [reasonSel, setReasonSel] = useState(() => new Set())
+  const changeLiveType = (t) => {
+    setLiveType(t)
+    ;[setActionTypeSel, setActionStatusSel, setAlertTypeSel, setAlertStatusSel, setUpdateTypeSel, setSaveTypeSel, setReasonSel].forEach(f => f(new Set()))
+    setEventName(''); setDoneBy('')
+  }
+  const showsVisits = !LIVE || liveType === 'all' || liveType === 'actions'
+  // "+ Review note": opens the slide-out for one task; submitted notes are kept per task.
+  const [reviewTask, setReviewTask] = useState(null) // { id, title }
+  const [reviewDraft, setReviewDraft] = useState('')
+  const [reviewNotes, setReviewNotes] = useState({})
+  const openReviewNote = (t) => { setReviewDraft(''); setReviewTask({ id: t.id, title: t.title }) }
+  const closeReviewNote = () => setReviewTask(null)
+  const submitReviewNote = () => {
+    if (!reviewDraft.trim()) return
+    setReviewNotes(prev => ({ ...prev, [reviewTask.id]: { by: 'Adrianna Janowski', date: `6 Jul 2026 at ${new Date().toTimeString().slice(0, 5)}`, text: reviewDraft.trim() } }))
+    closeReviewNote()
+  }
   const [openIds, setOpenIds] = useState(() => new Set())
   const toggle = (id) => setOpenIds(prev => {
     const next = new Set(prev)
     next.has(id) ? next.delete(id) : next.add(id)
     return next
   })
-  const expandAll = () => setOpenIds(new Set(ALL_VISITS.map(v => v.id)))
+  // Everything that can open: visits, plus (in the flat view) each task, plus updates/documents.
+  const expandableIds = [
+    ...ALL_VISITS.map(v => v.id),
+    ...(LIVE && !groupByVisit ? ALL_VISITS.flatMap(v => v.tasks.map(t => `t${t.id}`)) : []),
+    ...(LIVE && liveType === 'all' ? ALL_EVENTS.map(e => e.id) : []),
+  ]
+  const expandAll = () => setOpenIds(new Set(expandableIds))
   const collapseAll = () => setOpenIds(new Set())
-  const allExpanded = ALL_VISITS.every(v => openIds.has(v.id))
+  const allExpanded = expandableIds.every(id => openIds.has(id))
 
   const has = (text, q) => text.toLowerCase().includes(q.trim().toLowerCase())
   const matches = (i) =>
@@ -333,8 +430,32 @@ export default function App() {
   }
   const anyPillFilter = typePills.size + visitStatusPills.size + visitNamePills.size + careTypePills.size + byPills.size + taskTypePills.size + namePills.size + taskStatusPills.size > 0
   const clearAllPills = () => { setTypePills(new Set()); setVisitNamePills(new Set()); setCareTypePills(new Set()); setTaskTypePills(new Set()); setVisitStatusPills(new Set()); setTaskStatusPills(new Set()); setNamePills(new Set()); setByPills(new Set()) }
+  // Live filters work the same in both views. Grouped: a visit shows if it, or any of
+  // its tasks, matches (so Action type "Medications" finds every visit with a medication
+  // task). Flat: each visit and task is its own item and has to match itself.
+  const visitUnit = (v) => ({ kind: 'Visits', status: v.status, name: v.title, by: v.by })
+  const taskUnit = (v, t) => ({ kind: TYPE_LABEL[t.type], status: t.status, name: t.title, by: t.done ? (t.by || v.by) : null })
+  const liveUnitMatch = (u) =>
+    (!actionTypeSel.size || actionTypeSel.has(u.kind)) &&
+    (!actionStatusSel.size || actionStatusSel.has(ACTION_STATUS_LABEL[u.status])) &&
+    (!eventName.trim() || has(u.name, eventName)) &&
+    (!doneBy.trim() || has(u.by || '', doneBy))
+  const liveVisitShows = (v) => liveUnitMatch(visitUnit(v)) || v.tasks.some(t => liveUnitMatch(taskUnit(v, t)))
+  const liveEventMatch = (e) =>
+    (!updateTypeSel.size || updateTypeSel.has(e.updateType)) &&
+    (!saveTypeSel.size || saveTypeSel.has(e.saveType)) &&
+    (!reasonSel.size || reasonSel.has(e.reason)) &&
+    (!eventName.trim() || has(e.title, eventName)) &&
+    (!doneBy.trim() || has(e.by || '', doneBy))
+  const liveAlerts = (visits) => alertsOf(visits)
+    .filter(a =>
+      (!alertTypeSel.size || alertTypeSel.has(a.alertType)) &&
+      (!alertStatusSel.size || alertStatusSel.has(a.resolved ? 'Resolved' : 'Unresolved')) &&
+      (!eventName.trim() || has(a.title, eventName)) &&
+      (!doneBy.trim() || has(a.by || '', doneBy)))
+    .sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
   const applyFilters = (visits) => visits
-    .filter(v => PILL_FILTERS ? pillMatches(v) : (matches(v) || v.tasks.some(t => matches({ ...t, by: t.by || v.by }))))
+    .filter(v => LIVE ? liveVisitShows(v) : PILL_FILTERS ? pillMatches(v) : (matches(v) || v.tasks.some(t => matches({ ...t, by: t.by || v.by }))))
     .sort((a, b) => timeToMinutes(b.time) - timeToMinutes(a.time))
 
   const goToNow = () => {
@@ -345,6 +466,120 @@ export default function App() {
     window.scrollTo({ top, behavior: 'smooth' })
   }
 
+  // ── Rendering ──────────────────────────────────────────────
+  const detailsBlock = (body) => (<>
+    {body.cancelled && <CancelledVisitDetails {...body.cancelled} />}
+    {body.details.length > 0 && <dl className="vtp-details">
+      {body.details.map(d => (
+        <div className="vtp-details__item" key={d.label}><dt>{d.label}</dt><dd>{d.value}</dd></div>
+      ))}
+    </dl>}
+  </>)
+
+  // A visit with its tasks inside it (grouped view).
+  const groupedVisitNode = (visit, heading) => {
+    const isOpen = openIds.has(visit.id)
+    const body = isOpen ? buildVisitPanel(visit, heading, reviewNotes) : null
+    return (
+      <TimelineItem key={visit.id} item={{ ...visit, bell: visit.tasks.some(t => t.status === 'partial') }} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
+        {body && (
+          <div className="tl-nested">
+            {detailsBlock(body)}
+            <h2 className="vtp-section-title">Tasks{body.taskSummary && <span className="vtp-section-count"> ({body.taskSummary})</span>}</h2>
+            <VisitTasksList tasks={body.tasks} compact={!!body.cancelled} onAddReviewNote={openReviewNote} />
+            {body.cards.length > 0 && <div className="vtp-cards">{body.cards}</div>}
+          </div>
+        )}
+      </TimelineItem>
+    )
+  }
+
+  // A visit on its own, without its tasks (flat view: they are separate items).
+  const flatVisitNode = (visit, heading) => {
+    const isOpen = openIds.has(visit.id)
+    const body = isOpen ? buildVisitPanel(visit, heading, reviewNotes) : null
+    return (
+      <TimelineItem key={visit.id} item={{ ...visit, tasks: undefined, bell: visit.tasks.some(t => t.status === 'partial') }} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
+        {body && (
+          <div className="tl-nested">
+            {detailsBlock(body)}
+            {body.cards.length > 0 && <div className="vtp-cards">{body.cards}</div>}
+          </div>
+        )}
+      </TimelineItem>
+    )
+  }
+
+  // A task on its own (flat view).
+  const flatTaskNode = (visit, t, heading) => {
+    const id = `t${t.id}`
+    const isOpen = openIds.has(id)
+    const pt = isOpen ? buildVisitPanel(visit, heading, reviewNotes).tasks.find(x => x.id === t.id) : null
+    return (
+      <TimelineItem key={id} isOpen={isOpen} onToggle={() => toggle(id)} expandable
+        item={{ time: t.done || visit.time, type: t.type, title: t.title, status: t.status, by: t.done ? (t.by || visit.by) : null,
+          alert: t.status === 'partial' ? ((reviewNotes[t.id] || visit.reviewNote) ? 'resolved' : 'open') : undefined }}>
+        {pt && <div className="tl-nested"><VisitTasksList tasks={[pt]} compact={!!visit.cancellation} onAddReviewNote={openReviewNote} /></div>}
+      </TimelineItem>
+    )
+  }
+
+  // An update or document.
+  const eventNode = (e) => {
+    const isOpen = openIds.has(e.id)
+    return (
+      <TimelineItem key={e.id} isOpen={isOpen} onToggle={() => toggle(e.id)} expandable
+        item={{ time: e.time, type: e.kind, title: e.title, noStatus: true, by: e.by }}>
+        <div className="tl-nested tl-event-body">
+          <span className="tl-event-date"><CalendarHeaderIcon />{e.at}</span>
+          {e.saveType && <dl className="tl-event-fields">
+            <dt>Save type</dt><dd>{e.saveType}</dd>
+            {e.reason && <><dt>Review reason</dt><dd>{e.reason}</dd></>}
+            {e.nextReview && <><dt>Next review date</dt><dd>{e.nextReview}</dd></>}
+          </dl>}
+          <a className="tl-event-link" href="#" onClick={ev => ev.preventDefault()}>Open related page (in new tab)</a>
+        </div>
+      </TimelineItem>
+    )
+  }
+
+  // Everything one day shows under the live filters, newest first.
+  const liveEntries = (heading, visits) => {
+    if (liveType === 'alerts') {
+      return liveAlerts(visits).map(a => ({
+        key: `a${a.id}`, sort: 0,
+        node: <TimelineItem key={`a${a.id}`} isOpen={false} onToggle={() => {}}
+          item={{ time: a.time, type: a.type, title: a.title, status: a.status, by: a.by, alert: a.resolved ? 'resolved' : undefined }} />,
+      }))
+    }
+    const events = (EVENTS[heading] || []).filter(e => liveEventMatch(e))
+    if (liveType === 'updates' || liveType === 'documents') {
+      const kind = liveType === 'updates' ? 'update' : 'document'
+      return events.filter(e => e.kind === kind).map(e => ({ key: e.id, sort: timeToMinutes(e.time), node: eventNode(e) }))
+    }
+    const list = []
+    visits.forEach(v => {
+      if (groupByVisit) {
+        if (liveVisitShows(v)) list.push({ key: v.id, sort: timeToMinutes(v.time), node: groupedVisitNode(v, heading) })
+      } else {
+        if (liveUnitMatch(visitUnit(v))) list.push({ key: v.id, sort: timeToMinutes(v.time), node: flatVisitNode(v, heading) })
+        v.tasks.forEach(t => {
+          if (liveUnitMatch(taskUnit(v, t))) list.push({ key: `t${t.id}`, sort: timeToMinutes(t.done || v.time) + (t.doneDate ? 1440 : 0), node: flatTaskNode(v, t, heading) })
+        })
+      }
+    })
+    if (liveType === 'all') events.forEach(e => list.push({ key: e.id, sort: timeToMinutes(e.time), node: eventNode(e) }))
+    return list.sort((a, b) => b.sort - a.sort)
+  }
+
+  const DAYS = [
+    ['Monday 6 July 2026', TODAY_VISITS, latestDayRef],
+    ['Sunday 5 July 2026', PAST_VISITS, null],
+    ['Saturday 4 July 2026', SAT_VISITS, null],
+    ['Friday 3 July 2026', FRI_VISITS, null],
+    ['Thursday 2 July 2026', THU_VISITS, null],
+  ]
+
   const renderDay = (heading, visits, ref) => {
     const shown = applyFilters(visits)
     return (
@@ -352,30 +587,22 @@ export default function App() {
         <div className="tl-day-header">{heading}</div>
         <div className="tl-list">
           {shown.length === 0 && <div className="tl2-empty">No timeline events match these filters.</div>}
-          {shown.map(visit => {
-            const isOpen = openIds.has(visit.id)
-            const body = isOpen ? buildVisitPanel(visit, heading) : null
-            return (
-              <TimelineItem key={visit.id} item={{ ...visit, bell: visit.tasks.some(t => t.status === 'partial') }} isOpen={isOpen} onToggle={() => toggle(visit.id)} expandable>
-                {body && (
-                  <div className="tl-nested">
-                    {body.cancelled && <CancelledVisitDetails {...body.cancelled} />}
-                    {body.details.length > 0 && <dl className="vtp-details">
-                      {body.details.map(d => (
-                        <div className="vtp-details__item" key={d.label}><dt>{d.label}</dt><dd>{d.value}</dd></div>
-                      ))}
-                    </dl>}
-                    <h2 className="vtp-section-title">Tasks{body.taskSummary && <span className="vtp-section-count"> ({body.taskSummary})</span>}</h2>
-                    <VisitTasksList tasks={body.tasks} compact={!!body.cancelled} onAddReviewNote={() => {}} />
-                    {body.cards.length > 0 && <div className="vtp-cards">{body.cards}</div>}
-                  </div>
-                )}
-              </TimelineItem>
-            )
-          })}
+          {shown.map(visit => groupedVisitNode(visit, heading))}
         </div>
       </div>
     )
+  }
+
+  // Live filters: days with nothing to show are left out, with one message if nothing matches at all.
+  const renderLiveDays = () => {
+    const days = DAYS.map(([heading, visits, ref]) => ({ heading, ref, entries: liveEntries(heading, visits) })).filter(d => d.entries.length)
+    if (!days.length) return <div className="tl2-empty">No timeline events match these filters.</div>
+    return days.map(d => (
+      <div className="tl-day-group" ref={d.ref} key={d.heading}>
+        <div className="tl-day-header">{d.heading}</div>
+        <div className="tl-list">{d.entries.map(e => e.node)}</div>
+      </div>
+    ))
   }
 
   return (
@@ -403,10 +630,34 @@ export default function App() {
           showFilters={tab === 'care-events'}
           dateLabel="6 July 2026"
           onGoToNow={goToNow}
-          onToggleAll={allExpanded ? collapseAll : expandAll}
+          onToggleAll={showsVisits ? (allExpanded ? collapseAll : expandAll) : undefined}
           allExpanded={allExpanded}
+          viewSettings={LIVE && showsVisits ? (VIEW_STYLE === 'switch' ? (
+            <TimelineSwitch label="Group tasks" hint={GROUP_HINT} checked={groupByVisit} onChange={setGroupByVisit} />
+          ) : (
+            <TimelineViewSettings options={[{ key: 'group', label: 'Group tasks by visit', checked: groupByVisit, onChange: setGroupByVisit, hint: GROUP_HINT }]} />
+          )) : undefined}
         >
-          {FILTER_STYLE === 'menu' ? (
+          {LIVE ? (
+            <>
+              <TimelineFilterDropdown single prefix="Show:" label="Event type" items={LIVE_EVENT_TYPES} value={liveType} onChange={changeLiveType} />
+              {liveType === 'actions' && <>
+                <TimelineFilterDropdown label="Action type" allLabel="All actions" items={ACTION_TYPE_ITEMS} selected={actionTypeSel} onChange={setActionTypeSel} />
+                <TimelineFilterDropdown label="Action status" allLabel="All statuses" items={ACTION_STATUS_ITEMS} selected={actionStatusSel} onChange={setActionStatusSel} />
+              </>}
+              {liveType === 'alerts' && <>
+                <TimelineFilterDropdown label="Alert type" allLabel="All alerts" items={ALERT_TYPE_ITEMS} selected={alertTypeSel} onChange={setAlertTypeSel} />
+                <TimelineFilterDropdown label="Alert status" allLabel="All statuses" items={ALERT_STATUS_ITEMS} selected={alertStatusSel} onChange={setAlertStatusSel} />
+              </>}
+              {liveType === 'updates' && <>
+                <TimelineFilterDropdown label="Update type" allLabel="All updates" items={UPDATE_TYPE_ITEMS} selected={updateTypeSel} onChange={setUpdateTypeSel} />
+                <TimelineFilterDropdown label="Save type" allLabel="All save types" items={SAVE_TYPE_ITEMS} selected={saveTypeSel} onChange={setSaveTypeSel} />
+                <TimelineFilterDropdown label="Review reason" allLabel="All review reasons" items={REVIEW_REASON_ITEMS} selected={reasonSel} onChange={setReasonSel} />
+              </>}
+              {liveType !== 'updates' && <TimelineFilterInput label="Event name" value={eventName} onChange={setEventName} />}
+              <TimelineFilterInput label="Done by" value={doneBy} onChange={setDoneBy} />
+            </>
+          ) : FILTER_STYLE === 'menu' ? (
             <TimelineFiltersMenu onClearAll={clearAllPills} filters={[
               { key: 'type', label: 'Event type', items: EVENT_TYPE_PILLS, selected: typePills, onChange: setTypePills },
               { group: 'Visit', key: 'visitName', label: 'Visit name', items: visitNameItems, selected: visitNamePills, onChange: setVisitNamePills },
@@ -439,21 +690,28 @@ export default function App() {
         </TimelineHeader>
 
         <div className="tl2-body">
-          {tab === 'care-events' ? (
-            <>
-              {renderDay('Monday 6 July 2026', TODAY_VISITS, latestDayRef)}
-              {renderDay('Sunday 5 July 2026', PAST_VISITS, null)}
-              {renderDay('Saturday 4 July 2026', SAT_VISITS, null)}
-              {renderDay('Friday 3 July 2026', FRI_VISITS, null)}
-              {renderDay('Thursday 2 July 2026', THU_VISITS, null)}
-            </>
-          ) : (
+          {tab !== 'care-events' ? (
             <div className="tl2-empty">Journal entries will appear here.</div>
+          ) : LIVE ? renderLiveDays() : (
+            <>
+              {DAYS.map(([heading, visits, ref]) => renderDay(heading, visits, ref))}
+            </>
           )}
         </div>
       </div>
       </div>
       </div>
+      <SlidePanel
+        open={!!reviewTask} onClose={closeReviewNote}
+        title={reviewTask && `Review note: ${reviewTask.title.length > 40 ? `${reviewTask.title.slice(0, 40).trimEnd()}…` : reviewTask.title}`}
+        footer={<>
+          <button className="round-btn tertiary-btn" onClick={closeReviewNote}>Close</button>
+          <button className="round-btn primary-btn" disabled={!reviewDraft.trim()} onClick={submitReviewNote}>Submit</button>
+        </>}
+      >
+        <label className="rn-label" htmlFor="review-note-text">Review notes</label>
+        <textarea id="review-note-text" className="form-textarea" rows={12} autoFocus value={reviewDraft} onChange={e => setReviewDraft(e.target.value)} />
+      </SlidePanel>
     </>
   )
 }

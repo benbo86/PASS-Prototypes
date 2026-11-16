@@ -38,3 +38,16 @@
 .tl-nested .vtp-section-title { margin: 24px 0 16px; font-size: 16px; Color: #000000; }
 .tl-nested .table-wrap { background: #fff; }
 .tl2-empty { padding: 48px 0; text-align: center; font-family: Barlow, sans-serif; font-size: 16px; color: var(--greyscale-5-grey-45); }
+
+/* Updates and documents */
+.tl-event-body { display: flex; flex-direction: column; gap: 16px; font-family: Barlow, sans-serif; font-size: 16px; color: var(--greyscale-3-grey-30); padding-left: 96px; }
+.tl-event-date { display: inline-flex; align-items: center; gap: 8px; }
+.tl-event-date svg { width: 20px; height: 20px; color: var(--greyscale-5-grey-45); }
+.tl-event-fields { margin: 0; display: grid; gap: 4px; }
+.tl-event-fields dt { font-weight: 600; }
+.tl-event-fields dd { margin: 0 0 8px; }
+.tl-event-link { color: #2c4a8f; text-decoration: none; }
+.tl-event-link:hover { text-decoration: underline; }
+
+/* Review note slide-out */
+.rn-label { display: block; margin-bottom: 4px; font-size: 16px; font-weight: 600; color: var(--greyscale-4-grey-40); }

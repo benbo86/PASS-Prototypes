@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import FilterDropdown from './FilterDropdown'
-import { FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon, CollapseAllIcon, CalendarHeaderIcon } from './TimelineIcons'
+import Tooltip from './Tooltip'
+import { ViewSettingsIcon, FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon, CollapseAllIcon, CalendarHeaderIcon } from './TimelineIcons'
 
 // Refreshed timeline header (customer + employee timelines): tabs, then a
 // filter bar with the date and Go to now / Expand all / Collapse all.
@@ -17,7 +18,7 @@ import { FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon, CollapseAllIcon,
 // (used instead of onExpandAll / onCollapseAll, which render two buttons).
 export default function TimelineHeader({
   tabs, activeTab, onTabChange, dateLabel, showFilters = true,
-  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, children,
+  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, viewSettings, children,
 }) {
   const ref = useRef(null)
 
@@ -46,6 +47,7 @@ export default function TimelineHeader({
           {children}
           <button className="tlh-date" type="button">{dateLabel} <CalendarHeaderIcon /></button>
           <div className="tlh-actions">
+            {viewSettings}
             <button className="round-btn primary-btn btn-icon-left" onClick={onGoToNow}><ClockIcon /> Go to now</button>
             {onToggleAll && (
               <button className="round-btn tertiary-btn btn-icon-left tlh-toggle-all" onClick={onToggleAll}>
@@ -240,4 +242,140 @@ export function TimelineSortPill({ options, value, onChange }) {
       )}
     </>
   )
+}
+
+const TickIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="5 12.5 10 17.5 19 7" /></svg>
+)
+
+// Labelled dropdown matching the live timeline filters: a field with the label
+// above it that opens a list, applied at once.
+//   multiple (default): checkbox list with an "All …" row at the top (ticked while
+//     nothing is picked; ticking it clears the rest). selected: Set<string>;
+//     onChange(Set). The field shows the allLabel, the one pick, or "N selected".
+//   single: radio list (e.g. Event type). items [{ value, label }]; value; onChange(value).
+//   prefix (optional): small text left of the field, e.g. "Show:".
+// items for multiple: string[].
+export function TimelineFilterDropdown({ label, prefix, items, allLabel, selected, onChange, single, value }) {
+  const [open, setOpen] = useState(false)
+  const anchor = useRef(null)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const rect = open && anchor.current ? anchor.current.getBoundingClientRect() : null
+  let text
+  if (single) text = items.find(o => o.value === value)?.label
+  else text = selected.size === 0 ? allLabel : selected.size === 1 ? [...selected][0] : `${selected.size} selected`
+
+  const toggle = (item) => {
+    const next = new Set(selected)
+    next.has(item) ? next.delete(item) : next.add(item)
+    onChange(next)
+  }
+
+  return (
+    <div className={`tlh-field${prefix ? ' tlh-show' : ''}`}>
+      <span className="tlh-field-label">{label}</span>
+      {prefix && <span className="tlh-show-prefix">{prefix}</span>}
+      <button
+        ref={anchor} type="button" data-devmode-passthrough="true"
+        className={`select-input tlh-dropdown-btn${!single && selected.size ? ' tlh-dropdown-btn--active' : ''}`}
+        aria-haspopup="listbox" aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+      >
+        {text}
+      </button>
+      {rect && createPortal(
+        <div className="fd-wrap tlh-menu tlh-dropdown-menu" ref={menuRef} role="listbox" style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, zIndex: 9999 }}>
+          {single ? items.map(o => (
+            <button key={o.value} type="button" role="option" aria-selected={o.value === value} className="tlh-dropdown-row"
+              onClick={() => { onChange(o.value); setOpen(false) }}>
+              <span className={`tlh-radio${o.value === value ? ' checked' : ''}`} />
+              <span>{o.label}</span>
+            </button>
+          )) : (
+            <>
+              <button type="button" role="option" aria-selected={selected.size === 0} className="tlh-dropdown-row" onClick={() => onChange(new Set())}>
+                <span className={`fd-checkbox${selected.size === 0 ? ' checked' : ''}`}>{selected.size === 0 && <TickIcon />}</span>
+                <span>{allLabel}</span>
+              </button>
+              {items.map(item => (
+                <button key={item} type="button" role="option" aria-selected={selected.has(item)} className="tlh-dropdown-row" onClick={() => toggle(item)}>
+                  <span className={`fd-checkbox${selected.has(item) ? ' checked' : ''}`}>{selected.has(item) && <TickIcon />}</span>
+                  <span>{item}</span>
+                </button>
+              ))}
+            </>
+          )}
+        </div>,
+        document.body
+      )}
+    </div>
+  )
+}
+
+// View settings button (opens a small popover of on/off switches), modelled on the
+// roster daily schedule's settings button. The button gets a purple outline and dot while any switch is on. options: [{ key, label, hint?, checked, onChange(bool) }]
+export function TimelineViewSettings({ options }) {
+  const [open, setOpen] = useState(false)
+  const anchor = useRef(null)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const rect = open && anchor.current ? anchor.current.getBoundingClientRect() : null
+  return (
+    <>
+      <button
+        ref={anchor} type="button" data-devmode-passthrough="true" aria-haspopup="dialog" aria-expanded={open}
+        className={`round-btn tertiary-btn btn-icon-left tlh-view-btn${open ? ' tlh-view-btn--open' : ''}${options.some(o => o.checked) ? ' tlh-view-btn--active' : ''}`}
+        onClick={() => setOpen(o => !o)}
+      >
+        <ViewSettingsIcon /> View settings
+      </button>
+      {rect && createPortal(
+        <div className="fd-wrap tlh-menu tlh-view-menu" ref={menuRef} role="dialog" aria-label="View settings"
+          style={{ position: 'fixed', top: rect.bottom + 6, right: window.innerWidth - rect.right, zIndex: 9999 }}>
+          <div className="tlh-view-title">View settings</div>
+          {options.map(o => (
+            <label key={o.key} className="tlh-view-row">
+              <span className="tlh-view-text">
+                <span className="tlh-view-label">{o.label}</span>
+                {o.hint && <span className="tlh-view-hint">{o.hint}</span>}
+              </span>
+              <input type="checkbox" role="switch" className="tlh-switch" checked={o.checked} onChange={e => o.onChange(e.target.checked)} />
+            </label>
+          ))}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
+
+// Inline on/off switch with a label, for a setting that deserves to sit on the bar
+// itself (an alternative to TimelineViewSettings). The hint shows in a tooltip on hover.
+export function TimelineSwitch({ label, hint, checked, onChange }) {
+  const field = (
+    <label className="tlh-switch-field">
+      <span>{label}</span>
+      <input type="checkbox" role="switch" className="tlh-switch" checked={checked} onChange={e => onChange(e.target.checked)} />
+    </label>
+  )
+  return hint ? <Tooltip text={hint} placement="bottom">{field}</Tooltip> : field
 }

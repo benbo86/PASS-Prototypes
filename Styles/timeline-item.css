@@ -16,6 +16,8 @@
 .tli-item--nutrition { --tl-bg: #eff7ea; --tl-circle: #d9ebcf; --tl-text: #3a5e27; --tl-icon: #2d5f1e; }
 .tli-item--hydration { --tl-bg: #effdff; --tl-circle: #b4f2fb; --tl-text: #275d75; --tl-icon: #005f78; }
 .tli-item--visit     { --tl-bg: #f2f9fe; --tl-circle: #c1e5fb; --tl-text: #2c67a3; --tl-icon: #0084d1; }
+.tli-item--document  { --tl-bg: #eef0fd; --tl-circle: #cbd2f6; --tl-text: #2c2aa0; --tl-icon: #4338ca; }
+.tli-item--update    { --tl-bg: #fbefdc; --tl-circle: #f8dcb0; --tl-text: #8a3a0a; --tl-icon: #b45309; }
 /* observation, outcome, cancelled and upcoming have no refreshed design yet:
    they use the neutral grey of the "future" item. */
 

@@ -12,7 +12,7 @@ import { BellIcon, NoteIcon, MedFormIcon, MedDosageIcon, MedSupportIcon, ReasonI
 // Care note (reason, who/when, carer note) and Alert (type, review note), as on the live timeline.
 // Care plan sits in a left column; Care note and Alert stack in a right column.
 //   reviewNote? { by, date, text } shows under a resolved alert.
-// onAddReviewNote (optional): shows an "Add review note" link under a task with an open alert.
+// onAddReviewNote (optional): shows a "+ Review note" link on every task that has no review note yet, whatever its status.
 
 const PILL_CLASS = {
   complete: 'status-completed',
@@ -51,12 +51,16 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
   return (
     <ul className="vtl-list">
       {tasks.map(t => {
+        // "+ Review note" on a task in any status; not once it already has a review note.
+        const reviewLink = (task) => onAddReviewNote && !task.reviewNote && (
+          <button type="button" className="vtl-review-link" onClick={() => onAddReviewNote(task)}>+ Review note</button>
+        )
         const hasPlan = t.instructions?.length > 0 || t.form || t.dosage || t.support
         const cancelled = t.status === 'cancelled'
         if (compact) return (
           <li className="vtl-item vtl-item--compact" key={t.id}>
             {t.icon && <span className="vtl-icon">{t.icon}</span>}
-            <div className="vtl-main"><span className="vtl-title vtl-title--cancelled">{t.title}</span></div>
+            <div className="vtl-main"><span className="vtl-title vtl-title--cancelled">{t.title}</span>{reviewLink(t)}</div>
             <div className="vtl-side"><span className="vtl-status"><span className={`status-pill ${PILL_CLASS[t.status] || ''}`}>{t.statusLabel}</span></span></div>
           </li>
         )
@@ -94,6 +98,12 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
                   {t.note && <span className="vtl-note"><NoteIcon /><span>{t.note}</span></span>}
                 </section>
               )}
+              {!t.alert && t.reviewNote && (
+                <section className="vtl-section">
+                  <h4 className="vtl-section-title">Review note</h4>
+                  <span className="vtl-note"><NoteIcon /><span>{t.reviewNote.text}<span className="vtl-note-meta">{t.reviewNote.by} · {t.reviewNote.date}</span></span></span>
+                </section>
+              )}
               {t.alert && (
                 <section className="vtl-section">
                   <h4 className="vtl-section-title">Alert</h4>
@@ -101,13 +111,11 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
                   {t.alert === 'resolved' && t.reviewNote && (
                     <span className="vtl-note"><NoteIcon /><span>{t.reviewNote.text}<span className="vtl-note-meta">{t.reviewNote.by} · {t.reviewNote.date}</span></span></span>
                   )}
-                  {t.alert === 'open' && onAddReviewNote && (
-                    <button type="button" className="vtl-review-link" onClick={() => onAddReviewNote(t)}>+ Add review note</button>
-                  )}
                 </section>
               )}
               </div>
               </div>
+              {reviewLink(t)}
             </div>
             <div className="vtl-side">
               <span className="vtl-status">

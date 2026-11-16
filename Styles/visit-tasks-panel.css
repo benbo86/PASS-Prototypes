@@ -75,7 +75,7 @@
 .vtl-item:last-child { border-bottom: none; padding-bottom: 4px; }
 .vtl-icon { flex-shrink: 0; }
 .vtl-icon .tli-icon-circle { width: 32px; height: 32px; }
-.vtl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.vtl-main { flex: 1; }
 .vtl-title { font-size: 14px; font-weight: 600; color: #101828; line-height: 20px; }
 .vtl-instructions {
   font-size: 14px; color: var(--greyscale-6-grey-50); line-height: 16px;
@@ -109,6 +109,6 @@
 .vtl-alert--resolved { color: var(--legacy-status-complete); }
 .vtl-alert svg { width: 24px; height: 24px; }
 .vtl-meta-item .vtl-alert svg { color: inherit; }
-.vtl-review-link { margin-top: 4px; padding: 0; border: none; background: none; font: inherit; font-size: 14px; color: #3b5bdb; cursor: pointer; }
+.vtl-review-link { display: block; margin-top: 8px; padding: 0; border: none; background: none; font: inherit; font-size: 14px; color: #3b5bdb; cursor: pointer; }
 .vtl-review-link:hover { text-decoration: underline; }
 .vtl-empty { padding: 16px 0; font-size: 14px; color: var(--greyscale-6-grey-50); }
