@@ -26,7 +26,7 @@
   grid-template-columns: 72px minmax(0, 1fr) auto;
   align-items: center;
   height: 56px;
-  padding: 0 12px;
+  padding: 0 12px 0 24px;
   background: var(--tl-bg);
   color: var(--tl-text);
   cursor: pointer;
@@ -36,6 +36,12 @@
 .tli-item { transition: border-color .15s ease, box-shadow .15s ease; }
 .tli-item:hover { border-color: #d8b4fe; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1); }
 .tli-row:hover { filter: brightness(0.97); }
+
+/* Proposed row style: white rows, with the type shown by a coloured bar on the
+   left (the type's pastel colour) instead of a tinted background. Turn it on with .tl-rows--bars on any
+   ancestor of the rows. The type icon circle and chevron keep their tone. */
+.tl-rows--bars .tli-item { --tl-bg: #fff; --tl-text: #333; }
+.tl-rows--bars .tli-row { box-shadow: inset 8px 0 0 var(--tl-circle); }
 
 .tli-time { font-size: 14px; font-weight: 600; }
 

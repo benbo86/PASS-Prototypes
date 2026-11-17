@@ -463,6 +463,8 @@ export default function App() {
   //   'dropdowns' (Current) one dropdown per filter on the bar, as on live
   //   'menu' (Proposed)     Event type, then one Filters menu with the rest, applied filters shown as chips
   const [filterLayout, setFilterLayout] = useState('dropdowns')
+  // Prototype-only: 'current' (tinted rows) or 'bars' (white rows with a coloured left bar)
+  const [rowStyle, setRowStyle] = useState('current')
   const changeFilterLayout = setFilterLayout
   // "+ Review note": opens the slide-out for one task; submitted notes are kept per task.
   const [reviewTask, setReviewTask] = useState(null) // { id, title }
@@ -741,7 +743,7 @@ export default function App() {
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
-      <div className="page" ref={pageRef}>
+      <div className={`page${rowStyle === 'bars' ? ' tl-rows--bars' : ''}`} ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <SideNav activeItem="timeline" />
 
@@ -835,6 +837,9 @@ export default function App() {
           <span>Filter style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
             options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }]} />
+          <span className="tl-layout-switch-label">Row style:</span>
+          <SegmentedToggle value={rowStyle} onChange={setRowStyle}
+            options={[{ value: 'current', label: 'Current' }, { value: 'bars', label: 'Proposed' }]} />
         </div>
       )}
     </>
