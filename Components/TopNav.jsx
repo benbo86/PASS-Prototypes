@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import passgeniusUrl from '../Images/passgenius.svg'
@@ -42,6 +43,7 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
   useEffect(() => {
     if (!menuOpen) return
     const handleClick = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false)
       }

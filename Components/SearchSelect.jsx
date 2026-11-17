@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -52,6 +53,7 @@ export default function SearchSelect({ items, value, onChange, placeholder = 'Se
   useEffect(() => {
     if (!open) return
     function handleMouseDown(e) {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (fieldRef.current?.contains(e.target) || listRef.current?.contains(e.target)) return
       close()
     }

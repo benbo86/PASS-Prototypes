@@ -130,9 +130,9 @@
 
 /* ── View settings (TimelineViewSettings) ───────────────────────── */
 .tlh-view-btn--open { background: var(--ui-purple-5-languid-lavendar); }
-.tlh-view-menu { width: 320px; padding: 8px 0; }
-.tlh-view-title { padding: 8px 24px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--greyscale-6-grey-50); }
-.tlh-view-row { display: flex; align-items: center; gap: 16px; padding: 12px 24px; cursor: pointer; }
+.tlh-view-menu { width: 320px; padding: 16px 20px; }
+.tlh-view-title { font-size: 16px; font-weight: 600; color: var(--greyscale-2-grey-20); margin-bottom:12px; }
+.tlh-view-row { display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom:12px; }
 .tlh-view-row:hover { background: var(--ui-purple-7-lightest-lavendar); }
 .tlh-view-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .tlh-view-label { font-size: 16px; font-weight: 500; color: var(--greyscale-2-grey-20); }

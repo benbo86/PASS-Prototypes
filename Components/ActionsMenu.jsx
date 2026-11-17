@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useRef, useEffect } from 'react'
 
 // Generic bulk-actions dropdown: a trigger (fully caller-controlled, so it
@@ -13,6 +14,7 @@ export default function ActionsMenu({ trigger, items, disabled, align = 'right' 
   useEffect(() => {
     if (!open) return
     function handleMouseDown(e) {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (wrapRef.current?.contains(e.target)) return
       setOpen(false)
     }

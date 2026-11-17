@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import Tooltip from './Tooltip'
@@ -35,6 +36,7 @@ export default function RowActionsMenu({ items }) {
   useEffect(() => {
     if (!open) return
     function handleMouseDown(e) {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current?.contains(e.target)) return
       if (btnRef.current?.contains(e.target)) return
       setOpen(false)

@@ -73,6 +73,7 @@
   font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1;
   color: var(--legacy-status-complete);
 }
+.tli-alert-placeholder { width: 26px; height: 26px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); flex-shrink: 0; }
 .tli-bell {
   width: 26px; height: 26px; border-radius: 50%; background: #fff; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: var(--legacy-status-partial);
@@ -98,3 +99,10 @@
 .tli-task-dot--overdue,
 .tli-task-dot--missed    { background: var(--legacy-status-overdue); }
 .tli-task-dot--cancelled { background: var(--legacy-status-cancelled); }
+
+/* "for (avatar) Customer" column, for timelines that span customers (item.customer) */
+.tli-row--customer { grid-template-columns: 72px 280px minmax(0, 1fr) auto; }
+.tli-row--customer.tli-row--expandable { grid-template-columns: 72px 280px minmax(0, 1fr) auto 36px; }
+.tli-for { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; color: #333; }
+.tli-for-label { font-weight: 600; flex-shrink: 0; }
+.tli-for-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -112,3 +112,9 @@
 .vtl-review-link { display: block; margin-top: 8px; padding: 0; border: none; background: none; font: inherit; font-size: 14px; color: #3b5bdb; cursor: pointer; }
 .vtl-review-link:hover { text-decoration: underline; }
 .vtl-empty { padding: 16px 0; font-size: 14px; color: var(--greyscale-6-grey-50); }
+
+/* Status icon in the Care note's first line (eltico glyphs, see VisitTasksList statusInNote). */
+.vtl-status-glyph { font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1; flex-shrink: 0; }
+.vtl-status-glyph--complete { color: var(--legacy-status-complete); }
+.vtl-status-glyph--partial  { color: var(--legacy-status-partial); }
+.vtl-status-glyph--missed   { color: var(--legacy-status-overdue); }

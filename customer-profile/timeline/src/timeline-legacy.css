@@ -138,7 +138,7 @@
 }
 /* Tone classes, keyed off each status icon's own `tone` prop in App.jsx —
    moved out of an inline colour so Dev Edit can select/edit them. */
-.tl-eltico-icon--overdue  { color: var(--legacy-status-overdue); }
+.tl-eltico-icon--missed   { color: var(--legacy-status-overdue); }
 .tl-eltico-icon--complete { color: var(--legacy-status-complete); }
 .tl-eltico-icon--partial  { color: var(--legacy-status-partial); }
 .tl-eltico-icon--success  { color: var(--legacy-success); }

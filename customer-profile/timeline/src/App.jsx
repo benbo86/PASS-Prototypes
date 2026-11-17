@@ -47,7 +47,7 @@ const OutcomeIcon = () => <FaIcon code={''} weight="regular" /> // fa-star, "
 // Status icons — eltico glyphs (icon-task-status-*, icon-alert-rag-GREEN).
 // icon-alert-rag-GREEN also backs the default/no-alert state in the
 // export's own CSS, so there's no separate grey "none" glyph.
-const OverdueIcon = () => <EltIcon code={''} tone="overdue" />
+const MissedIcon = () => <EltIcon code={''} tone="missed" />
 const CompleteIcon = () => <EltIcon code={''} tone="complete" />
 const PartialIcon = () => <EltIcon code={''} tone="partial" />
 const AlertGreenIcon = () => <EltIcon code={''} tone="success" />
@@ -97,7 +97,7 @@ const TYPE_META = {
   outcome:     { icon: OutcomeIcon,     tone: 'outcome' },
 }
 
-const STATUS_ICON = { overdue: OverdueIcon, complete: CompleteIcon, partial: PartialIcon, cancelled: CancelledIcon }
+const STATUS_ICON = { missed: MissedIcon, complete: CompleteIcon, partial: PartialIcon, cancelled: CancelledIcon }
 
 // Cancelled items always render flat grey, regardless of their type —
 // matches MAR Chart's CANCELLED bubble colors exactly (AIOP-22638).
@@ -148,7 +148,7 @@ const TODAY_ITEMS = [
   { id: 11, time: '10:00', type: 'general', title: 'BRUSH MY HAIR WITH CONSENT', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '30 Apr 2026 at 10:02',
     due: { due: '09:30', completeBy: '10:30' }, notes: ['Ask first — some days this isn’t wanted.'],
     completionNote: 'Asked first — Patricia was happy for her hair to be brushed today.' },
-  { id: 12, time: '09:30', type: 'medication', title: 'Medi Derma cream *As agreed by the Registered Manager**', bodyType: 'medication', status: 'overdue',
+  { id: 12, time: '09:30', type: 'medication', title: 'Medi Derma cream *As agreed by the Registered Manager**', bodyType: 'medication', status: 'missed',
     due: { due: '09:30', completeBy: '10:30' },
     medication: { form: 'Cream', formType: 'Topical', dosage: '1 x pea sized amount', instruction: 'Administer', bodymapButton: true },
     notes: [
@@ -158,7 +158,7 @@ const TODAY_ITEMS = [
   { id: 13, time: '10:08', type: 'general', title: 'INCONTINENCE PAD', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '30 Apr 2026 at 10:10',
     due: { due: '09:30', completeBy: '10:30' }, notes: ['Dispose of used pads in the bathroom bin, not the kitchen.'],
     completionNote: 'Changed pad and disposed of it in the bathroom bin as instructed.' },
-  { id: 14, time: '09:30', type: 'general', title: 'COMPANIONSHIP', bodyType: 'generic', status: 'overdue',
+  { id: 14, time: '09:30', type: 'general', title: 'COMPANIONSHIP', bodyType: 'generic', status: 'missed',
     due: { due: '09:30', completeBy: '10:30' }, notes: ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."] },
   { id: 15, time: '10:14', type: 'general', title: 'ENSURE BATHROOM & TOILET CLEANED AFTER USE', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '30 Apr 2026 at 10:15',
     due: { due: '09:30', completeBy: '10:30' }, notes: ['Cleaning products are under the sink.'],
@@ -184,7 +184,7 @@ const PAST_ITEMS = [
   { id: 22, time: '09:53', type: 'hydration', title: 'OFFER FLUIDS', bodyType: 'generic', status: 'complete', by: 'Karen Bailey', at: '5 Jul 2026 at 09:55',
     due: { due: '09:30', completeBy: '10:30' }, notes: ['Prefers a glass of squash rather than water — jug is in the fridge door.'],
     completionNote: 'Offered a glass of squash from the fridge, which Patricia drank most of.' },
-  { id: 23, time: '09:30', type: 'general', title: 'COMPANIONSHIP', bodyType: 'generic', status: 'overdue',
+  { id: 23, time: '09:30', type: 'general', title: 'COMPANIONSHIP', bodyType: 'generic', status: 'missed',
     due: { due: '09:30', completeBy: '10:30' }, notes: ["Please engage with me throughout the visit, I have Parkinson's with Lewy bodies and I am not always fully able to communicate with full sentences but can acknowledge and say some words in response but you may have to prompt."] },
 ]
 
@@ -208,7 +208,7 @@ function HeadingRight({ item }) {
   const StatusIcon = STATUS_ICON[item.status]
   // The green "resolved" bell only ever applies to a task that was partially
   // done but has since been resolved by the office (item.alert) — never for
-  // complete/overdue tasks.
+  // complete/missed tasks.
   const showResolvedAlert = item.status === 'partial' && item.alert
   return (
     <div className="tl-heading-right">

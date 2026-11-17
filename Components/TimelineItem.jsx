@@ -2,7 +2,7 @@ import InitialsAvatar from './InitialsAvatar'
 import '../Styles/initials-avatar.css'
 import {
   GeneralListIcon, MedListIcon, NutritionListIcon, HydrationListIcon, VisitListIcon,
-  AlertCircleIcon, BellIcon, StatusCheckIcon, StatusBanIcon, DocumentListIcon, UpdateListIcon,
+  AlertCircleIcon, ResolvedAlertIcon, BellIcon, StatusCheckIcon, StatusBanIcon, DocumentListIcon, UpdateListIcon,
 } from './TimelineIcons'
 
 // Refreshed timeline list item (customer + employee timelines). Renders the
@@ -13,7 +13,9 @@ import {
 // expanded body as children.
 // onViewTasks (optional): shows a "View tasks" button on the row, e.g. for a
 // visit whose tasks open in Components/VisitTasksPanel.jsx.
-// item: { time, type, title, status, by?, noStatus?, alert?, bell?, dueIn?, tasks? }
+// item: { time, type, title, status, by?, customer?, noStatus?, alert?, bell?, dueIn?, tasks? }
+//   customer (optional, name): for timelines that span customers, adds "for (avatar) Name" between the time and
+//   the title. A trailing "(LIC)"-style tag is shown but left out of the avatar initials.
 //   bell (optional): an orange bell in a white circle to the right of the status, for an item with an alert.
 //   tasks (optional, [{ status }]): adds a "Tasks ● 10 ● 3 ● 1" pill after the title:
 //   a coloured dot and count per status (complete | partial | overdue | missed | cancelled).
@@ -80,15 +82,21 @@ function RowRight({ item, onViewTasks }) {
         <button className="round-btn tertiary-btn tli-view-tasks" onClick={e => { e.stopPropagation(); onViewTasks() }}>View tasks</button>
       )}
       {item.by && <span className="tli-by">by <Avatar name={item.by} /> {item.by}</span>}
-      {overdue && <span className="tli-alert"><AlertCircleIcon /></span>}
+      {/* Status first (a missed row shows its red "!" here), then the alert slot
+          (a grey placeholder circle when there is no alert). */}
+      {overdue
+        ? <span className="tli-alert"><AlertCircleIcon /></span>
+        : item.status === 'complete'
+          // Same glyph as the "Completed" line in the expanded care note
+          // (eltico icon-task-status-complete, loaded by Styles/legacy.css).
+          ? <span className="tli-status-glyph" aria-hidden="true">{'\uE90B'}</span>
+          : <span className={`tli-status tli-status--${item.status}`}>{StatusGlyph && <StatusGlyph />}</span>}
       {/* A partial task later resolved by the office gets a green alert. */}
-      {item.status === 'partial' && item.alert && <span className="tli-alert tli-alert--resolved"><AlertCircleIcon /></span>}
-      {item.status === 'complete'
-        // Same glyph as the "Completed" line in the expanded care note
-        // (eltico icon-task-status-complete, loaded by Styles/legacy.css).
-        ? <span className="tli-status-glyph" aria-hidden="true">{'\uE90B'}</span>
-        : <span className={`tli-status${overdue ? '' : ` tli-status--${item.status}`}`}>{StatusGlyph && <StatusGlyph />}</span>}
-      {item.bell && <span className="tli-bell" title="Alert"><BellIcon /></span>}
+      {item.status === 'partial' && item.alert
+        ? <span className="tli-alert tli-alert--resolved"><ResolvedAlertIcon /></span>
+        : item.bell
+          ? <span className="tli-bell" title="Alert"><BellIcon /></span>
+          : <span className="tli-alert-placeholder" aria-hidden="true" />}
     </div>
   )
 }
@@ -108,8 +116,15 @@ export default function TimelineItem({ item, isOpen, onToggle, onViewTasks, expa
 
   return (
     <div className={`tli-item tli-item--${tone}`}>
-      <div className={`tli-row${expandable ? ' tli-row--expandable' : ''}`} onClick={onToggle} role="button" tabIndex={0} aria-expanded={expandable ? !!isOpen : undefined}>
+      <div className={`tli-row${expandable ? ' tli-row--expandable' : ''}${item.customer ? ' tli-row--customer' : ''}`} onClick={onToggle} role="button" tabIndex={0} aria-expanded={expandable ? !!isOpen : undefined}>
         <span className="tli-time">({item.time})</span>
+        {item.customer && (
+          <span className="tli-for">
+            <span className="tli-for-label">for</span>
+            <InitialsAvatar name={item.customer.replace(/\s*\(.*\)\s*$/, '')} size={30} />
+            <span className="tli-for-name">{item.customer}</span>
+          </span>
+        )}
         <span className="tli-title-wrap">
           <span className="tli-icon-circle"><Icon /></span>
           <span className={`tli-title${caps ? ' tli-title--caps' : ''}${cancelled ? ' tli-title--cancelled' : ''}`}>{item.title}</span>

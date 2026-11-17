@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { AlertCircleIcon } from './TimelineIcons'
+import { AlertCircleIcon, ResolvedAlertIcon } from './TimelineIcons'
 import FilterDropdown from './FilterDropdown'
 
 // The task table used by Components/VisitTasksPanel.jsx and by visit items
@@ -110,7 +110,7 @@ export default function VisitTasksTable({ tasks = [], dropdownZIndex = 10900 }) 
               <td>
                 <span className="vtp-status-cell">
                   <span className={`status-pill ${PILL_CLASS[t.status] || ''}`}>{t.statusLabel}</span>
-                  {t.alert && <span className={`vtp-alert${t.alert === 'resolved' ? ' vtp-alert--resolved' : ''}`} title="Alert"><AlertCircleIcon /></span>}
+                  {t.alert && <span className={`vtp-alert${t.alert === 'resolved' ? ' vtp-alert--resolved' : ''}`} title="Alert">{t.alert === 'resolved' ? <ResolvedAlertIcon /> : <AlertCircleIcon />}</span>}
                 </span>
               </td>
               <td className="vtp-note">{t.note || '—'}</td>

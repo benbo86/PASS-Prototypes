@@ -35,9 +35,9 @@ const PILL_FILTERS = FILTER_STYLE !== 'original'
 // label -> task type.
 // Status filter options: Visit status (the status on the row) and Task status.
 const VISIT_STATUS_OPTIONS = ['Completed', 'Missed', 'Cancelled']
-const TASK_STATUS_OPTIONS = ['Completed', 'Overdue', 'Partial', 'Cancelled']
+const TASK_STATUS_OPTIONS = ['Completed', 'Missed', 'Partial', 'Cancelled']
 const VISIT_STATUS_PILL = { complete: 'Completed', missed: 'Missed', cancelled: 'Cancelled' }
-const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Overdue', partial: 'Partial', cancelled: 'Cancelled' }
+const TASK_STATUS_PILL = { complete: 'Completed', overdue: 'Missed', partial: 'Partial', cancelled: 'Cancelled' }
 
 const EVENT_TYPE_PILLS = ['Visits', 'Alerts', 'Updates', 'Documents']
 const TASK_TYPE_PILL_TYPES = { Tasks: 'general', Medication: 'medication', Nutrition: 'nutrition', Hydration: 'hydration', Observations: 'observation' }
@@ -222,7 +222,7 @@ const ALL_VISITS = [...TODAY_VISITS, ...PAST_VISITS, ...SAT_VISITS, ...FRI_VISIT
 
 const VISIT_STATUS_LABELS = { complete: 'Complete', missed: 'Missed', cancelled: 'Cancelled' }
 const TASK_TYPE_LABELS = { general: 'Tasks', observation: 'Observations', medication: 'Medication', nutrition: 'Nutrition', hydration: 'Hydration' }
-const TASK_STATUS_LABELS = { complete: 'Completed', partial: 'Partial', overdue: 'Overdue', cancelled: 'Cancelled' }
+const TASK_STATUS_LABELS = { complete: 'Completed', partial: 'Partial', overdue: 'Missed', cancelled: 'Cancelled' }
 
 function timeToMinutes(time) {
   const [h, m] = time.split(':').map(Number)

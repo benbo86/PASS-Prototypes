@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useEffect, useRef } from 'react'
 import passLogoUrl from '../Images/pass-logo-white.svg'
 import passGeniusUrl from '../Icons/PASS nav/pass-genius.svg'
@@ -90,6 +91,7 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
   useEffect(() => {
     if (!moreOpen) return
     const handleClick = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (moreRef.current && !moreRef.current.contains(e.target)) {
         setMoreOpen(false)
       }

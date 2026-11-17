@@ -1,3 +1,4 @@
+import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -53,6 +54,7 @@ export default function FilterDropdown({
   }, [isOpen, anchorEl]);
 
   const handleOutside = useCallback((e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
     if (
       dropRef.current && !dropRef.current.contains(e.target) &&
       anchorEl && !anchorEl.contains(e.target)

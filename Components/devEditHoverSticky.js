@@ -72,6 +72,12 @@ export function useDevEditActive() {
 // inspector panel too, on the offwebsite chance both are somehow relevant
 // to the same click.
 const OTHER_TOOL_UI_SELECTOR = '[data-devedit-ui], [data-devmode-ui], [data-devcomments-ui], [data-wireframeaccess-ui], [data-devtoolbar-ui]'
+// True when a click landed on a dev tool's own chrome (toolbar, Dev Edit panel, ...).
+// Click-away handlers on dropdowns/menus call this first so that using a dev tool
+// (turning Dev Edit on, typing in its panel) doesn't read as clicking away and close
+// the popup that's being edited.
+export const isDevToolUi = (target) => !!(target && target.closest && target.closest(OTHER_TOOL_UI_SELECTOR))
+
 export function useDevEditStickyDismiss(active, visible, setVisible, ownSelector) {
   useEffect(() => {
     if (!active || !visible) return

@@ -1,3 +1,4 @@
+import { useDevEditActive, useDevEditStickyDismiss, isDevToolUi } from './devEditHoverSticky'
 import { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import FilterDropdown from './FilterDropdown'
@@ -10,7 +11,7 @@ import { ViewSettingsIcon, FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon
 // tabs (.ep-tabs/.ep-tab) — import both. Sticky; publishes its live height as
 // --tlh-height so day headings can pin directly beneath it.
 //
-// tabs: [{ id, label }]. children are the filter fields (they differ between
+// tabs: [{ id, label }] (leave empty for no tab bar). children are the filter fields (they differ between
 // timelines) — build them with TimelineFilterPill (current) or the original
 // TimelineFilterSelect / TimelineFilterInput (kept so the old look can be restored).
 // Pass showFilters={false} to hide the filter bar (e.g. on the Journal tab).
@@ -34,13 +35,13 @@ export default function TimelineHeader({
 
   return (
     <div className="tlh-header" ref={ref}>
-      <div className="tlh-tabs ep-tabs" role="tablist">
+      {tabs?.length > 0 && <div className="tlh-tabs ep-tabs" role="tablist">
         {tabs.map(t => (
           <button key={t.id} className={`ep-tab${activeTab === t.id ? ' ep-tab--active' : ''}`} role="tab" aria-selected={activeTab === t.id} onClick={() => onTabChange(t.id)}>
             {t.label}
           </button>
         ))}
-      </div>
+      </div>}
 
       {showFilters && (
         <div className={`tlh-filters${filtersClassName ? ` ${filtersClassName}` : ''}`}>
@@ -167,6 +168,7 @@ export function TimelineFiltersMenu({ filters, onClearAll }) {
   useEffect(() => {
     if (!open || view) return
     const onDown = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) close()
     }
     document.addEventListener('mousedown', onDown)
@@ -232,9 +234,15 @@ export function TimelineSortPill({ options, value, onChange }) {
   const anchor = useRef(null)
   const menuRef = useRef(null)
 
+  // While Dev Edit is on, the menu stays open so its contents can be selected and styled
+  // (turning Dev Edit on is a click outside the menu, which would otherwise close it).
+  // Click-away and Escape still dismiss it, via the shared sticky-dismiss hook.
+  const devEditActive = useDevEditActive()
+  useDevEditStickyDismiss(devEditActive, open, setOpen, '.tlh-view-menu')
   useEffect(() => {
     if (!open) return
     const onDown = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', onDown)
@@ -290,6 +298,7 @@ export function TimelineFilterDropdown({ label, prefix, items, allLabel, selecte
   useEffect(() => {
     if (!open) return
     const onDown = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', onDown)
@@ -349,8 +358,9 @@ export function TimelineFilterDropdown({ label, prefix, items, allLabel, selecte
 }
 
 // View settings button (opens a small popover of on/off switches), modelled on the
-// roster daily schedule's settings button. The button gets a purple outline and dot while any switch is on. options: [{ key, label, hint?, checked, onChange(bool) }]
-export function TimelineViewSettings({ options }) {
+// roster daily schedule's settings button. choice (optional): a pick-one radio group shown above the switches,
+// { title, value, onChange(value), options: [{ value, label, hint? }] } (the first option is the default). The button gets a purple outline and dot while any switch is on. options: [{ key, label, hint?, checked, onChange(bool) }]
+export function TimelineViewSettings({ options = [], choice }) {
   const [open, setOpen] = useState(false)
   const anchor = useRef(null)
   const menuRef = useRef(null)
@@ -358,6 +368,7 @@ export function TimelineViewSettings({ options }) {
   useEffect(() => {
     if (!open) return
     const onDown = (e) => {
+    if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
       if (menuRef.current && !menuRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', onDown)
@@ -369,7 +380,7 @@ export function TimelineViewSettings({ options }) {
     <>
       <button
         ref={anchor} type="button" data-devmode-passthrough="true" aria-haspopup="dialog" aria-expanded={open}
-        className={`round-btn tertiary-btn btn-icon-left tlh-view-btn${open ? ' tlh-view-btn--open' : ''}${options.some(o => o.checked) ? ' tlh-view-btn--active' : ''}`}
+        className={`round-btn tertiary-btn btn-icon-left tlh-view-btn${open ? ' tlh-view-btn--open' : ''}${options.some(o => o.checked) || (choice && choice.value !== choice.options[0].value) ? ' tlh-view-btn--active' : ''}`}
         onClick={() => setOpen(o => !o)}
       >
         <ViewSettingsIcon /> View settings
@@ -378,6 +389,19 @@ export function TimelineViewSettings({ options }) {
         <div className="fd-wrap tlh-menu tlh-view-menu" ref={menuRef} role="dialog" aria-label="View settings"
           style={{ position: 'fixed', top: rect.bottom + 6, right: window.innerWidth - rect.right, zIndex: 9999 }}>
           <div className="tlh-view-title">View settings</div>
+          {choice && (
+            <div role="radiogroup" aria-label={choice.title}>
+              {choice.options.map(o => (
+                <label key={o.value} className="tlh-view-row">
+                  <input type="radio" className="form-radio" name="tlh-view-choice" checked={choice.value === o.value} onChange={() => choice.onChange(o.value)} />
+                  <span className="tlh-view-text">
+                    <span className="tlh-view-label">{o.label}</span>
+                    {o.hint && <span className="tlh-view-hint">{o.hint}</span>}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
           {options.map(o => (
             <label key={o.key} className="tlh-view-row">
               <span className="tlh-view-text">

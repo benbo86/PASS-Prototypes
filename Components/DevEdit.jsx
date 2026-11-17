@@ -1321,17 +1321,32 @@ export default function DevEdit({ containerRef, prototypeId }) {
 
     const handleLeave = () => { setHoveredEl(null); setHoverRect(null) }
 
+    // ⌘-click (Ctrl-click on Windows) passes straight through to the page, so a click-to-open
+    // dropdown, menu or modal can be opened while editing, then selected and styled like
+    // anything else. (⌥-click is already "select the parent".) \`__devEditReplay\` marks the
+    // synthetic mousedown dispatched in handleClick below, which must not be swallowed.
+    const isPassthrough = (e) => e.metaKey || e.ctrlKey || e.__devEditReplay
+
     const handleSuppress = (e) => {
-      if (isOtherUi(e.target)) return
+      if (isOtherUi(e.target) || isPassthrough(e)) return
       e.preventDefault()
       e.stopPropagation()
     }
 
     const handleClick = (e) => {
-      if (isOtherUi(e.target)) return
+      if (isOtherUi(e.target) || isPassthrough(e)) return
       e.preventDefault()
       e.stopPropagation()
       const rawTarget = e.target
+
+      // Mousedown is swallowed while editing, so a dropdown or menu left open on the page never
+      // sees clicks elsewhere. Replay one as a plain document-level event (not dispatched on the
+      // element itself, so the page's own mousedown handlers don't run) so click-away logic
+      // works as normal: clicking inside the open popup leaves it open, clicking outside closes it.
+      const replay = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window })
+      replay.__devEditReplay = true
+      Object.defineProperty(replay, 'target', { value: rawTarget })
+      document.dispatchEvent(replay)
 
       if (!isRecognized(rawTarget)) {
         // Clicking outside the recognized page entirely — same as

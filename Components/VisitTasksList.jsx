@@ -1,4 +1,4 @@
-import { BellIcon, NoteIcon, MedFormIcon, MedDosageIcon, MedSupportIcon, ReasonIcon, EmployeeIcon, DueIcon } from './TimelineIcons'
+import { BellIcon, ResolvedAlertIcon, NoteIcon, MedFormIcon, MedDosageIcon, MedSupportIcon, ReasonIcon, EmployeeIcon, DueIcon } from './TimelineIcons'
 
 // A visit's tasks as a plain list (no table header, no filters), for visit
 // items that expand inline. The table version, with filters and sort, is
@@ -12,6 +12,7 @@ import { BellIcon, NoteIcon, MedFormIcon, MedDosageIcon, MedSupportIcon, ReasonI
 // Care note (reason, who/when, carer note) and Alert (type, review note), as on the live timeline.
 // Care plan sits in a left column; Care note and Alert stack in a right column.
 //   reviewNote? { by, date, text } shows under a resolved alert.
+// statusInNote (optional): drop the status pill and show the status as the first line of the Care note, with an icon.
 // onAddReviewNote (optional): shows a "+ Review note" link on every task that has no review note yet, whatever its status.
 
 const PILL_CLASS = {
@@ -21,6 +22,9 @@ const PILL_CLASS = {
   missed: 'status-missed',
   partial: 'vtp-pill--partial',
 }
+
+// Status glyphs (eltico, loaded by Styles/legacy.css) for the status line in the care note.
+const STATUS_GLYPH = { complete: ['\uE90B', 'complete'], partial: ['\uE909', 'partial'], overdue: ['\uE90C', 'missed'], missed: ['\uE90C', 'missed'] }
 
 const ALERT_LABEL = 'Not done'
 
@@ -47,7 +51,7 @@ export function CancelledVisitDetails({ plan, at, reason, note }) {
 }
 
 // compact: just icon, title and status, for tasks inside a cancelled visit.
-export default function VisitTasksList({ tasks = [], onAddReviewNote, compact }) {
+export default function VisitTasksList({ tasks = [], onAddReviewNote, compact, statusInNote }) {
   return (
     <ul className="vtl-list">
       {tasks.map(t => {
@@ -64,7 +68,7 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
             <div className="vtl-side"><span className="vtl-status"><span className={`status-pill ${PILL_CLASS[t.status] || ''}`}>{t.statusLabel}</span></span></div>
           </li>
         )
-        const hasNote = t.reason || t.note || t.completed || t.cancelledAt
+        const hasNote = statusInNote || t.reason || t.note || t.completed || t.cancelledAt
         return (
           <li className="vtl-item" key={t.id}>
             {t.icon && <span className="vtl-icon">{t.icon}</span>}
@@ -90,6 +94,9 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
               {hasNote && (
                 <section className="vtl-section">
                   <h4 className="vtl-section-title">{cancelled ? 'Cancelled' : 'Care note'}</h4>
+                  {statusInNote && STATUS_GLYPH[t.status] && (
+                    <span className="vtl-meta"><span className="vtl-meta-item" title="Status"><span className={`vtl-status-glyph vtl-status-glyph--${STATUS_GLYPH[t.status][1]}`} aria-hidden="true">{STATUS_GLYPH[t.status][0]}</span>{t.statusLabel}</span></span>
+                  )}
                   {t.cancelledAt && <span className="vtl-meta"><span className="vtl-meta-item" title="Cancelled"><DueIcon />{t.cancelledAt}</span></span>}
                   {t.reason && <span className="vtl-meta"><span className="vtl-meta-item" title="Reason"><ReasonIcon />{t.reason}</span></span>}
                   {t.completed && (
@@ -107,7 +114,7 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
               {t.alert && (
                 <section className="vtl-section">
                   <h4 className="vtl-section-title">Alert</h4>
-                  <span className="vtl-meta-item"><span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`}><BellIcon /></span>{ALERT_LABEL}{t.alert === 'resolved' ? ' (resolved)' : ''}</span>
+                  <span className="vtl-meta-item"><span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`}>{t.alert === 'resolved' ? <ResolvedAlertIcon /> : <BellIcon />}</span>{ALERT_LABEL}{t.alert === 'resolved' ? ' (resolved)' : ''}</span>
                   {t.alert === 'resolved' && t.reviewNote && (
                     <span className="vtl-note"><NoteIcon /><span>{t.reviewNote.text}<span className="vtl-note-meta">{t.reviewNote.by} · {t.reviewNote.date}</span></span></span>
                   )}
@@ -117,12 +124,14 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact })
               </div>
               {reviewLink(t)}
             </div>
-            <div className="vtl-side">
-              <span className="vtl-status">
-                <span className={`status-pill ${PILL_CLASS[t.status] || ''}`}>{t.statusLabel}</span>
-                {t.alert && <span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`} title={t.alert === 'resolved' ? 'Alert resolved' : 'Alert'}><BellIcon /></span>}
-              </span>
-            </div>
+            {!statusInNote && (
+              <div className="vtl-side">
+                <span className="vtl-status">
+                  <span className={`status-pill ${PILL_CLASS[t.status] || ''}`}>{t.statusLabel}</span>
+                  {t.alert && <span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`} title={t.alert === 'resolved' ? 'Alert resolved' : 'Alert'}>{t.alert === 'resolved' ? <ResolvedAlertIcon /> : <BellIcon />}</span>}
+                </span>
+              </div>
+            )}
           </li>
         )
       })}
