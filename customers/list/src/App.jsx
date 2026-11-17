@@ -19,61 +19,63 @@ const ChevronLeftIcon = () => (
     <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
   </svg>
 )
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+
+// The product now uses Lucide icons (https://lucide.dev, ISC licence). These are
+// copied inline from lucide-react 0.487.0, the version the design team's
+// prototype uses, so there's no extra dependency.
+const LucideIcon = ({ size = 16, children }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {children}
   </svg>
+)
+const PlusIcon = () => (
+  <LucideIcon><path d="M5 12h14" /><path d="M12 5v14" /></LucideIcon>
 )
 const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M10.85 18.69c1.78 0 3.43-.61 4.75-1.61l3.62 3.62c.21.21.48.32.74.32s.55-.11.74-.32a1.05 1.05 0 000-1.48l-3.6-3.62a7.84 7.84 0 001.61-4.75c0-4.33-3.52-7.85-7.85-7.85S3 6.51 3 10.84s3.52 7.85 7.85 7.85zm0-13.6c3.16 0 5.75 2.57 5.75 5.75s-2.6 5.75-5.75 5.75-5.76-2.6-5.76-5.75 2.58-5.75 5.76-5.75z" />
-  </svg>
+  <LucideIcon><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></LucideIcon>
 )
-const FiltersIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M15 17c0-.55-.45-1-1-1h-4a1 1 0 100 2h4c.55 0 1-.45 1-1zm3-5c0-.55-.45-1-1-1H7a1 1 0 100 2h10c.55 0 1-.45 1-1zM4 8h16a1 1 0 100-2H4a1 1 0 100 2z" />
-  </svg>
+const SlidersHorizontalIcon = () => (
+  <LucideIcon size={20}>
+    <line x1="21" x2="14" y1="4" y2="4" /><line x1="10" x2="3" y1="4" y2="4" />
+    <line x1="21" x2="12" y1="12" y2="12" /><line x1="8" x2="3" y1="12" y2="12" />
+    <line x1="21" x2="16" y1="20" y2="20" /><line x1="12" x2="3" y1="20" y2="20" />
+    <line x1="14" x2="14" y1="2" y2="6" /><line x1="8" x2="8" y1="10" y2="14" /><line x1="16" x2="16" y1="18" y2="22" />
+  </LucideIcon>
 )
-// Sort glyph: three bars shortening, plus an arrow pointing the way the list runs
-const SortAscIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 7h7M4 12h5M4 17h3" /><path d="M17 5v14M14 16l3 3 3-3" />
-  </svg>
+const ArrowDownAZIcon = () => (
+  <LucideIcon size={20}>
+    <path d="m3 16 4 4 4-4" /><path d="M7 20V4" /><path d="M20 8h-5" /><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10" /><path d="M15 14h5l-5 6h5" />
+  </LucideIcon>
 )
-const SortDescIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M4 7h3M4 12h5M4 17h7" /><path d="M17 5v14M14 8l3-3 3 3" />
-  </svg>
+const ArrowDownZAIcon = () => (
+  <LucideIcon size={20}>
+    <path d="m3 16 4 4 4-4" /><path d="M7 4v16" /><path d="M15 4h5l-5 6h5" /><path d="M15 20v-3.5a2.5 2.5 0 0 1 5 0V20" /><path d="M20 18h-5" />
+  </LucideIcon>
 )
 const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M18 7.2L16.8 6 12 10.8 7.2 6 6 7.2l4.8 4.8L6 16.8 7.2 18l4.8-4.8 4.8 4.8 1.2-1.2-4.8-4.8z" />
-  </svg>
+  <LucideIcon><path d="M18 6 6 18" /><path d="m6 6 12 12" /></LucideIcon>
 )
 const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M8.3 7.7l4.6 4.6-4.6 4.6 1.4 1.4 6-6-6-6z" />
-  </svg>
+  <LucideIcon><path d="m9 18 6-6-6-6" /></LucideIcon>
 )
 const MapPinIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0z" /><circle cx="12" cy="10" r="3" />
-  </svg>
+  <LucideIcon>
+    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" />
+  </LucideIcon>
 )
 const HeartPulseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0016.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4 3 5.5l7 7z" /><path d="M3.2 12H9l1.5-2 3 4 1.5-2h5.8" />
-  </svg>
+  <LucideIcon>
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
+  </LucideIcon>
 )
 const LockIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
-  </svg>
+  <LucideIcon><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></LucideIcon>
 )
 const TriangleAlertIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" /><path d="M12 9v4M12 17h.01" />
-  </svg>
+  <LucideIcon>
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" />
+  </LucideIcon>
 )
 
 // ─── Sorting, filtering and searching ─────────────────────────
@@ -303,6 +305,7 @@ function TagsFooter({ chips }) {
       <Chip chip={first} />
       {rest.length > 0 && (
         <Tooltip
+          wrapClassName="cl-alltags-tip"
           text={
             <div className="cl-alltags">
               <p>All tags</p>
@@ -551,12 +554,12 @@ export default function App() {
               <div className="cl-filterbar">
                 <Popover
                   label={filtersCount > 0 ? `Filter (${filtersCount} applied)` : 'Filter'}
-                  icon={<FiltersIcon />} dot={filtersCount > 0} panelClassName="cl-popover--filter"
+                  icon={<SlidersHorizontalIcon />} dot={filtersCount > 0} panelClassName="cl-popover--filter"
                 >
                   <FilterPanel filters={filters} onChange={setFilters} tagGroups={tagGroups} resultCount={total} />
                 </Popover>
                 <Popover
-                  label="Sort" icon={sortDirection === 'asc' ? <SortAscIcon /> : <SortDescIcon />}
+                  label="Sort" icon={sortDirection === 'asc' ? <ArrowDownAZIcon /> : <ArrowDownZAIcon />}
                   dot={!(sortBy === 'surname' && sortDirection === 'asc')}
                 >
                   <div className="cl-sort-panel">

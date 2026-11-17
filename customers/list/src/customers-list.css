@@ -184,7 +184,8 @@
 .cl-card-slot {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, ...) so a long unbreakable line (an address) can't widen the column */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: subgrid;
   grid-row: span 4;
   min-width: 0;
@@ -195,7 +196,8 @@
 .cl-card {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, ...) so a long unbreakable line (an address) can't widen the column */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: subgrid;
   grid-row: span 4;
   min-width: 0;
@@ -313,7 +315,9 @@
 .cl-tag--more { color: #364153; cursor: default; }
 .cl-tag--more:hover { background: #f3f4f6; }
 
-.cl-alltags { width: max-content; max-width: 360px; white-space: normal; text-align: left; }
+/* The shared tooltip caps its width at 260px, so widen this one or the tags spill out of it */
+.tooltip.cl-alltags-tip { max-width: 384px; white-space: normal; }
+.cl-alltags { text-align: left; }
 .cl-alltags p { margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #101828; }
 .cl-alltags div { display: flex; flex-wrap: wrap; gap: 6px; }
 
