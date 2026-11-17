@@ -3,7 +3,7 @@
    Source: assets/main-CyA-m16i.css (source CSS rules, not computed styles)
 */
 
-.top-nav { height: 44px; background: rgb(255, 255, 255); border-bottom: 1px solid rgb(229, 231, 235); display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0px 24px; flex-shrink: 0; position: sticky; top: 0px; z-index: 100; }
+.top-nav { height: 44px; background: rgb(255, 255, 255); border-bottom: 1px solid rgb(229, 231, 235); display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0px 24px; flex-shrink: 0; position: sticky; top: var(--dev-toolbar-height, 0px); z-index: 100; }
 
 .top-nav-title { margin-right: auto; font-family: Barlow, sans-serif; font-size: 16px; font-weight: 600; color: rgb(30, 41, 59); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 

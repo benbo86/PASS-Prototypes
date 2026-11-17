@@ -51,7 +51,10 @@
 .tli-title--caps { text-transform: uppercase; }
 
 .tli-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-.tli-by { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #333; margin-right: 70px; }
+/* A fixed width and fixed slots to its right keep the "by" column at the same
+   x on every row, whether or not the row has status icons. */
+.tli-by { display: flex; align-items: center; gap: 8px; width: 176px; flex-shrink: 0; overflow: hidden; white-space: nowrap; font-size: 14px; font-weight: 600; color: #333; margin-right: 70px; }
+.tli-slot { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; }
 .tli-due-in { font-size: 14px; font-weight: 600; }
 
 /* Right-hand status indicators: a 24px alert circle (red "!" on a white

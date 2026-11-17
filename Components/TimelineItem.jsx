@@ -72,7 +72,13 @@ function TaskSummary({ tasks }) {
 function RowRight({ item, onViewTasks }) {
   if (item.status === 'upcoming') return <span className="tli-due-in">{item.dueIn}</span>
   if (item.noStatus) {
-    return item.by ? <span className="tli-by">by <Avatar name={item.by} /> {item.by}</span> : null
+    // Reserve the two right-hand slots so "by" lines up with rows that have them
+    return item.by ? (
+      <div className="tli-right">
+        <span className="tli-by">by <Avatar name={item.by} /> {item.by}</span>
+        <span className="tli-slot" aria-hidden="true" /><span className="tli-slot" aria-hidden="true" />
+      </div>
+    ) : null
   }
   const overdue = item.status === 'overdue' || item.status === 'missed'
   const StatusGlyph = item.status === 'cancelled' ? StatusBanIcon : overdue ? null : StatusCheckIcon
@@ -84,19 +90,23 @@ function RowRight({ item, onViewTasks }) {
       {item.by && <span className="tli-by">by <Avatar name={item.by} /> {item.by}</span>}
       {/* Status first (a missed row shows its red "!" here), then the alert slot
           (a grey placeholder circle when there is no alert). */}
-      {overdue
-        ? <span className="tli-alert"><AlertCircleIcon /></span>
-        : item.status === 'complete'
-          // Same glyph as the "Completed" line in the expanded care note
-          // (eltico icon-task-status-complete, loaded by Styles/legacy.css).
-          ? <span className="tli-status-glyph" aria-hidden="true">{'\uE90B'}</span>
-          : <span className={`tli-status tli-status--${item.status}`}>{StatusGlyph && <StatusGlyph />}</span>}
+      <span className="tli-slot">
+        {overdue
+          ? <span className="tli-alert"><AlertCircleIcon /></span>
+          : item.status === 'complete'
+            // Same glyph as the "Completed" line in the expanded care note
+            // (eltico icon-task-status-complete, loaded by Styles/legacy.css).
+            ? <span className="tli-status-glyph" aria-hidden="true">{'\uE90B'}</span>
+            : <span className={`tli-status tli-status--${item.status}`}>{StatusGlyph && <StatusGlyph />}</span>}
+      </span>
       {/* A partial task later resolved by the office gets a green alert. */}
-      {item.status === 'partial' && item.alert
-        ? <span className="tli-alert tli-alert--resolved"><ResolvedAlertIcon /></span>
-        : item.bell
-          ? <span className="tli-bell" title="Alert"><BellIcon /></span>
-          : <span className="tli-alert-placeholder" aria-hidden="true" />}
+      <span className="tli-slot">
+        {item.status === 'partial' && item.alert
+          ? <span className="tli-alert tli-alert--resolved"><ResolvedAlertIcon /></span>
+          : item.bell
+            ? <span className="tli-bell" title="Alert"><BellIcon /></span>
+            : <span className="tli-alert-placeholder" aria-hidden="true" />}
+      </span>
     </div>
   )
 }

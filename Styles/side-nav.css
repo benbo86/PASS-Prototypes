@@ -3,7 +3,7 @@
    Source: assets/main-CyA-m16i.css (source CSS rules, not computed styles)
 */
 
-.side-nav { width: 250px; height: 100vh; position: sticky; top: 0px; flex-shrink: 0; display: flex; flex-direction: column; background: rgb(255, 255, 255); border-right: 1px solid rgb(229, 231, 235); transition: width 0.15s; font-family: Barlow, sans-serif; }
+.side-nav { width: 250px; height: calc(100vh - var(--dev-toolbar-height, 0px)); position: sticky; top: var(--dev-toolbar-height, 0px); flex-shrink: 0; display: flex; flex-direction: column; background: rgb(255, 255, 255); border-right: 1px solid rgb(229, 231, 235); transition: width 0.15s; font-family: Barlow, sans-serif; }
 
 .side-nav.collapsed { width: 60px; }
 

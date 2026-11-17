@@ -12,9 +12,6 @@
   color: #5a5967;
 }
 
-/* The top nav pins at the top of the page, so sit it below the dev toolbar */
-.cl-page .top-nav { top: var(--dev-toolbar-height, 0px); }
-
 .cl-container {
   width: 100%;
   max-width: 1600px;
