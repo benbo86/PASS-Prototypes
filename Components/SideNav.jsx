@@ -132,6 +132,7 @@ const NAV_ITEMS = [
 // as the old WebNav's NAV_LINKS. Pass onSelectItem to override (e.g. the
 // component demo, which just updates local state instead of navigating).
 const NAV_LINKS = {
+  customers: '../../customers/list/',
   employees: '../../web/employees/',
   office: '../../office/details/',
 }
@@ -151,7 +152,10 @@ export default function SideNav({
 
   const handleSelect = (key) => {
     if (onSelectItem) { onSelectItem(key); return }
-    if (NAV_LINKS[key]) window.location.href = NAV_LINKS[key]
+    if (!NAV_LINKS[key]) return
+    // Already on the destination page: do nothing (a reload would reset its state)
+    const target = new URL(NAV_LINKS[key], window.location.href)
+    if (target.pathname !== window.location.pathname) window.location.href = NAV_LINKS[key]
   }
 
   // `force` shows the tooltip even when expanded (the toggle needs it in
