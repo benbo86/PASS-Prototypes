@@ -9,6 +9,7 @@ import harinderPhoto from '../../../Images/Customer=Harinder Kulkarni.png'
 import maryPhoto from '../../../Images/Customer=Mary McCarthy.png'
 import hilaryPhoto from '../../../Images/Customer=Hilary Buxton.png'
 import samPhoto from '../../../Images/Customer=Sam Malone.png'
+import { region, attr, AVATAR, initialsOf } from '../../../Components/peopleListData'
 
 export const STATUS_LABEL = {
   'assessment-booked': 'Assessment booked',
@@ -24,23 +25,6 @@ export function reviewIn(days) {
   d.setDate(d.getDate() + days)
   return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`
 }
-
-// Area tags carry their own colour. Same pastel pairs as the live app.
-const REGION = {
-  teal: { bg: '#e0f1f4', fg: '#004753', border: '#a6d6de' },
-  blue: { bg: '#e5ecfd', fg: '#13337a', border: '#b3c8f8' },
-  pink: { bg: '#fbe4e9', fg: '#750f25', border: '#f5b0bf' },
-  green: { bg: '#e3f4e1', fg: '#1f5a1a', border: '#b5dcb0' },
-  amber: { bg: '#fdf0d5', fg: '#6b4400', border: '#f1d18f' },
-  violet: { bg: '#eee8fb', fg: '#3d2380', border: '#cbbdf0' },
-}
-const region = (label, color) => ({ type: 'region', label, ...REGION[color] })
-const attr = (key, value) => ({ type: 'attr', key, value })
-
-const AVATAR = ['#c9b4de', '#b7dda8', '#b1c8de', '#f0c9a8', '#a8d8d4', '#e8b4c4']
-
-const initialsOf = (fullName) =>
-  fullName.replace(/^(Mr|Mrs|Ms|Miss|Master|Dr) /, '').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
 // Every customer starts Active with no flags, tags or review date; `o` overrides.
 const person = (id, fullName, surname, o, i) => ({

@@ -1,0 +1,453 @@
+/* People lists (customers/list, employees/list) via Components/PeopleList.jsx.
+   Sizes and colours are taken from captures of the live pages. Shell (side nav,
+   top nav), buttons, checkboxes and radios come from the shared styles. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.pl-page {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  background: var(--ui-purple-7-lightest-lavendar);
+  font-family: Barlow, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #5a5967;
+}
+
+.pl-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+  /* Where the pinned toolbar rests: below the dev toolbar and the 44px top nav */
+  --pl-toolbar-top: calc(var(--dev-toolbar-height, 0px) + 44px);
+}
+
+/* ── Pinned toolbar: title, filter bar, A-Z jump bar ─────────── */
+.pl-toolbar {
+  position: sticky;
+  top: var(--pl-toolbar-top);
+  z-index: 30;
+  margin: 0 -24px;
+  padding: 20px 24px 8px;
+  background: var(--ui-purple-7-lightest-lavendar);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pl-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: 12px;
+}
+/* The add button is 36px tall on live (the shared round button is 44px) */
+.pl-title-row .round-btn { height: 36px; padding: 6px 20px 6px 16px; font-size: 14px; font-weight: 600; }
+.pl-title-row h1 {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.pl-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pl-icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #364153;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.pl-icon-btn:hover, .pl-icon-btn--open { background: #f9fafb; }
+/* Purple dot while a filter is applied, or the sort isn't the default */
+.pl-icon-btn-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--brand-purple-6-purple-4);
+  border: 2px solid #fff;
+}
+
+.pl-search { position: relative; flex: 1; min-width: 0; width: 576px; }
+.pl-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: #6a7282;
+  pointer-events: none;
+}
+.pl-search input {
+  width: 100%;
+  height: 38px;
+  padding: 0 160px 0 36px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #101828;
+}
+.pl-search input::placeholder { color: #6a7282; }
+.pl-search input:focus { outline: none; border-color: var(--brand-purple-6-purple-4); box-shadow: 0 0 0 2px rgba(154, 38, 214, 0.2); }
+.pl-search-end {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4a5565;
+  pointer-events: none;
+}
+.pl-search-clear {
+  display: flex;
+  padding: 2px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #6a7282;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.pl-search-clear:hover { color: #1e2939; background: #f3f4f6; }
+
+.pl-letters { display: flex; flex-wrap: wrap; gap: 2px; }
+.pl-letter {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-purple-3-purple-2);
+  cursor: pointer;
+}
+.pl-letter:hover:not(:disabled) { background: #faf5ff; }
+.pl-letter:disabled { color: #99a1af; cursor: default; }
+
+/* ── Letter sections ─────────────────────────────────────────── */
+.pl-section-title {
+  position: sticky;
+  top: calc(var(--pl-toolbar-top) + var(--pl-toolbar-h, 0px));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  background: var(--ui-purple-7-lightest-lavendar);
+  font-size: 18px;
+  font-weight: 600;
+  color: #101828;
+}
+/* A rule running out to the right edge of the content, so each group reads as a band */
+.pl-section-title::after { content: ''; flex: 1; height: 2px; background: #e5e7eb; }
+.pl-section-letter { scroll-margin-top: calc(var(--pl-toolbar-top) + var(--pl-toolbar-h, 0px) + 8px); }
+.pl-section-sep { margin: 0 8px; color: #99a1af; }
+
+/* Each card spans 4 rows of this grid via subgrid (header / flags / details /
+   tags), so those rows are as tall as the tallest card in the row. */
+.pl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 0;
+  margin-top: 4px;
+}
+@media (max-width: 1280px) { .pl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .pl-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Grid items are transparent wrappers so each card slot is a direct grid child */
+.pl-grid-item { display: contents; }
+
+.pl-card-slot {
+  position: relative;
+  display: grid;
+  /* minmax(0, ...) so a long unbreakable line (an address) can't widen the column */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  min-width: 0;
+  margin-bottom: 16px;
+}
+.pl-card-slot:hover { z-index: 5; }
+
+.pl-card {
+  position: relative;
+  display: grid;
+  /* minmax(0, ...) so a long unbreakable line (an address) can't widen the column */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  grid-row: span 4;
+  min-width: 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  /* The slot is the hover target and the card inside it moves, so the pointer
+     is never "outside" mid-lift (which would make the card jitter). */
+  transition: translate 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pl-card-slot:hover .pl-card {
+  translate: 0 -4px;
+  border-color: rgba(154, 38, 214, 0.55);
+  box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.16), 0 4px 10px -4px rgba(15, 23, 42, 0.08);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-card { transition: none; }
+  .pl-card-slot:hover .pl-card { translate: none; }
+}
+
+.pl-card-head { display: flex; align-items: flex-start; gap: 12px; }
+.pl-avatar {
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f3f4f6;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+.pl-avatar--photo { object-fit: cover; object-position: top; }
+.pl-card-name { flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; }
+/* The name wraps (up to two lines) rather than truncating */
+.pl-card-name-text {
+  display: block;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  color: #101828;
+  overflow-wrap: anywhere;
+}
+/* A line under the name (an employee's role) */
+.pl-role { display: block; font-size: 14px; line-height: 20px; font-weight: 500; color: #4a5565; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-role--senior { color: #6e11b0; }
+
+/* Badges: status, flags, review date */
+.pl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pl-status { flex-shrink: 0; }
+.pl-status--active { background: #d4ebc3; color: #2d5f1e; border-color: #afdb98; }
+.pl-status--assessment-booked,
+.pl-status--assessment-completed { background: #fef3c6; color: #b75000; border-color: #ffd230; }
+.pl-status--inactive,
+.pl-status--finished { background: #f3f4f6; color: #4a5565; border-color: #d1d5dc; }
+
+.pl-card-flags { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; padding-top: 12px; }
+.pl-card-flags--off { padding-top: 0; }
+.pl-flag { background: #ffe2e2; color: #9f0712; border-color: #ffc9c9; }
+.pl-flag--high-risk { background: #c10007; color: #fff; border-color: #c10007; }
+.pl-review { background: #f3f4f6; color: #4a5565; border-color: #e5e7eb; }
+.pl-review--overdue { background: #ffe2e2; color: #9f0712; border-color: #ffc9c9; }
+
+.pl-card-body { padding: 12px 0; min-width: 0; }
+.pl-card-details { display: flex; flex-direction: column; gap: 4px; font-size: 15px; line-height: 22px; }
+.pl-card-details > div { display: flex; gap: 8px; min-width: 0; }
+.pl-card-details dt { flex-shrink: 0; color: #6a7282; }
+.pl-card-details dd { margin: 0; }
+.pl-detail-value { min-width: 0; color: #101828; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-detail-tip { display: block; min-width: 0; cursor: default; }
+
+/* The tag band runs edge to edge along the bottom of the card: negative
+   margins cancel the card's own padding. */
+.pl-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 54px;
+  margin: 0 -16px -16px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-top: 1px solid #f3f4f6;
+  border-radius: 0 0 9px 9px;
+}
+
+.pl-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #364153;
+  white-space: nowrap;
+}
+.pl-tag svg { flex-shrink: 0; }
+.pl-tag--attr b { font-weight: 600; }
+.pl-tag--more { color: #364153; cursor: default; }
+.pl-tag--more:hover { background: #f3f4f6; }
+
+/* The shared tooltip caps its width at 260px, so widen this one or the tags spill out of it */
+.tooltip.pl-alltags-tip { max-width: 384px; white-space: normal; }
+.pl-alltags { text-align: left; }
+.pl-alltags p { margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #101828; }
+.pl-alltags div { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.pl-empty { padding: 64px 0; text-align: center; }
+.pl-empty-title { font-size: 16px; font-weight: 600; color: #101828; }
+.pl-empty-hint { margin-top: 4px; font-size: 14px; color: #4a5565; }
+.pl-empty-actions { display: flex; justify-content: center; gap: 12px; margin-top: 16px; }
+
+/* ── Filter and sort panels (portaled to <body>) ─────────────── */
+.pl-popover {
+  z-index: 9999;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  font-family: Barlow, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #101828;
+}
+.pl-popover--filter { width: min(720px, calc(100vw - 48px)); }
+
+.pl-filter-panel { display: flex; flex-direction: column; max-height: min(80vh, 720px); }
+.pl-filter-scroll { overflow-y: auto; padding-right: 4px; }
+.pl-filter-cols, .pl-sort-panel { display: flex; gap: 32px; }
+
+.pl-fieldset { border: none; min-width: 0; }
+.pl-fieldset legend { margin-bottom: 4px; font-size: 14px; font-weight: 600; color: #101828; }
+.pl-check { display: flex; align-items: center; gap: 8px; padding: 2px 0; margin-bottom:2px; font-size: 14px; color: #101828; cursor: pointer; }
+.pl-radio { gap: 8px; }
+.pl-link-btn {
+  margin-top: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-purple-3-purple-2);
+  cursor: pointer;
+}
+.pl-link-btn:hover { text-decoration: underline; }
+
+.pl-tags-title { margin: 16px 0 2px; font-size: 14px; font-weight: 600; color: #101828; }
+.pl-tag-group { border-bottom: 1px solid #d1d5dc; }
+.pl-tag-group:last-child { border-bottom: none; }
+.pl-tag-group-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+  text-align: left;
+  cursor: pointer;
+}
+.pl-tag-group-chev { display: flex; transition: transform 0.2s; }
+.pl-tag-group-chev--open { transform: rotate(90deg); }
+.pl-tag-group-count { font-weight: 500; color: var(--brand-purple-3-purple-2); }
+.pl-tag-group-values { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 16px; padding: 0 0 8px 24px; }
+
+.pl-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #4a5565;
+}
+
+/* ── Extra row under the details (an employee's app activity) ── */
+.pl-card-extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+/* An icon with its meaning on hover */
+.tooltip-wrap:has(> .pl-icon-tip) { cursor: default; color: inherit; }
+.pl-icon-tip { display: inline-flex; border-radius: 50%; outline: none; color: #364153; }
+.pl-icon-tip:focus-visible { box-shadow: 0 0 0 2px rgba(154, 38, 214, 0.5); }
+
+/* ── Employees: app activity (notifications, last login, app version) ── */
+/* A bell with a small tick (notifications on) or cross (off) badge at its bottom right */
+.pl-bell { position: relative; display: inline-flex; margin-right: 6px; }
+.pl-bell-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -2px;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px #fff;
+}
+.pl-bell-badge--on { color: #008236; }
+.pl-bell-badge--off { color: #c10007; }
+
+/* Last login, right-aligned even when it wraps onto its own line */
+.pl-app-login { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 2px 8px; text-align: right; color: #364153; }
+.pl-app-stale { color: #9f0712; font-weight: 500; }
+.pl-app-none { color: #4a5565; }
+.pl-version--latest { color: #008236; }
+.pl-version--update { color: #b75000; }

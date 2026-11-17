@@ -133,7 +133,7 @@ const NAV_ITEMS = [
 // component demo, which just updates local state instead of navigating).
 const NAV_LINKS = {
   customers: '../../customers/list/',
-  employees: '../../web/employees/',
+  employees: '../../employees/list/',
   timeline: '../../office/timeline/',
   office: '../../office/details/',
 }

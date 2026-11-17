@@ -9,7 +9,7 @@ import '../../../Styles/dev-mode.css'
 import '../../../Styles/dev-comments.css'
 import '../../../Styles/dev-edit.css'
 import '../../../Styles/wireframe-access.css'
-import './customers-list.css'
+import '../../../Styles/people-list.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
