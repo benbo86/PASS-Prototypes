@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tools — Page capture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #f5f5f6; --card: #fff; --text: #2e2e38; --muted: #6b6b7a; --line: #dcd9e4; --purple: #9a26d6; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1f; --card: #26262c; --text: #f2f2f5; --muted: #a8a8b4; --line: #3a3a44; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 Barlow, system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 16px 96px; }
+    a.back { color: var(--purple); text-decoration: none; font-weight: 500; }
+    h1 { font-size: 28px; font-weight: 500; margin: 16px 0 8px; }
+    h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+    p, li { color: var(--muted); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 24px; margin-top: 24px; }
+    .bookmarklet { display: inline-block; padding: 10px 16px; background: var(--purple); color: #fff; border-radius: 24px; font-weight: 600; text-decoration: none; cursor: grab; }
+    button { font: inherit; padding: 8px 16px; border-radius: 24px; border: 1px solid var(--purple); background: transparent; color: var(--purple); cursor: pointer; font-weight: 500; }
+    ol { padding-left: 24px; margin: 8px 0 0; }
+    li { margin: 4px 0; }
+    code { background: var(--bg); padding: 1px 6px; border-radius: 4px; color: var(--text); font-size: 14px; }
+    .warn { border-left: 4px solid #f0a205; }
+    .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+    #status { color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../../">← Prototypes</a>
+    <h1>Page capture</h1>
+    <p>Pick an element on any web page, including logged-in pages such as the live PASS app, and save it as a file that can be handed to Claude to rebuild. It records the element tree, the styles that differ from browser defaults, sizes and positions, fonts and CSS variables.</p>
+
+    <div class="card">
+      <h2>1. Add the bookmarklet</h2>
+      <p>Drag this to your bookmarks bar.</p>
+      <div class="row">
+        <a id="bookmarklet" class="bookmarklet" href="#">Capture page</a>
+        <button id="copy" type="button">Copy script instead</button>
+        <span id="status"></span>
+      </div>
+      <p>If a site's security policy blocks bookmarklets, use “Copy script instead”, then paste it into the browser console (Cmd+Option+J) on that page and press Enter.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. Capture</h2>
+      <ol>
+        <li>Open the live page, signed in, and get it into the state you want (a menu open, a tab selected).</li>
+        <li>Click the bookmarklet. Hover to highlight, then click the element to capture. Up/Down arrows select the parent or child.</li>
+        <li>⌘-click (Ctrl-click on Windows) passes a click through to the page, so you can open a menu while the picker is active.</li>
+        <li>A <code>capture-….json</code> file downloads. Move it into the <code>captures/</code> folder in this repo (ignored by git) and tell Claude its name.</li>
+      </ol>
+    </div>
+
+    <div class="card warn">
+      <h2>Before you share a capture</h2>
+      <p>A capture contains the text on the page, which on the live app can include customer and employee names. Tick <b>Mask text</b> in the picker bar to replace letters with “x” and digits with “0”, keeping the layout. Masked text is fine for layout and styling but hides real labels, so for a screen where the wording matters, capture unmasked and only share it if the content is safe to share. Password fields are never captured.</p>
+      <p>It doesn't capture canvas, video or iframe contents (they are marked as not captured), and it can't record behaviour such as what a click does. Add a screenshot or a note for those.</p>
+    </div>
+  </main>
+  <script type="module">
+    import src from './capture.js?raw'
+    // Drop full-line comments, keep line breaks so the script still parses.
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').trim()
+    document.getElementById('bookmarklet').setAttribute('href', 'javascript:' + encodeURIComponent(code))
+    document.getElementById('bookmarklet').addEventListener('click', e => e.preventDefault())
+    document.getElementById('copy').addEventListener('click', async () => {
+      const status = document.getElementById('status')
+      try { await navigator.clipboard.writeText(code); status.textContent = 'Copied.' } catch { status.textContent = 'Could not copy.' }
+    })
+  </script>
+</body>
+</html>

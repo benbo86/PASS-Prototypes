@@ -1045,6 +1045,17 @@ Ben: wanted a "review feature button" available only locally, whose job is "scru
 
 ---
 
+## Page capture tool (`tools/capture/`)
+
+A bookmarklet (not a prototype, so it skips the Prototype conventions) for rebuilding a page from a live web page, including logged-in ones such as the live PASS app. `tools/capture/capture.js` is the whole tool; `tools/capture/index.html` (linked under Tools on the root index) turns it into a draggable bookmarklet (`?raw` import, full-line comments stripped) and has a "Copy script" fallback to paste into the DevTools console where a site's CSP blocks bookmarklets.
+
+- **Picker:** hover highlights, click captures; ↑/↓ select parent/child; ⌘/Ctrl-click passes through so a menu can be opened while it's active; Esc cancels; "Whole page" button; "Mask text" checkbox (letters → `x`, digits → `0`).
+- **Output:** one `capture-<host>-<time>.json` download (`format: "pass-capture/1"`): element tree (`t` tag, `a` attributes, `s` styles, `r` [x, y, w, h] relative to the root, `c` children with strings for text, `p` ::before/::after, `svg` inline markup), plus fonts used, `@font-face` rules, root CSS variables and viewport. Styles list only values that differ from a same-tag baseline (rendered in a hidden iframe); font/colour/line-height/etc. are also dropped when equal to the parent, so they inherit. Sizes are rendered values, not authored ones. Canvas, video and iframe contents aren't captured.
+- **Where it goes:** the user moves it into `captures/` (gitignored) and gives Claude the name. Treat captures as containing real customer/employee text unless `masked: true`; never commit them or paste them into outside services.
+- **Rebuilding from one:** use the project's components and tokens, not the captured markup/classes as is; ask about states, interactions and anything marked not captured.
+
+---
+
 ## Wireframe tool (`tools/wireframe/`)
 
 A small in-browser wireframing canvas — **not a product prototype**, a dev tool, so it skips the "Prototype conventions" section above entirely (no back-link/Dev Mode/Dev Comments/Dev Edit wiring). Lets Ben rough out a layout directly (frames, rectangles, ellipses, arrows, text — all movable/resizable/deletable, with optional fill color) and save it as a real JSON file in the repo, which Claude then reads directly to understand layout intent before implementing an actual prototype — faster than sketching in a separate app, and avoids losing the back-and-forth to ambiguous prose descriptions.
