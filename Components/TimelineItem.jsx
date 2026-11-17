@@ -137,7 +137,7 @@ export default function TimelineItem({ item, isOpen, onToggle, onViewTasks, expa
         )}
         <span className="tli-title-wrap">
           <span className="tli-icon-circle"><Icon /></span>
-          <span className={`tli-title${caps ? ' tli-title--caps' : ''}${cancelled ? ' tli-title--cancelled' : ''}`}>{item.title}</span>
+          <span className={`tli-title${caps ? ' tli-title--caps' : ''}${cancelled ? ' tli-title--cancelled' : ''}`} title={item.title}>{item.title}</span>
           {!cancelled && <TaskSummary tasks={item.tasks} />}
         </span>
         <RowRight item={item} onViewTasks={onViewTasks} />

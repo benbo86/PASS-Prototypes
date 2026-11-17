@@ -41,7 +41,7 @@
    left (the type's pastel colour) instead of a tinted background. Turn it on with .tl-rows--bars on any
    ancestor of the rows. The type icon circle and chevron keep their tone. */
 .tl-rows--bars .tli-item { --tl-bg: #fff; --tl-text: #333; }
-.tl-rows--bars .tli-row { box-shadow: inset 8px 0 0 var(--tl-circle); }
+.tl-rows--bars .tli-row { box-shadow: inset 6px 0 0 var(--tl-circle); }
 
 .tli-time { font-size: 14px; font-weight: 600; }
 
@@ -52,7 +52,10 @@
   background: var(--tl-circle); color: var(--tl-icon);
 }
 .tli-icon-circle svg { width: 18px; height: 18px; }
-.tli-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A long title is cut off with an ellipsis rather than running across the row
+   (the full text is in the row's hover title). It also still shrinks when the
+   row itself is narrow. */
+.tli-title { max-width: 264px; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tli-title--cancelled { text-decoration: line-through; }
 .tli-title--caps { text-transform: uppercase; }
 

@@ -134,6 +134,7 @@ const NAV_ITEMS = [
 const NAV_LINKS = {
   customers: '../../customers/list/',
   employees: '../../web/employees/',
+  timeline: '../../office/timeline/',
   office: '../../office/details/',
 }
 
