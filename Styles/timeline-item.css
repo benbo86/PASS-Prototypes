@@ -38,10 +38,12 @@
 .tli-row:hover { filter: brightness(0.97); }
 
 /* Proposed row style: white rows, with the type shown by a coloured bar on the
-   left (the type's pastel colour) instead of a tinted background. Turn it on with .tl-rows--bars on any
+   left instead of a tinted background. Turn it on with .tl-rows--bars on any
    ancestor of the rows. The type icon circle and chevron keep their tone. */
 .tl-rows--bars .tli-item { --tl-bg: #fff; --tl-text: #333; }
-.tl-rows--bars .tli-row { box-shadow: inset 6px 0 0 var(--tl-circle); }
+/* The bar is a mix of the type's strong icon colour and its pastel circle colour.
+   --tl-bar-strength is how much of the strong colour (0% = pastel, 100% = full). */
+.tl-rows--bars .tli-row { box-shadow: inset 6px 0 0 color-mix(in srgb, var(--tl-icon) var(--tl-bar-strength, 50%), var(--tl-circle)); }
 
 .tli-time { font-size: 14px; font-weight: 600; }
 
