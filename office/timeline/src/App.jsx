@@ -485,7 +485,7 @@ export default function App() {
   const showsVisits = !LIVE || includes('actions')
   // How the live filters are laid out (switchable so both can be compared; always starts on Current):
   //   'dropdowns' (Current) one dropdown per filter on the bar, as on live
-  //   'menu' (Proposed)     Event type, then one Filters menu with the rest, applied filters shown as chips
+  //   'menu' (hidden from the toggle)     Event type, then one Filters menu with the rest, applied filters shown as chips
   const [filterLayout, setFilterLayout] = useState('dropdowns')
   // Prototype-only: 'current' (tinted rows) or 'bars' (white rows with a coloured left bar)
   const [rowStyle, setRowStyle] = useState('current')
@@ -888,7 +888,7 @@ export default function App() {
         <div className="tl-layout-switch">
           <span>Filter style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
-            options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }, { value: 'combined', label: 'Combined' }]} />
+            options={[{ value: 'dropdowns', label: 'Current' }, { value: 'combined', label: 'Proposed' }]} />
           <span className="tl-layout-switch-label">Row style:</span>
           <SegmentedToggle value={rowStyle} onChange={setRowStyle}
             options={[{ value: 'current', label: 'Current' }, { value: 'bars', label: 'Proposed' }]} />
