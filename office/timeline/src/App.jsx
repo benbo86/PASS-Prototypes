@@ -808,6 +808,7 @@ export default function App() {
           showFilters={tab === 'care-events'}
           dateLabel="6 July 2026"
           onGoToNow={goToNow}
+          centerDate={combined}
           onToggleAll={showsVisits ? (allExpanded ? collapseAll : expandAll) : undefined}
           allExpanded={allExpanded}
           filtersClassName={LIVE ? 'tlh-filters--hybrid' : undefined}
@@ -886,7 +887,7 @@ export default function App() {
       </SlidePanel>
       {LIVE && (
         <div className="tl-layout-switch">
-          <span>Filter style:</span>
+          <span>Header style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
             options={[{ value: 'dropdowns', label: 'Current' }, { value: 'combined', label: 'Proposed' }]} />
           <span className="tl-layout-switch-label">Row style:</span>

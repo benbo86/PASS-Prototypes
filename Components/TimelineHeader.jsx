@@ -19,7 +19,7 @@ import { ViewSettingsIcon, FunnelIcon, FilterLinesIcon, ClockIcon, ExpandAllIcon
 // (used instead of onExpandAll / onCollapseAll, which render two buttons).
 export default function TimelineHeader({
   tabs, activeTab, onTabChange, dateLabel, showFilters = true,
-  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, viewSettings, filtersClassName, chips, children,
+  onGoToNow, onExpandAll, onCollapseAll, onToggleAll, allExpanded, viewSettings, filtersClassName, chips, children, centerDate,
 }) {
   const ref = useRef(null)
 
@@ -46,10 +46,17 @@ export default function TimelineHeader({
       {showFilters && (
         <div className={`tlh-filters${filtersClassName ? ` ${filtersClassName}` : ''}`}>
           {children}
-          <button className="tlh-date" type="button">{dateLabel} <CalendarHeaderIcon /></button>
+          {centerDate ? (
+            <div className="tlh-center">
+              <button className="tlh-date" type="button">{dateLabel} <CalendarHeaderIcon /></button>
+              <button className="round-btn primary-btn btn-icon-left" onClick={onGoToNow}><ClockIcon /> Go to now</button>
+            </div>
+          ) : (
+            <button className="tlh-date" type="button">{dateLabel} <CalendarHeaderIcon /></button>
+          )}
           <div className="tlh-actions">
             {viewSettings}
-            <button className="round-btn primary-btn btn-icon-left" onClick={onGoToNow}><ClockIcon /> Go to now</button>
+            {!centerDate && <button className="round-btn primary-btn btn-icon-left" onClick={onGoToNow}><ClockIcon /> Go to now</button>}
             {onToggleAll && (
               <button className="round-btn tertiary-btn btn-icon-left tlh-toggle-all" onClick={onToggleAll}>
                 {allExpanded ? <><CollapseAllIcon /> Collapse all</> : <><ExpandAllIcon /> Expand all</>}
