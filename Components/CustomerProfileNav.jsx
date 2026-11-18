@@ -20,7 +20,7 @@ const PRIMARY_TABS = [
   { label: 'Care Management', href: '../care-management/' },
   { label: 'Care Notes', href: null },
   { label: 'MAR Chart', href: '../mar-chart/' },
-  { label: 'Timeline', href: '../timeline/' },
+  { label: 'Timeline', href: '../timeline-expandable/' },
   { label: 'Documents', href: '../assessments/' },
   { label: 'About Me', href: null },
   { label: 'Details', href: null },

@@ -422,6 +422,8 @@ export default function App() {
   //   'menu' (hidden from the toggle) Event type, then one Filters menu with the rest, applied filters shown as chips
   const [filterLayout, setFilterLayout] = useState('dropdowns')
   // Only Proposed can have several event types ticked, so leaving it collapses them to All.
+  // Prototype-only: 'current' (tinted rows) or 'bars' (white rows with a coloured left bar)
+  const [rowStyle, setRowStyle] = useState('current')
   const changeFilterLayout = (next) => { if (next !== 'combined' && liveTypes.size > 1) changeLiveType('all'); setFilterLayout(next) }
   // "+ Review note": opens the slide-out for one task; submitted notes are kept per task.
   const [reviewTask, setReviewTask] = useState(null) // { id, title }
@@ -716,7 +718,7 @@ export default function App() {
         <WireframeToggle />
         <AuditCapture containerRef={pageRef} />
       </DevToolbar>
-      <div className="page" ref={pageRef}>
+      <div className={`page${rowStyle === 'bars' ? ' tl-rows--bars' : ''}`} ref={pageRef}>
       <a href="../../" className="back-link"><ChevronLeftIcon /> Prototypes</a>
       <SideNav activeItem="customers" />
 
@@ -813,6 +815,9 @@ export default function App() {
           <span>Filter style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
             options={[{ value: 'dropdowns', label: 'Current' }, { value: 'combined', label: 'Proposed' }]} />
+          <span className="tl-layout-switch-label">Row style:</span>
+          <SegmentedToggle value={rowStyle} onChange={setRowStyle}
+            options={[{ value: 'current', label: 'Current' }, { value: 'bars', label: 'Proposed' }]} />
         </div>
       )}
     </>
