@@ -51,9 +51,12 @@ function ScaledPage({ scale, width, children }) {
   )
 }
 
-// Cards ×2 (the same cards in two columns) is parked for reference: the layout still
-// renders in SchedulePdfPreview, it's just not offered in the toggle. Flip to true to compare.
+// Parked card layouts, kept for reference: they still render in SchedulePdfPreview, they're
+// just not offered in the toggle. Flip to true to compare.
+//   ×2: wider cards, no wrapping, but nothing the 3-column layout doesn't do.
+//   ×4: every name wraps (hyphenated names split) and it still needs 2 pages.
 const SHOW_TWO_COLUMN_CARDS = false
+const SHOW_FOUR_COLUMN_CARDS = false
 
 export default function PrintScheduleDialog({ mode, weekLabel, customers, appliedFilters, onClose }) {
   const CUSTOMERS = customers
@@ -186,7 +189,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
           <span>Text size (prototype option)</span>
           <SegmentedToggle options={[{ value: 16, label: '16pt' }, { value: 14, label: '14pt' }]} value={largeSize} onChange={setLargeSize} />
           <span>Layout</span>
-          <SegmentedToggle options={[{ value: 'cards', label: 'Cards' }, ...(SHOW_TWO_COLUMN_CARDS ? [{ value: 'cards2', label: 'Cards ×2' }] : []), { value: 'list', label: 'List' }]} value={largeLayout} onChange={setLargeLayout} />
+          <SegmentedToggle options={[{ value: 'cards', label: 'Cards' }, ...(SHOW_FOUR_COLUMN_CARDS ? [{ value: 'cards4', label: 'Cards ×4' }] : []), ...(SHOW_TWO_COLUMN_CARDS ? [{ value: 'cards2', label: 'Cards ×2' }] : []), { value: 'list', label: 'List' }]} value={largeLayout} onChange={setLargeLayout} />
         </div>
       )}
       <ScaledPage scale={scale} width={pageW}>

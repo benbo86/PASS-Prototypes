@@ -4,7 +4,7 @@
 //   standard + cards  → today's layout (7 day columns)
 //   large    + cards  → Concept 2 from wireframes/schedule-pdf.json (days flow into
 //                       3 columns portrait / 4 landscape); 'cards2' is the same with 2 / 3
-//                       columns, to compare at 16pt
+//                       columns and 'cards4' with 4 / 5, to compare at 16pt
 //   large    + list   → Nourish-style list, one row per visit
 //
 // Visit data is a fixed week for the live example customer; the dialog's
@@ -94,7 +94,7 @@ function paginate(layout, large, portrait, visits, columns, size) {
   if (!large) return [all]
   const KEY = 44 // room for the key on whichever page is last
   const avail = [(portrait ? 450 : 295) - KEY, (portrait ? 720 : 475) - KEY]
-  const perLine = Math.floor((columns >= 3 ? 17 : 27) * 16 / size) // rough characters per line in a card
+  const perLine = Math.floor((columns >= 4 ? 12 : columns >= 3 ? 17 : 27) * 16 / size) // rough characters per line in a card
   const cardH = v => (2 + Math.ceil(v.carer.length / perLine)) * LINE + 12
   const dayH = d => {
     const vs = visits.filter(v => v.day === d)
@@ -124,7 +124,7 @@ export default function SchedulePdfPreview({ customer, weekLabel, textSize, orie
   const { w, h } = PAGE[orientation]
   const portrait = orientation === 'portrait'
   const layout = large ? (largeLayout === 'list' ? 'list' : 'cards') : 'cards'
-  const columns = !large ? 7 : largeLayout === 'cards2' ? (portrait ? 2 : 3) : (portrait ? 3 : 4)
+  const columns = !large ? 7 : largeLayout === 'cards2' ? (portrait ? 2 : 3) : largeLayout === 'cards4' ? (portrait ? 4 : 5) : (portrait ? 3 : 4)
   const pages = paginate(layout, large, portrait, visits, columns, largeSize)
 
   return (
