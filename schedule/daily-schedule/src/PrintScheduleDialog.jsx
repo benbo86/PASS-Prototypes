@@ -181,7 +181,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       open={previewOpen}
       stacked
       onClose={() => setPreviewOpen(false)}
-      title={`Preview — ${previewCustomer || ''}`}
+      title={`Preview - ${textSize === 'large' ? 'Large' : 'Standard'} Text Size`}
       width={modalW}
     >
       {textSize === 'large' && (
