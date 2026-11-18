@@ -87,6 +87,7 @@
   font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1;
   color: var(--legacy-status-complete);
 }
+.tli-status-glyph--missed { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: var(--legacy-status-overdue); }
 .tli-alert-placeholder { width: 26px; height: 26px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); flex-shrink: 0; }
 .tli-bell {
   width: 26px; height: 26px; border-radius: 50%; background: #fff; flex-shrink: 0;

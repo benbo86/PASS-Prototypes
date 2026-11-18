@@ -11,7 +11,7 @@ import SegmentedToggle from '../../../Components/SegmentedToggle'
 import SlidePanel from '../../../Components/SlidePanel'
 import VisitTasksList, { CancelledVisitDetails } from '../../../Components/VisitTasksList'
 import TimelineItem, { TimelineTypeIcon } from '../../../Components/TimelineItem'
-import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu, TimelineFilterDropdown, TimelineViewSettings, TimelineSwitch, TimelineFilterChips } from '../../../Components/TimelineHeader'
+import TimelineHeader, { TimelineFilterSelect, TimelineFilterInput, TimelineFilterPill, TimelineFiltersMenu, TimelineCombinedFilter, TimelineFilterDropdown, TimelineViewSettings, TimelineSwitch, TimelineFilterChips } from '../../../Components/TimelineHeader'
 import { CalendarHeaderIcon } from '../../../Components/TimelineIcons'
 
 const ChevronLeftIcon = () => (
@@ -361,7 +361,7 @@ function alertType(t) {
 function alertsOf(visits) {
   return visits.flatMap(v => v.tasks.filter(t => t.status === 'partial' || t.status === 'overdue').map(t => ({
     id: t.id, customer: v.customer, time: t.done || v.time, type: t.type, title: t.title, by: t.done ? (t.by || v.by) : null,
-    status: t.status, alertType: alertType(t),
+    status: t.status, alertType: alertType(t), visit: v, task: t,
     resolved: t.status === 'partial' && !!v.reviewNote,
   })))
 }
@@ -436,7 +436,11 @@ export default function App() {
   const nameItems = [...new Set(ALL_VISITS.flatMap(v => v.tasks.map(t => t.title)))].sort((a, b) => a.localeCompare(b))
   const byItems = [...new Set(ALL_VISITS.map(v => v.by).filter(Boolean))].sort((a, b) => a.localeCompare(b))
   // Live-style filters (FILTER_STYLE 'live'). Changing the event type clears them.
-  const [liveType, setLiveType] = useState('all')
+  // Ticked event types (actions / alerts / updates / documents); empty means all. Current and Proposed only
+  // ever hold one (a dropdown); the Combined layout can tick several. liveType is the single-choice view of it.
+  const [liveTypes, setLiveTypes] = useState(() => new Set())
+  const liveType = liveTypes.size === 1 ? [...liveTypes][0] : 'all'
+  const includes = (t) => liveTypes.size === 0 || liveTypes.has(t)
   const [actionTypeSel, setActionTypeSel] = useState(() => new Set())
   const [actionStatusSel, setActionStatusSel] = useState(() => new Set())
   const [groupByVisit, setGroupByVisit] = useState(false) // off by default, as in the ticket
@@ -453,19 +457,40 @@ export default function App() {
     ...ALL_VISITS.flatMap(v => [v.by, ...v.tasks.map(t => t.by)]),
     ...ALL_EVENTS.map(e => e.by),
   ].filter(Boolean))].sort((a, b) => a.localeCompare(b))
-  const changeLiveType = (t) => {
-    setLiveType(t)
+  // Clears every filter (not the event types), as Clear all does.
+  const clearFilterSets = () => {
     ;[setActionTypeSel, setActionStatusSel, setAlertTypeSel, setAlertStatusSel, setUpdateTypeSel, setSaveTypeSel, setReasonSel, setDoneBySel, setDoneForSel].forEach(f => f(new Set()))
     setEventName(''); setDoneBy('')
   }
-  const showsVisits = !LIVE || liveType === 'all' || liveType === 'actions'
+  // Choosing a different event type in the dropdown layouts clears the filters.
+  const changeLiveType = (t) => {
+    setLiveTypes(t === 'all' ? new Set() : new Set([t]))
+    clearFilterSets()
+  }
+  // Each type's own filters (the ones that mean nothing under any other type).
+  const TYPE_FILTER_CLEARERS = {
+    actions: [setActionTypeSel, setActionStatusSel],
+    alerts: [setAlertTypeSel, setAlertStatusSel],
+    updates: [setUpdateTypeSel, setSaveTypeSel, setReasonSel],
+    documents: [],
+  }
+  // Combined layout: tick or untick a type. Unticking clears that type's own filters, so nothing is left
+  // applied that you can't see; search, Done for and Done by stay.
+  const toggleLiveType = (t) => {
+    const next = new Set(liveTypes)
+    if (next.has(t)) { next.delete(t); TYPE_FILTER_CLEARERS[t].forEach(f => f(new Set())) } else next.add(t)
+    setLiveTypes(next)
+  }
+  const ensureLiveType = (t) => { if (!liveTypes.has(t)) setLiveTypes(new Set([...liveTypes, t])) }
+  const showsVisits = !LIVE || includes('actions')
   // How the live filters are laid out (switchable so both can be compared; always starts on Current):
   //   'dropdowns' (Current) one dropdown per filter on the bar, as on live
   //   'menu' (Proposed)     Event type, then one Filters menu with the rest, applied filters shown as chips
   const [filterLayout, setFilterLayout] = useState('dropdowns')
   // Prototype-only: 'current' (tinted rows) or 'bars' (white rows with a coloured left bar)
   const [rowStyle, setRowStyle] = useState('current')
-  const changeFilterLayout = setFilterLayout
+  // Only the Combined layout can have several event types ticked, so leaving it collapses them to All.
+  const changeFilterLayout = (next) => { if (next !== 'combined' && liveTypes.size > 1) changeLiveType('all'); setFilterLayout(next) }
   // "+ Review note": opens the slide-out for one task; submitted notes are kept per task.
   const [reviewTask, setReviewTask] = useState(null) // { id, title }
   const [reviewDraft, setReviewDraft] = useState('')
@@ -487,7 +512,7 @@ export default function App() {
   const expandableIds = [
     ...ALL_VISITS.map(v => v.id),
     ...(LIVE && !groupByVisit ? ALL_VISITS.flatMap(v => v.tasks.map(t => `t${t.id}`)) : []),
-    ...(LIVE && liveType === 'all' ? ALL_EVENTS.map(e => e.id) : []),
+    ...(LIVE ? ALL_EVENTS.filter(e => includes(e.kind === 'update' ? 'updates' : 'documents')).map(e => e.id) : []),
   ]
   const expandAll = () => setOpenIds(new Set(expandableIds))
   const collapseAll = () => setOpenIds(new Set())
@@ -528,9 +553,10 @@ export default function App() {
     (!doneForSel.size || doneForSel.has(u.for))
   const liveVisitShows = (v) => liveUnitMatch(visitUnit(v)) || v.tasks.some(t => liveUnitMatch(taskUnit(v, t)))
   const liveEventMatch = (e) =>
-    (!updateTypeSel.size || updateTypeSel.has(e.updateType)) &&
-    (!saveTypeSel.size || saveTypeSel.has(e.saveType)) &&
-    (!reasonSel.size || reasonSel.has(e.reason)) &&
+    (e.kind !== 'update' || (
+      (!updateTypeSel.size || updateTypeSel.has(e.updateType)) &&
+      (!saveTypeSel.size || saveTypeSel.has(e.saveType)) &&
+      (!reasonSel.size || reasonSel.has(e.reason)))) &&
     (!eventName.trim() || has(e.title, eventName)) &&
     (!doneBySel.size || doneBySel.has(e.by)) &&
     (!doneForSel.size || doneForSel.has(e.customer))
@@ -612,6 +638,21 @@ export default function App() {
     )
   }
 
+  // An alert on its own (Alerts type): the task that raised it, with the same expanded detail. An open partial
+  // alert shows the orange bell; a resolved one the green tick; a missed one its red "!".
+  const alertNode = (a, heading) => {
+    const id = `a${a.id}`
+    const isOpen = openIds.has(id)
+    const pt = isOpen ? buildVisitPanel(a.visit, heading, reviewNotes).tasks.find(x => x.id === a.id) : null
+    return (
+      <TimelineItem key={id} isOpen={isOpen} onToggle={() => toggle(id)} expandable
+        item={{ customer: a.customer, time: a.time, type: a.type, title: a.title, status: a.status, by: a.by,
+          alert: a.status === 'overdue' ? 'missed' : a.resolved ? 'resolved' : undefined, bell: a.status === 'partial' && !a.resolved }}>
+        {pt && <div className="tl-nested"><VisitTasksList statusInNote tasks={[a.status === 'overdue' ? { ...pt, alert: 'missed' } : pt]} compact={!!a.visit.cancellation} onAddReviewNote={openReviewNote} /></div>}
+      </TimelineItem>
+    )
+  }
+
   // An update or document.
   const eventNode = (e) => {
     const isOpen = openIds.has(e.id)
@@ -633,30 +674,25 @@ export default function App() {
 
   // Everything one day shows under the live filters, newest first.
   const liveEntries = (heading, visits) => {
-    if (liveType === 'alerts') {
-      return liveAlerts(visits).map(a => ({
-        key: `a${a.id}`, sort: 0,
-        node: <TimelineItem key={`a${a.id}`} isOpen={false} onToggle={() => {}}
-          item={{ customer: a.customer, time: a.time, type: a.type, title: a.title, status: a.status, by: a.by, alert: a.resolved ? 'resolved' : undefined }} />,
-      }))
-    }
-    const events = (EVENTS[heading] || []).filter(e => liveEventMatch(e))
-    if (liveType === 'updates' || liveType === 'documents') {
-      const kind = liveType === 'updates' ? 'update' : 'document'
-      return events.filter(e => e.kind === kind).map(e => ({ key: e.id, sort: timeToMinutes(e.time), node: eventNode(e) }))
-    }
     const list = []
-    visits.forEach(v => {
-      if (groupByVisit) {
-        if (liveVisitShows(v)) list.push({ key: v.id, sort: timeToMinutes(v.time), node: groupedVisitNode(v, heading) })
-      } else {
-        if (liveUnitMatch(visitUnit(v))) list.push({ key: v.id, sort: timeToMinutes(v.time), node: flatVisitNode(v, heading) })
-        v.tasks.forEach(t => {
-          if (liveUnitMatch(taskUnit(v, t))) list.push({ key: `t${t.id}`, sort: timeToMinutes(t.done || v.time) + (t.doneDate ? 1440 : 0), node: flatTaskNode(v, t, heading) })
-        })
-      }
-    })
-    if (liveType === 'all') events.forEach(e => list.push({ key: e.id, sort: timeToMinutes(e.time), node: eventNode(e) }))
+    // Alerts only show when ticked (All timeline events doesn't include them here).
+    if (liveTypes.has('alerts')) {
+      liveAlerts(visits).forEach(a => list.push({ key: `a${a.id}`, sort: timeToMinutes(a.time), node: alertNode(a, heading) }))
+    }
+    ;(EVENTS[heading] || []).filter(e => liveEventMatch(e) && includes(e.kind === 'update' ? 'updates' : 'documents'))
+      .forEach(e => list.push({ key: e.id, sort: timeToMinutes(e.time), node: eventNode(e) }))
+    if (includes('actions')) {
+      visits.forEach(v => {
+        if (groupByVisit) {
+          if (liveVisitShows(v)) list.push({ key: v.id, sort: timeToMinutes(v.time), node: groupedVisitNode(v, heading) })
+        } else {
+          if (liveUnitMatch(visitUnit(v))) list.push({ key: v.id, sort: timeToMinutes(v.time), node: flatVisitNode(v, heading) })
+          v.tasks.forEach(t => {
+            if (liveUnitMatch(taskUnit(v, t))) list.push({ key: `t${t.id}`, sort: timeToMinutes(t.done || v.time) + (t.doneDate ? 1440 : 0), node: flatTaskNode(v, t, heading) })
+          })
+        }
+      })
+    }
     return list.sort((a, b) => b.sort - a.sort)
   }
 
@@ -694,45 +730,59 @@ export default function App() {
   }
 
   // The filters for the chosen event type, used by both layouts.
-  const liveFilterDefs = !LIVE ? [] : {
+  const liveFilterDefsByType = !LIVE ? {} : {
     all: [
-      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
-      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel },
-      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName, shared: true },
+      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel, shared: true },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel, shared: true },
     ],
     actions: [
       { key: 'actionType', label: 'Action type', allLabel: 'All actions', items: ACTION_TYPE_ITEMS, selected: actionTypeSel, onChange: setActionTypeSel },
       { key: 'actionStatus', label: 'Action status', allLabel: 'All statuses', items: ACTION_STATUS_ITEMS, selected: actionStatusSel, onChange: setActionStatusSel },
-      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
-      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel },
-      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName, shared: true },
+      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel, shared: true },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel, shared: true },
     ],
     alerts: [
       { key: 'alertType', label: 'Alert type', allLabel: 'All alerts', items: ALERT_TYPE_ITEMS, selected: alertTypeSel, onChange: setAlertTypeSel },
       { key: 'alertStatus', label: 'Alert status', allLabel: 'All statuses', items: ALERT_STATUS_ITEMS, selected: alertStatusSel, onChange: setAlertStatusSel },
-      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
-      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel },
-      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName, shared: true },
+      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel, shared: true },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel, shared: true },
     ],
     updates: [
       { key: 'updateType', label: 'Update type', allLabel: 'All updates', items: UPDATE_TYPE_ITEMS, selected: updateTypeSel, onChange: setUpdateTypeSel },
       { key: 'saveType', label: 'Save type', allLabel: 'All save types', items: SAVE_TYPE_ITEMS, selected: saveTypeSel, onChange: setSaveTypeSel },
       { key: 'reason', label: 'Review reason', allLabel: 'All review reasons', items: REVIEW_REASON_ITEMS, selected: reasonSel, onChange: setReasonSel },
-      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel },
-      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel, shared: true },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel, shared: true },
     ],
     documents: [
-      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName },
-      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel },
-      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel },
+      { key: 'name', label: 'Event name', text: true, value: eventName, onChange: setEventName, shared: true },
+      { key: 'for', label: 'Done for', allLabel: 'All customers', items: doneForItems, selected: doneForSel, onChange: setDoneForSel, shared: true },
+      { key: 'by', label: 'Done by', allLabel: 'All employees', items: doneByItems, selected: doneBySel, onChange: setDoneBySel, shared: true },
     ],
-  }[liveType]
-  const clearLiveFilters = () => changeLiveType(liveType)
-  const hybrid = LIVE && filterLayout === 'menu'
-  // In the menu layout the free-text Event name becomes a search box at the top of the Filters menu.
-  const searchableDefs = liveFilterDefs.map(f => f.text ? { ...f, label: 'Search', placeholder: 'Search events' } : f)
+  }
+  const liveFilterDefs = liveFilterDefsByType[liveType] || []
+  const clearLiveFilters = clearFilterSets
+  const combined = LIVE && filterLayout === 'combined'
+  const hybrid = LIVE && (filterLayout === 'menu' || combined)
+  // Combined: the filters of every ticked type (or the all-types ones when none is ticked), each once.
+  const COMBINED_TYPES = LIVE_EVENT_TYPES.filter(t => t.value !== 'all')
+  const mergeDefs = (types) => { const seen = new Set(); return types.flatMap(t => liveFilterDefsByType[t] || []).filter(f => !seen.has(f.key) && seen.add(f.key)) }
+  // The search term applies to everything shown, so it's counted and shown as a chip whichever types are ticked.
+  const nameDef = liveFilterDefsByType.all?.find(f => f.key === 'name')
+  const shownDefs = combined ? mergeDefs(['all', ...COMBINED_TYPES.map(t => t.value).filter(t => liveTypes.has(t))]).sort((a, b) => Number(!!b.text) - Number(!!a.text)) : liveFilterDefs
+  // In the menu layouts the free-text Event name becomes a search box at the top of the Filters menu.
+  const toMenuDefs = (defs) => { const d = defs.map(f => f.text ? { ...f, label: 'Search', placeholder: 'Search events' } : f); return [...d.filter(f => f.text), ...d.filter(f => !f.text)] }
+  const searchableDefs = shownDefs.map(f => f.text ? { ...f, label: 'Search', placeholder: 'Search events' } : f)
   const chipDefs = hybrid ? searchableDefs : LIVE ? liveFilterDefs.filter(f => f.text) : []
-  const menuDefs = hybrid ? [...searchableDefs.filter(f => f.text), ...searchableDefs.filter(f => !f.text)] : []
+  const menuDefs = hybrid ? toMenuDefs(shownDefs) : []
+  // Every event type's filters, for the combined control (which previews other types' filters before one is ticked).
+  // The search box sits above the types, so it isn't in these lists.
+  const menuDefsByType = combined ? Object.fromEntries(COMBINED_TYPES.map(t => [t.value, liveFilterDefsByType[t.value].filter(f => !f.text)])) : {}
+  const combinedSearch = nameDef && { ...nameDef, label: 'Search', placeholder: 'Search events' }
+  const appliedCount = shownDefs.reduce((n, f) => n + (f.text ? (f.value.trim() ? 1 : 0) : f.selected.size), 0)
 
   return (
     <>
@@ -769,7 +819,9 @@ export default function App() {
           )) : undefined}
         >
           {LIVE ? (
-            <>
+            combined ? (
+              <TimelineCombinedFilter types={COMBINED_TYPES} selected={liveTypes} onToggleType={toggleLiveType} onEnsureType={ensureLiveType} search={combinedSearch} defsByType={menuDefsByType} appliedCount={appliedCount} onClear={() => changeLiveType('all')} />
+            ) : <>
               <TimelineFilterDropdown single prefix="Show:" label="Event type" items={LIVE_EVENT_TYPES} value={liveType} onChange={changeLiveType} />
               {hybrid ? (
                 <TimelineFiltersMenu key={liveType} filters={menuDefs} onClearAll={clearLiveFilters} />
@@ -836,7 +888,7 @@ export default function App() {
         <div className="tl-layout-switch">
           <span>Filter style:</span>
           <SegmentedToggle value={filterLayout} onChange={changeFilterLayout}
-            options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }]} />
+            options={[{ value: 'dropdowns', label: 'Current' }, { value: 'menu', label: 'Proposed' }, { value: 'combined', label: 'Combined' }]} />
           <span className="tl-layout-switch-label">Row style:</span>
           <SegmentedToggle value={rowStyle} onChange={setRowStyle}
             options={[{ value: 'current', label: 'Current' }, { value: 'bars', label: 'Proposed' }]} />

@@ -151,7 +151,7 @@ function MenuSearchRow({ filter }) {
   return (
     <div className="tlh-menu-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><line x1="16" y1="16" x2="20" y2="20" /></svg>
-      <input className="form-input" autoFocus placeholder={placeholder} aria-label={placeholder} value={draft} onChange={e => setDraft(e.target.value)}
+      <input className="form-input" autoFocus={!filter.noAutoFocus} placeholder={placeholder} aria-label={placeholder} value={draft} onChange={e => setDraft(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { filter.onChange(draft.trim()); setDraft('') } }} />
     </div>
   )
@@ -229,6 +229,201 @@ export function TimelineFiltersMenu({ filters, onClearAll }) {
 
 // Separate Sort pill: shows the current choice ("Sort: Newest first") and opens
 // a single-choice list. options: [{ value, label }]; onChange(value) applies at once.
+// The third level of TimelineCombinedFilter: one filter's options as a tick list, shown beside the
+// filters panel. Applied as you tick (no Apply button). A search box appears for long lists.
+function ComboOptions({ filter, maxHeight, onChange, onKeyDown }) {
+  const [search, setSearch] = useState('')
+  const items = filter.items || []
+  const visible = search.trim() ? items.filter(i => i.toLowerCase().includes(search.trim().toLowerCase())) : items
+  const toggle = (item) => {
+    const next = new Set(filter.selected)
+    if (next.has(item)) next.delete(item); else next.add(item)
+    onChange(next)
+  }
+  return (
+    <div className="tlh-opt-panel" style={{ maxHeight }} onKeyDown={onKeyDown}>
+      {items.length > 8 && (
+        <div className="tlh-menu-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><line x1="16" y1="16" x2="20" y2="20" /></svg>
+          <input className="form-input" placeholder="Search" aria-label={`Search ${filter.label}`} value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+      )}
+      <div className="tlh-opt-list" role="group" aria-label={filter.label}>
+        {visible.map(item => (
+          <button key={item} type="button" role="checkbox" aria-checked={filter.selected.has(item)} className="tlh-opt" onClick={() => toggle(item)}>
+            <span className={`fd-checkbox ${filter.selected.has(item) ? 'checked' : ''}`}>
+              {filter.selected.has(item) && (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              )}
+            </span>
+            <span className="fd-item-label">{item}</span>
+          </button>
+        ))}
+        {visible.length === 0 && <span className="fd-empty">No results</span>}
+      </div>
+    </div>
+  )
+}
+
+// One pill (named for the ticked types) that combines Event type with the rest of the filters (one control instead of
+// the Event type dropdown plus a Filters menu). It opens up to three panels side by side, each shown by
+// pointing at (or clicking, or focusing) a row in the one before:
+//   1. a search box (applied on Enter, as on live) and the event types as checkboxes (tick several;
+//      nothing ticked means all types);
+//   2. the filters for the type you are pointing at;
+//   3. the options for the filter you are pointing at, as a tick list applied as you tick.
+// Picking one of a type's own filters ticks that type too. Filters marked `shared` (Done for, Done by)
+// apply to everything shown, so they never tick a type. Clear, at the bottom of the first panel, unticks every type and
+// clears every filter (the chips row's Clear all keeps the ticked types).
+// types: [{ value, label }]; selected: Set of ticked type values; onToggleType(value); onEnsureType(value)
+// (tick it if it isn't); search: the free-text filter shaped as for TimelineFiltersMenu ({ text: true, value,
+// onChange, placeholder }); defsByType: { [type]: filters } for the non-text filters, shaped as for
+// TimelineFiltersMenu, with `shared: true` on the ones that aren't specific to the type; appliedCount: how many
+// filters are applied (shown on the pill).
+export function TimelineCombinedFilter({ types, selected, onToggleType, onEnsureType, search, defsByType, appliedCount, onClear }) {
+  const [open, setOpen] = useState(false)
+  const [preview, setPreview] = useState(null) // the type whose filters panel 2 shows; none until you point at one
+  const [active, setActive] = useState(null) // { key, top } the filter whose options panel 3 shows
+  const anchor = useRef(null)
+  const wrapRef = useRef(null)
+  const timer = useRef(null)
+  const devEditActive = useDevEditActive()
+  useDevEditStickyDismiss(devEditActive, open, setOpen, '.tlh-combined')
+
+  const close = () => { clearTimeout(timer.current); setOpen(false); setActive(null) }
+  const ticked = types.filter(t => selected.has(t.value))
+  const pillLabel = ticked.length === 0 ? 'All timeline events' : ticked.length <= 2 ? ticked.map(t => t.label).join(', ') : `${ticked.length} event types`
+  // What's applied to one type: every option ticked in its filters panel, shared ones (Done for, Done by)
+  // included since they apply to it too, so the number on its row matches what that panel shows.
+  const typeCount = (type) => (defsByType[type] || []).reduce((n, f) => n + (f.selected ? f.selected.size : 0), 0)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      if (isDevToolUi(e.target)) return // a click on dev-tool chrome isn't a click away
+      if (wrapRef.current && !wrapRef.current.contains(e.target) && anchor.current && !anchor.current.contains(e.target)) close()
+    }
+    const onKey = (e) => { if (e.key === 'Escape') close() }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [open])
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  const openMenu = () => { setPreview(null); setActive(null); setOpen(true) }
+  // A short delay before a panel switches, so moving the pointer diagonally across a list towards the next
+  // panel doesn't flip it on the way. Entering a later panel cancels a pending switch.
+  const later = (fn) => { clearTimeout(timer.current); timer.current = setTimeout(fn, 120) }
+  const showType = (t) => { if (t !== preview) { setPreview(t); setActive(null) } }
+  const showFilter = (key, el) => setActive({ key, top: Math.max(0, el.offsetTop - 4) })
+  const focusRow = (sel, i, step) => {
+    const rows = [...wrapRef.current.querySelectorAll(sel)]
+    rows[(i + step + rows.length) % rows.length]?.focus()
+  }
+
+  const typeKeyDown = (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); wrapRef.current?.querySelector('.tlh-filter-row')?.focus() }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      const rows = [...wrapRef.current.querySelectorAll('.tlh-type-row')]
+      if (e.key === 'ArrowUp' && rows.indexOf(e.currentTarget) === 0) wrapRef.current.querySelector('.tlh-combined-types input')?.focus()
+      else focusRow('.tlh-type-row', rows.indexOf(e.currentTarget), e.key === 'ArrowDown' ? 1 : -1)
+    }
+  }
+  const filterKeyDown = (e, key) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); wrapRef.current?.querySelector(`.tlh-type-row[data-type="${preview}"]`)?.focus() }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault(); showFilter(key, e.currentTarget)
+      requestAnimationFrame(() => wrapRef.current?.querySelector('.tlh-opt')?.focus())
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      const rows = [...wrapRef.current.querySelectorAll('.tlh-filter-row')]
+      focusRow('.tlh-filter-row', rows.indexOf(e.currentTarget), e.key === 'ArrowDown' ? 1 : -1)
+    }
+  }
+  const optionsKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); wrapRef.current?.querySelector(`.tlh-filter-row[data-key="${active?.key}"]`)?.focus() }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const opts = [...wrapRef.current.querySelectorAll('.tlh-opt')]
+      if (opts.includes(document.activeElement)) { e.preventDefault(); focusRow('.tlh-opt', opts.indexOf(document.activeElement), e.key === 'ArrowDown' ? 1 : -1) }
+    }
+  }
+  const searchKeyDown = (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); wrapRef.current?.querySelector('.tlh-type-row')?.focus() }
+  }
+
+  const rect = open && anchor.current ? anchor.current.getBoundingClientRect() : null
+  const filters = preview ? defsByType[preview] || [] : []
+  const activeFilter = active ? filters.find(f => f.key === active.key) : null
+  const panelTop = rect ? rect.bottom + 6 + (active?.top ?? 0) : 0
+  const optionsMax = rect ? Math.max(180, Math.min(360, window.innerHeight - panelTop - 16)) : 360
+  const changeOptions = (f, next) => { if (!f.shared) onEnsureType(preview); f.onChange(next) }
+
+  return (
+    <>
+      <button
+        ref={anchor} type="button" data-devmode-passthrough="true"
+        className={`tlh-pill${appliedCount ? ' tlh-pill--active' : ''}${open ? ' tlh-pill--open' : ''}`}
+        aria-haspopup="menu" aria-expanded={open}
+        onClick={() => (open ? close() : openMenu())}
+      >
+        <FilterLinesIcon />
+        <span>{pillLabel}</span>
+        {appliedCount > 0 && <span className="tlh-pill-count">{appliedCount}</span>}
+        <PillChevron />
+      </button>
+
+      {open && rect && createPortal(
+        <div className="tlh-combined" ref={wrapRef} style={{ position: 'fixed', top: rect.bottom + 6, left: rect.left, zIndex: 9999 }}>
+          <div className="fd-wrap tlh-menu tlh-combined-types" role="group" aria-label="Event type">
+            <div onKeyDown={searchKeyDown}><MenuSearchRow filter={search} /></div>
+            {types.map(t => (
+              <button
+                key={t.value} type="button" role="checkbox" aria-checked={selected.has(t.value)} data-type={t.value}
+                className={`tlh-menu-row tlh-type-row${preview === t.value ? ' tlh-type-row--preview' : ''}`}
+                onMouseEnter={() => later(() => showType(t.value))} onFocus={() => showType(t.value)}
+                onClick={() => { showType(t.value); onToggleType(t.value) }} onKeyDown={typeKeyDown}
+              >
+                <span className="checkbox-wrap" aria-hidden="true">
+                  <input type="checkbox" checked={selected.has(t.value)} readOnly tabIndex={-1} />
+                  <span className="checkbox-box" />
+                </span>
+                <span>{t.label}</span>
+                {selected.has(t.value) && typeCount(t.value) > 0 && <span className="tlh-pill-count">{typeCount(t.value)}</span>}
+              </button>
+            ))}
+            <div className="tlh-menu-footer">
+              <button type="button" className="tlh-clear-all" disabled={appliedCount === 0 && selected.size === 0} onClick={onClear}>Clear</button>
+            </div>
+          </div>
+          {preview && <div className="fd-wrap tlh-menu tlh-combined-filters" onMouseEnter={() => clearTimeout(timer.current)}>
+            {filters.map(f => (
+              <button
+                key={f.key} type="button" data-key={f.key}
+                className={`tlh-menu-row tlh-filter-row${active?.key === f.key ? ' tlh-filter-row--active' : ''}`}
+                onMouseEnter={e => { const el = e.currentTarget; later(() => showFilter(f.key, el)) }}
+                onFocus={e => showFilter(f.key, e.currentTarget)}
+                onClick={e => showFilter(f.key, e.currentTarget)} onKeyDown={e => filterKeyDown(e, f.key)}
+              >
+                <span>{f.label}</span>
+                {f.selected.size > 0 && <span className="tlh-pill-count">{f.selected.size}</span>}
+                <MenuChevronRight />
+              </button>
+            ))}
+          </div>}
+          {activeFilter && (
+            <div className="fd-wrap tlh-menu tlh-combined-options" style={{ marginTop: active.top }} onMouseEnter={() => clearTimeout(timer.current)}>
+              <ComboOptions key={`${preview}-${activeFilter.key}`} filter={activeFilter} maxHeight={optionsMax} onChange={next => changeOptions(activeFilter, next)} onKeyDown={optionsKeyDown} />
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
+
 export function TimelineSortPill({ options, value, onChange }) {
   const [open, setOpen] = useState(false)
   const anchor = useRef(null)

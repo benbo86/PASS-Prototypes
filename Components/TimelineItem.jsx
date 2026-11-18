@@ -101,7 +101,10 @@ function RowRight({ item, onViewTasks }) {
       </span>
       {/* A partial task later resolved by the office gets a green alert. */}
       <span className="tli-slot">
-        {item.status === 'partial' && item.alert
+        {item.alert === 'missed'
+          // Missed alert: the red alert glyph (eltico icon-alert) where the grey placeholder would be
+          ? <span className="tli-status-glyph tli-status-glyph--missed" aria-hidden="true">{'\uE90E'}</span>
+          : item.status === 'partial' && item.alert
           ? <span className="tli-alert tli-alert--resolved"><ResolvedAlertIcon /></span>
           : item.bell
             ? <span className="tli-bell" title="Alert"><BellIcon /></span>

@@ -7,7 +7,7 @@ import { BellIcon, ResolvedAlertIcon, NoteIcon, MedFormIcon, MedDosageIcon, MedS
 //
 // tasks: same shape as VisitTasksTable — [{ id, title, instructions: string[],
 //   cancelledAt? (cancelled tasks: the Care note section becomes "Cancelled", with when, why and any note),
-//   completed, completedBy?, form?/dosage?/support? (medication), reason? (why a task was partly done), status, statusLabel, note, alert? ('open' | 'resolved'), icon (node) }]
+//   completed, completedBy?, form?/dosage?/support? (medication), reason? (why a task was partly done), status, statusLabel, note, alert? ('open' | 'resolved' | 'missed'), icon (node) }]
 // Each task is split into labelled sections: Care plan (instructions, medication details),
 // Care note (reason, who/when, carer note) and Alert (type, review note), as on the live timeline.
 // Care plan sits in a left column; Care note and Alert stack in a right column.
@@ -114,7 +114,9 @@ export default function VisitTasksList({ tasks = [], onAddReviewNote, compact, s
               {t.alert && (
                 <section className="vtl-section">
                   <h4 className="vtl-section-title">Alert</h4>
-                  <span className="vtl-meta-item"><span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`}>{t.alert === 'resolved' ? <ResolvedAlertIcon /> : <BellIcon />}</span>{ALERT_LABEL}{t.alert === 'resolved' ? ' (resolved)' : ''}</span>
+                  {t.alert === 'missed'
+                    ? <span className="vtl-meta-item"><span className="vtl-status-glyph vtl-status-glyph--missed" aria-hidden="true">{'\uE90E'}</span>Missed</span>
+                    : <span className="vtl-meta-item"><span className={`vtl-alert${t.alert === 'resolved' ? ' vtl-alert--resolved' : ''}`}>{t.alert === 'resolved' ? <ResolvedAlertIcon /> : <BellIcon />}</span>{ALERT_LABEL}{t.alert === 'resolved' ? ' (resolved)' : ''}</span>}
                   {t.alert === 'resolved' && t.reviewNote && (
                     <span className="vtl-note"><NoteIcon /><span>{t.reviewNote.text}<span className="vtl-note-meta">{t.reviewNote.by} · {t.reviewNote.date}</span></span></span>
                   )}
