@@ -283,6 +283,7 @@ function ComboOptions({ filter, maxHeight, onChange, onKeyDown }) {
 export function TimelineCombinedFilter({ types, selected, onToggleType, onEnsureType, search, defsByType, appliedCount, onClear }) {
   const [open, setOpen] = useState(false)
   const [preview, setPreview] = useState(null) // the type whose filters panel 2 shows; none until you point at one
+  const [previewTop, setPreviewTop] = useState(0) // how far down panel 2 sits, so it lines up with the type row it belongs to
   const [active, setActive] = useState(null) // { key, top } the filter whose options panel 3 shows
   const anchor = useRef(null)
   const wrapRef = useRef(null)
@@ -314,7 +315,7 @@ export function TimelineCombinedFilter({ types, selected, onToggleType, onEnsure
   // A short delay before a panel switches, so moving the pointer diagonally across a list towards the next
   // panel doesn't flip it on the way. Entering a later panel cancels a pending switch.
   const later = (fn) => { clearTimeout(timer.current); timer.current = setTimeout(fn, 120) }
-  const showType = (t) => { if (t !== preview) { setPreview(t); setActive(null) } }
+  const showType = (t, el) => { setPreviewTop(Math.max(0, el.offsetTop - 4)); if (t !== preview) { setPreview(t); setActive(null) } }
   const showFilter = (key, el) => setActive({ key, top: Math.max(0, el.offsetTop - 4) })
   const focusRow = (sel, i, step) => {
     const rows = [...wrapRef.current.querySelectorAll(sel)]
@@ -382,8 +383,8 @@ export function TimelineCombinedFilter({ types, selected, onToggleType, onEnsure
               <button
                 key={t.value} type="button" role="checkbox" aria-checked={selected.has(t.value)} data-type={t.value}
                 className={`tlh-menu-row tlh-type-row${preview === t.value ? ' tlh-type-row--preview' : ''}`}
-                onMouseEnter={() => later(() => showType(t.value))} onFocus={() => showType(t.value)}
-                onClick={() => { showType(t.value); onToggleType(t.value) }} onKeyDown={typeKeyDown}
+                onMouseEnter={e => { const el = e.currentTarget; later(() => showType(t.value, el)) }} onFocus={e => showType(t.value, e.currentTarget)}
+                onClick={e => { showType(t.value, e.currentTarget); onToggleType(t.value) }} onKeyDown={typeKeyDown}
               >
                 <span className="checkbox-wrap" aria-hidden="true">
                   <input type="checkbox" checked={selected.has(t.value)} readOnly tabIndex={-1} />
@@ -397,7 +398,7 @@ export function TimelineCombinedFilter({ types, selected, onToggleType, onEnsure
               <button type="button" className="tlh-clear-all" disabled={appliedCount === 0 && selected.size === 0} onClick={onClear}>Clear</button>
             </div>
           </div>
-          {preview && <div className="fd-wrap tlh-menu tlh-combined-filters" onMouseEnter={() => clearTimeout(timer.current)}>
+          {preview && <div className="fd-wrap tlh-menu tlh-combined-filters" style={{ marginTop: previewTop }} onMouseEnter={() => clearTimeout(timer.current)}>
             {filters.map(f => (
               <button
                 key={f.key} type="button" data-key={f.key}
