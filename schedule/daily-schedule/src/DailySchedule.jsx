@@ -713,9 +713,13 @@ export default function DailySchedule() {
   const pageRef = useRef(null)
 
   const [visitDate, setVisitDate] = useState(() => new Date())
-  const [viewBy, setViewBy] = useState('employees')       // 'employees' | 'customers'
+  // ?dialog=print|email opens the customer schedule's print/email dialog straight away
+  // (it needs the Customers view); ?view=customers starts on that view without it.
+  const startParams = new URLSearchParams(window.location.search)
+  const startDialog = ['print', 'email'].includes(startParams.get('dialog')) ? startParams.get('dialog') : null
+  const [viewBy, setViewBy] = useState(startDialog || startParams.get('view') === 'customers' ? 'customers' : 'employees') // 'employees' | 'customers'
   const [period, setPeriod] = useState('daily')           // 'daily' | 'weekly'
-  const [scheduleDialog, setScheduleDialog] = useState(null) // 'print' | 'email' — customer view only
+  const [scheduleDialog, setScheduleDialog] = useState(startDialog) // 'print' | 'email' — customer view only
   const [showClashes, setShowClashes] = useState(false)
   const [scheduleViewMode, setScheduleViewMode] = useState('timeline') // 'timeline' | 'map' — decorative, no map view built
 
