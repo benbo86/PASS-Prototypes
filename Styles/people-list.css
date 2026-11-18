@@ -357,6 +357,8 @@
 .pl-fieldset legend { margin-bottom: 4px; font-size: 14px; font-weight: 600; color: #101828; }
 .pl-check { display: flex; align-items: center; gap: 8px; padding: 2px 0; margin-bottom:2px; font-size: 14px; color: #101828; cursor: pointer; }
 .pl-radio { gap: 8px; }
+/* The Customers/Employees filter panel matches the live list pages: 16px radios (the shared .form-radio default is 20px). */
+.pl-radio .form-radio { width: 16px; height: 16px; }
 .pl-link-btn {
   margin-top: 4px;
   padding: 0;

@@ -10,6 +10,8 @@ import SegmentedToggle from '../../../Components/SegmentedToggle'
 import Tooltip from '../../../Components/Tooltip'
 import ScheduleFilterDropdown from '../../../Components/ScheduleFilterDropdown'
 import Pagination from '../../../Components/Pagination'
+import ActionsMenu from '../../../Components/ActionsMenu'
+import PrintScheduleDialog from './PrintScheduleDialog'
 import SearchSelect from '../../../Components/SearchSelect'
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker'
 import DevToolbar from '../../../Components/DevToolbar'
@@ -693,6 +695,18 @@ function BulkActionsMenu({ title, count, start, end, anchorEl, container, onClos
   )
 }
 
+// Monday-to-Sunday week containing the date, e.g. "Mon 16 Nov - Sun 22 Nov".
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function weekRangeLabel(date) {
+  const mon = new Date(date)
+  mon.setDate(date.getDate() - ((date.getDay() + 6) % 7))
+  const sun = new Date(mon)
+  sun.setDate(mon.getDate() + 6)
+  const f = d => `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`
+  return `${f(mon)} - ${f(sun)}`
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function DailySchedule() {
@@ -701,6 +715,7 @@ export default function DailySchedule() {
   const [visitDate, setVisitDate] = useState(() => new Date())
   const [viewBy, setViewBy] = useState('employees')       // 'employees' | 'customers'
   const [period, setPeriod] = useState('daily')           // 'daily' | 'weekly'
+  const [scheduleDialog, setScheduleDialog] = useState(null) // 'print' | 'email' — customer view only
   const [showClashes, setShowClashes] = useState(false)
   const [scheduleViewMode, setScheduleViewMode] = useState('timeline') // 'timeline' | 'map' — decorative, no map view built
 
@@ -1038,7 +1053,16 @@ export default function DailySchedule() {
                 />
               </div>
               <div className="ds-header-actions">
-                <button className="round-btn tertiary-btn btn-icon-left"><CogIcon /> Actions</button>
+                <ActionsMenu
+                  trigger={({ toggle }) => (
+                    <button className="round-btn tertiary-btn btn-icon-left" onClick={toggle}><CogIcon /> Actions</button>
+                  )}
+                  items={[
+                    { label: 'Auto Assign', onClick: () => {} },
+                    { label: 'Print schedule', onClick: () => setScheduleDialog('print'), disabled: viewBy !== 'customers', disabledReason: 'Switch to the Customers view to print the schedule' },
+                    { label: 'Email schedule', onClick: () => setScheduleDialog('email'), disabled: viewBy !== 'customers', disabledReason: 'Switch to the Customers view to email the schedule' },
+                  ]}
+                />
                 <button className="round-btn primary-btn btn-icon-left"><CheckIcon /> Publish</button>
                 <button className="ds-icon-btn ds-icon-btn--badge" aria-label="Settings">
                   <SettingsIcon /><span className="ds-icon-badge">2</span>
@@ -1405,6 +1429,16 @@ export default function DailySchedule() {
             container={pageRef.current}
             onClose={() => setBulkMenuOpen(false)}
             onAssign={handleBulkAssign}
+          />
+        )}
+
+        {scheduleDialog && (
+          <PrintScheduleDialog
+            mode={scheduleDialog}
+            weekLabel={weekRangeLabel(visitDate)}
+            customers={activeFilters.customers.size > 0 ? CUSTOMER_NAMES.filter(c => activeFilters.customers.has(c)) : CUSTOMER_NAMES}
+            appliedFilters={FILTER_DEFS.filter(f => activeFilters[f.key].size > 0).map(f => f.label)}
+            onClose={() => setScheduleDialog(null)}
           />
         )}
 
