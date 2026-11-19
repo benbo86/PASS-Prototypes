@@ -1,7 +1,8 @@
 // Mock-up of the customer schedule PDF (AIOP-25799). Page units are points
 // (1 CSS px = 1pt) on an A4 page, scaled to fit by the caller.
 //
-//   standard + cards  → today's layout (7 day columns)
+//   standard + cards  → today's layout (7 day columns); standardSize '11' shows the same
+//                       layout with ~11pt card text (Nourish's size) for comparison
 //   large    + cards  → Concept 2 from wireframes/schedule-pdf.json (days flow into
 //                       3 columns portrait / 4 landscape); 'cards2' is the same with 2 / 3
 //                       columns and 'cards4' with 4 / 5, to compare at 16pt
@@ -118,7 +119,7 @@ function paginate(layout, large, portrait, visits, columns, size) {
   return pages
 }
 
-export default function SchedulePdfPreview({ customer, weekLabel, textSize, orientation, largeLayout, largeSize = 16, showPending, showCancelled }) {
+export default function SchedulePdfPreview({ customer, weekLabel, textSize, orientation, largeLayout, largeSize = 16, standardSize = 'current', showPending, showCancelled }) {
   const large = textSize === 'large'
   const visits = VISITS.filter(v => (v.status !== 'pending' || showPending) && (v.status !== 'cancelled' || showCancelled))
   const { w, h } = PAGE[orientation]
@@ -130,7 +131,7 @@ export default function SchedulePdfPreview({ customer, weekLabel, textSize, orie
   return (
     <div className="pdf-pages">
       {pages.map((days, n) => (
-        <div key={n} className={`pdf-page${large ? ' pdf-page--large' : ''}`} style={{ width: w, height: h, '--lg': `${largeSize}px` }}>
+        <div key={n} className={`pdf-page${large ? ' pdf-page--large' : standardSize === '11' ? ' pdf-page--std11' : ''}`} style={{ width: w, height: h, '--lg': `${largeSize}px` }}>
           {n === 0 ? (
             <>
               <div className={`pdf-head${portrait ? '' : ' pdf-head--row'}`}>

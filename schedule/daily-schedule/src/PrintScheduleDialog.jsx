@@ -95,6 +95,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const [unassigned, setUnassigned] = useState(isPrint)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [largeSize, setLargeSize] = useState(16) // prototype-only: the AC says 16pt minimum; 14pt for Product to compare
+  const [standardSize, setStandardSize] = useState('current') // prototype-only: Standard as it is today, or the same layout at ~11pt (Nourish's size)
   const [largeLayout, setLargeLayout] = useState('cards') // prototype-only: compares the large-text layouts
 
   const [page, setPage] = useState(1)
@@ -283,6 +284,12 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       title={`Preview - ${textSize === 'large' ? 'Large' : 'Standard'} Text Size`}
       width={modalW}
     >
+      {textSize === 'standard' && (
+        <div className="ps-preview-bar">
+          <span>Text size (prototype option)</span>
+          <SegmentedToggle options={[{ value: 'current', label: 'Current' }, { value: '11', label: '11pt' }]} value={standardSize} onChange={setStandardSize} />
+        </div>
+      )}
       {textSize === 'large' && (
         <div className="ps-preview-bar">
           <span>Text size (prototype option)</span>
@@ -292,7 +299,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
         </div>
       )}
       <ScaledPage scale={scale} width={pageW}>
-        <SchedulePdfPreview customer={previewCustomer || ''} weekLabel={weekLabel} textSize={textSize} orientation={orientation} largeLayout={largeLayout} largeSize={largeSize} showPending={pending} showCancelled={cancelled} />
+        <SchedulePdfPreview customer={previewCustomer || ''} weekLabel={weekLabel} textSize={textSize} orientation={orientation} largeLayout={largeLayout} largeSize={largeSize} standardSize={standardSize} showPending={pending} showCancelled={cancelled} />
       </ScaledPage>
     </ModalPanel>
     </>

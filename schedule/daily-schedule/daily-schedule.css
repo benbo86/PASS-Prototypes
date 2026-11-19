@@ -615,6 +615,10 @@
 .pdf-card-name { font-size: 8.25px; font-weight: 500; }
 .pdf-card-label { font-size: 6.75px; color: #777; }
 .pdf-card--cancelled { background: #e8e8e8; }
+/* Prototype option: today's layout with Nourish-sized (11.2pt) text */
+.pdf-page--std11 .pdf-day-head, .pdf-page--std11 .pdf-card-time, .pdf-page--std11 .pdf-card-name, .pdf-page--std11 .pdf-card-label { font-size: 11.2px; }
+.pdf-page--std11 .pdf-key { font-size: 9px; }
+.pdf-page--std11 .pdf-key-label { font-size: 11.2px; }
 .pdf-key { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; font-size: 6px; }
 .pdf-key-label { font-size: 7.5px; margin-right: 4px; }
 .pdf-key-item { position: relative; overflow: hidden; border: 1px solid #ddd; border-radius: 3px; padding: 6px 8px 6px 14px; }
