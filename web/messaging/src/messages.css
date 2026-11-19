@@ -1784,3 +1784,36 @@ body { overflow: hidden; }
 }
 .msg-compose-visibility.warning { color: var(--rag-amber-amber-7); }
 .msg-compose-visibility.warning p { color: var(--greyscale-2-grey-20); }
+
+
+/* ── Groups (AIOP-25943): members list, "Allow replies" row ── */
+.msg-members-pop {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 30;
+  width: 280px; max-height: calc(100vh - 200px); overflow-y: auto;
+  padding: 16px; background: #fff; border-radius: 8px;
+  border: 1px solid var(--ui-purple-5-languid-lavendar);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+.msg-thread-view { position: relative; }
+.msg-members-pop h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
+.msg-members-pop h4 { margin: 16px 0 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ui-purple-3-grape-grey); }
+.msg-members-pop ul { margin: 0; padding: 0; list-style: none; }
+.msg-members-pop li { padding: 4px 0; font-size: 14px; }
+.msg-members-more { color: var(--ui-purple-3-grape-grey); }
+.msg-members-note { margin: 16px 0 0; font-size: 13px; color: var(--greyscale-6-grey-50); }
+
+.msg-select-all { border-bottom: 1px solid var(--ui-purple-6-lavendar-grey); font-weight: 500; }
+
+.msg-members-wrap { position: relative; }
+
+.msg-members-pop { width: 320px; }
+.msg-member-row { display: flex; align-items: center; justify-content: space-between; }
+.msg-member-remove { display: inline-flex; padding: 4px; border: none; background: none; border-radius: 4px; color: var(--ui-purple-3-grape-grey); cursor: pointer; }
+.msg-member-remove:hover { background: var(--ui-purple-6-lavendar-grey); color: var(--brand-purple-6-purple-4); }
+.msg-members-add-btn { margin-top: 16px; width: 100%; display: flex; align-items: center; justify-content: center; text-align: center; }
+.msg-members-add { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.msg-members-add .form-input { width: 100%; box-sizing: border-box; }
+.msg-members-add-list { max-height: 160px; overflow-y: auto; }
+.msg-members-add-list li { padding: 4px 0; }
+.msg-members-history { margin-top: 4px; font-size: 14px; }
+.msg-members-add-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }

@@ -211,7 +211,68 @@ function generateRecipients(readCount, totalCount, maxAgoMinutes = 180) {
   })
 }
 
+// Prototype flag (AIOP-25943): a broadcast with replies on is a group. On by
+// default; add ?groups=off to the URL to see messaging as it is today.
+const GROUPS_ENABLED = new URLSearchParams(window.location.search).get('groups') !== 'off'
+
+// A group with no name is called after its members, e.g.
+// "Chloe Barker, David Chen, Emma Richardson and 2 others".
+const byLastName = (a, b) => a.split(' ').at(-1).localeCompare(b.split(' ').at(-1))
+function defaultGroupName(names) {
+  const shown = names.slice(0, 3)
+  const rest = names.length - shown.length
+  if (rest > 0) return `${shown.join(', ')} and ${rest} other${rest === 1 ? '' : 's'}`
+  return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0] || 'Group'
+}
+
+// Names shown under a group's title: the office users in it first, then the employees.
+function groupDisplayNames(thread) {
+  return thread.isGroup ? [...(thread.officeMembers || []), ...thread.participantList] : thread.participantList
+}
+
+// Everyone in a group other than the sender, with who has read the message.
+function groupMemberList(thread) {
+  const names = [...(thread.memberNames || [])]
+  for (let i = 0; names.length < (thread.memberCount ?? 0); i++) {
+    const filler = `${FILLER_FIRST_NAMES[i % FILLER_FIRST_NAMES.length]} ${FILLER_LAST_NAMES[i % FILLER_LAST_NAMES.length]}`
+    if (!names.includes(filler)) names.push(filler)
+  }
+  return [...names, ...(thread.officeMembers || [])]
+}
+function groupRecipients(members, senderName, readCount = 0, maxAgoMinutes = 120) {
+  return members.filter(n => n !== senderName).map((name, i) => {
+    if (i >= readCount) return { name, read: false }
+    const minutesAgo = readCount === 1 ? maxAgoMinutes : Math.round((i / (readCount - 1)) * maxAgoMinutes)
+    return { name, read: true, readAt: formatReadAgo(minutesAgo) }
+  })
+}
+const GROUP_101_MEMBERS = ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton', 'Karen Ashworth']
+const GROUP_102_MEMBERS = ['Tom Harris', 'Priya Sharma', 'Emma Richardson', 'Nathan Wells', 'Priya Shah']
+const GROUP_103_MEMBERS = ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton', 'Karen Ashworth']
+const GROUP_104_MEMBERS = ['Chloe Barker', 'David Chen', 'Emma Richardson', 'Linda Peters', 'Michael Hughes', 'Karen Ashworth']
+const GROUP_105_MEMBERS = ['James Okafor', 'Linda Peters', 'Chloe Barker', 'Priya Shah']
+const GROUP_107_MEMBERS = ['Sarah Mitchell', 'David Chen', 'Olivia Brooks', 'Karen Ashworth']
+const GROUP_106_MEMBERS = ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Nathan Wells', 'Karen Ashworth']
+
 const THREADS = [
+  // Most recent first, so a group is visible without scrolling the list
+  ...(GROUPS_ENABLED ? [{
+    id: 107,
+    title: 'Mrs Walker — hospital discharge',
+    isBroadcast: true,
+    isGroup: true,
+    replyAllowed: true,
+    participants: '3 employees · 1 office user',
+    participantList: ['Sarah Mitchell', 'David Chen', 'Olivia Brooks'],
+    memberNames: ['Sarah Mitchell', 'David Chen', 'Olivia Brooks'],
+    memberCount: 3,
+    officeMembers: ['Karen Ashworth'],
+    lastSender: 'David Chen',
+    lastMessage: 'I can take the 4pm visit if she is home by then.',
+    time: '11:45 AM',
+    unread: true,
+    archivedByOffice: false,
+  }] : []),
   {
     id: 1,
     title: 'Care Homes — Team Update',
@@ -331,11 +392,161 @@ const THREADS = [
     unread: true,
     archivedByOffice: false,
   },
+  ...(GROUPS_ENABLED ? [
+    {
+      id: 101,
+      title: 'Medication changes — North Sheffield',
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '5 employees · 1 office user',
+      participantList: ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton'],
+      memberNames: ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton'],
+      memberCount: 5,
+      officeMembers: ['Karen Ashworth'],
+      lastSender: 'Olivia Brooks',
+      lastMessage: 'Got it, I will update the MAR chart before my 2pm visit.',
+      time: '11:20 AM',
+      unread: true,
+      archivedByOffice: false,
+    },
+    {
+      id: 102,
+      title: 'Weekend cover — South Sheffield',
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '4 employees · 1 office user',
+      participantList: ['Tom Harris', 'Priya Sharma', 'Emma Richardson', 'Nathan Wells'],
+      memberNames: ['Tom Harris', 'Priya Sharma', 'Emma Richardson', 'Nathan Wells'],
+      memberCount: 4,
+      officeMembers: ['Priya Shah'],
+      lastSender: 'Tom Harris',
+      lastMessage: 'I can do Saturday morning if someone swaps my Sunday.',
+      time: 'Tue',
+      unread: false,
+      archivedByOffice: false,
+    },
+    {
+      // A group picked by area: shows the area chip in the list
+      id: 103,
+      title: 'North Sheffield team',
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '11 employees · 1 office user',
+      participantList: ['North Sheffield'],
+      areaTags: [{ name: 'North Sheffield', memberCount: 11 }],
+      memberNames: ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton'],
+      memberCount: 11,
+      officeMembers: ['Karen Ashworth'],
+      lastSender: 'Karen Bailey',
+      lastMessage: 'Parking is fine at the back, the gate code is the same.',
+      time: 'Mon',
+      unread: false,
+      archivedByOffice: false,
+    },
+    {
+      // Created with no name, so it's called after its members
+      id: 104,
+      title: defaultGroupName(['Chloe Barker', 'David Chen', 'Emma Richardson', 'Linda Peters', 'Michael Hughes']),
+      isDefaultName: true,
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '5 employees · 1 office user',
+      participantList: ['Chloe Barker', 'David Chen', 'Emma Richardson', 'Linda Peters', 'Michael Hughes'],
+      memberNames: ['Chloe Barker', 'David Chen', 'Emma Richardson', 'Linda Peters', 'Michael Hughes'],
+      memberCount: 5,
+      officeMembers: ['Karen Ashworth'],
+      lastSender: 'Karen Ashworth',
+      lastMessage: 'Thanks both. I will ask the GP to call Mr Okonkwo back today.',
+      time: 'Mon',
+      unread: false,
+      archivedByOffice: false,
+    },
+    {
+      // Created by another office user; replying would add Karen Ashworth
+      id: 105,
+      title: 'Rotherham late shift handover',
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '3 employees · 1 office user',
+      participantList: ['James Okafor', 'Linda Peters', 'Chloe Barker'],
+      memberNames: ['James Okafor', 'Linda Peters', 'Chloe Barker'],
+      memberCount: 3,
+      officeMembers: ['Priya Shah'],
+      lastSender: 'Linda Peters',
+      lastMessage: 'Mrs Patel was a bit chesty tonight, worth checking in the morning.',
+      time: 'Sun',
+      unread: true,
+      archivedByOffice: false,
+    },
+    {
+      // Archived group
+      id: 106,
+      title: 'Bank holiday cover — Rotherham',
+      isBroadcast: true,
+      isGroup: true,
+      replyAllowed: true,
+      participants: '4 employees · 1 office user',
+      participantList: ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Nathan Wells'],
+      memberNames: ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Nathan Wells'],
+      memberCount: 4,
+      officeMembers: ['Karen Ashworth'],
+      lastSender: 'Karen Ashworth',
+      lastMessage: 'All covered, thank you everyone.',
+      time: '3 Nov',
+      unread: false,
+      archivedByOffice: true,
+    },
+  ] : []),
 ]
 
 const CURRENT_OFFICE_USER = 'Karen Ashworth'
 
 const THREAD_MESSAGES = {
+  ...(GROUPS_ENABLED ? {
+    107: [
+      { id: 1, isMe: true, senderName: 'Karen Ashworth', text: 'Mrs Walker is being discharged from hospital this afternoon. We need a visit as soon as she is home, and her care plan has changed: she now needs help with all transfers.', time: '11:05 AM', day: 'Today', recipients: groupRecipients(GROUP_107_MEMBERS, 'Karen Ashworth', 3, 40) },
+      { id: 2, isMe: false, sender: 'Sarah Mitchell', text: 'I am on a visit until 3pm. Who is free after that?', time: '11:30 AM', day: 'Today' },
+      { id: 3, isMe: false, sender: 'David Chen', text: 'I can take the 4pm visit if she is home by then.', time: '11:45 AM', day: 'Today' },
+    ],
+    101: [
+      { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Quick update for everyone: Mrs Walker's evening medication has changed from 8pm to 6pm, starting tomorrow. The MAR chart is already updated.", time: '10:02 AM', day: 'Today', recipients: groupRecipients(GROUP_101_MEMBERS, 'Karen Ashworth', 5, 90) },
+      { id: 2, isMe: false, sender: 'Sarah Mitchell', text: 'Thanks Karen. Is that for all her visits or just weekdays?', time: '10:30 AM', day: 'Today' },
+      { id: 3, isMe: true, senderName: 'Karen Ashworth', text: 'All visits, including weekends.', time: '10:41 AM', day: 'Today', recipients: groupRecipients(GROUP_101_MEMBERS, 'Karen Ashworth', 3, 45) },
+      { id: 4, isMe: false, sender: 'Olivia Brooks', text: 'Got it, I will update the MAR chart before my 2pm visit.', time: '11:20 AM', day: 'Today' },
+    ],
+    102: [
+      { id: 1, isMe: true, senderName: 'Priya Shah', text: 'We need two people to cover Saturday morning visits in South Sheffield. Who can help?', time: 'Tue 9:12 AM', day: 'Tuesday' },
+      { id: 2, isMe: false, sender: 'Emma Richardson', text: "I'm free Saturday after 10.", time: 'Tue 9:40 AM', day: 'Tuesday' },
+      { id: 3, isMe: false, sender: 'Tom Harris', text: 'I can do Saturday morning if someone swaps my Sunday.', time: 'Tue 10:05 AM', day: 'Tuesday' },
+    ],
+    103: [
+      { id: 1, isMe: true, senderName: 'Karen Ashworth', text: 'Team, the new care home on Ecclesall Road starts taking visits next week. Does anyone know the parking situation?', time: 'Mon 9:05 AM', day: 'Monday', recipients: groupRecipients(GROUP_103_MEMBERS, 'Karen Ashworth', 5, 2400) },
+      { id: 2, isMe: false, sender: 'David Chen', text: 'Street parking only, and it fills up by 8.', time: 'Mon 9:30 AM', day: 'Monday' },
+      { id: 3, isMe: false, sender: 'Karen Bailey', text: 'Parking is fine at the back, the gate code is the same.', time: 'Mon 10:12 AM', day: 'Monday' },
+    ],
+    104: [
+      { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Mr Okonkwo's family have asked for a call about his mobility. Can you each note what you've seen on your visits this week?", time: 'Mon 8:40 AM', day: 'Monday', recipients: groupRecipients(GROUP_104_MEMBERS, 'Karen Ashworth', 5, 1500) },
+      { id: 2, isMe: false, sender: 'Linda Peters', text: 'He needed the frame for every transfer on Thursday and Friday.', time: 'Mon 9:15 AM', day: 'Monday' },
+      { id: 3, isMe: false, sender: 'Michael Hughes', text: 'Same on Saturday. He mentioned his knee was sore.', time: 'Mon 9:48 AM', day: 'Monday' },
+      { id: 4, isMe: true, senderName: 'Karen Ashworth', text: 'Thanks both. I will ask the GP to call Mr Okonkwo back today.', time: 'Mon 10:20 AM', day: 'Monday', recipients: groupRecipients(GROUP_104_MEMBERS, 'Karen Ashworth', 3, 1200) },
+    ],
+    105: [
+      { id: 1, isMe: true, senderName: 'Priya Shah', text: 'Handover thread for the late shift. Please note anything the morning team should know.', time: 'Sun 6:00 PM', day: 'Sunday' },
+      { id: 2, isMe: false, sender: 'James Okafor', text: 'All visits done on time. Mr Singh refused his evening medication, noted on the MAR.', time: 'Sun 10:20 PM', day: 'Sunday' },
+      { id: 3, isMe: false, sender: 'Linda Peters', text: 'Mrs Patel was a bit chesty tonight, worth checking in the morning.', time: 'Sun 10:45 PM', day: 'Sunday' },
+    ],
+    106: [
+      { id: 1, isMe: true, senderName: 'Karen Ashworth', text: 'We need four people for the bank holiday Monday in Rotherham. Reply here if you can do it.', time: '3 Nov 9:00 AM', day: '3 Nov', recipients: groupRecipients(GROUP_106_MEMBERS, 'Karen Ashworth', 4, 4000) },
+      { id: 2, isMe: false, sender: 'Tom Harris', text: 'I can do the morning.', time: '3 Nov 9:20 AM', day: '3 Nov' },
+      { id: 3, isMe: false, sender: 'Nathan Wells', text: 'Afternoon for me.', time: '3 Nov 9:41 AM', day: '3 Nov' },
+      { id: 4, isMe: true, senderName: 'Karen Ashworth', text: 'All covered, thank you everyone.', time: '3 Nov 11:10 AM', day: '3 Nov', recipients: groupRecipients(GROUP_106_MEMBERS, 'Karen Ashworth', 4, 3600) },
+    ],
+  } : {}),
   1: [
     { id: 1, isMe: true, senderName: 'Karen Ashworth', text: "Just a reminder the weekly handover meeting is Thursday at 4pm. Please make sure your visit notes are up to date beforehand.", time: '10:42 AM', day: 'Today', attachments: [{ name: 'Weekly_Handover_Agenda.pdf', size: '84 KB' }], recipients: generateRecipients(31, 49, 300) },
   ],
@@ -531,9 +742,11 @@ function ThreadRow({ thread, isActive, onClick }) {
         className={`msg-thread-avatar${thread.isBroadcast ? ' broadcast' : ''}`}
         style={palette ? { background: palette.bg, color: palette.fg } : {}}
       >
-        {thread.isBroadcast
-          ? <BroadcastIcon size={18} />
-          : <span className="msg-thread-initials">{getInitials(firstName)}</span>
+        {thread.isGroup
+          ? <GroupIcon size={18} />
+          : thread.isBroadcast
+            ? <BroadcastIcon size={18} />
+            : <span className="msg-thread-initials">{getInitials(firstName)}</span>
         }
         {extraCount > 0 && <span className="msg-thread-extra">+{extraCount}</span>}
       </div>
@@ -542,11 +755,11 @@ function ThreadRow({ thread, isActive, onClick }) {
           <span className="msg-thread-name">{thread.isBroadcast ? thread.title : employeeNameLine}</span>
           <span className="msg-thread-time">{thread.time}</span>
         </div>
-        {thread.isBroadcast ? (
+        {thread.isGroup && thread.isDefaultName ? null : thread.isBroadcast ? (
           <>
             {!thread.areaTags && (
               thread.participantList.length > 0
-                ? <RecipientNames names={thread.participantList} />
+                ? <RecipientNames names={groupDisplayNames(thread)} />
                 : <span className="msg-thread-recipient-plain">{thread.participants}</span>
             )}
             {thread.areaTags && <AreaTags tags={thread.areaTags} showCount />}
@@ -571,7 +784,7 @@ function ThreadRow({ thread, isActive, onClick }) {
 
 // ─── Sidebar ───────────────────────────────────────────────────
 
-const MESSAGE_TYPE_OPTIONS = ['Message', 'Broadcast']
+const MESSAGE_TYPE_OPTIONS = GROUPS_ENABLED ? ['Message', 'Broadcast', 'Group'] : ['Message', 'Broadcast']
 
 function threadAreas(t) {
   if (t.area) return [t.area]
@@ -781,7 +994,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
       (t.area && t.area.toLowerCase().includes(query)) ||
       (t.areaTags && t.areaTags.some(tag => tag.name.toLowerCase().includes(query)))
     const matchesEmployee = employeeFilter.size === 0 || t.participantList.some(p => employeeFilter.has(p))
-    const matchesType = typeFilter.size === 0 || typeFilter.has(t.isBroadcast ? 'Broadcast' : 'Message')
+    const matchesType = typeFilter.size === 0 || typeFilter.has(t.isGroup ? 'Group' : t.isBroadcast ? 'Broadcast' : 'Message')
     const matchesArea = areaFilter.size === 0 || threadAreas(t).some(a => areaFilter.has(a))
     return matchesTab && matchesSearch && matchesEmployee && matchesType && matchesArea
   })
@@ -803,6 +1016,11 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
               <button onClick={() => { setShowComposeMenu(false); onCompose('broadcast') }}>
                 <BroadcastIcon size={16} /> Broadcast
               </button>
+              {GROUPS_ENABLED && (
+                <button onClick={() => { setShowComposeMenu(false); onCompose('group') }}>
+                  <GroupIcon size={16} /> Group
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -851,7 +1069,7 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
 
 // ─── Thread View ───────────────────────────────────────────────
 
-function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread }) {
+function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread, onChangeMembers }) {
   const [inputText, setInputText] = useState('')
   const [localMsgs, setLocalMsgs] = useState(messages)
   const [replyTo, setReplyTo] = useState(null)
@@ -918,6 +1136,29 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
     return acc
   }, [])
 
+  const threadKind = thread.isGroup ? 'group' : thread.isBroadcast ? 'broadcast' : 'thread'
+  const [showMembers, setShowMembers] = useState(false)
+  const [addingMembers, setAddingMembers] = useState(false)
+  const [addSearch, setAddSearch] = useState('')
+  const [addSelected, setAddSelected] = useState([])
+  const [seeHistory, setSeeHistory] = useState(false)
+  const resetAddMembers = () => { setAddingMembers(false); setAddSearch(''); setAddSelected([]); setSeeHistory(false) }
+  const joinNames = names => names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0]
+  const changeMembers = ({ added = [], removed = [] }) => {
+    const text = added.length
+      ? `${CURRENT_OFFICE_USER} added ${joinNames(added)}. They ${seeHistory ? 'can' : "can't"} see earlier messages.`
+      : `${CURRENT_OFFICE_USER} removed ${joinNames(removed)}`
+    setLocalMsgs(prev => [...prev, { id: `members-${prev.length}-${Date.now()}`, type: 'event', text, day: 'Today' }])
+    onChangeMembers?.({ added, removed }, text)
+    resetAddMembers()
+  }
+  const addCandidates = CARERS
+    .map(c => c.name)
+    .filter(n => !(thread.memberNames || []).includes(n))
+    .filter(n => n.toLowerCase().includes(addSearch.toLowerCase()))
+  const officeMembers = thread.officeMembers || []
+  const memberTotal = (thread.memberCount ?? 0) + officeMembers.length
+
   const handleSend = () => {
     const text = inputText.trim()
     if (!text) return
@@ -926,8 +1167,13 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
       setEditing(null)
     } else {
       const broadcastTotal = localMsgs.find(m => m.recipients)?.recipients.length ?? CARERS.length
+      // Replying to a group from the web makes this office user a visible member
+      const joining = thread.isGroup && !officeMembers.includes(CURRENT_OFFICE_USER)
+      if (joining) {
+        setLocalMsgs(prev => [...prev, { id: `join-${prev.length}`, type: 'event', text: `${CURRENT_OFFICE_USER} joined the group`, day: 'Today' }])
+      }
       const newMsg = {
-        id: localMsgs.length + 1,
+        id: localMsgs.length + 2,
         isMe: true,
         senderName: CURRENT_OFFICE_USER,
         text,
@@ -935,7 +1181,9 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
         day: 'Today',
         ...(replyTo ? { replyTo } : {}),
         ...(attachments.length ? { attachments } : {}),
-        ...(thread.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
+        ...(thread.isGroup
+          ? { recipients: groupRecipients(groupMemberList(thread), CURRENT_OFFICE_USER) }
+          : thread.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
       }
       setLocalMsgs(prev => [...prev, newMsg])
       onSend?.(text, attachments)
@@ -947,26 +1195,28 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
   }
 
   return (
-    <div className="msg-thread-view" onClick={() => setActionTarget(null)}>
+    <div className="msg-thread-view" onClick={() => { setActionTarget(null); setShowMembers(false); resetAddMembers() }}>
       {/* Header */}
       <div className="msg-thread-header">
         <div
           className={`msg-thread-header-avatar${thread.isBroadcast ? ' broadcast' : ''}`}
           style={headerPalette ? { background: headerPalette.bg, color: headerPalette.fg } : {}}
         >
-          {thread.isBroadcast
-            ? <BroadcastIcon size={20} />
-            : <span className="msg-thread-initials">{headerInitials}</span>
+          {thread.isGroup
+            ? <GroupIcon size={20} />
+            : thread.isBroadcast
+              ? <BroadcastIcon size={20} />
+              : <span className="msg-thread-initials">{headerInitials}</span>
           }
         </div>
         <div className="msg-thread-header-info">
           <h2>{thread.isBroadcast ? thread.title : headerEmployeeNameLine}</h2>
           <div className="msg-thread-header-sub-row">
-            {thread.isBroadcast ? (
+            {thread.isGroup && thread.isDefaultName ? null : thread.isBroadcast ? (
               thread.areaTags ? (
                 <AreaTags tags={thread.areaTags} showCount />
               ) : thread.participantList.length > 0 ? (
-                <RecipientNames names={thread.participantList} />
+                <RecipientNames names={groupDisplayNames(thread)} />
               ) : (
                 <span className="msg-thread-header-sub">{thread.participants}</span>
               )
@@ -976,6 +1226,85 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           </div>
         </div>
         <div className="msg-thread-header-actions">
+          {thread.isGroup && (
+            <div className="msg-members-wrap">
+              <button
+                className="round-btn secondary-btn btn-icon-left msg-header-action-btn"
+                title="Who is in this group"
+                onClick={e => { e.stopPropagation(); setShowMembers(v => !v); resetAddMembers() }}
+              >
+                <GroupIcon size={18} />
+                <span>Members ({memberTotal})</span>
+              </button>
+              {showMembers && (
+                <div className="msg-members-pop" onClick={e => e.stopPropagation()}>
+                <h3>Members ({memberTotal})</h3>
+                <h4>Office</h4>
+                <ul>
+                  {officeMembers.map(n => <li key={n}>{n}{n === CURRENT_OFFICE_USER ? ' (you)' : ''}</li>)}
+                </ul>
+                <h4>Employees</h4>
+                <ul>
+                  {(thread.memberNames || []).map(n => (
+                    <li key={n} className="msg-member-row">
+                      <span>{n}</span>
+                      {(thread.memberNames || []).length > 1 && (
+                        <button className="msg-member-remove" aria-label={`Remove ${n}`} title={`Remove ${n}`} onClick={() => changeMembers({ removed: [n] })}>
+                          <CloseIcon size={14} />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                  {thread.memberCount > (thread.memberNames || []).length && (
+                    <li className="msg-members-more">+{thread.memberCount - thread.memberNames.length} more</li>
+                  )}
+                </ul>
+                {!addingMembers ? (
+                  <button className="round-btn secondary-btn msg-members-add-btn" onClick={() => setAddingMembers(true)}>Add members</button>
+                ) : (
+                  <div className="msg-members-add">
+                    <input
+                      className="form-input"
+                      placeholder="Search for an employee..."
+                      value={addSearch}
+                      onChange={e => setAddSearch(e.target.value)}
+                    />
+                    <ul className="msg-members-add-list">
+                      {addCandidates.map(n => (
+                        <li key={n}>
+                          <label className="checkbox-wrap">
+                            <input
+                              type="checkbox"
+                              checked={addSelected.includes(n)}
+                              onChange={() => setAddSelected(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])}
+                            />
+                            <span className="checkbox-box" />
+                            <span>{n}</span>
+                          </label>
+                        </li>
+                      ))}
+                      {addCandidates.length === 0 && <li className="msg-members-more">No one to add</li>}
+                    </ul>
+                    <label className="checkbox-wrap msg-members-history">
+                      <input type="checkbox" checked={seeHistory} onChange={e => setSeeHistory(e.target.checked)} />
+                      <span className="checkbox-box" />
+                      <span>Let them see earlier messages</span>
+                    </label>
+                    <div className="msg-members-add-actions">
+                      <button className="round-btn tertiary-btn" onClick={resetAddMembers}>Cancel</button>
+                      <button className="round-btn primary-btn" disabled={addSelected.length === 0} onClick={() => changeMembers({ added: addSelected })}>
+                        Add{addSelected.length ? ` (${addSelected.length})` : ''}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {!officeMembers.includes(CURRENT_OFFICE_USER) && (
+                  <p className="msg-members-note">You'll be added to this group, and everyone will see it, when you reply.</p>
+                )}
+                </div>
+              )}
+            </div>
+          )}
           {!thread.archivedByOffice && thread.replyAllowed && (
             <button
               className="round-btn secondary-btn btn-icon-left msg-header-action-btn"
@@ -988,11 +1317,11 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           )}
           <button
             className="round-btn secondary-btn btn-icon-left msg-header-action-btn"
-            title={thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive thread') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}
+            title={`${thread.archivedByOffice ? 'Unarchive' : 'Archive'} ${threadKind}`}
             onClick={e => { e.stopPropagation(); onToggleArchive?.() }}
           >
             <ArchiveIcon size={18} />
-            <span>{thread.archivedByOffice ? (thread.isBroadcast ? 'Unarchive broadcast' : 'Unarchive thread') : (thread.isBroadcast ? 'Archive broadcast' : 'Archive thread')}</span>
+            <span>{thread.archivedByOffice ? 'Unarchive' : 'Archive'} {threadKind}</span>
           </button>
         </div>
       </div>
@@ -1018,6 +1347,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                   className={`msg-message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
                 >
                   {msg.isMe && msg.senderName && <div className="msg-sender-label">{msg.senderName}</div>}
+                  {thread.isGroup && !msg.isMe && msg.sender && <div className="msg-sender-label">{msg.sender}</div>}
                   <div
                     className={`msg-bubble ${msg.isMe ? 'sent' : 'received'}`}
                     onClick={e => { e.stopPropagation(); setActionTarget(actionTarget?.id === msg.id ? null : msg) }}
@@ -1043,7 +1373,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
                   <div className="msg-meta">
                     <span className="msg-time">{msg.time}</span>
                     {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} size={14} />}
-                    {msg.isMe && thread.isBroadcast && msg.recipients && (
+                    {thread.isBroadcast && msg.recipients && (thread.isGroup ? msg.isMe && msg.senderName === CURRENT_OFFICE_USER : msg.isMe) && (
                       <button className="msg-read-count-inline" onClick={() => setReadStatusMsgId(msg.id)}>
                         {msg.recipients.filter(r => r.read).length}/{msg.recipients.length} <EyeIcon />
                       </button>
@@ -1131,7 +1461,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
       )}
 
       {/* One-way notice */}
-      {thread.isBroadcast && (
+      {thread.isBroadcast && !thread.isGroup && (
         <div className="msg-broadcast-notice read-only">
           <BroadcastIcon size={16} />
           <span>Employees can't reply to this broadcast</span>
@@ -1163,7 +1493,7 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread })
           <input
             ref={inputRef}
             className="msg-compose-input"
-            placeholder={thread.isBroadcast ? '' : 'Reply here (all office staff will see this)...'}
+            placeholder={thread.isGroup ? 'Message the group...' : thread.isBroadcast ? '' : 'Reply here (all office staff will see this)...'}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
@@ -1252,12 +1582,14 @@ const INITIALS_COLORS = [
 ]
 
 function ComposeView({ mode, onSend, onCancel }) {
-  const isBroadcast = mode === 'broadcast'
+  // 'group' is a broadcast with replies on (AIOP-25943)
+  const isBroadcast = mode === 'broadcast' || mode === 'group'
+  const isGroup = GROUPS_ENABLED && mode === 'group'
 
   const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
   const [selectedCarer, setSelectedCarer] = useState(null)
-  const [broadcastType, setBroadcastType] = useState('all')
+  const [broadcastType, setBroadcastType] = useState(mode === 'group' && GROUPS_ENABLED ? 'individuals' : 'all')
   const [selectedCarers, setSelectedCarers] = useState([])
   const [selectedTags, setSelectedTags] = useState([])
   const [recipientSearch, setRecipientSearch] = useState('')
@@ -1301,7 +1633,7 @@ function ComposeView({ mode, onSend, onCancel }) {
   const hasRecipients = isBroadcast
     ? (broadcastType === 'all' || (broadcastType === 'groups' ? selectedTags.length > 0 : selectedCarers.length > 0))
     : !!selectedCarer
-  const canSend = (!isBroadcast || title.trim()) && message.trim() && hasRecipients
+  const canSend = (!isBroadcast || isGroup || title.trim()) && message.trim() && hasRecipients
 
   // Employee mode: single selection, picking a new one replaces the current one
   const selectCarer = (carer) => {
@@ -1355,7 +1687,7 @@ function ComposeView({ mode, onSend, onCancel }) {
     <div className="msg-compose-view">
       <div className="msg-compose-header">
         <div className="msg-compose-header-titles">
-          <h2>New {isBroadcast ? 'Broadcast' : 'Message'}</h2>
+          <h2>New {isGroup ? 'Group' : isBroadcast ? 'Broadcast' : 'Message'}</h2>
         </div>
         <button className="msg-compose-cancel" onClick={onCancel}>
           <CloseIcon size={20} />
@@ -1371,18 +1703,33 @@ function ComposeView({ mode, onSend, onCancel }) {
 
           {isBroadcast && (
             <div className="msg-broadcast-type-tabs">
-              <button
-                className={`msg-broadcast-type-tab${broadcastType === 'all' ? ' active' : ''}`}
-                onClick={() => changeBroadcastType('all')}
-              ><BroadcastIcon size={14} />All</button>
-              <button
-                className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
-                onClick={() => changeBroadcastType('groups')}
-              ><MapPinIcon size={14} />Area</button>
-              <button
-                className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
-                onClick={() => changeBroadcastType('individuals')}
-              ><EmployeesIcon size={14} />Employees</button>
+              {isGroup ? (
+                <>
+                  <button
+                    className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
+                    onClick={() => changeBroadcastType('individuals')}
+                  ><EmployeesIcon size={14} />Employees</button>
+                  <button
+                    className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
+                    onClick={() => changeBroadcastType('groups')}
+                  ><MapPinIcon size={14} />Area</button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className={`msg-broadcast-type-tab${broadcastType === 'all' ? ' active' : ''}`}
+                    onClick={() => changeBroadcastType('all')}
+                  ><BroadcastIcon size={14} />All</button>
+                  <button
+                    className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
+                    onClick={() => changeBroadcastType('groups')}
+                  ><MapPinIcon size={14} />Area</button>
+                  <button
+                    className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
+                    onClick={() => changeBroadcastType('individuals')}
+                  ><EmployeesIcon size={14} />Employees</button>
+                </>
+              )}
             </div>
           )}
 
@@ -1455,6 +1802,15 @@ function ComposeView({ mode, onSend, onCancel }) {
                 <div className="msg-carer-dropdown">
                   {(!isBroadcast || broadcastType === 'individuals') && (
                     <>
+                      {isGroup && broadcastType === 'individuals' && !recipientSearch && (
+                        <div
+                          className="msg-carer-option msg-select-all"
+                          onClick={() => setSelectedCarers(selectedCarers.length === CARERS.length ? [] : [...CARERS])}
+                        >
+                          <input type="checkbox" className="msg-option-checkbox" checked={selectedCarers.length === CARERS.length} onChange={() => {}} />
+                          <span>Select all employees ({CARERS.length})</span>
+                        </div>
+                      )}
                       {filteredCarers.map(c => {
                         const palette = INITIALS_COLORS[c.id % INITIALS_COLORS.length]
                         const isSelected = isBroadcast && selectedCarers.some(s => s.id === c.id)
@@ -1519,7 +1875,9 @@ function ComposeView({ mode, onSend, onCancel }) {
         <div className={`msg-compose-visibility${officeUserWarning ? ' warning' : ''}`}>
           {officeUserWarning ? <WarningIcon /> : <InfoIcon />}
           <p>
-            {isBroadcast
+            {isGroup
+              ? <>Everyone in your office with PASS web access will see this group. Employees in it see each other's names and replies. Office users who reply join the group.</>
+              : isBroadcast
               ? <>Everyone in your office with PASS web access will see this broadcast and who's read it. Each employee receives it from "Office" and can't see who else it went to.</>
               : officeUserWarning
                 ? <><strong>{selectedCarer.name}</strong> is also an office user. Everyone in your office with PASS web access will see this conversation, so it isn't suitable for private messages between office staff.</>
@@ -1530,11 +1888,11 @@ function ComposeView({ mode, onSend, onCancel }) {
         {/* Title */}
         <div className="msg-compose-field">
           <label className="msg-compose-label">
-            Subject {isBroadcast ? <span className="msg-required">*</span> : '(optional)'}
+            {isGroup ? 'Group name' : 'Subject'} {isBroadcast && !isGroup ? <span className="msg-required">*</span> : '(optional)'}
           </label>
           <input
             className="form-input"
-            placeholder="What is this message about?"
+            placeholder={isGroup ? "Leave blank to use the members' names" : "What is this message about?"}
             value={title}
             onChange={e => setTitle(e.target.value)}
           />
@@ -1575,7 +1933,8 @@ function ComposeView({ mode, onSend, onCancel }) {
             className="round-btn primary-btn btn-icon-right"
             disabled={!canSend}
             onClick={() => canSend && onSend({
-              mode,
+              mode: isBroadcast ? 'broadcast' : 'employee',
+              replies: isGroup,
               broadcastType: isBroadcast ? broadcastType : undefined,
               title,
               recipients: isBroadcast ? (broadcastType === 'individuals' ? selectedCarers : []) : [selectedCarer],
@@ -1584,7 +1943,7 @@ function ComposeView({ mode, onSend, onCancel }) {
               attachments,
             })}
           >
-            {isBroadcast ? 'Send broadcast' : 'Send'} <SendIcon />
+            {isGroup ? 'Create group' : isBroadcast ? 'Send broadcast' : 'Send'} <SendIcon />
           </button>
         </div>
       </div>
@@ -1696,7 +2055,9 @@ export default function App() {
       if (!updated) return prev
       const rest = prev.filter(t => t.id !== activeThreadId)
       return [
-        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: false, ...(wasArchived ? { archivedByOffice: false } : {}) },
+        { ...updated, lastSender: 'Office', lastMessage: text, time: 'Just now', unread: false, ...(wasArchived ? { archivedByOffice: false } : {}),
+          ...(updated.isGroup && !(updated.officeMembers || []).includes(CURRENT_OFFICE_USER)
+            ? { officeMembers: [...(updated.officeMembers || []), CURRENT_OFFICE_USER] } : {}) },
         ...rest,
       ]
     })
@@ -1711,9 +2072,14 @@ export default function App() {
         time: 'Just now',
         day: 'Today',
         ...(attachments?.length ? { attachments } : {}),
-        ...(activeThread?.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
+        ...(activeThread?.isGroup
+          ? { recipients: groupRecipients(groupMemberList(activeThread), CURRENT_OFFICE_USER) }
+          : activeThread?.isBroadcast ? { recipients: generateRecipients(0, broadcastTotal) } : {}),
       }
-      return { ...prev, [activeThreadId]: [...existing, { ...sentMsg, id: now }] }
+      const joinEvent = activeThread?.isGroup && !(activeThread.officeMembers || []).includes(CURRENT_OFFICE_USER)
+        ? [{ id: `join-${now}`, type: 'event', text: `${CURRENT_OFFICE_USER} joined the group`, day: 'Today' }]
+        : []
+      return { ...prev, [activeThreadId]: [...existing, ...joinEvent, { ...sentMsg, id: now }] }
     })
   }
 
@@ -1725,13 +2091,28 @@ export default function App() {
     setRightPanel('empty')
   }
 
+  const handleChangeMembers = ({ added, removed }, eventText) => {
+    setThreads(prev => prev.map(t => {
+      if (t.id !== activeThreadId) return t
+      const names = [...(t.memberNames || []).filter(n => !removed.includes(n)), ...added]
+      const next = { ...t, memberNames: names, memberCount: (t.memberCount ?? 0) + added.length - removed.length }
+      if (!t.areaTags) next.participantList = names
+      if (t.isDefaultName) next.title = defaultGroupName([...names].sort(byLastName))
+      return next
+    }))
+    setThreadMessages(prev => ({
+      ...prev,
+      [activeThreadId]: [...(prev[activeThreadId] || []), { id: `members-${Date.now()}`, type: 'event', text: eventText, day: 'Today' }],
+    }))
+  }
+
   const handleMarkUnread = () => {
     setThreads(prev => prev.map(t =>
       t.id === activeThreadId ? { ...t, unread: true } : t
     ))
   }
 
-  const handleNewMessage = ({ mode, broadcastType, title, recipients, tags, message, attachments }) => {
+  const handleNewMessage = ({ mode, replies, broadcastType, title, recipients, tags, message, attachments }) => {
     const baseId = Math.max(...threads.map(t => t.id)) + 1
 
     if (mode === 'broadcast') {
@@ -1747,12 +2128,26 @@ export default function App() {
         broadcastType === 'groups' ? new Set(tags.flatMap(t => tagMembers(t).map(c => c.name))).size :
         broadcastType === 'all'    ? CARERS.length :
         recipients.length
+      const groupMemberNames =
+        broadcastType === 'groups' ? [...new Set(tags.flatMap(t => tagMembers(t).map(c => c.name)))] :
+        broadcastType === 'all'    ? CARERS.map(c => c.name) :
+        recipients.map(r => r.name)
+      const groupTitle = replies && !title.trim()
+        ? defaultGroupName(broadcastType === 'groups' ? tags.map(t => t.name) : [...groupMemberNames].sort(byLastName))
+        : title
       const newThread = {
         id: baseId,
-        title,
+        title: groupTitle,
+        ...(replies && !title.trim() ? { isDefaultName: true } : {}),
         isBroadcast: true,
-        replyAllowed: false,
-        participants: participantsSummary,
+        replyAllowed: !!replies,
+        ...(replies ? {
+          isGroup: true,
+          memberNames: groupMemberNames.slice(0, 12),
+          memberCount: broadcastTotalCount,
+          officeMembers: [CURRENT_OFFICE_USER],
+        } : {}),
+        participants: replies ? `${broadcastTotalCount} employees · 1 office user` : participantsSummary,
         participantList,
         areaTags: broadcastType === 'groups' && tags.length > 0
           ? tags.map(t => ({ name: t.name, memberCount: t.memberCount }))
@@ -1772,7 +2167,10 @@ export default function App() {
           text: message,
           time: 'Just now',
           day: 'Today',
-          recipients: generateRecipients(0, broadcastTotalCount),
+          senderName: CURRENT_OFFICE_USER,
+          recipients: replies
+            ? groupRecipients(groupMemberList({ memberNames: groupMemberNames.slice(0, 12), memberCount: broadcastTotalCount, officeMembers: [CURRENT_OFFICE_USER] }), CURRENT_OFFICE_USER)
+            : generateRecipients(0, broadcastTotalCount),
           ...(attachments?.length ? { attachments } : {}),
         }],
       }))
@@ -1856,10 +2254,12 @@ export default function App() {
               onSend={handleSend}
               onToggleArchive={handleToggleArchive}
               onMarkUnread={handleMarkUnread}
+              onChangeMembers={handleChangeMembers}
             />
           )}
           {rightPanel === 'compose' && (
             <ComposeView
+              key={composeMode}
               mode={composeMode}
               onSend={handleNewMessage}
               onCancel={() => setRightPanel('empty')}

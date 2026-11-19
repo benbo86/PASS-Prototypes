@@ -300,11 +300,14 @@
     <h3 class="sub">Proposal (for Product to confirm)</h3>
     <ul class="takeaways">
       <li><b>A broadcast has replies off, as today, or on.</b>With replies on it is a group, shown with an icon like a broadcast. Recipients are chosen as today (employees, area or tag), and replies are off by default.</li>
+      <li><b>Created from its own menu item, not "All".</b>Recipients are picked by employee (the default, with a select all option) or by area, and there is no "All" tab as for a broadcast. A group needs no name: if none is given it is called after its members, for example "Chloe Barker, David Chen, Emma Richardson and 2 others".</li>
+      <li><b>The office can add and remove employees.</b>It can change the members at any time from the group's member list. When adding, the office chooses whether the new members see earlier messages (proposed default: no). Each change is noted in the conversation, a group always keeps at least one employee, and an unnamed group renames itself after its members.</li>
       <li><b>Everyone sees everything in the group.</b>Who sent each message, everyone's replies, and who is in the group.</li>
+      <li><b>Read status on your own messages only.</b>Each person sees who has read the messages they sent, as in other messaging apps, and nobody sees it on other people's messages. This applies to office users and employees alike. The app side comes later, behind a feature flag.</li>
       <li><b>The office turns groups on.</b>It's a setting, off by default.</li>
       <li><b>Web shows all groups, the app shows only yours.</b>The web stays the shared inbox, and any office user can reply there. On the app an office user sees only groups they're a member of, with pushes and the unread badge following, as for 1:1s (AIOP-25726) and broadcasts (AIOP-25082).</li>
       <li><b>Who is a member.</b>The carers chosen, plus any office user who created the group or replied to it from the web. Replying makes them a visible member. Only reading a group on the web does not.</li>
-      <li><b>History on the app.</b>An office user who is a member sees the full history, as they can on the web. A setting decides whether a carer added later sees earlier messages. Proposed default: no, as earlier messages may contain customer information.</li>
+      <li><b>History on the app.</b>An office user who is a member sees the full history, as they can on the web. Whether an employee added later sees earlier messages is the office's choice each time they add someone. Proposed default: no, as earlier messages may contain customer information.</li>
       <li><b>First version.</b>Groups are created on the web. A private reply linked to a broadcast, and groups that follow an area, tag or package as people move, can wait.</li>
     </ul>
 
@@ -312,9 +315,9 @@
     <ul class="takeaways">
       <li><b>The word for groups.</b>Whether "Broadcast" is shown anywhere on live, and what replaces it.</li>
       <li><b>Full history on the app for an office user who joins by replying.</b>For a 1:1, AIOP-25726 says messages from before the reply may not be shown, which looks like a limit of how the app syncs (for engineering).</li>
-      <li><b>Adding and removing members</b> after a group is created, and rules for carers joining and leaving.</li>
+      <li><b>What a removed employee sees.</b>Whether the group disappears from their app and whether they keep the messages they already had, and whether an employee can leave a group themselves.</li>
       <li><b>Data protection.</b>Replies may mention customers, and members see each other's names.</li>
-      <li><b>Group size.</b>A broadcast can already reach 200 or more people (for engineering).</li>
+      <li><b>Group size.</b>A broadcast can already reach 200 or more people, and select all lets an office add everyone (for engineering).</li>
     </ul>
     <p class="caveat">Summarised from case descriptions written by our support team, not from conversations with the customers. We haven't searched Intercom conversations or calls.</p>
   </section>
