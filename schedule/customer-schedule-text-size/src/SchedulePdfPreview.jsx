@@ -1,12 +1,8 @@
 // Mock-up of the customer schedule PDF (AIOP-25799). Page units are points
 // (1 CSS px = 1pt) on an A4 page, scaled to fit by the caller.
 //
-//   standard + cards  → today's layout (7 day columns); standardSize '11' shows the same
-//                       layout with ~11pt card text (Nourish's size) for comparison
-//   large    + cards  → Concept 2 from wireframes/schedule-pdf.json (days flow into
-//                       3 columns portrait / 4 landscape); 'cards2' is the same with 2 / 3
-//                       columns and 'cards4' with 4 / 5, to compare at 16pt
-//   large    + list   → Nourish-style list, one row per visit
+//   11pt (default) → 7 day columns, ~11pt card text (the new size, matching Nourish)
+//   current        → the layout as it was before AIOP-25799: same columns, 6.75–8.25pt text
 //
 // Visit data is a fixed week for the live example customer; the dialog's
 // Include pending / cancelled checkboxes filter it.
@@ -57,92 +53,30 @@ function Cards({ days, visits, columns }) {
   )
 }
 
-function List({ days, visits }) {
-  return (
-    <table className="pdf-list">
-      <tbody>
-        {days.map(i => {
-          const d = DAYS[i]
-          const rows = visits.filter(v => v.day === i)
-          if (rows.length === 0) {
-            return (
-              <tr key={d}>
-                <td className="pdf-list-day">{d}</td>
-                <td colSpan={2} className="pdf-list-none">No visits</td>
-              </tr>
-            )
-          }
-          return rows.map((v, k) => (
-            <tr key={`${d}-${k}`} className={k === 0 ? 'pdf-list-first' : ''}>
-              {k === 0 && <td className="pdf-list-day" rowSpan={rows.length}>{d}</td>}
-              <td className={`pdf-list-time pdf-list-time--${v.status}`}>{v.time}</td>
-              <td className={v.status === 'cancelled' ? 'pdf-list-cancelled' : ''}>{v.carer}</td>
-            </tr>
-          ))
-        })}
-      </tbody>
-    </table>
-  )
-}
-
 export const PAGE = { portrait: { w: 595, h: 842 }, landscape: { w: 842, h: 595 } }
 
-// Splits the 7 days across pages by estimated height (pt). A mock-up, not a layout
-// engine: days never split between pages, and wrapped names are only estimated.
-function paginate(layout, large, portrait, visits, columns, size) {
-  const LINE = size * 1.35
-  const all = [0, 1, 2, 3, 4, 5, 6]
-  if (!large) return [all]
-  const KEY = 44 // room for the key on whichever page is last
-  const avail = [(portrait ? 450 : 295) - KEY, (portrait ? 720 : 475) - KEY]
-  const perLine = Math.floor((columns >= 4 ? 12 : columns >= 3 ? 17 : 27) * 16 / size) // rough characters per line in a card
-  const cardH = v => (2 + Math.ceil(v.carer.length / perLine)) * LINE + 12
-  const dayH = d => {
-    const vs = visits.filter(v => v.day === d)
-    return layout === 'cards'
-      ? 2 * LINE + 26 + (vs.length ? vs.reduce((t, v) => t + cardH(v), 0) : 24)
-      : Math.max(1, vs.length) * (LINE + 18)
-  }
-  // Cards fill row by row (a row is as tall as its tallest day); a list is one tall column.
-  const units = layout === 'cards'
-    ? Array.from({ length: Math.ceil(all.length / columns) }, (_, r) => all.slice(r * columns, r * columns + columns))
-    : all.map(d => [d])
-  const unitH = u => Math.max(...u.map(dayH))
-  const pages = [[]]
-  let used = 0
-  units.forEach(u => {
-    const cap = avail[pages.length === 1 ? 0 : 1]
-    if (used + unitH(u) > cap && pages[pages.length - 1].length) { pages.push([]); used = 0 }
-    pages[pages.length - 1].push(...u)
-    used += unitH(u)
-  })
-  return pages
-}
-
-export default function SchedulePdfPreview({ customer, weekLabel, textSize, orientation, largeLayout, largeSize = 16, standardSize = 'current', showPending, showCancelled }) {
-  const large = textSize === 'large'
+export default function SchedulePdfPreview({ customer, weekLabel, orientation, textSize = '11', showPending, showCancelled }) {
   const visits = VISITS.filter(v => (v.status !== 'pending' || showPending) && (v.status !== 'cancelled' || showCancelled))
   const { w, h } = PAGE[orientation]
   const portrait = orientation === 'portrait'
-  const layout = large ? (largeLayout === 'list' ? 'list' : 'cards') : 'cards'
-  const columns = !large ? 7 : largeLayout === 'cards2' ? (portrait ? 2 : 3) : largeLayout === 'cards4' ? (portrait ? 4 : 5) : (portrait ? 3 : 4)
-  const pages = paginate(layout, large, portrait, visits, columns, largeSize)
+  const pages = [[0, 1, 2, 3, 4, 5, 6]] // one page: all seven days
 
   return (
     <div className="pdf-pages">
       {pages.map((days, n) => (
-        <div key={n} className={`pdf-page${large ? ' pdf-page--large' : standardSize === '11' ? ' pdf-page--std11' : ''}`} style={{ width: w, height: h, '--lg': `${largeSize}px` }}>
+        <div key={n} className={`pdf-page${textSize === '11' ? ' pdf-page--std11' : ''}`} style={{ width: w, height: h }}>
           {n === 0 ? (
             <>
               <div className={`pdf-head${portrait ? '' : ' pdf-head--row'}`}>
-                <div className="pdf-customer">
-                  <b>{customer}</b>
-                  <div>44B Chelmsford Road</div><div>South Woodford</div><div>London</div><div>E18 2PP</div>
-                </div>
                 <div className="pdf-agency">
                   <b>Bluebird Care Redbridge</b>
                   <div>137 George Lane</div><div>South Woodford, London</div><div>E18 1AN</div>
                   <div className="pdf-agency-contact">0208 989 8444</div>
+                  <div>essexfinance@bluebirdcare.co.uk</div>
+                </div>
+                <div className="pdf-customer">
+                  <b>{customer}</b>
+                  <div>44B Chelmsford Road</div><div>South Woodford</div><div>London</div><div>E18 2PP</div>
                 </div>
               </div>
               <div className="pdf-title">Visit schedule for {customer}</div>
@@ -152,7 +86,7 @@ export default function SchedulePdfPreview({ customer, weekLabel, textSize, orie
           ) : (
             <div className="pdf-title pdf-title--cont">Visit schedule for {customer} (continued)</div>
           )}
-          {layout === 'cards' ? <Cards days={days} visits={visits} columns={columns} /> : <List days={days} visits={visits} />}
+          <Cards days={days} visits={visits} columns={7} />
           {n === pages.length - 1 && (
             <div className="pdf-key">
               <span className="pdf-key-label">Key</span>

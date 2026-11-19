@@ -1,0 +1,49 @@
+.ps-preview-frame { margin: 24px auto; }
+.pdf-pages { display: flex; flex-direction: column; gap: 16px; }
+.pdf-page { box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+.pdf-title--cont { margin-bottom: 16px; }
+/* ── Customer schedule PDF mock-up (units are pt; scaled by the caller) ── */
+.pdf-page { box-sizing: border-box; padding: 40px 24px 24px; position: relative; background: #fff; color: #000;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 9px; line-height: 1.35; }
+.pdf-head { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
+.pdf-agency { align-self: flex-end; width: 190px; }
+.pdf-head--row { flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.pdf-head--row .pdf-agency { align-self: auto; }
+.pdf-customer { margin-left: 40px; }
+.pdf-agency-contact { margin-top: 8px; }
+.pdf-title { font-size: 10.5px; font-weight: 500; }
+.pdf-range { font-size: 10.5px; font-weight: 300; margin-bottom: 16px; }
+.pdf-count { font-weight: 700; margin-bottom: 8px; }
+.pdf-grid { display: grid; border: 1px solid #c8c3d6; }
+.pdf-day { border-left: 1px solid #c8c3d6; padding: 8px 4px; min-height: 80px; }
+.pdf-day:first-child { border-left: none; }
+.pdf-day-head { font-family: Barlow, sans-serif; font-weight: 500; font-size: 9px; text-align: center; color: #555; margin-bottom: 8px; }
+.pdf-card { position: relative; overflow: hidden; font-family: Barlow, sans-serif; border: 1px solid #ddd; border-radius: 3px; padding: 4px 6px 4px 12px; margin-bottom: 4px; background: #fff; }
+/* Status bar down the left edge: solid = booked, hatched = pending (as on the live PDF) */
+.pdf-card::before, .pdf-key-item--booked::before, .pdf-key-item--pending::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
+.pdf-card--booked::before, .pdf-key-item--booked::before { background: #968caf; }
+.pdf-card--pending::before, .pdf-key-item--pending::before { background: repeating-linear-gradient(-45deg, #dcdcdc 0 2px, #fff 2px 5px); }
+.pdf-card--cancelled::before { background: #bbb; }
+.pdf-card-time { font-size: 6.75px; font-weight: 500; color: #555; }
+.pdf-card-name { font-size: 8.25px; font-weight: 500; }
+.pdf-card-label { font-size: 6.75px; color: #777; }
+.pdf-card--cancelled { background: #e8e8e8; }
+/* 11pt text (Nourish-sized, 11.2pt): the new size, the default in the preview */
+.pdf-page--std11 .pdf-day-head, .pdf-page--std11 .pdf-card-time, .pdf-page--std11 .pdf-card-name, .pdf-page--std11 .pdf-card-label { font-size: 11.2px; }
+.pdf-page--std11 .pdf-title, .pdf-page--std11 .pdf-range { font-size: 11.2px; } /* same size as the card text */
+.pdf-page--std11 .pdf-key { font-size: 9px; }
+.pdf-page--std11 .pdf-key-label { font-size: 11.2px; }
+.pdf-key { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 12px; font-size: 6px; }
+.pdf-key-label { font-size: 7.5px; margin-right: 4px; }
+.pdf-key-item { position: relative; overflow: hidden; border: 1px solid #ddd; border-radius: 3px; padding: 6px 8px 6px 14px; }
+.pdf-key-item--cancelled { background: #e8e8e8; }
+.pdf-footer { position: absolute; left: 24px; bottom: 16px; font-size: 7.5px; }
+.ps-preview-bar .seg-toggle-item { width: auto; flex: 1 1 auto; white-space: nowrap; } /* let a long option (e.g. "Current (6.75–8.25pt)") widen the toggle instead of wrapping */
+.ps-preview-bar { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 16px 48px 0; font-size: 15px; color: var(--greyscale-6-grey-50); }
+
+/* ── Page: the schedule document on plain white, with the text size toggle ── */
+.cst-page { min-height: calc(100vh - var(--dev-toolbar-height, 0px)); background: #fff; padding-bottom: 96px; }
+.cst-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 24px 48px 0; font-size: 15px; color: var(--greyscale-6-grey-50); }
+.cst-bar .seg-toggle-item { width: auto; flex: 1 1 auto; white-space: nowrap; }
+.ps-preview-frame { margin: 24px auto; }
+.cst-page .pdf-page { box-shadow: none; outline: 1px solid var(--ui-purple-5-languid-lavendar); }

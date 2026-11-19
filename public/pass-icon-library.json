@@ -2299,11 +2299,16 @@
         },
         {
           "kind": "inline",
+          "ref": "schedule/customer-schedule-text-size/src/CustomerScheduleTextSize.jsx#BackIcon",
+          "name": "BackIcon"
+        },
+        {
+          "kind": "inline",
           "ref": "schedule/employee-restricted-hours/src/EmployeeRestrictedHours.jsx#BackIcon",
           "name": "BackIcon"
         }
       ],
-      "usageCount": 11
+      "usageCount": 12
     },
     {
       "hash": "d0cc47c8",
@@ -5884,5 +5889,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-19T08:58:39.491Z"
+  "generatedAt": "2026-11-19T13:55:22.387Z"
 }
