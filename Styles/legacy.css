@@ -114,4 +114,4 @@
 }
 
 /* Resolved alert glyph (eltico U+E90A) used by the refreshed timeline components. */
-.resolved-alert-glyph { font-family: 'eltico'; font-style: normal; font-size: 24px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+.resolved-alert-glyph { font-family: 'eltico'; font-style: normal; font-size: 20px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }

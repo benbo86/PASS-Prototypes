@@ -24,16 +24,11 @@
         },
         {
           "kind": "inline",
-          "ref": "customer-profile/timeline/src/App.jsx#PlusIcon",
-          "name": "PlusIcon"
-        },
-        {
-          "kind": "inline",
           "ref": "office/customer-assessments/src/App.jsx#PlusIcon",
           "name": "PlusIcon"
         }
       ],
-      "usageCount": 5
+      "usageCount": 4
     },
     {
       "hash": "7adc2310",
@@ -2205,11 +2200,6 @@
         },
         {
           "kind": "inline",
-          "ref": "customer-profile/timeline/src/App.jsx#ChevronLeftIcon",
-          "name": "ChevronLeftIcon"
-        },
-        {
-          "kind": "inline",
           "ref": "customer-profile/timeline-expandable/src/App.jsx#ChevronLeftIcon",
           "name": "ChevronLeftIcon"
         },
@@ -2249,7 +2239,7 @@
           "name": "ChevronLeftIcon"
         }
       ],
-      "usageCount": 27
+      "usageCount": 26
     },
     {
       "hash": "83e17a13",
@@ -2414,6 +2404,55 @@
       "usageCount": 8
     },
     {
+      "hash": "9af5394b",
+      "name": "Chevron Left",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.7 16.9L11.1 12.3L15.7 7.70005L14.3 6.30005L8.30001 12.3L14.3 18.3L15.7 16.9Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/holiday-deduction/src/GrossPayAdvice.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "gross-pay-advice/salaried-travel-time/src/App.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "invoices/list/src/Invoices.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/PrintScheduleDialog.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "schedule/leave-requests/src/LeaveRequests.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/FunderDetail.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/FunderList.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        },
+        {
+          "kind": "inline",
+          "ref": "timesheets/filters/src/Timesheets.jsx#ChevronLeft",
+          "name": "ChevronLeft"
+        }
+      ],
+      "usageCount": 8
+    },
+    {
       "hash": "426924f7",
       "name": "Chevron Right",
       "group": "Inline",
@@ -2461,50 +2500,6 @@
         }
       ],
       "usageCount": 8
-    },
-    {
-      "hash": "9af5394b",
-      "name": "Chevron Left",
-      "group": "Inline",
-      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M15.7 16.9L11.1 12.3L15.7 7.70005L14.3 6.30005L8.30001 12.3L14.3 18.3L15.7 16.9Z\"/>\n  </svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/holiday-deduction/src/GrossPayAdvice.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "gross-pay-advice/salaried-travel-time/src/App.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "invoices/list/src/Invoices.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "schedule/leave-requests/src/LeaveRequests.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/FunderDetail.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/FunderList.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        },
-        {
-          "kind": "inline",
-          "ref": "timesheets/filters/src/Timesheets.jsx#ChevronLeft",
-          "name": "ChevronLeft"
-        }
-      ],
-      "usageCount": 7
     },
     {
       "hash": "8fc00cee",
@@ -4965,34 +4960,6 @@
       "usageCount": 1
     },
     {
-      "hash": "a1a8da86",
-      "name": "External Link",
-      "group": "Inline",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M14 3v2h3.59L9 13.59 10.41 15 19 6.41V10h2V3h-7zM19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z\"/></svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/timeline/src/App.jsx#ExternalLinkIcon",
-          "name": "ExternalLinkIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
-      "hash": "80aa3919",
-      "name": "Pencil Small",
-      "group": "Inline",
-      "svg": "<svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/></svg>",
-      "sources": [
-        {
-          "kind": "inline",
-          "ref": "customer-profile/timeline/src/App.jsx#PencilSmallIcon",
-          "name": "PencilSmallIcon"
-        }
-      ],
-      "usageCount": 1
-    },
-    {
       "hash": "e274201a",
       "name": "Info",
       "group": "Inline",
@@ -5637,6 +5604,20 @@
       "usageCount": 1
     },
     {
+      "hash": "5672dba1",
+      "name": "Chevron Right",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n    <path d=\"M8.3 16.9L12.9 12.3L8.3 7.7L9.7 6.3L15.7 12.3L9.7 18.3L8.3 16.9Z\"/>\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/PrintScheduleDialog.jsx#ChevronRight",
+          "name": "ChevronRight"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "7431a481",
       "name": "Ellipsis",
       "group": "Inline",
@@ -5903,5 +5884,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-17T16:53:02.935Z"
+  "generatedAt": "2026-11-19T08:58:39.491Z"
 }
