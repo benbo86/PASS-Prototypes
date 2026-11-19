@@ -652,4 +652,5 @@
 .pdf-page--large .pdf-key-label { font-size: 12px; }
 .pdf-page--large .pdf-footer { font-size: 10px; }
 .pdf-page--large .pdf-list { font-size: var(--lg, 16px); }
+.ps-preview-bar .seg-toggle-item { width: auto; flex: 1 1 auto; white-space: nowrap; } /* let a long option (e.g. "Current (6.75–8.25pt)") widen the toggle instead of wrapping */
 .ps-preview-bar { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 16px 48px 0; font-size: 15px; color: var(--greyscale-6-grey-50); }

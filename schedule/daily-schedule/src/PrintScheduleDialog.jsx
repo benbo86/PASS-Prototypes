@@ -287,7 +287,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       {textSize === 'standard' && (
         <div className="ps-preview-bar">
           <span>Text size (prototype option)</span>
-          <SegmentedToggle options={[{ value: 'current', label: 'Current' }, { value: '11', label: '11pt' }]} value={standardSize} onChange={setStandardSize} />
+          <SegmentedToggle options={[{ value: 'current', label: 'Current (6.75–8.25pt)' }, { value: '11', label: '11pt' }]} value={standardSize} onChange={setStandardSize} />
         </div>
       )}
       {textSize === 'large' && (
