@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group messaging research</title>
+<style>
+  :root {
+    --bg: #f6f4f9;
+    --surface: #ffffff;
+    --surface-soft: #fbfafd;
+    --ink: #221e2e;
+    --ink-soft: #5b5568;
+    --ink-faint: #948d9f;
+    --accent: #6b3fa0;
+    --accent-soft: #efe9f7;
+    --line: #e3dfea;
+    --good: #2f7a57;
+    --good-bg: #e5f3ec;
+    --warn: #9c6b1f;
+    --warn-bg: #fbf1de;
+    --serif: Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17141f;
+      --surface: #1e1a29;
+      --surface-soft: #221e2e;
+      --ink: #ece8f2;
+      --ink-soft: #b3aac2;
+      --ink-faint: #7c7390;
+      --accent: #b58ee0;
+      --accent-soft: #2c2440;
+      --line: #322b41;
+      --good: #6fcf9c;
+      --good-bg: #1c2f26;
+      --warn: #e0b76a;
+      --warn-bg: #332a17;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17141f;
+    --surface: #1e1a29;
+    --surface-soft: #221e2e;
+    --ink: #ece8f2;
+    --ink-soft: #b3aac2;
+    --ink-faint: #7c7390;
+    --accent: #b58ee0;
+    --accent-soft: #2c2440;
+    --line: #322b41;
+    --good: #6fcf9c;
+    --good-bg: #1c2f26;
+    --warn: #e0b76a;
+    --warn-bg: #332a17;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    margin: 0;
+    padding: 56px 16px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* Hand-styled to match the shared .back-link (this page doesn't load main.css). */
+  .back-link {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #9a26d6;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .back-link:hover { background: #8421b8; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+  .dek { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 16px; }
+  .meta { font-size: 13px; color: var(--ink-faint); margin: 0 0 24px; }
+  .meta a { color: var(--accent); }
+
+  /* Section nav — one pill per research type on this page. */
+  .section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 8px;
+    background: var(--bg);
+  }
+  .section-nav a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 16px;
+    padding: 6px 14px;
+    text-decoration: none;
+  }
+  .section-nav a span { font-weight: 400; color: var(--ink-soft); margin-left: 4px; }
+
+  .research-section { scroll-margin-top: 64px; }
+  .research-section + .research-section { border-top: 1px solid var(--line); margin-top: 56px; }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 40px 0 8px;
+  }
+  .section-lede { color: var(--ink-soft); margin: 0 0 16px; max-width: 64ch; }
+
+  h3.sub {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 32px 0 8px;
+  }
+  h3.sub .num { color: var(--accent); margin-right: 8px; }
+
+  .cards { display: grid; gap: 12px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .card h4 { font-size: 15px; margin: 0 0 4px; }
+  .card h4 .tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: 2px;
+  }
+  .card p { margin: 4px 0 0; font-size: 14px; color: var(--ink-soft); }
+  .card p b, .card li b { color: var(--ink); font-weight: 600; }
+  .card blockquote, .session blockquote {
+    margin: 8px 0 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--line);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* Customer sessions */
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .session-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 4px; }
+  .session-head h4 { font-size: 18px; margin: 0; }
+  .session-date { font-size: 13px; color: var(--ink-faint); }
+  .session-context { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+  .session h5 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 16px 0 6px;
+  }
+  .session ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .session li { margin: 4px 0; }
+
+  .themes { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .themes li { border-radius: 10px; padding: 14px 18px; font-size: 14px; background: var(--good-bg); }
+  .themes li.differ { background: var(--warn-bg); }
+  .themes b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+  .takeaways { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .takeaways li { background: var(--good-bg); border-radius: 10px; padding: 16px 20px; font-size: 14px; }
+  .takeaways b { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--surface-soft); font-weight: 600; font-size: 13px; color: var(--ink-soft); }
+  tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; }
+
+  .sources { font-size: 13px; color: var(--ink-soft); padding-left: 20px; }
+  .sources a { color: var(--accent); word-break: break-word; }
+  .caveat { font-size: 13px; color: var(--ink-faint); margin-top: 8px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 10px; padding: 2px 8px; }
+  .pill.for { background: var(--good-bg); color: var(--good); }
+  .pill.against { background: var(--warn-bg); color: var(--warn); }
+  .pill.none { background: var(--accent-soft); color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<a href="../../" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  Prototypes
+</a>
+<div class="page">
+  <div class="eyebrow">Research · Staff messaging</div>
+  <h1>Group messaging research</h1>
+  <p class="dek">What customers are asking for when they request group messages: conversations with several carers where everyone can reply, and replies to broadcasts.</p>
+  <p class="meta">Last updated 19 November 2026. Part of the wider <a href="../messaging-coverage/">messaging discovery and requirement coverage</a>. Linked from <a href="../../web/messaging/">Staff Messaging (web)</a> and <a href="../../mobile/messaging/">Staff Messaging (mobile app)</a>.</p>
+
+  <nav class="section-nav" aria-label="Research sections">
+    <a href="#support-cases">Support cases <span>9 recent</span></a>
+    <a href="#existing-work">Existing work <span>Jira</span></a>
+  </nav>
+
+  <!-- ─── Support cases ──────────────────────────────────────────── -->
+  <section class="research-section" id="support-cases">
+    <h2 class="section-title">Support cases</h2>
+    <p class="section-lede">Salesforce cases asking for group messaging, found by searching case subjects and text on 19 November 2026. Nine requests from six customers, all raised since 15 October 2026, the weeks after Two-Way Messaging was released. All are still "New Request". Together the six customers pay <b>£8,078.25 MRR</b> (Total Contracted MRR from Salesforce, each customer counted once).</p>
+
+    <h3 class="sub">What we've heard so far</h3>
+    <ul class="themes">
+      <li><b>Broadcasts can't be replied to, and that's the most common complaint</b>Four cases say it directly. Customers want to send one message to several carers and have everyone reply in the same thread, as with a group chat.</li>
+      <li class="differ"><b>Some want group chat to replace WhatsApp</b>Two customers say they run package or team groups on WhatsApp today, and a third wants fewer external messaging apps. Their reasons are governance, information on personal devices, and communication records spread across systems. Others only want the convenience of one message and one thread.</li>
+      <li class="differ"><b>Groups by package, area or tag</b>One customer wants groups built from care packages, areas or custom tags. Others only talk about selecting several recipients when starting a conversation.</li>
+      <li class="differ"><b>Beyond text</b>Two customers also ask for file and image sharing in groups. This is covered by a separate ticket, so it isn't part of this one. One also asks for read status and acknowledgements to carry across, and another for an office-level on/off setting for group chats.</li>
+    </ul>
+
+    <h3 class="sub">Recent requests</h3>
+    <div class="cards">
+      <div class="card">
+        <h4>Direct Healthcare 24 <span class="tag">Case 00225540 · 17 November 2026 · MRR £200.00</span></h4>
+        <p>Wants secure group chats for carers and managers assigned to a care package, to replace the WhatsApp groups they use now. Everyone in the group sees and answers messages, with read status and acknowledgements kept. Groups could be by package, area or custom tag, with file and image sharing later.</p>
+        <p>Sees Two-Way Messaging as a step forward but says it can't replace WhatsApp until group chat exists.</p>
+      </div>
+      <div class="card">
+        <h4>Topkare (My Homecare Slough South Bucks) <span class="tag">Case 00225274 · 12 November 2026 · MRR £1,110.59</span></h4>
+        <p>Already uses Two-Way Communications. Wants group conversations so one update, urgent information or instruction reaches several carers at once, instead of duplicate messages.</p>
+      </div>
+      <div class="card">
+        <h4>Health Now <span class="tag">Case 00225225 · 12 November 2026 · MRR £432.60</span></h4>
+        <p>Asks for group chats, multi-user conversations, and file and image sharing. Wants one platform in PASS so staff don't use external messaging apps for care matters.</p>
+      </div>
+      <div class="card">
+        <h4>Adonai Care Services <span class="tag">Cases 00225215, 00225213 · 12 November 2026; 00223205 · 20 October; 00222934 · 15 October · MRR £1,450.44</span></h4>
+        <p>Four cases from one customer over a month. They can broadcast to a group, but recipients can't reply, so conversations need separate threads. They want group chat creation, several staff in one conversation, replies kept with the original message, and an office setting to turn group chat on or off.</p>
+        <p>Example uses: medication changes, care updates, shift coordination, task handovers and operational announcements that need discussion.</p>
+      </div>
+      <div class="card">
+        <h4>AS Care <span class="tag">Case 00223444 · 21 October 2026 · MRR £3,685.17</span></h4>
+        <p>An office user should pick several recipients when starting a conversation, and every recipient can reply in the same thread, visible to all participants. A broadcast that can't be replied to doesn't work when the sender needs a response.</p>
+      </div>
+      <div class="card">
+        <h4>Athlone Healthcare Group <span class="tag">Case 00224412 · 2 November 2026 · MRR £1,199.45</span></h4>
+        <p>Wants true one-to-one messages to chosen role or office staff, private conversations, group chats and more targeted controls. Relies on WhatsApp today and wants communication, records and governance inside PASS.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">Older and related cases</h3>
+    <ul class="takeaways">
+      <li><b>Earlier asks for the same thing.</b>Compass Supported Living asked for broadcasting messages (case 00088226, 2022, still open). Someone asked for group messages via the app in 2021 (case 00074951, still New Request).</li>
+      <li><b>Bulk and group email or SMS.</b>Seren Support Services asked to send emails to tagged groups from the roster (case 00161244, September 2024, open), and for a bulk email and SMS broadcast by region and role (case 00198008, November 2025, marked Released).</li>
+      <li><b>A different question, not a request.</b>Bluebird Care Southampton asked why a message to one person, or a broadcast to a few people, seemed visible to everyone (case 00224058, still waiting on the customer). It points to the same area of the product, but isn't asking for group chat.</li>
+    </ul>
+
+    <h3 class="sub">What this means for the prototypes</h3>
+    <ul class="takeaways">
+      <li><b>Two different needs sit under one phrase.</b>Replies to a broadcast, where one sender writes to many and the replies stay with the message, and a true group chat, where everyone writes to everyone. The cases use both words for both.</li>
+      <li><b>Broadcasts can't be replied to by design today.</b>AIOP-23550 built broadcast threads as read-only with a "can't reply" notice. Changing that is the smallest step towards what customers describe.</li>
+      <li><b>Not yet known.</b>Whether customers would be content with replies to broadcasts, or really need group chat; how groups should be formed (picked per message, by package, by area or tag); and whether replies should be visible to all recipients or only to the sender.</li>
+    </ul>
+    <p class="caveat">Summarised from case descriptions written by our support team, not from conversations with the customers. We haven't searched Intercom conversations or calls.</p>
+  </section>
+
+  <!-- ─── Existing work ──────────────────────────────────────────── -->
+  <section class="research-section" id="existing-work">
+    <h2 class="section-title">Existing work</h2>
+    <p class="section-lede">Searched Jira (AIOP) on 19 November 2026. There is no ticket for group conversations or replies to broadcasts.</p>
+    <ul class="takeaways">
+      <li><b>Nothing covers group chat or replying to broadcasts.</b>Of about 40 messaging tickets, none does. A ticket with unusual wording could have been missed.</li>
+      <li><b>Broadcasts are designed as read-only.</b>AIOP-23550 (Accepted) built the read-only broadcast thread with a "can't reply" notice.</li>
+      <li><b>Nearby, not the same.</b>AIOP-25608 "[PRODUCT TBC] Area access in messaging" (Backlog) is about who sees what by area. AIOP-25209 and AIOP-25208 (Backlog) let managers message carers and other managers from the app.</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
