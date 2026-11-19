@@ -35,8 +35,8 @@ const LIVE = FILTER_STYLE === 'live'
 // How the "Group tasks by visit" setting is shown: 'switch' (a switch on the bar) or 'button' (a View settings button + popover).
 const VIEW_STYLE = 'button'
 const VIEW_CHOICES = [
-  { value: 'default', label: 'Default', hint: 'Each task appears as its own item on the timeline, alongside its visit.' },
   { value: 'visits', label: 'Tasks within visits', hint: 'Each visit’s tasks are shown inside the visit, instead of as separate items.' },
+  { value: 'separate', label: 'Tasks as separate items', hint: 'Each task appears as its own item on the timeline, alongside its visit.' },
 ]
 const GROUP_HINT = 'Show each visit’s tasks inside the visit, instead of as separate items.'
 const PILL_FILTERS = FILTER_STYLE !== 'original'
@@ -443,7 +443,7 @@ export default function App() {
   const includes = (t) => liveTypes.size === 0 || liveTypes.has(t)
   const [actionTypeSel, setActionTypeSel] = useState(() => new Set())
   const [actionStatusSel, setActionStatusSel] = useState(() => new Set())
-  const [groupByVisit, setGroupByVisit] = useState(false) // off by default, as in the ticket
+  const [groupByVisit, setGroupByVisit] = useState(true) // on by default (Product's preferred view); the ticket had it off
   const [alertTypeSel, setAlertTypeSel] = useState(() => new Set())
   const [alertStatusSel, setAlertStatusSel] = useState(() => new Set())
   const [updateTypeSel, setUpdateTypeSel] = useState(() => new Set())
@@ -816,7 +816,7 @@ export default function App() {
           viewSettings={LIVE && showsVisits ? (VIEW_STYLE === 'switch' ? (
             <TimelineSwitch label="Group tasks" hint={GROUP_HINT} checked={groupByVisit} onChange={setGroupByVisit} />
           ) : (
-            <TimelineViewSettings choice={{ title: 'View', value: groupByVisit ? 'visits' : 'default', onChange: v => setGroupByVisit(v === 'visits'), options: VIEW_CHOICES }} />
+            <TimelineViewSettings choice={{ title: 'View', value: groupByVisit ? 'visits' : 'separate', onChange: v => setGroupByVisit(v === 'visits'), options: VIEW_CHOICES }} />
           )) : undefined}
         >
           {LIVE ? (
