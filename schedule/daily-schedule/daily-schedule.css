@@ -545,9 +545,9 @@
 
 /* Dialog: wider than the default 937px slide panel, as on the live page */
 .slide-panel.ps-panel { width: 77%; min-width: 960px; }
-.ps-panel .slide-panel-body { flex-direction: row; gap: 48px; }
+.ps-panel .slide-panel-body { flex-direction: row; align-items: flex-start; gap: 48px; }
 .ps-col { flex: 1; min-width: 0; }
-.ps-col h2 { margin: 0 0 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ui-purple-5-languid-lavendar); }
+.ps-col h2 { font-size: 18px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ui-purple-5-languid-lavendar); }
 .ps-section { margin-bottom: 40px; }
 .ps-section:last-child { margin-bottom: 0; }
 
@@ -557,6 +557,17 @@
 .ps-checks .checkbox-wrap { font-size: 16px; }
 .ps-hint { margin: 16px 0 0; font-size: 16px; color: #1a1a1a; }
 
+/* The slide-out's table column is narrow: let the email table's cells wrap rather than scroll sideways. */
+.ps-panel .data-table .th-name, .ps-panel .data-table .td-name { min-width: 0; }
+.ps-panel .data-table th { white-space: normal; }
+.ps-panel--email .ps-col:first-child { flex: 3; }
+.ps-panel--email .ps-col:last-child { flex: 2; }
+.ps-th { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ps-email-fields { margin: 24px 0 0; }
+.ps-email-intro { font-size: 14px; }
+.ps-email-fields dt { font-size: 14px; color: #333; margin-top: 24px; }
+.ps-email-fields dt:first-child { margin-top: 0; }
+.ps-email-fields dd { margin: 4px 0 0; font-size: 16px; font-weight: 500; color: #000; line-height: 1.4; }
 .ps-nav-arrow {
   border: none; background: transparent; cursor: pointer;
   display: flex; align-items: center; justify-content: center;

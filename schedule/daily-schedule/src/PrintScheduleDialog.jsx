@@ -27,6 +27,19 @@ const ChevronRight = () => (
   </svg>
 )
 
+const SortIcon = ({ dir }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" className={`col-icon sort-icon ${dir ? 'col-icon--active' : ''}`} strokeLinecap="square">
+    <polyline points="7.5,9 12,5 16.5,9" stroke="currentColor" strokeWidth="2" fill="none" opacity={dir === 'desc' ? 0.35 : 1} />
+    <polyline points="7.5,19 12,15 16.5,19" stroke="currentColor" strokeWidth="2" fill="none"
+      style={{ transform: 'scaleY(-1)', transformOrigin: '12px 17px' }} opacity={dir === 'asc' ? 0.35 : 1} />
+  </svg>
+)
+
+// Email only: when each customer was last sent a schedule (sample data; every
+// sixth customer has never been sent one).
+const LAST_SENT = '30/10/2026 - 13:11'
+const LAST_PERIOD = 'Mon 2 Nov - Sun 8 Nov'
+
 function Check({ checked, onChange, label }) {
   return (
     <label className="checkbox-wrap">
@@ -71,14 +84,15 @@ const SHOW_TWO_COLUMN_CARDS = false
 const SHOW_FOUR_COLUMN_CARDS = false
 
 export default function PrintScheduleDialog({ mode, weekLabel, customers, appliedFilters, onClose }) {
+  const isPrint = mode === 'print'
   const CUSTOMERS = customers
   const [selected, setSelected] = useState(() => new Set(customers))
   const [range, setRange] = useState('weekly')
   const [orientation, setOrientation] = useState('portrait')
   const [textSize, setTextSize] = useState('standard')
   const [cancelled, setCancelled] = useState(false)
-  const [pending, setPending] = useState(true)
-  const [unassigned, setUnassigned] = useState(true)
+  const [pending, setPending] = useState(isPrint)
+  const [unassigned, setUnassigned] = useState(isPrint)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [largeSize, setLargeSize] = useState(16) // prototype-only: the AC says 16pt minimum; 14pt for Product to compare
   const [largeLayout, setLargeLayout] = useState('cards') // prototype-only: compares the large-text layouts
@@ -90,7 +104,24 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const safePage = Math.min(page, totalPages)
   const showStart = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1
   const showEnd = Math.min(safePage * rowsPerPage, totalRows)
-  const pageCustomers = CUSTOMERS.slice(showStart - 1, showEnd)
+  const [sort, setSort] = useState({ col: 'name', dir: 'asc' })
+  const neverSent = name => CUSTOMERS.indexOf(name) % 6 === 3
+  const sortedCustomers = [...CUSTOMERS].sort((a, b) => {
+    const val = n => sort.col === 'name' ? n : neverSent(n) ? '~' : sort.col === 'sent' ? LAST_SENT : LAST_PERIOD
+    return val(a).localeCompare(val(b)) * (sort.dir === 'asc' ? 1 : -1) || a.localeCompare(b)
+  })
+  const toggleSort = col => setSort(s => ({ col, dir: s.col === col && s.dir === 'asc' ? 'desc' : 'asc' }))
+  const sortHead = (col, label) => (
+    <th className="th-name">
+      <div className="ps-th">
+        <span>{label}</span>
+        <button className="col-icon-btn" aria-label={`Sort by ${label}`} onClick={() => toggleSort(col)}>
+          <SortIcon dir={sort.col === col ? sort.dir : null} />
+        </button>
+      </div>
+    </th>
+  )
+  const pageCustomers = (isPrint ? CUSTOMERS : sortedCustomers).slice(showStart - 1, showEnd)
 
   const allSelected = selected.size === CUSTOMERS.length
   const toggle = name => setSelected(s => {
@@ -98,7 +129,6 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
     next.has(name) ? next.delete(name) : next.add(name)
     return next
   })
-  const isPrint = mode === 'print'
   const previewCustomer = CUSTOMERS.find(c => selected.has(c))
   // Always A4 at 100% on screen (1pt = 96/72 px, so 595pt ≈ 794px wide).
   const pageW = PAGE[orientation].w
@@ -115,7 +145,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
             <button className="round-btn primary-btn" disabled={selected.size === 0}>Print selected</button>
           </>
         ) : (
-          <button className="round-btn primary-btn" disabled={selected.size === 0}>Email selected</button>
+          <button className="round-btn primary-btn" disabled={selected.size === 0}>Email schedule</button>
         )}
       </div>
     </>
@@ -126,7 +156,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
     <SlidePanel
       open
       onClose={onClose}
-      className="ps-panel"
+      className={`ps-panel${isPrint ? '' : ' ps-panel--email'}`}
       title={`${isPrint ? 'Print' : 'Email'} schedule (${weekLabel})`}
       footer={footer}
     >
@@ -152,7 +182,13 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
                     <span className="checkbox-box" />
                   </label>
                 </th>
-                <th className="th-name">Customer name</th>
+                {isPrint ? <th className="th-name">Customer name</th> : (
+                  <>
+                    {sortHead('name', 'Customer name')}
+                    {sortHead('sent', 'Last sent')}
+                    {sortHead('period', 'Period')}
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -160,6 +196,12 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
                 <tr key={name}>
                   <td className="check-col"><Check checked={selected.has(name)} onChange={() => toggle(name)} label="" /></td>
                   <td className="td-name">{name}</td>
+                  {!isPrint && (
+                    <>
+                      <td className="nowrap">{neverSent(name) ? '-' : LAST_SENT}</td>
+                      <td className="nowrap">{neverSent(name) ? '-' : LAST_PERIOD}</td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -190,12 +232,12 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
         </div>
 
         <div className="ps-section">
-          <h2>Schedule orientation</h2>
+          <h2>{isPrint ? 'Schedule orientation' : 'PDF orientation'}</h2>
           <div className="ps-choices">
             <Radio name="orientation" value="portrait" current={orientation} onChange={setOrientation} label="Portrait" />
             <Radio name="orientation" value="landscape" current={orientation} onChange={setOrientation} label="Landscape" />
           </div>
-          <p className="ps-hint">The address will appear in the window of C5 and DL envelopes portrait only</p>
+          {isPrint && <p className="ps-hint">The address will appear in the window of C5 and DL envelopes portrait only</p>}
         </div>
 
         <div className="ps-section">
@@ -217,6 +259,21 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
           </div>
           <p className="ps-hint">Select visit states you wish to include with the customer</p>
         </div>
+
+        {!isPrint && (
+          <div className="ps-section">
+            <h2>Email content</h2>
+            <p className="ps-hint ps-email-intro">Selected customers will be sent a copy of their {range === 'weekly' ? 'weekly' : 'bi-weekly'} schedule</p>
+            <dl className="ps-email-fields">
+              <dt>From address</dt>
+              <dd>everylifetest+schedule@gmail.com</dd>
+              <dt>Email subject</dt>
+              <dd>Weekly Roster [period-from] to [period-to]</dd>
+              <dt>Email text</dt>
+              <dd>Dear [customer-name] Please view the attachment for your schedule visits for the period [period-from] to [period-to] If you have any queries or concerns please contact Bluebird Care Redbridge on adminredbridge@bluebirdcare.co.uk or call our office on 02089898444 Thank you in advance, we hope you have a lovely week. The Bluebird Care Redbridge Team</dd>
+            </dl>
+          </div>
+        )}
       </div>
     </SlidePanel>
     <ModalPanel
