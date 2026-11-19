@@ -1,3 +1,4 @@
+import { goToPage } from './splitPane'
 // Left sub-nav sitting inside the Rostering tab's own page content (not the
 // global SideNav rail, and not a horizontal tab bar like CustomerProfileNav/
 // OfficeNav) — first built for customer-profile/service-agreement/. Flat
@@ -56,7 +57,7 @@ export default function RosteringNav({ activeItem }) {
           <li key={key}>
             <button
               className={`rn-item${key === activeItem ? ' active' : ''}`}
-              onClick={() => href && (window.location.href = href)}
+              onClick={() => href && goToPage(href)}
               style={!href ? { cursor: 'default' } : undefined}
             >
               <span className="rn-item-icon"><Icon /></span>

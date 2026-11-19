@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { goToPage } from './splitPane'
 
 // Ported from NewInfoNav/CustomerInfoNav.tsx (another prototype's stack:
 // Tailwind + react-router + lucide). Reworked to this project's conventions:
@@ -102,7 +103,7 @@ export default function CustomerProfileNav({ activeTab, tabBadges = {} }) {
           {PRIMARY_TABS.map(({ label, href }) => (
             <li key={label} className={label === activeTab ? 'active' : ''}>
               <button
-                onClick={() => href && (window.location.href = href)}
+                onClick={() => href && goToPage(href)}
                 style={!href ? { opacity: 0.4, cursor: 'default' } : undefined}
               >
                 {label}

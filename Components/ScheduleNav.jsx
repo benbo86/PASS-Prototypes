@@ -1,3 +1,4 @@
+import { goToPage } from './splitPane'
 // Tab bar under TopNav for the Schedule area — modeled directly on
 // Components/OfficeNav.jsx (same shape: flat {key,label,href} list,
 // href:null renders disabled). A real, reusable "schedule menu" shared
@@ -33,7 +34,7 @@ export default function ScheduleNav({ active, tabBadges = {} }) {
         {TABS.map(({ key, label, href }) => (
           <li key={key} className={active === key ? 'active' : ''}>
             <button
-              onClick={() => href && (window.location.href = href)}
+              onClick={() => href && goToPage(href)}
               style={!href ? { opacity: 0.4, cursor: 'default' } : undefined}
             >
               {label}

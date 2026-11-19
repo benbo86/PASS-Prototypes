@@ -1,3 +1,4 @@
+import { goToPage } from './splitPane'
 const TABS = [
   { key: 'details',                  label: 'Details',                  href: '../../office/details/' },
   { key: 'checklists',               label: 'Checklists',               href: null },
@@ -15,7 +16,7 @@ export default function OfficeNav({ active }) {
         {TABS.map(({ key, label, href }) => (
           <li key={key} className={active === key ? 'active' : ''}>
             <button
-              onClick={() => href && (window.location.href = href)}
+              onClick={() => href && goToPage(href)}
               style={!href ? { opacity: 0.4, cursor: 'default' } : undefined}
             >
               {label}

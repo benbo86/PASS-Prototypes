@@ -1,6 +1,7 @@
 import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { goToPage } from './splitPane'
 import passgeniusUrl from '../Images/passgenius.svg'
 
 // ─── Nav icons ────────────────────────────────────────────────
@@ -78,7 +79,7 @@ export default function TopNav({ activeItem, unreadMessages = 0, onLogout, userN
         aria-label="Messages"
         onMouseEnter={(e) => showTip(e, 'Messages')}
         onMouseLeave={hideTip}
-        onClick={() => { window.location.href = '../../web/messaging/' }}
+        onClick={() => goToPage('../../web/messaging/')}
       >
         <MessagesIcon />
         {unreadMessages > 0 && (

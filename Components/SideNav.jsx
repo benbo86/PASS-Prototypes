@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { goToPage } from './splitPane'
 import passEmblemUrl from '../Images/PASS Emblem.png'
 
 // ─── Nav icons ────────────────────────────────────────────────
@@ -134,6 +135,7 @@ const NAV_ITEMS = [
 const NAV_LINKS = {
   customers: '../../customers/list/',
   employees: '../../employees/list/',
+  schedule: '../../schedule/daily-schedule/',
   timeline: '../../office/timeline/',
   office: '../../office/details/',
 }
@@ -156,7 +158,7 @@ export default function SideNav({
     if (!NAV_LINKS[key]) return
     // Already on the destination page: do nothing (a reload would reset its state)
     const target = new URL(NAV_LINKS[key], window.location.href)
-    if (target.pathname !== window.location.pathname) window.location.href = NAV_LINKS[key]
+    if (target.pathname !== window.location.pathname) goToPage(NAV_LINKS[key])
   }
 
   // `force` shows the tooltip even when expanded (the toggle needs it in

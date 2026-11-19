@@ -27,3 +27,17 @@ if (IS_SPLIT_PANE) {
   updateScale()
   window.addEventListener('resize', updateScale)
 }
+
+// Leaves the split: a web page's own navigation (side nav, top nav) should take
+// the whole tab to the new page, not load it inside the pane while the split
+// stays open. The mobile pane's own tab bar is the exception, so it just
+// navigates the pane as before.
+export function goToPage(url) {
+  if (IS_SPLIT_PANE && window.top !== window) {
+    const target = new URL(url, window.location.href)
+    target.searchParams.delete('splitpane')
+    window.top.location.href = target.href
+  } else {
+    window.location.href = url
+  }
+}

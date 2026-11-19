@@ -2,6 +2,7 @@ import { isDevToolUi } from './devEditHoverSticky'
 import { useState, useEffect, useRef } from 'react'
 import passLogoUrl from '../Images/pass-logo-white.svg'
 import passGeniusUrl from '../Icons/PASS nav/pass-genius.svg'
+import { goToPage } from './splitPane'
 
 // ─── Nav icons ────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
           <button
             key={key}
             className={`web-nav-item${activePage === key ? ' active' : ''}`}
-            onClick={() => { if (NAV_LINKS[key]) window.location.href = NAV_LINKS[key] }}
+            onClick={() => { if (NAV_LINKS[key]) goToPage(NAV_LINKS[key]) }}
           >
             <Icon />
             <span>{label}</span>
@@ -127,7 +128,7 @@ export default function WebNav({ activePage, unreadMessages = 0 }) {
         <button
           className={`web-nav-action-btn${activePage === 'messages' ? ' active' : ''}`}
           title="Messages"
-          onClick={() => { window.location.href = '../../web/messaging/' }}
+          onClick={() => { goToPage('../../web/messaging/') }}
         >
           <MessagesIcon />
           {unreadMessages > 0 && (
