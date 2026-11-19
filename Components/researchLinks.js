@@ -22,6 +22,9 @@ export const RESEARCH_LINKS = {
   'mobile/holidays/': [
     { title: 'Holiday requests research', href: 'research/holiday-requests/' },
   ],
+  'schedule/daily-schedule/': [
+    { title: 'Customer schedule text size research', href: 'research/customer-schedule-text-size/' },
+  ],
   'schedule/leave-requests/': [
     { title: 'Holiday requests research', href: 'research/holiday-requests/' },
   ],

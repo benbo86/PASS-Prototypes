@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer schedule text size research</title>
+<style>
+  :root {
+    --bg: #f6f4f9;
+    --surface: #ffffff;
+    --surface-soft: #fbfafd;
+    --ink: #221e2e;
+    --ink-soft: #5b5568;
+    --ink-faint: #948d9f;
+    --accent: #6b3fa0;
+    --accent-soft: #efe9f7;
+    --line: #e3dfea;
+    --good: #2f7a57;
+    --good-bg: #e5f3ec;
+    --warn: #9c6b1f;
+    --warn-bg: #fbf1de;
+    --serif: Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17141f;
+      --surface: #1e1a29;
+      --surface-soft: #221e2e;
+      --ink: #ece8f2;
+      --ink-soft: #b3aac2;
+      --ink-faint: #7c7390;
+      --accent: #b58ee0;
+      --accent-soft: #2c2440;
+      --line: #322b41;
+      --good: #6fcf9c;
+      --good-bg: #1c2f26;
+      --warn: #e0b76a;
+      --warn-bg: #332a17;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17141f;
+    --surface: #1e1a29;
+    --surface-soft: #221e2e;
+    --ink: #ece8f2;
+    --ink-soft: #b3aac2;
+    --ink-faint: #7c7390;
+    --accent: #b58ee0;
+    --accent-soft: #2c2440;
+    --line: #322b41;
+    --good: #6fcf9c;
+    --good-bg: #1c2f26;
+    --warn: #e0b76a;
+    --warn-bg: #332a17;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    margin: 0;
+    padding: 56px 16px 100px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* Hand-styled to match the shared .back-link (this page doesn't load main.css). */
+  .back-link {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #9a26d6;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .back-link:hover { background: #8421b8; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+  .dek { font-size: 16px; color: var(--ink-soft); max-width: 64ch; margin: 0 0 16px; }
+  .meta { font-size: 13px; color: var(--ink-faint); margin: 0 0 24px; }
+  .meta a { color: var(--accent); }
+
+  /* Section nav — one pill per research type on this page. */
+  .section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 8px;
+    background: var(--bg);
+  }
+  .section-nav a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 16px;
+    padding: 6px 14px;
+    text-decoration: none;
+  }
+  .section-nav a span { font-weight: 400; color: var(--ink-soft); margin-left: 4px; }
+
+  .research-section { scroll-margin-top: 64px; }
+  .research-section + .research-section { border-top: 1px solid var(--line); margin-top: 56px; }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 40px 0 8px;
+  }
+  .section-lede { color: var(--ink-soft); margin: 0 0 16px; max-width: 64ch; }
+
+  h3.sub {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 32px 0 8px;
+  }
+  h3.sub .num { color: var(--accent); margin-right: 8px; }
+
+  .cards { display: grid; gap: 12px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .card h4 { font-size: 15px; margin: 0 0 4px; }
+  .card h4 .tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 8px;
+    vertical-align: 2px;
+  }
+  .card p { margin: 4px 0 0; font-size: 14px; color: var(--ink-soft); }
+  .card p b, .card li b { color: var(--ink); font-weight: 600; }
+  .card blockquote, .session blockquote {
+    margin: 8px 0 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--line);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* Customer sessions */
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .session-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 4px; }
+  .session-head h4 { font-size: 18px; margin: 0; }
+  .session-date { font-size: 13px; color: var(--ink-faint); }
+  .session-context { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+  .session h5 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 16px 0 6px;
+  }
+  .session ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .session li { margin: 4px 0; }
+
+  .themes { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .themes li { border-radius: 10px; padding: 14px 18px; font-size: 14px; background: var(--good-bg); }
+  .themes li.differ { background: var(--warn-bg); }
+  .themes b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+  .takeaways { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .takeaways li { background: var(--good-bg); border-radius: 10px; padding: 16px 20px; font-size: 14px; }
+  .takeaways b { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--surface-soft); font-weight: 600; font-size: 13px; color: var(--ink-soft); }
+  tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; }
+
+  .sources { font-size: 13px; color: var(--ink-soft); padding-left: 20px; }
+  .sources a { color: var(--accent); word-break: break-word; }
+  td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .caveat { font-size: 13px; color: var(--ink-faint); margin-top: 8px; }
+</style>
+</head>
+<body>
+<a href="../../" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+  Prototypes
+</a>
+<div class="page">
+  <div class="eyebrow">Research · Schedule</div>
+  <h1>Customer schedule text size research</h1>
+  <p class="dek">How big the text is on the printed and emailed customer schedule today, how that compares with the original design, and what a competitor's schedule uses. Background for the Large text option.</p>
+  <p class="meta">Last updated 19 November 2026. Linked from <a href="../../schedule/daily-schedule/?view=customers">Print or email customer schedule (large text)</a>.</p>
+
+  <nav class="section-nav" aria-label="Research sections">
+    <a href="#current-printout">Current printout <span>live vs design</span></a>
+    <a href="#competitor-research">Competitor research <span>1 product</span></a>
+  </nav>
+
+  <!-- ─── Current printout ───────────────────────────────────────── -->
+  <section class="research-section" id="current-printout">
+    <h2 class="section-title">Current printout</h2>
+    <p class="section-lede">Text sizes on the cards of the live customer schedule (A4 portrait, weekly), measured from a live PDF and compared with the original design. Sizes are in points as rendered, so the design figures are what the scaled card actually works out to, not the number typed on the component.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Card text</th><th class="num">Design (pt)</th><th class="num">Live PDF (pt)</th><th>Difference</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Employee name</td><td class="num">8.65</td><td class="num">8.25</td><td>&minus;0.40 (live 5% smaller)</td></tr>
+          <tr><td>Label ("Morning", "Bed")</td><td class="num">6.73</td><td class="num">6.75</td><td>+0.02 (matches)</td></tr>
+          <tr><td>Time ("07:15 - 07:45")</td><td class="num">5.77</td><td class="num">6.75</td><td>+0.98 (live 17% larger)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caveat">The design is several years old. The live PDF is what offices print and email today.</p>
+
+    <h3 class="sub">What it tells us</h3>
+    <ul class="takeaways">
+      <li><b>Live is close to the design, so the design isn't the reason it's small.</b>The name is 5% smaller, the label matches, and only the time is larger (17%). The small text was designed in.</li>
+      <li><b>Everything on a card is under 9pt.</b>The name is 8.25pt and the time and label are 6.75pt. The Large text criterion asks for a minimum of 16pt, about twice the name and 2.4 times the time and label.</li>
+      <li><b>The seven-column layout can't hold 16pt.</b>Today's layout fits a whole week as seven day columns. At 16pt the columns are too narrow for names and times, so Large text needs a different layout, not just a bigger font.</li>
+    </ul>
+  </section>
+
+  <!-- ─── Competitor research ────────────────────────────────────── -->
+  <section class="research-section" id="competitor-research">
+    <h2 class="section-title">Competitor research</h2>
+    <p class="section-lede">A weekly schedule for one customer, produced by Nourish and shared with us by Care yourway, one of our customers, on 18 November 2026. Measured from the PDF file itself.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h4>Nourish weekly client schedule <span class="tag">A4 portrait</span></h4>
+        <p><b>11.2pt for everything:</b> the date range, customer name, dates, times, durations and carer names are all one size, in one font (DejaVu Sans, a wide typeface, so it reads larger than the same size in a narrower one).</p>
+        <p><b>A list, not cards:</b> one row per day with the date, then the time and duration ("09:15 - 09:45 (30 minutes)"), then the carer. The customer name sits in a merged cell down the left side. The agency logo is at the top.</p>
+        <p><b>Plenty of space:</b> one week for one customer fills less than half the page, so more text could fit.</p>
+        <p><b>No visit status:</b> there are no booked, pending or cancelled markers and no key.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">What it tells us</h3>
+    <ul class="takeaways">
+      <li><b>Their text is bigger than ours without being a large-print option.</b>11.2pt is well above our 6.75 to 8.25pt, yet still below the 16pt minimum, and below the 14pt option we're showing alongside it.</li>
+      <li><b>A list gives text room that cards don't.</b>It's the format that keeps the time, duration and name on one line at a larger size. It is different from our card style, which is the question for Product.</li>
+    </ul>
+    <p class="caveat">One example from one customer. We haven't seen how Nourish handles long names, many visits in a day, or landscape.</p>
+  </section>
+</div>
+</body>
+</html>
