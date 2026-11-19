@@ -557,12 +557,13 @@
 .ps-checks .checkbox-wrap { font-size: 16px; }
 .ps-hint { margin: 16px 0 0; font-size: 16px; color: #1a1a1a; }
 
-.ps-table { width: 100%; border: 1px solid var(--ui-purple-5-languid-lavendar); background: #fff; border-collapse: collapse; }
-.ps-table th, .ps-table td { padding: 16px; text-align: left; border-bottom: 1px solid var(--ui-purple-5-languid-lavendar); }
-.ps-table th { font-weight: 600; background: #fff; }
-.ps-table .ps-check { width: 48px; }
-.ps-table tr:last-child td { border-bottom: none; }
-.ps-count { text-align: right; margin-bottom: 12px; font-size: 16px; }
+.ps-nav-arrow {
+  border: none; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ui-purple-3-grape-grey); transition: color 0.15s; padding: 0;
+}
+.ps-nav-arrow:hover:not(:disabled) { color: var(--ui-purple-2-dark-grape-grey); }
+.ps-nav-arrow:disabled { opacity: 0.4; cursor: default; }
 .ps-pill {
   margin-right: 8px;
   display: inline-block; padding: 12px 24px; border-radius: 999px;

@@ -8,6 +8,7 @@ export default function Pagination({
   totalRows,
   onPageChange,
   onRowsPerPageChange,
+  showRowsPerPage = true,
 }) {
   return (
     <div className="pagination">
@@ -21,14 +22,16 @@ export default function Pagination({
         <button className="pag-arrow" onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages}>›</button>
         <button className="pag-btn" onClick={() => onPageChange(totalPages)} disabled={page >= totalPages}>Last</button>
       </div>
-      <div className="pag-right">
-        <span className="count-label">Rows per page</span>
-        <select className="rows-select" value={rowsPerPage}
-          onChange={e => onRowsPerPageChange(Number(e.target.value))}>
-          {rowsPerPageOptions.map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
-        <span className="count-label">{showStart}–{showEnd} of {totalRows}</span>
-      </div>
+      {showRowsPerPage && (
+        <div className="pag-right">
+          <span className="count-label">Rows per page</span>
+          <select className="rows-select" value={rowsPerPage}
+            onChange={e => onRowsPerPageChange(Number(e.target.value))}>
+            {rowsPerPageOptions.map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+          <span className="count-label">{showStart}–{showEnd} of {totalRows}</span>
+        </div>
+      )}
     </div>
   );
 }

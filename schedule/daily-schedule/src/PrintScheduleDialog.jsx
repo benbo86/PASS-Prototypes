@@ -2,6 +2,7 @@ import { useState, useRef, useLayoutEffect } from 'react'
 import SlidePanel from '../../../Components/SlidePanel'
 import ModalPanel from '../../../Components/ModalPanel'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
+import Pagination from '../../../Components/Pagination'
 import SchedulePdfPreview, { PAGE } from './SchedulePdfPreview'
 
 // Print / email dialog for the customer schedule (AIOP-25799 — large text option).
@@ -14,6 +15,17 @@ function Radio({ name, value, current, onChange, label }) {
     </label>
   )
 }
+
+const ChevronLeft = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15.7 16.9L11.1 12.3L15.7 7.70005L14.3 6.30005L8.30001 12.3L14.3 18.3L15.7 16.9Z"/>
+  </svg>
+)
+const ChevronRight = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8.3 16.9L12.9 12.3L8.3 7.7L9.7 6.3L15.7 12.3L9.7 18.3L8.3 16.9Z"/>
+  </svg>
+)
 
 function Check({ checked, onChange, label }) {
   return (
@@ -71,6 +83,15 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const [largeSize, setLargeSize] = useState(16) // prototype-only: the AC says 16pt minimum; 14pt for Product to compare
   const [largeLayout, setLargeLayout] = useState('cards') // prototype-only: compares the large-text layouts
 
+  const [page, setPage] = useState(1)
+  const rowsPerPage = 15
+  const totalRows = CUSTOMERS.length
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage))
+  const safePage = Math.min(page, totalPages)
+  const showStart = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1
+  const showEnd = Math.min(safePage * rowsPerPage, totalRows)
+  const pageCustomers = CUSTOMERS.slice(showStart - 1, showEnd)
+
   const allSelected = selected.size === CUSTOMERS.length
   const toggle = name => setSelected(s => {
     const next = new Set(s)
@@ -110,25 +131,47 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       footer={footer}
     >
       <div className="ps-col">
-        <div className="ps-count"><b>Selected:</b> {selected.size} - {CUSTOMERS.length} <b>Showing:</b> 1 - {CUSTOMERS.length} of {CUSTOMERS.length}</div>
-        <table className="ps-table">
-          <thead>
-            <tr>
-              <th className="ps-check">
-                <Check checked={allSelected} onChange={c => setSelected(new Set(c ? CUSTOMERS : []))} label="" />
-              </th>
-              <th>Customer name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {CUSTOMERS.map(name => (
-              <tr key={name}>
-                <td className="ps-check"><Check checked={selected.has(name)} onChange={() => toggle(name)} label="" /></td>
-                <td>{name}</td>
+        <div className="filter-bar">
+          <div className="filter-bar-left" />
+          <div className="filter-bar-right">
+            <span className="count-label">Selected: {selected.size} – {totalRows}</span>
+            <span className="count-label">Showing: {showStart} – {showEnd} of {totalRows}</span>
+            <button className="ps-nav-arrow pag-inline" disabled={safePage <= 1}
+              onClick={() => setPage(safePage - 1)}><ChevronLeft /></button>
+            <button className="ps-nav-arrow pag-inline" disabled={safePage >= totalPages}
+              onClick={() => setPage(safePage + 1)}><ChevronRight /></button>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th className="check-col">
+                  <label className="checkbox-wrap">
+                    <input type="checkbox" checked={allSelected} onChange={e => setSelected(new Set(e.target.checked ? CUSTOMERS : []))} />
+                    <span className="checkbox-box" />
+                  </label>
+                </th>
+                <th className="th-name">Customer name</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pageCustomers.map(name => (
+                <tr key={name}>
+                  <td className="check-col"><Check checked={selected.has(name)} onChange={() => toggle(name)} label="" /></td>
+                  <td className="td-name">{name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Pagination
+          page={safePage} totalPages={totalPages} rowsPerPage={rowsPerPage}
+          showRowsPerPage={false}
+          showStart={showStart} showEnd={showEnd} totalRows={totalRows}
+          onPageChange={setPage}
+          onRowsPerPageChange={() => {}}
+        />
         <div className="ps-section" style={{ marginTop: 40 }}>
           <h2>Applied filters</h2>
           {appliedFilters.length === 0
@@ -163,7 +206,6 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
           </div>
           <p className="ps-hint">Large text makes the schedule easier to read for customers with a visual impairment.</p>
           <button className="round-btn secondary-btn ps-preview-btn" disabled={selected.size === 0} onClick={() => setPreviewOpen(true)}>Preview</button>
-          {previewCustomer && <p className="ps-hint ps-preview-note">Shows the schedule for {previewCustomer}{selected.size > 1 ? ' (first selected customer)' : ''}.</p>}
         </div>
 
         <div className="ps-section">
