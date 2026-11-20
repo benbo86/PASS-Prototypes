@@ -1812,13 +1812,28 @@ body { overflow: hidden; }
 .msg-member-row { display: flex; align-items: center; justify-content: space-between; }
 .msg-member-remove { display: inline-flex; padding: 4px; border: none; background: none; border-radius: 4px; color: var(--ui-purple-3-grape-grey); cursor: pointer; }
 .msg-member-remove:hover { background: var(--ui-purple-6-lavendar-grey); color: var(--brand-purple-6-purple-4); }
-.msg-members-add-btn { margin-top: 16px; width: 100%; display: flex; align-items: center; justify-content: center; text-align: center; }
-.msg-members-add { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+/* Popover title row: title with the plus on the right */
+.msg-members-head { display: flex; align-items: center; gap: 8px; margin: -4px 0 8px; }
+.msg-members-head h3 { margin: 0; flex: 1; }
+.msg-members-head .msg-members-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; box-sizing: border-box; border: 2px solid var(--brand-purple-6-purple-4); border-radius: 50%; background: none; color: var(--brand-purple-6-purple-4); cursor: pointer; }
+.msg-members-icon-btn:hover { background: var(--ui-purple-7-lightest-lavendar); }
+.msg-members-add { display: flex; flex-direction: column; gap: 8px; }
 .msg-members-add .form-input { width: 100%; box-sizing: border-box; }
-.msg-members-add-list { max-height: 160px; overflow-y: auto; }
+.msg-members-add-list { max-height: 240px; overflow-y: auto; }
 .msg-members-add-list li { padding: 4px 0; }
-.msg-members-history { margin-top: 4px; font-size: 14px; }
-.msg-members-add-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+/* Same switch as the timeline's view settings (.tlh-switch) */
+/* Light grey bar running to the popover's left and right edges (negative margins cancel .msg-members-pop's 16px padding) */
+.msg-members-history { display: flex; align-items: center; gap: 12px; margin: 0 -16px; padding: 16px; background: var(--ui-purple-7-lightest-lavendar); font-size: 14px; font-weight: 500; color: var(--greyscale-2-grey-20); cursor: pointer; }
+.msg-switch {
+  appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 40px; height: 24px; border-radius: 12px; margin: 0;
+  background: var(--ui-purple-5-languid-lavendar); position: relative; cursor: pointer; transition: background .15s;
+}
+.msg-switch::after {
+  content: ''; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s;
+}
+.msg-switch:checked { background: var(--brand-purple-6-purple-4); }
+.msg-switch:checked::after { transform: translateX(16px); }
+.msg-members-add-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
 
 /* ── Compose forms on smaller screens ────────────────────────── */
 /* Half width on a big monitor, 75% under 1440px, full width under 1280px

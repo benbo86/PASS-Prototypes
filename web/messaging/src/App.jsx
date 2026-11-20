@@ -1282,67 +1282,74 @@ function ThreadView({ thread, messages, onSend, onToggleArchive, onMarkUnread, o
               </button>
               {showMembers && (
                 <div className="msg-members-pop" onClick={e => e.stopPropagation()}>
-                <h3>Members ({memberTotal})</h3>
-                <h4>Office</h4>
-                <ul>
-                  {officeMembers.map(n => <li key={n}>{n}{n === CURRENT_OFFICE_USER ? ' (you)' : ''}</li>)}
-                </ul>
-                <h4>Employees</h4>
-                <ul>
-                  {(thread.memberNames || []).map(n => (
-                    <li key={n} className="msg-member-row">
-                      <span>{n}</span>
-                      {(thread.memberNames || []).length > 1 && (
-                        <button className="msg-member-remove" aria-label={`Remove ${n}`} title={`Remove ${n}`} onClick={() => changeMembers({ removed: [n] })}>
-                          <CloseIcon size={14} />
+                {addingMembers ? (
+                  <>
+                    <div className="msg-members-add">
+                      <input
+                        className="form-input"
+                        placeholder="Search for an employee..."
+                        value={addSearch}
+                        onChange={e => setAddSearch(e.target.value)}
+                      />
+                      <ul className="msg-members-add-list">
+                        {addCandidates.map(n => (
+                          <li key={n}>
+                            <label className="checkbox-wrap">
+                              <input
+                                type="checkbox"
+                                checked={addSelected.includes(n)}
+                                onChange={() => setAddSelected(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])}
+                              />
+                              <span className="checkbox-box" />
+                              <span>{n}</span>
+                            </label>
+                          </li>
+                        ))}
+                        {addCandidates.length === 0 && <li className="msg-members-more">No one to add</li>}
+                      </ul>
+                      <label className="msg-members-history">
+                        <input type="checkbox" role="switch" className="msg-switch" checked={seeHistory} onChange={e => setSeeHistory(e.target.checked)} />
+                        <span>Share chat history</span>
+                      </label>
+                      <div className="msg-members-add-actions">
+                        <button className="round-btn tertiary-btn" onClick={resetAddMembers}>Cancel</button>
+                        <button className="round-btn primary-btn" disabled={addSelected.length === 0} onClick={() => changeMembers({ added: addSelected })}>
+                          Add{addSelected.length ? ` (${addSelected.length})` : ''}
                         </button>
-                      )}
-                    </li>
-                  ))}
-                  {thread.memberCount > (thread.memberNames || []).length && (
-                    <li className="msg-members-more">+{thread.memberCount - thread.memberNames.length} more</li>
-                  )}
-                </ul>
-                {!addingMembers ? (
-                  <button className="round-btn secondary-btn msg-members-add-btn" onClick={() => setAddingMembers(true)}>Add members</button>
+                      </div>
+                    </div>
+                  </>
                 ) : (
-                  <div className="msg-members-add">
-                    <input
-                      className="form-input"
-                      placeholder="Search for an employee..."
-                      value={addSearch}
-                      onChange={e => setAddSearch(e.target.value)}
-                    />
-                    <ul className="msg-members-add-list">
-                      {addCandidates.map(n => (
-                        <li key={n}>
-                          <label className="checkbox-wrap">
-                            <input
-                              type="checkbox"
-                              checked={addSelected.includes(n)}
-                              onChange={() => setAddSelected(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])}
-                            />
-                            <span className="checkbox-box" />
-                            <span>{n}</span>
-                          </label>
-                        </li>
-                      ))}
-                      {addCandidates.length === 0 && <li className="msg-members-more">No one to add</li>}
-                    </ul>
-                    <label className="checkbox-wrap msg-members-history">
-                      <input type="checkbox" checked={seeHistory} onChange={e => setSeeHistory(e.target.checked)} />
-                      <span className="checkbox-box" />
-                      <span>Let them see earlier messages</span>
-                    </label>
-                    <div className="msg-members-add-actions">
-                      <button className="round-btn tertiary-btn" onClick={resetAddMembers}>Cancel</button>
-                      <button className="round-btn primary-btn" disabled={addSelected.length === 0} onClick={() => changeMembers({ added: addSelected })}>
-                        Add{addSelected.length ? ` (${addSelected.length})` : ''}
+                  <>
+                    <div className="msg-members-head">
+                      <h3>Members ({memberTotal})</h3>
+                      <button className="msg-members-icon-btn" aria-label="Add members" title="Add members" onClick={() => setAddingMembers(true)}>
+                        <PlusIcon size={20} />
                       </button>
                     </div>
-                  </div>
+                    <h4>Office</h4>
+                    <ul>
+                      {officeMembers.map(n => <li key={n}>{n}{n === CURRENT_OFFICE_USER ? ' (you)' : ''}</li>)}
+                    </ul>
+                    <h4>Employees</h4>
+                    <ul>
+                      {(thread.memberNames || []).map(n => (
+                        <li key={n} className="msg-member-row">
+                          <span>{n}</span>
+                          {(thread.memberNames || []).length > 1 && (
+                            <button className="msg-member-remove" aria-label={`Remove ${n}`} title={`Remove ${n}`} onClick={() => changeMembers({ removed: [n] })}>
+                              <CloseIcon size={14} />
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                      {thread.memberCount > (thread.memberNames || []).length && (
+                        <li className="msg-members-more">+{thread.memberCount - thread.memberNames.length} more</li>
+                      )}
+                    </ul>
+                  </>
                 )}
-                {!officeMembers.includes(CURRENT_OFFICE_USER) && (
+                {!addingMembers && !officeMembers.includes(CURRENT_OFFICE_USER) && (
                   <p className="msg-members-note">You'll be added to this group, and everyone will see it, when you reply.</p>
                 )}
                 </div>

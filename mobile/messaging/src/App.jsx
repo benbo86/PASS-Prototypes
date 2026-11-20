@@ -12,6 +12,7 @@ import AuditCapture from '../../../Components/AuditCapture'
 import ReadReceipt from '../../../Components/ReadReceipt'
 import SegmentedToggle from '../../../Components/SegmentedToggle'
 import AlertDialog from '../../../Components/AlertDialog'
+import BottomSheet from '../../../Components/BottomSheet'
 import { THREADS, markMessagesRead } from '../../../Components/messagesData'
 import cqcImg from '../../../Images/CQC Good.jpeg'
 import handlingImg from '../../../Images/MOVING-AND-HANDLING-PEOPLE.webp'
@@ -91,6 +92,17 @@ const BroadcastIcon = ({ size = 20 }) => (
 const PersonIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+  </svg>
+)
+// Same group icon as web/messaging
+const GroupIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+  </svg>
+)
+const EyeIcon = ({ size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
   </svg>
 )
 const EditActionIcon = ({ size = 20 }) => (
@@ -245,6 +257,123 @@ const THREAD_MESSAGES = {
   ],
 }
 
+// ─── Groups (AIOP-25943) ─────────────────────────────────────
+// A group is a conversation the office starts with several employees where
+// everyone can reply. Prototype flag, on by default; ?groups=off shows
+// messaging as it is today. Groups are created on web, so the app only shows
+// and replies to them (no Group option in compose).
+const GROUPS_ENABLED = new URLSearchParams(window.location.search).get('groups') !== 'off'
+const ME = 'Adrianna Janowski'
+
+// Everyone in the group except the sender, with who has read the message.
+// Office users come first, like the member list.
+const recipientsFor = (names, readCount = 0, maxAgoMinutes = 120) =>
+  names.map((name, i) => {
+    if (i >= readCount) return { name, read: false }
+    const minutesAgo = readCount === 1 ? maxAgoMinutes : Math.round((i / (readCount - 1)) * maxAgoMinutes)
+    const readAt = minutesAgo < 1 ? 'Just now' : minutesAgo < 60 ? `${minutesAgo}m ago` : minutesAgo < 1440 ? `${Math.floor(minutesAgo / 60)}h ago` : `${Math.floor(minutesAgo / 1440)}d ago`
+    return { name, read: true, readAt }
+  })
+
+// Everyone in the group other than me, office users first
+const othersInGroup = (thread, extra = []) =>
+  [...thread.officeMembers, ...thread.employeeMembers.filter(n => n !== ME)].filter(n => !extra.includes(n))
+
+function makeGroup(g) {
+  const memberCount = g.officeMembers.length + g.employeeMembers.length
+  return {
+    isGroup: true,
+    careReceiver: null,
+    archivedByCarer: false,
+    sentByMe: false,
+    unread: false,
+    ...g,
+    participants: `${memberCount} members`,
+  }
+}
+
+const GROUP_THREADS = [
+  makeGroup({
+    id: 101,
+    title: 'Medication changes — North Sheffield',
+    officeMembers: ['Karen Ashworth'],
+    employeeMembers: ['Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton', ME],
+    lastSender: 'Olivia Brooks',
+    lastMessage: 'Got it, I will update the MAR chart before my 2pm visit.',
+    time: '11:20 AM',
+    unread: true,
+  }),
+  // Added to the group, and can see earlier messages
+  makeGroup({
+    id: 103,
+    title: 'Mrs Walker — hospital discharge',
+    officeMembers: ['Karen Ashworth'],
+    employeeMembers: ['Sarah Mitchell', 'David Chen', 'Olivia Brooks', ME],
+    lastSender: 'Karen Ashworth',
+    lastMessage: 'Thanks Adrianna, that would help. Please note it on her care plan after.',
+    time: '4 Nov',
+  }),
+  // Added to the group, can't see earlier messages
+  makeGroup({
+    id: 102,
+    title: 'Weekend cover — South Sheffield',
+    officeMembers: ['Priya Shah'],
+    employeeMembers: ['Tom Harris', 'Priya Sharma', 'Emma Richardson', 'Nathan Wells', ME],
+    lastSender: 'Tom Harris',
+    lastMessage: 'I can do Saturday morning if someone swaps my Sunday.',
+    time: 'Mon',
+  }),
+  // Removed from the group
+  makeGroup({
+    id: 104,
+    title: 'Bank holiday cover — Rotherham',
+    officeMembers: ['Karen Ashworth'],
+    employeeMembers: ['Tom Harris', 'Priya Sharma', 'James Okafor', 'Nathan Wells'],
+    removed: true,
+    lastSender: 'Karen Ashworth',
+    lastMessage: 'All covered, thank you everyone.',
+    time: '3 Nov',
+  }),
+]
+
+const g101Others = ['Karen Ashworth', 'Sarah Mitchell', 'Karen Bailey', 'David Chen', 'Olivia Brooks', 'Ryan Sutton']
+
+const GROUP_MESSAGES = {
+  101: [
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: "Quick update for everyone: Mrs Walker's evening medication has changed from 8pm to 6pm, starting tomorrow. The MAR chart is already updated.", time: '10:02 AM', day: 'Today' },
+    { id: 2, isMe: false, sender: 'Sarah Mitchell', text: 'Thanks Karen. Is that for all her visits or just weekdays?', time: '10:30 AM', day: 'Today' },
+    { id: 3, isMe: false, sender: 'Karen Ashworth', text: 'All visits, including weekends.', time: '10:41 AM', day: 'Today' },
+    { id: 4, isMe: true, text: 'Thanks, I have the Saturday and Sunday calls so I will make sure the 6pm slot is used.', time: '10:55 AM', day: 'Today', receipt: 'sent', recipients: recipientsFor(g101Others, 4, 25) },
+    { id: 5, isMe: false, sender: 'Olivia Brooks', text: 'Got it, I will update the MAR chart before my 2pm visit.', time: '11:20 AM', day: 'Today' },
+  ],
+  103: [
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: 'Mrs Walker is being discharged from hospital this afternoon. We need a visit as soon as she is home, and her care plan has changed: she now needs help with all transfers.', time: '2:05 PM', day: '3 Nov' },
+    { id: 2, isMe: false, sender: 'Sarah Mitchell', text: 'I am on a visit until 3pm. Who is free after that?', time: '2:30 PM', day: '3 Nov' },
+    { id: 3, isMe: false, sender: 'David Chen', text: 'I can take the 4pm visit if she is home by then.', time: '2:45 PM', day: '3 Nov' },
+    { id: 4, type: 'event', text: 'Karen Ashworth added you. You can see earlier messages.', day: '4 Nov' },
+    { id: 5, isMe: true, text: 'Hi all, I am nearby at 5pm if a second person is needed for transfers.', time: '9:10 AM', day: '4 Nov', receipt: 'read', recipients: recipientsFor(['Karen Ashworth', 'Sarah Mitchell', 'David Chen', 'Olivia Brooks'], 4, 300) },
+    { id: 6, isMe: false, sender: 'Karen Ashworth', text: 'Thanks Adrianna, that would help. Please note it on her care plan after.', time: '9:40 AM', day: '4 Nov' },
+  ],
+  102: [
+    { id: 1, type: 'event', text: "Priya Shah added you. You can't see earlier messages.", day: 'Monday' },
+    { id: 2, isMe: false, sender: 'Emma Richardson', text: "I'm free Saturday after 10.", time: 'Mon 9:40 AM', day: 'Monday' },
+    { id: 3, isMe: false, sender: 'Tom Harris', text: 'I can do Saturday morning if someone swaps my Sunday.', time: 'Mon 10:05 AM', day: 'Monday' },
+  ],
+  104: [
+    { id: 1, isMe: false, sender: 'Karen Ashworth', text: 'We need four people for the bank holiday Monday in Rotherham. Reply here if you can do it.', time: '9:00 AM', day: '3 Nov' },
+    { id: 2, isMe: false, sender: 'Tom Harris', text: 'I can do the morning.', time: '9:20 AM', day: '3 Nov' },
+    { id: 3, isMe: false, sender: 'Nathan Wells', text: 'Afternoon for me.', time: '9:41 AM', day: '3 Nov' },
+    { id: 4, isMe: false, sender: 'Karen Ashworth', text: 'All covered, thank you everyone.', time: '11:10 AM', day: '3 Nov' },
+    { id: 5, type: 'event', text: 'Karen Ashworth removed you.', day: '3 Nov' },
+  ],
+}
+
+// Inbox order: a recent group first, the rest of the groups after today's 1:1 messages
+const ALL_THREADS = GROUPS_ENABLED
+  ? [GROUP_THREADS[0], ...THREADS, GROUP_THREADS[1], GROUP_THREADS[2], GROUP_THREADS[3]]
+  : THREADS
+const ALL_THREAD_MESSAGES = GROUPS_ENABLED ? { ...THREAD_MESSAGES, ...GROUP_MESSAGES } : THREAD_MESSAGES
+
 // ─── Thread URLs ─────────────────────────────────────────────
 // Each thread gets its own shareable/reloadable URL (?thread=<slug-of-title>)
 // rather than only living in component state — matches the pathname+search
@@ -254,7 +383,7 @@ const slugifyThreadTitle = (title) =>
   title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
 const findThreadBySlug = (slug) =>
-  (slug && THREADS.find(t => slugifyThreadTitle(t.title) === slug)) || null
+  (slug && ALL_THREADS.find(t => slugifyThreadTitle(t.title) === slug)) || null
 
 // ─── Inbox Screen ────────────────────────────────────────────
 
@@ -354,8 +483,8 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
         className="thread-row"
         style={{ transform: `translateX(${dragX}px)`, transition: dragging ? 'none' : `transform ${THREAD_SWIPE_SLIDE_MS}ms ease` }}
       >
-        <div className={`thread-avatar ${thread.isBroadcast ? 'broadcast' : ''}`}>
-          {thread.isBroadcast ? <BroadcastIcon /> : <PersonIcon />}
+        <div className={`thread-avatar ${thread.isBroadcast ? 'broadcast' : ''}${thread.isGroup ? ' group' : ''}`}>
+          {thread.isGroup ? <GroupIcon /> : thread.isBroadcast ? <BroadcastIcon /> : <PersonIcon />}
         </div>
         <div className="thread-body">
           <div className="thread-top">
@@ -364,6 +493,7 @@ function ThreadRow({ thread, onClick, onArchive, showArchivedTag }) {
           </div>
           <div className={`thread-preview ${isUnread ? 'unread' : ''}`}>
             {thread.sentByMe && <span className="thread-preview-you">You: </span>}
+            {thread.isGroup && !thread.sentByMe && thread.lastSender && <span className="thread-preview-you">{thread.lastSender}: </span>}
             {thread.lastMessage}
           </div>
           <div className="thread-bottom">
@@ -648,6 +778,8 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
   const [infoMenuOpen, setInfoMenuOpen] = useState(false)
   const [infoMenuPos, setInfoMenuPos] = useState({ top: 0, right: 16 })
   const [previewAttachment, setPreviewAttachment] = useState(null)
+  const [showMembers, setShowMembers] = useState(false)
+  const [readStatusMsg, setReadStatusMsg] = useState(null)
   const [prevThreadId, setPrevThreadId] = useState(thread?.id)
   const endRef = useRef(null)
   const inputRef = useRef(null)
@@ -674,6 +806,8 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
     setShowAttach(false)
     setInfoMenuOpen(false)
     setPreviewAttachment(null)
+    setShowMembers(false)
+    setReadStatusMsg(null)
     setStaged([])
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'auto' }), 0)
   }, [thread?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -715,6 +849,14 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
   if (!thread) return <div className="screen" />
 
   const isReadOnly = thread.isBroadcast
+  const isGroup = !!thread.isGroup
+  // A group I was removed from stays in the list to read, but I can't reply
+  const cantReply = isGroup && thread.removed
+  const isOfficeMember = (name) => thread.officeMembers?.includes(name)
+  const memberRows = isGroup ? [
+    ...thread.officeMembers.map(name => ({ name, office: true })),
+    ...thread.employeeMembers.map(name => ({ name, you: name === ME })),
+  ] : []
 
   // Group messages by day
   const byDay = localMsgs.reduce((acc, msg) => {
@@ -738,6 +880,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
         time: 'Just now', day: 'Today', receipt: 'sending',
         upload: connectionRef.current === 'offline' ? 'queued' : 'uploading',
         attachments: photos.map(p => ({ type: 'image', name: p.name, src: p.src })),
+        ...(isGroup ? { recipients: recipientsFor(othersInGroup(thread)) } : {}),
         ...(replyTo ? { replyTo } : {}),
       }])
       setStaged([])
@@ -746,6 +889,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
       setLocalMsgs(prev => [...prev, {
         id: prev.length + 1, isMe: true, text,
         time: 'Just now', day: 'Today', receipt: 'sent',
+        ...(isGroup ? { recipients: recipientsFor(othersInGroup(thread)) } : {}),
         ...(replyTo ? { replyTo } : {}),
       }])
       onMessageSent?.(text)
@@ -800,10 +944,21 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
         <button className="app-header-back" onClick={onBack}>
           <ArrowLeftIcon />
         </button>
-        <div className="thread-header-center">
-          <span className="thread-header-title">{thread?.title}</span>
-          <span className="thread-header-sub">{thread?.participants}</span>
-        </div>
+        {isGroup ? (
+          <button
+            className="thread-header-center thread-header-center--tap"
+            onClick={e => { e.stopPropagation(); setInfoMenuOpen(false); setShowMembers(true) }}
+            aria-label="Show group members"
+          >
+            <span className="thread-header-title">{thread?.title}</span>
+            <span className="thread-header-sub">{thread?.participants}</span>
+          </button>
+        ) : (
+          <div className="thread-header-center">
+            <span className="thread-header-title">{thread?.title}</span>
+            <span className="thread-header-sub">{thread?.participants}</span>
+          </div>
+        )}
         <button className="app-header-action" onClick={toggleInfoMenu}><EllipsisIcon /></button>
       </div>
 
@@ -814,6 +969,11 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
           style={{ position: 'absolute', top: infoMenuPos.top, right: infoMenuPos.right, zIndex: 20 }}
           onClick={e => e.stopPropagation()}
         >
+          {isGroup && (
+            <button onClick={() => { setShowMembers(true); setInfoMenuOpen(false) }}>
+              <GroupIcon size={20} /> Group members
+            </button>
+          )}
           <button onClick={() => { onMarkUnread?.(thread.id); setInfoMenuOpen(false) }}>
             <UnreadBubbleIcon size={20} /> Mark as unread
           </button>
@@ -848,13 +1008,18 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
               const visibleAttachments = (msg.attachments || []).filter(a => a.type === 'image' || SHOW_FILE_AND_VIDEO_ATTACHMENTS)
               if (!msg.text && msg.attachments?.length && visibleAttachments.length === 0) return null
               const prev = group.msgs[i - 1]
-              const showSender = !msg.isMe && (!prev || prev.sender !== msg.sender || prev.isMe)
+              const showSender = !msg.isMe && (isGroup || !prev || prev.sender !== msg.sender || prev.isMe)
               return (
                 <div
                   key={msg.id}
                   className={`message-group ${msg.isMe ? 'from-me' : 'from-them'}`}
                 >
-                  {showSender && <div className="msg-sender-name">{msg.sender}</div>}
+                  {showSender && (
+                    <div className="msg-sender-name">
+                      {msg.sender}
+                      {isGroup && isOfficeMember(msg.sender) && <span className="msg-sender-office">Office</span>}
+                    </div>
+                  )}
                   <div
                     className={`bubble ${msg.isMe ? 'bubble-sent' : 'bubble-received'}${msg.replyTo ? ' has-reply' : ''}`}
                     onClick={e => { if (msg.upload) return; if (!isReadOnly || msg.isMe) openActions(e, msg) }}
@@ -882,7 +1047,14 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
                       <span className="msg-time">
                         {msg.upload === 'uploading' ? 'Sending…' : msg.upload === 'queued' ? 'Waiting for connection' : msg.time}
                       </span>
-                      {msg.isMe && <ReadReceipt status={msg.receipt || 'sent'} />}
+                      {msg.isMe && (
+                        <ReadReceipt status={msg.recipients && !msg.upload ? (msg.recipients.every(r => r.read) ? 'read' : 'sent') : (msg.receipt || 'sent')} />
+                      )}
+                      {isGroup && msg.isMe && msg.recipients && !msg.upload && (
+                        <button className="msg-read-count" onClick={e => { e.stopPropagation(); setReadStatusMsg(msg) }}>
+                          {msg.recipients.filter(r => r.read).length}/{msg.recipients.length} <EyeIcon />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -947,7 +1119,12 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
       )}
 
       {/* Compose bar */}
-      {isReadOnly ? (
+      {cantReply ? (
+        <div className="broadcast-notice">
+          <GroupIcon size={16} />
+          <span>You were removed from this group, so you can't reply.</span>
+        </div>
+      ) : isReadOnly ? (
         <div className="broadcast-notice">
           <BroadcastIcon size={16} />
           <span>This is a read-only broadcast — you can't reply.</span>
@@ -961,7 +1138,7 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
             <input
               ref={inputRef}
               className="compose-input"
-              placeholder="Message (All office staff will see this)"
+              placeholder={isGroup ? 'Message the group' : 'Message (All office staff will see this)'}
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSend() } }}
@@ -974,6 +1151,47 @@ const ThreadScreen = forwardRef(function ThreadScreen({ thread, messages, onBack
         </div>
       )}
 
+
+      {isGroup && (
+        <BottomSheet open={showMembers} onClose={() => setShowMembers(false)}>
+          <h3 className="group-sheet-title">{thread.title}</h3>
+          <p className="group-sheet-sub">{memberRows.length} members{thread.removed ? ' · you are no longer in this group' : ''}</p>
+          <ul className="group-sheet-list">
+            {memberRows.map(m => (
+              <li key={m.name} className="group-sheet-row">
+                <span className="group-sheet-name">{m.name}{m.you ? ' (You)' : ''}</span>
+                {m.office && <span className="msg-sender-office">Office</span>}
+              </li>
+            ))}
+          </ul>
+        </BottomSheet>
+      )}
+      {isGroup && (
+        <BottomSheet open={!!readStatusMsg} onClose={() => setReadStatusMsg(null)}>
+          {readStatusMsg && (
+            <>
+              <h3 className="group-sheet-title">{readStatusMsg.recipients.filter(r => r.read).length} of {readStatusMsg.recipients.length} read</h3>
+              {[
+                { label: 'Read', people: readStatusMsg.recipients.filter(r => r.read) },
+                { label: 'Not read', people: readStatusMsg.recipients.filter(r => !r.read) },
+              ].filter(g => g.people.length > 0).map(g => (
+                <div key={g.label}>
+                  <p className="group-sheet-sub group-sheet-heading">{g.label}</p>
+                  <ul className="group-sheet-list">
+                    {g.people.map(r => (
+                      <li key={r.name} className="group-sheet-row">
+                        <span className="group-sheet-name">{r.name}</span>
+                        {isOfficeMember(r.name) && <span className="msg-sender-office">Office</span>}
+                        {r.read && <span className="group-sheet-time">{r.readAt}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </>
+          )}
+        </BottomSheet>
+      )}
 
       {showCameraWarning && (
         <AlertDialog
@@ -1246,9 +1464,9 @@ export default function App() {
   )
   const [threads, setThreads] = useState(() => {
     const initial = findThreadBySlug(new URLSearchParams(window.location.search).get('thread'))
-    return initial ? THREADS.map(t => t.id === initial.id ? { ...t, unread: false } : t) : THREADS
+    return initial ? ALL_THREADS.map(t => t.id === initial.id ? { ...t, unread: false } : t) : ALL_THREADS
   })
-  const [threadMessages, setThreadMessages] = useState(THREAD_MESSAGES)
+  const [threadMessages, setThreadMessages] = useState(ALL_THREAD_MESSAGES)
   const [connection, setConnection] = useState('online')
   const [composeVisible, setComposeVisible] = useState(false)
   const [composeExiting, setComposeExiting] = useState(false)
@@ -1320,7 +1538,8 @@ export default function App() {
   }
 
   const handleReply = (text) => {
-    const wasArchived = threads.find(t => t.id === activeThreadId)?.archivedByCarer
+    const activeThreadForReply = threads.find(t => t.id === activeThreadId)
+    const wasArchived = activeThreadForReply?.archivedByCarer
     const now = Date.now()
     setThreads(prev => {
       const updated = prev.find(t => t.id === activeThreadId)
@@ -1335,7 +1554,8 @@ export default function App() {
       ...prev,
       [activeThreadId]: [
         ...(prev[activeThreadId] || []),
-        { id: now, isMe: true, text, time: 'Just now', day: 'Today', receipt: 'sent' },
+        { id: now, isMe: true, text, time: 'Just now', day: 'Today', receipt: 'sent',
+          ...(activeThreadForReply?.isGroup ? { recipients: recipientsFor(othersInGroup(activeThreadForReply)) } : {}) },
       ],
     }))
   }

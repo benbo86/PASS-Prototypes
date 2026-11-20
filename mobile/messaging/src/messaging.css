@@ -1592,3 +1592,83 @@
   letter-spacing: 0.04em;
   text-align: center;
 }
+
+/* ── Groups (AIOP-25943) ─────────────────────────────────────── */
+.thread-avatar.group {
+  background: var(--ui-purple-8-vibrant-lavendar);
+}
+
+/* The header becomes a button in a group, to open the member list */
+.thread-header-center--tap {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.msg-sender-office {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--ui-purple-6-lavendar-grey);
+  color: var(--brand-purple-3-purple-2);
+  font-family: Barlow, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.msg-read-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: Barlow, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--greyscale-8-grey-65);
+  cursor: pointer;
+}
+
+.group-sheet-title {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--greyscale-2-grey-20);
+}
+.group-sheet-sub {
+  margin: 4px 0 0;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  color: var(--greyscale-6-grey-50);
+}
+.group-sheet-heading {
+  margin-top: 16px;
+  font-weight: 600;
+}
+.group-sheet-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.group-sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ui-purple-6-lavendar-grey);
+  font-family: Barlow, sans-serif;
+  font-size: 15px;
+  color: var(--greyscale-2-grey-20);
+}
+.group-sheet-row .msg-sender-office { margin-left: 0; }
+.group-sheet-time {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--greyscale-8-grey-65);
+}
