@@ -1479,6 +1479,7 @@ body { overflow: hidden; }
   z-index: 20;
   max-height: 360px;
   overflow-y: auto;
+  overflow-x: hidden;
   margin-top: 4px;
 }
 
@@ -1600,6 +1601,7 @@ body { overflow: hidden; }
   flex-direction: column;
   gap: 1px;
   flex: 1;
+  min-width: 0; /* lets the long member-names line truncate instead of widening the row */
 }
 .msg-tag-member-count {
   font-size: 12px !important;

@@ -1013,14 +1013,14 @@ function Sidebar({ threads, activeThreadId, search, onSearch, onSelectThread, on
               <button onClick={() => { setShowComposeMenu(false); onCompose('employee') }}>
                 <PersonIcon size={16} /> Employee
               </button>
-              <button onClick={() => { setShowComposeMenu(false); onCompose('broadcast') }}>
-                <BroadcastIcon size={16} /> Broadcast
-              </button>
               {GROUPS_ENABLED && (
                 <button onClick={() => { setShowComposeMenu(false); onCompose('group') }}>
                   <GroupIcon size={16} /> Group
                 </button>
               )}
+              <button onClick={() => { setShowComposeMenu(false); onCompose('broadcast') }}>
+                <BroadcastIcon size={16} /> Broadcast
+              </button>
             </div>
           )}
         </div>
@@ -1892,7 +1892,7 @@ function ComposeView({ mode, onSend, onCancel }) {
           </label>
           <input
             className="form-input"
-            placeholder={isGroup ? "Leave blank to use the members' names" : "What is this message about?"}
+            placeholder={isGroup ? "Leaving blank will use the member's names" : "What is this message about?"}
             value={title}
             onChange={e => setTitle(e.target.value)}
           />
