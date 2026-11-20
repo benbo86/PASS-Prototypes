@@ -123,7 +123,7 @@ const ChevronRightIcon = ({ size = 16 }) => (
 
 // ─── Data ─────────────────────────────────────────────────────
 
-const CARERS = [
+const CARERS_BASE = [
   { id: 1,  name: 'Sarah Mitchell',  initials: 'SM', area: 'North Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Early Shift' },
   { id: 2,  name: 'Karen Bailey',    initials: 'KB', area: 'North Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Early Shift' },
   { id: 3,  name: 'Tom Harris',      initials: 'TH', area: 'South Sheffield',    careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
@@ -142,22 +142,58 @@ const CARERS = [
   { id: 15, name: 'Callum Reid',     initials: 'CR', area: 'Rotherham Central',  careHome: 'Blue Bird Sheffield', shiftPattern: 'Late Shift'  },
 ]
 
+// Extra tag values per employee, matching the tag types on the Tag Types page
+// (Office > Tags). Only types that apply to employees are offered when picking
+// recipients; customer-only types (e.g. Dystonia) never appear.
+const CARER_TAG_VALUES = {
+  1:  { language: ['English'],                 careSetting: ['Live-in'],                      staffType: 'Field Staff',  medComp: true,  skilled: false },
+  2:  { language: ['English', 'Polish'],       careSetting: ['Waking Night'],                 staffType: 'Field Staff',  medComp: true,  skilled: false },
+  3:  { language: ['English'],                 careSetting: ['Sleeping Night'],               staffType: 'Field Staff',  medComp: false, skilled: false },
+  4:  { language: ['English', 'Hindi'],        careSetting: ['Live-in', 'Waking Night'],      staffType: 'Field Staff',  medComp: true,  skilled: true  },
+  5:  { language: ['English', 'Yoruba / Igbo'], careSetting: ['Waking Night'],                staffType: 'Field Staff',  medComp: true,  skilled: true  },
+  6:  { language: ['English'],                 careSetting: ['Sleeping Night'],               staffType: 'Field Staff',  medComp: false, skilled: false },
+  7:  { language: ['English', 'Mandarin'],     careSetting: ['Live-in'],                      staffType: 'Field Staff',  medComp: true,  skilled: false },
+  8:  { language: ['English'],                 careSetting: [],                               staffType: 'Field Staff',  medComp: true,  skilled: false },
+  9:  { language: ['English'],                 careSetting: ['Waking Night'],                 staffType: 'Field Staff',  medComp: false, skilled: false },
+  10: { language: ['English', 'Polish'],       careSetting: ['Live-in'],                      staffType: 'Field Staff',  medComp: true,  skilled: true  },
+  11: { language: ['English'],                 careSetting: ['Sleeping Night'],               staffType: 'Field Staff',  medComp: false, skilled: false },
+  12: { language: ['English', 'Romanian'],     careSetting: ['Waking Night'],                 staffType: 'Field Staff',  medComp: true,  skilled: false },
+  13: { language: ['English'],                 careSetting: [],                               staffType: 'Field Staff',  medComp: true,  skilled: false },
+  14: { language: ['English'],                 careSetting: [],                               staffType: 'Office Staff', medComp: true,  skilled: false },
+  15: { language: ['English', 'Punjabi / Urdu'], careSetting: ['Live-in'],                    staffType: 'Field Staff',  medComp: false, skilled: false },
+}
+
+const CARERS = CARERS_BASE.map(c => ({ ...c, ...CARER_TAG_VALUES[c.id] }))
+
+// Tag types that apply to employees, in the order the Tag Types page lists them.
+// `field` is the employee attribute the tag is read from (a value or a list;
+// boolean fields match when true).
 const TAG_TYPES = [
-  { id: 1, name: 'Care Home',    field: 'careHome' },
-  { id: 2, name: 'Area',         field: 'area' },
-  { id: 3, name: 'Shift Pattern', field: 'shiftPattern' },
+  { id: 2, name: 'Area',                        field: 'area' },
+  { id: 4, name: 'Care Setting',                field: 'careSetting' },
+  { id: 5, name: 'Language',                    field: 'language' },
+  { id: 6, name: 'Staff Type',                  field: 'staffType' },
+  { id: 7, name: 'Medication Competency NPTCBC', field: 'medComp', custom: true },
+  { id: 8, name: 'Skilled Worker',              field: 'skilled', custom: true },
 ]
 
-const TAGS = [
-  { id: 101, typeId: 1, name: 'Blue Bird Sheffield',  memberCount: 15 },
-  { id: 102, typeId: 1, name: 'Sunrise Rotherham',    memberCount: 8  },
-  { id: 103, typeId: 1, name: 'Meadow View Leeds',    memberCount: 6  },
-  { id: 104, typeId: 2, name: 'North Sheffield',      memberCount: 11 },
-  { id: 105, typeId: 2, name: 'South Sheffield',      memberCount: 9  },
-  { id: 106, typeId: 2, name: 'Rotherham Central',    memberCount: 14 },
-  { id: 107, typeId: 3, name: 'Early Shift',          memberCount: 12 },
-  { id: 108, typeId: 3, name: 'Late Shift',           memberCount: 10 },
-  { id: 109, typeId: 3, name: 'Weekend',              memberCount: 7  },
+const TAGS_BASE = [
+  { id: 104, typeId: 2, name: 'North Sheffield',   memberCount: 11 },
+  { id: 105, typeId: 2, name: 'South Sheffield',   memberCount: 9  },
+  { id: 106, typeId: 2, name: 'Rotherham Central', memberCount: 14 },
+  { id: 110, typeId: 4, name: 'Live-in',           memberCount: 6  },
+  { id: 111, typeId: 4, name: 'Waking Night',      memberCount: 9  },
+  { id: 112, typeId: 4, name: 'Sleeping Night',    memberCount: 5  },
+  { id: 113, typeId: 5, name: 'English',           memberCount: 38 },
+  { id: 114, typeId: 5, name: 'Polish',            memberCount: 4  },
+  { id: 115, typeId: 5, name: 'Romanian',          memberCount: 3  },
+  { id: 116, typeId: 5, name: 'Hindi',             memberCount: 2  },
+  { id: 117, typeId: 5, name: 'Punjabi / Urdu',    memberCount: 2  },
+  { id: 118, typeId: 5, name: 'Yoruba / Igbo',     memberCount: 3  },
+  { id: 119, typeId: 6, name: 'Field Staff',       memberCount: 36 },
+  { id: 120, typeId: 6, name: 'Office Staff',      memberCount: 2  },
+  { id: 121, typeId: 7, name: 'Medication Competency NPTCBC', memberCount: 28 },
+  { id: 122, typeId: 8, name: 'Skilled Employees', memberCount: 12 },
 ]
 
 // Sample of the real employees behind each tag — used to preview names when
@@ -165,8 +201,16 @@ const TAGS = [
 // (which represents the full live roster, larger than this CARERS sample).
 function tagMembers(tag) {
   const type = TAG_TYPES.find(t => t.id === tag.typeId)
-  return CARERS.filter(c => c[type.field] === tag.name)
+  return CARERS.filter(c => {
+    const v = c[type.field]
+    if (typeof v === 'boolean') return v
+    return Array.isArray(v) ? v.includes(tag.name) : v === tag.name
+  })
 }
+
+// Counts come from the same employee list the roster panel shows, so the
+// dropdown, the chip and the roster always agree.
+const TAGS = TAGS_BASE.map(t => ({ ...t, memberCount: tagMembers(t).length }))
 
 // Extra plausible names to pad a broadcast's recipient list out to its real
 // total (a broadcast reaches far more people than the 15-person CARERS
@@ -1616,9 +1660,14 @@ function ComposeView({ mode, onSend, onCancel }) {
     ...type,
     tags: TAGS.filter(tag =>
       tag.typeId === type.id &&
-      tag.name.toLowerCase().includes(recipientSearch.toLowerCase())
+      (tag.name + ' ' + type.name).toLowerCase().includes(recipientSearch.toLowerCase())
     ),
   })).filter(type => type.tags.length > 0)
+
+  const tagChipLabel = (tag) => {
+    const type = TAG_TYPES.find(t => t.id === tag.typeId)
+    return type && type.name !== tag.name && type.name !== 'Area' ? `${type.name}: ${tag.name}` : tag.name
+  }
 
   const tagNamePreview = (tag) => {
     const members = tagMembers(tag)
@@ -1712,7 +1761,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                   <button
                     className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
                     onClick={() => changeBroadcastType('groups')}
-                  ><MapPinIcon size={14} />Area</button>
+                  ><MapPinIcon size={14} />Tags</button>
                 </>
               ) : (
                 <>
@@ -1723,7 +1772,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                   <button
                     className={`msg-broadcast-type-tab${broadcastType === 'groups' ? ' active' : ''}`}
                     onClick={() => changeBroadcastType('groups')}
-                  ><MapPinIcon size={14} />Area</button>
+                  ><MapPinIcon size={14} />Tags</button>
                   <button
                     className={`msg-broadcast-type-tab${broadcastType === 'individuals' ? ' active' : ''}`}
                     onClick={() => changeBroadcastType('individuals')}
@@ -1778,7 +1827,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                     {broadcastType === 'groups' && selectedTags.map(tag => (
                       <span key={tag.id} className="msg-compose-chip msg-compose-chip-broadcast">
                         <BroadcastIcon size={11} />
-                        {tag.name} · {tag.memberCount}
+                        {tagChipLabel(tag)} · {tag.memberCount}
                         <button onClick={() => toggleTag(tag)} className="msg-chip-remove">
                           <CloseIcon size={12} />
                         </button>
@@ -1788,7 +1837,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                       className="msg-compose-to-input"
                       placeholder={
                         hasRecipients ? '' :
-                        broadcastType === 'groups' ? 'Search for an area tag...' :
+                        broadcastType === 'groups' ? 'Search for a tag...' :
                         'Search for an employee...'
                       }
                       value={recipientSearch}
@@ -1856,7 +1905,7 @@ function ComposeView({ mode, onSend, onCancel }) {
                         })}
                       </div>
                     )) : (
-                      recipientSearch && <div className="msg-dropdown-empty">No area tags found</div>
+                      recipientSearch && <div className="msg-dropdown-empty">No tags found</div>
                     )
                   )}
 

@@ -1819,3 +1819,27 @@ body { overflow: hidden; }
 .msg-members-add-list li { padding: 4px 0; }
 .msg-members-history { margin-top: 4px; font-size: 14px; }
 .msg-members-add-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* ── Compose forms on smaller screens ────────────────────────── */
+/* Half width on a big monitor, 75% under 1440px, full width under 1280px
+   (the side nav, messages sidebar and recipients panel all share the width). */
+@media (max-width: 1440px) {
+  .msg-compose-field,
+  .msg-compose-field-grow { max-width: 75%; }
+}
+@media (max-width: 1280px) {
+  .msg-compose-field,
+  .msg-compose-field-grow { max-width: 100%; }
+  .msg-compose-roster-panel { width: 240px; }
+}
+/* Very narrow: the recipients panel drops below the form instead of squeezing it */
+@media (max-width: 860px) {
+  .msg-compose-body { flex-direction: column; overflow-y: auto; }
+  .msg-compose-form { flex: none; overflow-y: visible; }
+  .msg-compose-roster-panel {
+    width: auto;
+    border-left: none;
+    border-top: 1px solid var(--ui-purple-5-languid-lavendar);
+    overflow-y: visible;
+  }
+}
