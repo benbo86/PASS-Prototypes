@@ -25,11 +25,14 @@
 .pdf-card--pending::before, .pdf-key-item--pending::before { background: repeating-linear-gradient(-45deg, #dcdcdc 0 2px, #fff 2px 5px); }
 .pdf-card--cancelled::before { background: #bbb; }
 .pdf-card-time { font-size: 6.75px; font-weight: 500; color: #555; }
-.pdf-card-name { font-size: 8.25px; font-weight: 500; }
+.pdf-card-name { font-size: 8.25px; font-weight: 500; overflow-wrap: anywhere; } /* columns are equal, so a name too long for one breaks instead of widening its column */
 .pdf-card-label { font-size: 6.75px; color: #777; }
 .pdf-card--cancelled { background: #e8e8e8; }
 /* 11pt text (Nourish-sized, 11.2pt): the new size, the default in the preview */
 .pdf-page--std11 .pdf-day-head, .pdf-page--std11 .pdf-card-time, .pdf-page--std11 .pdf-card-name, .pdf-page--std11 .pdf-card-label { font-size: 11.2px; }
+/* Equal columns leave little room for a name at 11pt, so the 11pt layout uses tighter padding (the status bar is 6px wide) */
+.pdf-page--std11 .pdf-day { padding-left: 2px; padding-right: 2px; }
+.pdf-page--std11 .pdf-card { padding: 4px 4px 4px 10px; }
 .pdf-page--std11 .pdf-title, .pdf-page--std11 .pdf-range { font-size: 11.2px; } /* same size as the card text */
 .pdf-page--std11 .pdf-key { font-size: 9px; }
 .pdf-page--std11 .pdf-key-label { font-size: 11.2px; }

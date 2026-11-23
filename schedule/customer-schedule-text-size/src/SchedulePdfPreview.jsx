@@ -42,7 +42,7 @@ function Card({ v }) {
 
 function Cards({ days, visits, columns }) {
   return (
-    <div className="pdf-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+    <div className="pdf-grid" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
       {days.map(i => (
         <div className="pdf-day" key={i}>
           <div className="pdf-day-head">{DAYS[i]}</div>
