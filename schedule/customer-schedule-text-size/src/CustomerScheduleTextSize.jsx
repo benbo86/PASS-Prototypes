@@ -42,6 +42,7 @@ function ScaledPage({ scale, width, children }) {
 export default function CustomerScheduleTextSize() {
   const pageRef = useRef(null)
   const [textSize, setTextSize] = useState('11')
+  const [layout, setLayout] = useState('cards')
   const scale = 96 / 72 // 1pt = 96/72 px, so A4 is shown at 100%
   return (
     <>
@@ -57,9 +58,11 @@ export default function CustomerScheduleTextSize() {
         <div className="cst-bar">
           <span>Text size (prototype option)</span>
           <SegmentedToggle options={[{ value: '11', label: '11pt' }, { value: 'current', label: 'Current (6.75–8.25pt)' }]} value={textSize} onChange={setTextSize} />
+          <span>Layout (prototype option)</span>
+          <SegmentedToggle options={[{ value: 'cards', label: 'Cards' }, { value: 'list', label: 'For consideration' }]} value={layout} onChange={setLayout} />
         </div>
         <ScaledPage scale={scale} width={PAGE.portrait.w}>
-          <SchedulePdfPreview customer="Christine Gowans" weekLabel="Mon 16 Nov 2026 - Sun 22 Nov 2026" orientation="portrait" textSize={textSize} showPending showCancelled />
+          <SchedulePdfPreview customer="Christine Gowans" weekLabel="Mon 16 Nov 2026 - Sun 22 Nov 2026" orientation="portrait" textSize={textSize} layout={layout} showPending showCancelled />
         </ScaledPage>
       </div>
     </>

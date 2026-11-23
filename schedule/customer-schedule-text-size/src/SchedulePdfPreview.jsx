@@ -3,6 +3,7 @@
 //
 //   11pt (default) → 7 day columns, ~11pt card text (the new size, matching Nourish)
 //   current        → the layout as it was before AIOP-25799: same columns, 6.75–8.25pt text
+//   layout 'list'  → "for consideration": a Nourish-style list, one row per visit, over as many pages as it needs
 //
 // Visit data is a fixed week for the live example customer; the dialog's
 // Include pending / cancelled checkboxes filter it.
@@ -53,13 +54,60 @@ function Cards({ days, visits, columns }) {
   )
 }
 
+function List({ days, visits }) {
+  return (
+    <table className="pdf-list">
+      <tbody>
+        {days.map(i => {
+          const d = DAYS[i]
+          const rows = visits.filter(v => v.day === i)
+          if (rows.length === 0) {
+            return (
+              <tr key={d}>
+                <td className="pdf-list-day">{d}</td>
+                <td colSpan={2} className="pdf-list-none">No visits</td>
+              </tr>
+            )
+          }
+          return rows.map((v, k) => (
+            <tr key={`${d}-${k}`} className={k === 0 ? 'pdf-list-first' : ''}>
+              {k === 0 && <td className="pdf-list-day" rowSpan={rows.length}>{d}</td>}
+              <td className={`pdf-list-time pdf-list-time--${v.status}`}>{v.time}</td>
+              <td className={v.status === 'cancelled' ? 'pdf-list-cancelled' : ''}>{v.carer}</td>
+            </tr>
+          ))
+        })}
+      </tbody>
+    </table>
+  )
+}
+
 export const PAGE = { portrait: { w: 595, h: 842 }, landscape: { w: 842, h: 595 } }
 
-export default function SchedulePdfPreview({ customer, weekLabel, orientation, textSize = '11', showPending, showCancelled }) {
+// Splits the list's days across pages by estimated height (pt). A mock-up, not a layout
+// engine: a day never splits between pages.
+function paginateList(portrait, visits, size) {
+  const rowH = size * 1.35 + 10 // 4px padding top and bottom, plus the row border
+  const KEY = 44 // room for the key on whichever page is last
+  const avail = [(portrait ? 450 : 295) - KEY, (portrait ? 720 : 475) - KEY]
+  const pages = [[]]
+  let used = 0
+  ;[0, 1, 2, 3, 4, 5, 6].forEach(d => {
+    const h = Math.max(1, visits.filter(v => v.day === d).length) * rowH
+    const cap = avail[pages.length === 1 ? 0 : 1]
+    if (used + h > cap && pages[pages.length - 1].length) { pages.push([]); used = 0 }
+    pages[pages.length - 1].push(d)
+    used += h
+  })
+  return pages
+}
+
+export default function SchedulePdfPreview({ customer, weekLabel, orientation, textSize = '11', layout = 'cards', showPending, showCancelled }) {
   const visits = VISITS.filter(v => (v.status !== 'pending' || showPending) && (v.status !== 'cancelled' || showCancelled))
   const { w, h } = PAGE[orientation]
   const portrait = orientation === 'portrait'
-  const pages = [[0, 1, 2, 3, 4, 5, 6]] // one page: all seven days
+  const list = layout === 'list'
+  const pages = list ? paginateList(portrait, visits, textSize === '11' ? 11.2 : 9) : [[0, 1, 2, 3, 4, 5, 6]] // the cards fit one page: all seven days
 
   return (
     <div className="pdf-pages">
@@ -86,7 +134,7 @@ export default function SchedulePdfPreview({ customer, weekLabel, orientation, t
           ) : (
             <div className="pdf-title pdf-title--cont">Visit schedule for {customer} (continued)</div>
           )}
-          <Cards days={days} visits={visits} columns={7} />
+          {list ? <List days={days} visits={visits} /> : <Cards days={days} visits={visits} columns={7} />}
           {n === pages.length - 1 && (
             <div className="pdf-key">
               <span className="pdf-key-label">Key</span>
