@@ -633,6 +633,20 @@
       "usageCount": 1
     },
     {
+      "hash": "8b76e18b",
+      "name": "Columns",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" stroke=\"#000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n<path d=\"M9 3v18M15 3v18\" stroke=\"#000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/Columns.svg",
+          "name": "Columns"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "c5822ecb",
       "name": "Data",
       "group": "Icons",
@@ -978,6 +992,20 @@
           "kind": "repo-file",
           "ref": "Icons/Legal Flag DoLS.svg",
           "name": "Legal Flag DoLS"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "1efab46f",
+      "name": "List",
+      "group": "Icons",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13\" stroke=\"#000000\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</svg>",
+      "sources": [
+        {
+          "kind": "repo-file",
+          "ref": "Icons/List.svg",
+          "name": "List"
         }
       ],
       "usageCount": 1
@@ -5609,6 +5637,34 @@
       "usageCount": 1
     },
     {
+      "hash": "babc7f39",
+      "name": "List",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <path d=\"M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/PrintScheduleDialog.jsx#ListIcon",
+          "name": "ListIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
+      "hash": "115ae99d",
+      "name": "Columns",
+      "group": "Inline",
+      "svg": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n    <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />\n    <path d=\"M9 3v18M15 3v18\" />\n  </svg>",
+      "sources": [
+        {
+          "kind": "inline",
+          "ref": "schedule/daily-schedule/src/PrintScheduleDialog.jsx#ColumnsIcon",
+          "name": "ColumnsIcon"
+        }
+      ],
+      "usageCount": 1
+    },
+    {
       "hash": "4343c3d6",
       "name": "Warning",
       "group": "Inline",
@@ -5903,5 +5959,5 @@
       "usageCount": 1
     }
   ],
-  "generatedAt": "2026-11-24T10:38:40.536Z"
+  "generatedAt": "2026-11-24T11:38:19.930Z"
 }
