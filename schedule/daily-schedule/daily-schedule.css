@@ -582,9 +582,27 @@
 }
 .ps-footer-right { display: flex; gap: 12px; }
 
-.ps-preview-btn { margin-top: 16px; }
-.ps-layout-notice { margin: 16px 0; }
-.ps-notice-dismiss { margin-top: 8px; padding: 0; background: none; border: 0; font: inherit; font-size: 15px; color: var(--brand-purple-6-purple-4); text-decoration: underline; cursor: pointer; }
-.ps-layout-cards { display: flex; gap: 16px; margin-top: 24px; }
-.ps-layout-cards .radio-card { font-size: 16px; }
+/* Layout choice: stacked cards on the left, miniature on the right */
+.ps-layout-row { display: flex; align-items: flex-start; gap: 24px; margin-top: 24px; }
+.ps-layout-cards { display: flex; flex-direction: column; gap: 16px; flex: 1; min-width: 0; }
+.ps-layout-cards .radio-card { font-size: 16px; align-items: flex-start; }
 .ps-layout-cards .radio-card svg { color: var(--ui-purple-3-grape-grey); flex-shrink: 0; }
+.ps-layout-text { display: flex; flex-direction: column; gap: 4px; }
+.ps-layout-label { font-weight: 500; }
+.ps-layout-desc { font-size: 14px; color: #333; line-height: 1.4; }
+
+/* Miniature of the chosen layout; click to open the full preview */
+.ps-thumb { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 8px; flex-shrink: 0; padding: 0; background: none; border: 0; font: inherit; cursor: pointer; }
+.ps-thumb:disabled { cursor: default; opacity: 0.5; }
+.ps-thumb-page { display: block; position: relative; overflow: hidden; background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar); box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: border-color 0.12s, box-shadow 0.12s; }
+.ps-thumb-inner { display: block; position: absolute; top: 0; left: 0; transform-origin: top left; pointer-events: none; }
+.ps-thumb:hover:not(:disabled) .ps-thumb-page, .ps-thumb:focus-visible .ps-thumb-page { border-color: var(--brand-purple-6-purple-4); box-shadow: 0 2px 12px rgba(154,38,214,0.35); }
+.ps-thumb-hint { font-size: 14px; color: var(--brand-purple-6-purple-4); text-decoration: underline; }
+
+/* Layout cards: no radio circle, selection shown by a thicker border (input stays in the DOM for keyboard and screen readers) */
+.ps-layout-cards .radio-card { position: relative; }
+.ps-layout-cards .radio-card.selected { border-width: 2px; padding: 13px 15px; }
+.ps-layout-cards .radio-card input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
+.ps-layout-cards .radio-card:has(input:focus-visible) { outline: 2px solid var(--brand-purple-6-purple-4); outline-offset: 2px; }
+
+.ps-new-badge { margin-left: 8px; padding: 2px 8px; border-radius: 12px; background: var(--brand-purple-6-purple-4); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; vertical-align: 1px; }

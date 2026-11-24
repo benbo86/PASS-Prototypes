@@ -15,9 +15,6 @@ function Radio({ name, value, current, onChange, label }) {
   )
 }
 
-// Prototype only: "Don't show me this again" lasts until the page is refreshed, so the notice can be shown again by reloading.
-let layoutNoticeDismissed = false
-
 const ListIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13" />
@@ -30,11 +27,6 @@ const ColumnsIcon = () => (
   </svg>
 )
 
-const WarningIcon = () => (
-  <svg className="warning-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" d="M10.27,3.99 C11.04,2.66 12.96,2.66 13.73,3.99 L21.26,17 C22.03,18.33 21.07,20 19.53,20 L4.47,20 C2.93,20 1.97,18.33 2.74,17 Z M12,15 C11.4477153,15 11,15.4477153 11,16 C11,16.5522847 11.4477153,17 12,17 C12.5522847,17 13,16.5522847 13,16 C13,15.4477153 12.5522847,15 12,15 Z M12,7 C11.4477153,7 11,7.44771525 11,8 L11,12 C11,12.5522847 11.4477153,13 12,13 C12.5522847,13 13,12.5522847 13,12 L13,8 C13,7.44771525 12.5522847,7 12,7 Z"/>
-  </svg>
-)
 const ChevronLeft = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
     <path d="M15.7 16.9L11.1 12.3L15.7 7.70005L14.3 6.30005L8.30001 12.3L14.3 18.3L15.7 16.9Z"/>
@@ -77,8 +69,6 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const [orientation, setOrientation] = useState('portrait')
   const [layout, setLayout] = useState('list') // 'list' = one row per visit (the default), 'cards' = the seven-day columns layout (both at 11pt)
   const [previewOpen, setPreviewOpen] = useState(false)
-  const [showNotice, setShowNotice] = useState(!layoutNoticeDismissed)
-  const dismissNotice = () => { layoutNoticeDismissed = true; setShowNotice(false) }
   const [cancelled, setCancelled] = useState(false)
   const [pending, setPending] = useState(isPrint)
   const [unassigned, setUnassigned] = useState(isPrint)
@@ -112,6 +102,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const previewCustomer = CUSTOMERS.find(c => selected.has(c))
   const pageW = PAGE[orientation].w
   const scale = 96 / 72
+  const thumbScale = 160 / pageW
   const modalW = Math.min(pageW * scale + 96, window.innerWidth - 48)
 
   const allSelected = selected.size === CUSTOMERS.length
@@ -228,29 +219,32 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
 
         <div className="ps-section">
           <h2>Schedule layout</h2>
-          {showNotice && (
-            <div className="warning-banner orange ps-layout-notice">
-              <WarningIcon />
-              <div>
-                <h4>The schedule now uses a list layout</h4>
-                <p>Schedules are now sent as a list by default, with one row per visit. You can still choose weekly columns below.</p>
-                <button type="button" className="ps-notice-dismiss" onClick={dismissNotice}>Don't show me this again</button>
-              </div>
+          <div className="ps-layout-row">
+            <div className="ps-layout-cards">
+              {[
+                { key: 'list', label: 'List', isNew: true, icon: <ListIcon />, desc: 'One row per visit, grouped by day. Runs over as many pages as it needs.' },
+                { key: 'cards', label: 'Weekly columns', icon: <ColumnsIcon />, desc: 'Each day side by side in seven columns, all on one page.' },
+              ].map(o => (
+                <label key={o.key} className={`radio-card${layout === o.key ? ' selected' : ''}`}>
+                  <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => setLayout(o.key)} />
+                  {o.icon}
+                  <span className="ps-layout-text">
+                    <span className="ps-layout-label">{o.label}{o.isNew && <span className="ps-new-badge">NEW</span>}</span>
+                    <span className="ps-layout-desc">{o.desc}</span>
+                  </span>
+                </label>
+              ))}
             </div>
-          )}
-          <div className="ps-layout-cards">
-            {[
-              { key: 'list', label: 'List', icon: <ListIcon /> },
-              { key: 'cards', label: 'Weekly columns', icon: <ColumnsIcon /> },
-            ].map(o => (
-              <label key={o.key} className={`radio-card${layout === o.key ? ' selected' : ''}`}>
-                <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => setLayout(o.key)} />
-                {o.icon}
-                <span>{o.label}</span>
-              </label>
-            ))}
+            <button type="button" className="ps-thumb" disabled={selected.size === 0} onClick={() => setPreviewOpen(true)}
+              aria-label={`Open full preview - ${layout === 'list' ? 'List' : 'Weekly columns'}`}>
+              <span className="ps-thumb-page" style={{ width: pageW * thumbScale, height: PAGE[orientation].h * thumbScale }}>
+                <span className="ps-thumb-inner" style={{ transform: `scale(${thumbScale})`, width: pageW }}>
+                  <SchedulePdfPreview customer={previewCustomer || ''} weekLabel={weekLabel} orientation={orientation} textSize="11" layout={layout} showPending={pending} showCancelled={cancelled} />
+                </span>
+              </span>
+              <span className="ps-thumb-hint">Click to view full preview</span>
+            </button>
           </div>
-          <button className="round-btn secondary-btn ps-preview-btn" disabled={selected.size === 0} onClick={() => setPreviewOpen(true)}>Preview</button>
         </div>
 
         <div className="ps-section">
