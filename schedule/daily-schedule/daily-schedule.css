@@ -606,3 +606,4 @@
 .ps-layout-cards .radio-card:has(input:focus-visible) { outline: 2px solid var(--brand-purple-6-purple-4); outline-offset: 2px; }
 
 .ps-new-badge { margin-left: 8px; padding: 2px 8px; border-radius: 12px; background: var(--brand-purple-6-purple-4); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; vertical-align: 1px; }
+.ps-layout-cards .radio-card.selected svg { color: var(--brand-purple-6-purple-4); }
