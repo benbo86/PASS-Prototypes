@@ -69,6 +69,9 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const [orientation, setOrientation] = useState('portrait')
   const [layout, setLayout] = useState('list') // 'list' = one row per visit (the default), 'cards' = the seven-day columns layout (both at 11pt)
   const [previewOpen, setPreviewOpen] = useState(false)
+  // Footer prompt shown when printing/emailing with the new list layout, so the choice is deliberate.
+  const [confirming, setConfirming] = useState(null) // 'print' | 'download' | 'email' | null
+  const ask = action => layout === 'list' ? setConfirming(action) : setConfirming(null)
   const [cancelled, setCancelled] = useState(false)
   const [pending, setPending] = useState(isPrint)
   const [unassigned, setUnassigned] = useState(isPrint)
@@ -112,17 +115,26 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
     return next
   })
 
-  const footer = (
+  const confirmLabel = { print: 'print', download: 'download', email: 'email' }
+  const footer = confirming ? (
+    <>
+      <div className="ps-footer-right">
+        <p className="ps-confirm-text">Please confirm you are happy with the new <strong>list layout</strong></p>
+        <button className="round-btn tertiary-btn" onClick={() => setConfirming(null)}>Cancel</button>
+        <button className="round-btn primary-btn" onClick={() => setConfirming(null)}>Confirm &amp; {confirmLabel[confirming]}</button>
+      </div>
+    </>
+  ) : (
     <>
       <button className="round-btn tertiary-btn" onClick={onClose}>Cancel</button>
       <div className="ps-footer-right">
         {isPrint ? (
           <>
-            <button className="round-btn secondary-btn" disabled={selected.size === 0}>Download PDF</button>
-            <button className="round-btn primary-btn" disabled={selected.size === 0}>Print selected</button>
+            <button className="round-btn secondary-btn" disabled={selected.size === 0} onClick={() => ask('download')}>Download PDF</button>
+            <button className="round-btn primary-btn" disabled={selected.size === 0} onClick={() => ask('print')}>Print selected</button>
           </>
         ) : (
-          <button className="round-btn primary-btn" disabled={selected.size === 0}>Email schedule</button>
+          <button className="round-btn primary-btn" disabled={selected.size === 0} onClick={() => ask('email')}>Email schedule</button>
         )}
       </div>
     </>
@@ -226,7 +238,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
                 { key: 'cards', label: 'Weekly columns', icon: <ColumnsIcon />, desc: 'Each day side by side in seven columns, all on one page.' },
               ].map(o => (
                 <label key={o.key} className={`radio-card${layout === o.key ? ' selected' : ''}`}>
-                  <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => setLayout(o.key)} />
+                  <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => { setLayout(o.key); setConfirming(null) }} />
                   {o.icon}
                   <span className="ps-layout-text">
                     <span className="ps-layout-label">{o.label}{o.isNew && <span className="ps-new-badge">NEW</span>}</span>

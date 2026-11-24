@@ -580,7 +580,7 @@
   display: inline-block; padding: 12px 24px; border-radius: 999px;
   background: var(--ui-purple-6-lavendar-grey); font-weight: 600; margin-top: 24px;
 }
-.ps-footer-right { display: flex; gap: 12px; }
+.ps-footer-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 
 /* Layout choice: stacked cards on the left, miniature on the right */
 .ps-layout-row { display: flex; align-items: flex-start; gap: 24px; margin-top: 24px; }
@@ -607,3 +607,6 @@
 
 .ps-new-badge { margin-left: 8px; padding: 2px 8px; border-radius: 12px; background: var(--brand-purple-6-purple-4); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; vertical-align: 1px; }
 .ps-layout-cards .radio-card.selected svg { color: var(--brand-purple-6-purple-4); }
+
+/* Footer prompt confirming the list layout on print/email */
+.ps-confirm-text { margin: 0 12px 0 0; font-size: 16px; color: #1a1a1a; }
