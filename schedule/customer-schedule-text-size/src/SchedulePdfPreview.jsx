@@ -8,6 +8,31 @@
 // Visit data is a fixed week for the live example customer; the dialog's
 // Include pending / cancelled checkboxes filter it.
 
+import { useState, useRef, useLayoutEffect } from 'react'
+
+// Scales the page with transform, not CSS zoom (browsers disagree on what
+// getBoundingClientRect() returns inside a zoomed element, which made Dev Edit /
+// Dev Mode highlight the wrong place). A transform doesn't take up scaled space,
+// so the wrapper's height is measured and set explicitly.
+export function ScaledPage({ scale, width, children }) {
+  const ref = useRef(null)
+  const [h, setH] = useState(0)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => setH(el.offsetHeight)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div className="ps-preview-frame" style={{ width: width * scale, height: h * scale }}>
+      <div ref={ref} style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width }}>{children}</div>
+    </div>
+  )
+}
+
 export const DAYS = ['Mon 16', 'Tue 17', 'Wed 18', 'Thu 19', 'Fri 20', 'Sat 21', 'Sun 22']
 
 const VISITS = [
