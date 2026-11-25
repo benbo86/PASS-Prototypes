@@ -15,6 +15,11 @@ function Radio({ name, value, current, onChange, label }) {
   )
 }
 
+// Prototype only: these last until the page is refreshed, so Product can see the first-time and later states.
+// In the live product both would be stored per user.
+let layoutAcknowledged = false   // the user has confirmed the list layout (or chosen weekly table): no more prompt, no NEW label
+let rememberedLayout = 'list'    // the layout the user used last, so the dialog opens on it next time
+
 const ListIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13" />
@@ -67,11 +72,14 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
   const [selected, setSelected] = useState(() => new Set(customers))
   const [range, setRange] = useState('weekly')
   const [orientation, setOrientation] = useState('portrait')
-  const [layout, setLayout] = useState('list') // 'list' = one row per visit (the default), 'cards' = the seven-day columns layout (both at 11pt)
+  const [layout, setLayoutState] = useState(rememberedLayout) // 'list' = one row per visit (the default), 'cards' = the weekly table (both at 11pt)
+  const [acknowledged, setAcknowledgedState] = useState(layoutAcknowledged)
+  const setAcknowledged = () => { layoutAcknowledged = true; setAcknowledgedState(true) }
+  const setLayout = key => { rememberedLayout = key; setLayoutState(key) }
   const [previewOpen, setPreviewOpen] = useState(false)
   // Footer prompt shown when printing/emailing with the new list layout, so the choice is deliberate.
   const [confirming, setConfirming] = useState(null) // 'print' | 'download' | 'email' | null
-  const ask = action => layout === 'list' ? setConfirming(action) : setConfirming(null)
+  const ask = action => layout === 'list' && !acknowledged ? setConfirming(action) : setConfirming(null)
   const [cancelled, setCancelled] = useState(false)
   const [pending, setPending] = useState(isPrint)
   const [unassigned, setUnassigned] = useState(isPrint)
@@ -121,7 +129,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       <div className="ps-footer-right">
         <p className="ps-confirm-text">Please confirm you are happy with the new <strong>list layout</strong></p>
         <button className="round-btn tertiary-btn" onClick={() => setConfirming(null)}>Cancel</button>
-        <button className="round-btn primary-btn" onClick={() => setConfirming(null)}>Confirm &amp; {confirmLabel[confirming]}</button>
+        <button className="round-btn primary-btn" onClick={() => { setAcknowledged(); setConfirming(null) }}>Confirm &amp; {confirmLabel[confirming]}</button>
       </div>
     </>
   ) : (
@@ -235,20 +243,20 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
             <div className="ps-layout-cards">
               {[
                 { key: 'list', label: 'List', isNew: true, icon: <ListIcon />, desc: 'One row per visit, grouped by day. Runs over as many pages as it needs.' },
-                { key: 'cards', label: 'Weekly columns', icon: <ColumnsIcon />, desc: 'Each day side by side in seven columns, all on one page.' },
+                { key: 'cards', label: 'Weekly table', icon: <ColumnsIcon />, desc: 'Each column represents a day. One week per page.' },
               ].map(o => (
                 <label key={o.key} className={`radio-card${layout === o.key ? ' selected' : ''}`}>
-                  <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => { setLayout(o.key); setConfirming(null) }} />
+                  <input type="radio" className="form-radio" name="layout" checked={layout === o.key} onChange={() => { setLayout(o.key); setConfirming(null); if (o.key === 'cards') setAcknowledged() }} />
                   {o.icon}
                   <span className="ps-layout-text">
-                    <span className="ps-layout-label">{o.label}{o.isNew && <span className="ps-new-badge">NEW</span>}</span>
+                    <span className="ps-layout-label">{o.label}{o.isNew && !acknowledged && <span className="ps-new-badge">NEW</span>}</span>
                     <span className="ps-layout-desc">{o.desc}</span>
                   </span>
                 </label>
               ))}
             </div>
             <button type="button" className="ps-thumb" disabled={selected.size === 0} onClick={() => setPreviewOpen(true)}
-              aria-label={`Open full preview - ${layout === 'list' ? 'List' : 'Weekly columns'}`}>
+              aria-label={`Open full preview - ${layout === 'list' ? 'List' : 'Weekly table'}`}>
               <span className="ps-thumb-page" style={{ width: pageW * thumbScale, height: PAGE[orientation].h * thumbScale }}>
                 <span className="ps-thumb-inner" style={{ transform: `scale(${thumbScale})`, width: pageW }}>
                   <SchedulePdfPreview customer={previewCustomer || ''} weekLabel={weekLabel} orientation={orientation} textSize="11" layout={layout} showPending={pending} showCancelled={cancelled} />
@@ -289,7 +297,7 @@ export default function PrintScheduleDialog({ mode, weekLabel, customers, applie
       open={previewOpen}
       stacked
       onClose={() => setPreviewOpen(false)}
-      title={`Preview - ${layout === 'list' ? 'List' : 'Weekly columns'}`}
+      title={`Preview - ${layout === 'list' ? 'List' : 'Weekly table'}`}
       width={modalW}
     >
       <ScaledPage scale={scale} width={pageW}>
