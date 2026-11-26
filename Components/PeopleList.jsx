@@ -288,11 +288,14 @@ export function IconTip({ label, className = '', children }) {
 // is a line under the name. `flags` is the row of badges under the header: pass
 // it (even empty) to reserve the row so details line up across cards, or leave
 // it out to have no row. `extra` goes under the details, above the tags.
-export function PersonCard({ name, photo, initials, avatarColor, status, subtitle, flags, details, extra, chips }) {
+// `selector` (optional) sits first in the header, e.g. a row-selection checkbox;
+// `cardClassName` adds a class to the card itself; `onClick` makes the whole card clickable.
+export function PersonCard({ name, photo, initials, avatarColor, status, subtitle, flags, details, extra, chips, selector, cardClassName, onClick }) {
   return (
     <div className="pl-card-slot">
-      <div className="pl-card">
+      <div className={`pl-card${cardClassName ? ` ${cardClassName}` : ''}`} onClick={onClick}>
         <div className="pl-card-head">
+          {selector}
           {photo
             ? <img className="pl-avatar pl-avatar--photo" src={photo} alt="" />
             : <div className="pl-avatar" style={{ backgroundColor: avatarColor }} aria-hidden="true">{initials}</div>}
@@ -410,12 +413,13 @@ export function FilterPanel({ noun, nounPlural, resultCount, canClear, onClear, 
 // ─── The page ─────────────────────────────────────────────────
 
 // Everything from the dev toolbar down: side nav, top nav, pinned toolbar,
-// A-Z bar and the sections of cards. `items` is already filtered and sorted;
+// A-Z bar and the sections of cards. `children` (optional) render inside the page
+// container, for overlays like a modal that Dev Edit and Dev Mode should be able to reach. `items` is already filtered and sorted;
 // `renderCard(item)` returns a <PersonCard>. Each item needs `id` and `surname`.
 export default function PeopleListLayout({
   activeNav, title, addLabel, noun, nounPlural, idPrefix, searchPlaceholder, emptyHint,
   query, onQueryChange, filtersCount, filterPanel, onClearFilters,
-  sortPanel, sortDirection, sortIsDefault, groupedByLetter, items, renderCard,
+  sortPanel, sortDirection, sortIsDefault, groupedByLetter, items, renderCard, toolbarExtra, children,
 }) {
   const pageRef = useRef(null)
   const toolbarRef = useRef(null)
@@ -493,6 +497,8 @@ export default function PeopleListLayout({
                 </div>
               </div>
 
+              {toolbarExtra}
+
               {/* A-Z jump bar. Letters with nobody in them are disabled, and so is
                   the whole bar when the list isn't grouped by surname. */}
               <div
@@ -545,6 +551,7 @@ export default function PeopleListLayout({
             ))}
           </main>
         </div>
+        {children}
       </div>
     </>
   )
