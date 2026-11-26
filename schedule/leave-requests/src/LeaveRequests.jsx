@@ -22,7 +22,7 @@ import AuditCapture from '../../../Components/AuditCapture';
 import SplitViewToggle from '../../../Components/SplitViewToggle';
 import { fmtDate, DateRangeInput } from '../../../Components/DateRangePicker';
 import { LEAVE_REQUESTS, EMPLOYEE_NAMES, EMPLOYEE_AREAS, STATUSES, fmtD, fmtDT, fmtDTShort } from './data';
-import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, recordApprovedChange, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement, requestTimesText } from '../../../Components/leaveRequestsStore';
+import { DEMO_EMPLOYEE, useLeaveRequests, recordOfficeDecision, recordApprovedChange, resetLeaveRequests, useDemoScheme, setDemoScheme, useEntitlement } from '../../../Components/leaveRequestsStore';
 
 // The signed-in office user — matches Components/TopNav.jsx's own default
 // `userName` ("Alex Morgan"), declared explicitly here (rather than left
@@ -93,18 +93,17 @@ const statusClass = s => {
   return 'lr-status-awaiting-approval';
 };
 
-// Employee/Time/Status filters + sort — see FilterDropdown itself for
+// Employee/Status filters + sort — see FilterDropdown itself for
 // the pending/selected/sortDir/nameField shape.
 const emptyCheckboxFilter = () => ({ selected: new Set(), sortDir: 'asc', nameField: 'first' });
 
-const STRING_SORT_COLS = ['leaveTypeLabel', 'status'];
-const DATE_SORT_COLS = ['fromDate', 'toDate', 'submitted'];
+const STRING_SORT_COLS = ['status'];
+const DATE_SORT_COLS = ['fromAt', 'toAt', 'submitted'];
 const NUM_SORT_COLS = ['amount'];
 
-// 9 columns: Employee, Time, From Date, To Date, Amount,
-// Status, Submitted, Notes, Actions. Notes holds the reasons and notes on a
-// request, so Actions is just the menu.
-const RAW_COL_WIDTHS = [150, 120, 95, 95, 105, 175, 125, 215, 80];
+// 8 columns: Employee, From, To, Amount, Status, Submitted, Notes, Actions.
+// Notes holds the reasons and notes on a request, so Actions is just the menu.
+const RAW_COL_WIDTHS = [150, 130, 130, 105, 175, 125, 215, 80];
 
 // Amount is in days for most employees, but hours for an employee on an
 // hourly/zero-hours contract (see data.js's own EMPLOYEE_CONTRACTS) —
@@ -123,17 +122,22 @@ const hhmmToDate = hhmm => { const [h, m] = hhmm.split(':').map(Number); return 
 const dateToHhmm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
 // A request is dates with optional times, the same for both schemes
-// (AIOP-21555, 28/10/2026). The Time column shows "All day" or the times,
-// and filters on that.
-const withLeaveTypeLabel = row => {
-  const leaveTypeLabel = requestTimesText({ ...row, fromDate: dateToIso(row.fromDate), toDate: dateToIso(row.toDate) });
-  return { ...row, leaveTypeLabel, leaveCategory: leaveTypeLabel === 'All day' ? 'All day' : 'Set times' };
-};
-const LEAVE_TYPE_FILTER_ITEMS = ['All day', 'Set times'];
+// (AIOP-21555, 28/10/2026). The list shows its start and end as date-times
+// (AIOP-26229): no separate Time column. A whole-day request has no times, so
+// it starts at 00:00 on its first day and ends at 00:00 on its last day (a
+// whole-day 3-4 Nov reads 03/11/26, 00:00 to 04/11/26, 00:00). Once approved,
+// the row carries the approved dates and times instead of the requested ones.
+// Prototype assumption: with a start time but no end time, the end reads 23:59.
+const atTime = (date, hhmm) => { const [h, m] = hhmm.split(':').map(Number); const d = new Date(date); d.setHours(h, m, 0, 0); return d; };
+const withFromTo = row => ({
+  ...row,
+  fromAt: atTime(row.fromDate, row.startTime || '00:00'),
+  toAt: atTime(row.toDate, row.endTime || (row.startTime ? '23:59' : '00:00')),
+});
 
 // Shared store record -> this table's row shape.
 function toLinkedRow(r) {
-  return withLeaveTypeLabel({
+  return withFromTo({
     ...r,
     linked: true,
     fromDate: isoToDate(r.fromDate),
@@ -147,7 +151,7 @@ function toLinkedRow(r) {
     withdrawnAt: r.withdrawnAt ? new Date(r.withdrawnAt) : null,
   });
 }
-const GENERATED_ROWS = LEAVE_REQUESTS.map(withLeaveTypeLabel);
+const GENERATED_ROWS = LEAVE_REQUESTS.map(withFromTo);
 
 
 // A request's amount only means something once the office has approved
@@ -271,7 +275,7 @@ export default function LeaveRequests() {
       recordOfficeDecision(row.id, { ...patch, actionedAt: patch.actionedAt.toISOString() });
     } else {
       const { approved, kept, note, ...rest } = patch;
-      setLocalRows(prev => prev.map(r => r.id === row.id ? withLeaveTypeLabel({
+      setLocalRows(prev => prev.map(r => r.id === row.id ? withFromTo({
         ...r,
         ...rest,
         ...(approved ? { approvalNote: note || null, approvedBy: rest.actionedBy, approvedAt: rest.actionedAt } : {}),
@@ -316,8 +320,7 @@ export default function LeaveRequests() {
   // Prototype only: starts filtered to Adrianna, the employee linked to the
   // mobile Holidays app, so a demo opens on her requests. Clear shows everyone.
   const [employeeFilter, setEmployeeFilter] = useState(() => ({ ...emptyCheckboxFilter(), selected: new Set([DEMO_EMPLOYEE]) }));
-  const [leaveTypeFilter, setLeaveTypeFilter] = useState(emptyCheckboxFilter());
-  const [statusFilter, setStatusFilter] = useState(emptyCheckboxFilter());
+    const [statusFilter, setStatusFilter] = useState(emptyCheckboxFilter());
 
   const [sort, setSort] = useState({ col: null, dir: 'asc' });
   const [openDD, setOpenDD] = useState(null);
@@ -381,7 +384,6 @@ export default function LeaveRequests() {
 
   const clearAllFilters = () => {
     setEmployeeFilter(emptyCheckboxFilter());
-    setLeaveTypeFilter(emptyCheckboxFilter());
     setStatusFilter(emptyCheckboxFilter());
     setQuickStatuses(new Set());
     setSort({ col: null, dir: 'asc' });
@@ -395,11 +397,10 @@ export default function LeaveRequests() {
       r = r.filter(rec => rec.fromDate <= rangeEnd && rec.toDate >= startDate);
     }
     if (employeeFilter.selected.size) r = r.filter(rec => employeeFilter.selected.has(rec.employee));
-    if (leaveTypeFilter.selected.size) r = r.filter(rec => leaveTypeFilter.selected.has(rec.leaveCategory));
     if (statusFilter.selected.size) r = r.filter(rec => statusFilter.selected.has(rec.status));
     if (quickStatuses.size) r = r.filter(rec => quickStatuses.has(rec.status));
     return r;
-  }, [rows, startDate, endDate, employeeFilter, leaveTypeFilter, statusFilter, quickStatuses]);
+  }, [rows, startDate, endDate, employeeFilter, statusFilter, quickStatuses]);
 
   const sorted = useMemo(() => {
     const r = [...filtered];
@@ -431,7 +432,7 @@ export default function LeaveRequests() {
   const pageRows   = sorted.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
   const showStart  = totalRows === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
   const showEnd    = Math.min(safePage * rowsPerPage, totalRows);
-  const anyFilter  = !!(employeeFilter.selected.size || leaveTypeFilter.selected.size || statusFilter.selected.size || quickStatuses.size);
+  const anyFilter  = !!(employeeFilter.selected.size || statusFilter.selected.size || quickStatuses.size);
 
   // Other employees' holidays that overlap a date range (approved or still
   // pending), for the Approve dialog's clash warning. Skips the request being
@@ -467,7 +468,7 @@ export default function LeaveRequests() {
     if (editRow.linked) {
       recordApprovedChange(editRow.id, { approved, note, actionedBy: CURRENT_OFFICE_USER, actionedAt: new Date().toISOString() });
     } else {
-      setLocalRows(prev => prev.map(r => r.id === editRow.id ? withLeaveTypeLabel({
+      setLocalRows(prev => prev.map(r => r.id === editRow.id ? withFromTo({
         ...r,
         fromDate: isoToDate(approved.fromDate), toDate: isoToDate(approved.toDate),
         startTime: approved.startTime, endTime: approved.endTime, amount: approved.amount, dayDeductions: approved.dayDeductions,
@@ -611,38 +612,18 @@ export default function LeaveRequests() {
                   <ColResizeHandle onDrag={dx => resizeColumn(0, dx)} />
                 </th>
 
-                {/* Time — checkbox filter AND a real sort icon */}
-                <th className={sort.col === 'leaveTypeLabel' ? 'sorted' : ''}>
-                  <ColLabel>Time</ColLabel>
-                  <button ref={el => anchorRefs.current['leaveType'] = el}
-                    className={`col-icon-btn ${leaveTypeFilter.selected.size ? 'col-icon-btn--active' : ''}`}
-                    data-devmode-passthrough="true"
-                    onClick={() => openDropdown('leaveType')}>
-                    <FilterIcon active={leaveTypeFilter.selected.size > 0} />
-                  </button>
-                  <button className="col-icon-btn" onClick={() => toggleSort('leaveTypeLabel')}>
-                    <SortIcon dir={sort.col === 'leaveTypeLabel' ? sort.dir : null} />
-                  </button>
-                  <FilterDropdown items={LEAVE_TYPE_FILTER_ITEMS} selected={leaveTypeFilter.selected}
-                    onApply={(sel, sortDir, nameField) => { setLeaveTypeFilter({ selected: sel, sortDir, nameField }); setPage(1); }}
-                    onClear={() => { setLeaveTypeFilter(emptyCheckboxFilter()); setPage(1); }}
-                    isOpen={openDD === 'leaveType'} onClose={closeDropdown} anchorEl={anchorRefs.current['leaveType']}
-                  />
+                {/* From — sort only (by the start) */}
+                <th className={sort.col === 'fromAt' ? 'sorted' : ''}>
+                  <ColLabel>From</ColLabel>
+                  <button className="col-icon-btn" onClick={() => toggleSort('fromAt')}><SortIcon dir={sort.col === 'fromAt' ? sort.dir : null} /></button>
                   <ColResizeHandle onDrag={dx => resizeColumn(1, dx)} />
                 </th>
 
-                {/* From Date — sort only */}
-                <th className={sort.col === 'fromDate' ? 'sorted' : ''}>
-                  <ColLabel>From Date</ColLabel>
-                  <button className="col-icon-btn" onClick={() => toggleSort('fromDate')}><SortIcon dir={sort.col === 'fromDate' ? sort.dir : null} /></button>
+                {/* To — sort only (by the end) */}
+                <th className={sort.col === 'toAt' ? 'sorted' : ''}>
+                  <ColLabel>To</ColLabel>
+                  <button className="col-icon-btn" onClick={() => toggleSort('toAt')}><SortIcon dir={sort.col === 'toAt' ? sort.dir : null} /></button>
                   <ColResizeHandle onDrag={dx => resizeColumn(2, dx)} />
-                </th>
-
-                {/* To Date — sort only */}
-                <th className={sort.col === 'toDate' ? 'sorted' : ''}>
-                  <ColLabel>To Date</ColLabel>
-                  <button className="col-icon-btn" onClick={() => toggleSort('toDate')}><SortIcon dir={sort.col === 'toDate' ? sort.dir : null} /></button>
-                  <ColResizeHandle onDrag={dx => resizeColumn(3, dx)} />
                 </th>
 
                 {/* Amount — sort only, numeric. Mixed units (days vs
@@ -651,7 +632,7 @@ export default function LeaveRequests() {
                 <th className={`th-num ${sort.col === 'amount' ? 'sorted' : ''}`}>
                   <ColLabel>Amount</ColLabel>
                   <button className="col-icon-btn" onClick={() => toggleSort('amount')}><SortIcon dir={sort.col === 'amount' ? sort.dir : null} /></button>
-                  <ColResizeHandle onDrag={dx => resizeColumn(4, dx)} />
+                  <ColResizeHandle onDrag={dx => resizeColumn(3, dx)} />
                 </th>
 
                 {/* Status — checkbox filter AND a real sort icon */}
@@ -671,19 +652,19 @@ export default function LeaveRequests() {
                     onClear={() => { setStatusFilter(emptyCheckboxFilter()); setPage(1); }}
                     isOpen={openDD === 'status'} onClose={closeDropdown} anchorEl={anchorRefs.current['status']}
                   />
-                  <ColResizeHandle onDrag={dx => resizeColumn(5, dx)} />
+                  <ColResizeHandle onDrag={dx => resizeColumn(4, dx)} />
                 </th>
 
                 {/* Submitted — sort only; default table order (no col sort) is this column, descending */}
                 <th className={sort.col === 'submitted' ? 'sorted' : ''}>
                   <ColLabel>Submitted</ColLabel>
                   <button className="col-icon-btn" onClick={() => toggleSort('submitted')}><SortIcon dir={sort.col === 'submitted' ? sort.dir : null} /></button>
-                  <ColResizeHandle onDrag={dx => resizeColumn(6, dx)} />
+                  <ColResizeHandle onDrag={dx => resizeColumn(5, dx)} />
                 </th>
 
                 <th>
                   <ColLabel>Notes</ColLabel>
-                  <ColResizeHandle onDrag={dx => resizeColumn(7, dx)} />
+                  <ColResizeHandle onDrag={dx => resizeColumn(6, dx)} />
                 </th>
 
                 <th><span>Actions</span></th>
@@ -693,9 +674,8 @@ export default function LeaveRequests() {
               {pageRows.map(row => (
                 <tr key={row.id}>
                   <td className="td-name">{row.employee}</td>
-                  <td>{row.leaveTypeLabel}</td>
-                  <td className="nowrap">{fmtD(row.fromDate)}</td>
-                  <td className="nowrap">{fmtD(row.toDate)}</td>
+                  <td className="nowrap">{fmtDTShort(row.fromAt)}</td>
+                  <td className="nowrap">{fmtDTShort(row.toAt)}</td>
                   <td className="td-num">{fmtAmount(row)}</td>
                   <td><span className={`status-pill ${statusClass(row.status)}`}>{row.status}</span></td>
                   <td className="nowrap">{fmtDTShort(row.submitted)}</td>
@@ -836,9 +816,8 @@ export default function LeaveRequests() {
       {actionRow && (
         <Modal title={ACTION_COPY[actionMode].title} onClose={closeActionDialog}>
           <div className="lr-cancel-summary">
-            <div><span className="lr-cancel-label">Time</span><span>{actionRow.leaveTypeLabel}</span></div>
-            <div><span className="lr-cancel-label">Date from</span><span>{fmtD(actionRow.fromDate)}</span></div>
-            <div><span className="lr-cancel-label">Date to</span><span>{fmtD(actionRow.toDate)}</span></div>
+            <div><span className="lr-cancel-label">From</span><span>{fmtDTShort(actionRow.fromAt)}</span></div>
+            <div><span className="lr-cancel-label">To</span><span>{fmtDTShort(actionRow.toAt)}</span></div>
             {hasConfirmedAmount(actionRow) && (
               <div><span className="lr-cancel-label">{actionRow.unit === 'hours' ? 'Hours booked' : 'Days booked'}</span><span>{actionRow.amount}</span></div>
             )}
