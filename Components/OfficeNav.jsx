@@ -6,7 +6,7 @@ const TABS = [
   { key: 'care-groups',              label: 'Care Groups',              href: null },
   { key: 'tags',                     label: 'Tags',                     href: null },
   { key: 'roster-settings',          label: 'Roster Settings',          href: '../../roster-settings/settings/' },
-  { key: 'settings-and-permissions', label: 'Settings and Permissions', href: null },
+  { key: 'settings-and-permissions', label: 'Settings and Permissions', href: '../../office/roles-and-permissions/' },
 ]
 
 export default function OfficeNav({ active }) {

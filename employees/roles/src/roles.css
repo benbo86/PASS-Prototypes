@@ -1,0 +1,5 @@
+/* Employees list with each person's role (AIOP-25867). */
+.rr-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; font-size: 14px; }
+.rr-label { color: #555; font-weight: 500; }
+.rr-fixed { color: #555; text-align: right; }
+.rr-select { max-width: 70%; font: inherit; font-size: 14px; padding: 6px 8px; border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 6px; background: #fff; }
