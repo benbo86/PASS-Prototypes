@@ -115,7 +115,7 @@ export default function RolesPanel({ open, onClose }) {
           {view === 'list' && (
             <>
               <div className="rp-list-head">
-                <p className="rp-legend"><strong>V</strong> = View, <strong>E</strong> = Edit</p>
+                <p className="rp-legend">System roles are locked and keep today's access.<br />An employee keeps their system role and can have one custom role on top, for web access.</p>
                 <button type="button" className="round-btn secondary-btn" onClick={() => openForm(null)}>Add role</button>
               </div>
               <div className="rp-scroll">
@@ -136,8 +136,8 @@ export default function RolesPanel({ open, onClose }) {
                           <th scope="row" className="rp-role-col">
                             <span className="rp-role-name">{r.name}</span>
                             {r.builtIn && (
-                              <Tooltip text={r.appOnly ? 'Built-in role. Used in the PASSforcare app only, so it has no web access.' : 'Built-in role. It keeps today\'s access and can\'t be changed.'}>
-                                <span className="rp-lock" tabIndex={0} role="img" aria-label="Built-in role, can't be changed"><LockIcon /></span>
+                              <Tooltip text={r.appOnly ? 'System role. Used in the PASSforcare app only, so it has no web access.' : 'System role. It keeps today\'s access and can\'t be changed.'}>
+                                <span className="rp-lock" tabIndex={0} role="img" aria-label="System role, can't be changed"><LockIcon /></span>
                               </Tooltip>
                             )}
                           </th>
@@ -156,7 +156,6 @@ export default function RolesPanel({ open, onClose }) {
                 </table>
               </div>
               {state.roles.length === 0 && <p className="rp-empty">No custom roles yet. Add a role to give someone access to some sections and not others.</p>}
-              <p className="rp-note">Built-in roles are locked and keep today's access. An employee keeps their built-in role and can have one custom role on top, for web access. Careworkers and Supervisors only use the PASSforcare app, so they aren't listed.</p>
             </>
           )}
 
@@ -209,7 +208,7 @@ export default function RolesPanel({ open, onClose }) {
       {confirm && (
         <Modal title="Delete this role?" onClose={() => setConfirm(null)}>
           <p className="rp-modal-text">
-            {(() => { const n = peopleWithRole(state, confirm.id).length; return n === 0 ? `No employees have the ${confirm.name} role.` : `${n === 1 ? '1 employee has' : `${n} employees have`} the ${confirm.name} role. They go back to the access their built-in role gives them.` })()} This can't be undone.
+            {(() => { const n = peopleWithRole(state, confirm.id).length; return n === 0 ? `No employees have the ${confirm.name} role.` : `${n === 1 ? '1 employee has' : `${n} employees have`} the ${confirm.name} role. They go back to the access their system role gives them.` })()} This can't be undone.
           </p>
           <div className="rp-modal-actions">
             <button type="button" className="round-btn tertiary-btn" onClick={() => setConfirm(null)}>Cancel</button>

@@ -2,14 +2,14 @@
 .sp-content { padding: 32px 24px; }
 .sp-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; align-items: start; }
 .sp-col { display: flex; flex-direction: column; gap: 24px; }
-.sp-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12); padding: 16px 24px 24px; }
+.sp-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12); padding: 16px; }
 .sp-card-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
-.sp-card-head h2 { flex: 1; margin: 0; font-size: 18px; font-weight: 600; color: #101828; }
+.sp-card-head h2 { flex: 1; margin: 0; font-size: 16px; font-weight: 600; color: #101828; }
 .sp-card-head > svg { color: #1a1a1a; flex-shrink: 0; }
-.sp-card-edit { display: inline-flex; padding: 8px; border: 0; border-radius: 50%; background: #f2f4f7; color: #1a1a1a; cursor: pointer; }
+.sp-card-edit { display:flex; align-items: center; width:32px; height:32px; border: 0; border-radius: 50%; background: #f2f4f7; color: #1a1a1a; cursor: pointer; }
 .sp-card-edit:hover { background: var(--ui-purple-6-lavendar-grey); }
-.sp-card-body { padding-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.5; color: #475467; }
-.sp-card-body p { margin: 0; }
+.sp-card-body { padding-top: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px; font-weight:600; color: #475467; }
+.sp-card-body p { margin: 0; font-size:14px; }
 .sp-row { display: flex; justify-content: space-between; gap: 16px; color: #101828; }
 .sp-row strong { font-weight: 600; text-align: right; }
 .sp-sub { color: #101828; font-weight: 600; }
@@ -20,7 +20,7 @@
 .slide-panel.rp-slide { width: 80%; min-width: 960px; }
 .rp-body { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
 .rp-list-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.rp-legend { margin: 0; font-size: 15px; color: #333; }
+.rp-legend { margin: 0; max-width: 720px; font-size: 14px; line-height: 1.5; color: #555; }
 .rp-scroll { overflow-x: auto; background: #fff; border: 1px solid var(--ui-purple-5-languid-lavendar); border-radius: 8px; }
 .rp-matrix { width: 100%; border-collapse: collapse; font-size: 14px; }
 .rp-matrix th, .rp-matrix td { padding: 12px 8px; text-align: center; border-bottom: 1px solid var(--ui-purple-6-lavendar-grey); }
